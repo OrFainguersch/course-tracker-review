@@ -169,6 +169,46 @@ function cfgResolvedHtml(sel){
   return '<div class="infoBox" style="margin-top:14px;border-color:#bae6fd;background:#f0f9ff"><div class="inlineHead"><b>Resolved: '+esc(p.name)+'</b><span class="pill green">AUTO</span></div><p>This selection automatically opens the relevant training bundle.</p><div class="settingsGrid" style="margin-top:10px"><div><b>Syllabi ('+p.syllabusIds.length+')</b><p>'+names(p.syllabusIds,c.syllabi).map(esc).join(' · ')+'</p></div><div><b>Criteria ('+p.criteriaIds.length+')</b><p>'+names(p.criteriaIds,c.criteria).map(esc).join(' · ')+'</p></div><div><b>Emergencies ('+p.emergencyIds.length+')</b><p>'+names(p.emergencyIds,c.emergencies).map(esc).join(' · ')+'</p></div></div></div>';
 }
 function cfgId(prefix){return prefix+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)}
+
+function cfgCatalogCard(title,key,list){
+  return '<section class="card settingBox"><h3>'+esc(title)+'</h3><div class="editableList">'+
+    list.map(x=>'<div class="editableRow"><input class="input cfgName" data-kind="'+key+'" data-id="'+x.id+'" value="'+esc(x.name)+'"><button class="btn danger small" data-cfg-remove="'+key+'|'+x.id+'">Remove</button></div>').join('')+
+    '</div><form class="toolbar cfgAddForm" data-kind="'+key+'"><input class="input" name="name" placeholder="Add '+esc(title.toLowerCase())+'" required><button class="btn secondary" type="submit">＋ Add</button></form></section>';
+}
+function cfgPhaseCard(c){
+  const scope=state.phaseScope||c.courseTypes[0]?.id||'',list=c.phases.filter(x=>x.type===scope);
+  return '<section class="card settingBox"><h3>Phases by course type</h3><div class="field"><label>Scope type</label><select id="phaseScope">'+
+    c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+
+    '</select></div><div class="editableList" style="margin-top:10px">'+
+    list.map(x=>'<div class="editableRow"><input class="input cfgPhaseName" data-id="'+x.id+'" value="'+esc(x.name)+'"><button class="btn danger small" data-phase-remove="'+x.id+'">Remove</button></div>').join('')+
+    '</div><form class="toolbar" id="cfgAddPhase"><input class="input" name="name" placeholder="Add phase" required><button class="btn secondary" type="submit">＋ Add</button></form></section>';
+}
+function cfgCriteriaCard(list){
+  return '<section class="card settingBox"><h3>Assessment criteria</h3><div class="editableList">'+
+    list.map(x=>'<div class="editableRow"><input class="input cfgCriterionName" data-id="'+x.id+'" value="'+esc(x.name)+'"><input class="input cfgCriterionWeight" data-id="'+x.id+'" type="number" min="0" max="100" value="'+x.weight+'" style="max-width:86px"><button class="btn danger small" data-criterion-remove="'+x.id+'">Remove</button></div>').join('')+
+    '</div><form class="toolbar" id="cfgAddCriterion"><input class="input" name="name" placeholder="Criterion name" required><input class="input" name="weight" type="number" min="0" max="100" value="10" style="max-width:90px"><button class="btn secondary" type="submit">＋ Add</button></form></section>';
+}
+function cfgProfileCard(p,c){
+  const n=(list,id,any)=>id==='*'?(any||'Any'):(cfgItem(list,id)?.name||id),phase=cfgItem(c.phases,p.phaseId)?.name||p.phaseId;
+  return '<div class="draftCourse"><div class="inlineHead"><b>'+esc(p.name)+'</b><span class="pill violet">'+p.syllabusIds.length+' syllabi</span></div><p>'+
+    esc(n(c.courseTypes,p.courseType))+' · '+esc(phase)+' · '+esc(n(c.trainingKinds,p.trainingKind,'Any training'))+' · '+esc(n(c.dayNight,p.dayNight))+' · '+esc(n(c.countries,p.country,'Any country'))+
+    '</p><div class="profileMeta"><span class="pill blue">'+p.criteriaIds.length+' criteria</span><span class="pill gray">'+p.emergencyIds.length+' emergencies</span></div><div class="toolbar"><button class="btn secondary small" data-profile-edit="'+p.id+'">Edit</button><button class="btn danger small" data-profile-delete="'+p.id+'">Delete</button></div></div>';
+}
+function cfgProfileEditor(p,c){
+  const v=p||{courseType:c.courseTypes[0]?.id||'',phaseId:'',trainingKind:'*',dayNight:c.dayNight[0]?.id||'',country:'*',syllabusIds:[],criteriaIds:[],emergencyIds:[]};
+  const phases=c.phases.filter(x=>x.type===v.courseType); if(!v.phaseId)v.phaseId=phases[0]?.id||'';
+  const checks=(name,list,selected,extra)=>'<div class="criteria">'+list.map(x=>'<label class="criterion" style="justify-content:flex-start"><input type="checkbox" name="'+name+'" value="'+x.id+'" '+(selected.includes(x.id)?'checked':'')+'><span>'+esc(x.name)+(extra?extra(x):'')+'</span></label>').join('')+'</div>';
+  return '<form id="cfgProfileForm"><div class="fields"><div class="field"><label>Profile name</label><input class="input" name="name" required value="'+esc(p?.name||'')+'" placeholder="EP · Full Scale · Night"></div>'+
+    '<div class="field"><label>Course type</label><select name="courseType" id="cfgProfileType">'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===v.courseType?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>Phase</label><select name="phaseId" id="cfgProfilePhase">'+phases.map(x=>'<option value="'+x.id+'" '+(x.id===v.phaseId?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>Training type</label><select name="trainingKind"><option value="*">Any training type</option>'+c.trainingKinds.map(x=>'<option value="'+x.id+'" '+(x.id===v.trainingKind?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>Day / Night</label><select name="dayNight">'+c.dayNight.map(x=>'<option value="'+x.id+'" '+(x.id===v.dayNight?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>Country</label><select name="country"><option value="*">Any country</option>'+c.countries.map(x=>'<option value="'+x.id+'" '+(x.id===v.country?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></div>'+
+    '<div class="sectionHead"><h2>Assigned syllabi</h2><p>These become the available syllabus list for the matching course.</p></div>'+checks('syllabusIds',c.syllabi,v.syllabusIds)+
+    '<div class="sectionHead"><h2>Assigned criteria</h2></div>'+checks('criteriaIds',c.criteria,v.criteriaIds,x=>' · '+x.weight+'%')+
+    '<div class="sectionHead"><h2>Assigned emergencies</h2></div>'+checks('emergencyIds',c.emergencies,v.emergencyIds)+
+    '<div class="toolbar"><button class="btn sky" type="submit">'+(p?'Save profile':'Create profile')+'</button>'+(p?'<button class="btn secondary" type="button" id="cfgProfileCancel">Cancel</button>':'')+'</div></form>';
+}
 function settings(){const saved=getSettings();const settingsTab=state.settingsTab||'builder';const type=saved.builderType||'EP';const phases=getPhaseTemplates().filter(p=>p.type===type);const created=getDraftCourses();return `<div class="eyebrow">Editable configuration database</div><h1 class="pageTitle">Course Settings</h1><p class="sub">Build courses from versioned templates without touching production data.</p>
 <div class="scrollTabs"><button class="seg ${settingsTab==='builder'?'active':''}" data-settings-tab="builder">＋ New course</button><button class="seg ${settingsTab==='catalog'?'active':''}" data-settings-tab="catalog">▦ Template database</button></div>
 ${settingsTab==='builder'?`<div class="twoCol" style="margin-top:14px"><section class="card formCard"><div class="formTitle"><h2>Create course from a template</h2><span class="pill amber">DRAFT first</span></div><form id="courseBuilder"><div class="fields">
