@@ -123,6 +123,52 @@ ${tab==='emergencies'?`<section class="card timeline"><h3>Emergency practice</h3
 ${tab==='safety'?'<section class="card empty"><div class="icon">◈</div><h3>No open safety items for this trainee.</h3></section>':''}
 ${tab==='exams'?'<section class="card empty"><div class="icon">▤</div><h3>Exam results will appear here after import validation.</h3></section>':''}`}
 function mini(l,v){return `<div class="mini"><small>${l}</small><strong>${v}</strong></div>`}
+
+function cfgDefaults(){
+  return {
+    courseTypes: courseTypes.map(x=>({id:x.id,name:x.name})),
+    phases: phaseTemplates.map(x=>({id:x.id,type:x.type,name:x.name})),
+    trainingKinds: trainingKinds.map((name,n)=>({id:['new','conversion','instructor'][n]||('training_'+n),name})),
+    dayNight: dayNight.map((name,n)=>({id:['day','night'][n]||('time_'+n),name})),
+    countries: countries.map((name,n)=>({id:['israel','cyprus'][n]||('country_'+n),name})),
+    syllabi: syllabi.map((name,n)=>({id:'syll_'+(n+1),name})),
+    criteria: criteria.map(c=>({id:c.id,name:c.name,weight:Math.round(c.weight*100)})),
+    emergencies: emergencies.map((name,n)=>({id:'em_'+(n+1),name}))
+  };
+}
+function cfgGet(){try{return JSON.parse(localStorage.getItem('ct-review-catalogs'))||cfgDefaults()}catch{return cfgDefaults()}}
+function cfgSave(v){localStorage.setItem('ct-review-catalogs',JSON.stringify(v))}
+function cfgProfilesDefaults(){
+  const c=cfgDefaults();
+  return [
+    {id:'profile_ep_rc_day',name:'EP · RC Model · Day',courseType:'EP',phaseId:'ep_rc',trainingKind:'*',dayNight:'day',country:'*',syllabusIds:c.syllabi.map(x=>x.id),criteriaIds:c.criteria.map(x=>x.id),emergencyIds:c.emergencies.map(x=>x.id)},
+    {id:'profile_ep_full_night',name:'EP · Full Scale · Night',courseType:'EP',phaseId:'ep_full',trainingKind:'*',dayNight:'night',country:'*',syllabusIds:c.syllabi.filter(x=>['Circuits','Touch & Go','Basic Emergencies B','Complex Emergencies','Complex Engine Emergencies','Pre-Test Preparation','Solo Certification Check'].includes(x.name)).map(x=>x.id),criteriaIds:c.criteria.map(x=>x.id),emergencyIds:c.emergencies.map(x=>x.id)}
+  ];
+}
+function cfgProfilesGet(){try{return JSON.parse(localStorage.getItem('ct-review-profiles'))||cfgProfilesDefaults()}catch{return cfgProfilesDefaults()}}
+function cfgProfilesSave(v){localStorage.setItem('ct-review-profiles',JSON.stringify(v))}
+function cfgItem(list,id){return list.find(x=>x.id===id)}
+function cfgResolve(sel){
+  let best=null,score=-1;
+  for(const p of cfgProfilesGet()){
+    let ok=true,s=0;
+    for(const k of ['courseType','phaseId','dayNight']){
+      if(p[k]===sel[k])s+=4; else if(p[k]!=='*')ok=false;
+    }
+    for(const k of ['trainingKind','country']){
+      if(p[k]===sel[k])s+=2; else if(p[k]!=='*')ok=false;
+    }
+    if(ok&&s>score){best=p;score=s}
+  }
+  return best;
+}
+function cfgResolvedHtml(sel){
+  const c=cfgGet(),p=cfgResolve(sel);
+  if(!p)return '<div class="infoBox" style="margin-top:14px;border-color:#fed7aa;background:#fff7ed"><b>No matching configuration profile</b><p>Create one in Configuration profiles. This combination has no assigned syllabus/criteria bundle yet.</p></div>';
+  const names=(ids,list)=>ids.map(id=>cfgItem(list,id)?.name).filter(Boolean);
+  return '<div class="infoBox" style="margin-top:14px;border-color:#bae6fd;background:#f0f9ff"><div class="inlineHead"><b>Resolved: '+esc(p.name)+'</b><span class="pill green">AUTO</span></div><p>This selection automatically opens the relevant training bundle.</p><div class="settingsGrid" style="margin-top:10px"><div><b>Syllabi ('+p.syllabusIds.length+')</b><p>'+names(p.syllabusIds,c.syllabi).map(esc).join(' · ')+'</p></div><div><b>Criteria ('+p.criteriaIds.length+')</b><p>'+names(p.criteriaIds,c.criteria).map(esc).join(' · ')+'</p></div><div><b>Emergencies ('+p.emergencyIds.length+')</b><p>'+names(p.emergencyIds,c.emergencies).map(esc).join(' · ')+'</p></div></div></div>';
+}
+function cfgId(prefix){return prefix+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)}
 function settings(){const saved=getSettings();const settingsTab=state.settingsTab||'builder';const type=saved.builderType||'EP';const phases=getPhaseTemplates().filter(p=>p.type===type);const created=getDraftCourses();return `<div class="eyebrow">Editable configuration database</div><h1 class="pageTitle">Course Settings</h1><p class="sub">Build courses from versioned templates without touching production data.</p>
 <div class="scrollTabs"><button class="seg ${settingsTab==='builder'?'active':''}" data-settings-tab="builder">＋ New course</button><button class="seg ${settingsTab==='catalog'?'active':''}" data-settings-tab="catalog">▦ Template database</button></div>
 ${settingsTab==='builder'?`<div class="twoCol" style="margin-top:14px"><section class="card formCard"><div class="formTitle"><h2>Create course from a template</h2><span class="pill amber">DRAFT first</span></div><form id="courseBuilder"><div class="fields">
