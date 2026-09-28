@@ -125,24 +125,35 @@ ${tab==='exams'?'<section class="card empty"><div class="icon">▤</div><h3>Exam
 function mini(l,v){return `<div class="mini"><small>${l}</small><strong>${v}</strong></div>`}
 
 function cfgDefaults(){
+  const ep='EP';
   return {
     courseTypes: courseTypes.map(x=>({id:x.id,name:x.name})),
     phases: phaseTemplates.map(x=>({id:x.id,type:x.type,name:x.name})),
     trainingKinds: trainingKinds.map((name,n)=>({id:['new','conversion','instructor'][n]||('training_'+n),name})),
     dayNight: dayNight.map((name,n)=>({id:['day','night'][n]||('time_'+n),name})),
     countries: countries.map((name,n)=>({id:['israel','cyprus'][n]||('country_'+n),name})),
-    syllabi: syllabi.map((name,n)=>({id:'syll_'+(n+1),name})),
-    criteria: criteria.map(c=>({id:c.id,name:c.name,weight:Math.round(c.weight*100)})),
-    emergencies: emergencies.map((name,n)=>({id:'em_'+(n+1),name}))
+    syllabi: syllabi.map((name,n)=>({id:'syll_'+(n+1),courseType:ep,name})),
+    criteria: criteria.map(c=>({id:c.id,courseType:ep,name:c.name,weight:Math.round(c.weight*100)})),
+    emergencies: emergencies.map((name,n)=>({id:'em_'+(n+1),courseType:ep,name}))
   };
 }
-function cfgGet(){try{return JSON.parse(localStorage.getItem('ct-review-catalogs'))||cfgDefaults()}catch{return cfgDefaults()}}
+function cfgGet(){
+  try{
+    const raw=JSON.parse(localStorage.getItem('ct-review-catalogs')||'null');
+    if(!raw)return cfgDefaults();
+    const c={...cfgDefaults(),...raw};
+    c.syllabi=(c.syllabi||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
+    c.criteria=(c.criteria||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
+    c.emergencies=(c.emergencies||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
+    return c;
+  }catch{return cfgDefaults()}
+}
 function cfgSave(v){localStorage.setItem('ct-review-catalogs',JSON.stringify(v))}
 function cfgProfilesDefaults(){
-  const c=cfgDefaults();
+  const c=cfgDefaults(),syll=c.syllabi.filter(x=>x.courseType==='EP'),crit=c.criteria.filter(x=>x.courseType==='EP'),emer=c.emergencies.filter(x=>x.courseType==='EP');
   return [
-    {id:'profile_ep_rc_day',name:'EP · RC Model · Day',courseType:'EP',phaseId:'ep_rc',trainingKind:'*',dayNight:'day',country:'*',syllabusIds:c.syllabi.map(x=>x.id),criteriaIds:c.criteria.map(x=>x.id),emergencyIds:c.emergencies.map(x=>x.id)},
-    {id:'profile_ep_full_night',name:'EP · Full Scale · Night',courseType:'EP',phaseId:'ep_full',trainingKind:'*',dayNight:'night',country:'*',syllabusIds:c.syllabi.filter(x=>['Circuits','Touch & Go','Basic Emergencies B','Complex Emergencies','Complex Engine Emergencies','Pre-Test Preparation','Solo Certification Check'].includes(x.name)).map(x=>x.id),criteriaIds:c.criteria.map(x=>x.id),emergencyIds:c.emergencies.map(x=>x.id)}
+    {id:'profile_ep_rc_day',name:'EP · RC Model · Day',courseType:'EP',phaseId:'ep_rc',trainingKind:'*',dayNight:'day',country:'*',syllabusIds:syll.map(x=>x.id),criteriaIds:crit.map(x=>x.id),emergencyIds:emer.map(x=>x.id)},
+    {id:'profile_ep_full_night',name:'EP · Full Scale · Night',courseType:'EP',phaseId:'ep_full',trainingKind:'*',dayNight:'night',country:'*',syllabusIds:syll.filter(x=>['Circuits','Touch & Go','Basic Emergencies B','Complex Emergencies','Complex Engine Emergencies','Pre-Test Preparation','Solo Certification Check'].includes(x.name)).map(x=>x.id),criteriaIds:crit.map(x=>x.id),emergencyIds:emer.map(x=>x.id)}
   ];
 }
 function cfgProfilesGet(){try{return JSON.parse(localStorage.getItem('ct-review-profiles'))||cfgProfilesDefaults()}catch{return cfgProfilesDefaults()}}
@@ -175,6 +186,14 @@ function cfgCatalogCard(title,key,list){
     list.map(x=>'<div class="editableRow"><input class="input cfgName" data-kind="'+key+'" data-id="'+x.id+'" value="'+esc(x.name)+'"><button class="btn danger small" data-cfg-remove="'+key+'|'+x.id+'">Remove</button></div>').join('')+
     '</div><form class="toolbar cfgAddForm" data-kind="'+key+'"><input class="input" name="name" placeholder="Add '+esc(title.toLowerCase())+'" required><button class="btn secondary" type="submit">＋ Add</button></form></section>';
 }
+
+function cfgTypeScopedCard(title,key,list,type,kind){
+  const scoped=list.filter(x=>x.courseType===type);
+  const isCriteria=kind==='criteria';
+  return '<section class="card settingBox"><h3>'+esc(title)+'</h3><p class="sub">Belongs only to '+esc(cfgItem(cfgGet().courseTypes,type)?.name||type)+'.</p><div class="editableList">'+
+    scoped.map(x=>'<div class="editableRow"><input class="input cfgScopedName" data-kind="'+key+'" data-id="'+x.id+'" value="'+esc(x.name)+'">'+(isCriteria?'<input class="input cfgScopedWeight" data-id="'+x.id+'" type="number" min="0" max="100" value="'+x.weight+'" style="max-width:86px">':'')+'<button class="btn danger small" data-scoped-remove="'+key+'|'+x.id+'">Remove</button></div>').join('')+
+    '</div><form class="toolbar cfgScopedAdd" data-kind="'+key+'" data-course-type="'+type+'"><input class="input" name="name" placeholder="Add '+esc(title.toLowerCase())+'" required>'+(isCriteria?'<input class="input" name="weight" type="number" min="0" max="100" value="10" style="max-width:90px">':'')+'<button class="btn secondary" type="submit">＋ Add</button></form></section>';
+}
 function cfgPhaseCard(c){
   const scope=state.phaseScope||c.courseTypes[0]?.id||'',list=c.phases.filter(x=>x.type===scope);
   return '<section class="card settingBox"><h3>Phases by course type</h3><div class="field"><label>Scope type</label><select id="phaseScope">'+
@@ -195,8 +214,9 @@ function cfgProfileCard(p,c){
     '</p><div class="profileMeta"><span class="pill blue">'+p.criteriaIds.length+' criteria</span><span class="pill gray">'+p.emergencyIds.length+' emergencies</span></div><div class="toolbar"><button class="btn secondary small" data-profile-edit="'+p.id+'">Edit</button><button class="btn danger small" data-profile-delete="'+p.id+'">Delete</button></div></div>';
 }
 function cfgProfileEditor(p,c){
-  const v=p||{courseType:c.courseTypes[0]?.id||'',phaseId:'',trainingKind:'*',dayNight:c.dayNight[0]?.id||'',country:'*',syllabusIds:[],criteriaIds:[],emergencyIds:[]};
+  const v=p||{courseType:state.profileDraftType||c.courseTypes[0]?.id||'',phaseId:'',trainingKind:'*',dayNight:c.dayNight[0]?.id||'',country:'*',syllabusIds:[],criteriaIds:[],emergencyIds:[]};
   const phases=c.phases.filter(x=>x.type===v.courseType); if(!v.phaseId)v.phaseId=phases[0]?.id||'';
+  const scopedSyll=c.syllabi.filter(x=>x.courseType===v.courseType),scopedCrit=c.criteria.filter(x=>x.courseType===v.courseType),scopedEmer=c.emergencies.filter(x=>x.courseType===v.courseType);
   const checks=(name,list,selected,extra)=>'<div class="criteria">'+list.map(x=>'<label class="criterion" style="justify-content:flex-start"><input type="checkbox" name="'+name+'" value="'+x.id+'" '+(selected.includes(x.id)?'checked':'')+'><span>'+esc(x.name)+(extra?extra(x):'')+'</span></label>').join('')+'</div>';
   return '<form id="cfgProfileForm"><div class="fields"><div class="field"><label>Profile name</label><input class="input" name="name" required value="'+esc(p?.name||'')+'" placeholder="EP · Full Scale · Night"></div>'+
     '<div class="field"><label>Course type</label><select name="courseType" id="cfgProfileType">'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===v.courseType?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>'+
@@ -204,19 +224,19 @@ function cfgProfileEditor(p,c){
     '<div class="field"><label>Training type</label><select name="trainingKind"><option value="*">Any training type</option>'+c.trainingKinds.map(x=>'<option value="'+x.id+'" '+(x.id===v.trainingKind?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>'+
     '<div class="field"><label>Day / Night</label><select name="dayNight">'+c.dayNight.map(x=>'<option value="'+x.id+'" '+(x.id===v.dayNight?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>'+
     '<div class="field"><label>Country</label><select name="country"><option value="*">Any country</option>'+c.countries.map(x=>'<option value="'+x.id+'" '+(x.id===v.country?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></div>'+
-    '<div class="sectionHead"><h2>Assigned syllabi</h2><p>These become the available syllabus list for the matching course.</p></div>'+checks('syllabusIds',c.syllabi,v.syllabusIds)+
-    '<div class="sectionHead"><h2>Assigned criteria</h2></div>'+checks('criteriaIds',c.criteria,v.criteriaIds,x=>' · '+x.weight+'%')+
-    '<div class="sectionHead"><h2>Assigned emergencies</h2></div>'+checks('emergencyIds',c.emergencies,v.emergencyIds)+
+    '<div class="infoBox" style="margin-top:12px"><b>Scoped to '+esc(cfgItem(c.courseTypes,v.courseType)?.name||v.courseType)+'</b><p>You are not choosing from a global bank. Only items owned by this course type appear below.</p></div>'+
+    '<div class="sectionHead"><h2>Assigned syllabi</h2><p>Only '+esc(cfgItem(c.courseTypes,v.courseType)?.name||v.courseType)+' syllabi are available.</p></div><div id="cfgProfileSyllabi">'+checks('syllabusIds',scopedSyll,v.syllabusIds)+'</div>'+
+    '<div class="sectionHead"><h2>Assigned criteria</h2></div><div id="cfgProfileCriteria">'+checks('criteriaIds',scopedCrit,v.criteriaIds,x=>' · '+x.weight+'%')+'</div>'+
+    '<div class="sectionHead"><h2>Assigned emergencies</h2></div><div id="cfgProfileEmergencies">'+checks('emergencyIds',scopedEmer,v.emergencyIds)+'</div>'+
     '<div class="toolbar"><button class="btn sky" type="submit">'+(p?'Save profile':'Create profile')+'</button>'+(p?'<button class="btn secondary" type="button" id="cfgProfileCancel">Cancel</button>':'')+'</div></form>';
 }
-
 function settings(){
   const c=cfgGet(),tab=state.settingsTab||'builder',created=getDraftCourses();
   const type=state.builderType||c.courseTypes[0]?.id||'',phases=c.phases.filter(x=>x.type===type),phase=state.builderPhase&&phases.some(x=>x.id===state.builderPhase)?state.builderPhase:(phases[0]?.id||'');
   const training=state.builderTraining||c.trainingKinds[0]?.id||'',time=state.builderDay||c.dayNight[0]?.id||'',country=state.builderCountry||c.countries[0]?.id||'';
   const sel={courseType:type,phaseId:phase,trainingKind:training,dayNight:time,country};
-  let html='<div class="eyebrow">Editable configuration database</div><h1 class="pageTitle">Course Settings</h1><p class="sub">Edit every catalog and connect combinations to the correct syllabus, criteria and emergency bundle.</p>';
-  html+='<div class="scrollTabs"><button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">＋ New course</button><button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">▦ Master catalogs</button><button class="seg '+(tab==='profiles'?'active':'')+'" data-settings-tab="profiles">⌘ Configuration profiles</button></div>';
+  let html='<div class="eyebrow">Editable configuration database</div><h1 class="pageTitle">Course Settings</h1><p class="sub">Each course type owns its own phases, syllabi, criteria and emergencies. Shared dimensions stay global.</p>';
+  html+='<div class="scrollTabs"><button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">＋ New course</button><button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">▦ Course type setup</button><button class="seg '+(tab==='profiles'?'active':'')+'" data-settings-tab="profiles">⌘ Configuration profiles</button></div>';
 
   if(tab==='builder'){
     html+='<div class="twoCol" style="margin-top:14px"><section class="card formCard"><div class="formTitle"><h2>Create course from configuration</h2><span class="pill amber">DRAFT first</span></div><form id="courseBuilder"><div class="fields">';
@@ -229,26 +249,28 @@ function settings(){
     html+='<div class="field"><label>Country</label><select name="country" id="builderCountry">'+c.countries.map(x=>'<option value="'+x.id+'" '+(x.id===country?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Start date</label><input class="input" name="startsOn" type="date"></div></div>';
     html+='<div id="cfgResolvedPreview">'+cfgResolvedHtml(sel)+'</div><div class="toolbar"><button class="btn sky" type="submit" '+(phase?'':'disabled')+'>＋ Create as draft</button></div></form></section>';
-    html+='<section class="card sideCard"><h3>Draft courses</h3><p class="sub">Each draft keeps a snapshot of the matched configuration.</p><div class="draftList">'+(created.length?created.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.name)+' · '+esc(x.code)+'</b><span class="pill amber">DRAFT</span></div><p>'+esc(x.summary||[x.courseType,x.phaseName,x.trainingKind,x.dayNight,x.country].filter(Boolean).join(' · '))+'</p><div class="profileMeta"><span class="pill blue">'+(x.syllabusCount||0)+' syllabi</span><span class="pill violet">'+(x.criteriaCount||0)+' criteria</span><span class="pill gray">'+(x.emergencyCount||0)+' emergencies</span></div></div>').join(''):'<p style="color:#64748b;font-size:12px">No local draft courses yet.</p>')+'</div></section></div>';
+    html+='<section class="card sideCard"><h3>Draft courses</h3><p class="sub">Each draft keeps a snapshot of the matched configuration.</p><div class="draftList">'+(created.length?created.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.name)+' · '+esc(x.code)+'</b><span class="pill amber">DRAFT</span></div><p>'+esc(x.summary||'')+'</p><div class="profileMeta"><span class="pill blue">'+(x.syllabusCount||0)+' syllabi</span><span class="pill violet">'+(x.criteriaCount||0)+' criteria</span><span class="pill gray">'+(x.emergencyCount||0)+' emergencies</span></div></div>').join(''):'<p style="color:#64748b;font-size:12px">No local draft courses yet.</p>')+'</div></section></div>';
   }
 
   if(tab==='catalog'){
+    const scope=state.typeWorkspace||c.courseTypes[0]?.id||'',scopeName=cfgItem(c.courseTypes,scope)?.name||scope;
+    html+='<div class="card settingBox" style="margin-top:14px"><div class="inlineHead"><div><h3>Course type workspace</h3><p class="sub" style="margin:3px 0 0">Open a type and manage everything that belongs to it.</p></div><select id="typeWorkspace" style="max-width:220px">'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div><div class="courseMeta"><span class="pill blue">'+esc(scopeName)+'</span><span class="pill gray">Scoped configuration</span></div></div>';
     html+='<div class="settingsGrid" style="margin-top:14px">';
     html+=cfgCatalogCard('Course types','courseTypes',c.courseTypes);
-    html+=cfgPhaseCard(c);
+    html+=cfgPhaseCard({...c,courseTypes:c.courseTypes});
+    html+=cfgTypeScopedCard(scopeName+' syllabi','syllabi',c.syllabi,scope,'syllabi');
+    html+=cfgTypeScopedCard(scopeName+' assessment criteria','criteria',c.criteria,scope,'criteria');
+    html+=cfgTypeScopedCard(scopeName+' emergencies','emergencies',c.emergencies,scope,'emergencies');
     html+=cfgCatalogCard('Training types','trainingKinds',c.trainingKinds);
     html+=cfgCatalogCard('Day / Night','dayNight',c.dayNight);
     html+=cfgCatalogCard('Countries','countries',c.countries);
-    html+=cfgCatalogCard('Syllabi','syllabi',c.syllabi);
-    html+=cfgCriteriaCard(c.criteria);
-    html+=cfgCatalogCard('Emergencies','emergencies',c.emergencies);
-    html+='<section class="card settingBox"><h3>Catalog controls</h3><p class="sub">Rename keeps stable IDs. Removing an item may invalidate profiles that reference it.</p><div class="toolbar"><button class="btn sky" id="cfgSaveCatalogs">Save all edits</button><button class="btn danger" id="cfgResetCatalogs">Reset defaults</button></div></section></div>';
+    html+='<section class="card settingBox"><h3>Save / reset</h3><p class="sub">Renaming keeps stable IDs. Items created inside '+esc(scopeName)+' remain owned by '+esc(scopeName)+'.</p><div class="toolbar"><button class="btn sky" id="cfgSaveCatalogs">Save all edits</button><button class="btn danger" id="cfgResetCatalogs">Reset defaults</button></div></section></div>';
   }
 
   if(tab==='profiles'){
     const p=state.editProfileId?cfgProfilesGet().find(x=>x.id===state.editProfileId):null;
-    html+='<div class="twoCol" style="margin-top:14px"><section class="card formCard"><div class="formTitle"><h2>'+(p?'Edit':'Create')+' configuration profile</h2><span class="pill blue">Selection → bundle</span></div>'+cfgProfileEditor(p,c)+'</section>';
-    html+='<section class="card sideCard"><h3>Saved profiles</h3><p class="sub">Example: EP + Full Scale + Night immediately resolves to its assigned syllabus/criteria list.</p><div class="draftList">'+cfgProfilesGet().map(x=>cfgProfileCard(x,c)).join('')+'</div></section></div>';
+    html+='<div class="twoCol" style="margin-top:14px"><section class="card formCard"><div class="formTitle"><h2>'+(p?'Edit':'Create')+' configuration profile</h2><span class="pill blue">Type → phase → conditions → bundle</span></div>'+cfgProfileEditor(p,c)+'</section>';
+    html+='<section class="card sideCard"><h3>Saved profiles</h3><p class="sub">A profile can only use syllabi, criteria and emergencies owned by its course type.</p><div class="draftList">'+cfgProfilesGet().map(x=>cfgProfileCard(x,c)).join('')+'</div></section></div>';
   }
   return html;
 }
@@ -270,13 +292,14 @@ function bindSettings(){
   const updateBuilder=()=>{
     const type=$('#courseTypeSelect')?.value||'',phase=$('#phaseSelect')?.value||'',training=$('#builderTraining')?.value||'',time=$('#builderDay')?.value||'',country=$('#builderCountry')?.value||'';
     state.builderType=type;state.builderPhase=phase;state.builderTraining=training;state.builderDay=time;state.builderCountry=country;
-    const box=$('#cfgResolvedPreview'); if(box)box.innerHTML=cfgResolvedHtml({courseType:type,phaseId:phase,trainingKind:training,dayNight:time,country});
+    const box=$('#cfgResolvedPreview');if(box)box.innerHTML=cfgResolvedHtml({courseType:type,phaseId:phase,trainingKind:training,dayNight:time,country});
   };
   if($('#courseTypeSelect'))$('#courseTypeSelect').onchange=e=>{
     const list=c.phases.filter(x=>x.type===e.target.value);state.builderType=e.target.value;state.builderPhase=list[0]?.id||'';
     $('#phaseSelect').innerHTML=list.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');updateBuilder();
   };
   ['phaseSelect','builderTraining','builderDay','builderCountry'].forEach(id=>{if($('#'+id))$('#'+id).onchange=updateBuilder});
+
   if($('#courseBuilder'))$('#courseBuilder').onsubmit=e=>{
     e.preventDefault();const fd=new FormData(e.currentTarget),sel={courseType:String(fd.get('courseType')),phaseId:String(fd.get('phase')),trainingKind:String(fd.get('trainingKind')),dayNight:String(fd.get('dayNight')),country:String(fd.get('country'))};
     const p=cfgResolve(sel),cc=cfgGet(),ct=cfgItem(cc.courseTypes,sel.courseType),ph=cfgItem(cc.phases,sel.phaseId),tk=cfgItem(cc.trainingKinds,sel.trainingKind),dn=cfgItem(cc.dayNight,sel.dayNight),co=cfgItem(cc.countries,sel.country),arr=getDraftCourses();
@@ -284,53 +307,64 @@ function bindSettings(){
     localStorage.setItem('ct-review-courses',JSON.stringify(arr));toast(p?'Draft created with matched configuration':'Draft created — no matching profile');render();
   };
 
-  if($('#phaseScope'))$('#phaseScope').onchange=e=>{state.phaseScope=e.target.value;render()};
+  if($('#typeWorkspace'))$('#typeWorkspace').onchange=e=>{state.typeWorkspace=e.target.value;state.phaseScope=e.target.value;render()};
+  if($('#phaseScope'))$('#phaseScope').onchange=e=>{state.phaseScope=e.target.value;state.typeWorkspace=e.target.value;render()};
 
   if($('#cfgSaveCatalogs'))$('#cfgSaveCatalogs').onclick=()=>{
     const cc=cfgGet();
     document.querySelectorAll('.cfgName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
     document.querySelectorAll('.cfgPhaseName').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
-    document.querySelectorAll('.cfgCriterionName').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
-    document.querySelectorAll('.cfgCriterionWeight').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x)x.weight=Math.max(0,Math.min(100,Number(el.value)||0))});
-    cfgSave(cc);toast('All catalog changes saved');render();
+    document.querySelectorAll('.cfgScopedName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
+    document.querySelectorAll('.cfgScopedWeight').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x)x.weight=Math.max(0,Math.min(100,Number(el.value)||0))});
+    cfgSave(cc);toast('All changes saved for this course type');render();
   };
 
   document.querySelectorAll('.cfgAddForm').forEach(form=>form.onsubmit=e=>{
     e.preventDefault();const cc=cfgGet(),kind=form.dataset.kind,name=String(new FormData(form).get('name')||'').trim();if(!name)return;
-    const prefix={courseTypes:'type',trainingKinds:'training',dayNight:'time',countries:'country',syllabi:'syllabus',emergencies:'emergency'}[kind]||'item';
+    const prefix={courseTypes:'type',trainingKinds:'training',dayNight:'time',countries:'country'}[kind]||'item';
     cc[kind].push({id:cfgId(prefix),name});cfgSave(cc);toast(name+' added');render();
   });
 
-  document.querySelectorAll('[data-cfg-remove]').forEach(btn=>btn.onclick=()=>{
-    const parts=btn.dataset.cfgRemove.split('|'),kind=parts[0],id=parts[1],cc=cfgGet();cc[kind]=cc[kind].filter(x=>x.id!==id);
-    if(kind==='courseTypes')cc.phases=cc.phases.filter(x=>x.type!==id);cfgSave(cc);toast('Catalog item removed');render();
+  document.querySelectorAll('.cfgScopedAdd').forEach(form=>form.onsubmit=e=>{
+    e.preventDefault();const cc=cfgGet(),kind=form.dataset.kind,type=form.dataset.courseType,fd=new FormData(form),name=String(fd.get('name')||'').trim();if(!name)return;
+    const obj={id:cfgId(kind==='criteria'?'criterion':kind==='syllabi'?'syllabus':'emergency'),courseType:type,name};
+    if(kind==='criteria')obj.weight=Math.max(0,Math.min(100,Number(fd.get('weight'))||0));
+    cc[kind].push(obj);cfgSave(cc);toast(name+' added to '+(cfgItem(cc.courseTypes,type)?.name||type));render();
   });
 
+  document.querySelectorAll('[data-cfg-remove]').forEach(btn=>btn.onclick=()=>{
+    const [kind,id]=btn.dataset.cfgRemove.split('|'),cc=cfgGet();cc[kind]=cc[kind].filter(x=>x.id!==id);
+    if(kind==='courseTypes'){cc.phases=cc.phases.filter(x=>x.type!==id);cc.syllabi=cc.syllabi.filter(x=>x.courseType!==id);cc.criteria=cc.criteria.filter(x=>x.courseType!==id);cc.emergencies=cc.emergencies.filter(x=>x.courseType!==id)}
+    cfgSave(cc);toast('Catalog item removed');render();
+  });
+  document.querySelectorAll('[data-scoped-remove]').forEach(btn=>btn.onclick=()=>{const [kind,id]=btn.dataset.scopedRemove.split('|'),cc=cfgGet();cc[kind]=cc[kind].filter(x=>x.id!==id);cfgSave(cc);toast('Item removed');render()});
   document.querySelectorAll('[data-phase-remove]').forEach(btn=>btn.onclick=()=>{const cc=cfgGet();cc.phases=cc.phases.filter(x=>x.id!==btn.dataset.phaseRemove);cfgSave(cc);toast('Phase removed');render()});
   if($('#cfgAddPhase'))$('#cfgAddPhase').onsubmit=e=>{
-    e.preventDefault();const cc=cfgGet(),name=String(new FormData(e.currentTarget).get('name')||'').trim(),type=state.phaseScope||cc.courseTypes[0]?.id||'';if(!name||!type)return;
-    cc.phases.push({id:cfgId('phase'),type,name});cfgSave(cc);toast(name+' phase added');render();
+    e.preventDefault();const cc=cfgGet(),name=String(new FormData(e.currentTarget).get('name')||'').trim(),type=state.typeWorkspace||state.phaseScope||cc.courseTypes[0]?.id||'';if(!name||!type)return;
+    cc.phases.push({id:cfgId('phase'),type,name});cfgSave(cc);toast(name+' added to '+(cfgItem(cc.courseTypes,type)?.name||type));render();
   };
 
-  document.querySelectorAll('[data-criterion-remove]').forEach(btn=>btn.onclick=()=>{const cc=cfgGet();cc.criteria=cc.criteria.filter(x=>x.id!==btn.dataset.criterionRemove);cfgSave(cc);toast('Criterion removed');render()});
-  if($('#cfgAddCriterion'))$('#cfgAddCriterion').onsubmit=e=>{
-    e.preventDefault();const fd=new FormData(e.currentTarget),name=String(fd.get('name')||'').trim(),weight=Math.max(0,Math.min(100,Number(fd.get('weight'))||0));if(!name)return;
-    const cc=cfgGet();cc.criteria.push({id:cfgId('criterion'),name,weight});cfgSave(cc);toast('Criterion added');render();
+  if($('#cfgResetCatalogs'))$('#cfgResetCatalogs').onclick=()=>{if(confirm('Reset all course-type configuration to defaults?')){localStorage.removeItem('ct-review-catalogs');state.typeWorkspace=null;state.phaseScope=null;toast('Configuration reset');render()}};
+
+  if($('#cfgProfileType'))$('#cfgProfileType').onchange=e=>{
+    const cc=cfgGet(),type=e.target.value,ph=cc.phases.filter(x=>x.type===type),sy=cc.syllabi.filter(x=>x.courseType===type),cr=cc.criteria.filter(x=>x.courseType===type),em=cc.emergencies.filter(x=>x.courseType===type);
+    state.profileDraftType=type;
+    $('#cfgProfilePhase').innerHTML=ph.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');
+    const checks=(name,list,extra)=>'<div class="criteria">'+list.map(x=>'<label class="criterion" style="justify-content:flex-start"><input type="checkbox" name="'+name+'" value="'+x.id+'"><span>'+esc(x.name)+(extra?extra(x):'')+'</span></label>').join('')+'</div>';
+    $('#cfgProfileSyllabi').innerHTML=checks('syllabusIds',sy);
+    $('#cfgProfileCriteria').innerHTML=checks('criteriaIds',cr,x=>' · '+x.weight+'%');
+    $('#cfgProfileEmergencies').innerHTML=checks('emergencyIds',em);
   };
-
-  if($('#cfgResetCatalogs'))$('#cfgResetCatalogs').onclick=()=>{if(confirm('Reset every master catalog to its default values?')){localStorage.removeItem('ct-review-catalogs');state.phaseScope=null;toast('Catalogs reset to defaults');render()}};
-
-  if($('#cfgProfileType'))$('#cfgProfileType').onchange=e=>{const cc=cfgGet(),list=cc.phases.filter(x=>x.type===e.target.value);$('#cfgProfilePhase').innerHTML=list.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')};
   if($('#cfgProfileForm'))$('#cfgProfileForm').onsubmit=e=>{
-    e.preventDefault();const fd=new FormData(e.currentTarget),arr=cfgProfilesGet(),old=state.editProfileId?arr.find(x=>x.id===state.editProfileId):null;
-    const obj={id:old?.id||cfgId('profile'),name:String(fd.get('name')),courseType:String(fd.get('courseType')),phaseId:String(fd.get('phaseId')),trainingKind:String(fd.get('trainingKind')),dayNight:String(fd.get('dayNight')),country:String(fd.get('country')),syllabusIds:fd.getAll('syllabusIds').map(String),criteriaIds:fd.getAll('criteriaIds').map(String),emergencyIds:fd.getAll('emergencyIds').map(String)};
+    e.preventDefault();const fd=new FormData(e.currentTarget),arr=cfgProfilesGet(),old=state.editProfileId?arr.find(x=>x.id===state.editProfileId):null,type=String(fd.get('courseType')),cc=cfgGet();
+    const allowedS=new Set(cc.syllabi.filter(x=>x.courseType===type).map(x=>x.id)),allowedC=new Set(cc.criteria.filter(x=>x.courseType===type).map(x=>x.id)),allowedE=new Set(cc.emergencies.filter(x=>x.courseType===type).map(x=>x.id));
+    const obj={id:old?.id||cfgId('profile'),name:String(fd.get('name')),courseType:type,phaseId:String(fd.get('phaseId')),trainingKind:String(fd.get('trainingKind')),dayNight:String(fd.get('dayNight')),country:String(fd.get('country')),syllabusIds:fd.getAll('syllabusIds').map(String).filter(x=>allowedS.has(x)),criteriaIds:fd.getAll('criteriaIds').map(String).filter(x=>allowedC.has(x)),emergencyIds:fd.getAll('emergencyIds').map(String).filter(x=>allowedE.has(x))};
     cfgProfilesSave(old?arr.map(x=>x.id===old.id?obj:x):[...arr,obj]);state.editProfileId=null;toast(old?'Configuration profile updated':'Configuration profile created');render();
   };
   if($('#cfgProfileCancel'))$('#cfgProfileCancel').onclick=()=>{state.editProfileId=null;render()};
   document.querySelectorAll('[data-profile-edit]').forEach(btn=>btn.onclick=()=>{state.editProfileId=btn.dataset.profileEdit;render()});
   document.querySelectorAll('[data-profile-delete]').forEach(btn=>btn.onclick=()=>{cfgProfilesSave(cfgProfilesGet().filter(x=>x.id!==btn.dataset.profileDelete));if(state.editProfileId===btn.dataset.profileDelete)state.editProfileId=null;toast('Profile deleted');render()});
 }
-
 render();
 </script>
 </body>
