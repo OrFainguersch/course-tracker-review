@@ -209,29 +209,49 @@ function cfgProfileEditor(p,c){
     '<div class="sectionHead"><h2>Assigned emergencies</h2></div>'+checks('emergencyIds',c.emergencies,v.emergencyIds)+
     '<div class="toolbar"><button class="btn sky" type="submit">'+(p?'Save profile':'Create profile')+'</button>'+(p?'<button class="btn secondary" type="button" id="cfgProfileCancel">Cancel</button>':'')+'</div></form>';
 }
-function settings(){const saved=getSettings();const settingsTab=state.settingsTab||'builder';const type=saved.builderType||'EP';const phases=getPhaseTemplates().filter(p=>p.type===type);const created=getDraftCourses();return `<div class="eyebrow">Editable configuration database</div><h1 class="pageTitle">Course Settings</h1><p class="sub">Build courses from versioned templates without touching production data.</p>
-<div class="scrollTabs"><button class="seg ${settingsTab==='builder'?'active':''}" data-settings-tab="builder">＋ New course</button><button class="seg ${settingsTab==='catalog'?'active':''}" data-settings-tab="catalog">▦ Template database</button></div>
-${settingsTab==='builder'?`<div class="twoCol" style="margin-top:14px"><section class="card formCard"><div class="formTitle"><h2>Create course from a template</h2><span class="pill amber">DRAFT first</span></div><form id="courseBuilder"><div class="fields">
-<div class="field"><label>Course name</label><input class="input" name="name" required placeholder="Cyprus EP Course 2027"></div>
-<div class="field"><label>Course code</label><input class="input" name="code" required placeholder="CEP-27"></div>
-<div class="field"><label>Course type</label><select name="courseType" id="courseTypeSelect">${courseTypes.map(x=>`<option value="${x.id}" ${type===x.id?'selected':''}>${x.name}</option>`).join('')}</select></div>
-<div class="field"><label>Phase</label><select name="phase" id="phaseSelect">${phases.length?phases.map(x=>`<option value="${x.id}">${x.name}</option>`).join(''):'<option value="">No phases yet — add in Template database</option>'}</select></div>
-<div class="field"><label>Training type</label><select name="trainingKind">${trainingKinds.map(x=>`<option>${x}</option>`).join('')}</select></div>
-<div class="field"><label>Day / Night</label><select name="dayNight">${dayNight.map(x=>`<option>${x}</option>`).join('')}</select></div>
-<div class="field"><label>Country</label><select name="country">${countries.map(x=>`<option>${x}</option>`).join('')}</select></div>
-<div class="field"><label>Start date</label><input class="input" name="startsOn" type="date"></div>
-</div><div class="courseMeta" style="margin:14px 0"><span class="pill blue">Type → Phase hierarchy</span><span class="pill green">New / Conversion / Instructor training</span><span class="pill amber">Day or Night</span><span class="pill gray">Country</span></div><button class="btn sky" type="submit" ${phases.length?'':'disabled'}>＋ Create as draft</button></form></section>
-<section class="card sideCard"><h3>Safe template behavior</h3><div class="infoBox" style="margin-top:12px"><b>Course-specific snapshot</b><p>The selected phase is copied into a course-specific snapshot. Later template edits do not silently rewrite an active course.</p></div><div class="infoBox" style="margin-top:9px"><b>Draft first</b><p>New courses start as DRAFT and require explicit activation.</p></div><div class="infoBox" style="margin-top:9px"><b>Stable relationships</b><p>Stable IDs and foreign keys preserve every relationship.</p></div><div class="sectionHead"><h2>Draft courses</h2><p>Mock local snapshots created during review.</p></div><div class="draftList">${created.length?created.map(c=>`<div class="draftCourse"><div class="inlineHead"><b>${esc(c.name)} · ${esc(c.code)}</b><span class="pill amber">DRAFT</span></div><p>${c.courseType} · ${c.phaseName} · ${c.trainingKind} · ${c.dayNight} · ${c.country}${c.startsOn?' · '+c.startsOn:''}</p></div>`).join(''):'<p style="color:#64748b;font-size:12px">No local draft courses yet.</p>'}</div></section></div>`:''}
-${settingsTab==='catalog'?`<div class="catalogGrid" style="margin-top:14px">
-<section class="card catalogRow"><h3>Course types</h3><div class="catalogPills">${courseTypes.map(x=>`<span class="pill blue">${x.name}</span>`).join('')}</div><p class="sub" style="margin-top:10px">EP / IP / TECHNICIAN are course-level classifications.</p></section>
-<section class="card catalogRow"><h3>Phases by course type</h3><div class="field"><label>Scope type</label><select id="catalogType">${courseTypes.map(x=>`<option value="${x.id}" ${type===x.id?'selected':''}>${x.name}</option>`).join('')}</select></div><div class="catalogPills" style="margin-top:10px">${phases.length?phases.map(p=>`<span class="pill violet">${p.name}</span>`).join(''):'<span style="color:#94a3b8;font-size:12px">No phases for this type yet.</span>'}</div><form id="addPhaseForm" class="toolbar"><input class="input" name="phaseName" placeholder="New phase name" required><button class="btn secondary" type="submit">＋ Add phase</button></form></section>
-<section class="card catalogRow"><h3>Countries</h3><div class="catalogPills">${countries.map(x=>`<span class="pill gray">${x}</span>`).join('')}</div></section>
-<section class="card catalogRow"><h3>Training classifications</h3><div class="catalogPills">${trainingKinds.map(x=>`<span class="pill green">${x}</span>`).join('')}</div><div class="catalogPills" style="margin-top:8px">${dayNight.map(x=>`<span class="pill amber">${x}</span>`).join('')}</div></section>
-<section class="card catalogRow"><h3>Phase syllabi</h3><div class="catalogPills">${syllabi.map(x=>`<span class="pill blue">${x}</span>`).join('')}</div></section>
-<section class="card catalogRow"><h3>Assessment criteria</h3><div class="catalogPills">${criteria.map(x=>`<span class="pill violet">${x.name} · ${Math.round(x.weight*100)}%</span>`).join('')}</div></section>
-<section class="card catalogRow"><h3>Emergencies</h3><div class="catalogPills">${emergencies.map(x=>`<span class="pill gray">${x}</span>`).join('')}</div></section>
-<section class="card catalogRow"><h3>Review controls</h3><p class="sub">Reset only browser-local mock data.</p><button class="btn danger" id="resetLocal">Reset review data</button></section>
-</div><p class="infoBox" style="margin-top:14px">Choose a course type to scope phase-dependent catalogs. The important structural change is that <b>Day / Night is now separate from Phase</b>, and training purpose (new training / conversion / flight instructor training) is also a separate course attribute.</p>`:''}`}
+
+function settings(){
+  const c=cfgGet(),tab=state.settingsTab||'builder',created=getDraftCourses();
+  const type=state.builderType||c.courseTypes[0]?.id||'',phases=c.phases.filter(x=>x.type===type),phase=state.builderPhase&&phases.some(x=>x.id===state.builderPhase)?state.builderPhase:(phases[0]?.id||'');
+  const training=state.builderTraining||c.trainingKinds[0]?.id||'',time=state.builderDay||c.dayNight[0]?.id||'',country=state.builderCountry||c.countries[0]?.id||'';
+  const sel={courseType:type,phaseId:phase,trainingKind:training,dayNight:time,country};
+  let html='<div class="eyebrow">Editable configuration database</div><h1 class="pageTitle">Course Settings</h1><p class="sub">Edit every catalog and connect combinations to the correct syllabus, criteria and emergency bundle.</p>';
+  html+='<div class="scrollTabs"><button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">＋ New course</button><button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">▦ Master catalogs</button><button class="seg '+(tab==='profiles'?'active':'')+'" data-settings-tab="profiles">⌘ Configuration profiles</button></div>';
+
+  if(tab==='builder'){
+    html+='<div class="twoCol" style="margin-top:14px"><section class="card formCard"><div class="formTitle"><h2>Create course from configuration</h2><span class="pill amber">DRAFT first</span></div><form id="courseBuilder"><div class="fields">';
+    html+='<div class="field"><label>Course name</label><input class="input" name="name" required placeholder="Cyprus EP Course 2027"></div>';
+    html+='<div class="field"><label>Course code</label><input class="input" name="code" required placeholder="CEP-27"></div>';
+    html+='<div class="field"><label>Course type</label><select name="courseType" id="courseTypeSelect">'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===type?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
+    html+='<div class="field"><label>Phase</label><select name="phase" id="phaseSelect">'+phases.map(x=>'<option value="'+x.id+'" '+(x.id===phase?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
+    html+='<div class="field"><label>Training type</label><select name="trainingKind" id="builderTraining">'+c.trainingKinds.map(x=>'<option value="'+x.id+'" '+(x.id===training?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
+    html+='<div class="field"><label>Day / Night</label><select name="dayNight" id="builderDay">'+c.dayNight.map(x=>'<option value="'+x.id+'" '+(x.id===time?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
+    html+='<div class="field"><label>Country</label><select name="country" id="builderCountry">'+c.countries.map(x=>'<option value="'+x.id+'" '+(x.id===country?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
+    html+='<div class="field"><label>Start date</label><input class="input" name="startsOn" type="date"></div></div>';
+    html+='<div id="cfgResolvedPreview">'+cfgResolvedHtml(sel)+'</div><div class="toolbar"><button class="btn sky" type="submit" '+(phase?'':'disabled')+'>＋ Create as draft</button></div></form></section>';
+    html+='<section class="card sideCard"><h3>Draft courses</h3><p class="sub">Each draft keeps a snapshot of the matched configuration.</p><div class="draftList">'+(created.length?created.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.name)+' · '+esc(x.code)+'</b><span class="pill amber">DRAFT</span></div><p>'+esc(x.summary||[x.courseType,x.phaseName,x.trainingKind,x.dayNight,x.country].filter(Boolean).join(' · '))+'</p><div class="profileMeta"><span class="pill blue">'+(x.syllabusCount||0)+' syllabi</span><span class="pill violet">'+(x.criteriaCount||0)+' criteria</span><span class="pill gray">'+(x.emergencyCount||0)+' emergencies</span></div></div>').join(''):'<p style="color:#64748b;font-size:12px">No local draft courses yet.</p>')+'</div></section></div>';
+  }
+
+  if(tab==='catalog'){
+    html+='<div class="settingsGrid" style="margin-top:14px">';
+    html+=cfgCatalogCard('Course types','courseTypes',c.courseTypes);
+    html+=cfgPhaseCard(c);
+    html+=cfgCatalogCard('Training types','trainingKinds',c.trainingKinds);
+    html+=cfgCatalogCard('Day / Night','dayNight',c.dayNight);
+    html+=cfgCatalogCard('Countries','countries',c.countries);
+    html+=cfgCatalogCard('Syllabi','syllabi',c.syllabi);
+    html+=cfgCriteriaCard(c.criteria);
+    html+=cfgCatalogCard('Emergencies','emergencies',c.emergencies);
+    html+='<section class="card settingBox"><h3>Catalog controls</h3><p class="sub">Rename keeps stable IDs. Removing an item may invalidate profiles that reference it.</p><div class="toolbar"><button class="btn sky" id="cfgSaveCatalogs">Save all edits</button><button class="btn danger" id="cfgResetCatalogs">Reset defaults</button></div></section></div>';
+  }
+
+  if(tab==='profiles'){
+    const p=state.editProfileId?cfgProfilesGet().find(x=>x.id===state.editProfileId):null;
+    html+='<div class="twoCol" style="margin-top:14px"><section class="card formCard"><div class="formTitle"><h2>'+(p?'Edit':'Create')+' configuration profile</h2><span class="pill blue">Selection → bundle</span></div>'+cfgProfileEditor(p,c)+'</section>';
+    html+='<section class="card sideCard"><h3>Saved profiles</h3><p class="sub">Example: EP + Full Scale + Night immediately resolves to its assigned syllabus/criteria list.</p><div class="draftList">'+cfgProfilesGet().map(x=>cfgProfileCard(x,c)).join('')+'</div></section></div>';
+  }
+  return html;
+}
 function getPhaseTemplates(){try{return [...phaseTemplates,...JSON.parse(localStorage.getItem('ct-review-phases')||'[]')]}catch{return phaseTemplates}}
 function getDraftCourses(){try{return JSON.parse(localStorage.getItem('ct-review-courses')||'[]')}catch{return []}}
 function getSettings(){try{return JSON.parse(localStorage.getItem('ct-review-settings')||'{}')}catch{return {}}}function saveSettings(x){try{localStorage.setItem('ct-review-settings',JSON.stringify(x))}catch{}}
