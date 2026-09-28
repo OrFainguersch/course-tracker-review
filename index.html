@@ -260,11 +260,77 @@ function reports(){return `<div class="eyebrow">Reports & analytics</div><h1 cla
 function render(){renderNav();let html='';switch(state.screen){case'home':html=home();break;case'evaluation':html=evaluation();break;case'roster':html=roster();break;case'profile':html=traineeProfile();break;case'settings':html=settings();break;case'reports':html=reports();break;case'safety':html=placeholder('Safety','◈');break;case'exams':html=placeholder('Exams','▤');break;case'planned':html=placeholder('Planned vs Executed','▣');break}$('#content').innerHTML=html;bind();}
 function bind(){document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;render()});document.querySelectorAll('[data-trainee]').forEach(b=>b.onclick=()=>go('profile',{selectedTrainee:b.dataset.trainee}));document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});document.querySelectorAll('[data-settings-tab]').forEach(b=>b.onclick=()=>{state.settingsTab=b.dataset.settingsTab;render()});document.querySelectorAll('[data-roster-type]').forEach(b=>b.onclick=()=>{state.rosterType=b.dataset.rosterType;render()});
 if($('#rosterSearch')){$('#rosterSearch').oninput=e=>{state.search=e.target.value;clearTimeout(window._rs);window._rs=setTimeout(render,120)};$('#statusFilter').onchange=e=>{state.filter=e.target.value;render()};$('#addPersonBtn').onclick=()=>$('#personModal').classList.add('open');$('#closePersonModal').onclick=()=>$('#personModal').classList.remove('open');$('#personModal').onclick=e=>{if(e.target.id==='personModal')$('#personModal').classList.remove('open')};$('#addPersonForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget),type=fd.get('type');const arr=getRosterExtras();const name=String(fd.get('name'));arr.push({id:'x_'+Date.now(),name,email:String(fd.get('email')||''),type,status:'Active',initials:name.split(' ').map(x=>x[0]).join('').slice(0,2),average:type==='TRAINEE'?null:undefined,totalFlights:type==='TRAINEE'?0:undefined});localStorage.setItem('ct-review-roster',JSON.stringify(arr));toast(name+' added to the course');render()}}
-if($('#backRoster'))$('#backRoster').onclick=()=>go('roster');if($('#evalForm'))bindEval();if($('#courseBuilder')||$('#addPhaseForm')||$('#resetLocal'))bindSettings();document.querySelectorAll('[data-edit-eval]').forEach(b=>b.onclick=()=>{state.editingEval=b.dataset.editEval;render()});}
+if($('#backRoster'))$('#backRoster').onclick=()=>go('roster');if($('#evalForm'))bindEval();if(state.screen==='settings')bindSettings();document.querySelectorAll('[data-edit-eval]').forEach(b=>b.onclick=()=>{state.editingEval=b.dataset.editEval;render()});}
 function bindEval(){const f=$('#evalForm');const scoreEls=[...f.querySelectorAll('select[name^="score_"]')];const recalc=()=>{let complete=true,total=0;criteria.forEach(c=>{const el=f.querySelector('[name="score_'+c.id+'"]'),v=Number(el?.value||0);if(!v)complete=false;total+=v*c.weight});$('#suggestedGrade').textContent=complete?(Math.round(total*10)/10).toFixed(1):'—'};scoreEls.forEach(x=>x.onchange=recalc);f.querySelectorAll('input,select,textarea').forEach(x=>x.onchange=()=>$('#draftBadge')?.classList.remove('hidden'));f.querySelectorAll('input[name="gradeMode"]').forEach(x=>x.onchange=()=>{$('#overrideWrap').style.display=x.value==='INSTRUCTOR'&&x.checked?'block':(f.querySelector('input[name="gradeMode"]:checked')?.value==='INSTRUCTOR'?'block':'none')});
 $('#draftBtn').onclick=()=>toast('Draft saved locally');if($('#cancelEdit'))$('#cancelEdit').onclick=()=>{state.editingEval=null;render()};if($('#excelBtn'))$('#excelBtn').onclick=()=>{const rows=[['Date','Trainee','Instructor','Syllabus','Grade','Revision'],...getEvaluations().map(i=>[i.flightDate,i.traineeName,i.instructorName,i.syllabus,i.grade,i.revision])];const csv=rows.map(r=>r.join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='course-evaluations.csv';a.click();URL.revokeObjectURL(a.href)};if($('#pdfBtn'))$('#pdfBtn').onclick=()=>window.print();
 f.onsubmit=e=>{e.preventDefault();const fd=new FormData(f),list=getEvaluations(),old=state.editingEval?list.find(x=>x.id===state.editingEval):null,traineeId=old?.traineeId||fd.get('trainee'),instId=fd.get('instructor');const scores={};criteria.forEach(c=>scores[c.id]=Number(fd.get('score_'+c.id))||0);let suggested=0,complete=true;criteria.forEach(c=>{if(!scores[c.id])complete=false;suggested+=scores[c.id]*c.weight});suggested=complete?Math.round(suggested*10)/10:0;const gradeMode=fd.get('gradeMode')||'SUGGESTED';const grade=gradeMode==='INSTRUCTOR'?Number(fd.get('instructorGrade')||0):suggested;const obj={id:old?.id||'ev_'+Date.now(),revision:old?(old.revision||1)+1:1,revisionCount:old?(old.revisionCount||1)+1:1,traineeId,instructorId:instId,traineeName:trainees.find(t=>t.id===traineeId)?.name||'Trainee',instructorName:instructors.find(i=>i.id===instId)?.name||'Instructor',syllabus:old?.syllabus||fd.get('syllabus'),duration:Number(fd.get('duration')),flightDate:fd.get('date'),time:fd.get('time'),scores,suggestedGrade:suggested,gradeMode,grade,comments:fd.get('comments'),emphases:fd.get('emphases'),emergencies:emergencies.map((_,i)=>Number(fd.get('em_'+i))||0),changeReason:fd.get('changeReason')||''};const next=old?list.map(x=>x.id===old.id?obj:x):[obj,...list];setEvaluations(next);state.editingEval=null;toast(old?'Revision '+obj.revision+' saved and verified':'Evaluation saved and verified');render()}}
-function bindSettings(){if($('#courseTypeSelect'))$('#courseTypeSelect').onchange=e=>{saveSettings({...getSettings(),builderType:e.target.value});render()};if($('#courseBuilder'))$('#courseBuilder').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget),phase=getPhaseTemplates().find(p=>p.id===fd.get('phase'));const arr=getDraftCourses();arr.unshift({id:'c_'+Date.now(),name:String(fd.get('name')),code:String(fd.get('code')),courseType:String(fd.get('courseType')),phaseId:String(fd.get('phase')),phaseName:phase?.name||'',trainingKind:String(fd.get('trainingKind')),dayNight:String(fd.get('dayNight')),country:String(fd.get('country')),startsOn:String(fd.get('startsOn')||'')});localStorage.setItem('ct-review-courses',JSON.stringify(arr));toast('Draft course created · template snapshot prepared');render()};if($('#catalogType'))$('#catalogType').onchange=e=>{saveSettings({...getSettings(),builderType:e.target.value});render()};if($('#addPhaseForm'))$('#addPhaseForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget),type=getSettings().builderType||'EP',name=String(fd.get('phaseName'));const arr=JSON.parse(localStorage.getItem('ct-review-phases')||'[]');arr.push({id:'phase_'+Date.now(),type,name});localStorage.setItem('ct-review-phases',JSON.stringify(arr));toast(name+' phase added to '+type);render()};if($('#resetLocal'))$('#resetLocal').onclick=()=>{if(confirm('Reset local review data?')){['ct-review-evals','ct-review-settings','ct-review-roster','ct-review-phases','ct-review-courses'].forEach(k=>localStorage.removeItem(k));toast('Local review data reset');render()}}}
+
+function bindSettings(){
+  const c=cfgGet();
+  const updateBuilder=()=>{
+    const type=$('#courseTypeSelect')?.value||'',phase=$('#phaseSelect')?.value||'',training=$('#builderTraining')?.value||'',time=$('#builderDay')?.value||'',country=$('#builderCountry')?.value||'';
+    state.builderType=type;state.builderPhase=phase;state.builderTraining=training;state.builderDay=time;state.builderCountry=country;
+    const box=$('#cfgResolvedPreview'); if(box)box.innerHTML=cfgResolvedHtml({courseType:type,phaseId:phase,trainingKind:training,dayNight:time,country});
+  };
+  if($('#courseTypeSelect'))$('#courseTypeSelect').onchange=e=>{
+    const list=c.phases.filter(x=>x.type===e.target.value);state.builderType=e.target.value;state.builderPhase=list[0]?.id||'';
+    $('#phaseSelect').innerHTML=list.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');updateBuilder();
+  };
+  ['phaseSelect','builderTraining','builderDay','builderCountry'].forEach(id=>{if($('#'+id))$('#'+id).onchange=updateBuilder});
+  if($('#courseBuilder'))$('#courseBuilder').onsubmit=e=>{
+    e.preventDefault();const fd=new FormData(e.currentTarget),sel={courseType:String(fd.get('courseType')),phaseId:String(fd.get('phase')),trainingKind:String(fd.get('trainingKind')),dayNight:String(fd.get('dayNight')),country:String(fd.get('country'))};
+    const p=cfgResolve(sel),cc=cfgGet(),ct=cfgItem(cc.courseTypes,sel.courseType),ph=cfgItem(cc.phases,sel.phaseId),tk=cfgItem(cc.trainingKinds,sel.trainingKind),dn=cfgItem(cc.dayNight,sel.dayNight),co=cfgItem(cc.countries,sel.country),arr=getDraftCourses();
+    arr.unshift({id:cfgId('course'),name:String(fd.get('name')),code:String(fd.get('code')),summary:[ct?.name,ph?.name,tk?.name,dn?.name,co?.name].filter(Boolean).join(' · '),startsOn:String(fd.get('startsOn')||''),profileId:p?.id||null,syllabusCount:p?.syllabusIds.length||0,criteriaCount:p?.criteriaIds.length||0,emergencyCount:p?.emergencyIds.length||0,snapshot:p?JSON.parse(JSON.stringify(p)):null});
+    localStorage.setItem('ct-review-courses',JSON.stringify(arr));toast(p?'Draft created with matched configuration':'Draft created — no matching profile');render();
+  };
+
+  if($('#phaseScope'))$('#phaseScope').onchange=e=>{state.phaseScope=e.target.value;render()};
+
+  if($('#cfgSaveCatalogs'))$('#cfgSaveCatalogs').onclick=()=>{
+    const cc=cfgGet();
+    document.querySelectorAll('.cfgName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
+    document.querySelectorAll('.cfgPhaseName').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
+    document.querySelectorAll('.cfgCriterionName').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
+    document.querySelectorAll('.cfgCriterionWeight').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x)x.weight=Math.max(0,Math.min(100,Number(el.value)||0))});
+    cfgSave(cc);toast('All catalog changes saved');render();
+  };
+
+  document.querySelectorAll('.cfgAddForm').forEach(form=>form.onsubmit=e=>{
+    e.preventDefault();const cc=cfgGet(),kind=form.dataset.kind,name=String(new FormData(form).get('name')||'').trim();if(!name)return;
+    const prefix={courseTypes:'type',trainingKinds:'training',dayNight:'time',countries:'country',syllabi:'syllabus',emergencies:'emergency'}[kind]||'item';
+    cc[kind].push({id:cfgId(prefix),name});cfgSave(cc);toast(name+' added');render();
+  });
+
+  document.querySelectorAll('[data-cfg-remove]').forEach(btn=>btn.onclick=()=>{
+    const parts=btn.dataset.cfgRemove.split('|'),kind=parts[0],id=parts[1],cc=cfgGet();cc[kind]=cc[kind].filter(x=>x.id!==id);
+    if(kind==='courseTypes')cc.phases=cc.phases.filter(x=>x.type!==id);cfgSave(cc);toast('Catalog item removed');render();
+  });
+
+  document.querySelectorAll('[data-phase-remove]').forEach(btn=>btn.onclick=()=>{const cc=cfgGet();cc.phases=cc.phases.filter(x=>x.id!==btn.dataset.phaseRemove);cfgSave(cc);toast('Phase removed');render()});
+  if($('#cfgAddPhase'))$('#cfgAddPhase').onsubmit=e=>{
+    e.preventDefault();const cc=cfgGet(),name=String(new FormData(e.currentTarget).get('name')||'').trim(),type=state.phaseScope||cc.courseTypes[0]?.id||'';if(!name||!type)return;
+    cc.phases.push({id:cfgId('phase'),type,name});cfgSave(cc);toast(name+' phase added');render();
+  };
+
+  document.querySelectorAll('[data-criterion-remove]').forEach(btn=>btn.onclick=()=>{const cc=cfgGet();cc.criteria=cc.criteria.filter(x=>x.id!==btn.dataset.criterionRemove);cfgSave(cc);toast('Criterion removed');render()});
+  if($('#cfgAddCriterion'))$('#cfgAddCriterion').onsubmit=e=>{
+    e.preventDefault();const fd=new FormData(e.currentTarget),name=String(fd.get('name')||'').trim(),weight=Math.max(0,Math.min(100,Number(fd.get('weight'))||0));if(!name)return;
+    const cc=cfgGet();cc.criteria.push({id:cfgId('criterion'),name,weight});cfgSave(cc);toast('Criterion added');render();
+  };
+
+  if($('#cfgResetCatalogs'))$('#cfgResetCatalogs').onclick=()=>{if(confirm('Reset every master catalog to its default values?')){localStorage.removeItem('ct-review-catalogs');state.phaseScope=null;toast('Catalogs reset to defaults');render()}};
+
+  if($('#cfgProfileType'))$('#cfgProfileType').onchange=e=>{const cc=cfgGet(),list=cc.phases.filter(x=>x.type===e.target.value);$('#cfgProfilePhase').innerHTML=list.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')};
+  if($('#cfgProfileForm'))$('#cfgProfileForm').onsubmit=e=>{
+    e.preventDefault();const fd=new FormData(e.currentTarget),arr=cfgProfilesGet(),old=state.editProfileId?arr.find(x=>x.id===state.editProfileId):null;
+    const obj={id:old?.id||cfgId('profile'),name:String(fd.get('name')),courseType:String(fd.get('courseType')),phaseId:String(fd.get('phaseId')),trainingKind:String(fd.get('trainingKind')),dayNight:String(fd.get('dayNight')),country:String(fd.get('country')),syllabusIds:fd.getAll('syllabusIds').map(String),criteriaIds:fd.getAll('criteriaIds').map(String),emergencyIds:fd.getAll('emergencyIds').map(String)};
+    cfgProfilesSave(old?arr.map(x=>x.id===old.id?obj:x):[...arr,obj]);state.editProfileId=null;toast(old?'Configuration profile updated':'Configuration profile created');render();
+  };
+  if($('#cfgProfileCancel'))$('#cfgProfileCancel').onclick=()=>{state.editProfileId=null;render()};
+  document.querySelectorAll('[data-profile-edit]').forEach(btn=>btn.onclick=()=>{state.editProfileId=btn.dataset.profileEdit;render()});
+  document.querySelectorAll('[data-profile-delete]').forEach(btn=>btn.onclick=()=>{cfgProfilesSave(cfgProfilesGet().filter(x=>x.id!==btn.dataset.profileDelete));if(state.editProfileId===btn.dataset.profileDelete)state.editProfileId=null;toast('Profile deleted');render()});
+}
+
 render();
 </script>
 </body>
