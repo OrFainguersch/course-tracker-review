@@ -128,6 +128,73 @@ main{padding:16px 14px calc(30px + env(safe-area-inset-bottom));max-width:1220px
 .courseQuick .quickIcon{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;margin:0 auto 8px;font-size:18px}
 .homeMiniStatus{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.homeMiniStatus .pill{background:rgba(255,255,255,.13);color:#fff;padding:5px 8px;font-size:9px}
 
+
+/* ===== Home dashboard 0524 ===== */
+.homeDashboard{display:grid;gap:16px}
+.homeDashboard .mobileHero{margin:0}
+.homePrimaryGrid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.homePanel{background:#fff;border:1px solid #e2ebf4;border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.homePanelPad{padding:14px}
+.homeBlockHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:0 0 10px}
+.homeBlockTitle{display:flex;gap:9px;min-width:0}
+.homeBlockTitle:before{content:"";width:4px;height:21px;border-radius:99px;background:#e0a82f;flex:0 0 auto;margin-top:2px}
+.homeBlockTitle h2{margin:0;color:#082f57;font-size:17px;line-height:1.15}
+.homeBlockTitle p{margin:3px 0 0;color:#71849a;font-size:10.5px}
+.homeDateChip{border:1px solid #dce8f3;background:#f8fbfe;border-radius:10px;padding:7px 9px;color:#365c82;font-size:10px;font-weight:750;white-space:nowrap}
+.homePlanList{display:grid}
+.homePlanRow{appearance:none;border:0;border-top:1px solid #e8eff6;background:#fff;width:100%;padding:11px 12px;display:grid;grid-template-columns:54px 32px minmax(0,1fr) auto;gap:9px;align-items:center;text-align:left;cursor:pointer}
+.homePlanRow:first-child{border-top:0}
+.homePlanRow:hover{background:#f8fbfe}
+.homePlanTime{font-size:11px;color:#2f5f8d;font-weight:850}
+.homeInitial{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;background:#fff2cf;color:#7f5a11;font-size:9px;font-weight:900}
+.homePlanMain b{display:block;color:#0b315b;font-size:11.5px}
+.homePlanMain small{display:block;color:#71849a;font-size:9.5px;margin-top:2px;line-height:1.25}
+.homePlanTags{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap}
+.homeTag{display:inline-flex;align-items:center;border-radius:999px;padding:5px 7px;background:#edf3f9;color:#61768c;font-size:8.5px;font-weight:800;white-space:nowrap}
+.homeTag.solo{background:#dcf7e8;color:#12814e}.homeTag.instructed{background:#e5f2ff;color:#0b71cf}
+.homeQuickActions{display:grid;gap:8px}
+.homeQuickBtn{appearance:none;border:0;border-radius:13px;min-height:49px;padding:10px 12px;background:#edf6ff;color:#0b315b;display:flex;align-items:center;gap:10px;text-align:left;font-size:11px;font-weight:850;cursor:pointer}
+.homeQuickBtn.primary{background:#087cf0;color:#fff;box-shadow:0 8px 18px rgba(8,124,240,.20)}
+.homeQuickBtn:disabled{opacity:.48;cursor:default}
+.homeQuickIcon{width:26px;height:26px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.62);color:#087cf0;font-size:14px;flex:0 0 auto}
+.homeQuickBtn.primary .homeQuickIcon{background:rgba(255,255,255,.17);color:#fff}
+.homeQuickBtn em{margin-left:auto;font-style:normal;background:#f04438;color:#fff;min-width:19px;height:19px;padding:0 5px;border-radius:99px;display:grid;place-items:center;font-size:8px}
+.homePulseGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.homePulseCard{border:1px solid #e4ecf4;border-radius:16px;padding:12px 9px;background:#fff;text-align:center;min-height:112px}
+.homePulseIcon{width:38px;height:38px;margin:0 auto 7px;border-radius:50%;display:grid;place-items:center;background:#eef6ff;color:#087cf0;font-size:18px}
+.homePulseValue{font-size:20px;color:#082f57;font-weight:900;line-height:1}
+.homePulseLabel{font-size:9.5px;color:#536b82;margin-top:5px;line-height:1.25}
+.homePulseNote{font-size:8.5px;color:#0b9a58;font-weight:800;margin-top:6px}
+.homePulseNote.neutral{color:#71849a}
+.homeAttention{overflow:auto}
+.homeAttentionTable{width:100%;border-collapse:collapse;min-width:660px}
+.homeAttentionTable th{font-size:9px;color:#60758a;text-align:left;background:#f8fbfe;padding:8px 10px;border-bottom:1px solid #e2ebf4}
+.homeAttentionTable td{padding:9px 10px;border-bottom:1px solid #edf2f7;font-size:10px;color:#39556f;vertical-align:middle}
+.homeAttentionTable tr:last-child td{border-bottom:0}
+.homePersonCell{display:flex;align-items:center;gap:8px;color:#0b315b;font-weight:800}
+.homeMiniAvatar{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;background:#e8f3ff;color:#0d6fc6;font-size:9px;font-weight:900;flex:0 0 auto}
+.homeIssue{display:inline-flex;align-items:center;gap:5px}.homeIssue:before{content:"!";width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:#fff1e5;color:#dc7a13;font-size:9px;font-weight:900}
+.homeProgressCell{display:flex;align-items:center;gap:7px;min-width:120px}.homeProgressBar{height:6px;flex:1;border-radius:99px;background:#e5edf5;overflow:hidden}.homeProgressBar i{display:block;height:100%;border-radius:inherit;background:#1188ef}
+.homeReviewBtn{border:0;border-radius:9px;background:#e7f3ff;color:#0b67bb;padding:7px 10px;font-size:9px;font-weight:850;cursor:pointer}
+.homeBottomGrid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.homeFeed{display:grid}.homeFeedItem{display:grid;grid-template-columns:10px 29px minmax(0,1fr) auto;gap:8px;align-items:center;padding:9px 0;border-top:1px solid #edf2f7}.homeFeedItem:first-child{border-top:0}.homeFeedDot{width:8px;height:8px;border-radius:50%;background:#1488ef}.homeFeedDot.gold{background:#e2a621}.homeFeedMain b{display:block;color:#0b315b;font-size:10.5px}.homeFeedMain small{display:block;color:#71849a;font-size:9px;margin-top:2px}.homeScore{background:#e9f4ff;color:#0b6fc9;border-radius:8px;padding:6px 8px;font-size:10px;font-weight:900}
+.homeUpcoming{display:grid}.homeUpcomingItem{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid #edf2f7}.homeUpcomingItem:first-child{border-top:0}.homeCalendar{width:44px;height:44px;border-radius:11px;background:#f0f6fc;color:#0b315b;display:grid;place-items:center;text-align:center;font-size:8px;line-height:1.1;font-weight:800}.homeCalendar b{display:block;font-size:14px}.homeUpcomingMain b{display:block;color:#0b315b;font-size:10.5px}.homeUpcomingMain small{display:block;color:#71849a;font-size:9px;margin-top:2px}.homeDue{background:#e7f3ff;color:#0b6fc9;border-radius:8px;padding:6px 8px;font-size:8.5px;font-weight:850;white-space:nowrap}.homeDue.soon{background:#fff0ec;color:#d64c39}
+.homeInlineLink{border:1px solid #dce8f3;background:#fff;color:#087cf0;border-radius:9px;padding:7px 10px;font-size:9px;font-weight:850;cursor:pointer}
+@media(min-width:760px){
+  .homeDashboard{gap:18px}
+  .homePrimaryGrid{grid-template-columns:minmax(0,1.9fr) minmax(240px,.72fr)}
+  .homePulseGrid{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .homeBottomGrid{grid-template-columns:1fr 1fr}
+  .homePanelPad{padding:15px}
+}
+@media(max-width:759px){
+  .homePlanRow{grid-template-columns:47px 30px minmax(0,1fr);padding:10px}
+  .homePlanTags{grid-column:3;justify-content:flex-start;margin-top:3px}
+  .homePulseGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .homeAttentionTable{min-width:610px}
+  .homeBlockHead{align-items:center}
+}
+
 /* roster */
 .rosterTopbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
 .rosterControls{padding:11px}.rosterSearchRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:10px}
@@ -268,7 +335,7 @@ select option[value=""]{color:#8a9bad}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0523 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0524 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentCourseId='AEP-26';
@@ -354,27 +421,90 @@ function getExamRecords(){return safeArrayStorage('ct-review-exams')}
 function saveExamRecords(v){localStorage.setItem('ct-review-exams',JSON.stringify(v))}
 function currentActivityCounts(){return {evaluation:getEvaluations().length,safety:mockSafetyEvents.length+getSafetyRecords().length,exams:mockExamAttempts.length+getExamRecords().length,planned:getDailyReports().length,roster:trainees.length+instructors.length}}
 function home(){
- const counts=currentActivityCounts();
- return '<section class="mobileHero">'+
-   '<div class="eyebrow" style="color:#8bc8ff">AEROSTAR EP COURSE</div>'+
-   '<div class="welcome">Welcome back, Or</div>'+
-   '<p>Train. Track. Progress.</p>'+
-   '<div class="heroMeta">Israel · Sep–Oct 2026</div>'+
-   '<div class="homeMiniStatus"><span class="pill">EP</span><span class="pill">RC Model</span><span class="pill">New Training</span><span class="pill">Day</span></div>'+
- '</section>'+
- '<div class="homeSectionTitle"><div><h2>Operational Activities</h2><p>Your daily training tools</p></div></div>'+
- '<section class="mobileActivityGrid">'+
-   '<button class="mobileActivity" data-go="evaluation"><span class="activityCount">'+counts.evaluation+'</span><div class="tileIcon" style="background:#e0efff;color:#087cf0">✓</div><b>Evaluation</b><small>Log flights and complete evaluations</small><span class="tileArrow">›</span></button>'+
-   '<button class="mobileActivity" data-go="safety"><span class="activityCount">'+counts.safety+'</span><div class="tileIcon" style="background:#dcf7ee;color:#0aa66f">◈</div><b>Safety</b><small>Report safety events and manage cases</small><span class="tileArrow">›</span></button>'+
-   '<button class="mobileActivity" data-go="exams"><span class="activityCount">'+counts.exams+'</span><div class="tileIcon" style="background:#eee8ff;color:#7655e8">▤</div><b>Theoretical Exams</b><small>Manage exams and track results</small><span class="tileArrow">›</span></button>'+
-   '<button class="mobileActivity" data-go="planned"><span class="activityCount">'+counts.planned+'</span><div class="tileIcon" style="background:#fff0e1;color:#f1842f">▣</div><b>Planned vs Executed</b><small>Plan training and record actual flights</small><span class="tileArrow">›</span></button>'+
- '</section>'+
- '<div class="homeSectionTitle"><div><h2>Course</h2><p>People, progress and insights</p></div></div>'+
- '<section class="courseQuickGrid">'+
-   '<button class="courseQuick" data-go="roster"><span class="quickIcon" style="background:#e6f3ff;color:#087cf0">♙</span>Course<br>Roster</button>'+
-   '<button class="courseQuick" data-go="reports"><span class="quickIcon" style="background:#eee9ff;color:#7655e8">▥</span>Reports</button>'+
-   '<button class="courseQuick" data-go="settings"><span class="quickIcon" style="background:#eef2f6;color:#536b82">⚙</span>Course<br>Settings</button>'+
- '</section>';
+ const activeT=allTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active');
+ const evals=allEvaluationsForAnalytics().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const avgProgress=Math.round(mean(activeT.map(t=>Number(t.progress)||0))||0);
+ const avgGrade=mean(activeT.map(t=>Number(t.average)).filter(Number.isFinite));
+ const weekAgo=new Date();weekAgo.setDate(weekAgo.getDate()-7);
+ const weeklyFlights=evals.filter(e=>{const d=new Date(e.date+'T12:00:00');return !Number.isNaN(d.getTime())&&d>=weekAgo}).length;
+ const openSafety=getSafetyRecords().filter(x=>!['CLOSED','RESOLVED'].includes(String(x.status||'').toUpperCase())).length;
+ const examMap=Object.fromEntries(mockExamAttempts.map(x=>[x.traineeId,x]));
+ const latestBy={};evals.forEach(e=>{if(!latestBy[e.traineeId])latestBy[e.traineeId]=e});
+ const attention=activeT.map(t=>{
+   const prog=progressionByTrainee[t.id]||{};
+   const exam=examMap[t.id];
+   let issue='';
+   if(exam&&Number(exam.grade)<Number(exam.pass))issue='Exam below pass mark';
+   else if(prog.reviewRequired)issue='Instructor decision pending';
+   else if(Number(t.progress)<avgProgress-6)issue='Below course average';
+   return {...t,issue,lastFlight:latestBy[t.id]?.date||'—'};
+ }).filter(x=>x.issue).slice(0,3);
+ const fallbackAttention=activeT.filter(t=>!attention.some(x=>x.id===t.id)).sort((a,b)=>a.progress-b.progress).slice(0,Math.max(0,3-attention.length)).map(t=>({...t,issue:'Monitor progression',lastFlight:latestBy[t.id]?.date||'—'}));
+ const attentionRows=[...attention,...fallbackAttention].slice(0,3);
+ const plan=[
+   {time:'08:00',t:activeT[0],activity:'Circuits & Touch-and-Go',mode:'Instructed'},
+   {time:'09:30',t:activeT[1]||activeT[0],activity:'Figure-8 & De-crab',mode:'Solo'},
+   {time:'11:00',t:activeT[2]||activeT[0],activity:'Engine Cut (Downwind)',mode:'Instructed'},
+   {time:'13:30',t:activeT[3]||activeT[0],activity:'Complex Emergencies',mode:'Instructed'}
+ ].filter(x=>x.t);
+ const recent=evals.slice(0,5);
+ const draft=getActivityDraft('evaluation');
+ const todayLabel=new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).format(new Date());
+ const fmtDate=s=>{if(!s||s==='—')return '—';const d=new Date(s+'T12:00:00');return Number.isNaN(d.getTime())?s:new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',year:'numeric'}).format(d)};
+ const initials=t=>esc(t.initials||personInitials(t));
+ const upcoming=[
+   ['30','Sep','Systems Knowledge Exam','Written Test','In 1 day','soon'],
+   ['02','Oct','Solo Check Flight',activeT[0]?.name||'Trainee','In 3 days',''],
+   ['05','Oct','Stage Progression Review','RC Model → Half-Scale','In 6 days',''],
+   ['10','Oct','Night Training Start','Phase 1','In 11 days','']
+ ];
+ return '<div class="homeDashboard">'+
+   '<section class="mobileHero">'+
+     '<div class="eyebrow" style="color:#8bc8ff">AEROSTAR EP COURSE</div>'+
+     '<div class="welcome">Welcome back, Or</div>'+
+     '<p>Train. Track. Progress.</p>'+
+     '<div class="heroMeta">Israel · Sep–Oct 2026</div>'+
+     '<div class="homeMiniStatus"><span class="pill">EP</span><span class="pill">RC Model</span><span class="pill">New Training</span><span class="pill">Day</span></div>'+
+   '</section>'+
+   '<section class="homePrimaryGrid">'+
+     '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Today\'s Plan</h2><p>Scheduled flights and activities for today</p></div></div><span class="homeDateChip">▣ '+esc(todayLabel)+'</span></div></div>'+
+       '<div class="homePlanList">'+plan.map(x=>'<button class="homePlanRow" data-start-eval="'+esc(x.t.id)+'"><span class="homePlanTime">◷ '+x.time+'</span><span class="homeInitial">'+initials(x.t)+'</span><span class="homePlanMain"><b>'+esc(x.t.name)+'</b><small>'+esc(x.activity)+'</small></span><span class="homePlanTags"><span class="homeTag">RC Model</span><span class="homeTag '+(x.mode==='Solo'?'solo':'instructed')+'">'+esc(x.mode)+'</span></span></button>').join('')+
+       '</div>'+
+     '</div>'+
+     '<div class="homePanel homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Quick Actions</h2><p>Common daily tasks</p></div></div></div>'+
+       '<div class="homeQuickActions">'+
+         '<button class="homeQuickBtn primary" data-go="evaluation"><span class="homeQuickIcon">▷</span><span>Start Evaluation</span></button>'+
+         '<button class="homeQuickBtn" '+(draft?'data-go="evaluation"':'disabled')+'><span class="homeQuickIcon">▤</span><span>'+(draft?'Resume Draft':'No Draft to Resume')+'</span>'+(draft?'<em>1</em>':'')+'</button>'+
+         '<button class="homeQuickBtn" data-go="planned"><span class="homeQuickIcon">▣</span><span>Today\'s Plan</span></button>'+
+         '<button class="homeQuickBtn" data-go="safety"><span class="homeQuickIcon">◇</span><span>Log Safety Event</span></button>'+
+       '</div>'+
+     '</div>'+
+   '</section>'+
+   '<section class="homePanel homePanelPad">'+
+     '<div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Course Pulse</h2><p>Key indicators for current course</p></div></div><button class="homeInlineLink" data-go="reports">View Reports</button></div>'+
+     '<div class="homePulseGrid">'+
+       '<div class="homePulseCard"><div class="homePulseIcon">♙</div><div class="homePulseValue">'+activeT.length+'</div><div class="homePulseLabel">Active Trainees</div><div class="homePulseNote neutral">Current roster</div></div>'+
+       '<div class="homePulseCard"><div class="homePulseIcon">◔</div><div class="homePulseValue">'+avgProgress+'%</div><div class="homePulseLabel">Average Progress</div><div class="homePulseNote">Course status</div></div>'+
+       '<div class="homePulseCard"><div class="homePulseIcon">✈</div><div class="homePulseValue">'+weeklyFlights+'</div><div class="homePulseLabel">Flights Completed<br>This Week</div><div class="homePulseNote neutral">Evaluations logged</div></div>'+
+       '<div class="homePulseCard"><div class="homePulseIcon" style="background:#fff4dd;color:#c88a13">★</div><div class="homePulseValue">'+(avgGrade?avgGrade.toFixed(1):'—')+'</div><div class="homePulseLabel">Average Grade</div><div class="homePulseNote">Active trainees</div></div>'+
+       '<div class="homePulseCard"><div class="homePulseIcon" style="background:#fff0ef;color:#e05b51">◇</div><div class="homePulseValue">'+openSafety+'</div><div class="homePulseLabel">Open Safety Events</div><div class="homePulseNote">'+(openSafety===0?'Good standing':'Needs review')+'</div></div>'+
+     '</div>'+
+   '</section>'+
+   '<section class="homePanel">'+
+     '<div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Trainees Requiring Attention</h2><p>Trainees that may need follow-up</p></div></div><button class="homeInlineLink" data-go="roster">View All</button></div></div>'+
+     '<div class="homeAttention"><table class="homeAttentionTable"><thead><tr><th>Trainee</th><th>Issue</th><th>Last Flight</th><th>Progress</th><th>Action</th></tr></thead><tbody>'+
+       attentionRows.map(t=>'<tr><td><span class="homePersonCell"><span class="homeMiniAvatar">'+initials(t)+'</span>'+esc(t.name)+'</span></td><td><span class="homeIssue">'+esc(t.issue)+'</span></td><td>'+esc(fmtDate(t.lastFlight))+'</td><td><span class="homeProgressCell"><b>'+esc(t.progress)+'%</b><span class="homeProgressBar"><i style="width:'+Math.max(0,Math.min(100,Number(t.progress)||0))+'%"></i></span></span></td><td><button class="homeReviewBtn" data-trainee="'+esc(t.id)+'">Review</button></td></tr>').join('')+
+     '</tbody></table></div>'+
+   '</section>'+
+   '<section class="homeBottomGrid">'+
+     '<div class="homePanel homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Recent Activity</h2><p>Latest updates across the course</p></div></div><button class="homeInlineLink" data-go="reports">View All</button></div><div class="homeFeed">'+
+       recent.map((e,i)=>{const t=allTrainees().find(x=>x.id===e.traineeId)||{name:'Trainee',initials:'TR'};return '<div class="homeFeedItem"><span class="homeFeedDot '+(i===3?'gold':'')+'"></span><span class="homeMiniAvatar">'+initials(t)+'</span><span class="homeFeedMain"><b>'+esc(t.name)+'</b><small>'+esc(e.syllabus||'Evaluation completed')+' · '+esc(fmtDate(e.date))+'</small></span><span class="homeScore">'+(Number.isFinite(Number(e.grade))?Number(e.grade).toFixed(1):'✓')+'</span></div>'}).join('')+
+     '</div></div>'+
+     '<div class="homePanel homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Upcoming Items</h2><p>Exams, milestones and deadlines</p></div></div><button class="homeInlineLink" data-go="planned">View All</button></div><div class="homeUpcoming">'+
+       upcoming.map(x=>'<div class="homeUpcomingItem"><span class="homeCalendar"><span><b>'+x[0]+'</b>'+x[1]+'</span></span><span class="homeUpcomingMain"><b>'+esc(x[2])+'</b><small>'+esc(x[3])+'</small></span><span class="homeDue '+x[5]+'">'+esc(x[4])+'</span></div>').join('')+
+     '</div></div>'+
+   '</section>'+
+ '</div>';
 }
 function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.find(x=>x.id===state.editingEval):null,autoDraft=getActivityDraft('evaluation'),allT=allTrainees(),activeT=allT.filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active'),tracking=currentCourseTrackingCounters(),tracks=type=>tracking.some(x=>x.type===type),prefillTrainee=edit?.traineeId||state.evaluationTraineeId||'';return `<div class="eyebrow">Evaluation workflow</div><h1 class="pageTitle">Evaluation</h1><p class="sub">Record, review and revise flight evaluations with weighted criteria and emergency practice.</p>
 <div class="twoCol"><section class="card formCard"><div class="formTitle"><h2>${edit?`Edit evaluation · revision ${edit.revision}`:'New evaluation'}</h2><span class="autoDraftNote" id="draftBadge">${autoDraft?draftSavedLabel('evaluation'):'Auto-save ready'}</span></div>
