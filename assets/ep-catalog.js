@@ -1,6 +1,27 @@
 window.EP_CATALOG = {
   version: "2026-09-29",
   profession: { id: "EP", name: "External Pilot" },
+  sourceDocuments: [
+    {name:"EP Screenings - RC Simulator Syllabus (Edition B) - Instructor.docx",kind:"Syllabus",scope:"Screening · RC Simulator"},
+    {name:"EP Screenings - RC Simulator Syllabus (Edition B) - Trainee.docx",kind:"Syllabus",scope:"Screening · RC Simulator"},
+    {name:"EP Screenings - RC Syllabus (Edition C) - Instructor.docx",kind:"Syllabus",scope:"Screening · Live RC"},
+    {name:"EP Screenings - RC Syllabus (Edition C) - Trainee - Copy.docx",kind:"Syllabus",scope:"Screening · Live RC"},
+    {name:"EP Course – R.C Model stage (Edition E)– Instructor.docx",kind:"Syllabus",scope:"RC Model"},
+    {name:"EP Course – R.C Model stage (Edition E)– Trainee.docx",kind:"Syllabus",scope:"RC Model"},
+    {name:"EP Course – Half Scale stage (Edition F)– Instructor.docx",kind:"Syllabus",scope:"Half Scale"},
+    {name:"EP Course – Half Scale stage (Edition F)– Trainee.docx",kind:"Syllabus",scope:"Half Scale"},
+    {name:"EP Course – Full scale stage (Edition F) – Instructor.docx",kind:"Syllabus",scope:"Full Scale · Aerostar"},
+    {name:"EP Course – Full scale stage (Edition F) – Trainee.docx",kind:"Syllabus",scope:"Full Scale · Aerostar"},
+    {name:"EP Refreshment – Full scale stage (Edition A) – Trainee.docx",kind:"Syllabus",scope:"Full Scale · Refreshment"},
+    {name:"EP Return to Currency – Full scale stage (Edition B).docx",kind:"Syllabus",scope:"Full Scale · Return to Currency"},
+    {name:"EP FLIGHT MANUAL AEROSTAR BP ENG. D.docx",kind:"Flight Manual",scope:"Aerostar"},
+    {name:"EP FLIGHT MANUAL AEROSTAR BP ENG. H.docx",kind:"Flight Manual",scope:"Aerostar"},
+    {name:"בדח כיס אירוסטאר- חוץ.docx",kind:"Pocket Checklist",scope:"Aerostar"},
+    {name:"בדח כיס אירוסטאר- חוץ.pdf",kind:"Pocket Checklist",scope:"Aerostar"},
+    {name:"New Microsoft Word Document.docx",kind:"Supplemental Procedure",scope:"Aerostar"},
+    {name:"EP Flight Manual Orbiter 3MP Revision 0 NMT.docx",kind:"Flight Manual",scope:"Orbiter 3MP"},
+    {name:"Limitations.docx",kind:"Limitations",scope:"Orbiter 3MP"}
+  ],
   phases: [
     { id: "ep_screening", name: "Screening", description: "EP screening flow: RC Simulator and live RC screening." },
     { id: "ep_rc", name: "RC Model", description: "Foundational RC model training phase." },
