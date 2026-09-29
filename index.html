@@ -356,11 +356,21 @@ select option[value=""]{color:#8a9bad}
 .epCourseSuitOverview h3{margin:3px 0 2px;color:#082f57}.epCourseSuitOverview p{margin:0;color:#6e8297;font-size:10px}
 .epCourseSuitOverview .epSuiteStats{margin-top:12px}.epCourseSuitOverview .epSuitBadges{margin-top:9px}
 @media(max-width:759px){.epCourseSuitOverview{padding:12px}.epCourseSuitOverview .epSuiteStats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.epActiveSuit{border:1px solid #d8e6f2;background:#f8fbfe;border-radius:15px;padding:12px 13px;margin:0 0 14px}
+.epActiveSuitTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.epActiveSuit b{color:#082f57;font-size:12px}.epActiveSuit p{margin:3px 0 0;color:#71849a;font-size:9.5px;line-height:1.4}
+.epSyllabusBrief{border:1px solid #dbe8f3;background:#f8fbfe;border-radius:15px;padding:12px;margin:11px 0 2px}.epSyllabusBrief.empty{border-style:dashed;color:#71849a}.epSyllabusBrief h3{margin:0;color:#082f57;font-size:13px}
+.epLessonDetails{margin-top:10px;border-top:1px solid #e1eaf2;padding-top:8px}.epLessonDetails details{border:1px solid #e2eaf2;border-radius:10px;background:#fff;margin-top:6px;overflow:hidden}.epLessonDetails summary{cursor:pointer;padding:8px 10px;font-size:9.5px;font-weight:850;color:#244b70;list-style:none}.epLessonDetails summary::-webkit-details-marker{display:none}.epLessonDetails summary:after{content:"＋";float:right;color:#7990a6}.epLessonDetails details[open] summary:after{content:"−"}.epLessonDetails ul{margin:0;padding:0 24px 9px 28px;color:#445e77;font-size:9px;line-height:1.5}.epLessonDetails li+li{margin-top:3px}.epLessonDetails .safety summary{color:#a05d0a}.epLessonDetails .instructor summary{color:#0b70ca}.epLessonDetails .average summary{color:#6d50a8}
+.epSyllabusBrief p{font-size:10px;color:#526b83;line-height:1.5;margin:7px 0 0}.epBriefMeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.epBriefMeta span{padding:4px 7px;border-radius:999px;background:#eaf3fb;color:#345c80;font-size:8.5px;font-weight:800}.epBriefMeta .gold{background:#fff5dc;color:#9a6a06}.epBriefMeta .green{background:#e2f8ec;color:#13794d}.epBriefList{margin:8px 0 0;padding-left:18px;color:#39556f;font-size:9.5px;line-height:1.5}.epBriefList li+li{margin-top:3px}
+.epProgramProgress{display:grid;gap:7px;margin-top:10px}.epProgressRow{border:1px solid #e3ebf3;border-radius:13px;padding:10px;background:#fff}.epProgressTop{display:flex;align-items:center;justify-content:space-between;gap:8px}.epProgressTop b{font-size:10.5px;color:#0b315b}.epProgressTop span{font-size:8.5px;color:#657c93}.epProgressMeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.epProgressMeta span{font-size:8px;padding:4px 6px;border-radius:999px;background:#edf4fa;color:#526c84}.epProgressMeta .done{background:#ddf7e9;color:#117849}.epProgressMeta .current{background:#fff2d4;color:#8d650d}.epProgressRow.optional{opacity:.78}.epProgramHeader{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px}.epProgramHeader h3{margin:0;color:#082f57}.epProgramHeader p{margin:3px 0 0;color:#71849a;font-size:9.5px}.epBuilderHint{font-size:9px;color:#71849a;margin-top:5px;line-height:1.4}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0533 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar Training</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0600 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script src="./assets/ep-catalog.js"></script>
+<script src="./assets/aerostar-platform.js"></script>
+<script src="./assets/ip-catalog.js"></script>
+<script src="./assets/technician-catalog.js"></script>
+<script src="./assets/training-core.js"></script>
 <script src="./assets/ep-lessons-screening.js"></script>
 <script src="./assets/ep-lessons-rc-1.js"></script>
 <script src="./assets/ep-lessons-rc-2.js"></script>
@@ -389,9 +399,11 @@ const phaseTemplates=[
 {id:'ep_screening',type:'EP',name:'Screening'},
 {id:'ep_rc',type:'EP',name:'RC Model'},
 {id:'ep_half',type:'EP',name:'Half Scale'},
-{id:'ep_full',type:'EP',name:'Full Scale'}
+{id:'ep_full',type:'EP',name:'Full Scale'},
+{id:'ip_full',type:'IP',name:'Full Scale'},
+{id:'tech_full',type:'TECHNICIAN',name:'Full Scale'}
 ];
-const trainingKinds=['New Training','Conversion','Flight Instructor Training','Screening','Refreshment','Return to Currency'];
+const trainingKinds=['New Training','Conversion','Flight Instructor Training','Screening','Refreshment','Return to Currency','Customer-specific Qualification'];
 const dayNight=['Day','Night','Mixed / Day+Night'];
 const countries=['Israel','Cyprus'];
 let activeCoursePreview={};try{activeCoursePreview=JSON.parse(localStorage.getItem('ct-review-active-course')||'{}')||{}}catch{}
@@ -399,7 +411,7 @@ const currentCourseMeta={type:'EP',phase:'RC Model',platformId:'rc_model',traini
 const syllProgress=[['Basic Handling',100,'Complete'],['Figure 8',100,'Complete'],['Circuits',100,'Complete'],['Emergencies',80,'Current'],['Final Preparation',0,'Next']];
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
 const state={screen:'home',selectedTrainee:'t1',selectedInstructor:'i1',search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',...initialUiState};
-function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace,emergencyProfileFilter:state.emergencyProfileFilter,builderType:state.builderType,builderPhase:state.builderPhase,builderPlatform:state.builderPlatform,builderTraining:state.builderTraining,builderDay:state.builderDay,builderCountry:state.builderCountry}))}catch{}}
+function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace,emergencyProfileFilter:state.emergencyProfileFilter,builderType:state.builderType,builderPhase:state.builderPhase,builderPlatform:state.builderPlatform,builderTraining:state.builderTraining,builderProgram:state.builderProgram,builderDay:state.builderDay,builderCountry:state.builderCountry,libraryProfession:state.libraryProfession}))}catch{}}
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function safeArrayStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[]}catch{return []}}
 function safeObjectStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch{return {}}}
@@ -544,7 +556,7 @@ function home(){
    '</section>'+
  '</div>';
 }
-function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.find(x=>x.id===state.editingEval):null,autoDraft=getActivityDraft('evaluation'),allT=allTrainees(),activeT=allT.filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active'),tracking=currentCourseTrackingCounters(),tracks=type=>tracking.some(x=>x.type===type),prefillTrainee=edit?.traineeId||state.evaluationTraineeId||'';return `<div class="eyebrow">Evaluation workflow</div><h1 class="pageTitle">Evaluation</h1><p class="sub">Record, review and revise flight evaluations with weighted criteria and emergency practice.</p>${epCurrentSuitSummaryHtml()}
+function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.find(x=>x.id===state.editingEval):null,autoDraft=getActivityDraft('evaluation'),allT=allTrainees(),activeT=allT.filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active'),tracking=currentCourseTrackingCounters(),tracks=type=>tracking.some(x=>x.type===type),prefillTrainee=edit?.traineeId||state.evaluationTraineeId||'',evalCriteria=evaluationCriteriaDefs();return `<div class="eyebrow">Evaluation workflow</div><h1 class="pageTitle">Evaluation</h1><p class="sub">Record, review and revise flight evaluations with weighted criteria and emergency practice.</p>${epCurrentSuitSummaryHtml()}
 <div class="twoCol"><section class="card formCard"><div class="formTitle"><h2>${edit?`Edit evaluation · revision ${edit.revision}`:'New evaluation'}</h2><span class="autoDraftNote" id="draftBadge">${autoDraft?draftSavedLabel('evaluation'):'Auto-save ready'}</span></div>
 <form id="evalForm">
 <div class="fields">
@@ -558,7 +570,7 @@ ${tracks('LANDING')?`<div class="field"><label>Landings</label><input class="inp
 </div>
 <div id="epSyllabusBriefPanel">${epSyllabusBriefHtml(edit?.syllabus||'')}</div>
 <div class="sectionHead"><h2>Assessment criteria</h2><p>Weighted score exactly like the Phase 2 workflow.</p></div>
-<div class="criteria">${criteria.map(c=>`<div class="criterion"><span>${c.name} <small style="color:#94a3b8">(${Math.round(c.weight*100)}%)</small> <span class="requiredStar">*</span></span><select name="score_${c.id}" required><option value="">—</option>${[1,2,3,4,5].map(v=>`<option value="${v}" ${edit?.scores?.[c.id]===v?'selected':''}>${v}</option>`).join('')}</select></div>`).join('')}</div>
+<div class="criteria">${evalCriteria.map(c=>`<div class="criterion"><span>${c.name} <small style="color:#94a3b8">(${Math.round(c.weight*100)}%)</small> <span class="requiredStar">*</span></span><select name="score_${c.id}" required><option value="">—</option>${[1,2,3,4,5].map(v=>`<option value="${v}" ${edit?.scores?.[c.id]===v?'selected':''}>${v}</option>`).join('')}</select></div>`).join('')}</div>
 <div class="suggested"><small>Suggested grade</small><strong id="suggestedGrade">${edit?.suggestedGrade??edit?.grade??'—'}</strong><span style="font-size:11px;color:#64748b">Benchmark 4.0</span></div>
 <div class="field"><label>Grade source</label><div class="gradeMode"><label><input type="radio" name="gradeMode" value="SUGGESTED" ${!edit||edit.gradeMode!=='INSTRUCTOR'?'checked':''}> Use suggested grade</label><label><input type="radio" name="gradeMode" value="INSTRUCTOR" ${edit?.gradeMode==='INSTRUCTOR'?'checked':''}> Instructor override</label></div></div>
 <div class="field" id="overrideWrap" style="${edit?.gradeMode==='INSTRUCTOR'?'':'display:none'};margin-top:10px"><label>Instructor grade</label><select name="instructorGrade" id="instructorGradeSelect"><option value="">—</option>${[1,2,3,4,5].map(v=>`<option value="${v}" ${Number(edit?.grade)===v?'selected':''}>${v}</option>`).join('')}</select></div>
@@ -730,7 +742,7 @@ function builderAccumulationHtml(phase){
   return '<div class="accumulationCard"><div class="inlineHead"><div><h3>Accumulation requirements · '+esc(phase.name)+'</h3><p>This section appears only because this phase tracks accumulated events. Set the required minimums for this specific course.</p></div><span class="pill blue">Phase-specific</span></div><div class="accumulationInputs">'+counters.map(x=>'<div class="field"><label>Required '+esc(x.label)+'</label><input class="input" name="activityReq_'+x.type+'" type="number" min="0" step="'+(x.type==='TRAINING_HOUR'?'0.1':'1')+'" placeholder="Not set" value="'+(x.minimum==null?'':x.minimum)+'"></div>').join('')+'</div></div>';
 }
 function currentCoursePhase(){const c=cfgGet();return c.phases.find(x=>x.type===currentCourseMeta.type&&x.name===currentCourseMeta.phase)||null}
-function currentCourseTrackingCounters(){return enabledPhaseCounters(currentCoursePhase())}
+function currentCourseTrackingCounters(){const suit=epCurrentProgram?.();if(suit?.experienceCounters?.length)return suit.experienceCounters.map(x=>({type:x.id,label:x.name,minimum:x.minimum,unit:x.unit||'count',group:x.group||''}));return enabledPhaseCounters(currentCoursePhase())}
 
 const emergencyCategories=['Electrical','Propulsion / Engine','Flight Controls','Communications / Avionics','General / Operational'];
 function defaultEmergencyCategory(name){
@@ -747,13 +759,13 @@ function currentConfigSelection(){
   const trainingKind=c.trainingKinds.find(x=>x.name===currentCourseMeta.trainingKind)?.id||'*';
   const dayNight=c.dayNight.find(x=>x.name===currentCourseMeta.dayNight)?.id||'';
   const country=c.countries.find(x=>x.name===currentCourseMeta.country)?.id||'*';
-  return {courseType:type,phaseId:phase,platformId:currentCourseMeta.platformId||'',trainingKind,dayNight,country};
+  return {courseType:type,phaseId:phase,platformId:currentCourseMeta.platformId||'',trainingKind,programId:currentCourseMeta.programId||'',dayNight,country};
 }
 function evaluationEmergencyDefs(){
   const sel=currentConfigSelection();
-  if(sel.courseType==='EP'&&window.EP_CATALOG){
-    const em=window.epCatalogHelpers.emergenciesForPlatform(sel.platformId);
-    if(em.length)return em.map(x=>({...x,courseType:'EP',category:x.category||defaultEmergencyCategory(x.name)}));
+  if(window.FLYMPUS_TRAINING){
+    const suit=epCurrentProgram(),em=window.FLYMPUS_TRAINING.requiredEmergencies(suit);
+    if(em.length)return em.map(x=>({...x,courseType:sel.courseType,category:x.category||defaultEmergencyCategory(x.name)}));
   }
   const c=cfgGet(),p=cfgResolve(sel),allowed=p?.emergencyIds?.length?new Set(p.emergencyIds):null;
   return c.emergencies.filter(x=>x.courseType===sel.courseType&&(!allowed||allowed.has(x.id))).map(x=>({...x,category:x.category||defaultEmergencyCategory(x.name)}));
@@ -907,22 +919,21 @@ function renderEmergencyPractice(edit,traineeId){
       return '<details class="emergencyGroup" data-emergency-group="'+esc(cat)+'" '+(open?'open':'')+'><summary><span class="emergencyGroupSummary"><strong>'+esc(cat)+'</strong><small>'+practiced+' of '+rows.length+' practiced previously · '+groupPast+' total occurrence'+(groupPast===1?'':'s')+'</small><span class="emergencyGroupProgress"><i style="width:'+pct+'%"></i></span></span><span class="emergencyGroupMeta compact"><span class="emergencyGroupPast" data-group-past="'+esc(cat)+'">'+groupPast+' past</span><span class="emergencyGroupTotal" data-group-total="'+esc(cat)+'">'+groupTotal+' this flight</span></span></summary><div class="emergencyRows">'+rows.map(x=>'<label class="emergencyRow '+(x.planned?'isPlanned':'')+'" data-emergency-name="'+esc(x.name.toLowerCase())+'" data-emergency-category="'+esc(cat.toLowerCase())+'" data-emergency-id-row="'+esc(x.id)+'"><span class="emergencyNameBlock"><span>'+esc(x.name)+'</span><span class="emergencyHistoryBadge '+(x.history?'has':'none')+'" data-history-id="'+esc(x.id)+'">'+(x.history?'Previously: '+x.history:'Not practiced yet')+'</span><span class="emergencyPlanTag">Planned for this sortie</span></span><input class="input emergencyCountInput" type="number" min="0" max="99" step="1" name="emid_'+esc(x.id)+'" data-emergency-id="'+esc(x.id)+'" data-emergency-category="'+esc(cat)+'" value="'+x.value+'"></label>').join('')+'</div></details>';
     }).join('')+'<div class="emergencyNoResults" id="emergencyNoResults">No emergency matches this filter.</div></div>';
 }
-function epPlatformLabel(id){return (window.EP_CATALOG?.platforms||[]).find(x=>x.id===id)?.name||id||'—'}
-function epTrainingIdFromName(name){return ({'New Training':'new','Conversion':'conversion','Flight Instructor Training':'instructor','Screening':'screening','Refreshment':'refreshment','Return to Currency':'return_currency'})[name]||name||''}
+function epPlatformLabel(id){return window.FLYMPUS_PLATFORMS?.[id]?.name||Object.values(window.FLYMPUS_TRAINING?.catalogs||{}).flatMap(x=>x.platforms||[]).find(x=>x.id===id)?.name||id||'—'}
+function epTrainingIdFromName(name){return ({'New Training':'new','Conversion':'conversion','Flight Instructor Training':'instructor','Screening':'screening','Refreshment':'refreshment','Return to Currency':'return_currency','Customer-specific Qualification':'customer_qualification'})[name]||name||''}
 function epDayIdFromName(name){return ({'Day':'day','Night':'night','Mixed / Day+Night':'mixed'})[name]||name||''}
 function epProgramResolve(sel){
-  if(!window.EP_CATALOG||sel?.courseType!=='EP')return null;
-  const phaseId=sel.phaseId||'',platformId=sel.platformId||'',trainingKind=sel.trainingKind||'',dayNight=sel.dayNight||'';
-  return (window.EP_CATALOG.programs||[]).find(p=>p.phaseId===phaseId&&(!platformId||p.platformId===platformId)&&(!trainingKind||p.trainingKind===trainingKind)&&(!dayNight||p.dayNight===dayNight))||null;
+  return window.FLYMPUS_TRAINING?.resolve(sel||{})||null;
 }
 function epCurrentProgram(){
-  if(currentCourseMeta.type!=='EP'||!window.EP_CATALOG)return null;
-  if(currentCourseMeta.programId)return window.EP_CATALOG.programs.find(x=>x.id===currentCourseMeta.programId)||null;
-  const c=cfgGet(),phase=c.phases.find(x=>x.type==='EP'&&x.name===currentCourseMeta.phase)?.id||'';
-  return epProgramResolve({courseType:'EP',phaseId:phase,platformId:currentCourseMeta.platformId||'',trainingKind:epTrainingIdFromName(currentCourseMeta.trainingKind),dayNight:epDayIdFromName(currentCourseMeta.dayNight)});
+  if(!window.FLYMPUS_TRAINING)return null;
+  const c=cfgGet(),phase=c.phases.find(x=>x.type===currentCourseMeta.type&&x.name===currentCourseMeta.phase)?.id||'';
+  const sel={courseType:currentCourseMeta.type,phaseId:phase,platformId:currentCourseMeta.platformId||'',trainingKind:epTrainingIdFromName(currentCourseMeta.trainingKind),programId:currentCourseMeta.programId||'',dayNight:epDayIdFromName(currentCourseMeta.dayNight),country:c.countries.find(x=>x.name===currentCourseMeta.country)?.id||currentCourseMeta.country||''};
+  return window.FLYMPUS_TRAINING.resolve(sel,{courseKey:currentCourseMeta.courseCode||currentCourseId});
 }
 function epTheoryExamDefs(){
   const p=epCurrentProgram();if(!p)return[];
+  if(p.exams?.length)return p.exams;
   return (p.theory||[]).filter(x=>/exam/i.test(String(x.type||''))||/exam/i.test(String(x.name||''))).map(x=>{
     let pass=null;
     if(/regulations.*limitations/i.test(x.name)||/limitations.*regulations/i.test(x.name))pass=85;
@@ -940,7 +951,7 @@ function activeSuitOverviewHtml(){
   const p=f.program;
   return '<section class="card epCourseSuitOverview"><div class="inlineHead"><div><div class="eyebrow">ACTIVE TRAINING SUIT</div><h3>'+esc(p.name)+'</h3><p>'+esc(f.platform)+' · '+esc(currentCourseMeta.phase)+' · '+esc(currentCourseMeta.trainingKind)+' · '+esc(currentCourseMeta.dayNight)+'</p></div><span class="pill green">SOURCE-MAPPED</span></div>'+
     '<div class="epSuiteStats"><div class="epSuiteStat"><b>'+f.syllabusCount+'</b><small>Syllabus series</small></div><div class="epSuiteStat"><b>'+f.theoryCount+'</b><small>Theory items</small></div><div class="epSuiteStat"><b>'+f.examCount+'</b><small>Defined exams</small></div><div class="epSuiteStat"><b>'+f.emergencyCount+'</b><small>Platform emergencies</small></div></div>'+
-    '<div class="epSuitBadges"><span>'+f.requiredCount+' required series</span><span>'+f.soloCount+' solo series</span><span>'+f.optionalCount+' optional</span><span class="gold">'+esc(p.source)+'</span></div>'+
+    '<div class="epSuitBadges"><span>'+f.requiredCount+' required series</span><span>'+f.soloCount+' solo series</span><span>'+f.optionalCount+' optional</span><span class="gold">'+esc(p.source)+'</span>'+(p.courseOverrideApplied?'<span class="gold">COURSE OVERRIDES</span>':'')+'</div>'+
     (p.prerequisite?'<div class="epSourceNote"><b>Prerequisite:</b> '+esc(p.prerequisite)+'</div>':'')+
     (p.theoryRequirement?'<div class="epSourceNote"><b>Theory gate:</b> '+esc(p.theoryRequirement)+'</div>':'')+
     (p.completion?'<div class="epSourceNote"><b>Completion:</b> '+esc(p.completion)+'</div>':'')+
@@ -951,27 +962,32 @@ function evaluationSyllabusDefs(){
   if(p?.syllabi?.length)return p.syllabi;
   return cfgGet().syllabi.filter(x=>x.courseType===currentCourseMeta.type).map(x=>({id:x.id,name:x.name,minimum:x.minimum,mode:x.instructorPresence==='WITHOUT INSTRUCTOR'?'SOLO':'INSTRUCTED'}));
 }
+function evaluationCriteriaDefs(){
+  const defs=epCurrentProgram()?.criteria||window.FLYMPUS_TRAINING?.catalog(currentCourseMeta.type)?.criteria||[];
+  if(defs.length){const sum=defs.reduce((a,x)=>a+Number(x.weight||0),0)||100;return defs.map(x=>({id:x.id,name:x.name,weight:Number(x.weight||0)/sum}))}
+  return criteria;
+}
 function evaluationSyllabusNames(){return evaluationSyllabusDefs().map(x=>x.name)}
 function epResolvedHtml(sel){
-  if(sel.courseType!=='EP'||!window.EP_CATALOG)return '';
+  if(!sel.courseType||!window.FLYMPUS_TRAINING)return '';
   const platformId=sel.platformId||'';
   if(!sel.phaseId||!platformId||!sel.trainingKind||!sel.dayNight)return '<div class="epSuitHero"><h3>EP training suit</h3><p>Select Phase, Platform, Training package and Day/Night. The imported syllabus, theory, emergency catalog and progression rules will resolve automatically.</p></div>';
-  const p=epProgramResolve(sel),em=window.epCatalogHelpers.emergenciesForPlatform(platformId);
+  const p=epProgramResolve(sel),em=window.FLYMPUS_TRAINING.emergencyCatalog(platformId);
   if(!p){
     const plat=epPlatformLabel(platformId);
-    return '<div class="epSuitHero epMissing"><h3>'+esc(plat)+' · EP platform package</h3><p>The platform emergency catalog is imported ('+em.length+' emergencies), but no matching platform-specific syllabus was supplied in the uploaded EP package for this combination.</p><div class="epSuitBadges"><span>'+esc(cfgItem(cfgGet().phases,sel.phaseId)?.name||sel.phaseId)+'</span><span>'+esc(plat)+'</span><span class="gold">'+em.length+' emergencies ready</span></div></div>';
+    return '<div class="epSuitHero epMissing"><h3>'+esc(plat)+' · '+esc(sel.courseType)+' platform package</h3><p>The platform catalog is imported ('+em.length+' emergencies), but no matching profession-specific syllabus was supplied for this combination.</p><div class="epSuitBadges"><span>'+esc(cfgItem(cfgGet().phases,sel.phaseId)?.name||sel.phaseId)+'</span><span>'+esc(plat)+'</span><span class="gold">'+em.length+' platform emergencies</span></div></div>';
   }
   const optional=p.syllabi.filter(x=>x.optional).length,solo=p.syllabi.filter(x=>x.mode==='SOLO').length;
   return '<div class="epSuitHero"><div class="inlineHead"><div><h3>'+esc(p.name)+'</h3><p>'+esc(p.source)+'</p></div><span class="pill green">IMPORTED</span></div>'+
     '<div class="epSuitBadges"><span>'+esc(cfgItem(cfgGet().phases,p.phaseId)?.name||p.phaseId)+'</span><span>'+esc(epPlatformLabel(p.platformId))+'</span><span>'+esc(p.trainingKind.replaceAll('_',' '))+'</span><span>'+esc(p.dayNight)+'</span></div>'+
-    '<div class="epSuiteStats"><div class="epSuiteStat"><b>'+p.theory.length+'</b><small>Theory items</small></div><div class="epSuiteStat"><b>'+p.syllabi.length+'</b><small>Syllabus series</small></div><div class="epSuiteStat"><b>'+solo+'</b><small>Solo series</small></div><div class="epSuiteStat"><b>'+em.length+'</b><small>Platform emergencies</small></div></div>'+
+    '<div class="epSuiteStats"><div class="epSuiteStat"><b>'+(p.theory||[]).length+'</b><small>Theory items</small></div><div class="epSuiteStat"><b>'+(p.syllabi||[]).length+'</b><small>Syllabus series</small></div><div class="epSuiteStat"><b>'+solo+'</b><small>Solo series</small></div><div class="epSuiteStat"><b>'+window.FLYMPUS_TRAINING.requiredEmergencies(p).length+'/'+em.length+'</b><small>Required / platform emergencies</small></div></div>'+
     (p.totalFlights?'<div class="epSourceNote"><b>Practical volume:</b> '+esc(p.totalFlights)+(p.sourceNote?' · '+esc(p.sourceNote):'')+'</div>':'')+
     (p.theoryRequirement?'<div class="epSourceNote"><b>Theory gate:</b> '+esc(p.theoryRequirement)+'</div>':'')+
     (p.prerequisite?'<div class="epSourceNote"><b>Prerequisite:</b> '+esc(p.prerequisite)+'</div>':'')+
     (p.completion?'<div class="epSourceNote"><b>Completion:</b> '+esc(p.completion)+'</div>':'')+
     '<div class="sectionHead"><h2>Practical syllabus</h2><p>'+p.syllabi.length+' series · '+optional+' optional</p></div>'+
     '<div style="overflow:auto"><table class="epMiniTable"><thead><tr><th>Series</th><th>Mode</th><th>Min.</th><th>Topics / remarks</th></tr></thead><tbody>'+p.syllabi.map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td><span class="epMode '+(x.mode==='SOLO'?'solo':x.optional?'optional':'')+'">'+esc(x.optional?'OPTIONAL':x.mode)+'</span></td><td>'+esc(x.minimum==null?'—':x.minimum)+'</td><td>'+esc(x.topics||'')+(x.remarks?'<br><small>'+esc(x.remarks)+'</small>':'')+'</td></tr>').join('')+'</tbody></table></div>'+
-    '<div class="sectionHead"><h2>Platform emergency catalog</h2><p>'+em.length+' items from the selected platform package</p></div><div class="epEmergencyChips">'+em.map(x=>'<span>'+esc(x.name)+'</span>').join('')+'</div>'+
+    '<div class="sectionHead"><h2>Training-suit emergency requirements</h2><p>'+window.FLYMPUS_TRAINING.requiredEmergencies(p).length+' applicable items selected from '+em.length+' platform procedures</p></div><div class="epEmergencyChips">'+window.FLYMPUS_TRAINING.requiredEmergencies(p).map(x=>'<span>'+esc(x.name)+'</span>').join('')+'</div>'+
     '</div>';
 }
 function epLibraryHtml(){
@@ -990,6 +1006,30 @@ function epLibraryHtml(){
     '<div class="sectionHead"><h2>Platform emergency catalogs</h2><p>Only the selected platform emergency set should open in Evaluation.</p></div><div class="epPlatformGrid">'+platformCards+'</div>'+
     '<div class="sectionHead"><h2>Imported source coverage</h2><p>'+((cat.sourceDocuments||[]).length)+' source documents mapped into the EP architecture.</p></div>'+
     '<section class="card settingBox"><div style="overflow:auto"><table class="epMiniTable"><thead><tr><th>Source</th><th>Type</th><th>Scope</th></tr></thead><tbody>'+((cat.sourceDocuments||[]).map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td>'+esc(x.kind)+'</td><td>'+esc(x.scope)+'</td></tr>').join(''))+'</tbody></table></div></section>';
+}
+
+function professionLibraryHtml(professionId){
+  if(professionId==='EP')return epLibraryHtml();
+  const cat=window.FLYMPUS_TRAINING?.catalog(professionId);if(!cat)return '<div class="infoBox">Catalog not loaded.</div>';
+  const cards=(cat.programs||[]).map(p=>'<details class="epProgramCard"><summary><div><b>'+esc(p.name)+'</b><small>'+esc(p.source||'')+(p.sourceRevision?' · Edition '+esc(p.sourceRevision):'')+' · '+esc(epPlatformLabel(p.platformId))+'</small></div><span class="pill blue">'+(p.syllabi||[]).length+' requirements</span></summary><div class="epProgramBody">'+
+    '<div class="epSuiteStats"><div class="epSuiteStat"><b>'+(p.theory||[]).length+'</b><small>Theory</small></div><div class="epSuiteStat"><b>'+(p.exams||[]).length+'</b><small>Exams</small></div><div class="epSuiteStat"><b>'+(p.syllabi||[]).length+'</b><small>Syllabi / tasks</small></div><div class="epSuiteStat"><b>'+(p.experienceCounters||[]).length+'</b><small>Experience counters</small></div></div>'+
+    '<div style="overflow:auto"><table class="epMiniTable"><thead><tr><th>Order</th><th>Requirement</th><th>Group / mode</th><th>Minimum</th><th>Source</th></tr></thead><tbody>'+(p.syllabi||[]).map(x=>'<tr><td>'+esc(x.order||'—')+'</td><td><b>'+esc(x.name)+'</b><br><small>'+esc(x.topics||'')+'</small></td><td>'+esc(x.group||x.mode||'')+'</td><td>'+esc(x.minimum==null?'—':x.minimum)+'</td><td>'+esc(x.source?.document||p.source||'')+'</td></tr>').join('')+'</tbody></table></div>'+
+    ((p.conflicts||[]).length?'<div class="epSourceNote"><b>Review required:</b> '+p.conflicts.map(x=>esc(x.message)).join(' ')+'</div>':'')+'</div></details>').join('');
+  return '<div class="epSuitHero"><div class="inlineHead"><div><h3>'+esc(cat.profession.name)+' Training Architecture</h3><p>Profession → Full Scale → Aerostar. Requirements remain profession-specific while the QRH stays at platform level.</p></div><span class="pill green">SOURCE-MAPPED</span></div><div class="epSuitBadges"><span>'+cat.phases.map(x=>esc(x.name)).join('</span><span>')+'</span><span class="gold">'+(cat.programs||[]).length+' packages</span></div></div><div class="sectionHead"><h2>Training packages</h2><p>Base definitions and source-specific variants</p></div><div class="epProgramGrid">'+cards+'</div><div class="sectionHead"><h2>Sources</h2></div><section class="card settingBox"><table class="epMiniTable"><thead><tr><th>Document</th><th>Type</th><th>Revision</th></tr></thead><tbody>'+(cat.sourceDocuments||[]).map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td>'+esc(x.kind)+'</td><td>'+esc(x.revision||'—')+'</td></tr>').join('')+'</tbody></table></section>';
+}
+function trainingLibraryHtml(){
+  const type=state.libraryProfession||'EP';
+  return '<div class="scrollTabs" style="margin-top:14px">'+['EP','IP','TECHNICIAN'].map(x=>'<button class="seg '+(x===type?'active':'')+'" data-library-profession="'+x+'">'+esc(cfgItem(cfgGet().courseTypes,x)?.name||x)+'</button>').join('')+'</div>'+professionLibraryHtml(type);
+}
+function courseOverridesHtml(){
+  const p=window.FLYMPUS_TRAINING?.resolve(currentConfigSelection());if(!p)return '<div class="infoBox" style="margin-top:14px"><b>No active source-mapped suit</b><p>Open a draft course with a resolved training suit first.</p></div>';
+  const key=currentCourseMeta.courseCode||currentCourseId,o=window.FLYMPUS_TRAINING.getOverrides(key),required=new Set(Array.isArray(o.emergencyRequirementIds)?o.emergencyRequirementIds:(p.emergencyRequirementIds||[])),platformEmergency=window.FLYMPUS_TRAINING.emergencyCatalog(p.platformId);
+  return '<form id="courseOverridesForm" class="card settingBox" style="margin-top:14px"><div class="inlineHead"><div><h3>Course overrides · '+esc(p.name)+'</h3><p class="sub" style="margin:3px 0 0">Base source defaults stay unchanged. These values apply only to '+esc(key)+'.</p></div><span class="pill amber">BASE + OVERLAY</span></div><div class="tableWrap"><table class="dataTable"><thead><tr><th>Use</th><th>Order</th><th>Syllabus / task</th><th>Minimum</th><th>Supervision</th><th>Track</th></tr></thead><tbody>'+(p.syllabi||[]).map(x=>{const v={...x,...(o.syllabi?.[x.id]||{})};return '<tr><td><input type="checkbox" name="app_'+esc(x.id)+'" '+(v.applicable===false?'':'checked')+'></td><td><input class="input" style="width:72px" type="number" min="1" name="order_'+esc(x.id)+'" value="'+esc(v.order||1)+'"></td><td><b>'+esc(x.name)+'</b><br><small>'+esc(x.source?.document||p.source||'')+'</small></td><td><input class="input" style="width:90px" type="number" min="0" name="min_'+esc(x.id)+'" value="'+(v.minimum==null?'':esc(v.minimum))+'" placeholder="None"></td><td><select name="supervision_'+esc(x.id)+'"><option value="INSTRUCTED" '+(v.instructorRequired!==false?'selected':'')+'>Instructor required</option><option value="SOLO" '+(v.instructorRequired===false?'selected':'')+'>No instructor / Solo</option></select></td><td><select name="track_'+esc(x.id)+'"><option value="shared" '+(v.track==='shared'?'selected':'')+'>Shared</option><option value="day" '+(v.track==='day'?'selected':'')+'>Day</option><option value="night" '+(v.track==='night'?'selected':'')+'>Night</option></select></td></tr>'}).join('')+'</tbody></table></div>'+
+    '<details style="margin-top:14px"><summary><b>Experience / accumulation minimums ('+(p.experienceCounters||[]).length+')</b></summary><div class="settingsGrid" style="margin-top:10px">'+(p.experienceCounters||[]).map(x=>{const v={...x,...(o.counters?.[x.id]||{})};return '<label class="field"><span>'+esc(x.name)+' · '+esc(x.unit)+'</span><input class="input" name="counter_'+esc(x.id)+'" type="number" min="0" step="0.1" value="'+(v.minimum==null?'':esc(v.minimum))+'" placeholder="No fixed minimum"></label>'}).join('')+'</div></details>'+
+    '<details style="margin-top:14px"><summary><b>Assessment criteria and exams</b></summary><div class="settingsGrid" style="margin-top:10px">'+(p.criteria||[]).map(x=>{const v={...x,...(o.criteria?.[x.id]||{})};return '<label class="field"><span>'+esc(x.name)+' weight (%)</span><input class="input" name="criterion_'+esc(x.id)+'" type="number" min="0" max="100" value="'+esc(v.weight||0)+'"></label>'}).join('')+(p.exams||[]).map(x=>{const v={...x,...(o.exams?.[x.id]||{})};return '<div class="field"><label><input type="checkbox" name="exam_app_'+esc(x.id)+'" '+(v.applicable===false?'':'checked')+'> '+esc(x.name)+'</label><input class="input" name="exam_pass_'+esc(x.id)+'" type="number" min="0" step="0.1" value="'+(v.pass==null?'':esc(v.pass))+'" placeholder="Decision / no numeric threshold"></div>'}).join('')+'</div></details>'+
+    '<details style="margin-top:14px"><summary><b>Progression gates ('+(p.progression||[]).length+')</b></summary><div class="criteria" style="margin-top:10px">'+(p.progression||[]).map(x=>{const v={...x,...(o.progression?.[x.id]||{})};return '<label class="criterion" style="justify-content:flex-start"><input type="checkbox" name="gate_'+esc(x.id)+'" '+(v.applicable===false?'':'checked')+'><span><b>'+esc(x.id)+'</b> · '+esc(x.prerequisite||x.decisionRequired||x.after||'Defined source gate')+'</span></label>'}).join('')+'</div></details>'+
+    '<details style="margin-top:14px"><summary><b>Training emergency requirements ('+required.size+' of '+platformEmergency.length+')</b></summary><p class="sub">The Aerostar platform catalog is not changed. This selects which procedures are required by this course.</p><div class="criteria">'+platformEmergency.map(x=>'<label class="criterion" style="justify-content:flex-start"><input type="checkbox" name="requiredEmergency" value="'+esc(x.id)+'" '+(required.has(x.id)?'checked':'')+'><span>'+esc(x.name)+' · '+esc(x.category)+'</span></label>').join('')+'</div></details>'+
+    '<div class="toolbar"><button class="btn sky" type="submit">Save course overrides</button><button class="btn danger" type="button" id="resetCourseOverrides">Reset to source defaults</button></div></form>';
 }
 
 function epCurrentSuitSummaryHtml(){
@@ -1064,7 +1104,7 @@ function cfgDefaults(){
   return {
     courseTypes: courseTypes.map(x=>({id:x.id,name:x.name})),
     phases: phaseTemplates.map(x=>({id:x.id,type:x.type,name:x.name,tracking:defaultPhaseTracking(x.id)})),
-    trainingKinds: trainingKinds.map((name,n)=>({id:['new','conversion','instructor','screening','refreshment','return_currency'][n]||('training_'+n),name})),
+    trainingKinds: trainingKinds.map((name,n)=>({id:['new','conversion','instructor','screening','refreshment','return_currency','customer_qualification'][n]||('training_'+n),name})),
     dayNight: dayNight.map((name,n)=>({id:['day','night','mixed'][n]||('time_'+n),name})),
     countries: countries.map((name,n)=>({id:['israel','cyprus'][n]||('country_'+n),name})),
     syllabi: syllabi.map((name,n)=>({id:'syll_'+(n+1),courseType:ep,name,minimum:null,instructorPresence:'WITH INSTRUCTOR'})),
@@ -1076,7 +1116,9 @@ function cfgGet(){
   try{
     const raw=JSON.parse(localStorage.getItem('ct-review-catalogs')||'null');
     if(!raw)return cfgDefaults();
-    const c={...cfgDefaults(),...raw};
+    const defaults=cfgDefaults(),c={...defaults,...raw};
+    const mergeStable=(base,saved)=>[...base.map(x=>saved?.find(y=>y.id===x.id)?{...x,...saved.find(y=>y.id===x.id)}:x),...(saved||[]).filter(x=>!base.some(y=>y.id===x.id))];
+    c.courseTypes=mergeStable(defaults.courseTypes,raw.courseTypes);c.phases=mergeStable(defaults.phases,raw.phases);c.trainingKinds=mergeStable(defaults.trainingKinds,raw.trainingKinds);c.dayNight=mergeStable(defaults.dayNight,raw.dayNight);c.countries=mergeStable(defaults.countries,raw.countries);
     c.phases=(c.phases||[]).map(x=>({...x,tracking:normalizePhaseTracking(x)}));
     c.syllabi=(c.syllabi||[]).map(x=>({...x,courseType:x.courseType||'EP',minimum:x.minimum===undefined?null:x.minimum,instructorPresence:x.instructorPresence||'WITH INSTRUCTOR'}));
     c.criteria=(c.criteria||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
@@ -1110,7 +1152,7 @@ function cfgResolve(sel){
   return best;
 }
 function cfgResolvedHtml(sel){
-  if(sel.courseType==='EP'&&window.EP_CATALOG)return epResolvedHtml(sel);
+  if(sel.courseType&&window.FLYMPUS_TRAINING?.catalog(sel.courseType))return epResolvedHtml(sel);
   const c=cfgGet();if(!sel.courseType||!sel.phaseId||!sel.trainingKind||!sel.dayNight||!sel.country)return '<div class="infoBox" style="margin-top:14px"><b>Complete the course selections</b><p>The matching syllabus, criteria, emergencies and accumulation requirements will appear here.</p></div>';const p=cfgResolve(sel);
   if(!p)return '<div class="infoBox" style="margin-top:14px;border-color:#fed7aa;background:#fff7ed"><b>No matching configuration profile</b><p>Create one in Configuration profiles. This combination has no assigned syllabus/criteria bundle yet.</p></div>';
   const names=(ids,list)=>ids.map(id=>cfgItem(list,id)?.name).filter(Boolean);
@@ -1178,14 +1220,18 @@ function cfgProfileEditor(p,c){
 function settings(){
   const c=cfgGet(),tab=state.settingsTab||'builder',created=getDraftCourses();
   const type=state.builderType||'',phases=type?c.phases.filter(x=>x.type===type):[],phase=state.builderPhase&&phases.some(x=>x.id===state.builderPhase)?state.builderPhase:'';
-  const training=state.builderTraining||'',time=state.builderDay||'',country=state.builderCountry||'',platform=state.builderPlatform||'';
-  const epPlatforms=(type==='EP'&&window.epCatalogHelpers)?window.epCatalogHelpers.platformsForPhase(phase):[];
-  const sel={courseType:type,phaseId:phase,platformId:platform,trainingKind:training,dayNight:time,country};
+  const training=state.builderTraining||'',time=state.builderDay||'',country=state.builderCountry||'',platform=state.builderPlatform||'',programId=state.builderProgram||'';
+  const epPlatforms=window.FLYMPUS_TRAINING?.platformsFor(type,phase)||[];
+  const builderPrograms=window.FLYMPUS_TRAINING?.programsFor({courseType:type,phaseId:phase,platformId:platform,trainingKind:training,country})||[];
+  const sel={courseType:type,phaseId:phase,platformId:platform,trainingKind:training,programId,dayNight:time,country};
   let html='<div class="eyebrow">Editable configuration database</div><h1 class="pageTitle">Course Settings</h1><p class="sub">Profession → phase → platform → training package resolves one active training suit.</p>'+activeSuitOverviewHtml();
-  html+='<div class="scrollTabs"><button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">＋ New course</button><button class="seg '+(tab==='ep_library'?'active':'')+'" data-settings-tab="ep_library">✈ EP Library</button><button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">▦ Course type setup</button><button class="seg '+(tab==='profiles'?'active':'')+'" data-settings-tab="profiles">⌘ Configuration profiles</button></div>';
+  html+='<div class="scrollTabs"><button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">＋ New course</button><button class="seg '+(tab==='training_library'?'active':'')+'" data-settings-tab="training_library">✈ Training Library</button><button class="seg '+(tab==='overrides'?'active':'')+'" data-settings-tab="overrides">⌘ Course overrides</button><button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">▦ Course type setup</button><button class="seg '+(tab==='profiles'?'active':'')+'" data-settings-tab="profiles">Profiles</button></div>';
 
-  if(tab==='ep_library'){
-    html+=epLibraryHtml();
+  if(tab==='training_library'){
+    html+=trainingLibraryHtml();
+  }
+  if(tab==='overrides'){
+    html+=courseOverridesHtml();
   }
 
   if(tab==='builder'){
@@ -1194,12 +1240,13 @@ function settings(){
     html+='<div class="field"><label>Course code</label><input class="input" name="code" required placeholder="CEP-27"></div>';
     html+='<div class="field"><label>Course type</label><select name="courseType" id="courseTypeSelect" required><option value="" '+(!type?'selected':'')+' disabled>Select course type</option>'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===type?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Phase</label><select name="phase" id="phaseSelect" required '+(!type?'disabled':'')+'><option value="" '+(!phase?'selected':'')+' disabled>Select phase</option>'+phases.map(x=>'<option value="'+x.id+'" '+(x.id===phase?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
-    html+='<div class="field"><label>Platform</label><select name="platformId" id="builderPlatform" required '+(!(type==='EP'&&phase)?'disabled':'')+'><option value="" '+(!platform?'selected':'')+' disabled>Select platform</option>'+epPlatforms.map(x=>'<option value="'+x.id+'" '+(x.id===platform?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
+    html+='<div class="field"><label>Platform</label><select name="platformId" id="builderPlatform" required '+(!phase?'disabled':'')+'><option value="" '+(!platform?'selected':'')+' disabled>Select platform</option>'+epPlatforms.map(x=>'<option value="'+x.id+'" '+(x.id===platform?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Training package</label><select name="trainingKind" id="builderTraining" required><option value="" '+(!training?'selected':'')+' disabled>Select training type</option>'+c.trainingKinds.map(x=>'<option value="'+x.id+'" '+(x.id===training?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
+    html+='<div class="field"><label>Source definition / variant</label><select name="programId" id="builderProgram" required '+(!training?'disabled':'')+'><option value="" '+(!programId?'selected':'')+' disabled>Select source definition</option>'+builderPrograms.map(x=>'<option value="'+x.id+'" '+(x.id===programId?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Day / Night</label><select name="dayNight" id="builderDay" required><option value="" '+(!time?'selected':'')+' disabled>Select day / night</option>'+c.dayNight.map(x=>'<option value="'+x.id+'" '+(x.id===time?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Country</label><select name="country" id="builderCountry" required><option value="" '+(!country?'selected':'')+' disabled>Select country</option>'+c.countries.map(x=>'<option value="'+x.id+'" '+(x.id===country?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Start date</label><input class="input" name="startsOn" type="date" required></div></div>';
-    html+='<div id="builderAccumulation">'+builderAccumulationHtml(cfgItem(c.phases,phase))+'</div><div id="cfgResolvedPreview">'+cfgResolvedHtml(sel)+'</div><div class="toolbar"><button class="btn sky" id="courseBuilderSubmit" type="submit" '+((type==='EP'?!!epProgramResolve(sel):!!phase)?'':'disabled')+'>＋ Create as draft</button></div></form></section>';
+    html+='<div id="builderAccumulation">'+builderAccumulationHtml(cfgItem(c.phases,phase))+'</div><div id="cfgResolvedPreview">'+cfgResolvedHtml(sel)+'</div><div class="toolbar"><button class="btn sky" id="courseBuilderSubmit" type="submit" '+(epProgramResolve(sel)?'':'disabled')+'>＋ Create as draft</button></div></form></section>';
     html+='<section class="card sideCard"><h3>Draft courses</h3><p class="sub">Each draft keeps a snapshot of the matched configuration.</p><div class="draftList">'+(created.length?created.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.name)+' · '+esc(x.code)+'</b><span class="pill '+(currentCourseMeta.courseCode===x.code?'green':'amber')+'">'+(currentCourseMeta.courseCode===x.code?'ACTIVE':'DRAFT')+'</span></div><p>'+esc(x.summary||'')+'</p><div class="profileMeta"><span class="pill blue">'+(x.syllabusCount||0)+' syllabi</span><span class="pill violet">'+(x.criteriaCount||0)+' criteria</span><span class="pill gray">'+(x.emergencyCount||0)+' emergencies</span></div><div class="toolbar"><button class="btn sky small" data-open-course-draft="'+x.id+'">'+(currentCourseMeta.courseCode===x.code?'Open active course':'Open with training suit')+'</button><button class="btn danger small" data-delete-course-draft="'+x.id+'">Delete</button></div></div>').join(''):'<p style="color:#64748b;font-size:12px">No local draft courses yet.</p>')+'</div></section></div>';
   }
 
@@ -1292,7 +1339,7 @@ function bindGlobalFormUx(){
     if(control&&label&&!label.querySelector('.requiredStar'))label.insertAdjacentHTML('beforeend','<span class="requiredStar">*</span>');
   });
 }
-function bind(){bindGlobalFormUx();if($('#evalSyllabusSelect')&&$('#epSyllabusBriefPanel'))$('#evalSyllabusSelect').onchange=e=>{$('#epSyllabusBriefPanel').innerHTML=epSyllabusBriefHtml(e.target.value)};document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.go==='evaluation')state.evaluationTraineeId=null;go(b.dataset.go)});document.querySelectorAll('[data-start-eval]').forEach(b=>b.onclick=()=>go('evaluation',{evaluationTraineeId:b.dataset.startEval}));document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;render()});document.querySelectorAll('[data-trainee]').forEach(b=>b.onclick=()=>go('profile',{selectedTrainee:b.dataset.trainee}));document.querySelectorAll('[data-instructor]').forEach(b=>b.onclick=()=>go('instructor',{selectedInstructor:b.dataset.instructor}));document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});document.querySelectorAll('[data-emergency-profile-filter]').forEach(b=>b.onclick=()=>{state.emergencyProfileFilter=b.dataset.emergencyProfileFilter;render()});document.querySelectorAll('[data-settings-tab]').forEach(b=>b.onclick=()=>{state.settingsTab=b.dataset.settingsTab;render()});document.querySelectorAll('[data-roster-type]').forEach(b=>b.onclick=()=>{state.rosterType=b.dataset.rosterType;render()});
+function bind(){bindGlobalFormUx();if($('#evalSyllabusSelect')&&$('#epSyllabusBriefPanel'))$('#evalSyllabusSelect').onchange=e=>{$('#epSyllabusBriefPanel').innerHTML=epSyllabusBriefHtml(e.target.value)};document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.go==='evaluation')state.evaluationTraineeId=null;go(b.dataset.go)});document.querySelectorAll('[data-start-eval]').forEach(b=>b.onclick=()=>go('evaluation',{evaluationTraineeId:b.dataset.startEval}));document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;render()});document.querySelectorAll('[data-trainee]').forEach(b=>b.onclick=()=>go('profile',{selectedTrainee:b.dataset.trainee}));document.querySelectorAll('[data-instructor]').forEach(b=>b.onclick=()=>go('instructor',{selectedInstructor:b.dataset.instructor}));document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});document.querySelectorAll('[data-emergency-profile-filter]').forEach(b=>b.onclick=()=>{state.emergencyProfileFilter=b.dataset.emergencyProfileFilter;render()});document.querySelectorAll('[data-settings-tab]').forEach(b=>b.onclick=()=>{state.settingsTab=b.dataset.settingsTab;render()});document.querySelectorAll('[data-library-profession]').forEach(b=>b.onclick=()=>{state.libraryProfession=b.dataset.libraryProfession;render()});document.querySelectorAll('[data-roster-type]').forEach(b=>b.onclick=()=>{state.rosterType=b.dataset.rosterType;render()});
 if($('#rosterSearch')){
   $('#rosterSearch').oninput=e=>{state.search=e.target.value;clearTimeout(window._rs);window._rs=setTimeout(render,120)};
   if($('#statusFilter'))$('#statusFilter').onchange=e=>{state.filter=e.target.value;render()};
@@ -1382,7 +1429,7 @@ function bindExams(){
  if($('#discardExamDraft'))$('#discardExamDraft').onclick=()=>{if(confirm('Discard this auto-saved exam draft?')){discardActivityDraft('exams');toast('Exam draft discarded');render()}};
  form.onsubmit=e=>{e.preventDefault();const fd=new FormData(form),arr=getExamRecords(),traineeId=String(fd.get('trainee')),grade=Number(fd.get('grade')),pass=Number(fd.get('pass')),allT=allTrainees();arr.unshift({id:'x_'+Date.now(),date:String(fd.get('date')),traineeId,traineeName:allT.find(t=>t.id===traineeId)?.name||'',exam:String(fd.get('exam')),grade,pass});saveExamRecords(arr);discardActivityDraft('exams');toast('Exam result saved locally');render()};
 }
-function bindEval(){const f=$('#evalForm'),savedDraft=getActivityDraft('evaluation'),canRestore=savedDraft?.data&&(!state.evaluationTraineeId||!savedDraft.data.trainee||savedDraft.data.trainee===state.evaluationTraineeId);if(canRestore&&!state.editingEval){const emph=Array.isArray(savedDraft.data.emphasisItem)?savedDraft.data.emphasisItem:(savedDraft.data.emphasisItem!==undefined?[savedDraft.data.emphasisItem]:[]);if(emph.length&&$('#emphasisEditor'))$('#emphasisEditor').innerHTML=emph.map((x,i)=>'<div class="emphasisEditRow"><span class="emphasisNo">'+(i+1)+'</span><input class="input" name="emphasisItem" value="'+esc(x)+'" placeholder="Next-flight emphasis"><button type="button" class="emphasisRemove" data-remove-emphasis aria-label="Remove">×</button></div>').join('');restoreFormDraft(f,savedDraft.data)}const scoreEls=[...f.querySelectorAll('select[name^="score_"]')];const recalc=()=>{let complete=true,total=0;criteria.forEach(c=>{const el=f.querySelector('[name="score_'+c.id+'"]'),v=Number(el?.value||0);if(!v)complete=false;total+=v*c.weight});$('#suggestedGrade').textContent=complete?(Math.round(total*10)/10).toFixed(1):'—'};scoreEls.forEach(x=>x.onchange=recalc);f.querySelectorAll('input,select,textarea').forEach(x=>x.onchange=()=>$('#draftBadge')?.classList.remove('hidden'));
+function bindEval(){const f=$('#evalForm'),evalCriteria=evaluationCriteriaDefs(),savedDraft=getActivityDraft('evaluation'),canRestore=savedDraft?.data&&(!state.evaluationTraineeId||!savedDraft.data.trainee||savedDraft.data.trainee===state.evaluationTraineeId);if(canRestore&&!state.editingEval){const emph=Array.isArray(savedDraft.data.emphasisItem)?savedDraft.data.emphasisItem:(savedDraft.data.emphasisItem!==undefined?[savedDraft.data.emphasisItem]:[]);if(emph.length&&$('#emphasisEditor'))$('#emphasisEditor').innerHTML=emph.map((x,i)=>'<div class="emphasisEditRow"><span class="emphasisNo">'+(i+1)+'</span><input class="input" name="emphasisItem" value="'+esc(x)+'" placeholder="Next-flight emphasis"><button type="button" class="emphasisRemove" data-remove-emphasis aria-label="Remove">×</button></div>').join('');restoreFormDraft(f,savedDraft.data)}const scoreEls=[...f.querySelectorAll('select[name^="score_"]')];const recalc=()=>{let complete=true,total=0;evalCriteria.forEach(c=>{const el=f.querySelector('[name="score_'+c.id+'"]'),v=Number(el?.value||0);if(!v)complete=false;total+=v*c.weight});$('#suggestedGrade').textContent=complete?(Math.round(total*10)/10).toFixed(1):'—'};scoreEls.forEach(x=>x.onchange=recalc);f.querySelectorAll('input,select,textarea').forEach(x=>x.onchange=()=>$('#draftBadge')?.classList.remove('hidden'));
 const renumberEmphases=()=>{[...f.querySelectorAll('.emphasisEditRow')].forEach((row,i)=>{const n=row.querySelector('.emphasisNo');if(n)n.textContent=i+1})};
 const markDraftSaved=()=>{if($('#draftBadge'))$('#draftBadge').textContent=draftSavedLabel('evaluation')};const persistDraft=()=>{saveActivityDraft('evaluation',serializeFormDraft(f));markDraftSaved()};
 const bindEmphasisRows=()=>{f.querySelectorAll('[data-remove-emphasis]').forEach(btn=>btn.onclick=()=>{const rows=[...f.querySelectorAll('.emphasisEditRow')];if(rows.length<=1){const input=rows[0]?.querySelector('input[name="emphasisItem"]');if(input)input.value='';persistDraft();return}btn.closest('.emphasisEditRow')?.remove();renumberEmphases();persistDraft()})};
@@ -1400,14 +1447,24 @@ if($('#emergencyExpandUsed'))$('#emergencyExpandUsed').onclick=()=>{emergencyMod
 updateEmergencyUi();applyEmergencyFilter();recalc();
 const syncOverrideRequired=()=>{const on=f.querySelector('input[name="gradeMode"]:checked')?.value==='INSTRUCTOR',wrap=$('#overrideWrap'),sel=$('#instructorGradeSelect');if(wrap)wrap.style.display=on?'block':'none';if(sel)sel.required=on};f.querySelectorAll('input[name="gradeMode"]').forEach(x=>x.onchange=syncOverrideRequired);syncOverrideRequired();
 if($('#discardDraftBtn'))$('#discardDraftBtn').onclick=()=>{if(confirm('Discard this auto-saved draft?')){discardActivityDraft('evaluation');toast('Evaluation draft discarded');render()}};if($('#cancelEdit'))$('#cancelEdit').onclick=()=>{state.editingEval=null;render()};if($('#excelBtn'))$('#excelBtn').onclick=()=>{const rows=[['Date','Trainee','Instructor','Syllabus','Grade','Revision'],...getEvaluations().map(i=>[i.flightDate,i.traineeName,i.instructorName,i.syllabus,i.grade,i.revision])];const csv=rows.map(r=>r.join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='course-evaluations.csv';a.click();URL.revokeObjectURL(a.href)};if($('#pdfBtn'))$('#pdfBtn').onclick=()=>window.print();
-f.onsubmit=e=>{e.preventDefault();const fd=new FormData(f),list=getEvaluations(),old=state.editingEval?list.find(x=>x.id===state.editingEval):null,traineeId=old?.traineeId||fd.get('trainee'),instId=fd.get('instructor');const scores={};criteria.forEach(c=>scores[c.id]=Number(fd.get('score_'+c.id))||0);let suggested=0,complete=true;criteria.forEach(c=>{if(!scores[c.id])complete=false;suggested+=scores[c.id]*c.weight});suggested=complete?Math.round(suggested*10)/10:0;const gradeMode=fd.get('gradeMode')||'SUGGESTED';const grade=gradeMode==='INSTRUCTOR'?Number(fd.get('instructorGrade')||0):suggested;const takeoffs=Math.max(0,Math.floor(Number(fd.get('takeoffs'))||0)),landings=Math.max(0,Math.floor(Number(fd.get('landings'))||0)),allT=allTrainees(),allI=allInstructors();const obj={id:old?.id||'ev_'+Date.now(),revision:old?(old.revision||1)+1:1,revisionCount:old?(old.revisionCount||1)+1:1,traineeId,instructorId:instId,traineeName:allT.find(t=>t.id===traineeId)?.name||'Trainee',instructorName:allI.find(i=>i.id===instId)?.name||'Instructor',syllabus:old?.syllabus||fd.get('syllabus'),duration:Number(fd.get('duration')),flightDate:fd.get('date'),takeoffs,landings,scores,suggestedGrade:suggested,gradeMode,grade,comments:fd.get('comments'),emphases:fd.getAll('emphasisItem').map(String).map(x=>x.trim()).filter(Boolean),plannedEmergencyIds:evaluationPlanIds(String(traineeId),old),emergencyCounts:Object.fromEntries(evaluationEmergencyDefs().map(x=>[x.id,Number(fd.get('emid_'+x.id))||0])),emergencies:evaluationEmergencyDefs().map(x=>Number(fd.get('emid_'+x.id))||0),changeReason:fd.get('changeReason')||''};const next=old?list.map(x=>x.id===old.id?obj:x):[obj,...list];setEvaluations(next);let activity=getActivityEvents().filter(x=>x.sourceId!==obj.id);if(takeoffs>0)activity.unshift({id:'evt_'+Date.now()+'_eto',traineeId:String(traineeId),date:String(obj.flightDate),type:'TAKEOFF',quantity:takeoffs,source:'Instructed flight',sourceId:obj.id,note:String(obj.syllabus),createdAt:new Date().toISOString()});if(landings>0)activity.unshift({id:'evt_'+Date.now()+'_eld',traineeId:String(traineeId),date:String(obj.flightDate),type:'LANDING',quantity:landings,source:'Instructed flight',sourceId:obj.id,note:String(obj.syllabus),createdAt:new Date().toISOString()});saveActivityEvents(activity);discardActivityDraft('evaluation');if(!old)clearTraineeEmergencyPlan(String(traineeId));state.evaluationTraineeId=null;state.editingEval=null;toast(old?'Revision '+obj.revision+' saved; activity counters updated':'Evaluation saved; emergency plan cleared for next sortie');render()}}
+f.onsubmit=e=>{e.preventDefault();const fd=new FormData(f),list=getEvaluations(),old=state.editingEval?list.find(x=>x.id===state.editingEval):null,traineeId=old?.traineeId||fd.get('trainee'),instId=fd.get('instructor');const scores={};evalCriteria.forEach(c=>scores[c.id]=Number(fd.get('score_'+c.id))||0);let suggested=0,complete=true;evalCriteria.forEach(c=>{if(!scores[c.id])complete=false;suggested+=scores[c.id]*c.weight});suggested=complete?Math.round(suggested*10)/10:0;const gradeMode=fd.get('gradeMode')||'SUGGESTED';const grade=gradeMode==='INSTRUCTOR'?Number(fd.get('instructorGrade')||0):suggested;const takeoffs=Math.max(0,Math.floor(Number(fd.get('takeoffs'))||0)),landings=Math.max(0,Math.floor(Number(fd.get('landings'))||0)),allT=allTrainees(),allI=allInstructors();const obj={id:old?.id||'ev_'+Date.now(),revision:old?(old.revision||1)+1:1,revisionCount:old?(old.revisionCount||1)+1:1,traineeId,instructorId:instId,traineeName:allT.find(t=>t.id===traineeId)?.name||'Trainee',instructorName:allI.find(i=>i.id===instId)?.name||'Instructor',syllabus:old?.syllabus||fd.get('syllabus'),duration:Number(fd.get('duration')),flightDate:fd.get('date'),takeoffs,landings,scores,suggestedGrade:suggested,gradeMode,grade,comments:fd.get('comments'),emphases:fd.getAll('emphasisItem').map(String).map(x=>x.trim()).filter(Boolean),plannedEmergencyIds:evaluationPlanIds(String(traineeId),old),emergencyCounts:Object.fromEntries(evaluationEmergencyDefs().map(x=>[x.id,Number(fd.get('emid_'+x.id))||0])),emergencies:evaluationEmergencyDefs().map(x=>Number(fd.get('emid_'+x.id))||0),changeReason:fd.get('changeReason')||''};const next=old?list.map(x=>x.id===old.id?obj:x):[obj,...list];setEvaluations(next);let activity=getActivityEvents().filter(x=>x.sourceId!==obj.id);if(takeoffs>0)activity.unshift({id:'evt_'+Date.now()+'_eto',traineeId:String(traineeId),date:String(obj.flightDate),type:'TAKEOFF',quantity:takeoffs,source:'Instructed flight',sourceId:obj.id,note:String(obj.syllabus),createdAt:new Date().toISOString()});if(landings>0)activity.unshift({id:'evt_'+Date.now()+'_eld',traineeId:String(traineeId),date:String(obj.flightDate),type:'LANDING',quantity:landings,source:'Instructed flight',sourceId:obj.id,note:String(obj.syllabus),createdAt:new Date().toISOString()});saveActivityEvents(activity);discardActivityDraft('evaluation');if(!old)clearTraineeEmergencyPlan(String(traineeId));state.evaluationTraineeId=null;state.editingEval=null;toast(old?'Revision '+obj.revision+' saved; activity counters updated':'Evaluation saved; emergency plan cleared for next sortie');render()}}
 
 function bindSettings(){
   const c=cfgGet();
+  if($('#courseOverridesForm'))$('#courseOverridesForm').onsubmit=e=>{
+    e.preventDefault();const fd=new FormData(e.currentTarget),p=window.FLYMPUS_TRAINING.resolve(currentConfigSelection()),overrides={syllabi:{},counters:{},criteria:{},exams:{},progression:{},emergencyRequirementIds:fd.getAll('requiredEmergency').map(String)};
+    (p.syllabi||[]).forEach(x=>{const min=fd.get('min_'+x.id),supervision=String(fd.get('supervision_'+x.id)||'INSTRUCTED');overrides.syllabi[x.id]={applicable:fd.has('app_'+x.id),order:Number(fd.get('order_'+x.id)||x.order||1),minimum:min===''?null:Number(min),instructorRequired:supervision==='INSTRUCTED',mode:supervision==='SOLO'?'SOLO':(x.mode==='SOLO'?'INSTRUCTED':x.mode),track:String(fd.get('track_'+x.id)||'shared')}});
+    (p.experienceCounters||[]).forEach(x=>{const v=fd.get('counter_'+x.id);overrides.counters[x.id]={minimum:v===''?null:Number(v)}});
+    (p.criteria||[]).forEach(x=>{overrides.criteria[x.id]={weight:Number(fd.get('criterion_'+x.id)||0)}});
+    (p.exams||[]).forEach(x=>{const v=fd.get('exam_pass_'+x.id);overrides.exams[x.id]={applicable:fd.has('exam_app_'+x.id),pass:v===''?null:Number(v)}});
+    (p.progression||[]).forEach(x=>{overrides.progression[x.id]={applicable:fd.has('gate_'+x.id)}});
+    window.FLYMPUS_TRAINING.saveOverrides(currentCourseMeta.courseCode||currentCourseId,overrides);toast('Course overrides saved without changing source defaults');render();
+  };
+  if($('#resetCourseOverrides'))$('#resetCourseOverrides').onclick=()=>{if(confirm('Reset this course to source defaults?')){window.FLYMPUS_TRAINING.saveOverrides(currentCourseMeta.courseCode||currentCourseId,{});toast('Course overrides reset');render()}};
   const updateBuilder=()=>{
-    const type=$('#courseTypeSelect')?.value||'',phase=$('#phaseSelect')?.value||'',platform=$('#builderPlatform')?.value||'',training=$('#builderTraining')?.value||'',time=$('#builderDay')?.value||'',country=$('#builderCountry')?.value||'';
-    state.builderType=type;state.builderPhase=phase;state.builderPlatform=platform;state.builderTraining=training;state.builderDay=time;state.builderCountry=country;
-    const acc=$('#builderAccumulation');if(acc)acc.innerHTML=builderAccumulationHtml(cfgItem(c.phases,phase));const selection={courseType:type,phaseId:phase,platformId:platform,trainingKind:training,dayNight:time,country};const box=$('#cfgResolvedPreview');if(box)box.innerHTML=cfgResolvedHtml(selection);const submit=$('#courseBuilderSubmit');if(submit)submit.disabled=type==='EP'?!epProgramResolve(selection):!phase;
+    const type=$('#courseTypeSelect')?.value||'',phase=$('#phaseSelect')?.value||'',platform=$('#builderPlatform')?.value||'',training=$('#builderTraining')?.value||'',programId=$('#builderProgram')?.value||'',time=$('#builderDay')?.value||'',country=$('#builderCountry')?.value||'';
+    state.builderType=type;state.builderPhase=phase;state.builderPlatform=platform;state.builderTraining=training;state.builderProgram=programId;state.builderDay=time;state.builderCountry=country;
+    const acc=$('#builderAccumulation');if(acc)acc.innerHTML=builderAccumulationHtml(cfgItem(c.phases,phase));const selection={courseType:type,phaseId:phase,platformId:platform,trainingKind:training,programId,dayNight:time,country};const box=$('#cfgResolvedPreview');if(box)box.innerHTML=cfgResolvedHtml(selection);const submit=$('#courseBuilderSubmit');if(submit)submit.disabled=!epProgramResolve(selection);
   };
   if($('#courseTypeSelect'))$('#courseTypeSelect').onchange=e=>{
     const list=c.phases.filter(x=>x.type===e.target.value);state.builderType=e.target.value;state.builderPhase='';state.builderPlatform='';
@@ -1417,35 +1474,38 @@ function bindSettings(){
   };
   if($('#phaseSelect'))$('#phaseSelect').onchange=e=>{
     state.builderPhase=e.target.value;state.builderPlatform='';
-    const list=($('#courseTypeSelect')?.value==='EP'&&window.epCatalogHelpers)?window.epCatalogHelpers.platformsForPhase(e.target.value):[];
+    const list=window.FLYMPUS_TRAINING?.platformsFor($('#courseTypeSelect')?.value,e.target.value)||[];
     if($('#builderPlatform')){$('#builderPlatform').disabled=!list.length;$('#builderPlatform').innerHTML='<option value="" selected disabled>Select platform</option>'+list.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')}
-    if($('#builderTraining'))$('#builderTraining').innerHTML='<option value="" selected disabled>Select platform first</option>';
+    if($('#builderTraining'))$('#builderTraining').innerHTML='<option value="" selected disabled>Select platform first</option>';if($('#builderProgram'))$('#builderProgram').innerHTML='<option value="" selected disabled>Select training package first</option>';
     if($('#builderDay'))$('#builderDay').innerHTML='<option value="" selected disabled>Select package first</option>';
     updateBuilder();
   };
   const syncEpPackageOptions=()=>{
     const type=$('#courseTypeSelect')?.value||'',phase=$('#phaseSelect')?.value||'',platform=$('#builderPlatform')?.value||'';
-    if(type!=='EP'||!phase||!platform)return;
-    const programs=epBuilderValidPrograms(phase,platform),trainingIds=[...new Set(programs.map(p=>p.trainingKind))],dayIds=[...new Set(programs.filter(p=>!$('#builderTraining')?.value||p.trainingKind===$('#builderTraining').value).map(p=>p.dayNight))];
+    if(!type||!phase||!platform)return;
+    const programs=window.FLYMPUS_TRAINING?.programsFor({courseType:type,phaseId:phase,platformId:platform,country:$('#builderCountry')?.value||''})||[],trainingIds=[...new Set(programs.map(p=>p.trainingKind))],selectedTraining=$('#builderTraining')?.value||'',validPrograms=programs.filter(p=>!selectedTraining||p.trainingKind===selectedTraining),selectedProgram=$('#builderProgram')?.value||'',chosen=validPrograms.find(p=>p.id===selectedProgram),dayIds=[...new Set((chosen?[chosen]:validPrograms).flatMap(p=>p.dayNight==='mixed'?['mixed','day','night']:[p.dayNight]))];
     if($('#builderTraining')){
       const cur=$('#builderTraining').value,opts=c.trainingKinds.filter(x=>trainingIds.includes(x.id));
       $('#builderTraining').innerHTML='<option value="" '+(opts.some(x=>x.id===cur)?'':'selected')+' disabled>Select training package</option>'+opts.map(x=>'<option value="'+x.id+'" '+(x.id===cur?'selected':'')+'>'+esc(x.name)+'</option>').join('');
     }
+    if($('#builderProgram')){const cur=$('#builderProgram').value;$('#builderProgram').disabled=!selectedTraining||!validPrograms.length;$('#builderProgram').innerHTML='<option value="" '+(validPrograms.some(x=>x.id===cur)?'':'selected')+' disabled>Select source definition</option>'+validPrograms.map(x=>'<option value="'+x.id+'" '+(x.id===cur?'selected':'')+'>'+esc(x.name)+'</option>').join('')}
     if($('#builderDay')){
       const cur=$('#builderDay').value,opts=c.dayNight.filter(x=>dayIds.includes(x.id));
       $('#builderDay').innerHTML='<option value="" '+(opts.some(x=>x.id===cur)?'':'selected')+' disabled>Select day / night</option>'+opts.map(x=>'<option value="'+x.id+'" '+(x.id===cur?'selected':'')+'>'+esc(x.name)+'</option>').join('');
     }
   };
   if($('#builderPlatform'))$('#builderPlatform').onchange=()=>{state.builderPlatform=$('#builderPlatform').value;syncEpPackageOptions();updateBuilder()};
-  if($('#builderTraining'))$('#builderTraining').onchange=()=>{state.builderTraining=$('#builderTraining').value;syncEpPackageOptions();updateBuilder()};
-  ['builderDay','builderCountry'].forEach(id=>{if($('#'+id))$('#'+id).onchange=updateBuilder});
+  if($('#builderTraining'))$('#builderTraining').onchange=()=>{state.builderTraining=$('#builderTraining').value;state.builderProgram='';syncEpPackageOptions();updateBuilder()};
+  if($('#builderProgram'))$('#builderProgram').onchange=()=>{state.builderProgram=$('#builderProgram').value;syncEpPackageOptions();updateBuilder()};
+  if($('#builderCountry'))$('#builderCountry').onchange=()=>{syncEpPackageOptions();updateBuilder()};
+  if($('#builderDay'))$('#builderDay').onchange=updateBuilder;
   if($('#courseBuilder')){syncEpPackageOptions();updateBuilder();}
 
   if($('#courseBuilder'))$('#courseBuilder').onsubmit=e=>{
-    e.preventDefault();const fd=new FormData(e.currentTarget),sel={courseType:String(fd.get('courseType')),phaseId:String(fd.get('phase')),platformId:String(fd.get('platformId')||''),trainingKind:String(fd.get('trainingKind')),dayNight:String(fd.get('dayNight')),country:String(fd.get('country'))};
-    const epProgram=sel.courseType==='EP'?epProgramResolve(sel):null,p=sel.courseType==='EP'?null:cfgResolve(sel),cc=cfgGet(),ct=cfgItem(cc.courseTypes,sel.courseType),ph=cfgItem(cc.phases,sel.phaseId),tk=cfgItem(cc.trainingKinds,sel.trainingKind),dn=cfgItem(cc.dayNight,sel.dayNight),co=cfgItem(cc.countries,sel.country),arr=getDraftCourses(),activityRequirements=enabledPhaseCounters(ph).map(x=>({type:x.type,label:x.label,required:fd.get('activityReq_'+x.type)===''?null:Number(fd.get('activityReq_'+x.type))}));
-    const emergencyCount=sel.courseType==='EP'?(window.epCatalogHelpers?.emergenciesForPlatform(sel.platformId)?.length||0):(p?.emergencyIds.length||0),syllabusCount=epProgram?.syllabi?.length||p?.syllabusIds.length||0,criteriaCount=sel.courseType==='EP'?(window.EP_CATALOG?.criteria?.length||0):(p?.criteriaIds.length||0);
-    arr.unshift({id:cfgId('course'),name:String(fd.get('name')),code:String(fd.get('code')),summary:[ct?.name,ph?.name,sel.platformId?epPlatformLabel(sel.platformId):'',tk?.name,dn?.name,co?.name].filter(Boolean).join(' · '),startsOn:String(fd.get('startsOn')||''),selection:sel,platformId:sel.platformId,programId:epProgram?.id||null,profileId:p?.id||null,syllabusCount,criteriaCount,emergencyCount,activityRequirements,activityRequirementCount:activityRequirements.length,snapshot:epProgram?JSON.parse(JSON.stringify(epProgram)):p?JSON.parse(JSON.stringify(p)):null});
+    e.preventDefault();const fd=new FormData(e.currentTarget),sel={courseType:String(fd.get('courseType')),phaseId:String(fd.get('phase')),platformId:String(fd.get('platformId')||''),trainingKind:String(fd.get('trainingKind')),programId:String(fd.get('programId')||''),dayNight:String(fd.get('dayNight')),country:String(fd.get('country'))};
+    const epProgram=epProgramResolve(sel),p=null,cc=cfgGet(),ct=cfgItem(cc.courseTypes,sel.courseType),ph=cfgItem(cc.phases,sel.phaseId),tk=cfgItem(cc.trainingKinds,sel.trainingKind),dn=cfgItem(cc.dayNight,sel.dayNight),co=cfgItem(cc.countries,sel.country),arr=getDraftCourses(),activityRequirements=(epProgram?.experienceCounters||[]).map(x=>({type:x.id,label:x.name,unit:x.unit,required:x.minimum==null?null:Number(x.minimum),source:x.source||null}));
+    const emergencyCount=window.FLYMPUS_TRAINING?.requiredEmergencies(epProgram).length||0,syllabusCount=epProgram?.syllabi?.length||0,criteriaCount=window.FLYMPUS_TRAINING?.catalog(sel.courseType)?.criteria?.length||0;
+    arr.unshift({id:cfgId('course'),name:String(fd.get('name')),code:String(fd.get('code')),summary:[ct?.name,ph?.name,sel.platformId?epPlatformLabel(sel.platformId):'',tk?.name,dn?.name,co?.name].filter(Boolean).join(' · '),startsOn:String(fd.get('startsOn')||''),selection:sel,platformId:sel.platformId,programId:epProgram?.id||null,profileId:null,syllabusCount,criteriaCount,emergencyCount,activityRequirements,activityRequirementCount:activityRequirements.length,snapshot:epProgram?JSON.parse(JSON.stringify(epProgram)):null});
     localStorage.setItem('ct-review-courses',JSON.stringify(arr));toast(epProgram||p?'Draft created with matched training suit':'Draft created — no matching training suit');render();
   };
 
@@ -1520,16 +1580,4 @@ function bindSettings(){
 render();
 </script>
 </body>
-</html
-.epActiveSuit{border:1px solid #d8e6f2;background:#f8fbfe;border-radius:15px;padding:12px 13px;margin:0 0 14px}
-.epActiveSuitTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.epActiveSuit b{color:#082f57;font-size:12px}.epActiveSuit p{margin:3px 0 0;color:#71849a;font-size:9.5px;line-height:1.4}
-.epSyllabusBrief{border:1px solid #dbe8f3;background:#f8fbfe;border-radius:15px;padding:12px;margin:11px 0 2px}
-.epSyllabusBrief.empty{border-style:dashed;color:#71849a}.epSyllabusBrief h3{margin:0;color:#082f57;font-size:13px}
-.epLessonDetails{margin-top:10px;border-top:1px solid #e1eaf2;padding-top:8px}.epLessonDetails details{border:1px solid #e2eaf2;border-radius:10px;background:#fff;margin-top:6px;overflow:hidden}.epLessonDetails summary{cursor:pointer;padding:8px 10px;font-size:9.5px;font-weight:850;color:#244b70;list-style:none}.epLessonDetails summary::-webkit-details-marker{display:none}.epLessonDetails summary:after{content:"＋";float:right;color:#7990a6}.epLessonDetails details[open] summary:after{content:"−"}.epLessonDetails ul{margin:0;padding:0 24px 9px 28px;color:#445e77;font-size:9px;line-height:1.5}.epLessonDetails li+li{margin-top:3px}.epLessonDetails .safety summary{color:#a05d0a}.epLessonDetails .instructor summary{color:#0b70ca}.epLessonDetails .average summary{color:#6d50a8}
-.epSyllabusBrief p{font-size:10px;color:#526b83;line-height:1.5;margin:7px 0 0}
-.epBriefMeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.epBriefMeta span{padding:4px 7px;border-radius:999px;background:#eaf3fb;color:#345c80;font-size:8.5px;font-weight:800}.epBriefMeta .gold{background:#fff5dc;color:#9a6a06}.epBriefMeta .green{background:#e2f8ec;color:#13794d}
-.epBriefList{margin:8px 0 0;padding-left:18px;color:#39556f;font-size:9.5px;line-height:1.5}.epBriefList li+li{margin-top:3px}
-.epProgramProgress{display:grid;gap:7px;margin-top:10px}.epProgressRow{border:1px solid #e3ebf3;border-radius:13px;padding:10px;background:#fff}.epProgressTop{display:flex;align-items:center;justify-content:space-between;gap:8px}.epProgressTop b{font-size:10.5px;color:#0b315b}.epProgressTop span{font-size:8.5px;color:#657c93}.epProgressMeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.epProgressMeta span{font-size:8px;padding:4px 6px;border-radius:999px;background:#edf4fa;color:#526c84}.epProgressMeta .done{background:#ddf7e9;color:#117849}.epProgressMeta .current{background:#fff2d4;color:#8d650d}
-.epProgressRow.optional{opacity:.78}.epProgramHeader{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px}.epProgramHeader h3{margin:0;color:#082f57}.epProgramHeader p{margin:3px 0 0;color:#71849a;font-size:9.5px}
-.epBuilderHint{font-size:9px;color:#71849a;margin-top:5px;line-height:1.4}
->
+</html>
