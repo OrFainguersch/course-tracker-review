@@ -67,10 +67,124 @@ main{padding:18px 14px calc(88px + env(safe-area-inset-bottom));max-width:1480px
 
 .personCard.manageCard{border-color:#bfdbfe;background:#fbfdff;box-shadow:0 0 0 1px #e0efff inset}
 .personCard.manageCard .rosterActions .btn.edit{min-width:84px}
+
+/* ===== Mobile Experience redesign — leaflet-aligned ===== */
+:root{
+  --navy:#082f57;--navy2:#092f58;--blue:#087cf0;--blue2:#2563eb;
+  --bg:#f4f8fd;--card:#fff;--line:#dbe7f3;--muted:#6a7d95;--text:#0b1f3a;
+  --green:#13a56f;--purple:#7755e8;--orange:#f38b35;--shadow:0 8px 24px rgba(24,67,112,.08)
+}
+html,body{background:linear-gradient(180deg,#f7fbff 0,#f3f7fc 100%);color:var(--text)}
+.top{
+  height:78px;background:linear-gradient(135deg,#082f57,#0a3b6a);border-bottom:0;color:#fff;
+  padding-left:14px;padding-right:14px;box-shadow:0 8px 24px rgba(8,47,87,.16)
+}
+.menuBtn{width:44px;height:44px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff;border-radius:14px}
+.topTitle b{color:#fff;font-size:15px}.topTitle span{color:#c9ddf2;font-size:11px}
+.top .avatar{width:42px;height:42px;background:#fff;color:#0b5d9c;border:0;box-shadow:0 5px 15px rgba(0,0,0,.12)}
+.topBrand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.topBrandMark{width:32px;height:32px;display:grid;place-items:center;flex:0 0 auto}
+.topBrandMark svg{width:32px;height:32px;display:block}
+.topBrandCopy{min-width:0}.topBrandCopy b{display:block;color:#fff;font-size:15px;line-height:1.15}.topBrandCopy span{display:block;color:#c9ddf2;font-size:11px;margin-top:3px}
+main{padding:16px 14px calc(30px + env(safe-area-inset-bottom));max-width:1220px}
+.card{border:1px solid #e2ebf4;box-shadow:var(--shadow);border-radius:18px}
+.pageTitle{font-size:25px;letter-spacing:-.025em;margin:6px 0 4px}.sub{font-size:12px;color:#70839a;margin-bottom:14px}
+.eyebrow{font-size:10px;letter-spacing:.14em;color:#237bd2}
+.btn{border-radius:13px}.btn.sky{background:#087cf0}.btn.secondary{border-color:#d7e4f1}.btn.edit{background:#edf6ff;border-color:#cde4fb;color:#1768bf}
+.scrollTabs{padding:4px;border-radius:16px;background:#fff;box-shadow:none}.seg{padding:10px 14px;border-radius:12px}.seg.active{background:#e3f1ff;color:#1269b9}
+.input,select,textarea{border-radius:13px;border-color:#ceddec;background:#fff;padding:12px 13px}
+.sectionHead{margin:22px 0 10px}.sectionHead h2{font-size:18px;letter-spacing:-.01em}.sectionHead p{font-size:11px}
+.reviewBanner{display:none}
+.mobileOnly{display:block}.desktopOnly{display:none}
+
+/* home */
+.mobileHero{
+  position:relative;overflow:hidden;color:#fff;border-radius:22px;padding:20px 18px 18px;
+  min-height:154px;background:
+    radial-gradient(circle at 85% 15%,rgba(62,164,245,.35),transparent 28%),
+    linear-gradient(135deg,#0b3868 0%,#0a2e54 56%,#173f69 100%);
+  box-shadow:0 18px 34px rgba(7,46,86,.18)
+}
+.mobileHero:before{content:"";position:absolute;left:-15%;right:-15%;bottom:-45px;height:95px;border-radius:50%;background:rgba(120,173,216,.17);transform:rotate(-4deg)}
+.mobileHero:after{content:"✈";position:absolute;right:24px;bottom:25px;font-size:54px;color:rgba(255,255,255,.13);transform:rotate(-6deg)}
+.mobileHero>*{position:relative;z-index:1}.mobileHero .welcome{font-size:24px;line-height:1.05;margin:8px 0 6px;font-weight:900;letter-spacing:-.03em}.mobileHero p{margin:0;color:#d7e8f8;font-size:12px}.mobileHero .heroMeta{margin-top:12px;font-size:11px;color:#bfd7ed}
+.homeSectionTitle{display:flex;align-items:flex-start;gap:9px;margin:22px 3px 10px}.homeSectionTitle:before{content:"";width:4px;height:20px;border-radius:99px;background:#087cf0;margin-top:2px}.homeSectionTitle h2{margin:0;color:#082f57;font-size:18px}.homeSectionTitle p{margin:3px 0 0;color:#71849a;font-size:11px}
+.mobileActivityGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mobileActivity{
+  min-height:138px;border:1px solid #e2ebf4;border-radius:18px;background:#fff;padding:14px;
+  text-align:left;box-shadow:var(--shadow);display:flex;flex-direction:column;position:relative
+}
+.mobileActivity .tileIcon{width:44px;height:44px;border-radius:15px;display:grid;place-items:center;font-size:21px;margin-bottom:12px}
+.mobileActivity b{font-size:14px;color:#0b315b;line-height:1.15}.mobileActivity small{display:block;color:#71849a;font-size:10.5px;line-height:1.35;margin-top:5px;padding-right:16px}.mobileActivity .tileArrow{position:absolute;right:12px;bottom:12px;font-size:23px;color:#6b87a4}.mobileActivity .activityCount{position:absolute;right:10px;top:10px;margin:0;height:24px;min-width:24px;border:0;background:#edf6ff}
+.courseQuickGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.courseQuick{
+  border:1px solid #e2ebf4;background:#fff;border-radius:17px;min-height:96px;padding:12px 8px;
+  text-align:center;box-shadow:var(--shadow);color:#0b315b;font-weight:850;font-size:11px
+}
+.courseQuick .quickIcon{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;margin:0 auto 8px;font-size:18px}
+.homeMiniStatus{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.homeMiniStatus .pill{background:rgba(255,255,255,.13);color:#fff;padding:5px 8px;font-size:9px}
+
+/* roster */
+.rosterTopbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.rosterControls{padding:11px}.rosterSearchRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:10px}
+.rosterFilterRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.statusSegments{display:flex;background:#f1f5f9;border-radius:12px;padding:3px;gap:2px}
+.statusSegments button{border:0;background:transparent;color:#64748b;padding:8px 11px;border-radius:9px;font-size:11px;font-weight:800}
+.statusSegments button.active{background:#087cf0;color:#fff}
+.sortHint{font-size:10px;color:#6c8197;font-weight:700}
+.people{gap:9px}.personCard{
+  padding:11px;min-height:104px;border-radius:18px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center
+}
+.personCard .personAvatarSize{width:68px!important;height:68px!important;border-radius:14px!important;font-size:22px!important}
+.personCard .personInfo b{font-size:14px;line-height:1.15}.personCard .personInfo small{font-size:10.5px}
+.rosterStats{display:grid;grid-template-columns:auto minmax(78px,1fr);gap:12px;margin-top:7px;align-items:end}
+.rosterStatLabel{display:block;color:#7b8ca0;font-size:9px}.rosterStatValue{display:block;color:#082f57;font-size:16px;font-weight:900;margin-top:1px}
+.miniProgress{height:6px;border-radius:999px;background:#dfe8f1;overflow:hidden;margin-top:3px}.miniProgress i{display:block;height:100%;background:#087cf0;border-radius:inherit}
+.rankBadge{padding:5px 8px;border-radius:10px;background:#eaf4ff;color:#126cc2;font-size:10px;font-weight:900}
+.rosterChevron{border:0;background:transparent;color:#6e8aa7;font-size:25px;padding:8px}.rosterEditBtn{min-width:70px}
+.manageBanner{border-radius:16px}.manageBanner span{font-size:10px}
+.instructorRole{margin-top:4px}
+
+/* profile */
+.profileNav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.profileBack{border:0;background:transparent;color:#0c3967;font-weight:800;padding:6px 0}
+.profileMenu{border:0;background:#eef5fb;color:#0b315b;width:38px;height:38px;border-radius:13px;font-size:18px}
+.profileHero{border-radius:20px;padding:15px;box-shadow:none}
+.profileTop{align-items:flex-start}.profileHero .personAvatarSize{width:82px!important;height:82px!important;border-radius:50%!important}
+.profileIdentity h2{font-size:20px}.profileIdentityMeta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 16px;margin-top:9px}.profileIdentityMeta span{font-size:10px;color:#667b92}.profileIdentityMeta b{display:block;color:#092f58;font-size:13px;margin-top:1px}
+.profileTabs{margin-top:10px;background:transparent;border:0;border-bottom:1px solid #dce7f2;border-radius:0;padding:0;gap:16px}.profileTabs .seg{border-radius:0;padding:11px 0;background:transparent!important;color:#5f7690}.profileTabs .seg.active{color:#087cf0;border-bottom:2px solid #087cf0}
+.profileProgressCard{padding:15px;margin-top:12px;background:linear-gradient(135deg,#f4f8ff,#eef4ff);border-color:#dfeafa}
+.profileProgressHead{display:flex;justify-content:space-between;align-items:end}.profileProgressHead strong{font-size:23px;color:#0b3a6a}.profileProgressHead b{font-size:13px;color:#0b315b}
+.trainingPair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:10px}.trainingTile{padding:12px;border:1px solid #e2ebf4;border-radius:16px;background:#fff}.trainingTile small{font-size:9px;color:#6b8198}.trainingTile b{display:block;color:#0a315c;font-size:12px;line-height:1.25;margin:3px 0}.trainingTile p{margin:0;color:#71849a;font-size:9.5px;line-height:1.35}
+.profileCharts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.profileCharts .card{padding:12px;min-width:0}.profileCharts h3{margin:0 0 8px;font-size:12px;color:#0b315b}.profileCharts .chart{height:120px;padding:12px 6px 6px}.profileCharts .donut{width:92px;height:92px}.profileCharts .donut>div{width:64px;height:64px}.profileCharts .donut strong{font-size:18px}
+.profileBottomActions{position:sticky;bottom:calc(8px + env(safe-area-inset-bottom));z-index:10;display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:8px;margin-top:14px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border:1px solid #dfe9f3;border-radius:18px;box-shadow:0 10px 30px rgba(24,67,112,.14)}
+.profileBottomActions .btn{padding:10px 6px;font-size:10px;border-radius:11px}.profileBottomActions .moreBtn{background:#eef5fb;color:#15446f}
+.compactInfoCard{padding:13px}
+
+/* generic inner screens */
+.formCard,.settingBox,.sideCard,.workflowStep,.saved{border-radius:18px}.formTitle h2,.sideCard h3,.settingBox h3{font-size:16px}.workflowStepHead{background:#f4f8fd}.reportKpis>div{border-radius:16px}.infoBox{border-radius:15px}
+
+/* desktop keeps the same design language, expands rather than becoming another app */
+@media(min-width:760px){
+  body{padding-left:244px}.top{height:70px;background:#fff;color:#0b315b;box-shadow:0 1px 0 #e1ebf4;padding-left:24px}
+  .topBrandMark svg path,.topBrandMark svg line{stroke:#0b477f}.topBrandCopy b{color:#0b315b}.topBrandCopy span{color:#71849a}.top .avatar{background:#e5f3ff;color:#0b5d9c}
+  .drawer{width:244px}.panel{width:244px;background:linear-gradient(180deg,#082f57,#072846)}
+  main{padding:24px 28px 40px}.mobileHero{min-height:190px;padding:28px}.mobileHero .welcome{font-size:34px}
+  .mobileActivityGrid{grid-template-columns:repeat(4,minmax(0,1fr))}.courseQuickGrid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:660px}
+  .people{grid-template-columns:repeat(2,minmax(0,1fr))}.personCard{min-height:118px}
+  .personCard .personAvatarSize{width:78px!important;height:78px!important}
+  .profileHero .personAvatarSize{width:106px!important;height:106px!important}.profileCharts{grid-template-columns:1.3fr .7fr}
+  .profileBottomActions{position:static;max-width:480px;margin-left:auto}
+  .reviewBanner{display:block;opacity:.58;font-size:9px}
+}
+@media(min-width:1100px){
+  .people{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topTitle"><b>Aerostar EP Course</b><span>AEP-26 · Active</span></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker Next</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0445 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><span class="topBrandMark" aria-hidden="true"><svg viewBox="0 0 40 32" fill="none"><path d="M4 8h11l5 5 5-5h11" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 14h10l3 4 3-4h10" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20h6l2 7 2-7h6" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker Next</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0500 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const trainees=[
