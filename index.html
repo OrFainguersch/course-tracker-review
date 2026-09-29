@@ -227,10 +227,33 @@ select option[value=""]{color:#8a9bad}
 .requiredStar{color:#c93838;font-weight:900;margin-left:3px}.requiredLegend{font-size:9px;color:#7a8da2;margin:4px 0 10px}.requiredLegend b{color:#c93838}
 
 .emergencyGroups .emergencyGroupProgress{display:none!important}
+
+/* ===== FLYMPUS subtle brand integration ===== */
+:root{--brand-gold:#d6a343;--brand-gold-soft:#f7ecd2;--brand-white:#f8fbff}
+.topBrand{gap:9px}
+.topBrandLogo{display:none!important}
+.topBrandIcon{width:34px;height:34px;border-radius:10px;object-fit:cover;flex:0 0 auto;box-shadow:0 2px 7px rgba(0,0,0,.15)}
+.topBrandCopy b{display:block;color:#fff;font-size:15px;line-height:1.05;letter-spacing:.025em}
+.topBrandCopy span{display:block;color:#c9ddf2;font-size:10px;margin-top:3px;letter-spacing:.01em}
+.brand{display:flex!important;align-items:center;gap:10px;padding:8px 10px 18px!important}
+.brandLogoSide{display:none!important}
+.brandIconSide{width:42px;height:42px;border-radius:12px;object-fit:cover;flex:0 0 auto;box-shadow:0 3px 10px rgba(0,0,0,.16)}
+.brandCopy{min-width:0}
+.brandName{display:block;color:#fff;font-size:17px;font-weight:900;letter-spacing:.025em;line-height:1}
+.brandTagline{display:block!important;text-align:left!important;color:#9fc9ea!important;font-size:8.5px!important;letter-spacing:.14em!important;text-transform:uppercase;margin-top:5px!important;white-space:nowrap}
+.navBtn.active{box-shadow:inset 3px 0 0 var(--brand-gold)}
+.navLabel{color:#a9d3ef}
+.drawerFooter{border-color:rgba(214,163,67,.22)}
+.homeSectionTitle:before{background:var(--brand-gold)}
+.mobileHero{background:linear-gradient(135deg,#082f57 0%,#0b3a68 100%)}
+.mobileHero:after{content:"";position:absolute;right:20px;top:18px;width:34px;height:2px;border-radius:99px;background:linear-gradient(90deg,transparent,var(--brand-gold));opacity:.9}
+.homeMiniStatus .pill{border:1px solid rgba(214,163,67,.16)}
+@media(max-width:390px){.topBrandIcon{width:31px;height:31px}.topBrandCopy b{font-size:14px}}
+
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandLogo" src="./assets/flympus-wordmark.svg" alt="FLYMPUS"><div class="topBrandCopy"><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="brandLogoSide" src="./assets/flympus-wordmark.svg" alt="FLYMPUS"><span class="brandTagline">Train. Track. Progress.</span></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0518 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-app-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>FLYMPUS</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="brandIconSide" src="./assets/flympus-app-icon.webp" alt="FLYMPUS logo"><div class="brandCopy"><span class="brandName">FLYMPUS</span><span class="brandTagline">Train. Track. Progress.</span></div></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0519 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentCourseId='AEP-26';
@@ -320,7 +343,7 @@ function home(){
  return '<section class="mobileHero">'+
    '<div class="eyebrow" style="color:#8bc8ff">AEROSTAR EP COURSE</div>'+
    '<div class="welcome">Welcome back, Or</div>'+
-   '<p>Train. Track. Develop.</p>'+
+   '<p>Train. Track. Progress.</p>'+
    '<div class="heroMeta">Israel · Sep–Oct 2026</div>'+
    '<div class="homeMiniStatus"><span class="pill">EP</span><span class="pill">RC Model</span><span class="pill">New Training</span><span class="pill">Day</span></div>'+
  '</section>'+
