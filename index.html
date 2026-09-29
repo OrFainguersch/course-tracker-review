@@ -217,7 +217,7 @@ select option[value=""]{color:#8a9bad}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><span class="topBrandMark" aria-hidden="true"><svg viewBox="0 0 40 32" fill="none"><path d="M4 8h11l5 5 5-5h11" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 14h10l3 4 3-4h10" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20h6l2 7 2-7h6" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0512 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><span class="topBrandMark" aria-hidden="true"><svg viewBox="0 0 40 32" fill="none"><path d="M4 8h11l5 5 5-5h11" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 14h10l3 4 3-4h10" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20h6l2 7 2-7h6" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0513 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentCourseId='AEP-26';
@@ -247,7 +247,7 @@ const currentCourseMeta={type:'EP',phase:'RC Model',trainingKind:'New Training',
 const syllProgress=[['Basic Handling',100,'Complete'],['Figure 8',100,'Complete'],['Circuits',100,'Complete'],['Emergencies',80,'Current'],['Final Preparation',0,'Next']];
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
 const state={screen:'home',selectedTrainee:'t1',selectedInstructor:'i1',search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',...initialUiState};
-function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace}))}catch{}}
+function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace,emergencyProfileFilter:state.emergencyProfileFilter}))}catch{}}
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function safeArrayStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[]}catch{return []}}
 function safeObjectStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch{return {}}}
@@ -565,7 +565,7 @@ function traineeSoloBreakdown(t){
 }
 function criterionScoreForEvaluation(e,c,index){
  if(e.scores&&Number(e.scores[c.id]))return Number(e.scores[c.id]);
- const offsets=[-.05,-.4,.1,-.25,.15],base=Number(e.grade)||0;
+ const offsets=[-.05,-.65,.1,-.25,.15],base=Number(e.grade)||0;
  return Math.max(1,Math.min(5,Math.round((base+(offsets[index]||0))*10)/10));
 }
 function traineeAssessmentFocus(traineeId,limit=5){
