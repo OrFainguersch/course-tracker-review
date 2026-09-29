@@ -489,8 +489,22 @@ if(state.screen==='reports')bindReports();
 if(state.screen==='planned')bindPlanned();
 if(state.screen==='safety')bindSafety();
 if(state.screen==='exams')bindExams();
+if(state.screen==='profile')bindActivity();
 document.querySelectorAll('[data-edit-eval]').forEach(b=>b.onclick=()=>{state.editingEval=b.dataset.editEval;render()});}
 
+
+function bindActivity(){
+  const form=$('#activityForm');
+  if(form)form.onsubmit=e=>{
+    e.preventDefault();const fd=new FormData(form),arr=getActivityEvents(),qty=Number(fd.get('quantity')||0);
+    if(!(qty>0))return;
+    arr.unshift({id:'evt_'+Date.now(),traineeId:state.selectedTrainee,date:String(fd.get('date')),type:String(fd.get('type')),quantity:qty,source:String(fd.get('source')),note:String(fd.get('note')||''),createdAt:new Date().toISOString()});
+    saveActivityEvents(arr);toast('Activity added to trainee progress');render();
+  };
+  document.querySelectorAll('[data-event-delete]').forEach(btn=>btn.onclick=()=>{
+    saveActivityEvents(getActivityEvents().filter(x=>x.id!==btn.dataset.eventDelete));toast('Activity record removed');render();
+  });
+}
 function bindReports(){
  const bindSel=(id,key)=>{if($('#'+id))$('#'+id).onchange=e=>{state[key]=e.target.value;render()}};
  bindSel('reportTrainee','reportTrainee');bindSel('reportInstructor','reportInstructor');bindSel('reportSyllabus','reportSyllabus');
