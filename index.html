@@ -169,10 +169,16 @@ ${edit?`<div class="field" style="margin-top:12px"><label>Change reason</label><
 function evalCard(e){return `<article class="evalItem"><div class="evalTop"><div><b>${e.traineeName}</b><p>${e.flightDate} · ${e.syllabus}</p></div><span class="pill blue">Grade ${e.grade}</span></div><p>${e.instructorName} · revision ${e.revision||1} · ${e.revisionCount||1} snapshots</p><div class="toolbar"><button class="btn secondary small" data-edit-eval="${e.id}">✎ Edit revision</button></div></article>`}
 function roster(){
  const extras=getRosterExtras();
- const allT=[...trainees,...extras.filter(x=>x.type==='TRAINEE')];
- const allI=[...instructors.map(i=>({...i,initials:i.name.split(' ').map(x=>x[0]).join('').slice(0,2),type:'INSTRUCTOR',status:'Active',email:i.id==='i1'?'or@example.test':'nir@example.test'})),...extras.filter(x=>x.type==='INSTRUCTOR')];
+ const allT=[...trainees,...extras.filter(x=>x.type==='TRAINEE')].map(t=>{
+   const m=courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'});
+   return {...t,status:m.status||'Active'};
+ });
+ const allI=[...instructors.map(i=>({...i,initials:i.name.split(' ').map(x=>x[0]).join('').slice(0,2),type:'INSTRUCTOR',email:i.id==='i1'?'or@example.test':'nir@example.test'})),...extras.filter(x=>x.type==='INSTRUCTOR')].map(i=>{
+   const m=courseMembershipFor(i.id,'INSTRUCTOR',{role:i.role||'INSTRUCTOR'});
+   return {...i,role:m.role||'INSTRUCTOR'};
+ });
  const type=state.rosterType||'TRAINEE',base=type==='TRAINEE'?allT:allI;
- let list=base.filter(t=>state.filter==='All'||t.status===state.filter);
+ let list=type==='TRAINEE'?base.filter(t=>state.filter==='All'||t.status===state.filter):base;
  if(state.search)list=list.filter(t=>(t.name+' '+(t.email||'')).toLowerCase().includes(state.search.toLowerCase()));
  list=list.slice().sort((a,b)=>{
    if(type==='TRAINEE'){
@@ -186,18 +192,21 @@ function roster(){
    }
    return String(a.name).localeCompare(String(b.name),undefined,{sensitivity:'base'});
  });
- return '<div class="eyebrow">Course roster</div><h1 class="pageTitle">Course Roster</h1><p class="sub">Active trainees first; instructors are ordered by course role and workload.</p>'+
+ return '<div class="eyebrow">Course roster</div><h1 class="pageTitle">Course Roster</h1><p class="sub">Roles and active status below belong to this course only: '+currentCourseId+'.</p>'+
  '<div class="card" style="padding:12px"><div class="scrollTabs"><button class="seg '+(type==='TRAINEE'?'active':'')+'" data-roster-type="TRAINEE">Trainees ('+allT.length+')</button><button class="seg '+(type==='INSTRUCTOR'?'active':'')+'" data-roster-type="INSTRUCTOR">Instructors ('+allI.length+')</button></div>'+
- '<div class="search"><input class="input" id="rosterSearch" placeholder="Search name or email" value="'+esc(state.search)+'"><select id="statusFilter" style="width:145px"><option value="All" '+(state.filter==='All'?'selected':'')+'>All statuses</option><option value="Active" '+(state.filter==='Active'?'selected':'')+'>Active</option><option value="Inactive" '+(state.filter==='Inactive'?'selected':'')+'>Inactive</option></select><button class="btn sky" id="addPersonBtn">+ Add person</button></div></div>'+
+ '<div class="search"><input class="input" id="rosterSearch" placeholder="Search name or email" value="'+esc(state.search)+'">'+
+ (type==='TRAINEE'?'<select id="statusFilter" style="width:145px"><option value="All" '+(state.filter==='All'?'selected':'')+'>All statuses</option><option value="Active" '+(state.filter==='Active'?'selected':'')+'>Active</option><option value="Inactive" '+(state.filter==='Inactive'?'selected':'')+'>Inactive</option></select>':'')+
+ '<button class="btn sky" id="addPersonBtn">+ Add person</button></div></div>'+
  '<section class="people">'+(list.length?list.map(t=>{
-   if(type==='TRAINEE')return '<article class="card personCard"><div class="bigAvatar" style="width:50px;height:50px;border-radius:16px">'+(t.initials||t.name.split(' ').map(x=>x[0]).join('').slice(0,2))+'</div><div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b><span class="pill '+(t.status==='Active'?'green':'gray')+'">'+esc(t.status)+'</span></div><small>'+(t.status==='Active'?'Current: '+esc(t.currentSyllabus||'—'):'Course status: inactive')+'</small><div class="statrow"><span>'+(t.rank?'Rank #'+t.rank:'Unranked')+'</span><span>Avg '+(t.average??'—')+'</span><span>'+Number(t.totalFlights||0)+' flights</span></div></div><button class="btn secondary small" data-trainee="'+t.id+'">View</button></article>';
+   if(type==='TRAINEE'){
+     const active=t.status==='Active';
+     return '<article class="card personCard"><div class="bigAvatar" style="width:50px;height:50px;border-radius:16px">'+(t.initials||t.name.split(' ').map(x=>x[0]).join('').slice(0,2))+'</div><div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b><span class="pill '+(active?'green':'gray')+'">'+esc(t.status)+'</span></div><small>'+(active?'Current: '+esc(t.currentSyllabus||'—'):'Inactive in this course')+'</small><div class="statrow"><span>'+(t.rank?'Rank #'+t.rank:'Unranked')+'</span><span>Avg '+(t.average??'—')+'</span><span>'+Number(t.totalFlights||0)+' flights</span></div></div><div class="membershipControl"><button class="btn secondary small" data-trainee="'+t.id+'">View</button><button class="btn '+(active?'danger':'secondary')+' small statusBtn" data-trainee-status="'+t.id+'|'+(active?'Inactive':'Active')+'">'+(active?'Set inactive':'Reactivate')+'</button></div></article>';
+   }
    const manager=t.role==='COURSE_MANAGER';
-   return '<button class="card personCard '+(manager?'manager':'')+'" data-instructor="'+t.id+'" style="border-width:1px;text-align:left"><div class="bigAvatar" style="width:50px;height:50px;border-radius:16px">'+(t.initials||t.name.split(' ').map(x=>x[0]).join('').slice(0,2))+'</div><div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b></div><span class="instructorRole '+(manager?'manager':'')+'">'+(manager?'Course Manager':'Instructor')+'</span><div class="statrow"><span>Workload #'+(t.workloadRank||'—')+'</span><span>'+Number(t.flights||0)+' flights</span><span>'+Number(t.trainees||0)+' trainees</span></div><small>Last activity: '+esc(t.lastActivity||'—')+'</small></div><span class="arr">›</span></button>';
+   return '<article class="card personCard '+(manager?'manager':'')+'"><div class="bigAvatar" style="width:50px;height:50px;border-radius:16px">'+(t.initials||t.name.split(' ').map(x=>x[0]).join('').slice(0,2))+'</div><div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b></div><span class="instructorRole '+(manager?'manager':'')+'">'+(manager?'Course Manager':'Instructor')+'</span><div class="statrow"><span>Workload #'+(t.workloadRank||'—')+'</span><span>'+Number(t.flights||0)+' flights</span><span>'+Number(t.trainees||0)+' trainees</span></div><small>Last activity: '+esc(t.lastActivity||'—')+'</small></div><div class="membershipControl"><select class="courseRoleSelect" data-instructor-role="'+t.id+'"><option value="INSTRUCTOR" '+(!manager?'selected':'')+'>Instructor</option><option value="COURSE_MANAGER" '+(manager?'selected':'')+'>Course Manager</option></select><button class="btn secondary small" data-instructor="'+t.id+'">View</button></div></article>';
  }).join(''):'<div class="card empty"><h3>No matching people.</h3></div>')+'</section>'+
- '<div class="modal" id="personModal"><div class="modalCard"><div class="inlineHead"><div><h2>Add to course roster</h2><p>Creates a mock person and active course membership.</p></div><button class="btn secondary small" id="closePersonModal">✕</button></div><form id="addPersonForm"><div class="fields"><div class="field"><label>Full name</label><input class="input" name="name" required></div><div class="field"><label>Email (optional)</label><input class="input" type="email" name="email"></div><div class="field"><label>Role</label><select name="type"><option value="TRAINEE">Trainee</option><option value="INSTRUCTOR">Instructor</option></select></div></div><div class="toolbar"><button class="btn sky" type="submit">Add to roster</button></div></form></div></div>';
+ '<div class="modal" id="personModal"><div class="modalCard"><div class="inlineHead"><div><h2>Add to course roster</h2><p>Creates a mock person and course membership.</p></div><button class="btn secondary small" id="closePersonModal">✕</button></div><form id="addPersonForm"><div class="fields"><div class="field"><label>Full name</label><input class="input" name="name" required></div><div class="field"><label>Email (optional)</label><input class="input" type="email" name="email"></div><div class="field"><label>Person type</label><select name="type"><option value="TRAINEE">Trainee</option><option value="INSTRUCTOR">Instructor</option></select></div></div><div class="toolbar"><button class="btn sky" type="submit">Add to course</button></div></form></div></div>';
 }
-
-const currentCourseId='AEP-26';
 function getCourseMembershipState(){
   try{return JSON.parse(localStorage.getItem('ct-review-course-memberships')||'{}')}catch{return {}}
 }
