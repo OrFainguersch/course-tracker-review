@@ -352,10 +352,14 @@ select option[value=""]{color:#8a9bad}
 .epMissing{background:#fff7ed;border-color:#fed7aa}.epMissing b{color:#9a4f13}
 @media(min-width:760px){.epProgramGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.epPlatformGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.epSuiteStats{grid-template-columns:repeat(4,minmax(0,1fr))}}
 
+.epCourseSuitOverview{padding:14px;margin:12px 0 16px;border-color:#cfe3f5;background:linear-gradient(135deg,#fbfdff,#f4f9fd)}
+.epCourseSuitOverview h3{margin:3px 0 2px;color:#082f57}.epCourseSuitOverview p{margin:0;color:#6e8297;font-size:10px}
+.epCourseSuitOverview .epSuiteStats{margin-top:12px}.epCourseSuitOverview .epSuitBadges{margin-top:9px}
+@media(max-width:759px){.epCourseSuitOverview{padding:12px}.epCourseSuitOverview .epSuiteStats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0531 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0532 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script src="./assets/ep-catalog.js"></script>
 <script src="./assets/ep-lessons-screening.js"></script>
 <script src="./assets/ep-lessons-rc-1.js"></script>
@@ -366,7 +370,7 @@ select option[value=""]{color:#8a9bad}
 <script src="./assets/ep-lessons-night.js"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
-const currentCourseId='AEP-26';
+let currentCourseId=(()=>{try{return JSON.parse(localStorage.getItem('ct-review-active-course')||'{}').courseCode||'AEP-26'}catch{return 'AEP-26'}})();
 const trainees=[
 {id:'t1',name:'Yoav Shauli',initials:'YS',status:'Active',progress:85,totalFlights:29,instructedFlights:18,soloFlights:11,average:4.4,rank:1,currentSyllabus:'Complex Emergencies',nextSyllabus:'Pre-Test Preparation',startDate:'Sep 3'},
 {id:'t2',name:'Noam Cohen',initials:'NC',status:'Active',progress:72,totalFlights:24,instructedFlights:18,soloFlights:6,average:4.1,rank:3,currentSyllabus:'Basic Emergencies B',nextSyllabus:'Complex Emergencies',startDate:'Sep 6'},
@@ -391,7 +395,7 @@ const trainingKinds=['New Training','Conversion','Flight Instructor Training','S
 const dayNight=['Day','Night','Mixed / Day+Night'];
 const countries=['Israel','Cyprus'];
 let activeCoursePreview={};try{activeCoursePreview=JSON.parse(localStorage.getItem('ct-review-active-course')||'{}')||{}}catch{}
-const currentCourseMeta={type:'EP',phase:'RC Model',platformId:'rc_model',trainingKind:'New Training',dayNight:'Day',country:'Israel',programId:'ep_rc_new',courseName:'Aerostar EP Course',...activeCoursePreview};
+const currentCourseMeta={type:'EP',phase:'RC Model',platformId:'rc_model',trainingKind:'New Training',dayNight:'Day',country:'Israel',programId:'ep_rc_new',courseName:'Aerostar EP Course',courseCode:'AEP-26',startsOn:'2026-09-01',...activeCoursePreview};
 const syllProgress=[['Basic Handling',100,'Complete'],['Figure 8',100,'Complete'],['Circuits',100,'Complete'],['Emergencies',80,'Current'],['Final Preparation',0,'Next']];
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
 const state={screen:'home',selectedTrainee:'t1',selectedInstructor:'i1',search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',...initialUiState};
@@ -484,18 +488,20 @@ function home(){
  const todayLabel=new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).format(new Date());
  const fmtDate=s=>{if(!s||s==='—')return '—';const d=new Date(s+'T12:00:00');return Number.isNaN(d.getTime())?s:new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',year:'numeric'}).format(d)};
  const initials=t=>esc(t.initials||personInitials(t));
+ const theoryExams=epTheoryExamDefs();
+ const nextRequired=(activeProgram?.syllabi||[]).find(x=>!x.optional&&x.minimum!=null);
  const upcoming=[
-   ['30','Sep','Systems Knowledge Exam','Written Test','In 1 day','soon'],
-   ['02','Oct','Solo Check Flight',activeT[0]?.name||'Trainee','In 3 days',''],
-   ['05','Oct','Stage Progression Review','RC Model → Half-Scale','In 6 days',''],
-   ['10','Oct','Night Training Start','Phase 1','In 11 days','']
- ];
+   ...(theoryExams.slice(0,2).map((x,i)=>[String(30+i).padStart(2,'0'),'Sep',x.name,x.type||'Exam',i===0?'Course requirement':'Theory requirement',i===0?'soon':''])),
+   ...(nextRequired?[[ '02','Oct',nextRequired.name,'Practical syllabus · Min '+nextRequired.minimum,'Next syllabus','' ]]:[]),
+   ...(activeProgram?.completion?[[ '05','Oct','Stage Completion Gate',activeProgram.completion,'Program gate','' ]]:[]),
+   ...(currentCourseMeta.dayNight==='Day'&&currentCourseMeta.phase==='Full Scale'?[[ '10','Oct','Night Package','Available after Day prerequisites','Next package','' ]]:[])
+ ].slice(0,4);
  return '<div class="homeDashboard">'+
    '<section class="mobileHero">'+
      '<div class="eyebrow" style="color:#8bc8ff">'+esc(String(currentCourseMeta.courseName||course.name).toUpperCase())+'</div>'+
      '<div class="welcome">Welcome back, Or</div>'+
      '<p>Train. Track. Progress.</p>'+
-     '<div class="heroMeta">Israel · Sep–Oct 2026</div>'+
+     '<div class="heroMeta">'+esc(currentCourseMeta.country||'—')+(currentCourseMeta.startsOn?' · Starts '+esc(formatCourseDate(currentCourseMeta.startsOn)):'')+'</div>'+
      '<div class="homeMiniStatus"><span class="pill">'+esc(currentCourseMeta.type)+'</span><span class="pill">'+esc(currentCourseMeta.phase)+'</span><span class="pill">'+esc(epPlatformLabel(currentCourseMeta.platformId))+'</span><span class="pill">'+esc(currentCourseMeta.trainingKind)+'</span><span class="pill">'+esc(currentCourseMeta.dayNight)+'</span></div>'+
    '</section>'+
    '<section class="homePrimaryGrid">'+
@@ -915,6 +921,31 @@ function epCurrentProgram(){
   const c=cfgGet(),phase=c.phases.find(x=>x.type==='EP'&&x.name===currentCourseMeta.phase)?.id||'';
   return epProgramResolve({courseType:'EP',phaseId:phase,platformId:currentCourseMeta.platformId||'',trainingKind:epTrainingIdFromName(currentCourseMeta.trainingKind),dayNight:epDayIdFromName(currentCourseMeta.dayNight)});
 }
+function epTheoryExamDefs(){
+  const p=epCurrentProgram();if(!p)return[];
+  return (p.theory||[]).filter(x=>/exam/i.test(String(x.type||''))||/exam/i.test(String(x.name||''))).map(x=>{
+    let pass=null;
+    if(/regulations.*limitations/i.test(x.name)||/limitations.*regulations/i.test(x.name))pass=85;
+    else if(/theoretical phase exam/i.test(x.name)||currentCourseMeta.phase==='RC Model')pass=80;
+    return {...x,pass};
+  });
+}
+function activeSuitFacts(){
+  const p=epCurrentProgram(),em=evaluationEmergencyDefs();
+  if(!p)return null;
+  return {program:p,platform:epPlatformLabel(p.platformId),syllabusCount:(p.syllabi||[]).length,requiredCount:(p.syllabi||[]).filter(x=>!x.optional&&x.minimum!=null).length,soloCount:(p.syllabi||[]).filter(x=>x.mode==='SOLO').length,optionalCount:(p.syllabi||[]).filter(x=>x.optional).length,theoryCount:(p.theory||[]).length,examCount:epTheoryExamDefs().length,emergencyCount:em.length};
+}
+function activeSuitOverviewHtml(){
+  const f=activeSuitFacts();if(!f)return '';
+  const p=f.program;
+  return '<section class="card epCourseSuitOverview"><div class="inlineHead"><div><div class="eyebrow">ACTIVE TRAINING SUIT</div><h3>'+esc(p.name)+'</h3><p>'+esc(f.platform)+' · '+esc(currentCourseMeta.phase)+' · '+esc(currentCourseMeta.trainingKind)+' · '+esc(currentCourseMeta.dayNight)+'</p></div><span class="pill green">SOURCE-MAPPED</span></div>'+
+    '<div class="epSuiteStats"><div class="epSuiteStat"><b>'+f.syllabusCount+'</b><small>Syllabus series</small></div><div class="epSuiteStat"><b>'+f.theoryCount+'</b><small>Theory items</small></div><div class="epSuiteStat"><b>'+f.examCount+'</b><small>Defined exams</small></div><div class="epSuiteStat"><b>'+f.emergencyCount+'</b><small>Platform emergencies</small></div></div>'+
+    '<div class="epSuitBadges"><span>'+f.requiredCount+' required series</span><span>'+f.soloCount+' solo series</span><span>'+f.optionalCount+' optional</span><span class="gold">'+esc(p.source)+'</span></div>'+
+    (p.prerequisite?'<div class="epSourceNote"><b>Prerequisite:</b> '+esc(p.prerequisite)+'</div>':'')+
+    (p.theoryRequirement?'<div class="epSourceNote"><b>Theory gate:</b> '+esc(p.theoryRequirement)+'</div>':'')+
+    (p.completion?'<div class="epSourceNote"><b>Completion:</b> '+esc(p.completion)+'</div>':'')+
+  '</section>';
+}
 function evaluationSyllabusDefs(){
   const p=epCurrentProgram();
   if(p?.syllabi?.length)return p.syllabi;
@@ -1150,7 +1181,7 @@ function settings(){
   const training=state.builderTraining||'',time=state.builderDay||'',country=state.builderCountry||'',platform=state.builderPlatform||'';
   const epPlatforms=(type==='EP'&&window.epCatalogHelpers)?window.epCatalogHelpers.platformsForPhase(phase):[];
   const sel={courseType:type,phaseId:phase,platformId:platform,trainingKind:training,dayNight:time,country};
-  let html='<div class="eyebrow">Editable configuration database</div><h1 class="pageTitle">Course Settings</h1><p class="sub">Each course type owns its own phases, syllabi, criteria and emergencies. Shared dimensions stay global.</p>';
+  let html='<div class="eyebrow">Editable configuration database</div><h1 class="pageTitle">Course Settings</h1><p class="sub">Profession → phase → platform → training package resolves one active training suit.</p>'+activeSuitOverviewHtml();
   html+='<div class="scrollTabs"><button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">＋ New course</button><button class="seg '+(tab==='ep_library'?'active':'')+'" data-settings-tab="ep_library">✈ EP Library</button><button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">▦ Course type setup</button><button class="seg '+(tab==='profiles'?'active':'')+'" data-settings-tab="profiles">⌘ Configuration profiles</button></div>';
 
   if(tab==='ep_library'){
@@ -1169,7 +1200,7 @@ function settings(){
     html+='<div class="field"><label>Country</label><select name="country" id="builderCountry" required><option value="" '+(!country?'selected':'')+' disabled>Select country</option>'+c.countries.map(x=>'<option value="'+x.id+'" '+(x.id===country?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Start date</label><input class="input" name="startsOn" type="date" required></div></div>';
     html+='<div id="builderAccumulation">'+builderAccumulationHtml(cfgItem(c.phases,phase))+'</div><div id="cfgResolvedPreview">'+cfgResolvedHtml(sel)+'</div><div class="toolbar"><button class="btn sky" id="courseBuilderSubmit" type="submit" '+((type==='EP'?!!epProgramResolve(sel):!!phase)?'':'disabled')+'>＋ Create as draft</button></div></form></section>';
-    html+='<section class="card sideCard"><h3>Draft courses</h3><p class="sub">Each draft keeps a snapshot of the matched configuration.</p><div class="draftList">'+(created.length?created.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.name)+' · '+esc(x.code)+'</b><span class="pill amber">DRAFT</span></div><p>'+esc(x.summary||'')+'</p><div class="profileMeta"><span class="pill blue">'+(x.syllabusCount||0)+' syllabi</span><span class="pill violet">'+(x.criteriaCount||0)+' criteria</span><span class="pill gray">'+(x.emergencyCount||0)+' emergencies</span></div></div>').join(''):'<p style="color:#64748b;font-size:12px">No local draft courses yet.</p>')+'</div></section></div>';
+    html+='<section class="card sideCard"><h3>Draft courses</h3><p class="sub">Each draft keeps a snapshot of the matched configuration.</p><div class="draftList">'+(created.length?created.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.name)+' · '+esc(x.code)+'</b><span class="pill '+(currentCourseMeta.courseCode===x.code?'green':'amber')+'">'+(currentCourseMeta.courseCode===x.code?'ACTIVE':'DRAFT')+'</span></div><p>'+esc(x.summary||'')+'</p><div class="profileMeta"><span class="pill blue">'+(x.syllabusCount||0)+' syllabi</span><span class="pill violet">'+(x.criteriaCount||0)+' criteria</span><span class="pill gray">'+(x.emergencyCount||0)+' emergencies</span></div><div class="toolbar"><button class="btn sky small" data-open-course-draft="'+x.id+'">'+(currentCourseMeta.courseCode===x.code?'Open active course':'Open with training suit')+'</button><button class="btn danger small" data-delete-course-draft="'+x.id+'">Delete</button></div></div>').join(''):'<p style="color:#64748b;font-size:12px">No local draft courses yet.</p>')+'</div></section></div>';
   }
 
   if(tab==='catalog'){
@@ -1224,10 +1255,15 @@ function safetyScreen(){
  '<section class="card sideCard"><h3>Recent safety events</h3><div class="draftList">'+(local.length?local.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.title)+'</b><span class="pill '+(x.severity==='High'?'amber':x.severity==='Medium'?'blue':'green')+'">'+esc(x.severity)+'</span></div><p>'+esc(x.date)+' · '+esc(x.classification)+'</p></div>').join(''):'<p class="sub">No locally added safety events yet. Two historical mock events are included in analytics.</p>')+'</div></section></div>';
 }
 function examsScreen(){
- const local=getExamRecords(),draft=getActivityDraft('exams');
- return '<div class="eyebrow">THEORETICAL EXAMS</div><h1 class="pageTitle">Exams</h1><p class="sub">Record results and calculate pass / fail automatically.</p>'+
- '<div class="twoCol"><section class="card formCard"><div class="formTitle"><h2>Record exam</h2><span class="autoDraftNote" id="examDraftBadge">'+(draft?draftSavedLabel('exams'):'Auto-save ready')+'</span></div><form id="examForm"><div class="fields"><div class="field"><label>Date</label><input class="input" name="date" type="date" required value="'+new Date().toISOString().slice(0,10)+'"></div><div class="field"><label>Trainee</label><select name="trainee" required><option value="" selected disabled>Select trainee</option>'+allTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active').map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('')+'</select></div><div class="field"><label>Exam</label><select name="exam" required><option value="" selected disabled>Select exam</option><option>Systems</option><option>Emergency procedures</option><option>Flight operations</option></select></div><div class="field"><label>Passing grade</label><input class="input" name="pass" type="number" min="0" max="100" required value="80"></div><div class="field"><label>Grade</label><input class="input" name="grade" type="number" min="0" max="100" required></div></div><div id="examPreview" class="infoBox" style="margin:12px 0"><b>Enter a grade to preview the result.</b></div><div class="toolbar"><button class="btn sky" type="submit">Save exam result</button><button class="btn secondary discardDraft" type="button" id="discardExamDraft">Discard draft</button></div></form></section>'+
- '<section class="card sideCard"><h3>Recent recorded results</h3><div class="draftList">'+(local.length?local.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.traineeName)+' · '+esc(x.exam)+'</b><span class="pill '+(x.grade>=x.pass?'green':'amber')+'">'+x.grade+'%</span></div><p>'+esc(x.date)+' · Pass '+x.pass+'%</p></div>').join(''):'<p class="sub">No locally recorded exams yet.</p>')+'</div></section></div>';
+ const local=getExamRecords(),draft=getActivityDraft('exams'),p=epCurrentProgram(),epExams=epTheoryExamDefs();
+ const examDefs=epExams.length?epExams:[{name:'Systems',type:'Exam',pass:80},{name:'Emergency procedures',type:'Exam',pass:80},{name:'Flight operations',type:'Exam',pass:80}];
+ const currentExam=draft?.data?.exam||'',selectedDef=examDefs.find(x=>x.name===currentExam)||examDefs[0],defaultPass=selectedDef?.pass??80;
+ return '<div class="eyebrow">THEORETICAL EXAMS</div><h1 class="pageTitle">Exams</h1><p class="sub">The exam list and known pass thresholds follow the active training suit.</p>'+
+ activeSuitOverviewHtml()+
+ '<div class="twoCol" style="margin-top:14px"><section class="card formCard"><div class="formTitle"><h2>Record exam</h2><span class="autoDraftNote" id="examDraftBadge">'+(draft?draftSavedLabel('exams'):'Auto-save ready')+'</span></div><form id="examForm"><div class="fields"><div class="field"><label>Date</label><input class="input" name="date" type="date" required value="'+new Date().toISOString().slice(0,10)+'"></div><div class="field"><label>Trainee</label><select name="trainee" required><option value="" selected disabled>Select trainee</option>'+allTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active').map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('')+'</select></div><div class="field"><label>Exam</label><select name="exam" id="examTypeSelect" required><option value="" '+(currentExam?'':'selected')+' disabled>Select exam</option>'+examDefs.map(x=>'<option value="'+esc(x.name)+'" data-pass="'+(x.pass==null?'':x.pass)+'" '+(currentExam===x.name?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div><div class="field"><label>Passing grade</label><input class="input" id="examPassInput" name="pass" type="number" min="0" max="100" required value="'+defaultPass+'"></div><div class="field"><label>Grade</label><input class="input" name="grade" type="number" min="0" max="100" required></div></div>'+
+ (p?.theoryRequirement?'<div class="epSourceNote"><b>Source requirement:</b> '+esc(p.theoryRequirement)+'</div>':'')+
+ '<div id="examPreview" class="infoBox" style="margin:12px 0"><b>Enter a grade to preview the result.</b></div><div class="toolbar"><button class="btn sky" type="submit">Save exam result</button><button class="btn secondary discardDraft" type="button" id="discardExamDraft">Discard draft</button></div></form></section>'+
+ '<section class="card sideCard"><h3>Recent recorded results</h3><p class="sub">'+(p?esc(p.name)+' · '+examDefs.length+' exam definition'+(examDefs.length===1?'':'s'):'Generic exam catalog')+'</p><div class="draftList">'+(local.length?local.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.traineeName)+' · '+esc(x.exam)+'</b><span class="pill '+(x.grade>=x.pass?'green':'amber')+'">'+x.grade+'%</span></div><p>'+esc(x.date)+' · Pass '+x.pass+'%</p></div>').join(''):'<p class="sub">No locally recorded exams yet.</p>')+'</div></section></div>';
 }
 function reports(){
  let rows=allEvaluationsForAnalytics();
@@ -1237,8 +1273,8 @@ function reports(){
  const avg=mean(rows.map(x=>x.grade)),passRate=mockExamAttempts.length?mockExamAttempts.filter(x=>x.grade>=x.pass).length/mockExamAttempts.length*100:null;
  const emergencyDist=dist(rows.flatMap(x=>x.emergencies||[])),syllabusDist=dist(rows.map(x=>x.syllabus)),traineeDist=dist(rows.map(x=>trainees.find(t=>t.id===x.traineeId)?.name||x.traineeId)),safetyDist=dist(mockSafetyEvents.map(x=>x.severity));
  const monthly=dist(rows.map(x=>String(x.date||'').slice(0,7)));
- const syllOptions=[...new Set(allEvaluationsForAnalytics().map(x=>x.syllabus))].sort();
- return '<div class="eyebrow">Reports & analytics</div><h1 class="pageTitle">Course analytics</h1><p class="sub">Portal-inspired course-wide KPIs, distributions, filters and exportable summaries.</p>'+
+ const syllOptions=[...new Set([...(epCurrentProgram()?.syllabi||[]).map(x=>x.name),...allEvaluationsForAnalytics().map(x=>x.syllabus)])].filter(Boolean).sort();
+ return '<div class="eyebrow">Reports & analytics</div><h1 class="pageTitle">Course analytics</h1><p class="sub">Analytics are scoped to the active course and its resolved training suit.</p>'+activeSuitOverviewHtml()+
  '<section class="card settingBox"><div class="inlineHead"><h3>Filters</h3><div class="reportToolbar" style="margin:0"><button class="btn secondary small" id="reportsReset">Reset</button><button class="btn secondary small" id="reportsCsv">⇩ Export CSV</button><button class="btn sky small" id="reportsPrint">Print / PDF</button></div></div><div class="reportFilters" style="margin-top:10px"><div class="field"><label>Trainee</label><select id="reportTrainee"><option value="ALL">All trainees</option>'+trainees.map(t=>'<option value="'+t.id+'" '+(state.reportTrainee===t.id?'selected':'')+'>'+esc(t.name)+'</option>').join('')+'</select></div><div class="field"><label>Instructor</label><select id="reportInstructor"><option value="ALL">All instructors</option>'+instructors.map(i=>'<option value="'+i.id+'" '+(state.reportInstructor===i.id?'selected':'')+'>'+esc(i.name)+'</option>').join('')+'</select></div><div class="field"><label>Syllabus</label><select id="reportSyllabus"><option value="ALL">All syllabi</option>'+syllOptions.map(x=>'<option '+(state.reportSyllabus===x?'selected':'')+'>'+esc(x)+'</option>').join('')+'</select></div><div class="field"><label>Matched evaluations</label><input class="input" value="'+rows.length+'" readonly></div></div></section>'+
  '<section class="reportKpis"><div><strong>'+trainees.filter(t=>t.status==='Active').length+'</strong><span>Active trainees</span></div><div><strong>'+rows.length+'</strong><span>Evaluations</span></div><div><strong>'+(avg==null?'—':avg.toFixed(1))+'</strong><span>Average grade</span></div><div><strong>'+mockSafetyEvents.length+'</strong><span>Safety events</span></div><div><strong>'+(passRate==null?'—':passRate.toFixed(0)+'%')+'</strong><span>Exam pass rate</span></div></section>'+
  '<div class="reportsGrid"><section class="card settingBox"><h3>Emergency exposure</h3><p class="sub">Recorded emergency practice across matched evaluated flights.</p>'+reportBars(emergencyDist,10)+'</section><section class="card settingBox"><h3>Syllabus activity</h3><p class="sub">Evaluations by syllabus.</p>'+reportBars(syllabusDist,10)+'</section><section class="card settingBox"><h3>Evaluation activity by trainee</h3>'+reportBars(traineeDist,10)+'</section><section class="card settingBox"><h3>Safety severity</h3>'+reportBars(safetyDist,8)+'</section><section class="card settingBox"><h3>Monthly activity</h3>'+reportBars(monthly,12)+'</section><section class="card settingBox"><h3>Interpretation</h3><div class="infoBox"><b>Filters affect evaluation-based analytics</b><p>Safety and exam KPIs remain course-wide in this review. In the real app they can also be filtered by date, trainee, phase and configuration profile.</p></div></section></div>';
@@ -1415,7 +1451,7 @@ function bindSettings(){
   document.querySelectorAll('[data-open-course-draft]').forEach(btn=>btn.onclick=()=>{
     const d=getDraftCourses().find(x=>x.id===btn.dataset.openCourseDraft);if(!d?.selection)return;
     const cc=cfgGet(),sel=d.selection,ph=cfgItem(cc.phases,sel.phaseId),tk=cfgItem(cc.trainingKinds,sel.trainingKind),dn=cfgItem(cc.dayNight,sel.dayNight),co=cfgItem(cc.countries,sel.country);
-    Object.assign(currentCourseMeta,{type:sel.courseType,phase:ph?.name||sel.phaseId,platformId:sel.platformId||'',trainingKind:tk?.name||sel.trainingKind,dayNight:dn?.name||sel.dayNight,country:co?.name||sel.country,programId:d.programId||null,courseName:d.name||course.name,courseCode:d.code||''});
+    Object.assign(currentCourseMeta,{type:sel.courseType,phase:ph?.name||sel.phaseId,platformId:sel.platformId||'',trainingKind:tk?.name||sel.trainingKind,dayNight:dn?.name||sel.dayNight,country:co?.name||sel.country,programId:d.programId||null,courseName:d.name||course.name,courseCode:d.code||'',startsOn:d.startsOn||''});currentCourseId=d.code||d.id||'AEP-26';
     localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta));state.screen='home';toast((d.name||'Course')+' opened with its training suit');render();
   });
     if($('#typeWorkspace'))$('#typeWorkspace').onchange=e=>{state.typeWorkspace=e.target.value;state.phaseScope=e.target.value;render()};
