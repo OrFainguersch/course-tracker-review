@@ -35,4 +35,5 @@ vm.runInContext("Object.assign(currentCourseMeta,{type:'TECHNICIAN',phase:'Full 
 assert.match(elements.get("#content").innerHTML,/Practical experience/);
 assert.match(elements.get("#content").innerHTML,/Record practical task/);
 assert.match(elements.get("#content").innerHTML,/Engine Installation \/ Removal/);
+assert.match(elements.get("#content").innerHTML,/name="quantity" type="number" min="1" step="1"/);
 console.log(JSON.stringify({ok:true,home:true,settings:true,ipLibrary:true,technicianLibrary:true,overrides:true,rosterMembership:true,experienceUx:true,technicianExperience:true}));
