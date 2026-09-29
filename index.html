@@ -59,7 +59,7 @@ main{padding:18px 14px calc(88px + env(safe-area-inset-bottom));max-width:1480px
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topTitle"><b>Aerostar EP Course</b><span>AEP-26 · Active</span></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker Next</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0440 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topTitle"><b>Aerostar EP Course</b><span>AEP-26 · Active</span></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker Next</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0441 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const trainees=[
@@ -215,6 +215,7 @@ function roster(){
  (manage?'<div class="modal" id="personModal"><div class="modalCard"><div class="inlineHead"><div><h2>Add to course roster</h2><p>Adds a person to this review course.</p></div><button class="btn secondary small" id="closePersonModal">✕</button></div><form id="addPersonForm"><div class="fields"><div class="field"><label>Full name</label><input class="input" name="name" required></div><div class="field"><label>Email (optional)</label><input class="input" type="email" name="email"></div><div class="field"><label>Person type</label><select name="type"><option value="TRAINEE">Trainee</option><option value="INSTRUCTOR">Instructor</option></select></div></div><div class="toolbar"><button class="btn sky" type="submit">Add to course</button></div></form></div></div>':'')+
  personEditModal();
 }
+const currentCourseId='AEP-26';
 function getCourseMembershipState(){return safeObjectStorage('ct-review-course-memberships')}
 function saveCourseMembershipState(v){localStorage.setItem('ct-review-course-memberships',JSON.stringify(v))}
 function courseMembershipFor(personId,type,defaults={}){
