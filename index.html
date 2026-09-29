@@ -232,15 +232,20 @@ select option[value=""]{color:#8a9bad}
 :root{--brand-gold:#d6a343;--brand-gold-soft:#f7ecd2;--brand-white:#f8fbff}
 .topBrand{gap:9px}
 .topBrandLogo{display:none!important}
-.topBrandIcon{width:34px;height:34px;border-radius:10px;object-fit:cover;flex:0 0 auto;box-shadow:0 2px 7px rgba(0,0,0,.15)}
-.topBrandCopy b{display:block;color:#fff;font-size:15px;line-height:1.05;letter-spacing:.025em}
-.topBrandCopy span{display:block;color:#c9ddf2;font-size:10px;margin-top:3px;letter-spacing:.01em}
-.brand{display:flex!important;align-items:center;gap:10px;padding:8px 10px 18px!important}
-.brandLogoSide{display:none!important}
-.brandIconSide{width:42px;height:42px;border-radius:12px;object-fit:cover;flex:0 0 auto;box-shadow:0 3px 10px rgba(0,0,0,.16)}
-.brandCopy{min-width:0}
-.brandName{display:block;color:#fff;font-size:17px;font-weight:900;letter-spacing:.025em;line-height:1}
-.brandTagline{display:block!important;text-align:left!important;color:#9fc9ea!important;font-size:8.5px!important;letter-spacing:.14em!important;text-transform:uppercase;margin-top:5px!important;white-space:nowrap}
+.topBrandIcon{
+  width:34px;height:34px;border-radius:9px;object-fit:cover;flex:0 0 auto;
+  box-shadow:0 2px 7px rgba(0,0,0,.14),0 0 0 1px rgba(214,163,67,.13)
+}
+.topBrandCopy b{display:block;color:#fff;font-size:15px;line-height:1.05;font-weight:900}
+.topBrandCopy span{display:block;color:#c9ddf2;font-size:10px;margin-top:3px}
+.brand{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  padding:6px 8px 18px!important;min-height:72px
+}
+.sidebarFlympusWordmark{
+  display:block;width:194px;max-width:92%;height:auto;object-fit:contain;
+  filter:drop-shadow(0 2px 5px rgba(0,0,0,.10))
+}
 .navBtn.active{box-shadow:inset 3px 0 0 var(--brand-gold)}
 .navLabel{color:#a9d3ef}
 .drawerFooter{border-color:rgba(214,163,67,.22)}
@@ -248,12 +253,22 @@ select option[value=""]{color:#8a9bad}
 .mobileHero{background:linear-gradient(135deg,#082f57 0%,#0b3a68 100%)}
 .mobileHero:after{content:"";position:absolute;right:20px;top:18px;width:34px;height:2px;border-radius:99px;background:linear-gradient(90deg,transparent,var(--brand-gold));opacity:.9}
 .homeMiniStatus .pill{border:1px solid rgba(214,163,67,.16)}
-@media(max-width:390px){.topBrandIcon{width:31px;height:31px}.topBrandCopy b{font-size:14px}}
+@media(max-width:390px){
+  .topBrandIcon{width:31px;height:31px}
+  .topBrandCopy b{font-size:14px}
+  .sidebarFlympusWordmark{width:176px}
+}
+@media(min-width:760px){
+  .topBrandIcon{width:36px;height:36px}
+  .topBrandCopy b{color:#0b315b}
+  .topBrandCopy span{color:#71849a}
+  .sidebarFlympusWordmark{width:190px}
+}
 
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-app-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>FLYMPUS</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="brandIconSide" src="./assets/flympus-app-icon.webp" alt="FLYMPUS logo"><div class="brandCopy"><span class="brandName">FLYMPUS</span><span class="brandTagline">Train. Track. Progress.</span></div></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0519 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-wordmark.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0521 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentCourseId='AEP-26';
