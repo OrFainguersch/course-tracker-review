@@ -355,7 +355,7 @@ select option[value=""]{color:#8a9bad}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0525 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0526 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script src="./assets/ep-catalog.js"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
@@ -1067,8 +1067,9 @@ function cfgProfileEditor(p,c){
 function settings(){
   const c=cfgGet(),tab=state.settingsTab||'builder',created=getDraftCourses();
   const type=state.builderType||'',phases=type?c.phases.filter(x=>x.type===type):[],phase=state.builderPhase&&phases.some(x=>x.id===state.builderPhase)?state.builderPhase:'';
-  const training=state.builderTraining||'',time=state.builderDay||'',country=state.builderCountry||'';
-  const sel={courseType:type,phaseId:phase,trainingKind:training,dayNight:time,country};
+  const training=state.builderTraining||'',time=state.builderDay||'',country=state.builderCountry||'',platform=state.builderPlatform||'';
+  const epPlatforms=(type==='EP'&&window.epCatalogHelpers)?window.epCatalogHelpers.platformsForPhase(phase):[];
+  const sel={courseType:type,phaseId:phase,platformId:platform,trainingKind:training,dayNight:time,country};
   let html='<div class="eyebrow">Editable configuration database</div><h1 class="pageTitle">Course Settings</h1><p class="sub">Each course type owns its own phases, syllabi, criteria and emergencies. Shared dimensions stay global.</p>';
   html+='<div class="scrollTabs"><button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">＋ New course</button><button class="seg '+(tab==='ep_library'?'active':'')+'" data-settings-tab="ep_library">✈ EP Library</button><button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">▦ Course type setup</button><button class="seg '+(tab==='profiles'?'active':'')+'" data-settings-tab="profiles">⌘ Configuration profiles</button></div>';
 
@@ -1082,7 +1083,8 @@ function settings(){
     html+='<div class="field"><label>Course code</label><input class="input" name="code" required placeholder="CEP-27"></div>';
     html+='<div class="field"><label>Course type</label><select name="courseType" id="courseTypeSelect" required><option value="" '+(!type?'selected':'')+' disabled>Select course type</option>'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===type?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Phase</label><select name="phase" id="phaseSelect" required '+(!type?'disabled':'')+'><option value="" '+(!phase?'selected':'')+' disabled>Select phase</option>'+phases.map(x=>'<option value="'+x.id+'" '+(x.id===phase?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
-    html+='<div class="field"><label>Training type</label><select name="trainingKind" id="builderTraining" required><option value="" '+(!training?'selected':'')+' disabled>Select training type</option>'+c.trainingKinds.map(x=>'<option value="'+x.id+'" '+(x.id===training?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
+    html+='<div class="field"><label>Platform</label><select name="platformId" id="builderPlatform" required '+(!(type==='EP'&&phase)?'disabled':'')+'><option value="" '+(!platform?'selected':'')+' disabled>Select platform</option>'+epPlatforms.map(x=>'<option value="'+x.id+'" '+(x.id===platform?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
+    html+='<div class="field"><label>Training package</label><select name="trainingKind" id="builderTraining" required><option value="" '+(!training?'selected':'')+' disabled>Select training type</option>'+c.trainingKinds.map(x=>'<option value="'+x.id+'" '+(x.id===training?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Day / Night</label><select name="dayNight" id="builderDay" required><option value="" '+(!time?'selected':'')+' disabled>Select day / night</option>'+c.dayNight.map(x=>'<option value="'+x.id+'" '+(x.id===time?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Country</label><select name="country" id="builderCountry" required><option value="" '+(!country?'selected':'')+' disabled>Select country</option>'+c.countries.map(x=>'<option value="'+x.id+'" '+(x.id===country?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Start date</label><input class="input" name="startsOn" type="date" required></div></div>';
@@ -1286,21 +1288,30 @@ f.onsubmit=e=>{e.preventDefault();const fd=new FormData(f),list=getEvaluations()
 function bindSettings(){
   const c=cfgGet();
   const updateBuilder=()=>{
-    const type=$('#courseTypeSelect')?.value||'',phase=$('#phaseSelect')?.value||'',training=$('#builderTraining')?.value||'',time=$('#builderDay')?.value||'',country=$('#builderCountry')?.value||'';
-    state.builderType=type;state.builderPhase=phase;state.builderTraining=training;state.builderDay=time;state.builderCountry=country;
-    const acc=$('#builderAccumulation');if(acc)acc.innerHTML=builderAccumulationHtml(cfgItem(c.phases,phase));const box=$('#cfgResolvedPreview');if(box)box.innerHTML=cfgResolvedHtml({courseType:type,phaseId:phase,trainingKind:training,dayNight:time,country});
+    const type=$('#courseTypeSelect')?.value||'',phase=$('#phaseSelect')?.value||'',platform=$('#builderPlatform')?.value||'',training=$('#builderTraining')?.value||'',time=$('#builderDay')?.value||'',country=$('#builderCountry')?.value||'';
+    state.builderType=type;state.builderPhase=phase;state.builderPlatform=platform;state.builderTraining=training;state.builderDay=time;state.builderCountry=country;
+    const acc=$('#builderAccumulation');if(acc)acc.innerHTML=builderAccumulationHtml(cfgItem(c.phases,phase));const box=$('#cfgResolvedPreview');if(box)box.innerHTML=cfgResolvedHtml({courseType:type,phaseId:phase,platformId:platform,trainingKind:training,dayNight:time,country});
   };
   if($('#courseTypeSelect'))$('#courseTypeSelect').onchange=e=>{
-    const list=c.phases.filter(x=>x.type===e.target.value);state.builderType=e.target.value;state.builderPhase='';
-    $('#phaseSelect').disabled=false;$('#phaseSelect').innerHTML='<option value="" selected disabled>Select phase</option>'+list.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');updateBuilder();
+    const list=c.phases.filter(x=>x.type===e.target.value);state.builderType=e.target.value;state.builderPhase='';state.builderPlatform='';
+    $('#phaseSelect').disabled=false;$('#phaseSelect').innerHTML='<option value="" selected disabled>Select phase</option>'+list.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');
+    if($('#builderPlatform')){$('#builderPlatform').disabled=true;$('#builderPlatform').innerHTML='<option value="" selected disabled>Select phase first</option>'}
+    updateBuilder();
   };
-  ['phaseSelect','builderTraining','builderDay','builderCountry'].forEach(id=>{if($('#'+id))$('#'+id).onchange=updateBuilder});
+  if($('#phaseSelect'))$('#phaseSelect').onchange=e=>{
+    state.builderPhase=e.target.value;state.builderPlatform='';
+    const list=($('#courseTypeSelect')?.value==='EP'&&window.epCatalogHelpers)?window.epCatalogHelpers.platformsForPhase(e.target.value):[];
+    if($('#builderPlatform')){$('#builderPlatform').disabled=!list.length;$('#builderPlatform').innerHTML='<option value="" selected disabled>Select platform</option>'+list.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')}
+    updateBuilder();
+  };
+  ['builderPlatform','builderTraining','builderDay','builderCountry'].forEach(id=>{if($('#'+id))$('#'+id).onchange=updateBuilder});
 
   if($('#courseBuilder'))$('#courseBuilder').onsubmit=e=>{
-    e.preventDefault();const fd=new FormData(e.currentTarget),sel={courseType:String(fd.get('courseType')),phaseId:String(fd.get('phase')),trainingKind:String(fd.get('trainingKind')),dayNight:String(fd.get('dayNight')),country:String(fd.get('country'))};
-    const p=cfgResolve(sel),cc=cfgGet(),ct=cfgItem(cc.courseTypes,sel.courseType),ph=cfgItem(cc.phases,sel.phaseId),tk=cfgItem(cc.trainingKinds,sel.trainingKind),dn=cfgItem(cc.dayNight,sel.dayNight),co=cfgItem(cc.countries,sel.country),arr=getDraftCourses(),activityRequirements=enabledPhaseCounters(ph).map(x=>({type:x.type,label:x.label,required:fd.get('activityReq_'+x.type)===''?null:Number(fd.get('activityReq_'+x.type))}));
-    arr.unshift({id:cfgId('course'),name:String(fd.get('name')),code:String(fd.get('code')),summary:[ct?.name,ph?.name,tk?.name,dn?.name,co?.name].filter(Boolean).join(' · '),startsOn:String(fd.get('startsOn')||''),profileId:p?.id||null,syllabusCount:p?.syllabusIds.length||0,criteriaCount:p?.criteriaIds.length||0,emergencyCount:p?.emergencyIds.length||0,activityRequirements,activityRequirementCount:activityRequirements.length,snapshot:p?JSON.parse(JSON.stringify(p)):null});
-    localStorage.setItem('ct-review-courses',JSON.stringify(arr));toast(p?'Draft created with matched configuration':'Draft created — no matching profile');render();
+    e.preventDefault();const fd=new FormData(e.currentTarget),sel={courseType:String(fd.get('courseType')),phaseId:String(fd.get('phase')),platformId:String(fd.get('platformId')||''),trainingKind:String(fd.get('trainingKind')),dayNight:String(fd.get('dayNight')),country:String(fd.get('country'))};
+    const epProgram=sel.courseType==='EP'?epProgramResolve(sel):null,p=sel.courseType==='EP'?null:cfgResolve(sel),cc=cfgGet(),ct=cfgItem(cc.courseTypes,sel.courseType),ph=cfgItem(cc.phases,sel.phaseId),tk=cfgItem(cc.trainingKinds,sel.trainingKind),dn=cfgItem(cc.dayNight,sel.dayNight),co=cfgItem(cc.countries,sel.country),arr=getDraftCourses(),activityRequirements=enabledPhaseCounters(ph).map(x=>({type:x.type,label:x.label,required:fd.get('activityReq_'+x.type)===''?null:Number(fd.get('activityReq_'+x.type))}));
+    const emergencyCount=sel.courseType==='EP'?(window.epCatalogHelpers?.emergenciesForPlatform(sel.platformId)?.length||0):(p?.emergencyIds.length||0),syllabusCount=epProgram?.syllabi?.length||p?.syllabusIds.length||0,criteriaCount=sel.courseType==='EP'?(window.EP_CATALOG?.criteria?.length||0):(p?.criteriaIds.length||0);
+    arr.unshift({id:cfgId('course'),name:String(fd.get('name')),code:String(fd.get('code')),summary:[ct?.name,ph?.name,sel.platformId?epPlatformLabel(sel.platformId):'',tk?.name,dn?.name,co?.name].filter(Boolean).join(' · '),startsOn:String(fd.get('startsOn')||''),platformId:sel.platformId,programId:epProgram?.id||null,profileId:p?.id||null,syllabusCount,criteriaCount,emergencyCount,activityRequirements,activityRequirementCount:activityRequirements.length,snapshot:epProgram?JSON.parse(JSON.stringify(epProgram)):p?JSON.parse(JSON.stringify(p)):null});
+    localStorage.setItem('ct-review-courses',JSON.stringify(arr));toast(epProgram||p?'Draft created with matched training suit':'Draft created — no matching training suit');render();
   };
 
   if($('#typeWorkspace'))$('#typeWorkspace').onchange=e=>{state.typeWorkspace=e.target.value;state.phaseScope=e.target.value;render()};
