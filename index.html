@@ -538,6 +538,45 @@ function evaluationEmergencyDefs(){
 }
 
 
+
+const mockSoloBreakdown={
+ t1:[['Circuits',5],['Basic Emergencies B',3],['Complex Emergencies',3]],
+ t2:[['Circuits',4],['Basic Emergencies A',2]],
+ t3:[['Circuits',4],['Basic Emergencies A',3]],
+ t4:[['Circuits',3]],t5:[]
+};
+const mockNextFlightEmphases={
+ 't1|2026-09-27':['Maintain altitude while handling the emergency','Complete diagnosis before taking corrective action','Keep the emergency brief concise while continuing to fly'],
+ 't2|2026-09-24':['Improve circuit spacing','Use a more methodical emergency scan'],
+ 't3|2026-09-25':['Preserve flight path during diagnosis','Avoid rushing the emergency sequence'],
+ 't4|2026-09-28':['Stabilize the circuit before increasing workload']
+};
+function formatCourseDate(v){if(!v)return '—';const d=new Date(String(v)+'T12:00:00');return Number.isNaN(d.getTime())?String(v):d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}
+function normalizeEmphases(v){const arr=Array.isArray(v)?v:String(v||'').split(/\n+/);return arr.map(x=>String(x).replace(/^\s*\d+[\.)-]?\s*/,'').trim()).filter(Boolean)}
+function traineeEvaluationHistory(traineeId){
+ const people=allInstructors(),saved=getEvaluations().filter(x=>x.traineeId===traineeId).map(x=>({...x,date:x.flightDate,instructorName:x.instructorName||people.find(i=>i.id===x.instructorId)?.name||'Instructor',emphases:normalizeEmphases(x.emphases),source:'saved'}));
+ const mock=mockEvalHistory.filter(x=>x.traineeId===traineeId).map(x=>({...x,instructorName:people.find(i=>i.id===x.instructorId)?.name||'Instructor',emphases:mockNextFlightEmphases[traineeId+'|'+x.date]||[],source:'mock'}));
+ return [...mock,...saved].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+}
+function traineeSoloBreakdown(t){
+ const map=new Map((mockSoloBreakdown[t.id]||[]).map(x=>[x[0],Number(x[1])||0]));
+ getSoloFlights().filter(x=>x.traineeId===t.id).forEach(x=>map.set(x.syllabus,(map.get(x.syllabus)||0)+1));
+ return [...map.entries()].filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+}
+function criterionScoreForEvaluation(e,c,index){
+ if(e.scores&&Number(e.scores[c.id]))return Number(e.scores[c.id]);
+ const offsets=[-.05,-.4,.1,-.25,.15],base=Number(e.grade)||0;
+ return Math.max(1,Math.min(5,Math.round((base+(offsets[index]||0))*10)/10));
+}
+function traineeAssessmentFocus(traineeId,limit=5){
+ const rows=traineeEvaluationHistory(traineeId).slice(0,limit),benchmark=4;
+ return {sample:rows.length,benchmark,items:criteria.map((c,i)=>{const vals=rows.map(e=>criterionScoreForEvaluation(e,c,i)).filter(Number.isFinite),avg=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0,delta=avg-benchmark;return {id:c.id,name:c.name,avg,delta,status:delta>.15?'above':delta<-.15?'below':'at'}}).sort((a,b)=>a.avg-b.avg)};
+}
+function latestTraineeEmphases(traineeId){const row=traineeEvaluationHistory(traineeId).find(x=>normalizeEmphases(x.emphases).length);return row?{date:row.date,items:normalizeEmphases(row.emphases)}:{date:null,items:[]}}
+function emphasisEditorHtml(edit){
+ const items=normalizeEmphases(edit?.emphases);if(!items.length)items.push('');
+ return '<div class="emphasisEditor" id="emphasisEditor">'+items.map((x,i)=>'<div class="emphasisEditRow"><span class="emphasisNo">'+(i+1)+'</span><input class="input" name="emphasisItem" value="'+esc(x)+'" placeholder="Next-flight emphasis"><button type="button" class="emphasisRemove" data-remove-emphasis aria-label="Remove">×</button></div>').join('')+'</div><button type="button" class="btn secondary small" id="addEmphasis" style="margin-top:7px">+ Add emphasis</button>';
+}
 function getEmergencyPlans(){return safeObjectStorage('ct-review-emergency-plans')}
 function getTraineeEmergencyPlan(traineeId){const all=getEmergencyPlans(),p=all[traineeId];return p&&Array.isArray(p.emergencyIds)?p:{emergencyIds:[],updatedAt:null}}
 function saveTraineeEmergencyPlan(traineeId,ids){const all=getEmergencyPlans();all[traineeId]={emergencyIds:[...new Set(ids.filter(Boolean))],updatedAt:new Date().toISOString()};localStorage.setItem('ct-review-emergency-plans',JSON.stringify(all))}
