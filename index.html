@@ -184,7 +184,7 @@ main{padding:16px 14px calc(30px + env(safe-area-inset-bottom));max-width:1220px
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><span class="topBrandMark" aria-hidden="true"><svg viewBox="0 0 40 32" fill="none"><path d="M4 8h11l5 5 5-5h11" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 14h10l3 4 3-4h10" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20h6l2 7 2-7h6" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker Next</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0500 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><span class="topBrandMark" aria-hidden="true"><svg viewBox="0 0 40 32" fill="none"><path d="M4 8h11l5 5 5-5h11" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 14h10l3 4 3-4h10" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20h6l2 7 2-7h6" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker Next</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0501 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const trainees=[
@@ -270,16 +270,25 @@ function saveExamRecords(v){localStorage.setItem('ct-review-exams',JSON.stringif
 function currentActivityCounts(){return {evaluation:getEvaluations().length,safety:mockSafetyEvents.length+getSafetyRecords().length,exams:mockExamAttempts.length+getExamRecords().length,planned:getDailyReports().length,roster:trainees.length+instructors.length}}
 function home(){
  const counts=currentActivityCounts();
- return '<section class="hero"><span class="pill blue">TRAINING OVERVIEW</span><h1>Aerostar EP Course</h1><p>RC / Simulator / Live Flights · Israel · Sep–Oct 2026</p><div class="courseMeta"><span class="pill blue">EP</span><span class="pill violet">RC Model</span><span class="pill green">New Training</span><span class="pill amber">Day</span><span class="pill gray">Israel</span></div></section>'+
- '<section class="grid metrics">'+metric('Trainees','5','4 active · 1 inactive')+metric('Planned Flights','136','72 completed')+metric('Syllabus Progress','68%','Course on track')+metric('Average Grade','4.2 / 5','+0.3 over 2 weeks')+metric('Safety Events','2','0 currently open')+'</section>'+
- '<div class="sectionHead"><h2>Operational activities</h2><p>Counts stay on the activity they belong to, not in a separate global strip.</p></div>'+
- '<section class="grid actions">'+
- '<button class="card action" data-go="evaluation"><div class="actionIcon" style="background:#2563eb">✓</div><div><b>Evaluation</b><small>Record and review flight evaluations</small></div><span class="activityCount">'+counts.evaluation+'</span><span class="arr">›</span></button>'+
- '<button class="card action" data-go="safety"><div class="actionIcon" style="background:#059669">◈</div><div><b>Safety</b><small>Report and manage safety events</small></div><span class="activityCount">'+counts.safety+'</span><span class="arr">›</span></button>'+
- '<button class="card action" data-go="exams"><div class="actionIcon" style="background:#7c3aed">▤</div><div><b>Theoretical Exams</b><small>Manage exams and trainee results</small></div><span class="activityCount">'+counts.exams+'</span><span class="arr">›</span></button>'+
- '<button class="card action" data-go="planned"><div class="actionIcon" style="background:#f97316">▣</div><div><b>Planned vs Executed</b><small>Step-by-step daily report workflow</small></div><span class="activityCount">'+counts.planned+'</span><span class="arr">›</span></button>'+
- '<button class="card action" data-go="roster"><div class="actionIcon" style="background:#0891b2">♙</div><div><b>Course Roster</b><small>Trainees and instructors in one place</small></div><span class="activityCount">'+counts.roster+'</span><span class="arr">›</span></button>'+
- '<button class="card action" data-go="reports"><div class="actionIcon" style="background:#4f46e5">▥</div><div><b>Reports & Analytics</b><small>Course trends, distributions and export</small></div><span class="arr">›</span></button>'+
+ return '<section class="mobileHero">'+
+   '<div class="eyebrow" style="color:#8bc8ff">AEROSTAR EP COURSE</div>'+
+   '<div class="welcome">Welcome back, Or</div>'+
+   '<p>Train. Track. Develop.</p>'+
+   '<div class="heroMeta">Israel · Sep–Oct 2026</div>'+
+   '<div class="homeMiniStatus"><span class="pill">EP</span><span class="pill">RC Model</span><span class="pill">New Training</span><span class="pill">Day</span></div>'+
+ '</section>'+
+ '<div class="homeSectionTitle"><div><h2>Operational Activities</h2><p>Your daily training tools</p></div></div>'+
+ '<section class="mobileActivityGrid">'+
+   '<button class="mobileActivity" data-go="evaluation"><span class="activityCount">'+counts.evaluation+'</span><div class="tileIcon" style="background:#e0efff;color:#087cf0">✓</div><b>Evaluation</b><small>Log flights and complete evaluations</small><span class="tileArrow">›</span></button>'+
+   '<button class="mobileActivity" data-go="safety"><span class="activityCount">'+counts.safety+'</span><div class="tileIcon" style="background:#dcf7ee;color:#0aa66f">◈</div><b>Safety</b><small>Report safety events and manage cases</small><span class="tileArrow">›</span></button>'+
+   '<button class="mobileActivity" data-go="exams"><span class="activityCount">'+counts.exams+'</span><div class="tileIcon" style="background:#eee8ff;color:#7655e8">▤</div><b>Theoretical Exams</b><small>Manage exams and track results</small><span class="tileArrow">›</span></button>'+
+   '<button class="mobileActivity" data-go="planned"><span class="activityCount">'+counts.planned+'</span><div class="tileIcon" style="background:#fff0e1;color:#f1842f">▣</div><b>Planned vs Executed</b><small>Plan training and record actual flights</small><span class="tileArrow">›</span></button>'+
+ '</section>'+
+ '<div class="homeSectionTitle"><div><h2>Course</h2><p>People, progress and insights</p></div></div>'+
+ '<section class="courseQuickGrid">'+
+   '<button class="courseQuick" data-go="roster"><span class="quickIcon" style="background:#e6f3ff;color:#087cf0">♙</span>Course<br>Roster</button>'+
+   '<button class="courseQuick" data-go="reports"><span class="quickIcon" style="background:#eee9ff;color:#7655e8">▥</span>Reports</button>'+
+   '<button class="courseQuick" data-go="settings"><span class="quickIcon" style="background:#eef2f6;color:#536b82">⚙</span>Course<br>Settings</button>'+
  '</section>';
 }
 function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.find(x=>x.id===state.editingEval):null,allT=allTrainees(),activeT=allT.filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active'),tracking=currentCourseTrackingCounters(),tracks=type=>tracking.some(x=>x.type===type);return `<div class="eyebrow">Evaluation workflow</div><h1 class="pageTitle">Evaluation</h1><p class="sub">Phase 2 mirror: weighted criteria, drafts, verified-save concept, revision history and exports are simulated locally.</p>
@@ -321,26 +330,37 @@ function roster(){
      const aa=Number(a.average??-999),ab=Number(b.average??-999);if(aa!==ab)return ab-aa;
    }else{
      const ma=a.role==='COURSE_MANAGER',mb=b.role==='COURSE_MANAGER';if(ma!==mb)return ma?-1:1;
-     if(Number(a.flights||0)!==Number(b.flights||0))return Number(b.flights||0)-Number(a.flights||0);
+     if(Number(a.workloadRank||999)!==Number(b.workloadRank||999))return Number(a.workloadRank||999)-Number(b.workloadRank||999);
    }
    return String(a.name).localeCompare(String(b.name),undefined,{sensitivity:'base'});
  });
- return '<div class="eyebrow">Course roster</div><div class="inlineHead"><div><h1 class="pageTitle" style="margin-bottom:4px">Course Roster</h1><p class="sub" style="margin:0">View mode is safe by default. Enter Manage roster before changing identities, status or course roles.</p></div><div class="pageActions"><button class="btn '+(manage?'secondary':'edit')+'" id="toggleRosterManage">'+(manage?'Done':'✎ Manage roster')+'</button></div></div>'+
- (manage?'<div class="manageBanner"><div><b>Manage mode</b><span> · Choose a person and tap Edit to change name, photo and course membership.</span></div><button class="btn sky small" id="addPersonBtn">+ Add person</button></div>':'')+
- '<div class="card" style="padding:12px"><div class="scrollTabs"><button class="seg '+(type==='TRAINEE'?'active':'')+'" data-roster-type="TRAINEE">Trainees ('+allT.length+')</button><button class="seg '+(type==='INSTRUCTOR'?'active':'')+'" data-roster-type="INSTRUCTOR">Instructors ('+allI.length+')</button></div>'+
- '<div class="search"><input class="input" id="rosterSearch" placeholder="Search name or email" value="'+esc(state.search)+'">'+(type==='TRAINEE'?'<select id="statusFilter" style="width:145px"><option value="All" '+(state.filter==='All'?'selected':'')+'>All statuses</option><option value="Active" '+(state.filter==='Active'?'selected':'')+'>Active</option><option value="Inactive" '+(state.filter==='Inactive'?'selected':'')+'>Inactive</option></select>':'')+'</div></div>'+
+ return '<div class="rosterTopbar"><div><div class="eyebrow">PEOPLE</div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div><button class="btn '+(manage?'secondary':'edit')+'" id="toggleRosterManage">'+(manage?'Done':'✎ Manage')+'</button></div>'+
+ (manage?'<div class="manageBanner"><div><b>Manage mode</b><span> · Edit identity, photo and course membership safely.</span></div><button class="btn sky small" id="addPersonBtn">+ Add person</button></div>':'')+
+ '<section class="card rosterControls"><div class="scrollTabs"><button class="seg '+(type==='TRAINEE'?'active':'')+'" data-roster-type="TRAINEE">Trainees ('+allT.length+')</button><button class="seg '+(type==='INSTRUCTOR'?'active':'')+'" data-roster-type="INSTRUCTOR">Instructors ('+allI.length+')</button></div>'+
+ '<div class="rosterSearchRow"><input class="input" id="rosterSearch" placeholder="Search '+(type==='TRAINEE'?'trainees':'instructors')+'..." value="'+esc(state.search)+'"><span class="rankBadge">⌕</span></div>'+
+ (type==='TRAINEE'?'<div class="rosterFilterRow"><div class="statusSegments"><button class="'+(state.filter==='All'?'active':'')+'" data-filter="All">All</button><button class="'+(state.filter==='Active'?'active':'')+'" data-filter="Active">Active</button><button class="'+(state.filter==='Inactive'?'active':'')+'" data-filter="Inactive">Inactive</button></div><span class="sortHint">Active first</span></div>':'<div class="rosterFilterRow"><span class="sortHint">Course Manager first · then workload</span></div>')+
+ '</section>'+
  '<section class="people">'+(list.length?list.map(t=>{
    if(type==='TRAINEE'){
-     const active=t.status==='Active';
-     return '<article class="card personCard '+(manage?'manageCard':'')+'">'+personAvatar(t,false)+'<div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b><span class="pill '+(active?'green':'gray')+'">'+esc(t.status)+'</span></div><small>'+(active?'Current: '+esc(t.currentSyllabus||'—'):'Inactive in this course')+'</small><div class="statrow"><span>'+(t.rank?'Rank #'+t.rank:'Unranked')+'</span><span>Avg '+(t.average??'—')+'</span><span>'+Number(t.totalFlights||0)+' flights</span></div></div><div class="rosterActions">'+(manage?'<button class="btn edit small" data-person-edit="TRAINEE:'+t.id+'">✎ Edit</button>':'<button class="btn secondary small" data-trainee="'+t.id+'">View</button>')+'</div></article>';
+     const active=t.status==='Active',avg=t.average==null?'—':Number(t.average).toFixed(1),progress=Math.max(0,Math.min(100,Number(t.progress||0)));
+     return '<article class="card personCard '+(manage?'manageCard':'')+'">'+
+       personAvatar(t,false)+
+       '<div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b><span class="pill '+(active?'green':'amber')+'">'+esc(t.status)+'</span>'+(t.rank?'<span class="rankBadge">#'+t.rank+'</span>':'')+'</div>'+
+       '<div class="rosterStats"><div><span class="rosterStatLabel">Average Grade</span><span class="rosterStatValue">'+avg+'</span></div><div><span class="rosterStatLabel">Progress · '+progress+'%</span><div class="miniProgress"><i style="width:'+progress+'%"></i></div></div></div></div>'+
+       '<div class="rosterActions">'+(manage?'<button class="btn edit small rosterEditBtn" data-person-edit="TRAINEE:'+t.id+'">✎ Edit</button>':'<button class="rosterChevron" data-trainee="'+t.id+'" aria-label="Open '+esc(t.name)+'">›</button>')+'</div>'+
+     '</article>';
    }
    const manager=t.role==='COURSE_MANAGER';
-   return '<article class="card personCard '+(manager?'manager ':'')+(manage?'manageCard':'')+'">'+personAvatar(t,false)+'<div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b></div><span class="instructorRole '+(manager?'manager':'')+'">'+(manager?'Course Manager':'Instructor')+'</span><div class="statrow"><span>Workload #'+(t.workloadRank||'—')+'</span><span>'+Number(t.flights||0)+' flights</span><span>'+Number(t.trainees||0)+' trainees</span></div><small>Last activity: '+esc(t.lastActivity||'—')+'</small></div><div class="rosterActions">'+(manage?'<button class="btn edit small" data-person-edit="INSTRUCTOR:'+t.id+'">✎ Edit</button>':'<button class="btn secondary small" data-instructor="'+t.id+'">View</button>')+'</div></article>';
+   return '<article class="card personCard '+(manager?'manager ':'')+(manage?'manageCard':'')+'">'+
+     personAvatar(t,false)+
+     '<div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b><span class="instructorRole '+(manager?'manager':'')+'">'+(manager?'Course Manager':'Instructor')+'</span></div>'+
+     '<div class="rosterStats"><div><span class="rosterStatLabel">Instructed Flights</span><span class="rosterStatValue">'+Number(t.flights||0)+'</span></div><div><span class="rosterStatLabel">Course Share</span><span class="rosterStatValue">'+Number(t.percent||0)+'%</span></div></div></div>'+
+     '<div class="rosterActions">'+(manage?'<button class="btn edit small rosterEditBtn" data-person-edit="INSTRUCTOR:'+t.id+'">✎ Edit</button>':'<button class="rosterChevron" data-instructor="'+t.id+'" aria-label="Open '+esc(t.name)+'">›</button>')+'</div>'+
+   '</article>';
  }).join(''):'<div class="card empty"><h3>No matching people.</h3></div>')+'</section>'+
- (manage?'<div class="modal" id="personModal"><div class="modalCard"><div class="inlineHead"><div><h2>Add to course roster</h2><p>Adds a person to this review course.</p></div><button class="btn secondary small" id="closePersonModal">✕</button></div><form id="addPersonForm"><div class="fields"><div class="field"><label>Full name</label><input class="input" name="name" required></div><div class="field"><label>Email (optional)</label><input class="input" type="email" name="email"></div><div class="field"><label>Person type</label><select name="type"><option value="TRAINEE">Trainee</option><option value="INSTRUCTOR">Instructor</option></select></div></div><div class="toolbar"><button class="btn sky" type="submit">Add to course</button></div></form></div></div>':'')+
+ (manage?'<div class="modal" id="personModal"><div class="modalCard"><div class="inlineHead"><div><h2>Add to course roster</h2><p>Adds a person to this course.</p></div><button class="btn secondary small" id="closePersonModal">✕</button></div><form id="addPersonForm"><div class="fields"><div class="field"><label>Full name</label><input class="input" name="name" required></div><div class="field"><label>Email (optional)</label><input class="input" type="email" name="email"></div><div class="field"><label>Person type</label><select name="type"><option value="TRAINEE">Trainee</option><option value="INSTRUCTOR">Instructor</option></select></div></div><div class="toolbar"><button class="btn sky" type="submit">Add to course</button></div></form></div></div>':'')+
  personEditModal();
 }
-const currentCourseId='AEP-26';
 function getCourseMembershipState(){return safeObjectStorage('ct-review-course-memberships')}
 function saveCourseMembershipState(v){localStorage.setItem('ct-review-course-memberships',JSON.stringify(v))}
 function courseMembershipFor(personId,type,defaults={}){
