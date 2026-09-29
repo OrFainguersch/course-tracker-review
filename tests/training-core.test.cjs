@@ -26,6 +26,30 @@ assert(epMixed.composedFrom?.length===2,"EP Day + Night must compose parallel tr
 assert(epMixed.syllabi.some(x=>x.track==="day")&&epMixed.syllabi.some(x=>x.track==="night"));
 assert(core.requiredEmergencies(epMixed).length>0&&core.requiredEmergencies(epMixed).length<core.emergencyCatalog("aerostar").length,"Suit requirements must be a subset of platform QRH catalog");
 
+const epRcGuide=core.guidedOptions({courseType:"EP",phaseId:"ep_rc"});
+assert.equal(epRcGuide.showPhase,true);assert.equal(epRcGuide.showPlatform,false);assert.equal(epRcGuide.showTrainingKind,false);
+const epRcAuto=core.resolveGuided({courseType:"EP",phaseId:"ep_rc"});
+assert.equal(epRcAuto.id,"ep_rc_new");assert.equal(epRcAuto.platformId,"rc_model");assert.equal(epRcAuto.trainingKind,"new");
+
+const epScreening=core.resolveGuided({courseType:"EP",phaseId:"ep_screening"});
+assert(epScreening.composedFrom?.length===2,"EP screening must resolve simulator + live RC as one phase package");
+assert.deepEqual([...epScreening.platformIds].sort(),["rc_model","rc_simulator"]);
+assert(epScreening.syllabi.some(x=>x.id==="screen_sim_basics")&&epScreening.syllabi.some(x=>x.id==="screen_rc_flights"));
+
+const epFullGuide=core.guidedOptions({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new"});
+assert.equal(epFullGuide.showPlatform,true);assert.equal(epFullGuide.showTrainingKind,true);assert.equal(epFullGuide.showTracks,true);
+assert(epFullGuide.dayNights.includes("mixed"),"EP Full Scale must allow Day + Night in the same course");
+
+const ipGuide=core.guidedOptions({courseType:"IP"});
+assert.equal(ipGuide.showPhase,false);assert.equal(ipGuide.showPlatform,true);assert.equal(ipGuide.showTrainingKind,true);assert.equal(ipGuide.showTracks,false);
+const ipAuto=core.resolveGuided({courseType:"IP",platformId:"aerostar",trainingKind:"new"});
+assert.equal(ipAuto.id,"ip_full_new_gcs_d");assert.equal(ipAuto.phaseId,"ip_full");assert.equal(ipAuto.platformId,"aerostar");
+
+const techGuide=core.guidedOptions({courseType:"TECHNICIAN"});
+assert.equal(techGuide.showPhase,false);assert.equal(techGuide.showPlatform,true);assert.equal(techGuide.showTrainingKind,false);assert.equal(techGuide.showTracks,false);
+const techAuto=core.resolveGuided({courseType:"TECHNICIAN",platformId:"aerostar"});
+assert.equal(techAuto.id,"tech_full_new");assert.equal(techAuto.phaseId,"tech_full");assert.equal(techAuto.trainingKind,"new");
+
 const ipC=core.resolve({courseType:"IP",phaseId:"ip_full",platformId:"aerostar",trainingKind:"new",programId:"ip_full_new_gcs_c",dayNight:"mixed"});
 const ipD=core.resolve({courseType:"IP",phaseId:"ip_full",platformId:"aerostar",trainingKind:"new",programId:"ip_full_new_gcs_d",dayNight:"mixed"});
 assert.equal(ipC.configurationId,"gcs_c");assert.equal(ipD.configurationId,"gcs_d");
