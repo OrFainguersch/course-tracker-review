@@ -243,7 +243,7 @@ select option[value=""]{color:#8a9bad}
   padding:6px 8px 18px!important;min-height:72px
 }
 .sidebarFlympusWordmark{
-  display:block;width:198px;max-width:94%;height:auto;overflow:visible;
+  display:block;width:198px;max-width:94%;height:auto;object-fit:contain;
   filter:drop-shadow(0 2px 5px rgba(0,0,0,.08))
 }
 .navBtn.active{box-shadow:inset 3px 0 0 var(--brand-gold)}
@@ -268,39 +268,7 @@ select option[value=""]{color:#8a9bad}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">
-<svg class="sidebarFlympusWordmark" viewBox="0 0 920 245" role="img" aria-label="FLYMPUS — Train. Track. Progress.">
-  <defs>
-    <linearGradient id="flIce" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff"/>
-      <stop offset=".5" stop-color="#fbfdff"/>
-      <stop offset=".82" stop-color="#d9f2ff"/>
-      <stop offset="1" stop-color="#8edcff"/>
-    </linearGradient>
-    <linearGradient id="flGold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fff6cc"/>
-      <stop offset=".5" stop-color="#ffd36a"/>
-      <stop offset="1" stop-color="#e6a323"/>
-    </linearGradient>
-    <filter id="flGlow" x="-20%" y="-30%" width="140%" height="160%">
-      <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#159cff" flood-opacity=".38"/>
-    </filter>
-  </defs>
-  <g filter="url(#flGlow)">
-    <path d="M25 58 C72 18 146 18 222 30 C243 33 257 28 272 17 C260 44 241 57 212 58 L25 58 Z" fill="url(#flIce)"/>
-    <path d="M26 94 C72 70 128 71 192 79 C214 82 232 78 247 66 C238 90 219 101 190 101 L82 101 L82 148 C82 163 69 175 51 181 L28 181 L28 104 C28 100 27 97 26 94 Z" fill="url(#flIce)"/>
-    <path d="M170 31 C214 34 245 29 272 17 C261 39 244 52 220 57 C204 53 187 46 170 31 Z" fill="url(#flGold)"/>
-    <path d="M165 80 C201 84 229 78 247 66 C239 84 223 95 199 100 C188 96 177 90 165 80 Z" fill="url(#flGold)" opacity=".55"/>
-    <text x="258" y="146" fill="url(#flIce)" font-family="Arial Black, Segoe UI, Arial, sans-serif" font-size="112" font-weight="900" letter-spacing="2">LYMPUS</text>
-    <path d="M376 59 L392 76 L408 59 L392 86 Z" fill="url(#flGold)"/>
-    <path d="M874 54 C890 51 903 45 912 37 C906 52 895 61 879 65 Z" fill="url(#flGold)"/>
-  </g>
-  <text x="460" y="222" text-anchor="middle" fill="#ffffff" opacity=".94"
-        font-family="Segoe UI, Arial, sans-serif" font-size="36" font-weight="600" letter-spacing="12">
-    TRAIN. TRACK. PROGRESS.
-  </text>
-</svg>
-</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0522 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0523 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentCourseId='AEP-26';
