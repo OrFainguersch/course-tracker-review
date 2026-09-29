@@ -34,6 +34,13 @@ main{padding:18px 14px calc(88px + env(safe-area-inset-bottom));max-width:1480px
 .draftList{display:grid;gap:9px}.draftCourse{padding:13px;border:1px solid var(--line);border-radius:14px}.draftCourse b{color:#0a315c}.draftCourse p{margin:4px 0 0;color:#64748b;font-size:12px}
 .gradeMode{display:grid;grid-template-columns:1fr 1fr;gap:8px}.gradeMode label{border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;gap:7px;align-items:center;font-size:12px;font-weight:700}
 @media(min-width:900px){.twoCol{grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr)}.catalogGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.modal{align-items:center}.modalCard{border-radius:24px}}
+
+.activityCount{margin-left:auto;min-width:30px;height:30px;padding:0 8px;border-radius:999px;display:grid;place-items:center;background:#eef6ff;color:#155fc5;font-size:11px;font-weight:900;border:1px solid #cfe1f5}
+.instructorRole{display:inline-flex;width:max-content;padding:4px 8px;border-radius:999px;background:#eef3f8;color:#536b82;font-size:10px;font-weight:850;margin-top:3px}.instructorRole.manager{background:#fff4cf;color:#7a5500}.personCard.manager{border-color:#e5c65a;box-shadow:0 0 0 1px #f6e9ad inset}
+.reportToolbar{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin:12px 0}.reportKpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}.reportKpis>div{display:grid;gap:3px;padding:14px;border:1px solid #d7e3f1;border-radius:13px;background:#fff}.reportKpis strong{font-size:23px;color:#145fc4}.reportKpis span{font-size:10px;color:#61758b}.reportsGrid{display:grid;grid-template-columns:1fr;gap:12px}.reportBars{display:grid;gap:8px;margin-top:12px}.reportBarRow{display:grid;grid-template-columns:minmax(92px,1fr) minmax(90px,2fr) 38px;gap:8px;align-items:center;font-size:11px}.reportBarRow i{height:9px;border-radius:999px;background:#e7edf5;overflow:hidden}.reportBarRow i b{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#1768d5,#5aa2ee)}.reportBarRow strong{text-align:right;color:#174d84}.reportFilters{display:grid;grid-template-columns:1fr 1fr;gap:8px}.reportFilters .field{margin:0}
+.requirementsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.requirementCard{padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff}.requirementCard strong{display:block;color:#0a315c;font-size:19px}.requirementCard span{display:block;color:#64748b;font-size:11px;margin-top:2px}.requirementCard.complete{border-color:#a7e3c4;background:#f0fdf7}.requirementCard.warn{border-color:#f4cf8b;background:#fffaf0}
+.workflowSteps{display:grid;gap:10px}.workflowStep{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden}.workflowStepHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;background:#f6f9fe}.workflowStepHead b{color:#174f90}.workflowStepBody{padding:14px}.stepStatus{padding:5px 8px;border-radius:999px;font-size:10px;font-weight:850;background:#eef2f7;color:#64748b}.stepStatus.current{background:#dbeafe;color:#1d4ed8}.stepStatus.complete{background:#dcfce7;color:#047857}.executionStrip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.executionItem{padding:11px;border:1px solid var(--line);border-radius:13px;background:#fff;text-align:center}.executionItem strong{display:block;font-size:20px;color:#0a315c}.executionItem span{font-size:10px;color:#64748b}.peopleLink{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border:0;border-bottom:1px solid #edf2f7;background:transparent;text-align:left}.peopleLink:last-child{border-bottom:0}.peopleLink b{color:#0a315c}.peopleLink small{display:block;color:#64748b;margin-top:2px}.peopleLink strong{color:#2563eb}
+@media(min-width:760px){.reportKpis{grid-template-columns:repeat(5,minmax(0,1fr))}.reportsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.reportFilters{grid-template-columns:repeat(4,minmax(0,1fr))}.requirementsGrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -46,7 +53,10 @@ const trainees=[
 {id:'t3',name:'Dana Levi',initials:'DL',status:'Active',progress:76,totalFlights:25,instructedFlights:18,soloFlights:7,average:4.2,rank:2,currentSyllabus:'Basic Emergencies B',nextSyllabus:'Complex Emergencies',startDate:'Sep 6'},
 {id:'t4',name:'Amit Barak',initials:'AB',status:'Active',progress:61,totalFlights:20,instructedFlights:17,soloFlights:3,average:3.9,rank:4,currentSyllabus:'Advanced Circuits',nextSyllabus:'Basic Emergencies A',startDate:'Sep 9'},
 {id:'t5',name:'Lior Dayan',initials:'LD',status:'Inactive',progress:38,totalFlights:13,instructedFlights:13,soloFlights:0,average:null,rank:null,currentSyllabus:'Circuits',nextSyllabus:null,startDate:'Sep 10'}];
-const instructors=[{id:'i1',name:'Or Fainguersch'},{id:'i2',name:'Nir Schneider'}];
+const instructors=[
+{id:'i1',name:'Or Fainguersch',role:'COURSE_MANAGER',flights:31,trainees:4,percent:43,lastActivity:'Sep 28',workloadRank:1,traineeDistribution:[['Yoav Shauli',12],['Dana Levi',8],['Noam Cohen',7],['Amit Barak',4]],syllabusDistribution:[['Complex Emergencies',8],['Circuits',7],['Basic Emergencies B',6],['Figure 8',5],['Pre-Test Preparation',5]],activitySeries:[3,5,4,6,7,6]},
+{id:'i2',name:'Nir Schneider',role:'INSTRUCTOR',flights:24,trainees:4,percent:33,lastActivity:'Sep 27',workloadRank:2,traineeDistribution:[['Dana Levi',9],['Yoav Shauli',7],['Noam Cohen',5],['Amit Barak',3]],syllabusDistribution:[['Circuits',7],['Basic Emergencies A',6],['Figure 8',5],['Complex Emergencies',4],['Basic Handling',2]],activitySeries:[2,4,5,4,5,4]}
+];
 const syllabi=['Basic Handling','Figure 8','Circuits','Touch & Go','Basic Emergencies A','Basic Emergencies B','Complex Emergencies','Complex Engine Emergencies','Pre-Test Preparation','Solo Certification Check'];
 const criteria=[{id:'c1',name:'Flight path control',weight:.25},{id:'c2',name:'Work method',weight:.2},{id:'c3',name:'Airmanship',weight:.2},{id:'c4',name:'Emergency handling',weight:.2},{id:'c5',name:'Brief / debrief quality',weight:.15}];
 const emergencies=['Engine cut','GEN malfunction','BAT malfunction','NO RPT','Stuck flaps','Flat tire / no fuel','Low clouds','Flight-box / IAS malfunction'];
@@ -61,15 +71,48 @@ const dayNight=['Day','Night'];
 const countries=['Israel','Cyprus'];
 const currentCourseMeta={type:'EP',phase:'RC Model',trainingKind:'New Training',dayNight:'Day',country:'Israel'};
 const syllProgress=[['Basic Handling',100,'Complete'],['Figure 8',100,'Complete'],['Circuits',100,'Complete'],['Emergencies',80,'Current'],['Final Preparation',0,'Next']];
-const state={screen:'home',selectedTrainee:'t1',search:'',filter:'All',editingEval:null};
+let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
+const state={screen:'home',selectedTrainee:'t1',selectedInstructor:'i1',search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',...initialUiState};
+function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace}))}catch{}}
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function toast(t){const x=$('#toast');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),1700)}
 function getEvaluations(){try{return JSON.parse(localStorage.getItem('ct-review-evals')||'[]')}catch{return []}}function setEvaluations(x){try{localStorage.setItem('ct-review-evals',JSON.stringify(x))}catch{}}
 const nav=[['home','⌂','Home'],['evaluation','✓','Evaluation'],['safety','◈','Safety'],['exams','▤','Exams'],['planned','▣','Planned vs Executed'],['__label','','COURSE'],['roster','♙','Course Roster'],['reports','▥','Reports'],['settings','⚙','Course Settings']];
 function renderNav(){const n=$('#nav');n.innerHTML=nav.map(([id,ic,l])=>id==='__label'?'<div class="navLabel">'+l+'</div>':`<button class="navBtn ${state.screen===id?'active':''}" data-nav="${id}"><span>${ic}</span><span>${l}</span></button>`).join('');n.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>go(b.dataset.nav));}
-function go(screen,extra={}){Object.assign(state,extra,{screen});$('#drawer').classList.remove('open');render()}
+function go(screen,extra={}){Object.assign(state,extra,{screen});saveUiState();$('#drawer').classList.remove('open');render()}
 $('#menuBtn').onclick=()=>$('#drawer').classList.add('open');$('#backdrop').onclick=()=>$('#drawer').classList.remove('open');
 function metric(label,value,detail){return `<div class="card metric"><div class="label">${label}</div><div class="value">${value}</div><div class="detail">${detail||''}</div></div>`}
+
+const mockEvalHistory=[
+{date:'2026-09-12',traineeId:'t4',instructorId:'i2',syllabus:'Basic Handling',grade:3.7,emergencies:[]},
+{date:'2026-09-14',traineeId:'t3',instructorId:'i1',syllabus:'Figure 8',grade:4.0,emergencies:[]},
+{date:'2026-09-16',traineeId:'t2',instructorId:'i2',syllabus:'Circuits',grade:3.9,emergencies:['Engine cut']},
+{date:'2026-09-18',traineeId:'t1',instructorId:'i1',syllabus:'Circuits',grade:4.1,emergencies:['Engine cut','GEN malfunction']},
+{date:'2026-09-20',traineeId:'t3',instructorId:'i2',syllabus:'Basic Emergencies A',grade:4.1,emergencies:['Engine cut','BAT malfunction']},
+{date:'2026-09-22',traineeId:'t1',instructorId:'i1',syllabus:'Basic Emergencies B',grade:4.3,emergencies:['NO RPT','Engine cut']},
+{date:'2026-09-24',traineeId:'t2',instructorId:'i1',syllabus:'Basic Emergencies B',grade:4.2,emergencies:['Stuck flaps']},
+{date:'2026-09-25',traineeId:'t3',instructorId:'i2',syllabus:'Complex Emergencies',grade:4.4,emergencies:['NO RPT','Low clouds']},
+{date:'2026-09-27',traineeId:'t1',instructorId:'i2',syllabus:'Complex Emergencies',grade:4.6,emergencies:['GEN malfunction','Flight-box / IAS malfunction']},
+{date:'2026-09-28',traineeId:'t4',instructorId:'i1',syllabus:'Circuits',grade:4.0,emergencies:['Engine cut']}
+];
+const mockSafetyEvents=[{date:'2026-09-11',severity:'Low'},{date:'2026-09-21',severity:'Medium'}];
+const mockExamAttempts=[{traineeId:'t1',grade:92,pass:80},{traineeId:'t2',grade:78,pass:80},{traineeId:'t3',grade:88,pass:80},{traineeId:'t4',grade:84,pass:80}];
+const requirementProgress={
+t1:[['Required instructed flights',18,18,'count'],['Solo flights',11,10,'count'],['Emergency types practiced',6,8,'count'],['Required syllabus gates',7,8,'count']],
+t2:[['Required instructed flights',18,20,'count'],['Solo flights',6,10,'count'],['Emergency types practiced',4,8,'count'],['Required syllabus gates',5,8,'count']],
+t3:[['Required instructed flights',18,20,'count'],['Solo flights',7,10,'count'],['Emergency types practiced',5,8,'count'],['Required syllabus gates',5,8,'count']],
+t4:[['Required instructed flights',17,22,'count'],['Solo flights',3,10,'count'],['Emergency types practiced',3,8,'count'],['Required syllabus gates',4,8,'count']]
+};
+function getDailyReports(){try{return JSON.parse(localStorage.getItem('ct-review-daily-reports')||'[]')}catch{return []}}
+function saveDailyReports(v){localStorage.setItem('ct-review-daily-reports',JSON.stringify(v))}
+function allEvaluationsForAnalytics(){
+ const saved=getEvaluations().map(e=>({date:e.flightDate,traineeId:e.traineeId,instructorId:e.instructorId,syllabus:e.syllabus,grade:Number(e.grade)||0,emergencies:(e.emergencies||[]).flatMap((n,i)=>Array.from({length:Number(n)||0},()=>emergencies[i])).filter(Boolean)}));
+ return [...mockEvalHistory,...saved];
+}
+function reportBars(items,maxItems=10){const list=(items||[]).slice(0,maxItems),max=Math.max(1,...list.map(x=>x.count||0));return list.length?'<div class="reportBars">'+list.map(x=>'<div class="reportBarRow"><span>'+esc(x.name)+'</span><i><b style="width:'+Math.max(3,(x.count||0)/max*100)+'%"></b></i><strong>'+esc(x.count)+'</strong></div>').join('')+'</div>':'<p class="sub">No matching data.</p>'}
+function dist(values){const m={};values.filter(Boolean).forEach(v=>m[v]=(m[v]||0)+1);return Object.keys(m).map(name=>({name,count:m[name]})).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name))}
+function mean(values){const v=values.filter(x=>Number.isFinite(Number(x))).map(Number);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null}
+function currentActivityCounts(){return {evaluation:getEvaluations().length,safety:mockSafetyEvents.length,exams:mockExamAttempts.length,planned:getDailyReports().length,roster:trainees.length+instructors.length}}
 function home(){return `<section class="hero"><span class="pill blue">TRAINING OVERVIEW</span><h1>Aerostar EP Course</h1><p>RC / Simulator / Live Flights · Israel · Sep–Oct 2026</p><div class="courseMeta"><span class="pill blue">EP</span><span class="pill violet">RC Model</span><span class="pill green">New Training</span><span class="pill amber">Day</span><span class="pill gray">Israel</span></div></section>
 <section class="grid metrics">${metric('Trainees','5','4 active · 1 inactive')}${metric('Planned Flights','136','72 completed')}${metric('Syllabus Progress','68%','Course on track')}${metric('Average Grade','4.2 / 5','+0.3 over 2 weeks')}${metric('Safety Events','2','0 currently open')}</section>
 <div class="sectionHead"><h2>Operational activities</h2><p>Your daily training tools</p></div>
