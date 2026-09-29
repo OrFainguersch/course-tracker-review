@@ -332,10 +332,31 @@ select option[value=""]{color:#8a9bad}
   .sidebarFlympusWordmark{width:198px}
 }
 
+/* ===== EP imported training suit ===== */
+.epSuitHero{border:1px solid #cfe4f7;background:linear-gradient(135deg,#f7fbff,#eef7ff);border-radius:17px;padding:15px;margin-top:14px}
+.epSuitHero h3{margin:0;color:#082f57;font-size:17px}.epSuitHero p{margin:5px 0 0;color:#60788f;font-size:11px;line-height:1.45}
+.epSuitBadges{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.epSuitBadges span{padding:5px 8px;border-radius:999px;background:#fff;border:1px solid #dbe8f3;color:#355a7e;font-size:9px;font-weight:800}
+.epSuitBadges .gold{border-color:#f0d695;background:#fffaf0;color:#9a6b08}
+.epSuiteStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.epSuiteStat{background:#fff;border:1px solid #dce9f4;border-radius:13px;padding:10px;text-align:center}.epSuiteStat b{display:block;color:#082f57;font-size:18px}.epSuiteStat small{display:block;color:#71849a;font-size:9px;margin-top:3px}
+.epProgramGrid{display:grid;grid-template-columns:1fr;gap:11px;margin-top:12px}
+.epProgramCard{border:1px solid #e0eaf3;border-radius:16px;background:#fff;overflow:hidden}
+.epProgramCard summary{list-style:none;cursor:pointer;padding:13px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.epProgramCard summary::-webkit-details-marker{display:none}
+.epProgramCard summary b{color:#082f57;font-size:12px}.epProgramCard summary small{display:block;color:#71849a;font-size:9px;margin-top:3px;line-height:1.4}
+.epProgramBody{padding:0 14px 14px;border-top:1px solid #edf2f7}
+.epMiniTable{width:100%;border-collapse:collapse;margin-top:10px;font-size:9.5px}.epMiniTable th{background:#f7fafc;color:#60758a;text-align:left;padding:7px;border-bottom:1px solid #dfe8f1}.epMiniTable td{padding:7px;border-bottom:1px solid #edf2f7;color:#39556f;vertical-align:top}.epMiniTable tr:last-child td{border-bottom:0}
+.epMode{display:inline-flex;padding:4px 6px;border-radius:999px;background:#eaf4ff;color:#0b70ca;font-size:8px;font-weight:850}.epMode.solo{background:#dcf7e8;color:#14814e}.epMode.optional{background:#f3ecff;color:#7752c7}
+.epPlatformGrid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}.epPlatformCard{border:1px solid #e1eaf3;border-radius:15px;background:#fff;padding:13px}.epPlatformCard h4{margin:0;color:#082f57}.epPlatformCard p{font-size:9.5px;color:#71849a;margin:4px 0 9px}.epEmergencyChips{display:flex;gap:5px;flex-wrap:wrap}.epEmergencyChips span{padding:5px 7px;border-radius:9px;background:#f4f8fb;color:#49647e;font-size:8.5px;border:1px solid #e4ebf2}
+.epSourceNote{margin-top:10px;padding:9px 10px;border-radius:11px;background:#fff9eb;border:1px solid #f3dfaa;color:#7e6016;font-size:9.5px;line-height:1.4}
+.epMissing{background:#fff7ed;border-color:#fed7aa}.epMissing b{color:#9a4f13}
+@media(min-width:760px){.epProgramGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.epPlatformGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.epSuiteStats{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0524 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0525 · mock/local only</div><div class="toast" id="toast"></div></div>
+<script src="./assets/ep-catalog.js"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentCourseId='AEP-26';
@@ -354,14 +375,15 @@ const criteria=[{id:'c1',name:'Flight path control',weight:.25},{id:'c2',name:'W
 const emergencies=['Engine cut','GEN malfunction','BAT malfunction','NO RPT','Stuck flaps','Flat tire / no fuel','Low clouds','Flight-box / IAS malfunction'];
 const courseTypes=[{id:'EP',name:'EP'},{id:'IP',name:'IP'},{id:'TECHNICIAN',name:'TECHNICIAN'}];
 const phaseTemplates=[
+{id:'ep_screening',type:'EP',name:'Screening'},
 {id:'ep_rc',type:'EP',name:'RC Model'},
 {id:'ep_half',type:'EP',name:'Half Scale'},
 {id:'ep_full',type:'EP',name:'Full Scale'}
 ];
-const trainingKinds=['New Training','Conversion','Flight Instructor Training'];
-const dayNight=['Day','Night'];
+const trainingKinds=['New Training','Conversion','Flight Instructor Training','Screening','Refreshment','Return to Currency'];
+const dayNight=['Day','Night','Mixed / Day+Night'];
 const countries=['Israel','Cyprus'];
-const currentCourseMeta={type:'EP',phase:'RC Model',trainingKind:'New Training',dayNight:'Day',country:'Israel'};
+const currentCourseMeta={type:'EP',phase:'RC Model',platformId:'rc_model',trainingKind:'New Training',dayNight:'Day',country:'Israel',programId:'ep_rc_new'};
 const syllProgress=[['Basic Handling',100,'Complete'],['Figure 8',100,'Complete'],['Circuits',100,'Complete'],['Emergencies',80,'Current'],['Final Preparation',0,'Next']];
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
 const state={screen:'home',selectedTrainee:'t1',selectedInstructor:'i1',search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',...initialUiState};
@@ -513,7 +535,7 @@ function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.fi
 <div class="field" style="grid-column:1/-1"><label>Date</label><input class="input" name="date" type="date" required value="${edit?.flightDate||new Date().toISOString().slice(0,10)}"></div>
 <div class="field"><label>Trainee</label><select name="trainee" required ${edit?'disabled':''}><option value="" ${prefillTrainee?'':'selected'} disabled>Select trainee</option>${activeT.map(t=>`<option value="${t.id}" ${prefillTrainee===t.id?'selected':''}>${t.name}</option>`).join('')}</select></div>
 <div class="field"><label>Instructor</label><select name="instructor" required><option value="" ${edit?'':'selected'} disabled>Select instructor</option>${allInstructors().map(i=>`<option value="${i.id}" ${edit?.instructorId===i.id?'selected':''}>${i.name}</option>`).join('')}</select></div>
-<div class="field"><label>Syllabus</label><select name="syllabus" required ${edit?'disabled':''}><option value="" ${edit?'':'selected'} disabled>Select syllabus</option>${syllabi.map(sy=>`<option ${edit?.syllabus===sy?'selected':''}>${sy}</option>`).join('')}</select></div>
+<div class="field"><label>Syllabus</label><select name="syllabus" required ${edit?'disabled':''}><option value="" ${edit?'':'selected'} disabled>Select syllabus</option>${evaluationSyllabusNames().map(sy=>`<option ${edit?.syllabus===sy?'selected':''}>${sy}</option>`).join('')}</select></div>
 <div class="field"><label>Duration</label><select name="duration" required><option value="" ${edit?'':'selected'} disabled>—</option>${[15,20,25,30,40].map(v=>`<option value="${v}" ${edit&&Number(edit.duration)===v?'selected':''}>${v} min</option>`).join('')}</select></div>
 ${tracks('TAKEOFF')?`<div class="field"><label>Takeoffs</label><input class="input" name="takeoffs" type="number" min="0" required value="${edit?.takeoffs??0}"></div>`:''}
 ${tracks('LANDING')?`<div class="field"><label>Landings</label><input class="input" name="landings" type="number" min="0" required value="${edit?.landings??0}"></div>`:''}
@@ -708,11 +730,15 @@ function currentConfigSelection(){
   const trainingKind=c.trainingKinds.find(x=>x.name===currentCourseMeta.trainingKind)?.id||'*';
   const dayNight=c.dayNight.find(x=>x.name===currentCourseMeta.dayNight)?.id||'';
   const country=c.countries.find(x=>x.name===currentCourseMeta.country)?.id||'*';
-  return {courseType:type,phaseId:phase,trainingKind,dayNight,country};
+  return {courseType:type,phaseId:phase,platformId:currentCourseMeta.platformId||'',trainingKind,dayNight,country};
 }
 function evaluationEmergencyDefs(){
-  const c=cfgGet(),sel=currentConfigSelection(),p=cfgResolve(sel);
-  const allowed=p?.emergencyIds?.length?new Set(p.emergencyIds):null;
+  const sel=currentConfigSelection();
+  if(sel.courseType==='EP'&&window.EP_CATALOG){
+    const em=window.epCatalogHelpers.emergenciesForPlatform(sel.platformId);
+    if(em.length)return em.map(x=>({...x,courseType:'EP',category:x.category||defaultEmergencyCategory(x.name)}));
+  }
+  const c=cfgGet(),p=cfgResolve(sel),allowed=p?.emergencyIds?.length?new Set(p.emergencyIds):null;
   return c.emergencies.filter(x=>x.courseType===sel.courseType&&(!allowed||allowed.has(x.id))).map(x=>({...x,category:x.category||defaultEmergencyCategory(x.name)}));
 }
 
@@ -746,6 +772,8 @@ function traineeSoloBreakdown(t){
 const mockSoloStageMinimums={Circuits:5,'Basic Emergencies B':3,'Complex Emergencies':4};
 const mockSoloLastDates={t1:{Circuits:'2026-09-18','Basic Emergencies B':'2026-09-23','Complex Emergencies':'2026-09-27'},t2:{Circuits:'2026-09-20','Basic Emergencies A':'2026-09-25'},t3:{Circuits:'2026-09-20','Basic Emergencies A':'2026-09-26'},t4:{Circuits:'2026-09-24'}};
 function configuredSoloStages(){
+ const p=epCurrentProgram();
+ if(currentCourseMeta.type==='EP'&&p)return (p.syllabi||[]).filter(x=>x.mode==='SOLO'&&Number(x.minimum)>0).map(x=>({name:x.name,minimum:Number(x.minimum)||0}));
  const c=cfgGet(),type=currentCourseMeta.type;
  return c.syllabi.filter(x=>x.courseType===type&&x.instructorPresence==='WITHOUT INSTRUCTOR'&&Number(x.minimum)>0);
 }
@@ -862,13 +890,71 @@ function renderEmergencyPractice(edit,traineeId){
       return '<details class="emergencyGroup" data-emergency-group="'+esc(cat)+'" '+(open?'open':'')+'><summary><span class="emergencyGroupSummary"><strong>'+esc(cat)+'</strong><small>'+practiced+' of '+rows.length+' practiced previously · '+groupPast+' total occurrence'+(groupPast===1?'':'s')+'</small><span class="emergencyGroupProgress"><i style="width:'+pct+'%"></i></span></span><span class="emergencyGroupMeta compact"><span class="emergencyGroupPast" data-group-past="'+esc(cat)+'">'+groupPast+' past</span><span class="emergencyGroupTotal" data-group-total="'+esc(cat)+'">'+groupTotal+' this flight</span></span></summary><div class="emergencyRows">'+rows.map(x=>'<label class="emergencyRow '+(x.planned?'isPlanned':'')+'" data-emergency-name="'+esc(x.name.toLowerCase())+'" data-emergency-category="'+esc(cat.toLowerCase())+'" data-emergency-id-row="'+esc(x.id)+'"><span class="emergencyNameBlock"><span>'+esc(x.name)+'</span><span class="emergencyHistoryBadge '+(x.history?'has':'none')+'" data-history-id="'+esc(x.id)+'">'+(x.history?'Previously: '+x.history:'Not practiced yet')+'</span><span class="emergencyPlanTag">Planned for this sortie</span></span><input class="input emergencyCountInput" type="number" min="0" max="99" step="1" name="emid_'+esc(x.id)+'" data-emergency-id="'+esc(x.id)+'" data-emergency-category="'+esc(cat)+'" value="'+x.value+'"></label>').join('')+'</div></details>';
     }).join('')+'<div class="emergencyNoResults" id="emergencyNoResults">No emergency matches this filter.</div></div>';
 }
+function epPlatformLabel(id){return (window.EP_CATALOG?.platforms||[]).find(x=>x.id===id)?.name||id||'—'}
+function epTrainingIdFromName(name){return ({'New Training':'new','Conversion':'conversion','Flight Instructor Training':'instructor','Screening':'screening','Refreshment':'refreshment','Return to Currency':'return_currency'})[name]||name||''}
+function epDayIdFromName(name){return ({'Day':'day','Night':'night','Mixed / Day+Night':'mixed'})[name]||name||''}
+function epProgramResolve(sel){
+  if(!window.EP_CATALOG||sel?.courseType!=='EP')return null;
+  const phaseId=sel.phaseId||'',platformId=sel.platformId||'',trainingKind=sel.trainingKind||'',dayNight=sel.dayNight||'';
+  return (window.EP_CATALOG.programs||[]).find(p=>p.phaseId===phaseId&&(!platformId||p.platformId===platformId)&&(!trainingKind||p.trainingKind===trainingKind)&&(!dayNight||p.dayNight===dayNight))||null;
+}
+function epCurrentProgram(){
+  if(currentCourseMeta.type!=='EP'||!window.EP_CATALOG)return null;
+  if(currentCourseMeta.programId)return window.EP_CATALOG.programs.find(x=>x.id===currentCourseMeta.programId)||null;
+  const c=cfgGet(),phase=c.phases.find(x=>x.type==='EP'&&x.name===currentCourseMeta.phase)?.id||'';
+  return epProgramResolve({courseType:'EP',phaseId:phase,platformId:currentCourseMeta.platformId||'',trainingKind:epTrainingIdFromName(currentCourseMeta.trainingKind),dayNight:epDayIdFromName(currentCourseMeta.dayNight)});
+}
+function evaluationSyllabusDefs(){
+  const p=epCurrentProgram();
+  if(p?.syllabi?.length)return p.syllabi;
+  return cfgGet().syllabi.filter(x=>x.courseType===currentCourseMeta.type).map(x=>({id:x.id,name:x.name,minimum:x.minimum,mode:x.instructorPresence==='WITHOUT INSTRUCTOR'?'SOLO':'INSTRUCTED'}));
+}
+function evaluationSyllabusNames(){return evaluationSyllabusDefs().map(x=>x.name)}
+function epResolvedHtml(sel){
+  if(sel.courseType!=='EP'||!window.EP_CATALOG)return '';
+  const platformId=sel.platformId||'';
+  if(!sel.phaseId||!platformId||!sel.trainingKind||!sel.dayNight)return '<div class="epSuitHero"><h3>EP training suit</h3><p>Select Phase, Platform, Training package and Day/Night. The imported syllabus, theory, emergency catalog and progression rules will resolve automatically.</p></div>';
+  const p=epProgramResolve(sel),em=window.epCatalogHelpers.emergenciesForPlatform(platformId);
+  if(!p){
+    const plat=epPlatformLabel(platformId);
+    return '<div class="epSuitHero epMissing"><h3>'+esc(plat)+' · EP platform package</h3><p>The platform emergency catalog is imported ('+em.length+' emergencies), but no matching platform-specific syllabus was supplied in the uploaded EP package for this combination.</p><div class="epSuitBadges"><span>'+esc(cfgItem(cfgGet().phases,sel.phaseId)?.name||sel.phaseId)+'</span><span>'+esc(plat)+'</span><span class="gold">'+em.length+' emergencies ready</span></div></div>';
+  }
+  const optional=p.syllabi.filter(x=>x.optional).length,solo=p.syllabi.filter(x=>x.mode==='SOLO').length;
+  return '<div class="epSuitHero"><div class="inlineHead"><div><h3>'+esc(p.name)+'</h3><p>'+esc(p.source)+'</p></div><span class="pill green">IMPORTED</span></div>'+
+    '<div class="epSuitBadges"><span>'+esc(cfgItem(cfgGet().phases,p.phaseId)?.name||p.phaseId)+'</span><span>'+esc(epPlatformLabel(p.platformId))+'</span><span>'+esc(p.trainingKind.replaceAll('_',' '))+'</span><span>'+esc(p.dayNight)+'</span></div>'+
+    '<div class="epSuiteStats"><div class="epSuiteStat"><b>'+p.theory.length+'</b><small>Theory items</small></div><div class="epSuiteStat"><b>'+p.syllabi.length+'</b><small>Syllabus series</small></div><div class="epSuiteStat"><b>'+solo+'</b><small>Solo series</small></div><div class="epSuiteStat"><b>'+em.length+'</b><small>Platform emergencies</small></div></div>'+
+    (p.totalFlights?'<div class="epSourceNote"><b>Practical volume:</b> '+esc(p.totalFlights)+(p.sourceNote?' · '+esc(p.sourceNote):'')+'</div>':'')+
+    (p.theoryRequirement?'<div class="epSourceNote"><b>Theory gate:</b> '+esc(p.theoryRequirement)+'</div>':'')+
+    (p.prerequisite?'<div class="epSourceNote"><b>Prerequisite:</b> '+esc(p.prerequisite)+'</div>':'')+
+    (p.completion?'<div class="epSourceNote"><b>Completion:</b> '+esc(p.completion)+'</div>':'')+
+    '<div class="sectionHead"><h2>Practical syllabus</h2><p>'+p.syllabi.length+' series · '+optional+' optional</p></div>'+
+    '<div style="overflow:auto"><table class="epMiniTable"><thead><tr><th>Series</th><th>Mode</th><th>Min.</th><th>Topics / remarks</th></tr></thead><tbody>'+p.syllabi.map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td><span class="epMode '+(x.mode==='SOLO'?'solo':x.optional?'optional':'')+'">'+esc(x.optional?'OPTIONAL':x.mode)+'</span></td><td>'+esc(x.minimum==null?'—':x.minimum)+'</td><td>'+esc(x.topics||'')+(x.remarks?'<br><small>'+esc(x.remarks)+'</small>':'')+'</td></tr>').join('')+'</tbody></table></div>'+
+    '<div class="sectionHead"><h2>Platform emergency catalog</h2><p>'+em.length+' items from the selected platform package</p></div><div class="epEmergencyChips">'+em.map(x=>'<span>'+esc(x.name)+'</span>').join('')+'</div>'+
+    '</div>';
+}
+function epLibraryHtml(){
+  const cat=window.EP_CATALOG;if(!cat)return '<div class="infoBox">EP catalog not loaded.</div>';
+  const phaseName=id=>cat.phases.find(x=>x.id===id)?.name||id;
+  const programs=cat.programs||[];
+  const programCards=programs.map(p=>'<details class="epProgramCard"><summary><div><b>'+esc(p.name)+'</b><small>'+esc(p.source)+' · '+esc(epPlatformLabel(p.platformId))+'</small></div><span class="pill blue">'+esc(p.totalFlights||p.syllabi.length+' series')+'</span></summary><div class="epProgramBody">'+
+    (p.theoryRequirement?'<div class="epSourceNote"><b>Theory gate:</b> '+esc(p.theoryRequirement)+'</div>':'')+
+    (p.prerequisite?'<div class="epSourceNote"><b>Prerequisite:</b> '+esc(p.prerequisite)+'</div>':'')+
+    (p.completion?'<div class="epSourceNote"><b>Completion:</b> '+esc(p.completion)+'</div>':'')+
+    '<div class="sectionHead"><h2>Theory</h2><p>'+p.theory.length+' items</p></div><div style="overflow:auto"><table class="epMiniTable"><thead><tr><th>#</th><th>Lesson</th><th>Type</th><th>Duration</th></tr></thead><tbody>'+p.theory.map(x=>'<tr><td>'+esc(x.no)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.type)+'</td><td>'+esc(x.duration)+'</td></tr>').join('')+'</tbody></table></div>'+
+    '<div class="sectionHead"><h2>Practical syllabus</h2><p>'+p.syllabi.length+' series</p></div><div style="overflow:auto"><table class="epMiniTable"><thead><tr><th>Series</th><th>Min.</th><th>Mode</th><th>Topics</th></tr></thead><tbody>'+p.syllabi.map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td>'+esc(x.minimum==null?'—':x.minimum)+'</td><td><span class="epMode '+(x.mode==='SOLO'?'solo':x.optional?'optional':'')+'">'+esc(x.optional?'OPTIONAL':x.mode)+'</span></td><td>'+esc(x.topics||'')+(x.remarks?'<br><small>'+esc(x.remarks)+'</small>':'')+'</td></tr>').join('')+'</tbody></table></div></div></details>').join('');
+  const platformCards=cat.platforms.map(pl=>{const em=window.epCatalogHelpers.emergenciesForPlatform(pl.id);return '<div class="epPlatformCard"><div class="inlineHead"><h4>'+esc(pl.name)+'</h4><span class="pill '+(em.length?'green':'gray')+'">'+em.length+' emergencies</span></div><p>Applicable phase: '+esc((pl.phaseIds||[]).map(phaseName).join(', '))+'</p>'+(em.length?'<div class="epEmergencyChips">'+em.map(x=>'<span>'+esc(x.name)+'</span>').join('')+'</div>':'<p>No emergency manual imported for this training device.</p>')+'</div>'}).join('');
+  return '<div class="epSuitHero"><div class="inlineHead"><div><h3>EP Training Architecture</h3><p>Imported directly from the uploaded EP syllabi and platform flight manuals. This is the base “suit” used by course creation and Evaluation.</p></div><span class="pill green">EP READY</span></div><div class="epSuitBadges">'+cat.phases.map(x=>'<span>'+esc(x.name)+'</span>').join('')+'<span class="gold">'+programs.length+' training packages</span></div></div>'+
+    '<div class="sectionHead"><h2>Training packages</h2><p>Phase + platform + training purpose + day/night</p></div><div class="epProgramGrid">'+programCards+'</div>'+
+    '<div class="sectionHead"><h2>Platform emergency catalogs</h2><p>Only the selected platform emergency set should open in Evaluation.</p></div><div class="epPlatformGrid">'+platformCards+'</div>';
+}
+
 function cfgDefaults(){
   const ep='EP';
   return {
     courseTypes: courseTypes.map(x=>({id:x.id,name:x.name})),
     phases: phaseTemplates.map(x=>({id:x.id,type:x.type,name:x.name,tracking:defaultPhaseTracking(x.id)})),
-    trainingKinds: trainingKinds.map((name,n)=>({id:['new','conversion','instructor'][n]||('training_'+n),name})),
-    dayNight: dayNight.map((name,n)=>({id:['day','night'][n]||('time_'+n),name})),
+    trainingKinds: trainingKinds.map((name,n)=>({id:['new','conversion','instructor','screening','refreshment','return_currency'][n]||('training_'+n),name})),
+    dayNight: dayNight.map((name,n)=>({id:['day','night','mixed'][n]||('time_'+n),name})),
     countries: countries.map((name,n)=>({id:['israel','cyprus'][n]||('country_'+n),name})),
     syllabi: syllabi.map((name,n)=>({id:'syll_'+(n+1),courseType:ep,name,minimum:null,instructorPresence:'WITH INSTRUCTOR'})),
     criteria: criteria.map(c=>({id:c.id,courseType:ep,name:c.name,weight:Math.round(c.weight*100)})),
@@ -913,6 +999,7 @@ function cfgResolve(sel){
   return best;
 }
 function cfgResolvedHtml(sel){
+  if(sel.courseType==='EP'&&window.EP_CATALOG)return epResolvedHtml(sel);
   const c=cfgGet();if(!sel.courseType||!sel.phaseId||!sel.trainingKind||!sel.dayNight||!sel.country)return '<div class="infoBox" style="margin-top:14px"><b>Complete the course selections</b><p>The matching syllabus, criteria, emergencies and accumulation requirements will appear here.</p></div>';const p=cfgResolve(sel);
   if(!p)return '<div class="infoBox" style="margin-top:14px;border-color:#fed7aa;background:#fff7ed"><b>No matching configuration profile</b><p>Create one in Configuration profiles. This combination has no assigned syllabus/criteria bundle yet.</p></div>';
   const names=(ids,list)=>ids.map(id=>cfgItem(list,id)?.name).filter(Boolean);
@@ -983,7 +1070,11 @@ function settings(){
   const training=state.builderTraining||'',time=state.builderDay||'',country=state.builderCountry||'';
   const sel={courseType:type,phaseId:phase,trainingKind:training,dayNight:time,country};
   let html='<div class="eyebrow">Editable configuration database</div><h1 class="pageTitle">Course Settings</h1><p class="sub">Each course type owns its own phases, syllabi, criteria and emergencies. Shared dimensions stay global.</p>';
-  html+='<div class="scrollTabs"><button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">＋ New course</button><button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">▦ Course type setup</button><button class="seg '+(tab==='profiles'?'active':'')+'" data-settings-tab="profiles">⌘ Configuration profiles</button></div>';
+  html+='<div class="scrollTabs"><button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">＋ New course</button><button class="seg '+(tab==='ep_library'?'active':'')+'" data-settings-tab="ep_library">✈ EP Library</button><button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">▦ Course type setup</button><button class="seg '+(tab==='profiles'?'active':'')+'" data-settings-tab="profiles">⌘ Configuration profiles</button></div>';
+
+  if(tab==='ep_library'){
+    html+=epLibraryHtml();
+  }
 
   if(tab==='builder'){
     html+='<div class="twoCol" style="margin-top:14px"><section class="card formCard"><div class="formTitle"><h2>Create course from configuration</h2><span class="pill amber">DRAFT first</span></div><form id="courseBuilder"><div class="fields">';
@@ -1038,7 +1129,7 @@ function plannedVsExecuted(){
  '<div class="executionStrip"><div class="executionItem"><strong>'+total+'</strong><span>Planned</span></div><div class="executionItem"><strong>'+executed+'</strong><span>Executed</span></div><div class="executionItem"><strong>'+cancelled+'</strong><span>Cancelled / not executed</span></div></div></section>'+
  '<div class="workflowSteps">'+
  '<section class="workflowStep"><div class="workflowStepHead"><b>Step 1 · Plan the day</b><span class="stepStatus '+(step1?'complete':'current')+'">'+(step1?'Complete':'Current')+'</span></div><div class="workflowStepBody"><div class="fields"><div class="field"><label>Planned instructed flights</label><input class="input" id="pvePlannedInstructed" type="number" min="0" required value="'+pi+'"></div><div class="field"><label>Planned solo flights</label><input class="input" id="pvePlannedSolo" type="number" min="0" required value="'+ps+'"></div></div></div></section>'+
- '<section class="workflowStep"><div class="workflowStepHead"><b>Step 2 · Record executed solo flights</b><span class="stepStatus '+(step1?'current':'')+'">'+executedSolo+' recorded</span></div><div class="workflowStepBody"><form id="soloExecutionForm"><div class="fields"><div class="field"><label>Trainee</label><select name="traineeId" required><option value="" '+(!soloDraft.traineeId?'selected':'')+' disabled>Select trainee</option>'+allT.map(t=>'<option value="'+t.id+'" '+(soloDraft.traineeId===t.id?'selected':'')+'>'+esc(t.name)+'</option>').join('')+'</select></div><div class="field"><label>Syllabus</label><select name="syllabus" required><option value="" '+(!soloDraft.syllabus?'selected':'')+' disabled>Select syllabus</option>'+syllabi.map(x=>'<option '+(soloDraft.syllabus===x?'selected':'')+'>'+esc(x)+'</option>').join('')+'</select></div>'+(tracks('TAKEOFF')?'<div class="field"><label>Takeoffs</label><input class="input" name="takeoffs" type="number" min="0" required value="'+(soloDraft.takeoffs??1)+'"></div>':'')+(tracks('LANDING')?'<div class="field"><label>Landings</label><input class="input" name="landings" type="number" min="0" required value="'+(soloDraft.landings??1)+'"></div>':'')+(tracks('TRAINING_HOUR')?'<div class="field"><label>Flight minutes</label><input class="input" name="minutes" type="number" min="0" required value="'+(soloDraft.minutes??20)+'"></div>':'')+'</div><button class="btn sky" type="submit">+ Add executed solo flight</button></form>'+
+ '<section class="workflowStep"><div class="workflowStepHead"><b>Step 2 · Record executed solo flights</b><span class="stepStatus '+(step1?'current':'')+'">'+executedSolo+' recorded</span></div><div class="workflowStepBody"><form id="soloExecutionForm"><div class="fields"><div class="field"><label>Trainee</label><select name="traineeId" required><option value="" '+(!soloDraft.traineeId?'selected':'')+' disabled>Select trainee</option>'+allT.map(t=>'<option value="'+t.id+'" '+(soloDraft.traineeId===t.id?'selected':'')+'>'+esc(t.name)+'</option>').join('')+'</select></div><div class="field"><label>Syllabus</label><select name="syllabus" required><option value="" '+(!soloDraft.syllabus?'selected':'')+' disabled>Select syllabus</option>'+evaluationSyllabusNames().map(x=>'<option '+(soloDraft.syllabus===x?'selected':'')+'>'+esc(x)+'</option>').join('')+'</select></div>'+(tracks('TAKEOFF')?'<div class="field"><label>Takeoffs</label><input class="input" name="takeoffs" type="number" min="0" required value="'+(soloDraft.takeoffs??1)+'"></div>':'')+(tracks('LANDING')?'<div class="field"><label>Landings</label><input class="input" name="landings" type="number" min="0" required value="'+(soloDraft.landings??1)+'"></div>':'')+(tracks('TRAINING_HOUR')?'<div class="field"><label>Flight minutes</label><input class="input" name="minutes" type="number" min="0" required value="'+(soloDraft.minutes??20)+'"></div>':'')+'</div><button class="btn sky" type="submit">+ Add executed solo flight</button></form>'+
  '<div class="infoBox" style="margin-top:12px"><b>Instructed execution: '+executedInstructed+'</b><p>Automatically derived from saved Evaluations on '+esc(date)+'.</p></div>'+
  '<div class="sectionHead"><h2>Solo flights recorded</h2><p>'+executedSolo+' executed</p></div><div class="soloList">'+(soloRows.length?soloRows.map(x=>'<div class="soloRow"><div class="inlineHead"><div><b>'+esc(x.traineeName)+' · '+esc(x.syllabus)+'</b><p>'+Number(x.takeoffs||0)+' takeoffs · '+Number(x.landings||0)+' landings · '+Number(x.minutes||0)+' min</p></div><button class="btn danger small" data-solo-delete="'+x.id+'">Delete</button></div></div>').join(''):'<p class="sub">No solo flights recorded for this date.</p>')+'</div></div></section>'+
  '<section class="workflowStep"><div class="workflowStepHead"><b>Step 3 · Cancellation / non-execution reasons</b><span class="stepStatus '+(step1&&step2?(step3?'complete':'current'):'')+'">'+(step1&&step2?(step3?'Complete':'Current'):'Pending')+'</span></div><div class="workflowStepBody">'+(cancelled?'<div class="field"><label>Why were '+cancelled+' planned flights not executed?</label><textarea id="pveReason" placeholder="Weather, technical, trainee, instructor, operational…">'+esc(reason)+'</textarea></div>':'<div class="infoBox"><b>No cancellation explanation required</b><p>Executed flights currently meet or exceed the plan.</p></div>')+'</div></section>'+
