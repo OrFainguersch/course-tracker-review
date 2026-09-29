@@ -214,6 +214,9 @@ select option[value=""]{color:#8a9bad}
 .nextEmphasisList{counter-reset:emph;display:grid;gap:8px;margin:9px 0 0;padding:0;list-style:none}.nextEmphasisList li{counter-increment:emph;display:grid;grid-template-columns:25px minmax(0,1fr);gap:8px;align-items:start;font-size:11px;color:#31465d}.nextEmphasisList li:before{content:counter(emph);width:23px;height:23px;border-radius:50%;display:grid;place-items:center;background:#e5f2ff;color:#1269b9;font-size:10px;font-weight:900}
 .recentEvalList{display:grid;gap:8px;margin-top:10px}.recentEvalCard{padding:12px;border:1px solid #e2ebf4;border-radius:15px;background:#fff}.recentEvalTop{display:flex;justify-content:space-between;gap:10px}.recentEvalCard b{font-size:12px;color:#183651}.recentEvalCard .grade{font-size:14px;font-weight:900;color:#1269b9}.recentEvalMeta{display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;margin-top:8px}.recentEvalMeta span{font-size:9.5px;color:#71849a}.recentEvalMeta strong{display:block;color:#2a4058;font-size:10px;margin-top:1px}
 .emphasisEditor{display:grid;gap:7px}.emphasisEditRow{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:7px;align-items:center}.emphasisNo{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#e5f2ff;color:#1269b9;font-size:10px;font-weight:900}.emphasisRemove{width:30px;height:30px;border:1px solid #f0c7c7;border-radius:10px;background:#fff5f5;color:#b42318;font-weight:900}.planReady{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}.planReady .pill{font-size:9px}
+
+.trainingStatusStack{display:grid;gap:9px;margin-top:10px}.trainingStatusCard{padding:13px 14px;border:1px solid #dce7f2;border-radius:16px;background:#fff}.trainingStatusTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.trainingStatusTop small{display:block;color:#71849a;font-size:9px;font-weight:850;letter-spacing:.04em}.trainingStatusTop b{display:block;color:#0b315b;font-size:14px;margin-top:3px}.trainingStatusDate{font-size:9px;color:#71849a;white-space:nowrap}.trainingStatusMeta{display:flex;justify-content:space-between;gap:8px;margin-top:10px;font-size:9.5px;color:#6f8195}.trainingStatusMeta strong{color:#0b315b}.trainingStatusBar{height:7px;background:#e8eef5;border-radius:999px;overflow:hidden;margin-top:7px}.trainingStatusBar i{display:block;height:100%;background:#16a3e5;border-radius:999px}.trainingStatusCard.solo .trainingStatusBar i{background:#10a56e}
+.emergencyPlanTag{display:none;margin-top:4px;width:max-content;padding:3px 7px;border-radius:999px;background:#e6f2ff;color:#1269b9;font-size:8.5px;font-weight:900}.emergencyRow.isPlanned .emergencyPlanTag{display:inline-flex}.emergencyRow.isPlanned{background:#f4f9ff;border-radius:10px;padding-left:7px;padding-right:7px}.emergencyToolbar .activeFilter{background:#087cf0;color:#fff;border-color:#087cf0}
 </style>
 </head>
 <body>
@@ -562,6 +565,44 @@ function traineeSoloBreakdown(t){
  const map=new Map((mockSoloBreakdown[t.id]||[]).map(x=>[x[0],Number(x[1])||0]));
  getSoloFlights().filter(x=>x.traineeId===t.id).forEach(x=>map.set(x.syllabus,(map.get(x.syllabus)||0)+1));
  return [...map.entries()].filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+}
+
+const mockSoloStageMinimums={Circuits:5,'Basic Emergencies B':3,'Complex Emergencies':4};
+const mockSoloLastDates={t1:{Circuits:'2026-09-18','Basic Emergencies B':'2026-09-23','Complex Emergencies':'2026-09-27'},t2:{Circuits:'2026-09-20','Basic Emergencies A':'2026-09-25'},t3:{Circuits:'2026-09-20','Basic Emergencies A':'2026-09-26'},t4:{Circuits:'2026-09-24'}};
+function configuredSoloStages(){
+ const c=cfgGet(),type=currentCourseMeta.type;
+ return c.syllabi.filter(x=>x.courseType===type&&x.instructorPresence==='WITHOUT INSTRUCTOR'&&Number(x.minimum)>0);
+}
+function traineeGuidedSnapshot(t,prog){
+ const history=traineeEvaluationHistory(t.id),matching=history.find(x=>x.syllabus===prog.current),completed=Math.max(0,Number(prog.completed)||0),minimum=Math.max(0,Number(prog.minimum)||0),pct=minimum?Math.min(100,Math.round(completed/minimum*100)):0;
+ return {label:'Guided flight',syllabus:prog.current||'—',date:matching?.date||history[0]?.date||null,completed,minimum,pct,status:prog.reviewRequired&&completed>=minimum?'Review needed':completed>=minimum?'Minimum met':'In progress'};
+}
+function traineeSoloSnapshot(t){
+ let stages=configuredSoloStages().map(x=>({name:x.name,minimum:Number(x.minimum)||0}));
+ const actual=getSoloFlights().filter(x=>x.traineeId===t.id).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+ const mockMap=new Map(mockSoloBreakdown[t.id]||[]);
+ if(!stages.length&&mockMap.size)stages=[...mockMap.keys()].map(name=>({name,minimum:Number(mockSoloStageMinimums[name]||Math.max(1,mockMap.get(name)||1))}));
+ if(!stages.length)return null;
+ const counts=new Map(stages.map(x=>[x.name,0])),dates=new Map();
+ actual.forEach(x=>{if(counts.has(x.syllabus)){counts.set(x.syllabus,(counts.get(x.syllabus)||0)+1);dates.set(x.syllabus,x.date)}});
+ if(!actual.length)for(const [name,n] of mockMap){if(counts.has(name)){counts.set(name,Number(n)||0);const d=mockSoloLastDates[t.id]?.[name];if(d)dates.set(name,d)}}
+ let currentIndex=0,latestActualIndex=-1;
+ stages.forEach((st,i)=>{if((counts.get(st.name)||0)>0)latestActualIndex=i});
+ if(latestActualIndex>=0)currentIndex=latestActualIndex;
+ const current=stages[currentIndex],completed=counts.get(current.name)||0,minimum=current.minimum||0,next=stages[currentIndex+1];
+ let status='Ready to start';
+ if(completed>0&&completed<minimum)status='In progress';
+ else if(completed>=minimum&&next){
+   const nextCount=counts.get(next.name)||0;
+   status=nextCount>0?'In progress':'Ready for next solo';
+   if(nextCount>0){currentIndex++;const c2=stages[currentIndex];return {label:'Solo',syllabus:c2.name,date:dates.get(c2.name)||null,completed:counts.get(c2.name)||0,minimum:c2.minimum||0,pct:c2.minimum?Math.min(100,Math.round((counts.get(c2.name)||0)/c2.minimum*100)):0,status:(counts.get(c2.name)||0)>=c2.minimum?(currentIndex===stages.length-1?'Solo complete':'Minimum met'):'In progress'};}
+ }
+ else if(completed>=minimum&&!next)status='Solo complete';
+ return {label:'Solo',syllabus:current.name,date:dates.get(current.name)||null,completed,minimum,pct:minimum?Math.min(100,Math.round(completed/minimum*100)):0,status};
+}
+function trainingStatusCardHtml(x,solo){
+ if(!x)return '';
+ return '<section class="trainingStatusCard '+(solo?'solo':'')+'"><div class="trainingStatusTop"><div><small>'+(solo?'SOLO':'GUIDED FLIGHT')+'</small><b>'+esc(x.syllabus)+'</b></div><span class="trainingStatusDate">'+(x.date?formatCourseDate(x.date):'Not performed yet')+'</span></div><div class="trainingStatusMeta"><span>'+esc(x.status)+'</span><span><strong>'+x.completed+' / '+(x.minimum||'—')+'</strong> minimum flights</span></div><div class="trainingStatusBar"><i style="width:'+x.pct+'%"></i></div></section>';
 }
 function criterionScoreForEvaluation(e,c,index){
  if(e.scores&&Number(e.scores[c.id]))return Number(e.scores[c.id]);
