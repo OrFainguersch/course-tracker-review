@@ -355,7 +355,7 @@ select option[value=""]{color:#8a9bad}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0526 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0527 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script src="./assets/ep-catalog.js"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
@@ -387,7 +387,7 @@ const currentCourseMeta={type:'EP',phase:'RC Model',platformId:'rc_model',traini
 const syllProgress=[['Basic Handling',100,'Complete'],['Figure 8',100,'Complete'],['Circuits',100,'Complete'],['Emergencies',80,'Current'],['Final Preparation',0,'Next']];
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
 const state={screen:'home',selectedTrainee:'t1',selectedInstructor:'i1',search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',...initialUiState};
-function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace,emergencyProfileFilter:state.emergencyProfileFilter}))}catch{}}
+function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace,emergencyProfileFilter:state.emergencyProfileFilter,builderType:state.builderType,builderPhase:state.builderPhase,builderPlatform:state.builderPlatform,builderTraining:state.builderTraining,builderDay:state.builderDay,builderCountry:state.builderCountry}))}catch{}}
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function safeArrayStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[]}catch{return []}}
 function safeObjectStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch{return {}}}
@@ -463,12 +463,14 @@ function home(){
  }).filter(x=>x.issue).slice(0,3);
  const fallbackAttention=activeT.filter(t=>!attention.some(x=>x.id===t.id)).sort((a,b)=>a.progress-b.progress).slice(0,Math.max(0,3-attention.length)).map(t=>({...t,issue:'Monitor progression',lastFlight:latestBy[t.id]?.date||'—'}));
  const attentionRows=[...attention,...fallbackAttention].slice(0,3);
+ const activeProgram=epCurrentProgram(),defs=activeProgram?.syllabi||[];
+ const pickDef=(name,fallback)=>defs.find(x=>x.name===name)||defs.find(x=>!x.optional&&x.mode!=='SIMULATOR')||{name:fallback,mode:'INSTRUCTED'};
  const plan=[
-   {time:'08:00',t:activeT[0],activity:'Circuits & Touch-and-Go',mode:'Instructed'},
-   {time:'09:30',t:activeT[1]||activeT[0],activity:'Figure-8 & De-crab',mode:'Solo'},
-   {time:'11:00',t:activeT[2]||activeT[0],activity:'Engine Cut (Downwind)',mode:'Instructed'},
-   {time:'13:30',t:activeT[3]||activeT[0],activity:'Complex Emergencies',mode:'Instructed'}
- ].filter(x=>x.t);
+   {time:'08:00',t:activeT[0],def:pickDef(activeT[0]?.currentSyllabus,'Circuits')},
+   {time:'09:30',t:activeT[1]||activeT[0],def:pickDef(activeT[1]?.currentSyllabus,'Figure-8')},
+   {time:'11:00',t:activeT[2]||activeT[0],def:pickDef(activeT[2]?.currentSyllabus,'Engine Emergencies')},
+   {time:'13:30',t:activeT[3]||activeT[0],def:pickDef(activeT[3]?.currentSyllabus,'Complex Emergencies')}
+ ].filter(x=>x.t).map(x=>({...x,activity:x.def.name,mode:x.def.mode==='SOLO'?'Solo':'Instructed'}));
  const recent=evals.slice(0,5);
  const draft=getActivityDraft('evaluation');
  const todayLabel=new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).format(new Date());
@@ -486,7 +488,7 @@ function home(){
      '<div class="welcome">Welcome back, Or</div>'+
      '<p>Train. Track. Progress.</p>'+
      '<div class="heroMeta">Israel · Sep–Oct 2026</div>'+
-     '<div class="homeMiniStatus"><span class="pill">EP</span><span class="pill">RC Model</span><span class="pill">New Training</span><span class="pill">Day</span></div>'+
+     '<div class="homeMiniStatus"><span class="pill">'+esc(currentCourseMeta.type)+'</span><span class="pill">'+esc(currentCourseMeta.phase)+'</span><span class="pill">'+esc(epPlatformLabel(currentCourseMeta.platformId))+'</span><span class="pill">'+esc(currentCourseMeta.trainingKind)+'</span><span class="pill">'+esc(currentCourseMeta.dayNight)+'</span></div>'+
    '</section>'+
    '<section class="homePrimaryGrid">'+
      '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Today\'s Plan</h2><p>Scheduled flights and activities for today</p></div></div><span class="homeDateChip">▣ '+esc(todayLabel)+'</span></div></div>'+
@@ -528,18 +530,19 @@ function home(){
    '</section>'+
  '</div>';
 }
-function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.find(x=>x.id===state.editingEval):null,autoDraft=getActivityDraft('evaluation'),allT=allTrainees(),activeT=allT.filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active'),tracking=currentCourseTrackingCounters(),tracks=type=>tracking.some(x=>x.type===type),prefillTrainee=edit?.traineeId||state.evaluationTraineeId||'';return `<div class="eyebrow">Evaluation workflow</div><h1 class="pageTitle">Evaluation</h1><p class="sub">Record, review and revise flight evaluations with weighted criteria and emergency practice.</p>
+function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.find(x=>x.id===state.editingEval):null,autoDraft=getActivityDraft('evaluation'),allT=allTrainees(),activeT=allT.filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active'),tracking=currentCourseTrackingCounters(),tracks=type=>tracking.some(x=>x.type===type),prefillTrainee=edit?.traineeId||state.evaluationTraineeId||'';return `<div class="eyebrow">Evaluation workflow</div><h1 class="pageTitle">Evaluation</h1><p class="sub">Record, review and revise flight evaluations with weighted criteria and emergency practice.</p>${epCurrentSuitSummaryHtml()}
 <div class="twoCol"><section class="card formCard"><div class="formTitle"><h2>${edit?`Edit evaluation · revision ${edit.revision}`:'New evaluation'}</h2><span class="autoDraftNote" id="draftBadge">${autoDraft?draftSavedLabel('evaluation'):'Auto-save ready'}</span></div>
 <form id="evalForm">
 <div class="fields">
 <div class="field" style="grid-column:1/-1"><label>Date</label><input class="input" name="date" type="date" required value="${edit?.flightDate||new Date().toISOString().slice(0,10)}"></div>
 <div class="field"><label>Trainee</label><select name="trainee" required ${edit?'disabled':''}><option value="" ${prefillTrainee?'':'selected'} disabled>Select trainee</option>${activeT.map(t=>`<option value="${t.id}" ${prefillTrainee===t.id?'selected':''}>${t.name}</option>`).join('')}</select></div>
 <div class="field"><label>Instructor</label><select name="instructor" required><option value="" ${edit?'':'selected'} disabled>Select instructor</option>${allInstructors().map(i=>`<option value="${i.id}" ${edit?.instructorId===i.id?'selected':''}>${i.name}</option>`).join('')}</select></div>
-<div class="field"><label>Syllabus</label><select name="syllabus" required ${edit?'disabled':''}><option value="" ${edit?'':'selected'} disabled>Select syllabus</option>${evaluationSyllabusNames().map(sy=>`<option ${edit?.syllabus===sy?'selected':''}>${sy}</option>`).join('')}</select></div>
+<div class="field"><label>Syllabus</label><select name="syllabus" id="evalSyllabusSelect" required ${edit?'disabled':''}><option value="" ${edit?'':'selected'} disabled>Select syllabus</option>${evaluationSyllabusNames().map(sy=>`<option ${edit?.syllabus===sy?'selected':''}>${sy}</option>`).join('')}</select></div>
 <div class="field"><label>Duration</label><select name="duration" required><option value="" ${edit?'':'selected'} disabled>—</option>${[15,20,25,30,40].map(v=>`<option value="${v}" ${edit&&Number(edit.duration)===v?'selected':''}>${v} min</option>`).join('')}</select></div>
 ${tracks('TAKEOFF')?`<div class="field"><label>Takeoffs</label><input class="input" name="takeoffs" type="number" min="0" required value="${edit?.takeoffs??0}"></div>`:''}
 ${tracks('LANDING')?`<div class="field"><label>Landings</label><input class="input" name="landings" type="number" min="0" required value="${edit?.landings??0}"></div>`:''}
 </div>
+<div id="epSyllabusBriefPanel">${epSyllabusBriefHtml(edit?.syllabus||'')}</div>
 <div class="sectionHead"><h2>Assessment criteria</h2><p>Weighted score exactly like the Phase 2 workflow.</p></div>
 <div class="criteria">${criteria.map(c=>`<div class="criterion"><span>${c.name} <small style="color:#94a3b8">(${Math.round(c.weight*100)}%)</small> <span class="requiredStar">*</span></span><select name="score_${c.id}" required><option value="">—</option>${[1,2,3,4,5].map(v=>`<option value="${v}" ${edit?.scores?.[c.id]===v?'selected':''}>${v}</option>`).join('')}</select></div>`).join('')}</div>
 <div class="suggested"><small>Suggested grade</small><strong id="suggestedGrade">${edit?.suggestedGrade??edit?.grade??'—'}</strong><span style="font-size:11px;color:#64748b">Benchmark 4.0</span></div>
@@ -683,7 +686,7 @@ function traineeProfile(){
  '<section class="card timeline compactInfoCard"><div class="inlineHead"><div><h3>Next-flight Emphases</h3><p class="sub" style="margin:2px 0 0">'+(latestEmph.date?'From '+formatCourseDate(latestEmph.date):'No saved emphases yet')+'</p></div></div>'+(latestEmph.items.length?'<ol class="nextEmphasisList">'+latestEmph.items.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol>':'<div class="infoBox"><b>No next-flight emphases</b><p>Add them in the Evaluation form and they will appear here.</p></div>')+'</section>'+
  '<div class="profileBottomActions" style="grid-template-columns:repeat(3,1fr)"><button class="btn sky" data-start-eval="'+t.id+'">✓ Evaluation</button><button class="btn" style="background:#10a56e" data-go="safety">◈ Safety</button><button class="btn" style="background:#7855e9" data-go="exams">▤ Exam</button></div>'
  :'')+
- (tab==='syllabus'?'<section class="card timeline"><div class="inlineHead"><h3>Syllabus Progression</h3><span class="pill blue">'+esc(gateState)+'</span></div>'+syllProgress.map(([n,p,status])=>'<div class="syll"><div class="syllRow"><b>'+esc(n)+'</b><span class="pill '+(status==='Complete'?'green':status==='Next'?'blue':'gray')+'">'+esc(status)+'</span></div><div class="progress"><i style="width:'+p+'%"></i></div></div>').join('')+'</section><section class="card timeline compactInfoCard" style="margin-top:10px"><div class="inlineHead"><div><h3>Solo Syllabus Activity</h3><p class="sub" style="margin:2px 0 0">Completed solo flights grouped by syllabus.</p></div><span class="pill blue">'+soloTotal+' total</span></div><div class="soloBreakdown">'+(soloBreakdown.length?soloBreakdown.map(x=>'<div class="soloRowMini"><b>'+esc(x[0])+'</b><span>'+x[1]+' flights</span></div>').join(''):'<p class="sub">No solo flights recorded yet.</p>')+'</div></section>':'')+
+ (tab==='syllabus'?epTraineeProgramProgressHtml(t)+'<section class="card timeline"><div class="inlineHead"><h3>Legacy Progress Summary</h3><span class="pill blue">'+esc(gateState)+'</span></div>'+syllProgress.map(([n,p,status])=>'<div class="syll"><div class="syllRow"><b>'+esc(n)+'</b><span class="pill '+(status==='Complete'?'green':status==='Next'?'blue':'gray')+'">'+esc(status)+'</span></div><div class="progress"><i style="width:'+p+'%"></i></div></div>').join('')+'</section><section class="card timeline compactInfoCard" style="margin-top:10px"><div class="inlineHead"><div><h3>Solo Syllabus Activity</h3><p class="sub" style="margin:2px 0 0">Completed solo flights grouped by syllabus.</p></div><span class="pill blue">'+soloTotal+' total</span></div><div class="soloBreakdown">'+(soloBreakdown.length?soloBreakdown.map(x=>'<div class="soloRowMini"><b>'+esc(x[0])+'</b><span>'+x[1]+' flights</span></div>').join(''):'<p class="sub">No solo flights recorded yet.</p>')+'</div></section>':'')+
  (tab==='evaluations'?'<section class="card timeline"><div class="inlineHead"><div><h3>Recent Evaluations</h3><p class="sub" style="margin:2px 0 0">Most recent guided evaluations with full context.</p></div></div><div class="recentEvalList">'+(evalRows.length?evalRows.map(r=>'<article class="recentEvalCard"><div class="recentEvalTop"><b>'+esc(r.syllabus||'—')+'</b><span class="grade">'+Number(r.grade||0).toFixed(1)+'</span></div><div class="recentEvalMeta"><span>Date<strong>'+formatCourseDate(r.date)+'</strong></span><span>Instructor<strong>'+esc(r.instructorName||'—')+'</strong></span><span>Guided syllabus<strong>'+esc(r.syllabus||'—')+'</strong></span><span>Grade<strong>'+Number(r.grade||0).toFixed(1)+' / 5.0</strong></span></div></article>').join(''):'<p class="sub">No evaluations yet.</p>')+'</div></section>':'')+
  (tab==='activity'?'<div class="twoCol"><section class="card formCard"><div class="formTitle"><h2>Add accumulated activity</h2><span class="pill blue">'+esc(currentCourseMeta.phase)+'</span></div><form id="activityForm"><div class="fields"><div class="field"><label>Date</label><input class="input" name="date" type="date" required value="'+new Date().toISOString().slice(0,10)+'"></div><div class="field"><label>Activity</label><select name="type" required><option value="" selected disabled>Select activity</option>'+tracking.map(x=>'<option value="'+x.type+'">'+esc(x.label)+'</option>').join('')+'</select></div><div class="field"><label>Quantity</label><input class="input" name="quantity" type="number" min="0.1" step="0.1" value="1" required></div><div class="field"><label>Source</label><select name="source" required><option value="" selected disabled>Select source</option><option>Manual adjustment</option><option>Instructed flight</option><option>Solo flight</option><option>Imported record</option></select></div></div><div class="field" style="margin-top:10px"><label>Note</label><input class="input" name="note" placeholder="Optional note"></div><button class="btn sky" type="submit">Add activity</button></form></section><section class="card sideCard"><h3>Accumulation</h3>'+eventSummary+'<div class="sectionHead"><h2>History</h2><p>'+events.length+' logged records</p></div><div class="eventLog">'+(events.length?events.slice(0,30).map(x=>'<div class="eventRow"><div class="eventIcon">'+(x.type==='TAKEOFF'?'↑':x.type==='LANDING'?'↓':x.type==='TRAINING_HOUR'?'h':'•')+'</div><div><b>'+esc(activityLabel(x.type))+'</b><small>'+esc(x.date)+' · '+esc(x.source||'Manual')+(x.note?' · '+esc(x.note):'')+'</small></div><div class="membershipControl"><span class="eventQty">+'+x.quantity+'</span><button class="btn danger small" data-event-delete="'+x.id+'">Delete</button></div></div>').join(''):'<p class="sub">No accumulated activity logged yet.</p>')+'</div></section></div>':'')+
  (tab==='emergencies'?'<section class="card timeline"><div class="inlineHead"><div><h3>Emergency Exposure</h3><p class="sub" style="margin:2px 0 0">What this trainee has practiced, what is missing, and how many repetitions were completed.</p></div></div>'+renderTraineeEmergencyProfile(t.id)+'</section>':'')+
@@ -948,6 +951,49 @@ function epLibraryHtml(){
     '<div class="sectionHead"><h2>Platform emergency catalogs</h2><p>Only the selected platform emergency set should open in Evaluation.</p></div><div class="epPlatformGrid">'+platformCards+'</div>';
 }
 
+function epCurrentSuitSummaryHtml(){
+  const p=epCurrentProgram(),em=evaluationEmergencyDefs();
+  if(!p)return '';
+  return '<div class="epActiveSuit"><div class="epActiveSuitTop"><div><b>'+esc(p.name)+'</b><p>'+esc(epPlatformLabel(p.platformId))+' · '+esc(p.source)+'</p></div><span class="pill green">ACTIVE SUIT</span></div><div class="epBriefMeta"><span>'+p.syllabi.length+' syllabus series</span><span>'+p.theory.length+' theory items</span><span class="gold">'+em.length+' platform emergencies</span></div></div>';
+}
+function epSyllabusDefinition(name){
+  const p=epCurrentProgram();if(!p||!name)return null;
+  const n=window.epLessonDetailHelpers?.normalize?window.epLessonDetailHelpers.normalize(name):String(name).toLowerCase().replace(/[^a-z0-9]/g,'');
+  return (p.syllabi||[]).find(x=>{
+    const q=window.epLessonDetailHelpers?.normalize?window.epLessonDetailHelpers.normalize(x.name):String(x.name).toLowerCase().replace(/[^a-z0-9]/g,'');
+    return q===n||q.includes(n)||n.includes(q);
+  })||null;
+}
+function epSyllabusBriefHtml(name){
+  const p=epCurrentProgram();if(!p)return '';
+  const s=epSyllabusDefinition(name);
+  if(!s)return '<div class="epSyllabusBrief empty"><b>Select a syllabus series</b><p>The active EP suit will show the exact minimum, mode, topics and special rules here.</p></div>';
+  const special=[];if(s.thirdFlightInstructed)special.push('Every 3rd flight is instructed');if(s.optional)special.push('Optional series');if(s.briefing)special.push('Briefing: '+s.briefing);if(s.remarks)special.push(s.remarks);
+  return '<div class="epSyllabusBrief"><div class="inlineHead"><div><h3>'+esc(s.name)+'</h3><p>'+esc(s.topics||'')+'</p></div><span class="epMode '+(s.mode==='SOLO'?'solo':s.optional?'optional':'')+'">'+esc(s.optional?'OPTIONAL':s.mode)+'</span></div><div class="epBriefMeta"><span>Minimum: '+esc(s.minimum==null?'—':s.minimum)+'</span><span>'+esc(epPlatformLabel(p.platformId))+'</span>'+(s.thirdFlightInstructed?'<span class="gold">3rd flight instructed</span>':'')+'</div>'+(special.length?'<ul class="epBriefList">'+special.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'')+'</div>';
+}
+function epTraineeProgramProgressHtml(t){
+  const p=epCurrentProgram();if(!p)return '';
+  const history=traineeEvaluationHistory(t.id),solos=getSoloFlights().filter(x=>x.traineeId===t.id),mockSolo=new Map(mockSoloBreakdown[t.id]||[]);
+  const norm=v=>window.epLessonDetailHelpers?.normalize?window.epLessonDetailHelpers.normalize(v):String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const rows=p.syllabi.map(s=>{
+    const sn=norm(s.name);
+    let completed=0;
+    if(s.mode==='SOLO'){
+      completed=solos.filter(x=>{const q=norm(x.syllabus);return q===sn||q.includes(sn)||sn.includes(q)}).length;
+      if(!solos.length){for(const [n,v] of mockSolo){const q=norm(n);if(q===sn||q.includes(sn)||sn.includes(q)){completed+=Number(v)||0}}}
+    }else if(s.mode!=='SIMULATOR'){
+      completed=history.filter(x=>{const q=norm(x.syllabus);return q===sn||q.includes(sn)||sn.includes(q)}).length;
+    }
+    const min=s.minimum==null?null:Number(s.minimum),done=s.optional?false:(min!=null&&completed>=min),current=!s.optional&&min!=null&&completed>0&&!done;
+    return {s,completed,min,done,current};
+  });
+  const required=rows.filter(x=>!x.s.optional&&x.min!=null),doneCount=required.filter(x=>x.done).length;
+  return '<section class="card timeline compactInfoCard"><div class="epProgramHeader"><div><h3>EP Training Suit · '+esc(p.name)+'</h3><p>'+esc(epPlatformLabel(p.platformId))+' · progress is resolved from the selected phase/platform package.</p></div><span class="pill blue">'+doneCount+'/'+required.length+' series met</span></div><div class="epProgramProgress">'+rows.map(x=>'<div class="epProgressRow '+(x.s.optional?'optional':'')+'"><div class="epProgressTop"><b>'+esc(x.s.name)+'</b><span>'+(x.min==null?'Optional / no fixed minimum':x.completed+' / '+x.min)+'</span></div><div class="epProgressMeta"><span>'+esc(x.s.mode)+'</span>'+(x.done?'<span class="done">Minimum met</span>':x.current?'<span class="current">In progress</span>':x.s.optional?'<span>Optional</span>':'<span>Not started</span>')+(x.s.thirdFlightInstructed?'<span>Every 3rd instructed</span>':'')+'</div>'+(x.min!=null?'<div class="progress" style="margin-top:7px;height:6px"><i style="width:'+Math.min(100,Math.round(x.completed/Math.max(1,x.min)*100))+'%"></i></div>':'')+'</div>').join('')+'</div></section>';
+}
+function epBuilderValidPrograms(phaseId,platformId){
+  if(!window.EP_CATALOG)return[];
+  return window.EP_CATALOG.programs.filter(p=>(!phaseId||p.phaseId===phaseId)&&(!platformId||p.platformId===platformId));
+}
 function cfgDefaults(){
   const ep='EP';
   return {
@@ -1176,7 +1222,7 @@ function bindGlobalFormUx(){
     if(control&&label&&!label.querySelector('.requiredStar'))label.insertAdjacentHTML('beforeend','<span class="requiredStar">*</span>');
   });
 }
-function bind(){bindGlobalFormUx();document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.go==='evaluation')state.evaluationTraineeId=null;go(b.dataset.go)});document.querySelectorAll('[data-start-eval]').forEach(b=>b.onclick=()=>go('evaluation',{evaluationTraineeId:b.dataset.startEval}));document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;render()});document.querySelectorAll('[data-trainee]').forEach(b=>b.onclick=()=>go('profile',{selectedTrainee:b.dataset.trainee}));document.querySelectorAll('[data-instructor]').forEach(b=>b.onclick=()=>go('instructor',{selectedInstructor:b.dataset.instructor}));document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});document.querySelectorAll('[data-emergency-profile-filter]').forEach(b=>b.onclick=()=>{state.emergencyProfileFilter=b.dataset.emergencyProfileFilter;render()});document.querySelectorAll('[data-settings-tab]').forEach(b=>b.onclick=()=>{state.settingsTab=b.dataset.settingsTab;render()});document.querySelectorAll('[data-roster-type]').forEach(b=>b.onclick=()=>{state.rosterType=b.dataset.rosterType;render()});
+function bind(){bindGlobalFormUx();if($('#evalSyllabusSelect')&&$('#epSyllabusBriefPanel'))$('#evalSyllabusSelect').onchange=e=>{$('#epSyllabusBriefPanel').innerHTML=epSyllabusBriefHtml(e.target.value)};document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.go==='evaluation')state.evaluationTraineeId=null;go(b.dataset.go)});document.querySelectorAll('[data-start-eval]').forEach(b=>b.onclick=()=>go('evaluation',{evaluationTraineeId:b.dataset.startEval}));document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;render()});document.querySelectorAll('[data-trainee]').forEach(b=>b.onclick=()=>go('profile',{selectedTrainee:b.dataset.trainee}));document.querySelectorAll('[data-instructor]').forEach(b=>b.onclick=()=>go('instructor',{selectedInstructor:b.dataset.instructor}));document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});document.querySelectorAll('[data-emergency-profile-filter]').forEach(b=>b.onclick=()=>{state.emergencyProfileFilter=b.dataset.emergencyProfileFilter;render()});document.querySelectorAll('[data-settings-tab]').forEach(b=>b.onclick=()=>{state.settingsTab=b.dataset.settingsTab;render()});document.querySelectorAll('[data-roster-type]').forEach(b=>b.onclick=()=>{state.rosterType=b.dataset.rosterType;render()});
 if($('#rosterSearch')){
   $('#rosterSearch').oninput=e=>{state.search=e.target.value;clearTimeout(window._rs);window._rs=setTimeout(render,120)};
   if($('#statusFilter'))$('#statusFilter').onchange=e=>{state.filter=e.target.value;render()};
@@ -1302,9 +1348,26 @@ function bindSettings(){
     state.builderPhase=e.target.value;state.builderPlatform='';
     const list=($('#courseTypeSelect')?.value==='EP'&&window.epCatalogHelpers)?window.epCatalogHelpers.platformsForPhase(e.target.value):[];
     if($('#builderPlatform')){$('#builderPlatform').disabled=!list.length;$('#builderPlatform').innerHTML='<option value="" selected disabled>Select platform</option>'+list.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('')}
+    if($('#builderTraining'))$('#builderTraining').innerHTML='<option value="" selected disabled>Select platform first</option>';
+    if($('#builderDay'))$('#builderDay').innerHTML='<option value="" selected disabled>Select package first</option>';
     updateBuilder();
   };
-  ['builderPlatform','builderTraining','builderDay','builderCountry'].forEach(id=>{if($('#'+id))$('#'+id).onchange=updateBuilder});
+  const syncEpPackageOptions=()=>{
+    const type=$('#courseTypeSelect')?.value||'',phase=$('#phaseSelect')?.value||'',platform=$('#builderPlatform')?.value||'';
+    if(type!=='EP'||!phase||!platform)return;
+    const programs=epBuilderValidPrograms(phase,platform),trainingIds=[...new Set(programs.map(p=>p.trainingKind))],dayIds=[...new Set(programs.filter(p=>!$('#builderTraining')?.value||p.trainingKind===$('#builderTraining').value).map(p=>p.dayNight))];
+    if($('#builderTraining')){
+      const cur=$('#builderTraining').value,opts=c.trainingKinds.filter(x=>trainingIds.includes(x.id));
+      $('#builderTraining').innerHTML='<option value="" '+(opts.some(x=>x.id===cur)?'':'selected')+' disabled>Select training package</option>'+opts.map(x=>'<option value="'+x.id+'" '+(x.id===cur?'selected':'')+'>'+esc(x.name)+'</option>').join('');
+    }
+    if($('#builderDay')){
+      const cur=$('#builderDay').value,opts=c.dayNight.filter(x=>dayIds.includes(x.id));
+      $('#builderDay').innerHTML='<option value="" '+(opts.some(x=>x.id===cur)?'':'selected')+' disabled>Select day / night</option>'+opts.map(x=>'<option value="'+x.id+'" '+(x.id===cur?'selected':'')+'>'+esc(x.name)+'</option>').join('');
+    }
+  };
+  if($('#builderPlatform'))$('#builderPlatform').onchange=()=>{state.builderPlatform=$('#builderPlatform').value;syncEpPackageOptions();updateBuilder()};
+  if($('#builderTraining'))$('#builderTraining').onchange=()=>{state.builderTraining=$('#builderTraining').value;syncEpPackageOptions();updateBuilder()};
+  ['builderDay','builderCountry'].forEach(id=>{if($('#'+id))$('#'+id).onchange=updateBuilder});
 
   if($('#courseBuilder'))$('#courseBuilder').onsubmit=e=>{
     e.preventDefault();const fd=new FormData(e.currentTarget),sel={courseType:String(fd.get('courseType')),phaseId:String(fd.get('phase')),platformId:String(fd.get('platformId')||''),trainingKind:String(fd.get('trainingKind')),dayNight:String(fd.get('dayNight')),country:String(fd.get('country'))};
@@ -1375,4 +1438,14 @@ function bindSettings(){
 render();
 </script>
 </body>
-</html>
+</html
+.epActiveSuit{border:1px solid #d8e6f2;background:#f8fbfe;border-radius:15px;padding:12px 13px;margin:0 0 14px}
+.epActiveSuitTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.epActiveSuit b{color:#082f57;font-size:12px}.epActiveSuit p{margin:3px 0 0;color:#71849a;font-size:9.5px;line-height:1.4}
+.epSyllabusBrief{border:1px solid #dbe8f3;background:#f8fbfe;border-radius:15px;padding:12px;margin:11px 0 2px}
+.epSyllabusBrief.empty{border-style:dashed;color:#71849a}.epSyllabusBrief h3{margin:0;color:#082f57;font-size:13px}.epSyllabusBrief p{font-size:10px;color:#526b83;line-height:1.5;margin:7px 0 0}
+.epBriefMeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.epBriefMeta span{padding:4px 7px;border-radius:999px;background:#eaf3fb;color:#345c80;font-size:8.5px;font-weight:800}.epBriefMeta .gold{background:#fff5dc;color:#9a6a06}.epBriefMeta .green{background:#e2f8ec;color:#13794d}
+.epBriefList{margin:8px 0 0;padding-left:18px;color:#39556f;font-size:9.5px;line-height:1.5}.epBriefList li+li{margin-top:3px}
+.epProgramProgress{display:grid;gap:7px;margin-top:10px}.epProgressRow{border:1px solid #e3ebf3;border-radius:13px;padding:10px;background:#fff}.epProgressTop{display:flex;align-items:center;justify-content:space-between;gap:8px}.epProgressTop b{font-size:10.5px;color:#0b315b}.epProgressTop span{font-size:8.5px;color:#657c93}.epProgressMeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.epProgressMeta span{font-size:8px;padding:4px 6px;border-radius:999px;background:#edf4fa;color:#526c84}.epProgressMeta .done{background:#ddf7e9;color:#117849}.epProgressMeta .current{background:#fff2d4;color:#8d650d}
+.epProgressRow.optional{opacity:.78}.epProgramHeader{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px}.epProgramHeader h3{margin:0;color:#082f57}.epProgramHeader p{margin:3px 0 0;color:#71849a;font-size:9.5px}
+.epBuilderHint{font-size:9px;color:#71849a;margin-top:5px;line-height:1.4}
+>
