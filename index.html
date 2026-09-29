@@ -113,17 +113,20 @@ function reportBars(items,maxItems=10){const list=(items||[]).slice(0,maxItems),
 function dist(values){const m={};values.filter(Boolean).forEach(v=>m[v]=(m[v]||0)+1);return Object.keys(m).map(name=>({name,count:m[name]})).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name))}
 function mean(values){const v=values.filter(x=>Number.isFinite(Number(x))).map(Number);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null}
 function currentActivityCounts(){return {evaluation:getEvaluations().length,safety:mockSafetyEvents.length,exams:mockExamAttempts.length,planned:getDailyReports().length,roster:trainees.length+instructors.length}}
-function home(){return `<section class="hero"><span class="pill blue">TRAINING OVERVIEW</span><h1>Aerostar EP Course</h1><p>RC / Simulator / Live Flights · Israel · Sep–Oct 2026</p><div class="courseMeta"><span class="pill blue">EP</span><span class="pill violet">RC Model</span><span class="pill green">New Training</span><span class="pill amber">Day</span><span class="pill gray">Israel</span></div></section>
-<section class="grid metrics">${metric('Trainees','5','4 active · 1 inactive')}${metric('Planned Flights','136','72 completed')}${metric('Syllabus Progress','68%','Course on track')}${metric('Average Grade','4.2 / 5','+0.3 over 2 weeks')}${metric('Safety Events','2','0 currently open')}</section>
-<div class="sectionHead"><h2>Operational activities</h2><p>Your daily training tools</p></div>
-<section class="grid actions">
-<button class="card action" data-go="evaluation"><div class="actionIcon" style="background:#2563eb">✓</div><div><b>Evaluation</b><small>Record and review flight evaluations</small></div><span class="arr">›</span></button>
-<button class="card action" data-go="safety"><div class="actionIcon" style="background:#059669">◈</div><div><b>Safety</b><small>Report and manage safety events</small></div><span class="arr">›</span></button>
-<button class="card action" data-go="exams"><div class="actionIcon" style="background:#7c3aed">▤</div><div><b>Theoretical Exams</b><small>Manage exams and trainee results</small></div><span class="arr">›</span></button>
-<button class="card action" data-go="planned"><div class="actionIcon" style="background:#f97316">▣</div><div><b>Planned vs Executed</b><small>Plan training and record outcomes</small></div><span class="arr">›</span></button>
-<button class="card action" data-go="roster"><div class="actionIcon" style="background:#0891b2">♙</div><div><b>Course Roster</b><small>Trainees and instructors in one place</small></div><span class="arr">›</span></button>
-<button class="card action" data-go="reports"><div class="actionIcon" style="background:#4f46e5">▥</div><div><b>Reports</b><small>Progress, analytics and insights</small></div><span class="arr">›</span></button>
-</section>`}
+function home(){
+ const counts=currentActivityCounts();
+ return '<section class="hero"><span class="pill blue">TRAINING OVERVIEW</span><h1>Aerostar EP Course</h1><p>RC / Simulator / Live Flights · Israel · Sep–Oct 2026</p><div class="courseMeta"><span class="pill blue">EP</span><span class="pill violet">RC Model</span><span class="pill green">New Training</span><span class="pill amber">Day</span><span class="pill gray">Israel</span></div></section>'+
+ '<section class="grid metrics">'+metric('Trainees','5','4 active · 1 inactive')+metric('Planned Flights','136','72 completed')+metric('Syllabus Progress','68%','Course on track')+metric('Average Grade','4.2 / 5','+0.3 over 2 weeks')+metric('Safety Events','2','0 currently open')+'</section>'+
+ '<div class="sectionHead"><h2>Operational activities</h2><p>Counts stay on the activity they belong to, not in a separate global strip.</p></div>'+
+ '<section class="grid actions">'+
+ '<button class="card action" data-go="evaluation"><div class="actionIcon" style="background:#2563eb">✓</div><div><b>Evaluation</b><small>Record and review flight evaluations</small></div><span class="activityCount">'+counts.evaluation+'</span><span class="arr">›</span></button>'+
+ '<button class="card action" data-go="safety"><div class="actionIcon" style="background:#059669">◈</div><div><b>Safety</b><small>Report and manage safety events</small></div><span class="activityCount">'+counts.safety+'</span><span class="arr">›</span></button>'+
+ '<button class="card action" data-go="exams"><div class="actionIcon" style="background:#7c3aed">▤</div><div><b>Theoretical Exams</b><small>Manage exams and trainee results</small></div><span class="activityCount">'+counts.exams+'</span><span class="arr">›</span></button>'+
+ '<button class="card action" data-go="planned"><div class="actionIcon" style="background:#f97316">▣</div><div><b>Planned vs Executed</b><small>Step-by-step daily report workflow</small></div><span class="activityCount">'+counts.planned+'</span><span class="arr">›</span></button>'+
+ '<button class="card action" data-go="roster"><div class="actionIcon" style="background:#0891b2">♙</div><div><b>Course Roster</b><small>Trainees and instructors in one place</small></div><span class="activityCount">'+counts.roster+'</span><span class="arr">›</span></button>'+
+ '<button class="card action" data-go="reports"><div class="actionIcon" style="background:#4f46e5">▥</div><div><b>Reports & Analytics</b><small>Course trends, distributions and export</small></div><span class="arr">›</span></button>'+
+ '</section>';
+}
 function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.find(x=>x.id===state.editingEval):null;return `<div class="eyebrow">Evaluation workflow</div><h1 class="pageTitle">Evaluation</h1><p class="sub">Phase 2 mirror: weighted criteria, drafts, verified-save concept, revision history and exports are simulated locally.</p>
 <div class="twoCol"><section class="card formCard"><div class="formTitle"><h2>${edit?`Edit evaluation · revision ${edit.revision}`:'New evaluation'}</h2><span class="pill amber" id="draftBadge">DRAFT · unsent</span></div>
 <form id="evalForm">
