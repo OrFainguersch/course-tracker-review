@@ -56,10 +56,18 @@ main{padding:18px 14px calc(88px + env(safe-area-inset-bottom));max-width:1480px
 
 .phaseConfig{padding:10px 0;border-bottom:1px solid #edf2f7}.phaseConfig:last-child{border-bottom:0}.phaseConfig summary{cursor:pointer;color:#175fb4;font-size:12px;font-weight:850;padding:6px 0}.trackingGrid{display:grid;gap:8px;margin-top:8px}.trackingRow{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px;align-items:center;padding:9px;border:1px solid var(--line);border-radius:12px;background:#fff}.trackingRow label{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:750;color:#334155}.trackingRow input[type=checkbox]{width:18px;height:18px}.accumulationCard{margin-top:14px;padding:14px;border:1px solid #bfdbfe;background:#f0f7ff;border-radius:16px}.accumulationCard h3{margin:0;color:#0a315c;font-size:16px}.accumulationCard p{margin:5px 0 10px;color:#64748b;font-size:11px}.accumulationInputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.accumulationInputs .field{margin:0}
 @media(max-width:560px){.trackingRow{grid-template-columns:1fr}.accumulationInputs{grid-template-columns:1fr}}
+
+.personAvatarSize{width:72px!important;height:72px!important;border-radius:20px!important;font-size:23px!important}
+.profileHero .personAvatarSize{width:86px!important;height:86px!important;border-radius:24px!important;font-size:27px!important}
+@media(min-width:760px){
+  .personAvatarSize{width:84px!important;height:84px!important;border-radius:22px!important;font-size:26px!important}
+  .profileHero .personAvatarSize{width:104px!important;height:104px!important;border-radius:28px!important;font-size:31px!important}
+  .personCard{min-height:118px}
+}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topTitle"><b>Aerostar EP Course</b><span>AEP-26 · Active</span></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker Next</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0442 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topTitle"><b>Aerostar EP Course</b><span>AEP-26 · Active</span></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker Next</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0443 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const trainees=[
@@ -251,7 +259,7 @@ function allInstructors(){return [...instructors.map(i=>({...i,type:'INSTRUCTOR'
 function personInitials(p){return String(p.name||'?').split(/\s+/).filter(Boolean).map(x=>x[0]).join('').slice(0,2).toUpperCase()}
 function personAvatar(p,editable=false){
   const content=p.photoData?'<img class="personPhoto" src="'+p.photoData+'" alt="">':esc(personInitials(p));
-  return '<span class="avatarWrap"><span class="bigAvatar" style="width:50px;height:50px;border-radius:16px">'+content+'</span>'+(editable?'<button class="avatarEdit" data-person-edit="'+p.type+':'+p.id+'" aria-label="Edit person">✎</button>':'')+'</span>';
+  return '<span class="avatarWrap"><span class="bigAvatar personAvatarSize">'+content+'</span>'+(editable?'<button class="avatarEdit" data-person-edit="'+p.type+':'+p.id+'" aria-label="Edit person">✎</button>':'')+'</span>';
 }
 function personEditModal(){
   const key=state.personEditKey||'',parts=key.split(':'),type=parts[0],id=parts.slice(1).join(':'),list=type==='INSTRUCTOR'?allInstructors():allTrainees(),p=list.find(x=>x.id===id);
