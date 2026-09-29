@@ -373,7 +373,7 @@ select option[value=""]{color:#8a9bad}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar Training</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0603 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar Training</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0604 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script src="./assets/ep-catalog.js"></script>
 <script src="./assets/aerostar-platform.js"></script>
 <script src="./assets/ip-catalog.js"></script>
@@ -1064,7 +1064,7 @@ function courseOverridesHtml(){
 function epCurrentSuitSummaryHtml(){
   const p=epCurrentProgram(),em=evaluationEmergencyDefs();
   if(!p)return '';
-  return '<div class="epActiveSuit"><div class="epActiveSuitTop"><div><b>'+esc(p.name)+'</b><p>'+esc(epPlatformLabel(p.platformId))+' · '+esc(p.source)+'</p></div><span class="pill green">ACTIVE SUIT</span></div><div class="epBriefMeta"><span>'+p.syllabi.length+' syllabus series</span><span>'+p.theory.length+' theory items</span><span class="gold">'+em.length+' platform emergencies</span></div></div>';
+  return '<div class="epActiveSuit"><div class="epActiveSuitTop"><div><b>'+esc(p.name)+'</b><p>'+esc(resolvedPlatformLabel(p))+' · '+esc(p.source)+'</p></div><span class="pill green">ACTIVE SUIT</span></div><div class="epBriefMeta"><span>'+p.syllabi.length+' syllabus series</span><span>'+p.theory.length+' theory items</span><span class="gold">'+em.length+' platform emergencies</span></div></div>';
 }
 function epSyllabusDefinition(name){
   const p=epCurrentProgram();if(!p||!name)return null;
@@ -1122,7 +1122,7 @@ function epTraineeProgramProgressHtml(t){
     return {s,completed,min,done,current};
   });
   const required=rows.filter(x=>!x.s.optional&&x.min!=null),doneCount=required.filter(x=>x.done).length;
-  return '<section class="card timeline compactInfoCard"><div class="epProgramHeader"><div><h3>EP Training Suit · '+esc(p.name)+'</h3><p>'+esc(epPlatformLabel(p.platformId))+' · progress is resolved from the selected phase/platform package.</p></div><span class="pill blue">'+doneCount+'/'+required.length+' series met</span></div><div class="epProgramProgress">'+rows.map(x=>'<div class="epProgressRow '+(x.s.optional?'optional':'')+'"><div class="epProgressTop"><b>'+esc(x.s.name)+'</b><span>'+(x.min==null?'Optional / no fixed minimum':x.completed+' / '+x.min)+'</span></div><div class="epProgressMeta"><span>'+esc(x.s.mode)+'</span>'+(x.done?'<span class="done">Minimum met</span>':x.current?'<span class="current">In progress</span>':x.s.optional?'<span>Optional</span>':'<span>Not started</span>')+(x.s.thirdFlightInstructed?'<span>Every 3rd instructed</span>':'')+'</div>'+(x.min!=null?'<div class="progress" style="margin-top:7px;height:6px"><i style="width:'+Math.min(100,Math.round(x.completed/Math.max(1,x.min)*100))+'%"></i></div>':'')+'</div>').join('')+'</div></section>';
+  return '<section class="card timeline compactInfoCard"><div class="epProgramHeader"><div><h3>EP Training Suit · '+esc(p.name)+'</h3><p>'+esc(resolvedPlatformLabel(p))+' · progress is resolved from the selected phase/platform package.</p></div><span class="pill blue">'+doneCount+'/'+required.length+' series met</span></div><div class="epProgramProgress">'+rows.map(x=>'<div class="epProgressRow '+(x.s.optional?'optional':'')+'"><div class="epProgressTop"><b>'+esc(x.s.name)+'</b><span>'+(x.min==null?'Optional / no fixed minimum':x.completed+' / '+x.min)+'</span></div><div class="epProgressMeta"><span>'+esc(x.s.mode)+'</span>'+(x.done?'<span class="done">Minimum met</span>':x.current?'<span class="current">In progress</span>':x.s.optional?'<span>Optional</span>':'<span>Not started</span>')+(x.s.thirdFlightInstructed?'<span>Every 3rd instructed</span>':'')+'</div>'+(x.min!=null?'<div class="progress" style="margin-top:7px;height:6px"><i style="width:'+Math.min(100,Math.round(x.completed/Math.max(1,x.min)*100))+'%"></i></div>':'')+'</div>').join('')+'</div></section>';
 }
 function epBuilderValidPrograms(phaseId,platformId){
   if(!window.EP_CATALOG)return[];
@@ -1536,8 +1536,10 @@ function bindSettings(){
     const program=epProgramResolve(raw);if(!program){toast('Complete the guided course path first');return}
     const cc=cfgGet(),ct=cfgItem(cc.courseTypes,sel.courseType),ph=cfgItem(cc.phases,sel.phaseId),tk=cfgItem(cc.trainingKinds,sel.trainingKind),dn=cfgItem(cc.dayNight,sel.dayNight),co=cfgItem(cc.countries,sel.country),arr=getDraftCourses(),name=String(fd.get('name')||state.builderName||'').trim();if(!name){toast('Course name is required');return}
     const code=String(fd.get('code')||state.builderCode||'').trim()||builderAutoCode(name,sel.courseType),activityRequirements=(program.experienceCounters||[]).map(x=>({type:x.id,label:x.name,unit:x.unit,required:x.minimum==null?null:Number(x.minimum),source:x.source||null})),emergencyCount=window.FLYMPUS_TRAINING?.requiredEmergencies(program).length||0,syllabusCount=program.syllabi?.length||0,criteriaCount=window.FLYMPUS_TRAINING?.catalog(sel.courseType)?.criteria?.length||0;
-    arr.unshift({id:cfgId('course'),name,code,summary:[ct?.name,ph?.name,resolvedPlatformLabel(program),tk?.name,dn?.name,co?.name].filter(Boolean).join(' · '),startsOn:String(fd.get('startsOn')||state.builderStartsOn||new Date().toISOString().slice(0,10)),selection:sel,platformId:sel.platformId,programId:sel.programId||program.id,profileId:null,syllabusCount,criteriaCount,emergencyCount,activityRequirements,activityRequirementCount:activityRequirements.length,snapshot:JSON.parse(JSON.stringify(program))});
-    localStorage.setItem('ct-review-courses',JSON.stringify(arr));toast('Course created with its resolved training suit');state.builderName='';state.builderCode='';state.builderStartsOn='';render();
+    const createdCourse={id:cfgId('course'),name,code,summary:[ct?.name,ph?.name,resolvedPlatformLabel(program),tk?.name,dn?.name,co?.name].filter(Boolean).join(' · '),startsOn:String(fd.get('startsOn')||state.builderStartsOn||new Date().toISOString().slice(0,10)),selection:sel,platformId:sel.platformId||program.platformId||'',programId:sel.programId||program.id,profileId:null,syllabusCount,criteriaCount,emergencyCount,activityRequirements,activityRequirementCount:activityRequirements.length,snapshot:JSON.parse(JSON.stringify(program))};
+    arr.unshift(createdCourse);localStorage.setItem('ct-review-courses',JSON.stringify(arr));
+    Object.assign(currentCourseMeta,{type:sel.courseType,phase:ph?.name||sel.phaseId,platformId:createdCourse.platformId,trainingKind:tk?.name||sel.trainingKind,dayNight:dn?.name||sel.dayNight,country:co?.name||sel.country,programId:createdCourse.programId,courseName:name,courseCode:code,startsOn:createdCourse.startsOn});currentCourseId=code;
+    localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta));state.settingsTab='overrides';state.builderName='';state.builderCode='';state.builderStartsOn='';toast('Course created · review or tailor its defaults');render();
   };
 
   document.querySelectorAll('[data-open-course-draft]').forEach(btn=>btn.onclick=()=>{
@@ -1548,7 +1550,7 @@ function bindSettings(){
   });
     document.querySelectorAll('[data-delete-course-draft]').forEach(btn=>btn.onclick=()=>{
     const arr=getDraftCourses().filter(x=>x.id!==btn.dataset.deleteCourseDraft);
-    localStorage.setItem('ct-review-courses',JSON.stringify(arr));toast('Draft course deleted');render();
+    localStorage.setItem('ct-review-courses',JSON.stringify(arr));toast('Course deleted');render();
   });
   if($('#typeWorkspace'))$('#typeWorkspace').onchange=e=>{state.typeWorkspace=e.target.value;state.phaseScope=e.target.value;render()};
   if($('#phaseScope'))$('#phaseScope').onchange=e=>{state.phaseScope=e.target.value;state.typeWorkspace=e.target.value;render()};
