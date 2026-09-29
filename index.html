@@ -53,10 +53,13 @@ main{padding:18px 14px calc(88px + env(safe-area-inset-bottom));max-width:1480px
 
 .pageActions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin:10px 0 14px}.manageBanner{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:14px;margin-bottom:12px}.manageBanner b{color:#174f90}.manageBanner span{font-size:11px;color:#64748b}.avatarWrap{position:relative;display:inline-grid;place-items:center;flex:0 0 auto}.avatarWrap .bigAvatar{overflow:hidden}.personPhoto{width:100%;height:100%;object-fit:cover;display:block}.avatarEdit{position:absolute;right:-5px;bottom:-5px;width:27px;height:27px;border:2px solid #fff;border-radius:50%;background:#1768d5;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:900;box-shadow:0 3px 10px rgba(15,23,42,.18);padding:0}.managePersonBtn{width:34px;height:34px;border-radius:10px;border:1px solid #cfe1f5;background:#eef6ff;color:#175fb4;font-size:15px;font-weight:900}.photoPreview{width:92px;height:92px;border-radius:20px;border:1px solid var(--line);overflow:hidden;display:grid;place-items:center;background:#eef4fb;color:#174f90;font-size:24px;font-weight:900}.photoPreview img{width:100%;height:100%;object-fit:cover}.identityEditGrid{display:grid;grid-template-columns:100px minmax(0,1fr);gap:14px;align-items:start}.mutedHint{font-size:11px;color:#64748b;line-height:1.4}
 @media(max-width:560px){.identityEditGrid{grid-template-columns:1fr}.photoPreview{width:84px;height:84px}}
+
+.phaseConfig{padding:10px 0;border-bottom:1px solid #edf2f7}.phaseConfig:last-child{border-bottom:0}.phaseConfig summary{cursor:pointer;color:#175fb4;font-size:12px;font-weight:850;padding:6px 0}.trackingGrid{display:grid;gap:8px;margin-top:8px}.trackingRow{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px;align-items:center;padding:9px;border:1px solid var(--line);border-radius:12px;background:#fff}.trackingRow label{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:750;color:#334155}.trackingRow input[type=checkbox]{width:18px;height:18px}.accumulationCard{margin-top:14px;padding:14px;border:1px solid #bfdbfe;background:#f0f7ff;border-radius:16px}.accumulationCard h3{margin:0;color:#0a315c;font-size:16px}.accumulationCard p{margin:5px 0 10px;color:#64748b;font-size:11px}.accumulationInputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.accumulationInputs .field{margin:0}
+@media(max-width:560px){.trackingRow{grid-template-columns:1fr}.accumulationInputs{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topTitle"><b>Aerostar EP Course</b><span>AEP-26 · Active</span></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker Next</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0438 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topTitle"><b>Aerostar EP Course</b><span>AEP-26 · Active</span></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker Next</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0439 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const trainees=[
@@ -306,11 +309,32 @@ function traineeProfile(){
 }
 function mini(l,v){return `<div class="mini"><small>${l}</small><strong>${v}</strong></div>`}
 
+
+function defaultPhaseTracking(phaseId){
+  const full=phaseId==='ep_full';
+  return {enabled:full,counters:{
+    TAKEOFF:{enabled:full,minimum:null,label:'Takeoffs'},
+    LANDING:{enabled:full,minimum:null,label:'Landings'},
+    TOUCH_AND_GO:{enabled:false,minimum:null,label:'Touch & Go'},
+    TRAINING_HOUR:{enabled:false,minimum:null,label:'Flight hours'}
+  }};
+}
+function normalizePhaseTracking(phase){
+  const d=defaultPhaseTracking(phase.id),raw=phase.tracking||{},rawCounters=raw.counters||{};
+  return {enabled:raw.enabled===undefined?d.enabled:!!raw.enabled,counters:Object.fromEntries(Object.entries(d.counters).map(([k,v])=>[k,{...v,...(rawCounters[k]||{})}]))};
+}
+function enabledPhaseCounters(phase){if(!phase)return[];const t=normalizePhaseTracking(phase);return t.enabled?Object.entries(t.counters).filter(([,v])=>v.enabled).map(([type,v])=>({type,...v})):[]}
+function builderAccumulationHtml(phase){
+  const counters=enabledPhaseCounters(phase);if(!counters.length)return '';
+  return '<div class="accumulationCard"><div class="inlineHead"><div><h3>Accumulation requirements · '+esc(phase.name)+'</h3><p>This section appears only because this phase tracks accumulated events. Set the required minimums for this specific course.</p></div><span class="pill blue">Phase-specific</span></div><div class="accumulationInputs">'+counters.map(x=>'<div class="field"><label>Required '+esc(x.label)+'</label><input class="input" name="activityReq_'+x.type+'" type="number" min="0" step="'+(x.type==='TRAINING_HOUR'?'0.1':'1')+'" placeholder="Not set" value="'+(x.minimum==null?'':x.minimum)+'"></div>').join('')+'</div></div>';
+}
+function currentCoursePhase(){const c=cfgGet();return c.phases.find(x=>x.type===currentCourseMeta.type&&x.name===currentCourseMeta.phase)||null}
+function currentCourseTrackingCounters(){return enabledPhaseCounters(currentCoursePhase())}
 function cfgDefaults(){
   const ep='EP';
   return {
     courseTypes: courseTypes.map(x=>({id:x.id,name:x.name})),
-    phases: phaseTemplates.map(x=>({id:x.id,type:x.type,name:x.name})),
+    phases: phaseTemplates.map(x=>({id:x.id,type:x.type,name:x.name,tracking:defaultPhaseTracking(x.id)})),
     trainingKinds: trainingKinds.map((name,n)=>({id:['new','conversion','instructor'][n]||('training_'+n),name})),
     dayNight: dayNight.map((name,n)=>({id:['day','night'][n]||('time_'+n),name})),
     countries: countries.map((name,n)=>({id:['israel','cyprus'][n]||('country_'+n),name})),
@@ -324,6 +348,7 @@ function cfgGet(){
     const raw=JSON.parse(localStorage.getItem('ct-review-catalogs')||'null');
     if(!raw)return cfgDefaults();
     const c={...cfgDefaults(),...raw};
+    c.phases=(c.phases||[]).map(x=>({...x,tracking:normalizePhaseTracking(x)}));
     c.syllabi=(c.syllabi||[]).map(x=>({...x,courseType:x.courseType||'EP',minimum:x.minimum===undefined?null:x.minimum,instructorPresence:x.instructorPresence||'WITH INSTRUCTOR'}));
     c.criteria=(c.criteria||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
     c.emergencies=(c.emergencies||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
@@ -383,10 +408,10 @@ function cfgTypeScopedCard(title,key,list,type,kind){
 }
 function cfgPhaseCard(c){
   const scope=state.phaseScope||c.courseTypes[0]?.id||'',list=c.phases.filter(x=>x.type===scope);
-  return '<section class="card settingBox"><h3>Phases by course type</h3><div class="field"><label>Scope type</label><select id="phaseScope">'+
+  return '<section class="card settingBox"><h3>Phases by course type</h3><p class="sub">Accumulation counters are phase-specific. Configure them only where they are relevant.</p><div class="field"><label>Scope type</label><select id="phaseScope">'+
     c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+
     '</select></div><div class="editableList" style="margin-top:10px">'+
-    list.map(x=>'<div class="editableRow"><input class="input cfgPhaseName" data-id="'+x.id+'" value="'+esc(x.name)+'"><button class="btn danger small" data-phase-remove="'+x.id+'">Remove</button></div>').join('')+
+    list.map(x=>{const tr=normalizePhaseTracking(x);return '<div class="phaseConfig"><div class="editableRow"><input class="input cfgPhaseName" data-id="'+x.id+'" value="'+esc(x.name)+'"><button class="btn danger small" data-phase-remove="'+x.id+'">Remove</button></div><details><summary>Accumulation requirements</summary><label class="checkItem"><input class="phaseTrackingEnabled" data-id="'+x.id+'" type="checkbox" '+(tr.enabled?'checked':'')+'>Track accumulated activity in this phase</label><div class="trackingGrid">'+Object.entries(tr.counters).map(([type,v])=>'<div class="trackingRow"><label><input class="phaseCounterEnabled" data-id="'+x.id+'" data-counter="'+type+'" type="checkbox" '+(v.enabled?'checked':'')+'> '+esc(v.label)+'</label><input class="input phaseCounterMinimum" data-id="'+x.id+'" data-counter="'+type+'" type="number" min="0" step="'+(type==='TRAINING_HOUR'?'0.1':'1')+'" placeholder="Default minimum" value="'+(v.minimum==null?'':v.minimum)+'"></div>').join('')+'</div></details></div>'}).join('')+
     '</div><form class="toolbar" id="cfgAddPhase"><input class="input" name="name" placeholder="Add phase" required><button class="btn secondary" type="submit">＋ Add</button></form></section>';
 }
 function cfgCriteriaCard(list){
@@ -435,7 +460,7 @@ function settings(){
     html+='<div class="field"><label>Day / Night</label><select name="dayNight" id="builderDay">'+c.dayNight.map(x=>'<option value="'+x.id+'" '+(x.id===time?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Country</label><select name="country" id="builderCountry">'+c.countries.map(x=>'<option value="'+x.id+'" '+(x.id===country?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Start date</label><input class="input" name="startsOn" type="date"></div></div>';
-    html+='<div id="cfgResolvedPreview">'+cfgResolvedHtml(sel)+'</div><div class="toolbar"><button class="btn sky" type="submit" '+(phase?'':'disabled')+'>＋ Create as draft</button></div></form></section>';
+    html+='<div id="builderAccumulation">'+builderAccumulationHtml(cfgItem(c.phases,phase))+'</div><div id="cfgResolvedPreview">'+cfgResolvedHtml(sel)+'</div><div class="toolbar"><button class="btn sky" type="submit" '+(phase?'':'disabled')+'>＋ Create as draft</button></div></form></section>';
     html+='<section class="card sideCard"><h3>Draft courses</h3><p class="sub">Each draft keeps a snapshot of the matched configuration.</p><div class="draftList">'+(created.length?created.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.name)+' · '+esc(x.code)+'</b><span class="pill amber">DRAFT</span></div><p>'+esc(x.summary||'')+'</p><div class="profileMeta"><span class="pill blue">'+(x.syllabusCount||0)+' syllabi</span><span class="pill violet">'+(x.criteriaCount||0)+' criteria</span><span class="pill gray">'+(x.emergencyCount||0)+' emergencies</span></div></div>').join(''):'<p style="color:#64748b;font-size:12px">No local draft courses yet.</p>')+'</div></section></div>';
   }
 
@@ -590,7 +615,7 @@ function bindSettings(){
   const updateBuilder=()=>{
     const type=$('#courseTypeSelect')?.value||'',phase=$('#phaseSelect')?.value||'',training=$('#builderTraining')?.value||'',time=$('#builderDay')?.value||'',country=$('#builderCountry')?.value||'';
     state.builderType=type;state.builderPhase=phase;state.builderTraining=training;state.builderDay=time;state.builderCountry=country;
-    const box=$('#cfgResolvedPreview');if(box)box.innerHTML=cfgResolvedHtml({courseType:type,phaseId:phase,trainingKind:training,dayNight:time,country});
+    const acc=$('#builderAccumulation');if(acc)acc.innerHTML=builderAccumulationHtml(cfgItem(c.phases,phase));const box=$('#cfgResolvedPreview');if(box)box.innerHTML=cfgResolvedHtml({courseType:type,phaseId:phase,trainingKind:training,dayNight:time,country});
   };
   if($('#courseTypeSelect'))$('#courseTypeSelect').onchange=e=>{
     const list=c.phases.filter(x=>x.type===e.target.value);state.builderType=e.target.value;state.builderPhase=list[0]?.id||'';
@@ -600,8 +625,8 @@ function bindSettings(){
 
   if($('#courseBuilder'))$('#courseBuilder').onsubmit=e=>{
     e.preventDefault();const fd=new FormData(e.currentTarget),sel={courseType:String(fd.get('courseType')),phaseId:String(fd.get('phase')),trainingKind:String(fd.get('trainingKind')),dayNight:String(fd.get('dayNight')),country:String(fd.get('country'))};
-    const p=cfgResolve(sel),cc=cfgGet(),ct=cfgItem(cc.courseTypes,sel.courseType),ph=cfgItem(cc.phases,sel.phaseId),tk=cfgItem(cc.trainingKinds,sel.trainingKind),dn=cfgItem(cc.dayNight,sel.dayNight),co=cfgItem(cc.countries,sel.country),arr=getDraftCourses();
-    arr.unshift({id:cfgId('course'),name:String(fd.get('name')),code:String(fd.get('code')),summary:[ct?.name,ph?.name,tk?.name,dn?.name,co?.name].filter(Boolean).join(' · '),startsOn:String(fd.get('startsOn')||''),profileId:p?.id||null,syllabusCount:p?.syllabusIds.length||0,criteriaCount:p?.criteriaIds.length||0,emergencyCount:p?.emergencyIds.length||0,snapshot:p?JSON.parse(JSON.stringify(p)):null});
+    const p=cfgResolve(sel),cc=cfgGet(),ct=cfgItem(cc.courseTypes,sel.courseType),ph=cfgItem(cc.phases,sel.phaseId),tk=cfgItem(cc.trainingKinds,sel.trainingKind),dn=cfgItem(cc.dayNight,sel.dayNight),co=cfgItem(cc.countries,sel.country),arr=getDraftCourses(),activityRequirements=enabledPhaseCounters(ph).map(x=>({type:x.type,label:x.label,required:fd.get('activityReq_'+x.type)===''?null:Number(fd.get('activityReq_'+x.type))}));
+    arr.unshift({id:cfgId('course'),name:String(fd.get('name')),code:String(fd.get('code')),summary:[ct?.name,ph?.name,tk?.name,dn?.name,co?.name].filter(Boolean).join(' · '),startsOn:String(fd.get('startsOn')||''),profileId:p?.id||null,syllabusCount:p?.syllabusIds.length||0,criteriaCount:p?.criteriaIds.length||0,emergencyCount:p?.emergencyIds.length||0,activityRequirements,activityRequirementCount:activityRequirements.length,snapshot:p?JSON.parse(JSON.stringify(p)):null});
     localStorage.setItem('ct-review-courses',JSON.stringify(arr));toast(p?'Draft created with matched configuration':'Draft created — no matching profile');render();
   };
 
@@ -611,7 +636,7 @@ function bindSettings(){
   if($('#cfgSaveCatalogs'))$('#cfgSaveCatalogs').onclick=()=>{
     const cc=cfgGet();
     document.querySelectorAll('.cfgName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
-    document.querySelectorAll('.cfgPhaseName').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
+    document.querySelectorAll('.cfgPhaseName').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});document.querySelectorAll('.phaseTrackingEnabled').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x){x.tracking=normalizePhaseTracking(x);x.tracking.enabled=el.checked}});document.querySelectorAll('.phaseCounterEnabled').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x){x.tracking=normalizePhaseTracking(x);x.tracking.counters[el.dataset.counter].enabled=el.checked}});document.querySelectorAll('.phaseCounterMinimum').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x){x.tracking=normalizePhaseTracking(x);x.tracking.counters[el.dataset.counter].minimum=el.value===''?null:Number(el.value)}});
     document.querySelectorAll('.cfgScopedName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
     document.querySelectorAll('.cfgScopedWeight').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x)x.weight=Math.max(0,Math.min(100,Number(el.value)||0))});document.querySelectorAll('.cfgSyllabusMinimum').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.minimum=el.value===''?null:Math.max(0,Math.min(999,Math.floor(Number(el.value)||0)))});document.querySelectorAll('.cfgSyllabusPresence').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.instructorPresence=el.value});
     cfgSave(cc);toast('All changes saved for this course type');render();
@@ -639,7 +664,7 @@ function bindSettings(){
   document.querySelectorAll('[data-phase-remove]').forEach(btn=>btn.onclick=()=>{const cc=cfgGet();cc.phases=cc.phases.filter(x=>x.id!==btn.dataset.phaseRemove);cfgSave(cc);toast('Phase removed');render()});
   if($('#cfgAddPhase'))$('#cfgAddPhase').onsubmit=e=>{
     e.preventDefault();const cc=cfgGet(),name=String(new FormData(e.currentTarget).get('name')||'').trim(),type=state.typeWorkspace||state.phaseScope||cc.courseTypes[0]?.id||'';if(!name||!type)return;
-    cc.phases.push({id:cfgId('phase'),type,name});cfgSave(cc);toast(name+' added to '+(cfgItem(cc.courseTypes,type)?.name||type));render();
+    const id=cfgId('phase');cc.phases.push({id,type,name,tracking:defaultPhaseTracking(id)});cfgSave(cc);toast(name+' added to '+(cfgItem(cc.courseTypes,type)?.name||type));render();
   };
 
   if($('#cfgResetCatalogs'))$('#cfgResetCatalogs').onclick=()=>{if(confirm('Reset all course-type configuration to defaults?')){localStorage.removeItem('ct-review-catalogs');state.typeWorkspace=null;state.phaseScope=null;toast('Configuration reset');render()}};
