@@ -143,16 +143,18 @@ function home(){
  '<button class="card action" data-go="reports"><div class="actionIcon" style="background:#4f46e5">▥</div><div><b>Reports & Analytics</b><small>Course trends, distributions and export</small></div><span class="arr">›</span></button>'+
  '</section>';
 }
-function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.find(x=>x.id===state.editingEval):null;return `<div class="eyebrow">Evaluation workflow</div><h1 class="pageTitle">Evaluation</h1><p class="sub">Phase 2 mirror: weighted criteria, drafts, verified-save concept, revision history and exports are simulated locally.</p>
+function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.find(x=>x.id===state.editingEval):null,allT=[...trainees,...getRosterExtras().filter(x=>x.type==='TRAINEE')],activeT=allT.filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active');return `<div class="eyebrow">Evaluation workflow</div><h1 class="pageTitle">Evaluation</h1><p class="sub">Phase 2 mirror: weighted criteria, drafts, verified-save concept, revision history and exports are simulated locally.</p>
 <div class="twoCol"><section class="card formCard"><div class="formTitle"><h2>${edit?`Edit evaluation · revision ${edit.revision}`:'New evaluation'}</h2><span class="pill amber" id="draftBadge">DRAFT · unsent</span></div>
 <form id="evalForm">
 <div class="fields">
-<div class="field"><label>Trainee</label><select name="trainee" ${edit?'disabled':''}>${trainees.filter(t=>t.status==='Active').map(t=>`<option value="${t.id}" ${(edit?.traineeId||state.selectedTrainee)===t.id?'selected':''}>${t.name}</option>`).join('')}</select></div>
+<div class="field"><label>Trainee</label><select name="trainee" ${edit?'disabled':''}>${activeT.map(t=>`<option value="${t.id}" ${(edit?.traineeId||state.selectedTrainee)===t.id?'selected':''}>${t.name}</option>`).join('')}</select></div>
 <div class="field"><label>Instructor</label><select name="instructor">${instructors.map(i=>`<option value="${i.id}" ${edit?.instructorId===i.id?'selected':''}>${i.name}</option>`).join('')}</select></div>
 <div class="field"><label>Syllabus</label><select name="syllabus" ${edit?'disabled':''}>${syllabi.map(sy=>`<option ${edit?.syllabus===sy?'selected':''}>${sy}</option>`).join('')}</select></div>
 <div class="field"><label>Duration</label><select name="duration">${[15,20,25,30,40].map(v=>`<option value="${v}" ${Number(edit?.duration||20)===v?'selected':''}>${v} min</option>`).join('')}</select></div>
 <div class="field"><label>Date</label><input class="input" name="date" type="date" value="${edit?.flightDate||new Date().toISOString().slice(0,10)}"></div>
 <div class="field"><label>Time</label><input class="input" name="time" type="time" value="${edit?.time||'10:00'}"></div>
+<div class="field"><label>Takeoffs</label><input class="input" name="takeoffs" type="number" min="0" value="${edit?.takeoffs??0}"></div>
+<div class="field"><label>Landings</label><input class="input" name="landings" type="number" min="0" value="${edit?.landings??0}"></div>
 </div>
 <div class="sectionHead"><h2>Assessment criteria</h2><p>Weighted score exactly like the Phase 2 workflow.</p></div>
 <div class="criteria">${criteria.map(c=>`<div class="criterion"><span>${c.name} <small style="color:#94a3b8">(${Math.round(c.weight*100)}%)</small></span><select name="score_${c.id}"><option value="0">—</option>${[1,2,3,4,5].map(v=>`<option value="${v}" ${edit?.scores?.[c.id]===v?'selected':''}>${v}</option>`).join('')}</select></div>`).join('')}</div>
