@@ -51,7 +51,7 @@ main{padding:18px 14px calc(88px + env(safe-area-inset-bottom));max-width:1480px
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topTitle"><b>Aerostar EP Course</b><span>AEP-26 · Active</span></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker Next</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0431 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topTitle"><b>Aerostar EP Course</b><span>AEP-26 · Active</span></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker Next</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0432 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const trainees=[
@@ -86,7 +86,7 @@ function safeArrayStorage(key){try{const v=JSON.parse(localStorage.getItem(key)|
 function safeObjectStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch{return {}}}
 
 function toast(t){const x=$('#toast');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),1700)}
-function getEvaluations(){try{return JSON.parse(localStorage.getItem('ct-review-evals')||'[]')}catch{return []}}function setEvaluations(x){try{localStorage.setItem('ct-review-evals',JSON.stringify(x))}catch{}}
+function getEvaluations(){return safeArrayStorage('ct-review-evals')}function setEvaluations(x){try{localStorage.setItem('ct-review-evals',JSON.stringify(x))}catch{}}
 const nav=[['home','⌂','Home'],['evaluation','✓','Evaluation'],['safety','◈','Safety'],['exams','▤','Exams'],['planned','▣','Planned vs Executed'],['__label','','COURSE'],['roster','♙','Course Roster'],['reports','▥','Reports'],['settings','⚙','Course Settings']];
 function renderNav(){const n=$('#nav');n.innerHTML=nav.map(([id,ic,l])=>id==='__label'?'<div class="navLabel">'+l+'</div>':`<button class="navBtn ${state.screen===id?'active':''}" data-nav="${id}"><span>${ic}</span><span>${l}</span></button>`).join('');n.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>go(b.dataset.nav));}
 function go(screen,extra={}){Object.assign(state,extra,{screen});saveUiState();$('#drawer').classList.remove('open');render()}
@@ -120,7 +120,7 @@ t3:{current:'Basic Emergencies B',completed:4,minimum:4,presence:'WITH INSTRUCTO
 t4:{current:'Circuits',completed:2,minimum:4,presence:'WITH INSTRUCTOR',reviewRequired:false,next:'Basic Emergencies A',optional:[]}
 };
 
-function getDailyReports(){try{return JSON.parse(localStorage.getItem('ct-review-daily-reports')||'[]')}catch{return []}}
+function getDailyReports(){return safeArrayStorage('ct-review-daily-reports')}
 function saveDailyReports(v){localStorage.setItem('ct-review-daily-reports',JSON.stringify(v))}
 function allEvaluationsForAnalytics(){
  const saved=getEvaluations().map(e=>({date:e.flightDate,traineeId:e.traineeId,instructorId:e.instructorId,syllabus:e.syllabus,grade:Number(e.grade)||0,emergencies:(e.emergencies||[]).flatMap((n,i)=>Array.from({length:Number(n)||0},()=>emergencies[i])).filter(Boolean)}));
@@ -130,9 +130,9 @@ function reportBars(items,maxItems=10){const list=(items||[]).slice(0,maxItems),
 function dist(values){const m={};values.filter(Boolean).forEach(v=>m[v]=(m[v]||0)+1);return Object.keys(m).map(name=>({name,count:m[name]})).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name))}
 function mean(values){const v=values.filter(x=>Number.isFinite(Number(x))).map(Number);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null}
 
-function getSafetyRecords(){try{return JSON.parse(localStorage.getItem('ct-review-safety')||'[]')}catch{return []}}
+function getSafetyRecords(){return safeArrayStorage('ct-review-safety')}
 function saveSafetyRecords(v){localStorage.setItem('ct-review-safety',JSON.stringify(v))}
-function getExamRecords(){try{return JSON.parse(localStorage.getItem('ct-review-exams')||'[]')}catch{return []}}
+function getExamRecords(){return safeArrayStorage('ct-review-exams')}
 function saveExamRecords(v){localStorage.setItem('ct-review-exams',JSON.stringify(v))}
 function currentActivityCounts(){return {evaluation:getEvaluations().length,safety:mockSafetyEvents.length+getSafetyRecords().length,exams:mockExamAttempts.length+getExamRecords().length,planned:getDailyReports().length,roster:trainees.length+instructors.length}}
 function home(){
@@ -228,7 +228,7 @@ function updateCourseMembership(personId,type,patch){
   bucket[personId]={...(bucket[personId]||{}),...patch};
   root[currentCourseId]=course;saveCourseMembershipState(root);
 }
-function getActivityEvents(){try{return JSON.parse(localStorage.getItem('ct-review-activity-events')||'[]')}catch{return []}}
+function getActivityEvents(){return safeArrayStorage('ct-review-activity-events')}
 function saveActivityEvents(v){localStorage.setItem('ct-review-activity-events',JSON.stringify(v))}
 function activityTotalsFor(traineeId){
   const out={TAKEOFF:0,LANDING:0,TOUCH_AND_GO:0,TRAINING_HOUR:0,TECH_ACTIVITY:0};
@@ -236,9 +236,9 @@ function activityTotalsFor(traineeId){
   return out;
 }
 function activityLabel(type){return ({TAKEOFF:'Takeoff',LANDING:'Landing',TOUCH_AND_GO:'Touch & Go',TRAINING_HOUR:'Training hour',TECH_ACTIVITY:'Technician activity'})[type]||type}
-function getSoloFlights(){try{return JSON.parse(localStorage.getItem('ct-review-solo-flights')||'[]')}catch{return []}}
+function getSoloFlights(){return safeArrayStorage('ct-review-solo-flights')}
 function saveSoloFlights(v){localStorage.setItem('ct-review-solo-flights',JSON.stringify(v))}
-function getRosterExtras(){try{return JSON.parse(localStorage.getItem('ct-review-roster')||'[]')}catch{return []}}
+function getRosterExtras(){return safeArrayStorage('ct-review-roster')}
 
 function instructorProfile(){
  const base=instructors.find(x=>x.id===state.selectedInstructor)||instructors[0],membership=courseMembershipFor(base.id,'INSTRUCTOR',{role:base.role||'INSTRUCTOR'}),i={...base,role:membership.role||'INSTRUCTOR'};
@@ -437,7 +437,7 @@ function settings(){
   return html;
 }
 function getPhaseTemplates(){try{return [...phaseTemplates,...JSON.parse(localStorage.getItem('ct-review-phases')||'[]')]}catch{return phaseTemplates}}
-function getDraftCourses(){try{return JSON.parse(localStorage.getItem('ct-review-courses')||'[]')}catch{return []}}
+function getDraftCourses(){return safeArrayStorage('ct-review-courses')}
 function getSettings(){try{return JSON.parse(localStorage.getItem('ct-review-settings')||'{}')}catch{return {}}}function saveSettings(x){try{localStorage.setItem('ct-review-settings',JSON.stringify(x))}catch{}}
 
 function plannedVsExecuted(){
