@@ -355,8 +355,15 @@ select option[value=""]{color:#8a9bad}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0529 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0530 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script src="./assets/ep-catalog.js"></script>
+<script src="./assets/ep-lessons-screening.js"></script>
+<script src="./assets/ep-lessons-rc-1.js"></script>
+<script src="./assets/ep-lessons-rc-2.js"></script>
+<script src="./assets/ep-lessons-half.js"></script>
+<script src="./assets/ep-lessons-full-day-a.js"></script>
+<script src="./assets/ep-lessons-full-day-b.js"></script>
+<script src="./assets/ep-lessons-night.js"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentCourseId='AEP-26';
@@ -940,12 +947,12 @@ function epLibraryHtml(){
   const cat=window.EP_CATALOG;if(!cat)return '<div class="infoBox">EP catalog not loaded.</div>';
   const phaseName=id=>cat.phases.find(x=>x.id===id)?.name||id;
   const programs=cat.programs||[];
-  const programCards=programs.map(p=>'<details class="epProgramCard"><summary><div><b>'+esc(p.name)+'</b><small>'+esc(p.source)+' · '+esc(epPlatformLabel(p.platformId))+'</small></div><span class="pill blue">'+esc(p.totalFlights||p.syllabi.length+' series')+'</span></summary><div class="epProgramBody">'+
+  const programCards=programs.map(p=>{const detailCount=(window.EP_LESSON_DETAILS||[]).filter(x=>x.programId===p.id).length;return '<details class="epProgramCard"><summary><div><b>'+esc(p.name)+'</b><small>'+esc(p.source)+' · '+esc(epPlatformLabel(p.platformId))+(detailCount?' · '+detailCount+' instructor lesson briefs':'')+'</small></div><span class="pill blue">'+esc(p.totalFlights||p.syllabi.length+' series')+'</span></summary><div class="epProgramBody">'+
     (p.theoryRequirement?'<div class="epSourceNote"><b>Theory gate:</b> '+esc(p.theoryRequirement)+'</div>':'')+
     (p.prerequisite?'<div class="epSourceNote"><b>Prerequisite:</b> '+esc(p.prerequisite)+'</div>':'')+
     (p.completion?'<div class="epSourceNote"><b>Completion:</b> '+esc(p.completion)+'</div>':'')+
     '<div class="sectionHead"><h2>Theory</h2><p>'+p.theory.length+' items</p></div><div style="overflow:auto"><table class="epMiniTable"><thead><tr><th>#</th><th>Lesson</th><th>Type</th><th>Duration</th></tr></thead><tbody>'+p.theory.map(x=>'<tr><td>'+esc(x.no)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.type)+'</td><td>'+esc(x.duration)+'</td></tr>').join('')+'</tbody></table></div>'+
-    '<div class="sectionHead"><h2>Practical syllabus</h2><p>'+p.syllabi.length+' series</p></div><div style="overflow:auto"><table class="epMiniTable"><thead><tr><th>Series</th><th>Min.</th><th>Mode</th><th>Topics</th></tr></thead><tbody>'+p.syllabi.map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td>'+esc(x.minimum==null?'—':x.minimum)+'</td><td><span class="epMode '+(x.mode==='SOLO'?'solo':x.optional?'optional':'')+'">'+esc(x.optional?'OPTIONAL':x.mode)+'</span></td><td>'+esc(x.topics||'')+(x.remarks?'<br><small>'+esc(x.remarks)+'</small>':'')+'</td></tr>').join('')+'</tbody></table></div></div></details>').join('');
+    '<div class="sectionHead"><h2>Practical syllabus</h2><p>'+p.syllabi.length+' series</p></div><div style="overflow:auto"><table class="epMiniTable"><thead><tr><th>Series</th><th>Min.</th><th>Mode</th><th>Topics</th></tr></thead><tbody>'+p.syllabi.map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td>'+esc(x.minimum==null?'—':x.minimum)+'</td><td><span class="epMode '+(x.mode==='SOLO'?'solo':x.optional?'optional':'')+'">'+esc(x.optional?'OPTIONAL':x.mode)+'</span></td><td>'+esc(x.topics||'')+(x.remarks?'<br><small>'+esc(x.remarks)+'</small>':'')+'</td></tr>').join('')+'</tbody></table></div></div></details>'}).join('');
   const platformCards=cat.platforms.map(pl=>{const em=window.epCatalogHelpers.emergenciesForPlatform(pl.id);return '<div class="epPlatformCard"><div class="inlineHead"><h4>'+esc(pl.name)+'</h4><span class="pill '+(em.length?'green':'gray')+'">'+em.length+' emergencies</span></div><p>Applicable phase: '+esc((pl.phaseIds||[]).map(phaseName).join(', '))+'</p>'+(em.length?'<div class="epEmergencyChips">'+em.map(x=>'<span>'+esc(x.name)+'</span>').join('')+'</div>':'<p>No emergency manual imported for this training device.</p>')+'</div>'}).join('');
   return '<div class="epSuitHero"><div class="inlineHead"><div><h3>EP Training Architecture</h3><p>Imported directly from the uploaded EP syllabi and platform flight manuals. This is the base “suit” used by course creation and Evaluation.</p></div><span class="pill green">EP READY</span></div><div class="epSuitBadges">'+cat.phases.map(x=>'<span>'+esc(x.name)+'</span>').join('')+'<span class="gold">'+programs.length+' training packages</span></div></div>'+
     '<div class="sectionHead"><h2>Training packages</h2><p>Phase + platform + training purpose + day/night</p></div><div class="epProgramGrid">'+programCards+'</div>'+
@@ -965,12 +972,36 @@ function epSyllabusDefinition(name){
     return q===n||q.includes(n)||n.includes(q);
   })||null;
 }
+function epLessonNorm(v){return String(v||'').toLowerCase().replace(/&/g,'and').replace(/touch\s*and\s*go/g,'touchgo').replace(/check\s*flight\s*preparation/g,'checkpreparation').replace(/end\s*of\s*stage/g,'').replace(/certification/g,'').replace(/[^a-z0-9]+/g,'')}
+function epInstructorLessonDetail(name){
+  const p=epCurrentProgram();if(!p||!name)return null;
+  const list=(window.EP_LESSON_DETAILS||[]).filter(x=>x.programId===p.id),n=epLessonNorm(name),def=epSyllabusDefinition(name),min=def?.minimum==null?null:String(def.minimum);
+  let candidates=list.filter(x=>epLessonNorm(x.title)===n);
+  if(!candidates.length)candidates=list.filter(x=>{const q=epLessonNorm(x.title);return q&&n&&(q.includes(n)||n.includes(q))});
+  if(candidates.length>1&&min!=null){const hit=candidates.find(x=>String(x.flights).trim()===min);if(hit)return hit}
+  if(candidates.length)return candidates[0];
+  const aliases={
+    'ep_rc_new|checkpreparationsolo':['checkpreparation','1'],
+    'ep_rc_new|checkpreparationfinal':['checkpreparation','2'],
+    'ep_rc_new|checkflight':['checkflight','1'],
+    'ep_full_day_new|touchgocircuitslanding':['touchgocircuitslanding','1'],
+    'ep_full_day_new|touchgocircuitsrto':['touchgocircuits','1'],
+    'ep_full_day_new|touchgocircuitstakeoff':['touchgocircuits','1']
+  },a=aliases[p.id+'|'+n];
+  if(a)return list.find(x=>epLessonNorm(x.title)===a[0]&&String(x.flights).trim()===a[1])||null;
+  return null;
+}
+function epLessonListHtml(title,items,cls=''){
+  if(!items?.length)return '';
+  return '<details class="'+cls+'"><summary>'+esc(title)+'</summary><ul>'+items.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></details>';
+}
 function epSyllabusBriefHtml(name){
   const p=epCurrentProgram();if(!p)return '';
   const s=epSyllabusDefinition(name);
   if(!s)return '<div class="epSyllabusBrief empty"><b>Select a syllabus series</b><p>The active EP suit will show the exact minimum, mode, topics and special rules here.</p></div>';
   const special=[];if(s.thirdFlightInstructed)special.push('Every 3rd flight is instructed');if(s.optional)special.push('Optional series');if(s.briefing)special.push('Briefing: '+s.briefing);if(s.remarks)special.push(s.remarks);
-  return '<div class="epSyllabusBrief"><div class="inlineHead"><div><h3>'+esc(s.name)+'</h3><p>'+esc(s.topics||'')+'</p></div><span class="epMode '+(s.mode==='SOLO'?'solo':s.optional?'optional':'')+'">'+esc(s.optional?'OPTIONAL':s.mode)+'</span></div><div class="epBriefMeta"><span>Minimum: '+esc(s.minimum==null?'—':s.minimum)+'</span><span>'+esc(epPlatformLabel(p.platformId))+'</span>'+(s.thirdFlightInstructed?'<span class="gold">3rd flight instructed</span>':'')+'</div>'+(special.length?'<ul class="epBriefList">'+special.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'')+'</div>';
+  const d=epInstructorLessonDetail(name);
+  return '<div class="epSyllabusBrief"><div class="inlineHead"><div><h3>'+esc(s.name)+'</h3><p>'+esc(s.topics||'')+'</p></div><span class="epMode '+(s.mode==='SOLO'?'solo':s.optional?'optional':'')+'">'+esc(s.optional?'OPTIONAL':s.mode)+'</span></div><div class="epBriefMeta"><span>Minimum: '+esc(s.minimum==null?'—':s.minimum)+'</span><span>'+esc(epPlatformLabel(p.platformId))+'</span>'+(s.thirdFlightInstructed?'<span class="gold">3rd flight instructed</span>':'')+(d?'<span class="green">Instructor notes loaded</span>':'')+'</div>'+(special.length?'<ul class="epBriefList">'+special.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'')+(d?'<div class="epLessonDetails">'+epLessonListHtml('Topics from instructor syllabus',d.topics)+epLessonListHtml('Instructor Emphases',d.instructorEmphases,'instructor')+epLessonListHtml('Objectives / benchmark',d.objectives)+epLessonListHtml('Safety',d.safety,'safety')+epLessonListHtml('Average trainee',d.averageTrainee,'average')+'</div>':'')+'</div>';
 }
 function epTraineeProgramProgressHtml(t){
   const p=epCurrentProgram();if(!p)return '';
@@ -1450,7 +1481,9 @@ render();
 .epActiveSuit{border:1px solid #d8e6f2;background:#f8fbfe;border-radius:15px;padding:12px 13px;margin:0 0 14px}
 .epActiveSuitTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.epActiveSuit b{color:#082f57;font-size:12px}.epActiveSuit p{margin:3px 0 0;color:#71849a;font-size:9.5px;line-height:1.4}
 .epSyllabusBrief{border:1px solid #dbe8f3;background:#f8fbfe;border-radius:15px;padding:12px;margin:11px 0 2px}
-.epSyllabusBrief.empty{border-style:dashed;color:#71849a}.epSyllabusBrief h3{margin:0;color:#082f57;font-size:13px}.epSyllabusBrief p{font-size:10px;color:#526b83;line-height:1.5;margin:7px 0 0}
+.epSyllabusBrief.empty{border-style:dashed;color:#71849a}.epSyllabusBrief h3{margin:0;color:#082f57;font-size:13px}
+.epLessonDetails{margin-top:10px;border-top:1px solid #e1eaf2;padding-top:8px}.epLessonDetails details{border:1px solid #e2eaf2;border-radius:10px;background:#fff;margin-top:6px;overflow:hidden}.epLessonDetails summary{cursor:pointer;padding:8px 10px;font-size:9.5px;font-weight:850;color:#244b70;list-style:none}.epLessonDetails summary::-webkit-details-marker{display:none}.epLessonDetails summary:after{content:"＋";float:right;color:#7990a6}.epLessonDetails details[open] summary:after{content:"−"}.epLessonDetails ul{margin:0;padding:0 24px 9px 28px;color:#445e77;font-size:9px;line-height:1.5}.epLessonDetails li+li{margin-top:3px}.epLessonDetails .safety summary{color:#a05d0a}.epLessonDetails .instructor summary{color:#0b70ca}.epLessonDetails .average summary{color:#6d50a8}
+.epSyllabusBrief p{font-size:10px;color:#526b83;line-height:1.5;margin:7px 0 0}
 .epBriefMeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.epBriefMeta span{padding:4px 7px;border-radius:999px;background:#eaf3fb;color:#345c80;font-size:8.5px;font-weight:800}.epBriefMeta .gold{background:#fff5dc;color:#9a6a06}.epBriefMeta .green{background:#e2f8ec;color:#13794d}
 .epBriefList{margin:8px 0 0;padding-left:18px;color:#39556f;font-size:9.5px;line-height:1.5}.epBriefList li+li{margin-top:3px}
 .epProgramProgress{display:grid;gap:7px;margin-top:10px}.epProgressRow{border:1px solid #e3ebf3;border-radius:13px;padding:10px;background:#fff}.epProgressTop{display:flex;align-items:center;justify-content:space-between;gap:8px}.epProgressTop b{font-size:10.5px;color:#0b315b}.epProgressTop span{font-size:8.5px;color:#657c93}.epProgressMeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.epProgressMeta span{font-size:8px;padding:4px 6px;border-radius:999px;background:#edf4fa;color:#526c84}.epProgressMeta .done{background:#ddf7e9;color:#117849}.epProgressMeta .current{background:#fff2d4;color:#8d650d}
