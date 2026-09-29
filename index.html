@@ -217,6 +217,8 @@ select option[value=""]{color:#8a9bad}
 
 .trainingStatusStack{display:grid;gap:9px;margin-top:10px}.trainingStatusCard{padding:13px 14px;border:1px solid #dce7f2;border-radius:16px;background:#fff}.trainingStatusTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.trainingStatusTop small{display:block;color:#71849a;font-size:9px;font-weight:850;letter-spacing:.04em}.trainingStatusTop b{display:block;color:#0b315b;font-size:14px;margin-top:3px}.trainingStatusDate{font-size:9px;color:#71849a;white-space:nowrap}.trainingStatusMeta{display:flex;justify-content:space-between;gap:8px;margin-top:10px;font-size:9.5px;color:#6f8195}.trainingStatusMeta strong{color:#0b315b}.trainingStatusBar{height:7px;background:#e8eef5;border-radius:999px;overflow:hidden;margin-top:7px}.trainingStatusBar i{display:block;height:100%;background:#16a3e5;border-radius:999px}.trainingStatusCard.solo .trainingStatusBar i{background:#10a56e}
 .emergencyPlanTag{display:none;margin-top:4px;width:max-content;padding:3px 7px;border-radius:999px;background:#e6f2ff;color:#1269b9;font-size:8.5px;font-weight:900}.emergencyRow.isPlanned .emergencyPlanTag{display:inline-flex}.emergencyRow.isPlanned{background:#f4f9ff;border-radius:10px;padding-left:7px;padding-right:7px}.emergencyToolbar .activeFilter{background:#087cf0;color:#fff;border-color:#087cf0}
+
+.autoDraftNote{display:inline-flex;align-items:center;gap:5px;color:#1269b9;background:#e7f3ff;border-radius:999px;padding:5px 8px;font-size:9px;font-weight:900}.autoDraftNote:before{content:"✓";font-size:9px}.discardDraft{border-color:#efc7c7!important;color:#b42318!important;background:#fffafa!important}
 </style>
 </head>
 <body>
@@ -616,6 +618,28 @@ function emphasisEditorHtml(edit){
  const items=normalizeEmphases(edit?.emphases);if(!items.length)items.push('');
  return '<div class="emphasisEditor" id="emphasisEditor">'+items.map((x,i)=>'<div class="emphasisEditRow"><span class="emphasisNo">'+(i+1)+'</span><input class="input" name="emphasisItem" value="'+esc(x)+'" placeholder="Next-flight emphasis"><button type="button" class="emphasisRemove" data-remove-emphasis aria-label="Remove">×</button></div>').join('')+'</div><button type="button" class="btn secondary small" id="addEmphasis" style="margin-top:7px">+ Add emphasis</button>';
 }
+
+const activityDraftPrefix='ct-review-activity-draft-';
+function activityDraftKey(name){return activityDraftPrefix+currentCourseId+'-'+name}
+function getActivityDraft(name){try{return JSON.parse(localStorage.getItem(activityDraftKey(name))||'null')}catch{return null}}
+function saveActivityDraft(name,data){localStorage.setItem(activityDraftKey(name),JSON.stringify({data,savedAt:new Date().toISOString()}))}
+function discardActivityDraft(name){localStorage.removeItem(activityDraftKey(name))}
+function serializeFormDraft(form){
+ const out={};for(const [k,v] of new FormData(form).entries()){const val=String(v);if(out[k]===undefined)out[k]=val;else if(Array.isArray(out[k]))out[k].push(val);else out[k]=[out[k],val]}return out;
+}
+function restoreFormDraft(form,data){
+ if(!form||!data)return;
+ Object.entries(data).forEach(([name,value])=>{const els=[...form.querySelectorAll('[name="'+String(name).replace(/"/g,'\\\"')+'"]')];if(!els.length)return;const values=Array.isArray(value)?value:[value];
+   if(els[0].type==='radio'||els[0].type==='checkbox'){els.forEach(el=>el.checked=values.includes(String(el.value)));return}
+   els.forEach((el,i)=>{const v=values[Math.min(i,values.length-1)];if(v!==undefined)el.value=String(v)});
+ });
+}
+function bindAutoDraft(form,name,onSaved){
+ if(!form)return()=>{};
+ const persist=()=>{const data=serializeFormDraft(form);saveActivityDraft(name,data);if(onSaved)onSaved(data)};
+ form.addEventListener('input',persist);form.addEventListener('change',persist);return persist;
+}
+function draftSavedLabel(name){const d=getActivityDraft(name);if(!d?.savedAt)return 'Auto-save ready';const dt=new Date(d.savedAt);return 'Auto-saved '+dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
 function getEmergencyPlans(){return safeObjectStorage('ct-review-emergency-plans')}
 function getTraineeEmergencyPlan(traineeId){const all=getEmergencyPlans(),p=all[traineeId];return p&&Array.isArray(p.emergencyIds)?p:{emergencyIds:[],updatedAt:null}}
 function saveTraineeEmergencyPlan(traineeId,ids){const all=getEmergencyPlans();all[traineeId]={emergencyIds:[...new Set(ids.filter(Boolean))],updatedAt:new Date().toISOString()};localStorage.setItem('ct-review-emergency-plans',JSON.stringify(all))}
