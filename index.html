@@ -240,7 +240,7 @@ function cfgDefaults(){
     trainingKinds: trainingKinds.map((name,n)=>({id:['new','conversion','instructor'][n]||('training_'+n),name})),
     dayNight: dayNight.map((name,n)=>({id:['day','night'][n]||('time_'+n),name})),
     countries: countries.map((name,n)=>({id:['israel','cyprus'][n]||('country_'+n),name})),
-    syllabi: syllabi.map((name,n)=>({id:'syll_'+(n+1),courseType:ep,name})),
+    syllabi: syllabi.map((name,n)=>({id:'syll_'+(n+1),courseType:ep,name,minimum:null,instructorPresence:'WITH INSTRUCTOR'})),
     criteria: criteria.map(c=>({id:c.id,courseType:ep,name:c.name,weight:Math.round(c.weight*100)})),
     emergencies: emergencies.map((name,n)=>({id:'em_'+(n+1),courseType:ep,name}))
   };
@@ -250,7 +250,7 @@ function cfgGet(){
     const raw=JSON.parse(localStorage.getItem('ct-review-catalogs')||'null');
     if(!raw)return cfgDefaults();
     const c={...cfgDefaults(),...raw};
-    c.syllabi=(c.syllabi||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
+    c.syllabi=(c.syllabi||[]).map(x=>({...x,courseType:x.courseType||'EP',minimum:x.minimum===undefined?null:x.minimum,instructorPresence:x.instructorPresence||'WITH INSTRUCTOR'}));
     c.criteria=(c.criteria||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
     c.emergencies=(c.emergencies||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
     return c;
@@ -285,7 +285,8 @@ function cfgResolvedHtml(sel){
   const c=cfgGet(),p=cfgResolve(sel);
   if(!p)return '<div class="infoBox" style="margin-top:14px;border-color:#fed7aa;background:#fff7ed"><b>No matching configuration profile</b><p>Create one in Configuration profiles. This combination has no assigned syllabus/criteria bundle yet.</p></div>';
   const names=(ids,list)=>ids.map(id=>cfgItem(list,id)?.name).filter(Boolean);
-  return '<div class="infoBox" style="margin-top:14px;border-color:#bae6fd;background:#f0f9ff"><div class="inlineHead"><b>Resolved: '+esc(p.name)+'</b><span class="pill green">AUTO</span></div><p>This selection automatically opens the relevant training bundle.</p><div class="settingsGrid" style="margin-top:10px"><div><b>Syllabi ('+p.syllabusIds.length+')</b><p>'+names(p.syllabusIds,c.syllabi).map(esc).join(' · ')+'</p></div><div><b>Criteria ('+p.criteriaIds.length+')</b><p>'+names(p.criteriaIds,c.criteria).map(esc).join(' · ')+'</p></div><div><b>Emergencies ('+p.emergencyIds.length+')</b><p>'+names(p.emergencyIds,c.emergencies).map(esc).join(' · ')+'</p></div></div></div>';
+  const syllabusLines=p.syllabusIds.map(id=>cfgItem(c.syllabi,id)).filter(Boolean).map(x=>x.name+' · '+(x.instructorPresence==='WITHOUT INSTRUCTOR'?'Without instructor':'With instructor')+' · Min '+(x.minimum==null?'—':x.minimum));
+  return '<div class="infoBox" style="margin-top:14px;border-color:#bae6fd;background:#f0f9ff"><div class="inlineHead"><b>Resolved: '+esc(p.name)+'</b><span class="pill green">AUTO</span></div><p>This selection automatically opens the relevant training bundle.</p><div class="settingsGrid" style="margin-top:10px"><div><b>Syllabi ('+p.syllabusIds.length+')</b><p>'+syllabusLines.map(esc).join(' · ')+'</p></div><div><b>Criteria ('+p.criteriaIds.length+')</b><p>'+names(p.criteriaIds,c.criteria).map(esc).join(' · ')+'</p></div><div><b>Emergencies ('+p.emergencyIds.length+')</b><p>'+names(p.emergencyIds,c.emergencies).map(esc).join(' · ')+'</p></div></div></div>';
 }
 function cfgId(prefix){return prefix+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)}
 
@@ -296,11 +297,15 @@ function cfgCatalogCard(title,key,list){
 }
 
 function cfgTypeScopedCard(title,key,list,type,kind){
-  const scoped=list.filter(x=>x.courseType===type);
-  const isCriteria=kind==='criteria';
-  return '<section class="card settingBox"><h3>'+esc(title)+'</h3><p class="sub">Belongs only to '+esc(cfgItem(cfgGet().courseTypes,type)?.name||type)+'.</p><div class="editableList">'+
-    scoped.map(x=>'<div class="editableRow"><input class="input cfgScopedName" data-kind="'+key+'" data-id="'+x.id+'" value="'+esc(x.name)+'">'+(isCriteria?'<input class="input cfgScopedWeight" data-id="'+x.id+'" type="number" min="0" max="100" value="'+x.weight+'" style="max-width:86px">':'')+'<button class="btn danger small" data-scoped-remove="'+key+'|'+x.id+'">Remove</button></div>').join('')+
-    '</div><form class="toolbar cfgScopedAdd" data-kind="'+key+'" data-course-type="'+type+'"><input class="input" name="name" placeholder="Add '+esc(title.toLowerCase())+'" required>'+(isCriteria?'<input class="input" name="weight" type="number" min="0" max="100" value="10" style="max-width:90px">':'')+'<button class="btn secondary" type="submit">＋ Add</button></form></section>';
+  const scoped=list.filter(x=>x.courseType===type),isCriteria=kind==='criteria',isSyllabus=kind==='syllabi';
+  const rows=scoped.map(x=>{
+    if(isSyllabus)return '<div class="editableRow" style="display:grid;grid-template-columns:minmax(0,1fr) 88px 150px auto"><input class="input cfgScopedName" data-kind="'+key+'" data-id="'+x.id+'" value="'+esc(x.name)+'"><input class="input cfgSyllabusMinimum" data-id="'+x.id+'" type="number" min="0" max="999" placeholder="Min" value="'+(x.minimum==null?'':x.minimum)+'"><select class="cfgSyllabusPresence" data-id="'+x.id+'"><option value="WITH INSTRUCTOR" '+(x.instructorPresence==='WITH INSTRUCTOR'?'selected':'')+'>With Instructor</option><option value="WITHOUT INSTRUCTOR" '+(x.instructorPresence==='WITHOUT INSTRUCTOR'?'selected':'')+'>Without Instructor</option></select><button class="btn danger small" data-scoped-remove="'+key+'|'+x.id+'">Remove</button></div>';
+    return '<div class="editableRow"><input class="input cfgScopedName" data-kind="'+key+'" data-id="'+x.id+'" value="'+esc(x.name)+'">'+(isCriteria?'<input class="input cfgScopedWeight" data-id="'+x.id+'" type="number" min="0" max="100" value="'+x.weight+'" style="max-width:86px">':'')+'<button class="btn danger small" data-scoped-remove="'+key+'|'+x.id+'">Remove</button></div>';
+  }).join('');
+  let add='<input class="input" name="name" placeholder="Add '+esc(title.toLowerCase())+'" required>';
+  if(isSyllabus)add+='<input class="input" name="minimum" type="number" min="0" max="999" placeholder="Minimum" style="max-width:110px"><select name="instructorPresence" style="max-width:180px"><option value="WITH INSTRUCTOR">With Instructor</option><option value="WITHOUT INSTRUCTOR">Without Instructor</option></select>';
+  if(isCriteria)add+='<input class="input" name="weight" type="number" min="0" max="100" value="10" style="max-width:90px">';
+  return '<section class="card settingBox"><h3>'+esc(title)+'</h3><p class="sub">Belongs only to '+esc(cfgItem(cfgGet().courseTypes,type)?.name||type)+(isSyllabus?' · Minimum 0 means optional / non-blocking.':'')+'</p><div class="editableList">'+rows+'</div><form class="toolbar cfgScopedAdd" data-kind="'+key+'" data-course-type="'+type+'">'+add+'<button class="btn secondary" type="submit">＋ Add</button></form></section>';
 }
 function cfgPhaseCard(c){
   const scope=state.phaseScope||c.courseTypes[0]?.id||'',list=c.phases.filter(x=>x.type===scope);
@@ -333,7 +338,7 @@ function cfgProfileEditor(p,c){
     '<div class="field"><label>Day / Night</label><select name="dayNight">'+c.dayNight.map(x=>'<option value="'+x.id+'" '+(x.id===v.dayNight?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>'+
     '<div class="field"><label>Country</label><select name="country"><option value="*">Any country</option>'+c.countries.map(x=>'<option value="'+x.id+'" '+(x.id===v.country?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></div>'+
     '<div class="infoBox" style="margin-top:12px"><b>Scoped to '+esc(cfgItem(c.courseTypes,v.courseType)?.name||v.courseType)+'</b><p>You are not choosing from a global bank. Only items owned by this course type appear below.</p></div>'+
-    '<div class="sectionHead"><h2>Assigned syllabi</h2><p>Only '+esc(cfgItem(c.courseTypes,v.courseType)?.name||v.courseType)+' syllabi are available.</p></div><div id="cfgProfileSyllabi">'+checks('syllabusIds',scopedSyll,v.syllabusIds)+'</div>'+
+    '<div class="sectionHead"><h2>Assigned syllabi</h2><p>Minimum and instructor-presence settings come from the '+esc(cfgItem(c.courseTypes,v.courseType)?.name||v.courseType)+' syllabus definition.</p></div><div id="cfgProfileSyllabi">'+checks('syllabusIds',scopedSyll,v.syllabusIds,x=>' · '+(x.instructorPresence==='WITHOUT INSTRUCTOR'?'Without Instructor':'With Instructor')+' · Min '+(x.minimum==null?'—':x.minimum))+'</div>'+
     '<div class="sectionHead"><h2>Assigned criteria</h2></div><div id="cfgProfileCriteria">'+checks('criteriaIds',scopedCrit,v.criteriaIds,x=>' · '+x.weight+'%')+'</div>'+
     '<div class="sectionHead"><h2>Assigned emergencies</h2></div><div id="cfgProfileEmergencies">'+checks('emergencyIds',scopedEmer,v.emergencyIds)+'</div>'+
     '<div class="toolbar"><button class="btn sky" type="submit">'+(p?'Save profile':'Create profile')+'</button>'+(p?'<button class="btn secondary" type="button" id="cfgProfileCancel">Cancel</button>':'')+'</div></form>';
@@ -499,7 +504,7 @@ function bindSettings(){
     document.querySelectorAll('.cfgName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
     document.querySelectorAll('.cfgPhaseName').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
     document.querySelectorAll('.cfgScopedName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
-    document.querySelectorAll('.cfgScopedWeight').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x)x.weight=Math.max(0,Math.min(100,Number(el.value)||0))});
+    document.querySelectorAll('.cfgScopedWeight').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x)x.weight=Math.max(0,Math.min(100,Number(el.value)||0))});document.querySelectorAll('.cfgSyllabusMinimum').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.minimum=el.value===''?null:Math.max(0,Math.min(999,Math.floor(Number(el.value)||0)))});document.querySelectorAll('.cfgSyllabusPresence').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.instructorPresence=el.value});
     cfgSave(cc);toast('All changes saved for this course type');render();
   };
 
@@ -512,7 +517,7 @@ function bindSettings(){
   document.querySelectorAll('.cfgScopedAdd').forEach(form=>form.onsubmit=e=>{
     e.preventDefault();const cc=cfgGet(),kind=form.dataset.kind,type=form.dataset.courseType,fd=new FormData(form),name=String(fd.get('name')||'').trim();if(!name)return;
     const obj={id:cfgId(kind==='criteria'?'criterion':kind==='syllabi'?'syllabus':'emergency'),courseType:type,name};
-    if(kind==='criteria')obj.weight=Math.max(0,Math.min(100,Number(fd.get('weight'))||0));
+    if(kind==='criteria')obj.weight=Math.max(0,Math.min(100,Number(fd.get('weight'))||0));if(kind==='syllabi'){obj.minimum=fd.get('minimum')===''?null:Math.max(0,Math.min(999,Math.floor(Number(fd.get('minimum'))||0)));obj.instructorPresence=String(fd.get('instructorPresence')||'WITH INSTRUCTOR')}
     cc[kind].push(obj);cfgSave(cc);toast(name+' added to '+(cfgItem(cc.courseTypes,type)?.name||type));render();
   });
 
@@ -535,7 +540,7 @@ function bindSettings(){
     state.profileDraftType=type;
     $('#cfgProfilePhase').innerHTML=ph.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');
     const checks=(name,list,extra)=>'<div class="criteria">'+list.map(x=>'<label class="criterion" style="justify-content:flex-start"><input type="checkbox" name="'+name+'" value="'+x.id+'"><span>'+esc(x.name)+(extra?extra(x):'')+'</span></label>').join('')+'</div>';
-    $('#cfgProfileSyllabi').innerHTML=checks('syllabusIds',sy);
+    $('#cfgProfileSyllabi').innerHTML=checks('syllabusIds',sy,x=>' · '+(x.instructorPresence==='WITHOUT INSTRUCTOR'?'Without Instructor':'With Instructor')+' · Min '+(x.minimum==null?'—':x.minimum));
     $('#cfgProfileCriteria').innerHTML=checks('criteriaIds',cr,x=>' · '+x.weight+'%');
     $('#cfgProfileEmergencies').innerHTML=checks('emergencyIds',em);
   };
