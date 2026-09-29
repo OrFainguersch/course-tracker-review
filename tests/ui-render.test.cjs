@@ -19,4 +19,10 @@ vm.runInContext("go('settings')",context);assert.match(elements.get("#content").
 vm.runInContext("state.settingsTab='training_library';state.libraryProfession='IP';render()",context);assert.match(elements.get("#content").innerHTML,/Internal Pilot Training Architecture/);
 vm.runInContext("state.libraryProfession='TECHNICIAN';render()",context);assert.match(elements.get("#content").innerHTML,/Technician Training Architecture/);
 vm.runInContext("state.settingsTab='overrides';render()",context);assert.match(elements.get("#content").innerHTML,/Course overrides/);
-console.log(JSON.stringify({ok:true,home:true,settings:true,ipLibrary:true,technicianLibrary:true,overrides:true}));
+vm.runInContext("state.screen='roster';state.rosterManage=true;state.rosterType='TRAINEE';state.personEditKey='TRAINEE:t1';render()",context);
+assert.match(elements.get("#content").innerHTML,/Add person/);
+assert.match(elements.get("#content").innerHTML,/Remove from course/);
+vm.runInContext("updateCourseMembership('t1','TRAINEE',{removed:true});state.personEditKey=null;render()",context);
+assert.doesNotMatch(elements.get("#content").innerHTML,/Yoav Shauli/);
+assert.equal(vm.runInContext("courseTrainees().some(x=>x.id==='t1')",context),false);
+console.log(JSON.stringify({ok:true,home:true,settings:true,ipLibrary:true,technicianLibrary:true,overrides:true,rosterMembership:true}));
