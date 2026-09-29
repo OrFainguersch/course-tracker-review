@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 190" role="img" aria-labelledby="title desc">
+<title id="title">FLYMPUS</title>
+<desc id="desc">FLYMPUS aviation training wordmark</desc>
+<defs>
+  <linearGradient id="ice" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#ffffff"/>
+    <stop offset=".48" stop-color="#eaf8ff"/>
+    <stop offset=".78" stop-color="#8edcff"/>
+    <stop offset="1" stop-color="#20a8ff"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#fff4bf"/>
+    <stop offset=".45" stop-color="#ffd36a"/>
+    <stop offset="1" stop-color="#e59a1b"/>
+  </linearGradient>
+  <filter id="softGlow" x="-30%" y="-40%" width="160%" height="180%">
+    <feGaussianBlur stdDeviation="3.2" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="blueGlow" x="-30%" y="-40%" width="160%" height="180%">
+    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#159cff" flood-opacity=".8"/>
+  </filter>
+</defs>
+<g filter="url(#blueGlow)">
+  <!-- wing-shaped F: compact and integrated with the word -->
+  <path d="M25 58 C72 18 146 18 222 30 C243 33 257 28 272 17 C260 44 241 57 212 58 L25 58 Z" fill="url(#ice)"/>
+  <path d="M26 94 C72 70 128 71 192 79 C214 82 232 78 247 66 C238 90 219 101 190 101 L82 101 L82 148 C82 163 69 175 51 181 L28 181 L28 104 C28 100 27 97 26 94 Z" fill="url(#ice)"/>
+  <path d="M170 31 C214 34 245 29 272 17 C261 39 244 52 220 57 C204 53 187 46 170 31 Z" fill="url(#gold)" opacity=".96"/>
+  <path d="M165 80 C201 84 229 78 247 66 C239 84 223 95 199 100 C188 96 177 90 165 80 Z" fill="url(#gold)" opacity=".55"/>
+  <text x="258" y="146" fill="url(#ice)" font-family="Arial Black, Segoe UI, Arial, sans-serif" font-size="112" font-weight="900" letter-spacing="2">LYMPUS</text>
+  <!-- subtle gold flight notch in Y -->
+  <path d="M376 59 L392 76 L408 59 L392 86 Z" fill="url(#gold)" filter="url(#softGlow)"/>
+  <!-- small forward accent on S -->
+  <path d="M874 54 C890 51 903 45 912 37 C906 52 895 61 879 65 Z" fill="url(#gold)" opacity=".95"/>
+</g>
+</svg>
