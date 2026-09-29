@@ -129,7 +129,7 @@
     const basePrograms=c?(c.programs||[]).filter(p=>(!phaseId||p.phaseId===phaseId)&&(!s.platformId||p.platformId===s.platformId)&&(!p.countryIds?.length||p.countryIds.includes(s.country||"israel"))):[];
     const trainingKinds=[...new Set(basePrograms.map(p=>p.trainingKind).filter(Boolean))];
     const selectedPrograms=basePrograms.filter(p=>!s.trainingKind||p.trainingKind===s.trainingKind);
-    const dayNights=[...new Set(selectedPrograms.flatMap(p=>p.dayNight==="mixed"?["day","night","mixed"]:[p.dayNight]).filter(Boolean))];
+    const daySet=new Set(selectedPrograms.flatMap(p=>p.dayNight==="mixed"?["day","night","mixed"]:[p.dayNight]).filter(Boolean));if(daySet.has("day")&&daySet.has("night"))daySet.add("mixed");const dayNights=[...daySet];
     const configPrograms=selectedPrograms.filter(p=>!s.dayNight||s.dayNight==="mixed"||p.dayNight===s.dayNight||p.dayNight==="mixed");
     return {
       selection:s,
