@@ -41,6 +41,10 @@ main{padding:18px 14px calc(88px + env(safe-area-inset-bottom));max-width:1480px
 .requirementsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.requirementCard{padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff}.requirementCard strong{display:block;color:#0a315c;font-size:19px}.requirementCard span{display:block;color:#64748b;font-size:11px;margin-top:2px}.requirementCard.complete{border-color:#a7e3c4;background:#f0fdf7}.requirementCard.warn{border-color:#f4cf8b;background:#fffaf0}
 .workflowSteps{display:grid;gap:10px}.workflowStep{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden}.workflowStepHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;background:#f6f9fe}.workflowStepHead b{color:#174f90}.workflowStepBody{padding:14px}.stepStatus{padding:5px 8px;border-radius:999px;font-size:10px;font-weight:850;background:#eef2f7;color:#64748b}.stepStatus.current{background:#dbeafe;color:#1d4ed8}.stepStatus.complete{background:#dcfce7;color:#047857}.executionStrip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.executionItem{padding:11px;border:1px solid var(--line);border-radius:13px;background:#fff;text-align:center}.executionItem strong{display:block;font-size:20px;color:#0a315c}.executionItem span{font-size:10px;color:#64748b}.peopleLink{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border:0;border-bottom:1px solid #edf2f7;background:transparent;text-align:left}.peopleLink:last-child{border-bottom:0}.peopleLink b{color:#0a315c}.peopleLink small{display:block;color:#64748b;margin-top:2px}.peopleLink strong{color:#2563eb}
 @media(min-width:760px){.reportKpis{grid-template-columns:repeat(5,minmax(0,1fr))}.reportsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.reportFilters{grid-template-columns:repeat(4,minmax(0,1fr))}.requirementsGrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+.membershipControl{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.membershipControl select{width:auto;min-width:145px;padding:8px 10px}.statusBtn{white-space:nowrap}
+.eventSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.eventMetric{padding:14px;border:1px solid var(--line);border-radius:14px;background:#fff}.eventMetric strong{display:block;font-size:24px;color:#0a315c}.eventMetric span{display:block;margin-top:2px;color:#64748b;font-size:11px}.eventLog{display:grid;gap:8px}.eventRow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #edf2f7}.eventRow:last-child{border-bottom:0}.eventIcon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#eef6ff;color:#1768d5;font-weight:900}.eventRow b{display:block;color:#0a315c;font-size:12px}.eventRow small{display:block;color:#64748b;margin-top:2px}.eventQty{font-weight:900;color:#1768d5}.soloList{display:grid;gap:8px}.soloRow{padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff}.soloRow b{color:#0a315c}.soloRow p{margin:4px 0 0;color:#64748b;font-size:11px}
+@media(min-width:760px){.eventSummary{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -192,6 +196,33 @@ function roster(){
  }).join(''):'<div class="card empty"><h3>No matching people.</h3></div>')+'</section>'+
  '<div class="modal" id="personModal"><div class="modalCard"><div class="inlineHead"><div><h2>Add to course roster</h2><p>Creates a mock person and active course membership.</p></div><button class="btn secondary small" id="closePersonModal">✕</button></div><form id="addPersonForm"><div class="fields"><div class="field"><label>Full name</label><input class="input" name="name" required></div><div class="field"><label>Email (optional)</label><input class="input" type="email" name="email"></div><div class="field"><label>Role</label><select name="type"><option value="TRAINEE">Trainee</option><option value="INSTRUCTOR">Instructor</option></select></div></div><div class="toolbar"><button class="btn sky" type="submit">Add to roster</button></div></form></div></div>';
 }
+
+const currentCourseId='AEP-26';
+function getCourseMembershipState(){
+  try{return JSON.parse(localStorage.getItem('ct-review-course-memberships')||'{}')}catch{return {}}
+}
+function saveCourseMembershipState(v){localStorage.setItem('ct-review-course-memberships',JSON.stringify(v))}
+function courseMembershipFor(personId,type,defaults={}){
+  const root=getCourseMembershipState(),course=root[currentCourseId]||{},bucket=type==='INSTRUCTOR'?(course.instructors||{}):(course.trainees||{});
+  return {...defaults,...(bucket[personId]||{})};
+}
+function updateCourseMembership(personId,type,patch){
+  const root=getCourseMembershipState(),course=root[currentCourseId]||{instructors:{},trainees:{}};
+  course.instructors=course.instructors||{};course.trainees=course.trainees||{};
+  const bucket=type==='INSTRUCTOR'?course.instructors:course.trainees;
+  bucket[personId]={...(bucket[personId]||{}),...patch};
+  root[currentCourseId]=course;saveCourseMembershipState(root);
+}
+function getActivityEvents(){try{return JSON.parse(localStorage.getItem('ct-review-activity-events')||'[]')}catch{return []}}
+function saveActivityEvents(v){localStorage.setItem('ct-review-activity-events',JSON.stringify(v))}
+function activityTotalsFor(traineeId){
+  const out={TAKEOFF:0,LANDING:0,TOUCH_AND_GO:0,TRAINING_HOUR:0,TECH_ACTIVITY:0};
+  getActivityEvents().filter(x=>x.traineeId===traineeId).forEach(x=>out[x.type]=(out[x.type]||0)+Number(x.quantity||0));
+  return out;
+}
+function activityLabel(type){return ({TAKEOFF:'Takeoff',LANDING:'Landing',TOUCH_AND_GO:'Touch & Go',TRAINING_HOUR:'Training hour',TECH_ACTIVITY:'Technician activity'})[type]||type}
+function getSoloFlights(){try{return JSON.parse(localStorage.getItem('ct-review-solo-flights')||'[]')}catch{return []}}
+function saveSoloFlights(v){localStorage.setItem('ct-review-solo-flights',JSON.stringify(v))}
 function getRosterExtras(){try{return JSON.parse(localStorage.getItem('ct-review-roster')||'[]')}catch{return []}}
 
 function instructorProfile(){
