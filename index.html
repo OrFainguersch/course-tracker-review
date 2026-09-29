@@ -355,7 +355,7 @@ select option[value=""]{color:#8a9bad}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0528 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0529 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script src="./assets/ep-catalog.js"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
@@ -1135,7 +1135,7 @@ function settings(){
     html+='<div class="field"><label>Day / Night</label><select name="dayNight" id="builderDay" required><option value="" '+(!time?'selected':'')+' disabled>Select day / night</option>'+c.dayNight.map(x=>'<option value="'+x.id+'" '+(x.id===time?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Country</label><select name="country" id="builderCountry" required><option value="" '+(!country?'selected':'')+' disabled>Select country</option>'+c.countries.map(x=>'<option value="'+x.id+'" '+(x.id===country?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
     html+='<div class="field"><label>Start date</label><input class="input" name="startsOn" type="date" required></div></div>';
-    html+='<div id="builderAccumulation">'+builderAccumulationHtml(cfgItem(c.phases,phase))+'</div><div id="cfgResolvedPreview">'+cfgResolvedHtml(sel)+'</div><div class="toolbar"><button class="btn sky" type="submit" '+(phase?'':'disabled')+'>＋ Create as draft</button></div></form></section>';
+    html+='<div id="builderAccumulation">'+builderAccumulationHtml(cfgItem(c.phases,phase))+'</div><div id="cfgResolvedPreview">'+cfgResolvedHtml(sel)+'</div><div class="toolbar"><button class="btn sky" id="courseBuilderSubmit" type="submit" '+((type==='EP'?!!epProgramResolve(sel):!!phase)?'':'disabled')+'>＋ Create as draft</button></div></form></section>';
     html+='<section class="card sideCard"><h3>Draft courses</h3><p class="sub">Each draft keeps a snapshot of the matched configuration.</p><div class="draftList">'+(created.length?created.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.name)+' · '+esc(x.code)+'</b><span class="pill amber">DRAFT</span></div><p>'+esc(x.summary||'')+'</p><div class="profileMeta"><span class="pill blue">'+(x.syllabusCount||0)+' syllabi</span><span class="pill violet">'+(x.criteriaCount||0)+' criteria</span><span class="pill gray">'+(x.emergencyCount||0)+' emergencies</span></div></div>').join(''):'<p style="color:#64748b;font-size:12px">No local draft courses yet.</p>')+'</div></section></div>';
   }
 
@@ -1337,7 +1337,7 @@ function bindSettings(){
   const updateBuilder=()=>{
     const type=$('#courseTypeSelect')?.value||'',phase=$('#phaseSelect')?.value||'',platform=$('#builderPlatform')?.value||'',training=$('#builderTraining')?.value||'',time=$('#builderDay')?.value||'',country=$('#builderCountry')?.value||'';
     state.builderType=type;state.builderPhase=phase;state.builderPlatform=platform;state.builderTraining=training;state.builderDay=time;state.builderCountry=country;
-    const acc=$('#builderAccumulation');if(acc)acc.innerHTML=builderAccumulationHtml(cfgItem(c.phases,phase));const box=$('#cfgResolvedPreview');if(box)box.innerHTML=cfgResolvedHtml({courseType:type,phaseId:phase,platformId:platform,trainingKind:training,dayNight:time,country});
+    const acc=$('#builderAccumulation');if(acc)acc.innerHTML=builderAccumulationHtml(cfgItem(c.phases,phase));const selection={courseType:type,phaseId:phase,platformId:platform,trainingKind:training,dayNight:time,country};const box=$('#cfgResolvedPreview');if(box)box.innerHTML=cfgResolvedHtml(selection);const submit=$('#courseBuilderSubmit');if(submit)submit.disabled=type==='EP'?!epProgramResolve(selection):!phase;
   };
   if($('#courseTypeSelect'))$('#courseTypeSelect').onchange=e=>{
     const list=c.phases.filter(x=>x.type===e.target.value);state.builderType=e.target.value;state.builderPhase='';state.builderPlatform='';
@@ -1369,6 +1369,7 @@ function bindSettings(){
   if($('#builderPlatform'))$('#builderPlatform').onchange=()=>{state.builderPlatform=$('#builderPlatform').value;syncEpPackageOptions();updateBuilder()};
   if($('#builderTraining'))$('#builderTraining').onchange=()=>{state.builderTraining=$('#builderTraining').value;syncEpPackageOptions();updateBuilder()};
   ['builderDay','builderCountry'].forEach(id=>{if($('#'+id))$('#'+id).onchange=updateBuilder});
+  if($('#courseBuilder')){syncEpPackageOptions();updateBuilder();}
 
   if($('#courseBuilder'))$('#courseBuilder').onsubmit=e=>{
     e.preventDefault();const fd=new FormData(e.currentTarget),sel={courseType:String(fd.get('courseType')),phaseId:String(fd.get('phase')),platformId:String(fd.get('platformId')||''),trainingKind:String(fd.get('trainingKind')),dayNight:String(fd.get('dayNight')),country:String(fd.get('country'))};
