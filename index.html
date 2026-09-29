@@ -181,10 +181,19 @@ main{padding:16px 14px calc(30px + env(safe-area-inset-bottom));max-width:1220px
   .people{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
+
+.emergencyToolbar{display:flex;gap:8px;align-items:center;margin:8px 0 10px}.emergencyToolbar .input{flex:1}.emergencySelected{white-space:nowrap;min-width:86px;text-align:center}
+.emergencyGroups{display:grid;gap:8px}.emergencyGroup{border:1px solid #dce7f2;border-radius:15px;background:#fff;overflow:hidden}.emergencyGroup[open]{border-color:#bcd8f3;box-shadow:0 5px 18px rgba(34,91,145,.06)}
+.emergencyGroup summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:13px 14px;color:#0b315b;font-weight:850;font-size:12px;background:#f8fbfe}.emergencyGroup summary::-webkit-details-marker{display:none}.emergencyGroup summary:after{content:"›";margin-left:auto;font-size:20px;color:#6d86a0;transform:rotate(90deg);transition:.15s}.emergencyGroup[open] summary:after{transform:rotate(-90deg)}
+.emergencyGroupMeta{display:flex;gap:6px;align-items:center;margin-left:auto}.emergencyGroupCount{font-size:9px;color:#657b93;background:#edf3f8;border-radius:999px;padding:4px 7px}.emergencyGroupTotal{font-size:9px;color:#1269b9;background:#e4f2ff;border-radius:999px;padding:4px 7px}
+.emergencyRows{padding:5px 12px 9px}.emergencyRow{display:grid;grid-template-columns:minmax(0,1fr) 74px;gap:10px;align-items:center;padding:9px 2px;border-bottom:1px solid #edf2f7}.emergencyRow:last-child{border-bottom:0}.emergencyRow span{font-size:12px;font-weight:750;color:#263b53}.emergencyRow input{padding:9px 10px;text-align:center}
+.emergencyNoResults{display:none;padding:18px;text-align:center;color:#70839a;font-size:12px}
+.cfgEmergencyRow{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,.7fr) auto;gap:8px;align-items:center}
+@media(max-width:560px){.cfgEmergencyRow{grid-template-columns:1fr}.emergencyToolbar{align-items:stretch}.emergencySelected{min-width:76px;padding-left:8px;padding-right:8px}}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><span class="topBrandMark" aria-hidden="true"><svg viewBox="0 0 40 32" fill="none"><path d="M4 8h11l5 5 5-5h11" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 14h10l3 4 3-4h10" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20h6l2 7 2-7h6" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0505 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><span class="topBrandMark" aria-hidden="true"><svg viewBox="0 0 40 32" fill="none"><path d="M4 8h11l5 5 5-5h11" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 14h10l3 4 3-4h10" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 20h6l2 7 2-7h6" stroke="white" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar EP Course</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand">Course Tracker</div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">iPhone Review · build 0506 · mock/local only</div><div class="toast" id="toast"></div></div>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentCourseId='AEP-26';
@@ -257,7 +266,7 @@ t4:{current:'Circuits',completed:2,minimum:4,presence:'WITH INSTRUCTOR',reviewRe
 function getDailyReports(){return safeArrayStorage('ct-review-daily-reports')}
 function saveDailyReports(v){localStorage.setItem('ct-review-daily-reports',JSON.stringify(v))}
 function allEvaluationsForAnalytics(){
- const saved=getEvaluations().map(e=>({date:e.flightDate,traineeId:e.traineeId,instructorId:e.instructorId,syllabus:e.syllabus,grade:Number(e.grade)||0,emergencies:(e.emergencies||[]).flatMap((n,i)=>Array.from({length:Number(n)||0},()=>emergencies[i])).filter(Boolean)}));
+ const defs=cfgGet().emergencies;const saved=getEvaluations().map(e=>({date:e.flightDate,traineeId:e.traineeId,instructorId:e.instructorId,syllabus:e.syllabus,grade:Number(e.grade)||0,emergencies:e.emergencyCounts?Object.entries(e.emergencyCounts).flatMap(([id,n])=>Array.from({length:Number(n)||0},()=>cfgItem(defs,id)?.name)).filter(Boolean):(e.emergencies||[]).flatMap((n,i)=>Array.from({length:Number(n)||0},()=>emergencies[i])).filter(Boolean)}));
  return [...mockEvalHistory,...saved];
 }
 function reportBars(items,maxItems=10){const list=(items||[]).slice(0,maxItems),max=Math.max(1,...list.map(x=>x.count||0));return list.length?'<div class="reportBars">'+list.map(x=>'<div class="reportBarRow"><span>'+esc(x.name)+'</span><i><b style="width:'+Math.max(3,(x.count||0)/max*100)+'%"></b></i><strong>'+esc(x.count)+'</strong></div>').join('')+'</div>':'<p class="sub">No matching data.</p>'}
@@ -310,8 +319,7 @@ ${tracks('LANDING')?`<div class="field"><label>Landings</label><input class="inp
 <div class="field"><label>Grade source</label><div class="gradeMode"><label><input type="radio" name="gradeMode" value="SUGGESTED" ${!edit||edit.gradeMode!=='INSTRUCTOR'?'checked':''}> Use suggested grade</label><label><input type="radio" name="gradeMode" value="INSTRUCTOR" ${edit?.gradeMode==='INSTRUCTOR'?'checked':''}> Instructor override</label></div></div>
 <div class="field" id="overrideWrap" style="${edit?.gradeMode==='INSTRUCTOR'?'':'display:none'};margin-top:10px"><label>Instructor grade</label><select name="instructorGrade"><option value="">—</option>${[1,2,3,4,5].map(v=>`<option value="${v}" ${Number(edit?.grade)===v?'selected':''}>${v}</option>`).join('')}</select></div>
 <div class="fields" style="margin-top:12px"><div class="field"><label>Comments</label><textarea name="comments" placeholder="Observed performance…">${esc(edit?.comments||'')}</textarea></div><div class="field"><label>Emphases (one per line)</label><textarea name="emphases" placeholder="Preserve / improve…">${esc(edit?.emphases||'')}</textarea></div></div>
-<div class="sectionHead"><h2>Emergency practice</h2><p>Occurrence count per emergency.</p></div>
-<div class="criteria">${emergencies.map((e,i)=>`<div class="criterion"><span>${e}</span><input class="input" style="width:82px;padding:9px" type="number" min="0" max="8" name="em_${i}" value="${edit?.emergencies?.[i]||0}"></div>`).join('')}</div>
+${renderEmergencyPractice(edit)}
 ${edit?`<div class="field" style="margin-top:12px"><label>Change reason</label><input class="input" name="changeReason" required value="${esc(edit.changeReason||'Correction')}"></div>`:''}
 <div class="toolbar"><button class="btn sky" type="submit">${edit?'Save revision':'Save evaluation'}</button><button class="btn secondary" type="button" id="draftBtn">▤ Save draft</button>${edit?'<button class="btn danger" type="button" id="cancelEdit">Cancel edit</button>':''}</div>
 </form></section>
@@ -480,6 +488,41 @@ function builderAccumulationHtml(phase){
 }
 function currentCoursePhase(){const c=cfgGet();return c.phases.find(x=>x.type===currentCourseMeta.type&&x.name===currentCourseMeta.phase)||null}
 function currentCourseTrackingCounters(){return enabledPhaseCounters(currentCoursePhase())}
+
+const emergencyCategories=['Electrical','Propulsion / Engine','Flight Controls','Communications / Avionics','General / Operational'];
+function defaultEmergencyCategory(name){
+  const n=String(name||'').toLowerCase();
+  if(/gen|bat|electr|power/.test(n))return 'Electrical';
+  if(/engine|fuel|prop|thrust/.test(n))return 'Propulsion / Engine';
+  if(/flap|aileron|rudder|elevator|control/.test(n))return 'Flight Controls';
+  if(/rpt|radio|comm|ias|flight-box|avion/.test(n))return 'Communications / Avionics';
+  return 'General / Operational';
+}
+function currentConfigSelection(){
+  const c=cfgGet(),type=c.courseTypes.find(x=>x.id===currentCourseMeta.type)?.id||currentCourseMeta.type;
+  const phase=c.phases.find(x=>x.type===type&&x.name===currentCourseMeta.phase)?.id||'';
+  const trainingKind=c.trainingKinds.find(x=>x.name===currentCourseMeta.trainingKind)?.id||'*';
+  const dayNight=c.dayNight.find(x=>x.name===currentCourseMeta.dayNight)?.id||'';
+  const country=c.countries.find(x=>x.name===currentCourseMeta.country)?.id||'*';
+  return {courseType:type,phaseId:phase,trainingKind,dayNight,country};
+}
+function evaluationEmergencyDefs(){
+  const c=cfgGet(),sel=currentConfigSelection(),p=cfgResolve(sel);
+  const allowed=p?.emergencyIds?.length?new Set(p.emergencyIds):null;
+  return c.emergencies.filter(x=>x.courseType===sel.courseType&&(!allowed||allowed.has(x.id))).map(x=>({...x,category:x.category||defaultEmergencyCategory(x.name)}));
+}
+function renderEmergencyPractice(edit){
+  const defs=evaluationEmergencyDefs(),legacy=edit?.emergencies||[],counts=edit?.emergencyCounts||{};
+  const groups={};
+  defs.forEach((x,i)=>{const cat=x.category||'General / Operational';(groups[cat]||(groups[cat]=[])).push({...x,legacyIndex:i,value:Number(counts[x.id]??legacy[i]??0)})});
+  const ordered=[...emergencyCategories,...Object.keys(groups).filter(x=>!emergencyCategories.includes(x))].filter(x=>groups[x]?.length);
+  const total=defs.reduce((sum,x,i)=>sum+Number(counts[x.id]??legacy[i]??0),0);
+  return '<div class="sectionHead"><div class="inlineHead"><div><h2>Emergency practice</h2><p>Grouped by system so large emergency libraries stay fast to use.</p></div><span class="pill blue" id="emergencySelectedBadge">'+total+' recorded</span></div></div>'+
+    '<div class="emergencyToolbar"><input class="input" id="emergencySearch" type="search" placeholder="Search emergency…"><button class="btn secondary small emergencySelected" type="button" id="emergencyExpandUsed">Used only</button></div>'+
+    '<div class="emergencyGroups" id="emergencyGroups">'+ordered.map((cat,gi)=>{const rows=groups[cat],groupTotal=rows.reduce((a,x)=>a+x.value,0),open=groupTotal>0;
+      return '<details class="emergencyGroup" data-emergency-group="'+esc(cat)+'" '+(open?'open':'')+'><summary><span>'+esc(cat)+'</span><span class="emergencyGroupMeta"><span class="emergencyGroupCount">'+rows.length+' items</span><span class="emergencyGroupTotal" data-group-total="'+esc(cat)+'">'+groupTotal+' recorded</span></span></summary><div class="emergencyRows">'+rows.map(x=>'<label class="emergencyRow" data-emergency-name="'+esc(x.name.toLowerCase())+'" data-emergency-category="'+esc(cat.toLowerCase())+'"><span>'+esc(x.name)+'</span><input class="input emergencyCountInput" type="number" min="0" max="99" step="1" name="emid_'+esc(x.id)+'" data-emergency-id="'+esc(x.id)+'" data-emergency-category="'+esc(cat)+'" value="'+x.value+'"></label>').join('')+'</div></details>';
+    }).join('')+'<div class="emergencyNoResults" id="emergencyNoResults">No emergency matches this search.</div></div>';
+}
 function cfgDefaults(){
   const ep='EP';
   return {
@@ -490,7 +533,7 @@ function cfgDefaults(){
     countries: countries.map((name,n)=>({id:['israel','cyprus'][n]||('country_'+n),name})),
     syllabi: syllabi.map((name,n)=>({id:'syll_'+(n+1),courseType:ep,name,minimum:null,instructorPresence:'WITH INSTRUCTOR'})),
     criteria: criteria.map(c=>({id:c.id,courseType:ep,name:c.name,weight:Math.round(c.weight*100)})),
-    emergencies: emergencies.map((name,n)=>({id:'em_'+(n+1),courseType:ep,name}))
+    emergencies: emergencies.map((name,n)=>({id:'em_'+(n+1),courseType:ep,name,category:defaultEmergencyCategory(name)}))
   };
 }
 function cfgGet(){
@@ -501,7 +544,7 @@ function cfgGet(){
     c.phases=(c.phases||[]).map(x=>({...x,tracking:normalizePhaseTracking(x)}));
     c.syllabi=(c.syllabi||[]).map(x=>({...x,courseType:x.courseType||'EP',minimum:x.minimum===undefined?null:x.minimum,instructorPresence:x.instructorPresence||'WITH INSTRUCTOR'}));
     c.criteria=(c.criteria||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
-    c.emergencies=(c.emergencies||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
+    c.emergencies=(c.emergencies||[]).map(x=>({...x,courseType:x.courseType||'EP',category:x.category||defaultEmergencyCategory(x.name)}));
     return c;
   }catch{return cfgDefaults()}
 }
@@ -546,15 +589,18 @@ function cfgCatalogCard(title,key,list){
 }
 
 function cfgTypeScopedCard(title,key,list,type,kind){
-  const scoped=list.filter(x=>x.courseType===type),isCriteria=kind==='criteria',isSyllabus=kind==='syllabi';
+  const scoped=list.filter(x=>x.courseType===type),isCriteria=kind==='criteria',isSyllabus=kind==='syllabi',isEmergency=kind==='emergencies';
+  const categoryOptions=value=>[...emergencyCategories,...(!emergencyCategories.includes(value)&&value?[value]:[])].map(cat=>'<option value="'+esc(cat)+'" '+(cat===value?'selected':'')+'>'+esc(cat)+'</option>').join('');
   const rows=scoped.map(x=>{
     if(isSyllabus)return '<div class="editableRow" style="display:grid;grid-template-columns:minmax(0,1fr) 88px 150px auto"><input class="input cfgScopedName" data-kind="'+key+'" data-id="'+x.id+'" value="'+esc(x.name)+'"><input class="input cfgSyllabusMinimum" data-id="'+x.id+'" type="number" min="0" max="999" placeholder="Min" value="'+(x.minimum==null?'':x.minimum)+'"><select class="cfgSyllabusPresence" data-id="'+x.id+'"><option value="WITH INSTRUCTOR" '+(x.instructorPresence==='WITH INSTRUCTOR'?'selected':'')+'>With Instructor</option><option value="WITHOUT INSTRUCTOR" '+(x.instructorPresence==='WITHOUT INSTRUCTOR'?'selected':'')+'>Without Instructor</option></select><button class="btn danger small" data-scoped-remove="'+key+'|'+x.id+'">Remove</button></div>';
+    if(isEmergency)return '<div class="cfgEmergencyRow"><input class="input cfgScopedName" data-kind="'+key+'" data-id="'+x.id+'" value="'+esc(x.name)+'"><select class="cfgEmergencyCategory" data-id="'+x.id+'">'+categoryOptions(x.category||defaultEmergencyCategory(x.name))+'</select><button class="btn danger small" data-scoped-remove="'+key+'|'+x.id+'">Remove</button></div>';
     return '<div class="editableRow"><input class="input cfgScopedName" data-kind="'+key+'" data-id="'+x.id+'" value="'+esc(x.name)+'">'+(isCriteria?'<input class="input cfgScopedWeight" data-id="'+x.id+'" type="number" min="0" max="100" value="'+x.weight+'" style="max-width:86px">':'')+'<button class="btn danger small" data-scoped-remove="'+key+'|'+x.id+'">Remove</button></div>';
   }).join('');
   let add='<input class="input" name="name" placeholder="Add '+esc(title.toLowerCase())+'" required>';
   if(isSyllabus)add+='<input class="input" name="minimum" type="number" min="0" max="999" placeholder="Minimum" style="max-width:110px"><select name="instructorPresence" style="max-width:180px"><option value="WITH INSTRUCTOR">With Instructor</option><option value="WITHOUT INSTRUCTOR">Without Instructor</option></select>';
   if(isCriteria)add+='<input class="input" name="weight" type="number" min="0" max="100" value="10" style="max-width:90px">';
-  return '<section class="card settingBox"><h3>'+esc(title)+'</h3><p class="sub">Belongs only to '+esc(cfgItem(cfgGet().courseTypes,type)?.name||type)+(isSyllabus?' · Minimum 0 means optional / non-blocking.':'')+'</p><div class="editableList">'+rows+'</div><form class="toolbar cfgScopedAdd" data-kind="'+key+'" data-course-type="'+type+'">'+add+'<button class="btn secondary" type="submit">＋ Add</button></form></section>';
+  if(isEmergency)add+='<select name="category" style="max-width:210px">'+categoryOptions('General / Operational')+'</select>';
+  return '<section class="card settingBox"><h3>'+esc(title)+'</h3><p class="sub">Belongs only to '+esc(cfgItem(cfgGet().courseTypes,type)?.name||type)+(isSyllabus?' · Minimum 0 means optional / non-blocking.':isEmergency?' · Categories control how emergencies are grouped during Evaluation.':'')+'</p><div class="editableList">'+rows+'</div><form class="toolbar cfgScopedAdd" data-kind="'+key+'" data-course-type="'+type+'">'+add+'<button class="btn secondary" type="submit">＋ Add</button></form></section>';
 }
 function cfgPhaseCard(c){
   const scope=state.phaseScope||c.courseTypes[0]?.id||'',list=c.phases.filter(x=>x.type===scope);
@@ -589,7 +635,7 @@ function cfgProfileEditor(p,c){
     '<div class="infoBox" style="margin-top:12px"><b>Scoped to '+esc(cfgItem(c.courseTypes,v.courseType)?.name||v.courseType)+'</b><p>You are not choosing from a global bank. Only items owned by this course type appear below.</p></div>'+
     '<div class="sectionHead"><h2>Assigned syllabi</h2><p>Minimum and instructor-presence settings come from the '+esc(cfgItem(c.courseTypes,v.courseType)?.name||v.courseType)+' syllabus definition.</p></div><div id="cfgProfileSyllabi">'+checks('syllabusIds',scopedSyll,v.syllabusIds,x=>' · '+(x.instructorPresence==='WITHOUT INSTRUCTOR'?'Without Instructor':'With Instructor')+' · Min '+(x.minimum==null?'—':x.minimum))+'</div>'+
     '<div class="sectionHead"><h2>Assigned criteria</h2></div><div id="cfgProfileCriteria">'+checks('criteriaIds',scopedCrit,v.criteriaIds,x=>' · '+x.weight+'%')+'</div>'+
-    '<div class="sectionHead"><h2>Assigned emergencies</h2></div><div id="cfgProfileEmergencies">'+checks('emergencyIds',scopedEmer,v.emergencyIds)+'</div>'+
+    '<div class="sectionHead"><h2>Assigned emergencies</h2><p>Emergency categories are defined in Course type setup and used in the Evaluation picker.</p></div><div id="cfgProfileEmergencies">'+checks('emergencyIds',scopedEmer,v.emergencyIds,x=>' · '+(x.category||defaultEmergencyCategory(x.name)))+'</div>'+
     '<div class="toolbar"><button class="btn sky" type="submit">'+(p?'Save profile':'Create profile')+'</button>'+(p?'<button class="btn secondary" type="button" id="cfgProfileCancel">Cancel</button>':'')+'</div></form>';
 }
 function settings(){
@@ -763,9 +809,13 @@ function bindExams(){
  form.elements.grade.oninput=preview;form.elements.pass.oninput=preview;
  form.onsubmit=e=>{e.preventDefault();const fd=new FormData(form),arr=getExamRecords(),traineeId=String(fd.get('trainee')),grade=Number(fd.get('grade')),pass=Number(fd.get('pass'));arr.unshift({id:'x_'+Date.now(),date:String(fd.get('date')),traineeId,traineeName:trainees.find(t=>t.id===traineeId)?.name||'',exam:String(fd.get('exam')),grade,pass});saveExamRecords(arr);toast('Exam result saved locally');render()};
 }
-function bindEval(){const f=$('#evalForm');const scoreEls=[...f.querySelectorAll('select[name^="score_"]')];const recalc=()=>{let complete=true,total=0;criteria.forEach(c=>{const el=f.querySelector('[name="score_'+c.id+'"]'),v=Number(el?.value||0);if(!v)complete=false;total+=v*c.weight});$('#suggestedGrade').textContent=complete?(Math.round(total*10)/10).toFixed(1):'—'};scoreEls.forEach(x=>x.onchange=recalc);f.querySelectorAll('input,select,textarea').forEach(x=>x.onchange=()=>$('#draftBadge')?.classList.remove('hidden'));f.querySelectorAll('input[name="gradeMode"]').forEach(x=>x.onchange=()=>{$('#overrideWrap').style.display=x.value==='INSTRUCTOR'&&x.checked?'block':(f.querySelector('input[name="gradeMode"]:checked')?.value==='INSTRUCTOR'?'block':'none')});
+function bindEval(){const f=$('#evalForm');const scoreEls=[...f.querySelectorAll('select[name^="score_"]')];const recalc=()=>{let complete=true,total=0;criteria.forEach(c=>{const el=f.querySelector('[name="score_'+c.id+'"]'),v=Number(el?.value||0);if(!v)complete=false;total+=v*c.weight});$('#suggestedGrade').textContent=complete?(Math.round(total*10)/10).toFixed(1):'—'};scoreEls.forEach(x=>x.onchange=recalc);f.querySelectorAll('input,select,textarea').forEach(x=>x.onchange=()=>$('#draftBadge')?.classList.remove('hidden'));
+const updateEmergencyUi=()=>{const inputs=[...f.querySelectorAll('.emergencyCountInput')],total=inputs.reduce((a,x)=>a+(Number(x.value)||0),0);if($('#emergencySelectedBadge'))$('#emergencySelectedBadge').textContent=total+' recorded';const byGroup={};inputs.forEach(x=>byGroup[x.dataset.emergencyCategory]=(byGroup[x.dataset.emergencyCategory]||0)+(Number(x.value)||0));f.querySelectorAll('[data-group-total]').forEach(el=>el.textContent=(byGroup[el.dataset.groupTotal]||0)+' recorded')};
+f.querySelectorAll('.emergencyCountInput').forEach(x=>{x.oninput=updateEmergencyUi;x.onchange=()=>{$('#draftBadge')?.classList.remove('hidden');updateEmergencyUi()}});
+if($('#emergencySearch'))$('#emergencySearch').oninput=e=>{const q=e.target.value.trim().toLowerCase(),rows=[...f.querySelectorAll('.emergencyRow')],groups=[...f.querySelectorAll('.emergencyGroup')];let shown=0;rows.forEach(row=>{const hit=!q||row.dataset.emergencyName.includes(q)||row.dataset.emergencyCategory.includes(q);row.style.display=hit?'grid':'none';if(hit)shown++});groups.forEach(g=>{const visible=[...g.querySelectorAll('.emergencyRow')].some(r=>r.style.display!=='none');g.style.display=visible?'block':'none';if(q&&visible)g.open=true});if($('#emergencyNoResults'))$('#emergencyNoResults').style.display=shown?'none':'block'};
+if($('#emergencyExpandUsed'))$('#emergencyExpandUsed').onclick=()=>{const inputs=[...f.querySelectorAll('.emergencyCountInput')],used=inputs.filter(x=>(Number(x.value)||0)>0);f.querySelectorAll('.emergencyGroup').forEach(g=>{const has=used.some(x=>g.contains(x));g.open=has;g.style.display=has?'block':'none'});if(!used.length){f.querySelectorAll('.emergencyGroup').forEach(g=>{g.style.display='block';g.open=false});toast('No emergency occurrences recorded yet')}else toast('Showing categories with recorded emergencies')};f.querySelectorAll('input[name="gradeMode"]').forEach(x=>x.onchange=()=>{$('#overrideWrap').style.display=x.value==='INSTRUCTOR'&&x.checked?'block':(f.querySelector('input[name="gradeMode"]:checked')?.value==='INSTRUCTOR'?'block':'none')});
 $('#draftBtn').onclick=()=>toast('Draft saved locally');if($('#cancelEdit'))$('#cancelEdit').onclick=()=>{state.editingEval=null;render()};if($('#excelBtn'))$('#excelBtn').onclick=()=>{const rows=[['Date','Trainee','Instructor','Syllabus','Grade','Revision'],...getEvaluations().map(i=>[i.flightDate,i.traineeName,i.instructorName,i.syllabus,i.grade,i.revision])];const csv=rows.map(r=>r.join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='course-evaluations.csv';a.click();URL.revokeObjectURL(a.href)};if($('#pdfBtn'))$('#pdfBtn').onclick=()=>window.print();
-f.onsubmit=e=>{e.preventDefault();const fd=new FormData(f),list=getEvaluations(),old=state.editingEval?list.find(x=>x.id===state.editingEval):null,traineeId=old?.traineeId||fd.get('trainee'),instId=fd.get('instructor');const scores={};criteria.forEach(c=>scores[c.id]=Number(fd.get('score_'+c.id))||0);let suggested=0,complete=true;criteria.forEach(c=>{if(!scores[c.id])complete=false;suggested+=scores[c.id]*c.weight});suggested=complete?Math.round(suggested*10)/10:0;const gradeMode=fd.get('gradeMode')||'SUGGESTED';const grade=gradeMode==='INSTRUCTOR'?Number(fd.get('instructorGrade')||0):suggested;const takeoffs=Math.max(0,Math.floor(Number(fd.get('takeoffs'))||0)),landings=Math.max(0,Math.floor(Number(fd.get('landings'))||0)),allT=[...trainees,...getRosterExtras().filter(x=>x.type==='TRAINEE')];const obj={id:old?.id||'ev_'+Date.now(),revision:old?(old.revision||1)+1:1,revisionCount:old?(old.revisionCount||1)+1:1,traineeId,instructorId:instId,traineeName:allT.find(t=>t.id===traineeId)?.name||'Trainee',instructorName:instructors.find(i=>i.id===instId)?.name||'Instructor',syllabus:old?.syllabus||fd.get('syllabus'),duration:Number(fd.get('duration')),flightDate:fd.get('date'),takeoffs,landings,scores,suggestedGrade:suggested,gradeMode,grade,comments:fd.get('comments'),emphases:fd.get('emphases'),emergencies:emergencies.map((_,i)=>Number(fd.get('em_'+i))||0),changeReason:fd.get('changeReason')||''};const next=old?list.map(x=>x.id===old.id?obj:x):[obj,...list];setEvaluations(next);let activity=getActivityEvents().filter(x=>x.sourceId!==obj.id);if(takeoffs>0)activity.unshift({id:'evt_'+Date.now()+'_eto',traineeId:String(traineeId),date:String(obj.flightDate),type:'TAKEOFF',quantity:takeoffs,source:'Instructed flight',sourceId:obj.id,note:String(obj.syllabus),createdAt:new Date().toISOString()});if(landings>0)activity.unshift({id:'evt_'+Date.now()+'_eld',traineeId:String(traineeId),date:String(obj.flightDate),type:'LANDING',quantity:landings,source:'Instructed flight',sourceId:obj.id,note:String(obj.syllabus),createdAt:new Date().toISOString()});saveActivityEvents(activity);state.editingEval=null;toast(old?'Revision '+obj.revision+' saved; activity counters updated':'Evaluation saved; activity counters updated');render()}}
+f.onsubmit=e=>{e.preventDefault();const fd=new FormData(f),list=getEvaluations(),old=state.editingEval?list.find(x=>x.id===state.editingEval):null,traineeId=old?.traineeId||fd.get('trainee'),instId=fd.get('instructor');const scores={};criteria.forEach(c=>scores[c.id]=Number(fd.get('score_'+c.id))||0);let suggested=0,complete=true;criteria.forEach(c=>{if(!scores[c.id])complete=false;suggested+=scores[c.id]*c.weight});suggested=complete?Math.round(suggested*10)/10:0;const gradeMode=fd.get('gradeMode')||'SUGGESTED';const grade=gradeMode==='INSTRUCTOR'?Number(fd.get('instructorGrade')||0):suggested;const takeoffs=Math.max(0,Math.floor(Number(fd.get('takeoffs'))||0)),landings=Math.max(0,Math.floor(Number(fd.get('landings'))||0)),allT=[...trainees,...getRosterExtras().filter(x=>x.type==='TRAINEE')];const obj={id:old?.id||'ev_'+Date.now(),revision:old?(old.revision||1)+1:1,revisionCount:old?(old.revisionCount||1)+1:1,traineeId,instructorId:instId,traineeName:allT.find(t=>t.id===traineeId)?.name||'Trainee',instructorName:instructors.find(i=>i.id===instId)?.name||'Instructor',syllabus:old?.syllabus||fd.get('syllabus'),duration:Number(fd.get('duration')),flightDate:fd.get('date'),takeoffs,landings,scores,suggestedGrade:suggested,gradeMode,grade,comments:fd.get('comments'),emphases:fd.get('emphases'),emergencyCounts:Object.fromEntries(evaluationEmergencyDefs().map(x=>[x.id,Number(fd.get('emid_'+x.id))||0])),emergencies:evaluationEmergencyDefs().map(x=>Number(fd.get('emid_'+x.id))||0),changeReason:fd.get('changeReason')||''};const next=old?list.map(x=>x.id===old.id?obj:x):[obj,...list];setEvaluations(next);let activity=getActivityEvents().filter(x=>x.sourceId!==obj.id);if(takeoffs>0)activity.unshift({id:'evt_'+Date.now()+'_eto',traineeId:String(traineeId),date:String(obj.flightDate),type:'TAKEOFF',quantity:takeoffs,source:'Instructed flight',sourceId:obj.id,note:String(obj.syllabus),createdAt:new Date().toISOString()});if(landings>0)activity.unshift({id:'evt_'+Date.now()+'_eld',traineeId:String(traineeId),date:String(obj.flightDate),type:'LANDING',quantity:landings,source:'Instructed flight',sourceId:obj.id,note:String(obj.syllabus),createdAt:new Date().toISOString()});saveActivityEvents(activity);state.editingEval=null;toast(old?'Revision '+obj.revision+' saved; activity counters updated':'Evaluation saved; activity counters updated');render()}}
 
 function bindSettings(){
   const c=cfgGet();
@@ -795,7 +845,7 @@ function bindSettings(){
     document.querySelectorAll('.cfgName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
     document.querySelectorAll('.cfgPhaseName').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});document.querySelectorAll('.phaseTrackingEnabled').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x){x.tracking=normalizePhaseTracking(x);x.tracking.enabled=el.checked}});document.querySelectorAll('.phaseCounterEnabled').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x){x.tracking=normalizePhaseTracking(x);x.tracking.counters[el.dataset.counter].enabled=el.checked}});document.querySelectorAll('.phaseCounterMinimum').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x){x.tracking=normalizePhaseTracking(x);x.tracking.counters[el.dataset.counter].minimum=el.value===''?null:Number(el.value)}});
     document.querySelectorAll('.cfgScopedName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
-    document.querySelectorAll('.cfgScopedWeight').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x)x.weight=Math.max(0,Math.min(100,Number(el.value)||0))});document.querySelectorAll('.cfgSyllabusMinimum').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.minimum=el.value===''?null:Math.max(0,Math.min(999,Math.floor(Number(el.value)||0)))});document.querySelectorAll('.cfgSyllabusPresence').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.instructorPresence=el.value});
+    document.querySelectorAll('.cfgScopedWeight').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x)x.weight=Math.max(0,Math.min(100,Number(el.value)||0))});document.querySelectorAll('.cfgEmergencyCategory').forEach(el=>{const x=cc.emergencies.find(v=>v.id===el.dataset.id);if(x)x.category=el.value||'General / Operational'});document.querySelectorAll('.cfgSyllabusMinimum').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.minimum=el.value===''?null:Math.max(0,Math.min(999,Math.floor(Number(el.value)||0)))});document.querySelectorAll('.cfgSyllabusPresence').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.instructorPresence=el.value});
     cfgSave(cc);toast('All changes saved for this course type');render();
   };
 
@@ -808,7 +858,7 @@ function bindSettings(){
   document.querySelectorAll('.cfgScopedAdd').forEach(form=>form.onsubmit=e=>{
     e.preventDefault();const cc=cfgGet(),kind=form.dataset.kind,type=form.dataset.courseType,fd=new FormData(form),name=String(fd.get('name')||'').trim();if(!name)return;
     const obj={id:cfgId(kind==='criteria'?'criterion':kind==='syllabi'?'syllabus':'emergency'),courseType:type,name};
-    if(kind==='criteria')obj.weight=Math.max(0,Math.min(100,Number(fd.get('weight'))||0));if(kind==='syllabi'){obj.minimum=fd.get('minimum')===''?null:Math.max(0,Math.min(999,Math.floor(Number(fd.get('minimum'))||0)));obj.instructorPresence=String(fd.get('instructorPresence')||'WITH INSTRUCTOR')}
+    if(kind==='criteria')obj.weight=Math.max(0,Math.min(100,Number(fd.get('weight'))||0));if(kind==='emergencies')obj.category=String(fd.get('category')||'General / Operational');if(kind==='syllabi'){obj.minimum=fd.get('minimum')===''?null:Math.max(0,Math.min(999,Math.floor(Number(fd.get('minimum'))||0)));obj.instructorPresence=String(fd.get('instructorPresence')||'WITH INSTRUCTOR')}
     cc[kind].push(obj);cfgSave(cc);toast(name+' added to '+(cfgItem(cc.courseTypes,type)?.name||type));render();
   });
 
