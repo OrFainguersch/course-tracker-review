@@ -306,14 +306,18 @@ assert.match(elements.get("#content").innerHTML,/Reusable Package Emergency/);
 assert.match(elements.get("#content").innerHTML,/PACKAGE CUSTOM/);
 
 vm.runInContext("FLYMPUS_TRAINING.saveGlobalOverrides('ep_full_refresh',{});FLYMPUS_TRAINING.removeCustomPackage('EP','ui_custom_package');state.settingsTab='catalog';state.typeWorkspace='IP';state.packageFocusId=null;state.packageEditId=null;render()",context);
-assert.match(elements.get("#content").innerHTML,/Package configuration · Control station \/ qualification/);
-assert.match(elements.get("#content").innerHTML,/IP Training Packages/);
+assert.match(elements.get("#content").innerHTML,/Configurations \/ qualifications/);
+assert.match(elements.get("#content").innerHTML,/Training Packages/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/IP Training Packages/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/Phases · IP|Platforms · IP|IP architecture/);
 assert.match(elements.get("#content").innerHTML,/globalPackageForm/);
 
 vm.runInContext("state.typeWorkspace='TECHNICIAN';state.packageFocusId=null;state.packageEditId=null;render()",context);
-assert.match(elements.get("#content").innerHTML,/Package configuration · System \/ qualification/);
+assert.match(elements.get("#content").innerHTML,/Systems \/ qualifications/);
 assert.match(elements.get("#content").innerHTML,/Engine H \/ GCS-D/);
-assert.match(elements.get("#content").innerHTML,/TECHNICIAN Training Packages/);
+assert.match(elements.get("#content").innerHTML,/Training Packages/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/TECHNICIAN Training Packages/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/Phases · TECHNICIAN|Platforms · TECHNICIAN|TECHNICIAN architecture/);
 vm.runInContext("FLYMPUS_TRAINING.saveGlobalOverrides('tech_full_new',{program:{name:'Global Technician Package'}});render()",context);
 assert.match(elements.get("#content").innerHTML,/Global Technician Package/);
 assert.doesNotMatch(elements.get("#content").innerHTML,/EDITED DEFAULT/,"Package state badges were intentionally removed");
