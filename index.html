@@ -528,18 +528,23 @@ html,body{background:#f5f7fa}
 .mobileHero{background:#10365d;box-shadow:0 10px 24px rgba(13,49,86,.12);min-height:0}
 .mobileHero:before,.mobileHero:after{display:none}
 .homeCourseContext{display:grid;margin-top:18px;padding:0 0 15px;border-bottom:1px solid rgba(255,255,255,.14)}
-.homeCourseContext.cols5{grid-template-columns:.72fr 1fr 1.08fr 1.36fr 1.05fr}
-.homeCourseContext.cols4{grid-template-columns:.72fr 1fr 1.08fr 1.36fr}
-.homeCourseContextItem{min-width:0;padding:0 9px;border-left:1px solid rgba(255,255,255,.13)}
+.homeCourseContext.cols5{grid-template-columns:.74fr 1.08fr 1.06fr 1.42fr .88fr}
+.homeCourseContext.cols4{grid-template-columns:.78fr 1.08fr 1.10fr 1.44fr}
+.homeCourseContextItem{min-width:0;padding:0 5px;border-left:1px solid rgba(255,255,255,.13)}
 .homeCourseContextItem:first-child{padding-left:0;border-left:0}
 .homeCourseContextItem:last-child{padding-right:0}
-.homeCourseContextItem small{display:block;color:rgba(218,232,244,.67);font-size:7.5px;line-height:1.1;font-weight:800;letter-spacing:.085em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.homeCourseContextItem b{display:block;margin-top:5px;color:#fff;font-size:10.5px;line-height:1.15;font-weight:760;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.homeCourseContextItem small{display:block;color:rgba(218,232,244,.67);font-size:7.2px;line-height:1.1;font-weight:800;letter-spacing:.055em;text-transform:uppercase;white-space:nowrap}
+.homeCourseContextItem b{display:block;margin-top:5px;color:#fff;font-size:10.2px;line-height:1.15;font-weight:760;white-space:nowrap}
+.homeContextLabelCompact{display:none}
 .mobileHero .heroMeta{margin-top:13px;color:#bfd0df;font-size:10.5px}
+@media(max-width:520px){
+  .homeContextLabelFull.long{display:none}
+  .homeContextLabelCompact{display:inline}
+}
 @media(max-width:390px){
-  .homeCourseContextItem{padding-left:7px;padding-right:7px}
-  .homeCourseContextItem small{font-size:6.8px;letter-spacing:.06em}
-  .homeCourseContextItem b{font-size:9.7px}
+  .homeCourseContextItem{padding-left:4px;padding-right:4px}
+  .homeCourseContextItem small{font-size:6.7px;letter-spacing:.035em}
+  .homeCourseContextItem b{font-size:9.6px}
 }
 .homeSectionTitle:before{width:3px;background:#c7a04a}
 @media(max-width:760px){
@@ -558,7 +563,7 @@ html,body{background:#f5f7fa}
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topCourseSwitcherWrap"><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch selected course" aria-haspopup="menu" aria-expanded="false" aria-controls="topCourseDropdown"><span>Selected course</span><b id="topCourseName" aria-live="polite">&nbsp;</b><i aria-hidden="true">⌄</i></button><div class="topCourseDropdown" id="topCourseDropdown" role="menu" hidden></div></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="removePersonalPhoto">Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored only in this browser for the review build.</p></div></div></div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0662 · minimal course context strip</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topCourseSwitcherWrap"><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch selected course" aria-haspopup="menu" aria-expanded="false" aria-controls="topCourseDropdown"><span>Selected course</span><b id="topCourseName" aria-live="polite">&nbsp;</b><i aria-hidden="true">⌄</i></button><div class="topCourseDropdown" id="topCourseDropdown" role="menu" hidden></div></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="removePersonalPhoto">Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored only in this browser for the review build.</p></div></div></div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0663 · responsive course context strip</div><div class="toast" id="toast"></div></div>
 <script>
 (()=>{try{
   const active=JSON.parse(localStorage.getItem('ct-review-active-course')||'{}')||{};
@@ -571,18 +576,18 @@ html,body{background:#f5f7fa}
   if(name)name.textContent='Aerostar EP Course';
 }})();
 </script>
-<script src="./assets/ep-catalog.js?v=0662"></script>
-<script src="./assets/aerostar-platform.js?v=0662"></script>
-<script src="./assets/ip-catalog.js?v=0662"></script>
-<script src="./assets/technician-catalog.js?v=0662"></script>
-<script src="./assets/training-core.js?v=0662"></script>
-<script src="./assets/ep-lessons-screening.js?v=0662"></script>
-<script src="./assets/ep-lessons-rc-1.js?v=0662"></script>
-<script src="./assets/ep-lessons-rc-2.js?v=0662"></script>
-<script src="./assets/ep-lessons-half.js?v=0662"></script>
-<script src="./assets/ep-lessons-full-day-a.js?v=0662"></script>
-<script src="./assets/ep-lessons-full-day-b.js?v=0662"></script>
-<script src="./assets/ep-lessons-night.js?v=0662"></script>
+<script src="./assets/ep-catalog.js?v=0663"></script>
+<script src="./assets/aerostar-platform.js?v=0663"></script>
+<script src="./assets/ip-catalog.js?v=0663"></script>
+<script src="./assets/technician-catalog.js?v=0663"></script>
+<script src="./assets/training-core.js?v=0663"></script>
+<script src="./assets/ep-lessons-screening.js?v=0663"></script>
+<script src="./assets/ep-lessons-rc-1.js?v=0663"></script>
+<script src="./assets/ep-lessons-rc-2.js?v=0663"></script>
+<script src="./assets/ep-lessons-half.js?v=0663"></script>
+<script src="./assets/ep-lessons-full-day-a.js?v=0663"></script>
+<script src="./assets/ep-lessons-full-day-b.js?v=0663"></script>
+<script src="./assets/ep-lessons-night.js?v=0663"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentUserId='i1';
@@ -736,7 +741,7 @@ function home(){
    ['Type',currentCourseMeta.trainingKind||'—'],
    ...(showHomeQualification?[[currentCourseMeta.type==='IP'?'Configuration':'Qualification',activeCourseContextLabel()||'—']]:[])
  ];
- const homeContextHtml='<div class="homeCourseContext cols'+homeContextItems.length+'">'+homeContextItems.map(([label,value])=>'<div class="homeCourseContextItem"><small>'+esc(label)+'</small><b>'+esc(value)+'</b></div>').join('')+'</div>';
+ const homeContextHtml='<div class="homeCourseContext cols'+homeContextItems.length+'">'+homeContextItems.map(([label,value])=>{const compact=label==='Qualification'?'Qual.':label==='Configuration'?'Config.':label;return '<div class="homeCourseContextItem"><small><span class="homeContextLabelFull '+((label==='Qualification'||label==='Configuration')?'long':'')+'">'+esc(label)+'</span><span class="homeContextLabelCompact">'+esc(compact)+'</span></small><b>'+esc(value)+'</b></div>'}).join('')+'</div>';
  const pickDef=(name,fallback)=>defs.find(x=>x.name===name)||defs.find(x=>!x.optional&&x.mode!=='SIMULATOR')||{name:fallback,mode:'INSTRUCTED'};
  const plan=[
    {time:'08:00',t:activeT[0],def:pickDef(activeT[0]?.currentSyllabus,'Circuits')},
