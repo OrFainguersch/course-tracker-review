@@ -50,6 +50,12 @@ assert(html.includes('id="mobileBottomNav"')&&html.includes("function renderMobi
 assert(html.includes("['roster','roster','Roster'],['evaluation','evaluation','Evaluation'],['home','home','Home'],['planned','planned','Plan'],['more','more','More']"),"Mobile bottom navigation must use Roster, Evaluation, Home, Plan and More with Home centered");
 assert(html.includes("const state={screen:'home'"),"A fresh session must default to Home while saved session state can still restore the previous screen");
 assert(html.includes("const nav=[['reports','reports','Reports'],['safety','safety','Safety'],['exams','exams','Exams'],['__label','','COURSE'],['courses','courses','My Courses'],['settings','settings','Course Management']]"),"Sidebar must place Reports in the primary section and My Courses in the COURSE section while omitting destinations already present in the mobile bottom bar");
+assert(html.includes("function normalizeDateValue(v)")&&html.includes("function formatDateDMY(v)")&&html.includes('placeholder="DD/MM/YYYY"'),"All date entry/display must use the deterministic DD/MM/YYYY layer");
+assert(!html.includes('type="date"'),"Native locale-dependent date inputs must not remain in the review UI");
+assert(html.includes(".dateDmy{width:100%!important;max-width:100%!important;min-width:0!important"),"Date inputs must be constrained to their container on mobile");
+assert(!html.includes('${epCurrentSuitSummaryHtml()}\n<div class="twoCol">'),"Evaluation must not render the redundant Active Suit overview");
+assert(!html.includes("activeSuitOverviewHtml()+\n '<div class=\"twoCol\" style=\"margin-top:14px\">"),"Exams must not render the redundant Active Package overview");
+assert(html.includes("flightDate:normalizeDateValue(fd.get('date'))")&&html.includes("date=normalizeDateValue($('#pveDate').value)"),"Date forms must normalize DD/MM/YYYY back to ISO for storage and comparisons");
 assert(html.includes("scrollMobileNavTop")&&html.includes("window.scrollTo({top:0,left:0,behavior:'smooth'})"),"Every mobile bottom-nav action must scroll the page back to the top");
 assert(html.includes("Mobile dark brand bottom navigation · 0680")&&html.includes("background:linear-gradient(180deg,#123b63 0%,#0b3157 100%)")&&html.includes(".mobileBottomItem.active{color:#e2b84e}"),"Mobile bottom navigation must keep the simple dark brand style with gold active state");
 assert(html.includes("font-size:9.6px")&&html.includes("width:100%;white-space:nowrap;overflow:visible;text-align:center"),"Mobile navigation labels must remain readable and unclipped");
