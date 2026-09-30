@@ -197,7 +197,7 @@ main{padding:16px 14px calc(30px + env(safe-area-inset-bottom));max-width:1220px
 
 /* roster */
 .rosterTopbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
-.rosterControls{padding:11px}.rosterSearchRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:10px}
+.rosterControls{padding:11px}.rosterSearchRow{display:grid;grid-template-columns:minmax(0,1fr);margin-top:10px}
 .rosterFilterRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
 .statusSegments{display:flex;background:#f1f5f9;border-radius:12px;padding:3px;gap:2px}
 .statusSegments button{border:0;background:transparent;color:#64748b;padding:8px 11px;border-radius:9px;font-size:11px;font-weight:800}
@@ -985,8 +985,8 @@ function roster(){
  return '<div class="rosterTopbar"><div><div class="eyebrow">PEOPLE</div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div><button class="btn '+(manage?'secondary rosterManageTopDone':'edit')+'" id="toggleRosterManage">'+(manage?'Done':'✎ Manage')+'</button></div>'+
  (manage?'<div class="manageBanner"><div><b>Manage mode</b><span> · Edit identity, photo and course membership safely.</span></div><button class="btn sky small" id="addPersonBtn">+ Add person</button></div>':'')+
  '<section class="card rosterControls"><div class="scrollTabs"><button class="seg '+(type==='TRAINEE'?'active':'')+'" data-roster-type="TRAINEE">Trainees ('+allT.length+')</button><button class="seg '+(type==='INSTRUCTOR'?'active':'')+'" data-roster-type="INSTRUCTOR">Instructors ('+allI.length+')</button></div>'+
- '<div class="rosterSearchRow"><input class="input" id="rosterSearch" placeholder="Search '+(type==='TRAINEE'?'trainees':'instructors')+'..." value="'+esc(state.search)+'"><span class="rankBadge">⌕</span></div>'+
- (type==='TRAINEE'?'<div class="rosterFilterRow"><div class="statusSegments"><button class="'+(state.filter==='All'?'active':'')+'" data-filter="All">All</button><button class="'+(state.filter==='Active'?'active':'')+'" data-filter="Active">Active</button><button class="'+(state.filter==='Inactive'?'active':'')+'" data-filter="Inactive">Inactive</button></div><span class="sortHint">Active first</span></div>':'<div class="rosterFilterRow"><span class="sortHint">Course Manager first · then workload</span></div>')+
+ '<div class="rosterSearchRow"><input class="input" id="rosterSearch" placeholder="Search '+(type==='TRAINEE'?'trainees':'instructors')+'..." value="'+esc(state.search)+'"></div>'+
+ (type==='TRAINEE'?'<div class="rosterFilterRow"><div class="statusSegments"><button class="'+(state.filter==='All'?'active':'')+'" data-filter="All">All</button><button class="'+(state.filter==='Active'?'active':'')+'" data-filter="Active">Active</button><button class="'+(state.filter==='Inactive'?'active':'')+'" data-filter="Inactive">Inactive</button></div></div>':'<div class="rosterFilterRow"><span class="sortHint">Course Manager first · then workload</span></div>')+
  '</section>'+
  '<section class="people">'+(list.length?list.map(t=>{
    if(type==='TRAINEE'){
