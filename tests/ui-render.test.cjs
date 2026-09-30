@@ -232,6 +232,10 @@ assert.doesNotMatch(collapsedPackagesHtml,/packageRules syllabiRules" open/,"Syl
 vm.runInContext("state.packageFocusId='ui_custom_package';render()",context);
 const packagesHtml=elements.get("#content").innerHTML;
 assert.match(packagesHtml,/Training Packages/);
+assert.match(packagesHtml,/id="packageCategoryFilter"/,"Training Packages must provide a category filter when multiple categories exist");
+assert.match(packagesHtml,/Refreshment/);
+assert.match(packagesHtml,/Qualification/);
+assert.match(packagesHtml,/Return to Currency/);
 assert.doesNotMatch(packagesHtml,/EP Training Packages|IP Training Packages|TECHNICIAN Training Packages/,'Training Packages heading must not repeat the selected sector');
 assert.match(packagesHtml,/globalPackageForm/);
 assert.match(packagesHtml,/Syllabi \/ practical tasks/);
@@ -244,6 +248,13 @@ assert.doesNotMatch(packagesHtml,/name="g_syll_order_[^"]+" type="number"/,"Orde
 assert.match(packagesHtml,/type="hidden" name="g_syll_order_/);
 assert.doesNotMatch(packagesHtml,/data-package-edit-toggle=/,"Package editing is controlled by the global Advanced Edit action");
 assert.doesNotMatch(packagesHtml,/data-delete-package="ui_custom_package"/,"Delete Package must stay hidden until Advanced Edit is active");
+vm.runInContext("state.packageCategoryFilter='refreshment';state.packageFocusId=null;render()",context);
+const refreshmentFilteredHtml=elements.get("#content").innerHTML;
+assert.match(refreshmentFilteredHtml,/1 of \d+ packages/);
+assert.match(refreshmentFilteredHtml,/EP Refreshment · Full Scale · Aerostar/);
+assert.doesNotMatch(refreshmentFilteredHtml,/EP Return to Currency · Full Scale · Aerostar/);
+assert.doesNotMatch(refreshmentFilteredHtml,/EP ATOL Qualification · Full Scale · Aerostar/);
+vm.runInContext("state.packageCategoryFilter='ALL';state.packageFocusId='ui_custom_package';render()",context);
 assert.match(packagesHtml,/total planned minimum/);
 assert.doesNotMatch(packagesHtml,/packageRules syllabiRules"[^>]* open/,"Focused Package may open, but Syllabi must remain collapsed until requested");
 vm.runInContext("state.packageAddFlow='ui_custom_package:syllabi';render()",context);

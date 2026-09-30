@@ -28,7 +28,8 @@ assert(epDay.experienceCounters.some(x=>x.kind==="TAKEOFF"&&x.track==="day"&&x.m
 assert(epDay.experienceCounters.some(x=>x.kind==="LANDING"&&x.track==="day"&&x.minimum===3),"Day EP must track 3 full-stop landings");
 assert(epNight.experienceCounters.some(x=>x.kind==="TAKEOFF"&&x.track==="night"&&x.minimum===3),"Night EP must track 3 takeoffs");
 assert(epNight.experienceCounters.some(x=>x.kind==="LANDING"&&x.track==="night"&&x.minimum===3),"Night EP must track 3 full-stop landings");
-assert(epNight.progression.some(x=>/Full Scale Day syllabus #11/.test(x.prerequisite||"")),"Night Package must preserve its dependency on Full Scale Day");
+assert.equal((epNight.progression||[]).length,0,"Night Package must not contain a blocking or visible Progression gate");
+assert(!epNight.prerequisitePackageIds,"Night Package must not enforce a prerequisite Package");
 
 const epRcGuide=core.guidedOptions({courseType:"EP",phaseId:"ep_rc"});
 assert.equal(epRcGuide.showPhase,true);assert.equal(epRcGuide.showPlatform,false);assert.equal(epRcGuide.showTrainingKind,false);

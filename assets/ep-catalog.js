@@ -222,10 +222,7 @@ window.EP_CATALOG = {
       name:"EP Course · Full Scale Night · Aerostar",
       phaseId:"ep_full", platformId:"aerostar", trainingKind:"new", qualificationId:"night", dayNight:"night",
       source:"EP Course – Full scale stage (Edition F)",
-      prerequisite:"Completion of the Full-Scale Day prerequisite stated in the source syllabus.",
       completion:"Complete night syllabus and pass night check flight.",
-      prerequisitePackageIds:["ep_full_day_new"],
-      progression:[{id:"night_requires_day",prerequisite:"Complete Full Scale Day syllabus #11 before starting Full Scale Night"}],
       theory:[],
       syllabi:[
         {id:"night_day_into_night",name:"Day into Night",minimum:1,mode:"INSTRUCTED",topics:"Day takeoff; day Touch-and-Go with NAV lights; night orientation / Figure-8 at 1000 ft",briefing:"UAV orientation at night"},
