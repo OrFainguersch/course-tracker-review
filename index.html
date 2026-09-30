@@ -495,19 +495,19 @@ select option[value=""]{color:#8a9bad}
 .courseDetailsInline{margin-top:9px}.courseDetailsStep .wizardStepBody>label,.courseIdentityStep .wizardStepBody>label{display:block}.addPackageChoice{border-style:dashed;background:#f8fbfe}.addPackageChoice b{color:#0875ce}.fieldHelp{display:block;margin-top:5px;color:#8192a4;font-size:9px}.courseIdentityStep .fields{margin-top:9px}
 </style></head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0641 · stable management editing and simpler actions</div><div class="toast" id="toast"></div></div>
-<script src="./assets/ep-catalog.js?v=0641"></script>
-<script src="./assets/aerostar-platform.js?v=0641"></script>
-<script src="./assets/ip-catalog.js?v=0641"></script>
-<script src="./assets/technician-catalog.js?v=0641"></script>
-<script src="./assets/training-core.js?v=0641"></script>
-<script src="./assets/ep-lessons-screening.js?v=0641"></script>
-<script src="./assets/ep-lessons-rc-1.js?v=0641"></script>
-<script src="./assets/ep-lessons-rc-2.js?v=0641"></script>
-<script src="./assets/ep-lessons-half.js?v=0641"></script>
-<script src="./assets/ep-lessons-full-day-a.js?v=0641"></script>
-<script src="./assets/ep-lessons-full-day-b.js?v=0641"></script>
-<script src="./assets/ep-lessons-night.js?v=0641"></script>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0642 · pixel-stable management edit view</div><div class="toast" id="toast"></div></div>
+<script src="./assets/ep-catalog.js?v=0642"></script>
+<script src="./assets/aerostar-platform.js?v=0642"></script>
+<script src="./assets/ip-catalog.js?v=0642"></script>
+<script src="./assets/technician-catalog.js?v=0642"></script>
+<script src="./assets/training-core.js?v=0642"></script>
+<script src="./assets/ep-lessons-screening.js?v=0642"></script>
+<script src="./assets/ep-lessons-rc-1.js?v=0642"></script>
+<script src="./assets/ep-lessons-rc-2.js?v=0642"></script>
+<script src="./assets/ep-lessons-half.js?v=0642"></script>
+<script src="./assets/ep-lessons-full-day-a.js?v=0642"></script>
+<script src="./assets/ep-lessons-full-day-b.js?v=0642"></script>
+<script src="./assets/ep-lessons-night.js?v=0642"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentUserId='i1';
@@ -1800,14 +1800,28 @@ function reports(){
 function render(){saveUiState();renderNav();const topCourse=document.querySelector('#topCourseName');if(topCourse)topCourse.textContent=currentCourseMeta.courseName||course.name;let html='';try{switch(state.screen){case'courses':html=myCourses();break;case'home':html=home();break;case'evaluation':html=evaluation();break;case'roster':html=roster();break;case'profile':html=traineeProfile();break;case'instructor':html=instructorProfile();break;case'settings':html=settings();break;case'reports':html=reports();break;case'safety':html=safetyScreen();break;case'exams':html=examsScreen();break;case'planned':html=plannedVsExecuted();break;default:state.screen='home';html=home();break}}catch(err){console.error('Course Tracker screen render failed',state.screen,err);html='<div class="eyebrow">Review build diagnostic</div><h1 class="pageTitle">This screen failed to load</h1><section class="card settingBox"><h3>'+esc(state.screen)+'</h3><p class="sub">'+esc(err&&err.message?err.message:String(err))+'</p><div class="toolbar"><button class="btn sky" data-go="home">Back to Home</button><button class="btn danger" id="resetBrokenReviewState">Reset local review data</button></div></section>'}if(!html){state.screen='home';html=home()}$('#content').innerHTML=html;bind();}
 
 function renderPreservingManagementView(update){
-  const root=$('#content'),scrollTop=Number(window.scrollY||document.documentElement?.scrollTop||document.body?.scrollTop||0),openStates=root?[...root.querySelectorAll('details')].map(x=>!!x.open):[];
+  const root=$('#content'),docEl=document.documentElement,body=document.body,scrollTop=Number(window.scrollY||docEl?.scrollTop||body?.scrollTop||0),openStates=root?[...root.querySelectorAll('details')].map(x=>!!x.open):[];
+  const anchorSelector='.card,.packageRules,.advancedStepLabel,.personCard,.rosterControls,.trainingStatusStack',anchorNodes=root?[...root.querySelectorAll(anchorSelector)]:[],viewportTop=Math.max(72,Math.min(Number(window.innerHeight||800)-40,96));
+  let anchorIndex=-1,anchorTop=null,best=null;
+  anchorNodes.forEach((el,i)=>{const r=el.getBoundingClientRect?.();if(!r||r.height<=0||r.bottom<=viewportTop)return;const score=r.top<=viewportTop?viewportTop-r.top:10000+(r.top-viewportTop);if(!best||score<best.score)best={i,top:r.top,score}});
+  if(best){anchorIndex=best.i;anchorTop=best.top}
+  const oldHtmlAnchor=docEl?.style?.overflowAnchor,oldBodyAnchor=body?.style?.overflowAnchor;
+  try{if(docEl?.style)docEl.style.overflowAnchor='none';if(body?.style)body.style.overflowAnchor='none';document.activeElement?.blur?.()}catch{}
   if(typeof update==='function')update();
   render();
   const restore=()=>{
     const next=$('#content');if(next)openStates.forEach((open,i)=>{const d=next.querySelectorAll('details')[i];if(d)d.open=open});
-    try{if(typeof window.scrollTo==='function')window.scrollTo(0,scrollTop);else if(document.documentElement)document.documentElement.scrollTop=scrollTop}catch{}
+    try{
+      if(typeof window.scrollTo==='function')window.scrollTo(0,scrollTop);else if(docEl)docEl.scrollTop=scrollTop;
+      if(next&&anchorIndex>=0&&anchorTop!=null){
+        const anchor=next.querySelectorAll(anchorSelector)[anchorIndex],rect=anchor?.getBoundingClientRect?.();
+        if(rect&&Number.isFinite(rect.top)){const delta=rect.top-anchorTop;if(Math.abs(delta)>.25){if(typeof window.scrollBy==='function')window.scrollBy(0,delta);else if(docEl)docEl.scrollTop+=delta}}
+      }
+    }catch{}
   };
-  restore();if(typeof window.requestAnimationFrame==='function')window.requestAnimationFrame(restore);
+  restore();
+  if(typeof window.requestAnimationFrame==='function')window.requestAnimationFrame(()=>{restore();window.requestAnimationFrame(()=>{restore();try{if(docEl?.style)docEl.style.overflowAnchor=oldHtmlAnchor||'';if(body?.style)body.style.overflowAnchor=oldBodyAnchor||''}catch{}})});
+  else try{if(docEl?.style)docEl.style.overflowAnchor=oldHtmlAnchor||'';if(body?.style)body.style.overflowAnchor=oldBodyAnchor||''}catch{}
 }
 
 function bindGlobalFormUx(){

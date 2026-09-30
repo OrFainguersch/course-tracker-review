@@ -13,6 +13,9 @@ context.window=context;vm.createContext(context);
 for(const file of ["assets/ep-catalog.js","assets/aerostar-platform.js","assets/ip-catalog.js","assets/technician-catalog.js","assets/training-core.js","assets/ep-lessons-screening.js","assets/ep-lessons-rc-1.js","assets/ep-lessons-rc-2.js","assets/ep-lessons-half.js","assets/ep-lessons-full-day-a.js","assets/ep-lessons-full-day-b.js","assets/ep-lessons-night.js"]){vm.runInContext(fs.readFileSync(file,"utf8"),context,{filename:file})}
 const html=fs.readFileSync("index.html","utf8");
 assert(html.includes("function renderPreservingManagementView(update)"),"Management edit mode needs a view-preserving renderer");
+assert(html.includes("overflowAnchor='none'"),"Management Edit must disable native scroll anchoring while the view is rebuilt");
+assert(html.includes("anchorSelector='.card,.packageRules,.advancedStepLabel,.personCard,.rosterControls,.trainingStatusStack'"),"Management Edit must preserve a visible content anchor, not only the absolute scrollTop");
+assert(html.includes("window.scrollBy(0,delta)"),"Management Edit must compensate for layout-height changes above the viewport");
 assert(html.includes("courseTailorEdit'))$('#courseTailorEdit').onclick=()=>renderPreservingManagementView"),"Tailor Edit must preserve the current view");
 assert(html.includes("advancedArchitectureEdit'))$('#advancedArchitectureEdit').onclick=()=>renderPreservingManagementView"),"Advanced Edit must preserve the current view");
 assert(html.includes("toggleRosterManage').onclick=()=>renderPreservingManagementView"),"Course Roster Manage must preserve the current view");
