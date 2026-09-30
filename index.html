@@ -661,6 +661,13 @@ form,.formCard,.twoCol,.fields,.field,.settingBox,.wizardStepBody{min-width:0}
 form input,form select,form textarea{max-width:100%;min-width:0}
 .field>.input,.field>select,.field>textarea{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
 .dateDmy{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;text-align:left;font-variant-numeric:tabular-nums;letter-spacing:.02em;-webkit-appearance:none;appearance:none}
+.dateCalendarField{position:relative;display:block;min-width:0;max-width:100%}
+.dateCalendarField>.dateDmy{display:block;padding-right:42px!important;cursor:pointer}
+.dateCalendarField:focus-within>.dateDmy{border-color:#82bde9;box-shadow:0 0 0 3px rgba(23,111,174,.10)}
+.dateCalendarIcon{position:absolute;right:13px;top:50%;transform:translateY(-50%);z-index:2;width:18px;height:18px;display:grid;place-items:center;color:#2f79b5;pointer-events:none}
+.dateCalendarIcon svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dateCalendarNative{position:absolute!important;inset:0!important;z-index:3!important;width:100%!important;height:100%!important;min-width:0!important;margin:0!important;padding:0!important;border:0!important;opacity:0!important;cursor:pointer!important;-webkit-appearance:auto!important;appearance:auto!important}
+.dateCalendarField.is-disabled{opacity:.62}
 @media(max-width:759px){.dateDmy{font-size:16px!important}.twoCol>*,.fields>*{min-width:0;max-width:100%}}
 </style>
 </head>
@@ -738,15 +745,29 @@ function normalizeDateValue(v){
 function formatDateDMY(v){const iso=normalizeDateValue(v);if(!iso)return '—';const [y,m,d]=iso.split('-');return d+'/'+m+'/'+y}
 function dateInputValue(v){const iso=normalizeDateValue(v);if(!iso)return '';return formatDateDMY(iso)}
 function bindDmyDateInputs(){
-  document.querySelectorAll('input[type="date"]').forEach(el=>{
+  document.querySelectorAll('input[type="date"]:not(.dateCalendarNative)').forEach(el=>{
     const raw=el.value;
     el.type='text';el.classList.add('dateDmy');el.inputMode='numeric';el.autocomplete='off';el.maxLength=10;el.placeholder='DD/MM/YYYY';
     if(raw)el.value=dateInputValue(raw);
   });
-  document.querySelectorAll('.dateDmy').forEach(el=>{
+  document.querySelectorAll('input.dateDmy').forEach(el=>{
+    if(el.dataset.dateCalendarBound==='1')return;
+    el.dataset.dateCalendarBound='1';
     const shape=()=>{let digits=String(el.value||'').replace(/\D/g,'').slice(0,8),out=digits.slice(0,2);if(digits.length>2)out+='/'+digits.slice(2,4);if(digits.length>4)out+='/'+digits.slice(4);el.value=out;el.setCustomValidity?.('')};
-    const validate=()=>{if(!el.value){el.setCustomValidity?.(el.required?'Enter a date as DD/MM/YYYY':'');return}const iso=normalizeDateValue(el.value);if(!iso){el.setCustomValidity?.('Use DD/MM/YYYY');return}el.setCustomValidity?.('');el.value=formatDateDMY(iso)};
-    el.addEventListener('input',shape);el.addEventListener('blur',validate);el.addEventListener('change',validate);if(el.value)validate();
+    const validate=()=>{if(!el.value){el.setCustomValidity?.(el.required?'Choose a date':'');return}const iso=normalizeDateValue(el.value);if(!iso){el.setCustomValidity?.('Use DD/MM/YYYY');return}el.setCustomValidity?.('');el.value=formatDateDMY(iso)};
+    const wrapper=document.createElement('span'),native=document.createElement('input'),icon=document.createElement('span'),parent=el.parentNode,currentIso=normalizeDateValue(el.value);
+    wrapper.className='dateCalendarField'+(el.disabled?' is-disabled':'');
+    if(el.style.width)wrapper.style.width=el.style.width;else wrapper.style.width='100%';
+    if(el.style.maxWidth)wrapper.style.maxWidth=el.style.maxWidth;
+    native.type='date';native.className='dateCalendarNative';native.value=currentIso||todayIsoDate();native.disabled=!!el.disabled;
+    const minIso=normalizeDateValue(el.getAttribute('min')||''),maxIso=normalizeDateValue(el.getAttribute('max')||'');if(minIso)native.min=minIso;if(maxIso)native.max=maxIso;
+    const label=el.id?document.querySelector('label[for="'+el.id+'"]')?.textContent:null;native.setAttribute('aria-label',(label||el.getAttribute('aria-label')||'Choose date').trim());
+    icon.className='dateCalendarIcon';icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="15" rx="2"></rect><path d="M7 3.5v4M17 3.5v4M3.5 9.5h17"></path></svg>';
+    parent.insertBefore(wrapper,el);wrapper.appendChild(el);wrapper.appendChild(icon);wrapper.appendChild(native);
+    const syncNative=()=>{const iso=normalizeDateValue(el.value);native.value=iso||todayIsoDate()};
+    el.addEventListener('input',shape);el.addEventListener('blur',validate);el.addEventListener('change',()=>{validate();syncNative()});
+    native.addEventListener('change',()=>{if(!native.value)return;el.value=formatDateDMY(native.value);el.setCustomValidity?.('');el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))});
+    if(el.value)validate();
   });
 }
 function safeArrayStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[]}catch{return []}}
