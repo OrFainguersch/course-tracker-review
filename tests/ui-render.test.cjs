@@ -12,7 +12,7 @@ const context={window:{},document,localStorage:storage(),sessionStorage:storage(
 context.window=context;vm.createContext(context);
 for(const file of ["assets/ep-catalog.js","assets/aerostar-platform.js","assets/ip-catalog.js","assets/technician-catalog.js","assets/training-core.js","assets/ep-lessons-screening.js","assets/ep-lessons-rc-1.js","assets/ep-lessons-rc-2.js","assets/ep-lessons-half.js","assets/ep-lessons-full-day-a.js","assets/ep-lessons-full-day-b.js","assets/ep-lessons-night.js"]){vm.runInContext(fs.readFileSync(file,"utf8"),context,{filename:file})}
 const html=fs.readFileSync("index.html","utf8");
-assert(html.includes("tile('platform','Platform',platformValue)")&&html.includes("tile('training','Training type',meta.trainingKind)")&&html.includes("tile('country','Country',meta.country,'countryWide')"),"My Courses must render course details as visible metadata tiles");
+assert(html.includes("tile('platform','Platform',platformValue)")&&html.includes("tile('training','Training type',meta.trainingKind)")&&html.includes("countryTile=tile('country','Country',meta.country,showContext?'':'countryWide')"),"My Courses must render course details as visible metadata tiles");
 assert(html.includes("platformLabels:{rc_simulator:'RC Simulator',rc_model:'Shahak'"),"Shahak must be the default display name for rc_model");
 assert(html.includes("catalog.platformLabels=labels"),"Platform renames must persist inside the architecture catalog");
 assert(html.includes("internal platform identifier stays stable automatically and is intentionally hidden"),"Platform editor must explain stable hidden IDs");
@@ -54,9 +54,12 @@ assert(html.includes("showHomeQualification=currentCourseMeta.type!=='EP'||!!epQ
 assert(!html.includes("'<p>Train. Track. Progress.</p>'+"),"The Home hero should avoid redundant slogan copy inside the course context card");
 assert(html.includes("orderedFiltered=[...filtered].sort((a,b)=>{const as=a.key===selectedCourse,bs=b.key===selectedCourse;return as===bs?0:as?-1:1})"),"My Courses must keep the selected course first while preserving the existing order of all other courses");
 assert(html.includes("myCourseOpen selectedState")&&html.includes("✓ Selected"),"Selected course action must be a solid blue Selected state with a checkmark");
-assert(html.includes("My Courses · Option 2 refined tile layout · 0669")&&html.includes(".myCourseStatusBar{display:flex")&&html.includes(".myCourseMeta .courseMetaTile"),"My Courses cards must use the selected Option 2 header-and-tile layout");
+assert(html.includes("My Courses · Option 2 refined tile layout · 0670")&&html.includes(".myCourseStatusBar{display:flex")&&html.includes(".myCourseMeta .courseMetaTile"),"My Courses cards must use the selected Option 2 header-and-tile layout");
 assert(html.includes("function courseMetaIconSvg(kind)")&&html.includes("courseMetaIcon"),"My Courses metadata tiles must use the refined icon system");
 assert(html.includes("linear-gradient(135deg,#0a6fbd 0%,#1590eb 54%,#0863a9 100%)"),"Selected action must use the approved polished blue gradient");
+assert(html.includes("myCourseRoleDivider")&&html.includes("background:rgba(255,255,255,.78)"),"Course role must show the requested white separator between the icon and role text");
+assert(html.includes(".myCourseRoleInline.manager")&&html.includes(".myCourseRoleInline.instructor"),"Course Manager and Instructor must have clearly distinct role treatments");
+assert(html.includes("countryTile=tile('country','Country',meta.country,showContext?'':'countryWide')"),"Country must pair with Qualification or Configuration when that context field exists");
 assert(html.includes("myCourseOpen selectAction"),"Unselected course action must use the white selectable state");
 assert(html.includes("myCourseSelectedDivider"),"My Courses must render a blue divider immediately after the selected course when other courses follow");
 assert(html.includes("function sortCourseSwitcherRows(rows,selectedKey=currentCourseId)"),"Quick course switcher needs deterministic ordering");
