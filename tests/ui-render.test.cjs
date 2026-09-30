@@ -54,6 +54,9 @@ assert(html.includes("showHomeQualification=currentCourseMeta.type!=='EP'||!!epQ
 assert(!html.includes("'<p>Train. Track. Progress.</p>'+"),"The Home hero should avoid redundant slogan copy inside the course context card");
 assert(html.includes("orderedFiltered=[...filtered].sort((a,b)=>{const as=a.key===selectedCourse,bs=b.key===selectedCourse;return as===bs?0:as?-1:1})"),"My Courses must keep the selected course first while preserving the existing order of all other courses");
 assert(html.includes("myCourseOpen selectedState")&&html.includes("✓ Selected"),"Selected course action must be a solid blue Selected state with a checkmark");
+assert(html.includes("My Courses · Option 2 refined tile layout · 0669")&&html.includes(".myCourseStatusBar{display:flex")&&html.includes(".myCourseMeta .courseMetaTile"),"My Courses cards must use the selected Option 2 header-and-tile layout");
+assert(html.includes("function courseMetaIconSvg(kind)")&&html.includes("courseMetaIcon"),"My Courses metadata tiles must use the refined icon system");
+assert(html.includes("linear-gradient(135deg,#0a6fbd 0%,#1590eb 54%,#0863a9 100%)"),"Selected action must use the approved polished blue gradient");
 assert(html.includes("myCourseOpen selectAction"),"Unselected course action must use the white selectable state");
 assert(html.includes("myCourseSelectedDivider"),"My Courses must render a blue divider immediately after the selected course when other courses follow");
 assert(html.includes("function sortCourseSwitcherRows(rows,selectedKey=currentCourseId)"),"Quick course switcher needs deterministic ordering");
@@ -95,6 +98,9 @@ assert.match(elements.get("#content").innerHTML,/<details class="myCoursesFilter
 assert.match(elements.get("#content").innerHTML,/IN PROGRESS/);
 assert.doesNotMatch(elements.get("#content").innerHTML,/courseSelectedBadge|>SELECTED</,"My Courses must not show a separate SELECTED badge");
 assert.match(elements.get("#content").innerHTML,/✓ Selected/);
+assert.match(elements.get("#content").innerHTML,/class="myCourseStatusBar"/);
+assert.match(elements.get("#content").innerHTML,/class="courseMetaTile/);
+assert.match(elements.get("#content").innerHTML,/class="myCourseTitle"/);
 assert.doesNotMatch(elements.get("#content").innerHTML,/>Select course<\/button>/,"With only one assigned course there should be no alternate course action");
 assert.doesNotMatch(elements.get("#content").innerHTML,/>ACTIVE</,"My Courses must not use ACTIVE to mean the selected course");
 assert.doesNotMatch(elements.get("#content").innerHTML,/<p>EP · RC Model · [^<]*New Training[^<]*<\/p>/,"My Courses must not use the small dot-separated subtitle");
