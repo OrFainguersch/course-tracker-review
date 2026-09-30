@@ -605,68 +605,47 @@ html,body{background:#f5f7fa}
 }
 </style>
 <style>
-/* ===== Mobile reference bottom navigation · 0677 ===== */
+/* ===== Mobile precision blue bottom navigation · 0678 ===== */
 .mobileBottomNav{display:none}
 @media(max-width:759px){
-  main{padding-bottom:calc(124px + env(safe-area-inset-bottom))}
+  main{padding-bottom:calc(126px + env(safe-area-inset-bottom))}
   .mobileBottomNav{
-    position:fixed;left:13px;right:13px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:45;
-    height:78px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:end;
-    padding:7px 8px 9px;border:1.25px solid rgba(228,184,73,.88);border-radius:27px;overflow:visible;
-    background:
-      linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.014) 40%,rgba(255,255,255,0) 72%),
-      linear-gradient(180deg,rgba(10,35,64,.985) 0%,rgba(5,22,43,.985) 100%);
-    -webkit-backdrop-filter:blur(9px) saturate(112%);backdrop-filter:blur(9px) saturate(112%);
-    box-shadow:0 12px 25px rgba(2,13,27,.29),0 2px 5px rgba(5,20,38,.18),inset 0 1px 0 rgba(255,255,255,.08);
+    position:fixed;left:14px;right:14px;bottom:calc(9px + env(safe-area-inset-bottom));z-index:45;
+    height:88px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:end;
+    padding:0 8px 10px;background:transparent;border:0;overflow:visible;
+    filter:drop-shadow(0 11px 18px rgba(3,20,38,.22));
   }
-  .mobileBottomNav:before{
-    content:"";position:absolute;left:50%;top:-28px;width:72px;height:72px;transform:translateX(-50%);
-    border-radius:50%;background:#071b34;border:1.25px solid rgba(228,184,73,.9);
-    box-shadow:0 0 0 3px rgba(7,27,52,.96),inset 0 1px 0 rgba(255,255,255,.05);
-    z-index:0;pointer-events:none
+  .mobileBottomShell{
+    position:absolute;inset:-16px 0 0;width:100%;height:104px;z-index:0;overflow:visible;pointer-events:none
   }
-  .mobileBottomNav:after{
-    content:"";position:absolute;left:calc(50% - 39px);top:-2px;width:78px;height:10px;
-    background:#071b34;z-index:0;pointer-events:none
-  }
+  .mobileBottomShell .shellBody{fill:url(#mobileNavBlue);stroke:#254b70;stroke-width:2}
+  .mobileBottomShell .shellGold{fill:none;stroke:#d8ad43;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+  .mobileBottomShell .shellHighlight{fill:none;stroke:rgba(255,255,255,.10);stroke-width:1.2}
   .mobileBottomItem{
-    position:relative;z-index:1;height:60px;min-width:0;padding:5px 1px 1px;border:0;background:transparent;
-    color:#edf3fa;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;
-    font-size:10.4px;font-weight:650;line-height:1;letter-spacing:-.012em;-webkit-tap-highlight-color:transparent
+    position:relative;z-index:1;height:63px;min-width:0;padding:5px 1px 0;border:0;background:transparent;
+    color:#d6e2ed;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;
+    font-size:9.4px;font-weight:650;line-height:1;letter-spacing:-.005em;-webkit-tap-highlight-color:transparent
   }
   .mobileBottomItem .mobileBottomIcon{width:25px;height:25px;display:grid;place-items:center}
   .mobileBottomItem .mobileBottomIcon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-  .mobileBottomItem .mobileBottomLabel{display:block;width:100%;white-space:nowrap;overflow:visible;text-align:center;color:#eef3f8}
-  .mobileBottomItem:nth-child(4):not(.active){color:#efb94d}
-  .mobileBottomItem:nth-child(5):not(.active){color:#aabbd0}
-  .mobileBottomItem.active:not(.homeCenter){color:#46b8ff}
-  .mobileBottomItem.active:not(.homeCenter) .mobileBottomLabel{color:#46b8ff}
+  .mobileBottomItem .mobileBottomLabel{display:block;width:100%;white-space:nowrap;overflow:visible;text-align:center;color:currentColor}
+  .mobileBottomItem.active{color:#e4b94e}
   .mobileBottomItem.homeCenter{
-    height:75px;justify-content:flex-start;padding-top:0;color:#fff;overflow:visible
+    height:76px;justify-content:flex-start;padding-top:0;overflow:visible;transform:translateY(-7px)
   }
   .mobileBottomItem.homeCenter .mobileBottomIcon{
-    width:60px;height:60px;margin-top:-25px;border-radius:50%;
-    color:#fff;background:
-      radial-gradient(circle at 34% 23%,rgba(255,255,255,.23),transparent 35%),
-      linear-gradient(145deg,#1ca8fa 0%,#087ed8 57%,#075da5 100%);
-    border:1.5px solid rgba(236,194,83,.96);
-    box-shadow:0 0 0 3px #071b34,0 8px 17px rgba(0,76,139,.34),inset 0 1px 0 rgba(255,255,255,.31);
+    width:31px;height:31px;margin-top:4px;color:currentColor;background:transparent;border:0;box-shadow:none
   }
-  .mobileBottomItem.homeCenter .mobileBottomIcon svg{width:29px;height:29px;stroke-width:1.9}
-  .mobileBottomItem.homeCenter .mobileBottomLabel{
-    margin-top:6px;color:#42b8ff;font-size:11.4px;font-weight:760;line-height:1
-  }
-  .mobileBottomItem.homeCenter.active .mobileBottomIcon{
-    box-shadow:0 0 0 3px #071b34,0 0 11px rgba(24,155,240,.15),0 8px 18px rgba(0,74,135,.36),inset 0 1px 0 rgba(255,255,255,.31)
-  }
-  .mobileBottomItem:focus-visible{outline:2px solid #65bfff;outline-offset:-2px;border-radius:12px}
-  .reviewBanner{bottom:calc(99px + env(safe-area-inset-bottom))}
-  .toast{bottom:calc(107px + env(safe-area-inset-bottom))}
+  .mobileBottomItem.homeCenter .mobileBottomIcon svg{width:30px;height:30px;stroke-width:1.72}
+  .mobileBottomItem.homeCenter .mobileBottomLabel{margin-top:5px;font-size:9.8px;font-weight:720;line-height:1}
+  .mobileBottomItem:focus-visible{outline:2px solid #68b8ef;outline-offset:-2px;border-radius:11px}
+  .reviewBanner{bottom:calc(100px + env(safe-area-inset-bottom))}
+  .toast{bottom:calc(108px + env(safe-area-inset-bottom))}
 }
 </style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topCourseSwitcherWrap"><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch selected course" aria-haspopup="menu" aria-expanded="false" aria-controls="topCourseDropdown"><span>Selected course</span><b id="topCourseName" aria-live="polite">&nbsp;</b><i aria-hidden="true">⌄</i></button><div class="topCourseDropdown" id="topCourseDropdown" role="menu" hidden></div></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="removePersonalPhoto">Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored only in this browser for the review build.</p></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3>Adjust profile photo</h3><p>Drag to reposition, then zoom to fit the circle.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint">Only the area inside the circle will appear in your profile.</p></div><div class="personalCropControls"><div class="personalCropZoomRow"><label for="personalCropZoom">Zoom</label><input id="personalCropZoom" type="range" min="1" max="3" step="0.01" value="1"><span class="personalCropZoomValue" id="personalCropZoomValue">100%</span></div><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0677 · reference-matched mobile navigation</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topCourseSwitcherWrap"><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch selected course" aria-haspopup="menu" aria-expanded="false" aria-controls="topCourseDropdown"><span>Selected course</span><b id="topCourseName" aria-live="polite">&nbsp;</b><i aria-hidden="true">⌄</i></button><div class="topCourseDropdown" id="topCourseDropdown" role="menu" hidden></div></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="removePersonalPhoto">Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored only in this browser for the review build.</p></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3>Adjust profile photo</h3><p>Drag to reposition, then zoom to fit the circle.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint">Only the area inside the circle will appear in your profile.</p></div><div class="personalCropControls"><div class="personalCropZoomRow"><label for="personalCropZoom">Zoom</label><input id="personalCropZoom" type="range" min="1" max="3" step="0.01" value="1"><span class="personalCropZoomValue" id="personalCropZoomValue">100%</span></div><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0678 · precision blue mobile navigation</div><div class="toast" id="toast"></div></div>
 <script>
 (()=>{try{
   const active=JSON.parse(localStorage.getItem('ct-review-active-course')||'{}')||{};
@@ -679,18 +658,18 @@ html,body{background:#f5f7fa}
   if(name)name.textContent='Aerostar EP Course';
 }})();
 </script>
-<script src="./assets/ep-catalog.js?v=0677"></script>
-<script src="./assets/aerostar-platform.js?v=0677"></script>
-<script src="./assets/ip-catalog.js?v=0677"></script>
-<script src="./assets/technician-catalog.js?v=0677"></script>
-<script src="./assets/training-core.js?v=0677"></script>
-<script src="./assets/ep-lessons-screening.js?v=0677"></script>
-<script src="./assets/ep-lessons-rc-1.js?v=0677"></script>
-<script src="./assets/ep-lessons-rc-2.js?v=0677"></script>
-<script src="./assets/ep-lessons-half.js?v=0677"></script>
-<script src="./assets/ep-lessons-full-day-a.js?v=0677"></script>
-<script src="./assets/ep-lessons-full-day-b.js?v=0677"></script>
-<script src="./assets/ep-lessons-night.js?v=0677"></script>
+<script src="./assets/ep-catalog.js?v=0678"></script>
+<script src="./assets/aerostar-platform.js?v=0678"></script>
+<script src="./assets/ip-catalog.js?v=0678"></script>
+<script src="./assets/technician-catalog.js?v=0678"></script>
+<script src="./assets/training-core.js?v=0678"></script>
+<script src="./assets/ep-lessons-screening.js?v=0678"></script>
+<script src="./assets/ep-lessons-rc-1.js?v=0678"></script>
+<script src="./assets/ep-lessons-rc-2.js?v=0678"></script>
+<script src="./assets/ep-lessons-half.js?v=0678"></script>
+<script src="./assets/ep-lessons-full-day-a.js?v=0678"></script>
+<script src="./assets/ep-lessons-full-day-b.js?v=0678"></script>
+<script src="./assets/ep-lessons-night.js?v=0678"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentUserId='i1';
@@ -769,7 +748,8 @@ function renderMobileBottomNav(){
   const n=$('#mobileBottomNav');if(!n)return;
   const active=state.screen==='home'?'home':(['roster','profile','instructor'].includes(state.screen)?'roster':state.screen==='evaluation'?'evaluation':state.screen==='planned'?'planned':'more');
   const items=[['roster','roster','Roster'],['evaluation','evaluation','Evaluation'],['home','home','Home'],['planned','planned','Plan'],['more','more','More']];
-  n.innerHTML=items.map(([id,icon,label])=>'<button class="mobileBottomItem '+(id==='home'?'homeCenter ':'')+(active===id?'active':'')+'" type="button" '+(id==='more'?'data-mobile-more="true"':'data-mobile-nav="'+id+'"')+' aria-label="'+label+'" '+(active===id?'aria-current="page"':'')+'><span class="mobileBottomIcon">'+navIconSvg(icon).replace('class="navIcon"','class="mobileBottomIconInner"')+'</span><span class="mobileBottomLabel">'+label+'</span></button>').join('');
+  const shell='<svg class="mobileBottomShell" viewBox="0 0 1000 140" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="mobileNavBlue" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#173d63"/><stop offset="100%" stop-color="#0d2948"/></linearGradient></defs><path class="shellBody" d="M42 136C20 136 8 122 8 99V60C8 39 24 28 46 28H410C446 28 459 4 500 4C541 4 554 28 590 28H954C976 28 992 39 992 60V99C992 122 980 136 958 136Z"/><path class="shellGold" d="M18 51C25 36 35 28 54 28H410C446 28 459 4 500 4C541 4 554 28 590 28H946C965 28 975 36 982 51"/><path class="shellHighlight" d="M25 56C31 44 42 37 58 37H414C450 37 465 14 500 14C535 14 550 37 586 37H942C958 37 969 44 975 56"/></svg>';
+  n.innerHTML=shell+items.map(([id,icon,label])=>'<button class="mobileBottomItem '+(id==='home'?'homeCenter ':'')+(active===id?'active':'')+'" type="button" '+(id==='more'?'data-mobile-more="true"':'data-mobile-nav="'+id+'"')+' aria-label="'+label+'" '+(active===id?'aria-current="page"':'')+'><span class="mobileBottomIcon">'+navIconSvg(icon).replace('class="navIcon"','class="mobileBottomIconInner"')+'</span><span class="mobileBottomLabel">'+label+'</span></button>').join('');
 }
 function go(screen,extra={}){Object.assign(state,extra,{screen});saveUiState();$('#drawer').classList.remove('open');render()}
 $('#menuBtn').onclick=()=>$('#drawer').classList.add('open');$('#backdrop').onclick=()=>$('#drawer').classList.remove('open');
