@@ -13,6 +13,9 @@ context.window=context;vm.createContext(context);
 for(const file of ["assets/ep-catalog.js","assets/aerostar-platform.js","assets/ip-catalog.js","assets/technician-catalog.js","assets/training-core.js","assets/ep-lessons-screening.js","assets/ep-lessons-rc-1.js","assets/ep-lessons-rc-2.js","assets/ep-lessons-half.js","assets/ep-lessons-full-day-a.js","assets/ep-lessons-full-day-b.js","assets/ep-lessons-night.js"]){vm.runInContext(fs.readFileSync(file,"utf8"),context,{filename:file})}
 const html=fs.readFileSync("index.html","utf8");
 assert(html.includes("myCoursesPlatformFilter")&&html.includes("myCoursesCountryFilter"),"My Courses must filter by platform and country");
+assert(html.includes("myCoursesStatusFilter"),"My Courses must filter by lifecycle status");
+assert(html.includes("courseSelectedBadge")&&html.includes("courseStateBadge"),"Selected-course state must be visually separate from course lifecycle status");
+assert(html.includes("function courseLifecycleStatus(record)"),"Course lifecycle status must support Upcoming, In progress and Completed");
 assert(html.includes("sectorPlatforms(sector)")&&html.includes("flatMap(x=>sectorPlatforms(x.id))"),"My Courses platform options must come from the architecture platform catalog");
 assert(html.includes("function courseSummaryFromMeta(meta)"),"Course summaries must be rebuilt from live architecture metadata");
 assert(html.includes("summary:'EP · RC Model · RC Model · New Training · Day · Israel'"),"Built-in summary must preserve separate Phase and Platform slots even when their labels match");
@@ -31,6 +34,10 @@ const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].ma
 assert.equal(scripts.length,1);vm.runInContext(scripts[0],context,{filename:"index-inline.js"});
 assert.match(elements.get("#content").innerHTML,/My Courses/);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Course/);
+assert.match(elements.get("#content").innerHTML,/id="myCoursesStatusFilter"/);
+assert.match(elements.get("#content").innerHTML,/IN PROGRESS/);
+assert.match(elements.get("#content").innerHTML,/SELECTED/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/>ACTIVE</,"My Courses must not use ACTIVE to mean the selected course");
 assert.match(elements.get("#content").innerHTML,/EP · RC Model · RC Model · New Training · Day · Israel/,"My Courses must show Phase and Platform as separate semantic fields");
 assert.match(elements.get("#content").innerHTML,/id="myCoursesPlatformFilter"/);
 assert.match(elements.get("#content").innerHTML,/id="myCoursesCountryFilter"/);
@@ -48,6 +55,11 @@ vm.runInContext("go('home')",context);assert(elements.get("#content").innerHTML.
 vm.runInContext(`localStorage.setItem('ct-review-courses',JSON.stringify([{id:'course_multi',name:'Aerostar EP Night 2027',code:'EP-NIGHT-27',summary:'EP · Full Scale · Aerostar · Night',startsOn:'2027-01-10',selection:{courseType:'EP',phaseId:'ep_full',platformId:'aerostar',trainingKind:'new',dayNight:'night',country:'israel'},platformId:'aerostar',programId:'ep_full_night_new'}]));updateCourseMembershipForCourse('EP-NIGHT-27',currentUserId,'INSTRUCTOR',{role:'COURSE_MANAGER',removed:false});state.screen='courses';render()`,context);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Night 2027/);
 assert.equal(vm.runInContext("instructorAssignedCourses(currentUserId).length",context),2);
+assert.match(elements.get("#content").innerHTML,/UPCOMING/,"Future courses must display Upcoming independently of the selected course");
+vm.runInContext("state.myCoursesStatus='UPCOMING';render()",context);
+assert.match(elements.get("#content").innerHTML,/Aerostar EP Night 2027/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/Aerostar EP Course/);
+vm.runInContext("state.myCoursesStatus='ALL';render()",context);
 vm.runInContext("state.myCoursesPhase='Full Scale';render()",context);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Night 2027/);
 assert.doesNotMatch(elements.get("#content").innerHTML,/Aerostar EP Course/);
@@ -140,6 +152,8 @@ vm.runInContext("FLYMPUS_TRAINING.saveGlobalOverrides('ep_full_day_new',{});rend
 vm.runInContext("state.screen='settings';state.settingsTab='overrides';render()",context);
 assert.match(elements.get("#content").innerHTML,/Package settings for this course/);
 assert.match(elements.get("#content").innerHTML,/name="course_package_name"/);
+assert.match(elements.get("#content").innerHTML,/Course status/);
+assert.match(elements.get("#content").innerHTML,/name="course_lifecycle"/);
 assert.match(elements.get("#content").innerHTML,/name="course_phase"/);
 assert.match(elements.get("#content").innerHTML,/name="course_platform"/);
 assert.match(elements.get("#content").innerHTML,/name="course_training"/);
