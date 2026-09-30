@@ -42,7 +42,7 @@ assert(html.includes("<span>Selected course</span>"),"Header switcher must descr
 assert(html.includes('<b id="topCourseName" aria-live="polite">&nbsp;</b>'),"Header must not hard-code Aerostar EP Course before persisted course state is restored");
 assert(html.includes("active.courseName||'Aerostar EP Course'"),"Header must restore the persisted selected course name before loading the large application scripts");
 assert(html.includes("function navIconSvg(name)")&&html.includes("class=\"navIcon\""),"Sidebar navigation must use a consistent SVG icon system instead of decorative glyphs");
-assert(!html.includes("['settings','⚙','Course Settings']"),"Course Settings must not use an emoji gear in the professional navigation");
+assert(!html.includes("['settings','⚙','Course Management']"),"Course Management must not use an emoji gear in the professional navigation");
 assert(html.includes("Professional visual refinement 0661")&&html.includes(".navBtn.active{background:rgba(255,255,255,.09)")&&html.includes(".sidebarFlympusWordmark{width:172px!important"),"Sidebar styling must use the restrained professional visual layer");
 assert(html.includes("homeCourseContext cols")&&html.includes("homeCourseContextItem"),"Home hero must use the minimal labeled key-value strip instead of rounded metadata pills");
 assert(html.includes(".homeCourseContext.cols5{grid-template-columns:.74fr 1.08fr 1.06fr 1.42fr .88fr}"),"Five-column Home metadata must allocate enough width to Phase and Type on mobile");
@@ -151,8 +151,8 @@ vm.runInContext("switchCourseByKey('AEP-26',{render:false,force:true})",context)
 assert.equal(vm.runInContext("getEvaluations().some(x=>x.id==='multi_eval')",context),false,"Evaluations must be isolated by course");
 vm.runInContext("switchCourseByKey('EP-NIGHT-27',{render:false})",context);
 assert.equal(vm.runInContext("getEvaluations().some(x=>x.id==='multi_eval')",context),true,"Course data must return when switching back");
-vm.runInContext("switchCourseByKey('AEP-26',{render:false,force:true});go('settings')",context);assert.match(elements.get("#content").innerHTML,/Course Settings/);
-assert.doesNotMatch(elements.get("#content").innerHTML,/ACTIVE PACKAGE/,"Course Settings must not repeat the large Active Package overview");
+vm.runInContext("switchCourseByKey('AEP-26',{render:false,force:true});go('settings')",context);assert.match(elements.get("#content").innerHTML,/Course Management/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/ACTIVE PACKAGE/,"Course Management must not repeat the large Active Package overview");
 assert.match(elements.get("#content").innerHTML,/Create a course/);
 assert.match(elements.get("#content").innerHTML,/Sector/);
 assert.match(elements.get("#content").innerHTML,/Tailor active course/);
