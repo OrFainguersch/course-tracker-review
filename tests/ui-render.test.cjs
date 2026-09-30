@@ -33,7 +33,7 @@ assert(html.includes('id="topPersonalProfileBtn"')&&html.includes('aria-label="P
 assert(html.includes('id="personalPhotoInput"')&&html.includes('id="removePersonalPhoto"'),"Personal profile editing must support changing or removing the user's photo");
 assert(html.includes("Your name, email and course role are managed by course administration."),"Self-service personal profile must keep identity and role read-only");
 assert(html.includes("function positionNotificationDropdown()"),"Notifications panel must position safely on mobile");
-assert(html.includes(".topNotificationDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right))"),"Mobile notifications panel must stay within the viewport");
+assert(html.includes(".topNotificationDropdown,.topPersonalProfileDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right))"),"Mobile notification and personal-profile panels must stay within the viewport");
 assert(html.includes(".topCourseDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right));width:auto"),"Mobile quick course dropdown must stay inside the viewport on both sides");
 assert(html.includes("function positionTopCourseDropdown()"),"Quick course switcher must position its mobile menu below the real header button");
 assert(html.includes("if(open)positionTopCourseDropdown()"),"Opening the quick course switcher must position the mobile menu before interaction");
