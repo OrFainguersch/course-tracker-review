@@ -495,19 +495,19 @@ select option[value=""]{color:#8a9bad}
 .courseDetailsInline{margin-top:9px}.courseDetailsStep .wizardStepBody>label,.courseIdentityStep .wizardStepBody>label{display:block}.addPackageChoice{border-style:dashed;background:#f8fbfe}.addPackageChoice b{color:#0875ce}.fieldHelp{display:block;margin-top:5px;color:#8192a4;font-size:9px}.courseIdentityStep .fields{margin-top:9px}
 </style></head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0637 · separate EP day night tracks and dependencies</div><div class="toast" id="toast"></div></div>
-<script src="./assets/ep-catalog.js?v=0637"></script>
-<script src="./assets/aerostar-platform.js?v=0637"></script>
-<script src="./assets/ip-catalog.js?v=0637"></script>
-<script src="./assets/technician-catalog.js?v=0637"></script>
-<script src="./assets/training-core.js?v=0637"></script>
-<script src="./assets/ep-lessons-screening.js?v=0637"></script>
-<script src="./assets/ep-lessons-rc-1.js?v=0637"></script>
-<script src="./assets/ep-lessons-rc-2.js?v=0637"></script>
-<script src="./assets/ep-lessons-half.js?v=0637"></script>
-<script src="./assets/ep-lessons-full-day-a.js?v=0637"></script>
-<script src="./assets/ep-lessons-full-day-b.js?v=0637"></script>
-<script src="./assets/ep-lessons-night.js?v=0637"></script>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0638 · qualifications architecture and cleaner headings</div><div class="toast" id="toast"></div></div>
+<script src="./assets/ep-catalog.js?v=0638"></script>
+<script src="./assets/aerostar-platform.js?v=0638"></script>
+<script src="./assets/ip-catalog.js?v=0638"></script>
+<script src="./assets/technician-catalog.js?v=0638"></script>
+<script src="./assets/training-core.js?v=0638"></script>
+<script src="./assets/ep-lessons-screening.js?v=0638"></script>
+<script src="./assets/ep-lessons-rc-1.js?v=0638"></script>
+<script src="./assets/ep-lessons-rc-2.js?v=0638"></script>
+<script src="./assets/ep-lessons-half.js?v=0638"></script>
+<script src="./assets/ep-lessons-full-day-a.js?v=0638"></script>
+<script src="./assets/ep-lessons-full-day-b.js?v=0638"></script>
+<script src="./assets/ep-lessons-night.js?v=0638"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentUserId='i1';
@@ -1270,10 +1270,20 @@ function trainingLibraryHtml(){
   return '<div class="scrollTabs" style="margin-top:14px">'+['EP','IP','TECHNICIAN'].map(x=>'<button class="seg '+(x===type?'active':'')+'" data-library-profession="'+x+'">'+esc(cfgItem(cfgGet().courseTypes,x)?.name||x)+'</button>').join('')+'</div>'+professionLibraryHtml(type);
 }
 
+function epQualificationId(p){
+  if(!p)return '';
+  if(p.qualificationId)return p.qualificationId;
+  if(p.id==='ep_full_atol'||/\bATOL\b/i.test(String(p.name||'')))return 'atol';
+  if(p.phaseId==='ep_full'&&(p.dayNight==='day'||p.dayNight==='night'))return p.dayNight;
+  return '';
+}
 function packageConfigurationLabel(type,p){
   if(!p)return '—';
+  if(type==='EP'){
+    const q=epQualificationId(p),label=cfgItem(cfgGet().qualifications||[],q)?.name;
+    return label||p.contextLabel||'';
+  }
   if(p.contextLabel)return p.contextLabel;
-  if(type==='EP')return p.dayNight==='mixed'?'Day + Night':p.dayNight==='night'?'Night':p.dayNight==='day'?'Day':'Shared';
   if(type==='IP'){
     if(p.configurationId==='gcs_d')return 'GCS-D';
     if(p.configurationId==='gcs_c')return 'GCS-C';
@@ -1302,7 +1312,7 @@ function packagePathControls(type,p,prefix){
   const phase=field('Phase','<select name="'+prefix+'phase">'+phases.map(x=>'<option value="'+esc(x.id)+'" '+(x.id===p.phaseId?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select>');
   const platform=field('Platform','<select name="'+prefix+'platform"><option value="" '+(!p.platformId?'selected':'')+'>Multi-platform / none</option>'+platforms.map(x=>'<option value="'+esc(x.id)+'" '+(x.id===p.platformId?'selected':'')+'>'+esc(epPlatformLabel(x.id))+'</option>').join('')+'</select>');
   const trainingField=field('Training type','<select name="'+prefix+'training">'+training.map(x=>'<option value="'+esc(x.id)+'" '+(x.id===p.trainingKind?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select>');
-  const context=type==='EP'?(c.dayNight.some(x=>x.id===p.dayNight)?field('Operating track','<select name="'+prefix+'daynight">'+c.dayNight.map(x=>'<option value="'+esc(x.id)+'" '+(x.id===p.dayNight?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select>'):field('Package context','<input class="input" value="'+esc(packageConfigurationLabel(type,p))+'" readonly>')):field(type==='IP'?'Control-station / qualification context':'System / qualification context','<input class="input" name="'+prefix+'context" value="'+esc(packageConfigurationLabel(type,p))+'" placeholder="'+(type==='IP'?'Example: GCS-D':'Example: Engine H / GCS-D')+'">');
+  const qualification=epQualificationId(p),context=type==='EP'?((p.phaseId==='ep_full'||qualification)?field('Qualification','<select name="'+prefix+'qualification"><option value="" '+(!qualification?'selected':'')+'>Not applicable</option>'+(c.qualifications||[]).map(x=>'<option value="'+esc(x.id)+'" '+(x.id===qualification?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select>'):''):field(type==='IP'?'Configuration / qualification':'System / qualification','<input class="input" name="'+prefix+'context" value="'+esc(packageConfigurationLabel(type,p))+'" placeholder="'+(type==='IP'?'Example: GCS-D':'Example: Engine H / GCS-D')+'">');
   return '<div class="packagePathEditor">'+phase+platform+trainingField+context+'</div>';
 }
 function builderPackage(){
@@ -1310,14 +1320,14 @@ function builderPackage(){
 }
 function advancedPlatformsCard(type){
   const platforms=sectorPlatforms(type),customIds=new Set((getCustomPlatforms()[type]||[]).map(x=>x.id));
-  return '<section class="card settingBox"><h3>Platforms · '+esc(cfgItem(cfgGet().courseTypes,type)?.name||type)+'</h3><p class="sub">Platforms belong to the selected sector and can be used in Package paths.</p><div class="editableList">'+
+  return '<section class="card settingBox"><h3>Platforms</h3><p class="sub">Platforms belong to the selected sector and can be used in Package paths.</p><div class="editableList">'+
     (platforms.length?platforms.map(x=>'<div class="editableRow"><input class="input cfgPlatformName" data-id="'+esc(x.id)+'" value="'+esc(x.name)+'"><span class="pill gray">'+esc(x.id)+'</span>'+(customIds.has(x.id)?'<button class="btn danger small" type="button" data-platform-remove="'+esc(x.id)+'">Remove</button>':'')+'</div>').join(''):'<div class="wizardEmpty compact">No platforms are defined for this sector.</div>')+
     '</div><form class="toolbar" id="cfgAddPlatform"><input class="input" name="name" placeholder="Add platform" required><button class="btn secondary" type="submit">＋ Add platform</button></form></section>';
 }
 function advancedContextCard(type,c){
   const cat=window.FLYMPUS_TRAINING?.catalog(type),programs=cat?.programs||[];
-  if(type==='EP')return cfgCatalogCard('Package configuration · Operating track','dayNight',c.dayNight,'Day and Night are separate operating-track Packages. Qualifications such as ATOL are separate Packages in Step 4 below and use prerequisites instead of a Mixed track.');
-  const title=type==='IP'?'Package configuration · Control station / qualification':'Package configuration · System / qualification';
+  if(type==='EP')return cfgCatalogCard('Qualifications','qualifications',c.qualifications,'Day, Night and ATOL are qualifications. Training purpose stays separate, while prerequisites and dependencies belong to each Package.');
+  const title=type==='IP'?'Configurations / qualifications':'Systems / qualifications';
   const desc=type==='IP'?'The Package context is defined by its control-station or qualification configuration; Day / Night is not the Package selector.':'The Package context is defined by its system or qualification configuration; Day / Night is not the Package selector.';
   const rows=[...new Set(programs.map(p=>packageConfigurationLabel(type,p)).filter(Boolean))];
   return '<section class="card settingBox"><h3>'+title+'</h3><p class="sub">'+desc+' Edit reusable defaults in Training Packages below.</p><div class="contextReferenceList">'+rows.map(x=>'<span class="contextReference">'+esc(x)+'</span>').join('')+'</div></section>';
@@ -1333,9 +1343,9 @@ function suggestedPackageName(type,values={}){
 }
 function sectorPackageAssignmentCard(type){
   const c=cfgGet(),packages=window.FLYMPUS_TRAINING?.packageCatalog?.(type)||[],phases=c.phases.filter(x=>x.type===type),platforms=sectorPlatforms(type),training=c.trainingKinds||[],scopeName=cfgItem(c.courseTypes,type)?.name||type,editing=state.advancedArchitectureEditing===true;
-  const defaultPhase=phases[0]?.id||'',defaultPlatform=platforms[0]?.id||'',defaultTraining=training[0]?.id||'',defaultContext=type==='EP'?'Day':type==='IP'?'General / GCS configuration':'General system configuration',suggested=suggestedPackageName(type,{phaseId:defaultPhase,platformId:defaultPlatform,trainingKind:defaultTraining,context:defaultContext}),createOpen=editing&&state.packageCreateOpen===type;
-  const createUi=editing?'<div class="toolbar sectorPackageActions"><button class="btn sky" type="button" data-package-assign-open="'+esc(type)+'" '+(createOpen?'hidden':'')+'>＋ Create Package for '+esc(scopeName)+'</button></div><div class="packageAssignPanel" data-package-assign-panel="'+esc(type)+'" '+(createOpen?'':'hidden')+'><form id="sectorPackageForm" data-sector="'+esc(type)+'" novalidate><div class="packageAssignGrid"><label class="field packageAssignName"><span class="fieldLabel">Package name</span><input class="input" name="name" id="sectorPackageName" value="'+esc(suggested)+'" data-auto-name="1"></label><label class="field"><span class="fieldLabel">Phase</span><select name="phaseId" class="packageRouteInput">'+(phases.length?phases.map((x,i)=>'<option value="'+esc(x.id)+'" '+(i===0?'selected':'')+'>'+esc(x.name)+'</option>').join(''):'<option value="">No phase</option>')+'</select></label><label class="field"><span class="fieldLabel">Platform</span><select name="platformId" class="packageRouteInput"><option value="">No platform</option>'+platforms.map((x,i)=>'<option value="'+esc(x.id)+'" '+(i===0?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></label><label class="field"><span class="fieldLabel">Training type</span><select name="trainingKind" class="packageRouteInput">'+training.map((x,i)=>'<option value="'+esc(x.id)+'" '+(i===0?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></label>'+(type==='EP'?'<label class="field"><span class="fieldLabel">Day / Night</span><select name="context" class="packageRouteInput"><option value="day">Day</option><option value="night">Night</option></select></label>':'<label class="field"><span class="fieldLabel">'+(type==='IP'?'Control-station / qualification context':'System / qualification context')+'</span><input class="input packageRouteInput" name="context" value="'+esc(defaultContext)+'"></label>')+'</div><div class="toolbar"><button class="btn sky" type="submit">Create & edit Package</button><button class="btn secondary" type="button" data-package-assign-cancel>Cancel</button></div></form></div>':'';
-  return '<section class="card settingBox sectorPackageCard"><div class="inlineHead"><div><h3>Packages</h3><p class="sub">'+packages.length+' Package'+(packages.length===1?'':'s')+' currently belong to '+esc(scopeName)+'. '+(editing?'Create a new Package here or edit an existing one below.':'Choose Edit to create, change or delete Packages.')+'</p></div><span class="pill blue">'+packages.length+'</span></div>'+createUi+'</section>';
+  const defaultPhase=phases[0]?.id||'',defaultPlatform=platforms[0]?.id||'',defaultTraining=training[0]?.id||'',defaultContext=type==='EP'?'':type==='IP'?'General / GCS configuration':'General system configuration',suggested=suggestedPackageName(type,{phaseId:defaultPhase,platformId:defaultPlatform,trainingKind:defaultTraining,context:defaultContext}),createOpen=editing&&state.packageCreateOpen===type;
+  const createUi=editing?'<div class="toolbar sectorPackageActions"><button class="btn sky" type="button" data-package-assign-open="'+esc(type)+'" '+(createOpen?'hidden':'')+'>＋ Create Package</button></div><div class="packageAssignPanel" data-package-assign-panel="'+esc(type)+'" '+(createOpen?'':'hidden')+'><form id="sectorPackageForm" data-sector="'+esc(type)+'" novalidate><div class="packageAssignGrid"><label class="field packageAssignName"><span class="fieldLabel">Package name</span><input class="input" name="name" id="sectorPackageName" value="'+esc(suggested)+'" data-auto-name="1"></label><label class="field"><span class="fieldLabel">Phase</span><select name="phaseId" class="packageRouteInput">'+(phases.length?phases.map((x,i)=>'<option value="'+esc(x.id)+'" '+(i===0?'selected':'')+'>'+esc(x.name)+'</option>').join(''):'<option value="">No phase</option>')+'</select></label><label class="field"><span class="fieldLabel">Platform</span><select name="platformId" class="packageRouteInput"><option value="">No platform</option>'+platforms.map((x,i)=>'<option value="'+esc(x.id)+'" '+(i===0?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></label><label class="field"><span class="fieldLabel">Training type</span><select name="trainingKind" class="packageRouteInput">'+training.map((x,i)=>'<option value="'+esc(x.id)+'" '+(i===0?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></label>'+(type==='EP'?'<label class="field"><span class="fieldLabel">Qualification</span><select name="context" class="packageRouteInput" id="sectorPackageQualification"><option value="">Not applicable</option>'+(c.qualifications||[]).map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('')+'</select></label>':'<label class="field"><span class="fieldLabel">'+(type==='IP'?'Configuration / qualification':'System / qualification')+'</span><input class="input packageRouteInput" name="context" value="'+esc(defaultContext)+'"></label>')+'</div><div class="toolbar"><button class="btn sky" type="submit">Create & edit Package</button><button class="btn secondary" type="button" data-package-assign-cancel>Cancel</button></div></form></div>':'';
+  return '<section class="card settingBox sectorPackageCard"><div class="inlineHead"><div><h3>Packages</h3><p class="sub">'+packages.length+' Package'+(packages.length===1?'':'s')+' currently defined for the selected sector. '+(editing?'Create a new Package here or edit an existing one below.':'Choose Edit to create, change or delete Packages.')+'</p></div><span class="pill blue">'+packages.length+'</span></div>'+createUi+'</section>';
 }
 function advancedPackagesHtml(type){
   const core=window.FLYMPUS_TRAINING,packages=core?.packageCatalog?.(type)||[];
@@ -1391,7 +1401,7 @@ function advancedPackagesHtml(type){
       '<details class="packageRules"><summary><b>Progression gates ('+gateActive.length+')</b><span>'+(allGates.length-gateActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('progression',['Use','Order / Move','Progression requirement','Status'],gates,'48px 92px minmax(320px,1.8fr) minmax(140px,.7fr)')+gateAdd+'</details>'+
       '</div></fieldset></details></form>';
   }).join('');
-  return '<div class="sectionHead advancedPackageTitle"><div><h2>'+esc(type)+' Training Packages</h2></div><span class="pill blue">'+packages.length+' packages</span></div><div class="globalPackageList">'+cards+'</div>';
+  return '<div class="sectionHead advancedPackageTitle"><div><h2>Training Packages</h2></div><span class="pill blue">'+packages.length+' packages</span></div><div class="globalPackageList">'+cards+'</div>';
 }
 function courseTailorModel(){
   const core=window.FLYMPUS_TRAINING,active=epCurrentProgram();if(!core||!active)return null;
@@ -1532,6 +1542,7 @@ function cfgDefaults(){
     courseTypes: courseTypes.map(x=>({id:x.id,name:x.name})),
     phases: phaseTemplates.map(x=>({id:x.id,type:x.type,name:x.name,tracking:defaultPhaseTracking(x.id)})),
     trainingKinds: trainingKinds.map((name,n)=>({id:['new','conversion','instructor','screening','refreshment','return_currency','qualification','customer_qualification'][n]||('training_'+n),name})),
+    qualifications:[{id:'day',name:'Day'},{id:'night',name:'Night'},{id:'atol',name:'ATOL'}],
     dayNight: dayNight.map((name,n)=>({id:['day','night'][n]||('time_'+n),name})),
     countries: countries.map((name,n)=>({id:['israel','cyprus'][n]||('country_'+n),name})),
     syllabi: syllabi.map((name,n)=>({id:'syll_'+(n+1),courseType:ep,name,minimum:null,instructorPresence:'WITH INSTRUCTOR'})),
@@ -1545,7 +1556,7 @@ function cfgGet(){
     if(!raw)return cfgDefaults();
     const defaults=cfgDefaults(),c={...defaults,...raw};
     const mergeStable=(base,saved)=>[...base.map(x=>saved?.find(y=>y.id===x.id)?{...x,...saved.find(y=>y.id===x.id)}:x),...(saved||[]).filter(x=>!base.some(y=>y.id===x.id))];
-    c.courseTypes=mergeStable(defaults.courseTypes,raw.courseTypes);c.phases=mergeStable(defaults.phases,raw.phases);c.trainingKinds=mergeStable(defaults.trainingKinds,raw.trainingKinds);c.dayNight=mergeStable(defaults.dayNight,raw.dayNight).filter(x=>x.id!=='mixed');c.countries=mergeStable(defaults.countries,raw.countries);
+    c.courseTypes=mergeStable(defaults.courseTypes,raw.courseTypes);c.phases=mergeStable(defaults.phases,raw.phases);c.trainingKinds=mergeStable(defaults.trainingKinds,raw.trainingKinds);c.qualifications=mergeStable(defaults.qualifications,raw.qualifications);c.dayNight=mergeStable(defaults.dayNight,raw.dayNight).filter(x=>x.id!=='mixed');c.dayNight=c.dayNight.map(x=>({...x,name:c.qualifications.find(q=>q.id===x.id)?.name||x.name}));c.countries=mergeStable(defaults.countries,raw.countries);
     c.phases=(c.phases||[]).map(x=>({...x,tracking:normalizePhaseTracking(x)}));
     c.syllabi=(c.syllabi||[]).map(x=>({...x,courseType:x.courseType||'EP',minimum:x.minimum===undefined?null:x.minimum,instructorPresence:x.instructorPresence||'WITH INSTRUCTOR'}));
     c.criteria=(c.criteria||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
@@ -1609,8 +1620,8 @@ function cfgTypeScopedCard(title,key,list,type,kind){
   return '<section class="card settingBox"><h3>'+esc(title)+'</h3><p class="sub">Belongs only to '+esc(cfgItem(cfgGet().courseTypes,type)?.name||type)+(isSyllabus?' · Minimum 0 means optional / non-blocking.':isEmergency?' · Categories control how emergencies are grouped during Evaluation.':'')+'</p><div class="editableList">'+rows+'</div><form class="toolbar cfgScopedAdd" data-kind="'+key+'" data-course-type="'+type+'">'+add+'<button class="btn secondary" type="submit">＋ Add</button></form></section>';
 }
 function cfgPhaseCard(c,scope){
-  const list=c.phases.filter(x=>x.type===scope),scopeName=cfgItem(c.courseTypes,scope)?.name||scope;
-  return '<section class="card settingBox"><h3>Phases · '+esc(scopeName)+'</h3><p class="sub">Phases belong to the sector selected above. Experience minimums belong to Training Packages, not to the phase itself.</p><div class="editableList" style="margin-top:10px">'+
+  const list=c.phases.filter(x=>x.type===scope);
+  return '<section class="card settingBox"><h3>Phases</h3><p class="sub">Phases belong to the sector selected above. Experience minimums belong to Training Packages, not to the phase itself.</p><div class="editableList" style="margin-top:10px">'+
     list.map(x=>'<div class="editableRow"><input class="input cfgPhaseName" data-id="'+x.id+'" value="'+esc(x.name)+'"><button class="btn danger small" data-phase-remove="'+x.id+'">Remove</button></div>').join('')+
     '</div><form class="toolbar" id="cfgAddPhase"><input class="input" name="name" placeholder="Add phase" required><button class="btn secondary" type="submit">＋ Add phase</button></form></section>';
 }
@@ -1672,7 +1683,7 @@ function settings(){
     const validScope=c.courseTypes.some(x=>x.id===state.typeWorkspace),scope=validScope?state.typeWorkspace:(c.courseTypes[0]?.id||''),scopeName=cfgItem(c.courseTypes,scope)?.name||scope,advancedEditing=!!state.advancedArchitectureEditing;
     html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><section class="advancedSequence" style="margin-top:14px"><div class="advancedStepLabel"><span>1</span><div><b>Define sectors</b><small>Add, rename or remove sectors first.</small></div></div>'+cfgCatalogCard('Course types','courseTypes',c.courseTypes)+'</section></fieldset>';
     html+='<section class="card settingBox advancedSectorPicker"><div class="advancedStepLabel"><span>2</span><div><b>Select sector to edit</b><small>Everything below is scoped to this sector.</small></div></div><div class="field" style="margin-top:12px"><label>Sector</label><select id="typeWorkspace" '+(advancedEditing?'disabled':'')+'>'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></section>';
-    html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><div class="advancedStepLabel scopedArchitectureLabel"><span>3</span><div><b>'+(advancedEditing?'Edit ':'')+esc(scopeName)+' architecture</b><small>Phases, platforms, training types and context options belong to the selected sector.</small></div></div>';
+    html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><div class="advancedStepLabel scopedArchitectureLabel"><span>3</span><div><b>'+(advancedEditing?'Edit architecture':'Architecture')+'</b><small>Phases, platforms, training types and qualifications belong to the selected sector.</small></div></div>';
     html+='<div class="settingsGrid advancedScopeGrid" style="margin-top:10px">';
     html+=cfgPhaseCard(c,scope);
     html+=advancedPlatformsCard(scope);
@@ -1680,7 +1691,7 @@ function settings(){
     html+=advancedContextCard(scope,c);
     html+=cfgCatalogCard('Countries / customer contexts','countries',c.countries);
     html+='</div></fieldset>';
-    html+='<section class="advancedPackagesFinal"><div class="advancedStepLabel"><span>4</span><div><b>Packages</b><small>Final step · create and manage the reusable Packages for '+esc(scopeName)+'.</small></div></div>'+sectorPackageAssignmentCard(scope)+advancedPackagesHtml(scope)+'</section>';
+    html+='<section class="advancedPackagesFinal"><div class="advancedStepLabel"><span>4</span><div><b>Packages</b><small>Final step · create and manage reusable Packages.</small></div></div>'+sectorPackageAssignmentCard(scope)+advancedPackagesHtml(scope)+'</section>';
     html+='<div class="toolbar packageSaveBar advancedArchitectureActions"><button class="btn sky" type="button" id="'+(advancedEditing?'cfgSaveCatalogs':'advancedArchitectureEdit')+'">'+(advancedEditing?'Save changes':'Edit')+'</button></div>';
   }
 
@@ -1951,7 +1962,7 @@ function bindSettings(){
     e.preventDefault();const form=e.currentTarget,fd=new FormData(form),m=courseTailorModel();if(!m)return;const {active:p,o}=m,gradingMin=Math.round(Number(fd.get('course_grade_min'))),gradingMax=Math.round(Number(fd.get('course_grade_max'))),gradingBenchmark=Number(fd.get('course_grade_benchmark'));
     if(!Number.isFinite(gradingMin)||!Number.isFinite(gradingMax)||!Number.isFinite(gradingBenchmark)||gradingMin<0||gradingMax<=gradingMin||gradingBenchmark<gradingMin||gradingBenchmark>gradingMax){toast('Grading settings must satisfy Minimum < Maximum and Benchmark must be inside the range');return}
     const program={...(o.program||{}),name:String(fd.get('course_package_name')||p.name).trim()||p.name,phaseId:String(fd.get('course_phase')||p.phaseId||''),platformId:String(fd.get('course_platform')||''),trainingKind:String(fd.get('course_training')||p.trainingKind||''),gradingMin,gradingBenchmark,gradingMax};
-    if(currentCourseMeta.type==='EP')program.dayNight=String(fd.get('course_daynight')||p.dayNight||'');else program.contextLabel=String(fd.get('course_context')||packageConfigurationLabel(currentCourseMeta.type,p)).trim()||packageConfigurationLabel(currentCourseMeta.type,p);
+    if(currentCourseMeta.type==='EP'){const q=String(fd.get('course_qualification')||epQualificationId(p)||'');program.qualificationId=q;program.dayNight=q==='day'||q==='night'?q:(p.phaseId==='ep_full'?'shared':(p.dayNight||'shared'));program.contextLabel=''}else program.contextLabel=String(fd.get('course_context')||packageConfigurationLabel(currentCourseMeta.type,p)).trim()||packageConfigurationLabel(currentCourseMeta.type,p);
     const overrides={program,custom:o.custom||{},syllabi:{},counters:{},criteria:{},exams:{},progression:{},emergencies:{},emergencyRequirementIds:fd.getAll('requiredEmergency').map(String)};
     const rowOrder=new Map([...form.querySelectorAll('.courseSyllabusTable > .packageSyllabusRow')].map((row,i)=>[row.dataset.courseSyllabusRow,i+1]));
     m.syllabi.forEach(x=>{const min=fd.get('min_'+x.id),supervision=String(fd.get('supervision_'+x.id)||'INSTRUCTED'),name=String(fd.get('syll_name_'+x.id)||x.name).trim()||x.name;overrides.syllabi[x.id]={applicable:fd.has('app_'+x.id),name,order:rowOrder.get(x.id)||Number(fd.get('order_'+x.id)||x.order||999),minimum:min===''?null:Number(min),instructorRequired:supervision!=='SOLO',mode:supervision==='SOLO'?'SOLO':(x.mode==='SOLO'?'INSTRUCTED':x.mode),track:String(fd.get('track_'+x.id)||x.track||'shared')}});
@@ -2012,10 +2023,10 @@ function bindSettings(){
   document.querySelectorAll('[data-open-package]').forEach(btn=>btn.onclick=()=>{state.settingsTab='catalog';state.typeWorkspace=btn.dataset.packageSector||state.typeWorkspace;state.packageFocusId=btn.dataset.openPackage;state.packageEditId=null;state.advancedArchitectureEditing=true;render()});
   if($('#sectorPackageForm')){
     const form=$('#sectorPackageForm'),type=form.dataset.sector,nameInput=$('#sectorPackageName');
-    const routeValues=()=>{const fd=new FormData(form),ctx=String(fd.get('context')||'');return {phaseId:String(fd.get('phaseId')||''),platformId:String(fd.get('platformId')||''),trainingKind:String(fd.get('trainingKind')||''),context:type==='EP'?(ctx==='mixed'?'Day + Night':ctx==='night'?'Night':'Day'):ctx}};
-    form.querySelectorAll('.packageRouteInput').forEach(el=>el.onchange=()=>{if(nameInput?.dataset.autoName==='1')nameInput.value=suggestedPackageName(type,routeValues())});
+    const routeValues=()=>{const fd=new FormData(form),ctx=String(fd.get('context')||'');return {phaseId:String(fd.get('phaseId')||''),platformId:String(fd.get('platformId')||''),trainingKind:String(fd.get('trainingKind')||''),context:type==='EP'?(cfgItem(cfgGet().qualifications||[],ctx)?.name||''):ctx}};
+    form.querySelectorAll('.packageRouteInput').forEach(el=>el.onchange=()=>{if(type==='EP'){const q=form.querySelector('[name="context"]'),trainingSel=form.querySelector('[name="trainingKind"]');if(el.name==='context'&&q?.value==='atol'&&trainingSel)trainingSel.value='qualification';if(el.name==='trainingKind'&&trainingSel?.value==='qualification'&&q)q.value='atol'}if(nameInput?.dataset.autoName==='1')nameInput.value=suggestedPackageName(type,routeValues())});
     if(nameInput)nameInput.oninput=()=>{nameInput.dataset.autoName='0'};
-    form.onsubmit=e=>{e.preventDefault();const fd=new FormData(form),name=String(fd.get('name')||'').trim();if(!name){toast('Enter a Package name');nameInput?.focus?.();return}const id=cfgId('pkg_'+String(type||'training').toLowerCase()),ctx=String(fd.get('context')||''),def={id,name,professionId:type,phaseId:String(fd.get('phaseId')||''),platformId:String(fd.get('platformId')||''),trainingKind:String(fd.get('trainingKind')||''),dayNight:type==='EP'?(ctx||'day'):'mixed',contextLabel:type==='EP'?'':ctx,gradingMin:1,gradingBenchmark:4,gradingMax:5,theory:[],syllabi:[],criteria:[],experienceCounters:[],exams:[],progression:[],emergencyRequirementIds:[],courseEmergencies:[]};window.FLYMPUS_TRAINING.saveCustomPackage(type,def);state.settingsTab='catalog';state.typeWorkspace=type;state.packageFocusId=id;state.packageEditId=id;state.packageAddFlow=null;state.packageCreateOpen=null;toast(name+' created for '+(cfgItem(cfgGet().courseTypes,type)?.name||type));render()};
+    form.onsubmit=e=>{e.preventDefault();const fd=new FormData(form),name=String(fd.get('name')||'').trim();if(!name){toast('Enter a Package name');nameInput?.focus?.();return}const id=cfgId('pkg_'+String(type||'training').toLowerCase()),ctx=String(fd.get('context')||''),def={id,name,professionId:type,phaseId:String(fd.get('phaseId')||''),platformId:String(fd.get('platformId')||''),trainingKind:String(fd.get('trainingKind')||''),qualificationId:type==='EP'?ctx:'',dayNight:type==='EP'?((ctx==='day'||ctx==='night')?ctx:'shared'):'mixed',contextLabel:type==='EP'?'':ctx,gradingMin:1,gradingBenchmark:4,gradingMax:5,theory:[],syllabi:[],criteria:[],experienceCounters:[],exams:[],progression:[],emergencyRequirementIds:[],courseEmergencies:[]};window.FLYMPUS_TRAINING.saveCustomPackage(type,def);state.settingsTab='catalog';state.typeWorkspace=type;state.packageFocusId=id;state.packageEditId=id;state.packageAddFlow=null;state.packageCreateOpen=null;toast(name+' created for '+(cfgItem(cfgGet().courseTypes,type)?.name||type));render()};
   }
   const refreshSyllabusMeta=form=>{
     if(!form)return;const table=form.querySelector('.packageSyllabusTable'),excluded=form.querySelector('.excludedSyllabusList'),activeRows=[...(table?.querySelectorAll('.packageSyllabusRow')||[])],excludedRows=[...(excluded?.querySelectorAll('.packageSyllabusRow')||[])];
@@ -2121,7 +2132,7 @@ function bindSettings(){
     const current=core.applyGlobalOverrides(base),fd=new FormData(form),old=core.getGlobalOverrides(id)||{},gradingMin=Math.round(Number(fd.get('g_grade_min'))),gradingMax=Math.round(Number(fd.get('g_grade_max'))),gradingBenchmark=Number(fd.get('g_grade_benchmark'));
     if(!Number.isFinite(gradingMin)||!Number.isFinite(gradingMax)||!Number.isFinite(gradingBenchmark)||gradingMin<0||gradingMax<=gradingMin||gradingBenchmark<gradingMin||gradingBenchmark>gradingMax){toast('Grading settings must satisfy Minimum < Maximum and Benchmark must be inside the range');return false}
     const program={...(old.program||{}),name:String(fd.get('g_package_name')||current.name).trim()||current.name,phaseId:String(fd.get('g_phase')||current.phaseId||''),platformId:String(fd.get('g_platform')||''),trainingKind:String(fd.get('g_training')||current.trainingKind||''),gradingMin,gradingBenchmark,gradingMax};
-    if(type==='EP')program.dayNight=String(fd.get('g_daynight')||current.dayNight||'');else program.contextLabel=String(fd.get('g_context')||packageConfigurationLabel(type,current)).trim()||packageConfigurationLabel(type,current);
+    if(type==='EP'){const q=String(fd.get('g_qualification')||epQualificationId(current)||'');program.qualificationId=q;program.dayNight=q==='day'||q==='night'?q:(current.phaseId==='ep_full'?'shared':(current.dayNight||'shared'));program.contextLabel=''}else program.contextLabel=String(fd.get('g_context')||packageConfigurationLabel(type,current)).trim()||packageConfigurationLabel(type,current);
     const overrides={...old,program,custom:old.custom||{},syllabi:{},criteria:{},emergencies:{},counters:{},exams:{},progression:{},emergencyRequirementIds:fd.getAll('g_required_emergency').map(String)};
     const rowOrder=new Map([...form.querySelectorAll('.packageSyllabusTable:not(.ruleEditorTable) > .packageSyllabusRow')].map((row,i)=>[row.dataset.syllabusRow,i+1])),editorOverrides=core.globalOverridesForProgram?.(base)||old,allEditorSyllabi=[...(base.syllabi||[]),...((editorOverrides.custom?.syllabi||[]).map(x=>({...x,packageCustom:true})))].filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i).map(x=>({...x,...(editorOverrides.syllabi?.[x.id]||{})}));
     allEditorSyllabi.forEach(x=>{const min=fd.get('g_syll_min_'+x.id),supervision=String(fd.get('g_syll_supervision_'+x.id)||'INSTRUCTED'),name=String(fd.get('g_syll_name_'+x.id)||x.name).trim()||x.name;overrides.syllabi[x.id]={applicable:fd.has('g_syll_app_'+x.id),name,order:rowOrder.get(x.id)||Number(fd.get('g_syll_order_'+x.id)||x.order||999),minimum:min===''?null:Number(min),instructorRequired:supervision!=='SOLO',mode:supervision==='SOLO'?'SOLO':(x.mode==='SOLO'?'INSTRUCTED':x.mode),track:String(fd.get('g_syll_track_'+x.id)||x.track||'shared')}});
@@ -2158,14 +2169,14 @@ function bindSettings(){
     document.querySelectorAll('.cfgPlatformName').forEach(el=>{if(el.value.trim())platformLabels[el.dataset.id]=el.value.trim()});savePlatformLabels(platformLabels);
     document.querySelectorAll('.cfgScopedName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
     document.querySelectorAll('.cfgScopedWeight').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x)x.weight=Math.max(0,Math.min(100,Number(el.value)||0))});document.querySelectorAll('.cfgEmergencyCategory').forEach(el=>{const x=cc.emergencies.find(v=>v.id===el.dataset.id);if(x)x.category=el.value||'General / Operational'});document.querySelectorAll('.cfgSyllabusMinimum').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.minimum=el.value===''?null:Math.max(0,Math.min(999,Math.floor(Number(el.value)||0)))});document.querySelectorAll('.cfgSyllabusPresence').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.instructorPresence=el.value});
-    cfgSave(cc);state.advancedArchitectureEditing=false;state.packageEditId=null;toast('Changes saved');render();
+    cc.dayNight=(cc.qualifications||[]).filter(x=>x.id==='day'||x.id==='night').map(x=>({id:x.id,name:x.name}));cfgSave(cc);state.advancedArchitectureEditing=false;state.packageEditId=null;toast('Changes saved');render();
   };
 
   document.querySelectorAll('[data-cfg-add-open]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-cfg-add-box]'),form=box?.querySelector('.cfgAddForm');if(!form)return;form.hidden=false;btn.hidden=true;form.querySelector('input[name="name"]')?.focus?.()});
   document.querySelectorAll('[data-cfg-add-cancel]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-cfg-add-box]'),form=box?.querySelector('.cfgAddForm'),trigger=box?.querySelector('[data-cfg-add-open]');if(form){form.reset?.();form.hidden=true}if(trigger)trigger.hidden=false});
   document.querySelectorAll('.cfgAddForm').forEach(form=>form.onsubmit=e=>{
     e.preventDefault();const cc=cfgGet(),kind=form.dataset.kind,name=String(new FormData(form).get('name')||'').trim();if(!name)return;
-    const prefix={courseTypes:'type',trainingKinds:'training',dayNight:'time',countries:'country'}[kind]||'item';
+    const prefix={courseTypes:'type',trainingKinds:'training',qualifications:'qualification',dayNight:'time',countries:'country'}[kind]||'item';
     cc[kind].push({id:cfgId(prefix),name});cfgSave(cc);toast(name+' added');render();
   });
 

@@ -165,7 +165,7 @@ window.EP_CATALOG = {
     {
       id:"ep_full_day_new",
       name:"EP Course · Full Scale Day · Aerostar",
-      phaseId:"ep_full", platformId:"aerostar", trainingKind:"new", dayNight:"day",
+      phaseId:"ep_full", platformId:"aerostar", trainingKind:"new", qualificationId:"day", dayNight:"day",
       source:"EP Course – Full scale stage (Edition F) – Instructor",
       theoryRequirement:"Theoretical Phase Exam ≥80; Regulations & Limitations Exam ≥85.",
       completion:"Complete the day syllabus and pass the check flight.",
@@ -220,7 +220,7 @@ window.EP_CATALOG = {
     {
       id:"ep_full_night_new",
       name:"EP Course · Full Scale Night · Aerostar",
-      phaseId:"ep_full", platformId:"aerostar", trainingKind:"new", dayNight:"night",
+      phaseId:"ep_full", platformId:"aerostar", trainingKind:"new", qualificationId:"night", dayNight:"night",
       source:"EP Course – Full scale stage (Edition F)",
       prerequisite:"Completion of the Full-Scale Day prerequisite stated in the source syllabus.",
       completion:"Complete night syllabus and pass night check flight.",
@@ -247,7 +247,7 @@ window.EP_CATALOG = {
     {
       id:"ep_full_atol",
       name:"EP ATOL Qualification · Full Scale · Aerostar",
-      phaseId:"ep_full", platformId:"aerostar", trainingKind:"qualification", dayNight:"shared", contextLabel:"ATOL Qualification",
+      phaseId:"ep_full", platformId:"aerostar", trainingKind:"qualification", qualificationId:"atol", dayNight:"shared", contextLabel:"ATOL",
       source:"Aerostar EP Israeli Course Syllabus (edition 1).pdf",
       prerequisite:"EP qualification; successfully completed OJT series; 15 Aerostar solo takeoffs and 15 solo landings. Practical ATOL starts after completion of Full Scale Day syllabus #11.",
       theoryRequirement:"ATOL Theory Exam ≥80.",

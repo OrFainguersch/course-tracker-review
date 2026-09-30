@@ -23,6 +23,7 @@ for(const profession of ["EP","IP","TECHNICIAN"]){
 
 const epDay=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"});
 const epNight=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"night"});
+assert.equal(epDay.qualificationId,"day");assert.equal(epNight.qualificationId,"night");
 assert(epDay.experienceCounters.some(x=>x.kind==="TAKEOFF"&&x.track==="day"&&x.minimum===3),"Day EP must track 3 takeoffs");
 assert(epDay.experienceCounters.some(x=>x.kind==="LANDING"&&x.track==="day"&&x.minimum===3),"Day EP must track 3 full-stop landings");
 assert(epNight.experienceCounters.some(x=>x.kind==="TAKEOFF"&&x.track==="night"&&x.minimum===3),"Night EP must track 3 takeoffs");
@@ -48,7 +49,8 @@ const epAtol=core.resolvePackage("EP","ep_full_atol");
 assert(epAtol,"ATOL must resolve as a standalone EP Package");
 assert.equal(epAtol.trainingKind,"qualification");
 assert.equal(epAtol.dayNight,"shared");
-assert.equal(epAtol.contextLabel,"ATOL Qualification");
+assert.equal(epAtol.qualificationId,"atol");
+assert.equal(epAtol.contextLabel,"ATOL");
 assert.equal(epAtol.syllabi.length,4,"ATOL practical Package must contain the four source syllabus flights");
 assert(epAtol.syllabi.some(x=>x.id==="atol_day_takeover"&&x.track==="day"));
 assert(epAtol.syllabi.some(x=>x.id==="atol_night_takeover"&&x.track==="night"));
