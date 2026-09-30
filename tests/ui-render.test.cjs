@@ -299,7 +299,7 @@ assert(advancedHtml.indexOf("Course types")<advancedHtml.indexOf("Select sector 
 assert(advancedHtml.indexOf("Select sector to edit")<advancedHtml.indexOf(">Architecture</b>"),"Architecture follows sector selection");
 assert(advancedHtml.indexOf(">Architecture</b>")<advancedHtml.indexOf("Final step · create and manage reusable Packages"),"Packages must be the final Advanced step");
 
-vm.runInContext("const cp=getCustomPlatforms();cp.EP=[{id:'platform_test',name:'Test Platform'}];saveCustomPlatforms(cp);const labels=getPlatformLabels();labels.platform_test='Test Platform';savePlatformLabels(labels);render()",context);
+vm.runInContext("const cp=getCustomPlatforms();cp.EP=[{id:'platform_test',name:'Test Platform'}];saveCustomPlatforms(cp);const labels3=getPlatformLabels();labels3.platform_test='Test Platform';savePlatformLabels(labels3);render()",context);
 assert.match(elements.get("#content").innerHTML,/Test Platform/);
 assert.match(elements.get("#content").innerHTML,/data-platform-remove="platform_test"/);
 assert.match(elements.get("#content").innerHTML,/value="platform_test"/);
