@@ -459,21 +459,24 @@ select option[value=""]{color:#8a9bad}
 /* ===== Active / excluded syllabus behavior ===== */
 .excludedSyllabiBox{margin-top:10px;border:1px solid #e4e8ed;border-radius:11px;background:#fafbfc;overflow:hidden}.excludedSyllabiBox>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;cursor:pointer;color:#5f7182}.excludedSyllabiBox>summary span{font-size:9px;color:#8594a3}.excludedSyllabusList{display:grid;gap:6px;padding:8px}.excludedSyllabusList .packageSyllabusRow{display:grid;grid-template-columns:minmax(220px,1fr) 180px;border:1px solid #e1e6eb;border-radius:9px;background:#f5f6f8;overflow:hidden}.excludedSyllabusList .packageSyllabusCell{display:none}.excludedSyllabusList .seriesCell,.excludedSyllabusList .statusCell{display:flex;border:0;padding:8px}.excludedSyllabusList .seriesCell input{background:transparent;border-color:transparent}.excludedSyllabusList .statusCell{justify-content:flex-end}.syllabusRestoreBtn{display:none}.syllabusExcludedRow .syllabusRestoreBtn{display:inline-flex}.syllabusExcludedRow .syllabusDefaultStatus{display:none}.syllabusExcludedRow{opacity:.85}.syllabusExcludedRow .syllabusDragHandle{display:none}.packageEditFieldset:disabled .syllabusRestoreBtn{display:none}.packageEditFieldset:disabled .excludedSyllabiBox>summary span:after{content:" · Edit Package to restore"}
 @media(max-width:620px){.excludedSyllabusList .packageSyllabusRow{grid-template-columns:1fr}.excludedSyllabusList .statusCell{justify-content:flex-start}.excludedSyllabiBox>summary{align-items:flex-start;flex-direction:column}}
+</style><style>
+/* ===== Smooth syllabus drag + compact add rows ===== */
+.packageSyllabusRow{transition:background-color 160ms ease,box-shadow 160ms ease,opacity 160ms ease}.packageSyllabusRow.dragging{transform:scale(1.006);box-shadow:0 12px 30px rgba(26,72,112,.24);background:#edf7ff;opacity:.97}.packageSyllabusRow.dragSettling{animation:syllabusSettle 180ms cubic-bezier(.2,.8,.2,1)}.packageSyllabusRow.dropBefore{box-shadow:inset 0 3px 0 #2c8ddd}.packageSyllabusRow.dropAfter{box-shadow:inset 0 -3px 0 #2c8ddd}.syllabusDragHandle{transition:transform 140ms ease,box-shadow 140ms ease,background-color 140ms ease}.syllabusDragHandle:hover{transform:scale(1.06);box-shadow:0 3px 10px rgba(32,91,134,.14);background:#f7fbff}.packageSyllabusRow.dragging .syllabusDragHandle{transform:scale(1.08);background:#e8f4ff}@keyframes syllabusSettle{0%{transform:scale(1.006)}55%{transform:scale(.997)}100%{transform:scale(1)}}.compactAddBox{margin-top:10px;border:0;background:transparent;padding:0}.packageAddTrigger{width:auto}.packageAddPanel{margin-top:8px;padding:10px;border:1px dashed #80b8e8;border-radius:12px;background:#f7fbff;animation:addRowOpen 150ms ease-out}.packageAddPanel[hidden]{display:none}.packageAddActions{margin-top:8px}.packageAddPanel .packageAddFields{margin:0}@keyframes addRowOpen{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 </style></head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0617 · excluded syllabi restore</div><div class="toast" id="toast"></div></div>
-<script src="./assets/ep-catalog.js?v=0617"></script>
-<script src="./assets/aerostar-platform.js?v=0617"></script>
-<script src="./assets/ip-catalog.js?v=0617"></script>
-<script src="./assets/technician-catalog.js?v=0617"></script>
-<script src="./assets/training-core.js?v=0617"></script>
-<script src="./assets/ep-lessons-screening.js?v=0617"></script>
-<script src="./assets/ep-lessons-rc-1.js?v=0617"></script>
-<script src="./assets/ep-lessons-rc-2.js?v=0617"></script>
-<script src="./assets/ep-lessons-half.js?v=0617"></script>
-<script src="./assets/ep-lessons-full-day-a.js?v=0617"></script>
-<script src="./assets/ep-lessons-full-day-b.js?v=0617"></script>
-<script src="./assets/ep-lessons-night.js?v=0617"></script>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0618 · smooth drag and compact add</div><div class="toast" id="toast"></div></div>
+<script src="./assets/ep-catalog.js?v=0618"></script>
+<script src="./assets/aerostar-platform.js?v=0618"></script>
+<script src="./assets/ip-catalog.js?v=0618"></script>
+<script src="./assets/technician-catalog.js?v=0618"></script>
+<script src="./assets/training-core.js?v=0618"></script>
+<script src="./assets/ep-lessons-screening.js?v=0618"></script>
+<script src="./assets/ep-lessons-rc-1.js?v=0618"></script>
+<script src="./assets/ep-lessons-rc-2.js?v=0618"></script>
+<script src="./assets/ep-lessons-half.js?v=0618"></script>
+<script src="./assets/ep-lessons-full-day-a.js?v=0618"></script>
+<script src="./assets/ep-lessons-full-day-b.js?v=0618"></script>
+<script src="./assets/ep-lessons-night.js?v=0618"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentUserId='i1';
@@ -1290,7 +1293,7 @@ function advancedPackagesHtml(type){
   const core=window.FLYMPUS_TRAINING,packages=core?.packageCatalog?.(type)||[];
   if(!packages.length)return '<section class="card settingBox"><h3>Training Packages</h3><p class="sub">No packages are defined for this sector.</p></section>';
   const field=(label,control,wide=false)=>'<label class="field '+(wide?'tailorWide':'')+'"><span class="fieldLabel">'+label+'</span>'+control+'</label>';
-  const addBox=(kind,title,fields)=>'<div class="packageAddBox" data-global-add-box="'+kind+'"><div class="inlineHead"><div><b>＋ '+title+'</b><p>Adds a new default item to this reusable Package.</p></div><span class="pill blue">PACKAGE ITEM</span></div><div class="packageAddFields">'+fields+'</div><button class="btn secondary" type="button" data-global-add="'+kind+'">Add to Package</button></div>';
+  const addBox=(kind,title,fields)=>'<div class="packageAddBox compactAddBox" data-global-add-box="'+kind+'"><button class="btn secondary packageAddTrigger" type="button" data-global-add-open="'+kind+'">＋ '+title+'</button><div class="packageAddPanel" data-global-add-panel="'+kind+'" hidden><div class="packageAddFields">'+fields+'</div><div class="toolbar packageAddActions"><button class="btn sky small" type="button" data-global-add="'+kind+'">Add</button><button class="btn secondary small" type="button" data-global-add-cancel="'+kind+'">Cancel</button></div></div></div>';
   const cards=packages.map(p=>{
     const base=core.packageBase?.(type,p.id)||p,o=core.getGlobalOverrides?.(p.id)||{},current=core.applyGlobalOverrides?.(base)||p,changed=Object.keys(o).length>0;
     const customBadge=(x,kind)=>x.packageCustom?'<div class="packageCustomMeta"><span class="pill blue">PACKAGE CUSTOM</span><button class="btn danger small" type="button" data-global-custom-remove="'+kind+'|'+esc(x.id)+'">Remove</button></div>':'<small>Package default item</small>';
@@ -1360,7 +1363,7 @@ function advancedPackagesHtml(type){
       '<details class="packageRules"><summary><b>Progression gates ('+(current.progression||[]).length+')</b><span>Edit, disable or add</span></summary><div class="packageEditorList">'+gates+gateAdd+'</div></details>'+
       '<div class="toolbar packageSaveBar"><button class="btn sky" type="submit">Save Package</button><button class="btn secondary" type="button" data-finish-package-edit="'+esc(p.id)+'">Save & Done</button><button class="btn secondary" type="button" data-reset-global-package="'+esc(p.id)+'">Reset Package defaults</button></div></div></fieldset></details></form>';
   }).join('');
-  return '<div class="sectionHead advancedPackageTitle"><div><h2>'+esc(type)+' Training Packages</h2><p>Packages start collapsed. Open only the Package you want to edit; each section inside it also starts collapsed. Changes here become the default for every course using that Package.</p></div><span class="pill blue">'+packages.length+' packages</span></div><div class="globalPackageList">'+cards+'</div>';
+  return '<div class="sectionHead advancedPackageTitle"><div><h2>'+esc(type)+' Training Packages</h2></div><span class="pill blue">'+packages.length+' packages</span></div><div class="globalPackageList">'+cards+'</div>';
 }
 function courseOverridesHtml(){
   const p=epCurrentProgram();if(!p)return '<div class="infoBox" style="margin-top:14px"><b>No active package</b><p>Open a course with a selected package first.</p></div>';
@@ -1641,7 +1644,7 @@ function settings(){
 
   if(tab==='packages'){
     const validScope=c.courseTypes.some(x=>x.id===(state.packageWorkspace||state.typeWorkspace)),scope=validScope?(state.packageWorkspace||state.typeWorkspace):(c.courseTypes[0]?.id||''),scopeName=cfgItem(c.courseTypes,scope)?.name||scope;
-    html+='<section class="card settingBox packagesPageHead" style="margin-top:14px"><div class="inlineHead"><div><div class="eyebrow">REUSABLE TRAINING PACKAGES</div><h3>Packages · '+esc(scopeName)+'</h3><p class="sub">Build and edit reusable Packages here. Changes become defaults for every course using that Package.</p></div><span class="pill blue">'+((window.FLYMPUS_TRAINING?.packageCatalog?.(scope)||[]).length)+' packages</span></div><div class="field" style="margin-top:12px"><label>Sector</label><select id="packageWorkspace">'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></section>';
+    html+='<section class="card settingBox packagesPageHead" style="margin-top:14px"><div class="inlineHead"><div><div class="eyebrow">REUSABLE TRAINING PACKAGES</div><h3>Packages · '+esc(scopeName)+'</h3></div><span class="pill blue">'+((window.FLYMPUS_TRAINING?.packageCatalog?.(scope)||[]).length)+' packages</span></div><div class="field" style="margin-top:12px"><label>Sector</label><select id="packageWorkspace">'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></section>';
     html+=advancedPackagesHtml(scope);
   }
 
@@ -1987,14 +1990,24 @@ function bindSettings(){
     const box=form.querySelector('.excludedSyllabiBox');if(box)box.hidden=excludedRows.length===0;
     const total=activeRows.reduce((n,row)=>n+(Number(row.querySelector('input[name^="g_syll_min_"]')?.value)||0),0),totalEl=form.querySelector('[data-syllabus-minimum-total]');if(totalEl)totalEl.textContent=total;
   };
+  const syllabusRowPositions=table=>new Map([...table.querySelectorAll('.packageSyllabusRow')].map(row=>[row,row.getBoundingClientRect?.()]));
+  const animateSyllabusReflow=(table,before)=>{
+    [...table.querySelectorAll('.packageSyllabusRow')].forEach(row=>{
+      const first=before.get(row),last=row.getBoundingClientRect?.();if(!first||!last)return;
+      const dx=first.left-last.left,dy=first.top-last.top;if(Math.abs(dx)<1&&Math.abs(dy)<1)return;
+      if(typeof row.animate==='function')row.animate([{transform:'translate('+dx+'px,'+dy+'px)'},{transform:'translate(0,0)'}],{duration:220,easing:'cubic-bezier(.22,.8,.24,1)'});
+      else{row.style.transition='none';row.style.transform='translate('+dx+'px,'+dy+'px)';requestAnimationFrame?.(()=>requestAnimationFrame?.(()=>{row.style.transition='transform 220ms cubic-bezier(.22,.8,.24,1)';row.style.transform='translate(0,0)'}))}
+    });
+  };
+  const clearSyllabusDropHints=table=>table?.querySelectorAll('.dropBefore,.dropAfter').forEach(row=>row.classList.remove('dropBefore','dropAfter'));
   document.querySelectorAll('.globalPackageForm').forEach(form=>{
     const table=form.querySelector('.packageSyllabusTable'),excluded=form.querySelector('.excludedSyllabusList');if(!table)return;
     let dragging=null,pointerId=null,startY=0,moved=false;
     table.querySelectorAll('.syllabusDragHandle').forEach(handle=>handle.onpointerdown=e=>{
       if(state.packageEditId!==form.dataset.globalPackageId||handle.disabled)return;
       e.preventDefault();e.stopPropagation();dragging=handle.closest('.packageSyllabusRow');if(!dragging)return;pointerId=e.pointerId;startY=e.clientY;moved=false;dragging.classList.add('dragging');handle.setPointerCapture?.(pointerId);
-      const onMove=ev=>{if(!dragging||ev.pointerId!==pointerId)return;ev.preventDefault();if(Math.abs(ev.clientY-startY)>3)moved=true;const target=document.elementFromPoint?.(ev.clientX,ev.clientY)?.closest?.('.packageSyllabusRow');if(!target||target===dragging||target.parentElement!==table)return;const rect=target.getBoundingClientRect();table.insertBefore(dragging,ev.clientY<rect.top+rect.height/2?target:target.nextSibling);refreshSyllabusMeta(form)};
-      const onUp=ev=>{if(ev.pointerId!==pointerId)return;dragging?.classList.remove('dragging');refreshSyllabusMeta(form);dragging=null;pointerId=null;document.removeEventListener('pointermove',onMove);document.removeEventListener('pointerup',onUp);document.removeEventListener('pointercancel',onUp);if(moved)toast('Syllabus order updated · Save Package to keep it')};
+      const onMove=ev=>{if(!dragging||ev.pointerId!==pointerId)return;ev.preventDefault();if(Math.abs(ev.clientY-startY)>3)moved=true;const target=document.elementFromPoint?.(ev.clientX,ev.clientY)?.closest?.('.packageSyllabusRow');clearSyllabusDropHints(table);if(!target||target===dragging||target.parentElement!==table)return;const rect=target.getBoundingClientRect(),beforeTarget=ev.clientY<rect.top+rect.height/2;target.classList.add(beforeTarget?'dropBefore':'dropAfter');const desiredNext=beforeTarget?target:target.nextSibling;if(desiredNext===dragging||dragging.nextSibling===desiredNext)return;const before=syllabusRowPositions(table);table.insertBefore(dragging,desiredNext);refreshSyllabusMeta(form);animateSyllabusReflow(table,before)};
+      const onUp=ev=>{if(ev.pointerId!==pointerId)return;clearSyllabusDropHints(table);const settling=dragging;settling?.classList.remove('dragging');settling?.classList.add('dragSettling');setTimeout(()=>settling?.classList.remove('dragSettling'),180);refreshSyllabusMeta(form);dragging=null;pointerId=null;document.removeEventListener('pointermove',onMove);document.removeEventListener('pointerup',onUp);document.removeEventListener('pointercancel',onUp);if(moved)toast('Syllabus order updated · Save Package to keep it')};
       document.addEventListener('pointermove',onMove,{passive:false});document.addEventListener('pointerup',onUp);document.addEventListener('pointercancel',onUp);
     });
     form.querySelectorAll('[data-syllabus-use]').forEach(cb=>cb.onchange=()=>{
@@ -2010,6 +2023,8 @@ function bindSettings(){
   document.querySelectorAll('[data-package-edit-toggle]').forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();const id=btn.dataset.packageEditToggle;if(state.packageEditId===id){const form=btn.closest('.globalPackageForm');if(form){form.dataset.finishAfterSave='1';form.requestSubmit?.()}else{state.packageEditId=null;render()}}else{state.packageEditId=id;state.packageFocusId=id;render()}});
   document.querySelectorAll('[data-finish-package-edit]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const form=btn.closest('.globalPackageForm');if(!form)return;form.dataset.finishAfterSave='1';form.requestSubmit?.()});
   document.querySelectorAll('[data-delete-package]').forEach(btn=>btn.onclick=e=>{e.preventDefault();e.stopPropagation();const id=btn.dataset.deletePackage,type=btn.dataset.packageSector,pkg=window.FLYMPUS_TRAINING.resolvePackage(type,id),name=pkg?.name||id,used=allCourses().filter(c=>(c.programId||c.selection?.programId)===id).length;if(!confirm('Are you sure you want to delete Package "'+name+'"?\n\nThis action removes it from Package lists and new course creation.'+(used?' '+used+' existing course'+(used===1?'':'s')+' already using it will keep working.':'')))return;window.FLYMPUS_TRAINING.deletePackage(type,id);if(state.packageEditId===id)state.packageEditId=null;if(state.packageFocusId===id)state.packageFocusId=null;toast(name+' deleted');render()});
+  document.querySelectorAll('[data-global-add-open]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-global-add-box]'),panel=box?.querySelector('[data-global-add-panel]');if(!panel)return;panel.hidden=false;btn.hidden=true;const first=panel.querySelector('input,select');first?.focus?.()});
+  document.querySelectorAll('[data-global-add-cancel]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-global-add-box]'),panel=box?.querySelector('[data-global-add-panel]'),trigger=box?.querySelector('[data-global-add-open]');if(panel)panel.hidden=true;if(trigger)trigger.hidden=false});
   document.querySelectorAll('[data-global-add]').forEach(btn=>btn.onclick=()=>{
     const form=btn.closest('.globalPackageForm'),box=btn.closest('[data-global-add-box]'),type=form?.dataset.globalPackageType,id=form?.dataset.globalPackageId;if(!type||!id||!box)return;
     const value=name=>String(box.querySelector('[data-add-field="'+name+'"]')?.value||'').trim(),core=window.FLYMPUS_TRAINING,base=core.packageBase(type,id),o=core.getGlobalOverrides(id)||{};o.custom=o.custom||{};
