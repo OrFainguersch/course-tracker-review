@@ -56,6 +56,8 @@ assert(html.includes(".dateDmy{width:100%!important;max-width:100%!important;min
 assert(!html.includes('${epCurrentSuitSummaryHtml()}\n<div class="twoCol">'),"Evaluation must not render the redundant Active Suit overview");
 assert(!html.includes("activeSuitOverviewHtml()+\n '<div class=\"twoCol\" style=\"margin-top:14px\">"),"Exams must not render the redundant Active Package overview");
 assert(html.includes("flightDate:normalizeDateValue(fd.get('date'))")&&html.includes("date=normalizeDateValue($('#pveDate').value)"),"Date forms must normalize DD/MM/YYYY back to ISO for storage and comparisons");
+assert(html.includes("function builderStartLabel(startsOn){return startsOn?formatDateDMY(startsOn):''}"),"Course-builder date labels must follow DD/MM/YYYY too");
+assert(html.includes("saved Evaluations on '+esc(formatDateDMY(date))"),"Planned vs Executed must never expose the internal ISO date to users");
 assert(html.includes("scrollMobileNavTop")&&html.includes("window.scrollTo({top:0,left:0,behavior:'smooth'})"),"Every mobile bottom-nav action must scroll the page back to the top");
 assert(html.includes("Mobile dark brand bottom navigation · 0680")&&html.includes("background:linear-gradient(180deg,#123b63 0%,#0b3157 100%)")&&html.includes(".mobileBottomItem.active{color:#e2b84e}"),"Mobile bottom navigation must keep the simple dark brand style with gold active state");
 assert(html.includes("font-size:9.6px")&&html.includes("width:100%;white-space:nowrap;overflow:visible;text-align:center"),"Mobile navigation labels must remain readable and unclipped");
