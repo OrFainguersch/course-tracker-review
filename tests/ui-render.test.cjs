@@ -88,6 +88,7 @@ assert.equal(vm.runInContext("getNotificationPreferences().evaluations",context)
 vm.runInContext("personOverride(currentUserId,{photoData:'data:image/jpeg;base64,profile-test'})",context);
 assert.equal(vm.runInContext("allInstructors().find(x=>x.id===currentUserId).photoData",context),"data:image/jpeg;base64,profile-test","Personal profile photo must persist on the current user without editing name or role");
 assert.match(elements.get("#content").innerHTML,/My Courses/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/data-go="settings">\+ Create course<\/button>/,"My Courses must not expose a redundant Create course action");
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Course/);
 assert.match(elements.get("#content").innerHTML,/id="myCoursesStatusFilter"/);
 assert.match(elements.get("#content").innerHTML,/<details class="myCoursesFilters" id="myCoursesFilters"/);
