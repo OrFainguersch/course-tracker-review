@@ -18,6 +18,11 @@ assert(html.includes("internal platform identifier stays stable automatically an
 assert(!html.includes("<span class=\"pill gray\">'+esc(x.id)+'</span>"),"Platform internal IDs must not be shown as user-facing pills");
 assert(html.includes("myCoursesPlatformFilter")&&html.includes("myCoursesCountryFilter"),"My Courses must filter by platform and country");
 assert(html.includes("myCoursesStatusFilter"),"My Courses must filter by lifecycle status");
+assert(html.includes('aria-controls="topCourseDropdown"')&&html.includes('id="topCourseDropdown"'),"Header must contain a real course switcher dropdown");
+assert(html.includes("<span>Selected course</span>"),"Header switcher must describe the selected course, not an active lifecycle state");
+assert(html.includes("function sortCourseSwitcherRows(rows,selectedKey=currentCourseId)"),"Quick course switcher needs deterministic ordering");
+assert(html.includes("View all courses →"),"Quick course switcher must link to the full My Courses screen");
+assert(!html.includes("if($('#topCourseSwitch'))$('#topCourseSwitch').onclick=()=>go('courses')"),"Top course control must no longer fake a dropdown by navigating directly to My Courses");
 assert(html.includes("courseSelectedBadge")&&html.includes("courseStateBadge"),"Selected-course state must be visually separate from course lifecycle status");
 assert(html.includes(".myCourseCard.selected{border-color:#2b8bde;box-shadow:0 0 0 3px rgba(43,139,222,.18)"),"Selected course card needs a strong visual frame in addition to the SELECTED badge");
 assert(html.includes("function courseLifecycleStatus(record)"),"Course lifecycle status must support Upcoming, In progress and Completed");
@@ -37,6 +42,8 @@ assert(!html.includes("Revert to Package defaults"),"Bulk course revert-to-defau
 assert(html.includes(".packageRules>summary>span{font-size:9px;color:#8092a5}"),"Summary helper styling must target only the direct helper span so counts inside titles keep the title font");
 const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(match=>match[1]).filter(x=>x.trim());
 assert.equal(scripts.length,1);vm.runInContext(scripts[0],context,{filename:"index-inline.js"});
+const switcherOrder=vm.runInContext("sortCourseSwitcherRows([{key:'done',course:{startsOn:'2025-01-01'},lifecycle:{id:'COMPLETED'}},{key:'future2',course:{startsOn:'2027-03-01'},lifecycle:{id:'UPCOMING'}},{key:'current',course:{startsOn:'2024-01-01'},lifecycle:{id:'COMPLETED'}},{key:'runOld',course:{startsOn:'2026-01-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'runNew',course:{startsOn:'2026-08-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'future1',course:{startsOn:'2027-01-01'},lifecycle:{id:'UPCOMING'}}],'current').map(x=>x.key).join(',')",context);
+assert.equal(switcherOrder,"current,runNew,runOld,future1,future2,done","Quick switcher order must be Selected, In Progress newest first, Upcoming soonest first, then Completed");
 assert.match(elements.get("#content").innerHTML,/My Courses/);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Course/);
 assert.match(elements.get("#content").innerHTML,/id="myCoursesStatusFilter"/);
@@ -60,6 +67,10 @@ vm.runInContext("go('home')",context);assert(elements.get("#content").innerHTML.
 vm.runInContext(`localStorage.setItem('ct-review-courses',JSON.stringify([{id:'course_multi',name:'Aerostar EP Night 2027',code:'EP-NIGHT-27',summary:'EP · Full Scale · Aerostar · Night',startsOn:'2027-01-10',selection:{courseType:'EP',phaseId:'ep_full',platformId:'aerostar',trainingKind:'new',dayNight:'night',country:'israel'},platformId:'aerostar',programId:'ep_full_night_new'}]));updateCourseMembershipForCourse('EP-NIGHT-27',currentUserId,'INSTRUCTOR',{role:'COURSE_MANAGER',removed:false});state.screen='courses';render()`,context);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Night 2027/);
 assert.equal(vm.runInContext("instructorAssignedCourses(currentUserId).length",context),2);
+const quickSwitcherHtml=vm.runInContext("topCourseSwitcherItemsHtml()",context);
+assert(quickSwitcherHtml.indexOf("Aerostar EP Course")<quickSwitcherHtml.indexOf("Aerostar EP Night 2027"),"Selected course must appear first in the quick switcher");
+assert.match(quickSwitcherHtml,/UPCOMING · Course Manager · Starts/);
+assert.match(quickSwitcherHtml,/✓ Selected/);
 assert.match(elements.get("#content").innerHTML,/UPCOMING/,"Future courses must display Upcoming independently of the selected course");
 vm.runInContext("state.myCoursesStatus='UPCOMING';render()",context);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Night 2027/);
