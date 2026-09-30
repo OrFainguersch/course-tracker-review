@@ -764,11 +764,44 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 .dateDmy{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;text-align:left;font-variant-numeric:tabular-nums;letter-spacing:.02em;-webkit-appearance:none;appearance:none}
 .dateCalendarField{position:relative;display:block;min-width:0;max-width:100%}
 .dateCalendarField>.dateDmy{display:block;padding-right:42px!important;cursor:pointer}
-.dateCalendarField:focus-within>.dateDmy{border-color:#82bde9;box-shadow:0 0 0 3px rgba(23,111,174,.10)}
-.dateCalendarIcon{position:absolute;right:13px;top:50%;transform:translateY(-50%);z-index:2;width:18px;height:18px;display:grid;place-items:center;color:#2f79b5;pointer-events:none}
+.dateCalendarField.is-open>.dateDmy,.dateCalendarField:focus-within>.dateDmy{border-color:#69ade2;box-shadow:0 0 0 3px rgba(23,111,174,.11);background:#fbfdff}
+.dateCalendarIcon{position:absolute;right:13px;top:50%;transform:translateY(-50%);z-index:2;width:18px;height:18px;display:grid;place-items:center;color:#2f79b5;pointer-events:none;transition:transform .16s ease,color .16s ease}
+.dateCalendarField.is-open .dateCalendarIcon{transform:translateY(-50%) scale(1.08);color:#176fae}
 .dateCalendarIcon svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.dateCalendarNative{position:absolute!important;inset:0!important;z-index:3!important;width:100%!important;height:100%!important;min-width:0!important;margin:0!important;padding:0!important;border:0!important;opacity:0!important;cursor:pointer!important;-webkit-appearance:auto!important;appearance:auto!important}
 .dateCalendarField.is-disabled{opacity:.62}
+.datePickerOverlay{position:fixed;inset:0;z-index:190;display:grid;place-items:end center;padding:16px;background:rgba(6,24,42,.42);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:datePickerBackdropIn .18s ease-out both}
+.datePickerOverlay[hidden]{display:none}
+.datePickerOverlay.closing{animation:datePickerBackdropOut .15s ease-in both}
+.datePickerPanel{width:min(380px,100%);background:#fff;border:1px solid #d9e5ef;border-radius:22px 22px 18px 18px;box-shadow:0 22px 70px rgba(4,28,50,.26);padding:15px;animation:datePickerSheetIn .22s cubic-bezier(.2,.8,.2,1) both}
+.datePickerOverlay.closing .datePickerPanel{animation:datePickerSheetOut .15s ease-in both}
+.datePickerHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.datePickerTitle{min-width:0;text-align:center;color:#173e63;font-size:14px;font-weight:900}
+.datePickerNav{width:36px;height:36px;border:1px solid #d8e5ef;border-radius:10px;background:#f8fbfe;color:#286a9f;font-size:19px;font-weight:800;display:grid;place-items:center;cursor:pointer}
+.datePickerNav:active{transform:scale(.96)}
+.datePickerWeekdays,.datePickerGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.datePickerWeekdays{margin-bottom:4px;color:#8091a3;font-size:8px;font-weight:850;text-align:center;text-transform:uppercase}
+.datePickerWeekdays span{padding:4px 0}
+.datePickerDay{aspect-ratio:1;border:0;border-radius:10px;background:transparent;color:#264761;font-size:11px;font-weight:750;display:grid;place-items:center;cursor:pointer;transition:background .13s ease,color .13s ease,transform .13s ease,box-shadow .13s ease}
+.datePickerDay:hover{background:#eef6fd}
+.datePickerDay:active{transform:scale(.94)}
+.datePickerDay.is-today{box-shadow:inset 0 0 0 1.5px #6daedd;color:#176fae}
+.datePickerDay.is-selected{background:#176fae;color:#fff;box-shadow:0 4px 11px rgba(23,111,174,.24)}
+.datePickerDay:disabled{opacity:.28;cursor:not-allowed;background:transparent;box-shadow:none}
+.datePickerBlank{aspect-ratio:1}
+.datePickerActions{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:11px;padding-top:11px;border-top:1px solid #edf2f6}
+.datePickerAction{border:0;background:transparent;color:#2b6f9f;font-size:10px;font-weight:850;padding:7px 5px;cursor:pointer}
+.datePickerAction.cancel{color:#73879a}
+@keyframes datePickerBackdropIn{from{opacity:0}to{opacity:1}}
+@keyframes datePickerBackdropOut{from{opacity:1}to{opacity:0}}
+@keyframes datePickerSheetIn{from{opacity:0;transform:translateY(22px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes datePickerSheetOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(16px) scale(.99)}}
+@media(min-width:760px){
+  .datePickerOverlay{place-items:center;padding:22px}
+  .datePickerPanel{border-radius:20px;animation:datePickerDesktopIn .18s cubic-bezier(.2,.8,.2,1) both}
+  .datePickerOverlay.closing .datePickerPanel{animation:datePickerDesktopOut .14s ease-in both}
+  @keyframes datePickerDesktopIn{from{opacity:0;transform:translateY(7px) scale(.975)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes datePickerDesktopOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(5px) scale(.985)}}
+}
 @media(max-width:759px){.dateDmy{font-size:16px!important}.twoCol>*,.fields>*{min-width:0;max-width:100%}}
 </style>
 </head>
@@ -845,30 +878,56 @@ function normalizeDateValue(v){
 }
 function formatDateDMY(v){const iso=normalizeDateValue(v);if(!iso)return '—';const [y,m,d]=iso.split('-');return d+'/'+m+'/'+y}
 function dateInputValue(v){const iso=normalizeDateValue(v);if(!iso)return '';return formatDateDMY(iso)}
+let activeDatePickerTarget=null,datePickerView=null,datePickerCloseTimer=null;
+function ensureDatePicker(){
+  let overlay=document.querySelector('#datePickerOverlay');if(overlay)return overlay;
+  overlay=document.createElement('div');overlay.id='datePickerOverlay';overlay.className='datePickerOverlay';overlay.hidden=true;overlay.innerHTML='<div class="datePickerPanel" role="dialog" aria-modal="true" aria-label="Choose date"><div class="datePickerHead"><button class="datePickerNav" type="button" data-date-prev aria-label="Previous month">‹</button><div class="datePickerTitle" id="datePickerTitle"></div><button class="datePickerNav" type="button" data-date-next aria-label="Next month">›</button></div><div class="datePickerWeekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div><div class="datePickerGrid" id="datePickerGrid"></div><div class="datePickerActions"><button class="datePickerAction cancel" type="button" data-date-cancel>Cancel</button><button class="datePickerAction" type="button" data-date-today>Today</button></div></div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closeDatePicker()});
+  overlay.querySelector('[data-date-cancel]').onclick=()=>closeDatePicker();
+  overlay.querySelector('[data-date-today]').onclick=()=>{const iso=todayIsoDate(),[y,m]=iso.split('-').map(Number);datePickerView=new Date(y,m-1,1);renderDatePicker();selectDateFromPicker(iso)};
+  overlay.querySelector('[data-date-prev]').onclick=()=>{datePickerView=new Date(datePickerView.getFullYear(),datePickerView.getMonth()-1,1);renderDatePicker()};
+  overlay.querySelector('[data-date-next]').onclick=()=>{datePickerView=new Date(datePickerView.getFullYear(),datePickerView.getMonth()+1,1);renderDatePicker()};
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!overlay.hidden)closeDatePicker()});
+  return overlay;
+}
+function openDatePicker(el){
+  if(!el||el.disabled)return;
+  clearTimeout(datePickerCloseTimer);const overlay=ensureDatePicker(),iso=normalizeDateValue(el.value)||todayIsoDate(),[y,m]=iso.split('-').map(Number);
+  activeDatePickerTarget=el;datePickerView=new Date(y,m-1,1);overlay.classList.remove('closing');overlay.hidden=false;
+  el.closest('.dateCalendarField')?.classList.add('is-open');renderDatePicker();
+}
+function closeDatePicker(){
+  const overlay=document.querySelector('#datePickerOverlay');if(!overlay||overlay.hidden)return;
+  activeDatePickerTarget?.closest('.dateCalendarField')?.classList.remove('is-open');overlay.classList.add('closing');
+  clearTimeout(datePickerCloseTimer);datePickerCloseTimer=setTimeout(()=>{overlay.hidden=true;overlay.classList.remove('closing');activeDatePickerTarget=null},150);
+}
+function selectDateFromPicker(iso){
+  const el=activeDatePickerTarget;if(!el)return;
+  el.value=formatDateDMY(iso);el.setCustomValidity?.('');closeDatePicker();
+  requestAnimationFrame(()=>{el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))});
+}
+function renderDatePicker(){
+  const overlay=ensureDatePicker(),grid=overlay.querySelector('#datePickerGrid'),title=overlay.querySelector('#datePickerTitle');if(!grid||!title||!datePickerView)return;
+  const y=datePickerView.getFullYear(),m=datePickerView.getMonth(),monthStart=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),lead=monthStart.getDay(),selected=normalizeDateValue(activeDatePickerTarget?.value||''),today=todayIsoDate(),min=normalizeDateValue(activeDatePickerTarget?.getAttribute('min')||''),max=normalizeDateValue(activeDatePickerTarget?.getAttribute('max')||'');
+  title.textContent=new Intl.DateTimeFormat(undefined,{month:'long',year:'numeric'}).format(monthStart);
+  let html='';for(let i=0;i<lead;i++)html+='<span class="datePickerBlank"></span>';
+  for(let d=1;d<=days;d++){const iso=String(y).padStart(4,'0')+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'),disabled=(min&&iso<min)||(max&&iso>max),cls='datePickerDay'+(iso===today?' is-today':'')+(iso===selected?' is-selected':'');html+='<button class="'+cls+'" type="button" data-date-value="'+iso+'" '+(disabled?'disabled':'')+'>'+d+'</button>'}
+  grid.innerHTML=html;grid.querySelectorAll('[data-date-value]').forEach(btn=>btn.onclick=()=>selectDateFromPicker(btn.dataset.dateValue));
+}
 function bindDmyDateInputs(){
-  document.querySelectorAll('input[type="date"]:not(.dateCalendarNative)').forEach(el=>{
-    const raw=el.value;
-    el.type='text';el.classList.add('dateDmy');el.inputMode='numeric';el.autocomplete='off';el.maxLength=10;el.placeholder='DD/MM/YYYY';
-    if(raw)el.value=dateInputValue(raw);
+  document.querySelectorAll('input[type="date"]').forEach(el=>{
+    const raw=el.value;el.type='text';el.classList.add('dateDmy');el.inputMode='none';el.autocomplete='off';el.maxLength=10;el.placeholder='DD/MM/YYYY';if(raw)el.value=dateInputValue(raw);
   });
   document.querySelectorAll('input.dateDmy').forEach(el=>{
-    if(el.dataset.dateCalendarBound==='1')return;
-    el.dataset.dateCalendarBound='1';
-    const shape=()=>{let digits=String(el.value||'').replace(/\D/g,'').slice(0,8),out=digits.slice(0,2);if(digits.length>2)out+='/'+digits.slice(2,4);if(digits.length>4)out+='/'+digits.slice(4);el.value=out;el.setCustomValidity?.('')};
+    if(el.dataset.dateCalendarBound==='1')return;el.dataset.dateCalendarBound='1';el.readOnly=true;el.inputMode='none';
     const validate=()=>{if(!el.value){el.setCustomValidity?.(el.required?'Choose a date':'');return}const iso=normalizeDateValue(el.value);if(!iso){el.setCustomValidity?.('Use DD/MM/YYYY');return}el.setCustomValidity?.('');el.value=formatDateDMY(iso)};
-    const wrapper=document.createElement('span'),native=document.createElement('input'),icon=document.createElement('span'),parent=el.parentNode,currentIso=normalizeDateValue(el.value);
-    wrapper.className='dateCalendarField'+(el.disabled?' is-disabled':'');
-    if(el.style.width)wrapper.style.width=el.style.width;else wrapper.style.width='100%';
-    if(el.style.maxWidth)wrapper.style.maxWidth=el.style.maxWidth;
-    native.type='date';native.className='dateCalendarNative';native.value=currentIso||todayIsoDate();native.disabled=!!el.disabled;
-    const minIso=normalizeDateValue(el.getAttribute('min')||''),maxIso=normalizeDateValue(el.getAttribute('max')||'');if(minIso)native.min=minIso;if(maxIso)native.max=maxIso;
-    const label=el.id?document.querySelector('label[for="'+el.id+'"]')?.textContent:null;native.setAttribute('aria-label',(label||el.getAttribute('aria-label')||'Choose date').trim());
+    const wrapper=document.createElement('span'),icon=document.createElement('span'),parent=el.parentNode;
+    wrapper.className='dateCalendarField'+(el.disabled?' is-disabled':'');if(el.style.width)wrapper.style.width=el.style.width;else wrapper.style.width='100%';if(el.style.maxWidth)wrapper.style.maxWidth=el.style.maxWidth;
     icon.className='dateCalendarIcon';icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="15" rx="2"></rect><path d="M7 3.5v4M17 3.5v4M3.5 9.5h17"></path></svg>';
-    parent.insertBefore(wrapper,el);wrapper.appendChild(el);wrapper.appendChild(icon);wrapper.appendChild(native);
-    const syncNative=()=>{const iso=normalizeDateValue(el.value);native.value=iso||todayIsoDate()};
-    el.addEventListener('input',shape);el.addEventListener('blur',validate);el.addEventListener('change',()=>{validate();syncNative()});
-    native.addEventListener('change',()=>{if(!native.value)return;el.value=formatDateDMY(native.value);el.setCustomValidity?.('');el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))});
-    if(el.value)validate();
+    parent.insertBefore(wrapper,el);wrapper.appendChild(el);wrapper.appendChild(icon);
+    el.addEventListener('click',e=>{e.preventDefault();openDatePicker(el)});el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();openDatePicker(el)}});
+    el.addEventListener('change',validate);if(el.value)validate();
   });
 }
 function safeArrayStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[]}catch{return []}}
