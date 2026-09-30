@@ -69,8 +69,26 @@
   function overrideKey(courseKey){return "flympus-course-overrides:"+(courseKey||"default")}
   function getOverrides(courseKey){try{return JSON.parse(localStorage.getItem(overrideKey(courseKey))||"{}")||{}}catch{return {}}}
   function saveOverrides(courseKey,value){localStorage.setItem(overrideKey(courseKey),JSON.stringify(value||{}))}
+  function globalOverrideKey(programId){return "flympus-global-program-overrides:"+(programId||"default")}
+  function getGlobalOverrides(programId){try{return JSON.parse(localStorage.getItem(globalOverrideKey(programId))||"{}")||{}}catch{return {}}}
+  function saveGlobalOverrides(programId,value){localStorage.setItem(globalOverrideKey(programId),JSON.stringify(value||{}))}
+  function mergeOverrideObjects(list){
+    const out={};
+    (list||[]).filter(Boolean).forEach(o=>{
+      if(o.program)out.program={...(out.program||{}),...o.program};
+      for(const key of ["syllabi","exams","criteria","counters","progression"])if(o[key])out[key]={...(out[key]||{}),...o[key]};
+      if(Array.isArray(o.emergencyRequirementIds))out.emergencyRequirementIds=o.emergencyRequirementIds.slice();
+    });
+    return out;
+  }
+  function globalOverridesForProgram(program){
+    if(!program)return{};
+    const ids=[...(program.composedFrom||[]),program.id].filter(Boolean);
+    return mergeOverrideObjects(ids.map(getGlobalOverrides));
+  }
   function applyOverrides(program,overrides){
     const p=clone(program);if(!p)return null;const o=overrides||{};
+    if(o.program)Object.assign(p,o.program);
     p.syllabi=(p.syllabi||[]).filter(x=>o.syllabi?.[x.id]?.applicable!==false).map(x=>({...x,...(o.syllabi?.[x.id]||{})})).sort((a,b)=>(a.order||0)-(b.order||0));
     p.exams=(p.exams||[]).filter(x=>o.exams?.[x.id]?.applicable!==false).map(x=>({...x,...(o.exams?.[x.id]||{})}));
     p.criteria=(p.criteria||[]).filter(x=>o.criteria?.[x.id]?.applicable!==false).map(x=>({...x,...(o.criteria?.[x.id]||{})}));
@@ -79,10 +97,16 @@
     if(Array.isArray(o.emergencyRequirementIds))p.emergencyRequirementIds=o.emergencyRequirementIds.slice();
     p.courseOverrideApplied=Object.keys(o).length>0;return p;
   }
+  function applyGlobalOverrides(program){
+    const o=globalOverridesForProgram(program),p=applyOverrides(program,o);
+    if(p)p.globalOverrideApplied=Object.keys(o).length>0;
+    return p;
+  }
   function resolve(sel,opts={}){
     let p=findBase(sel||{});if(!p)return null;
     if((sel||{}).courseType==="EP")p=normalizeEp(p);
     p.criteria=p.criteria||clone(catalog((sel||{}).courseType)?.criteria||[]);
+    p=applyGlobalOverrides(p);
     return opts.courseKey?applyOverrides(p,getOverrides(opts.courseKey)):p;
   }
   function normalizeGuidedSelection(sel={}){
@@ -151,7 +175,7 @@
       const matches=(c.programs||[]).filter(p=>p.phaseId===s.phaseId&&p.trainingKind===s.trainingKind&&(!p.countryIds?.length||p.countryIds.includes(s.country||"israel")));
       if(!matches.length)return null;
       let p=matches.length===1?clone(matches[0]):mergeProgramList(matches,{id:"ep_phase__"+s.phaseId,name:"EP · "+(c.phases?.find(x=>x.id===s.phaseId)?.name||s.phaseId),phaseId:s.phaseId,platformId:"",trainingKind:s.trainingKind,dayNight:"day"});
-      p=normalizeEp(p);p.criteria=p.criteria||clone(c.criteria||[]);
+      p=normalizeEp(p);p.criteria=p.criteria||clone(c.criteria||[]);p=applyGlobalOverrides(p);
       return opts.courseKey?applyOverrides(p,getOverrides(opts.courseKey)):p;
     }
     return resolve(s,opts);
@@ -171,5 +195,5 @@
     Object.values(catalogs).forEach(c=>(c.programs||[]).forEach(p=>{if(!p.phaseId||!p.platformId)errors.push(p.id+": missing phase/platform");const ids=new Set();(p.syllabi||[]).forEach(s=>{if(ids.has(s.id))errors.push(p.id+": duplicate syllabus "+s.id);ids.add(s.id);if(s.minimum!=null&&Number(s.minimum)<0)errors.push(p.id+": invalid minimum "+s.id)});(p.conflicts||[]).forEach(x=>warnings.push(p.id+": "+x.message))}));
     return {ok:!errors.length,errors,warnings,catalogs:Object.keys(catalogs).length,programs:Object.values(catalogs).reduce((n,c)=>n+(c.programs||[]).length,0)};
   }
-  window.FLYMPUS_TRAINING={catalogs,register,catalog,phasesFor,platformsFor,programsFor,resolve,resolveGuided,normalizeGuidedSelection,guidedOptions,emergencyCatalog,requiredEmergencies,getOverrides,saveOverrides,applyOverrides,validate,sourceText};
+  window.FLYMPUS_TRAINING={catalogs,register,catalog,phasesFor,platformsFor,programsFor,resolve,resolveGuided,normalizeGuidedSelection,guidedOptions,emergencyCatalog,requiredEmergencies,getOverrides,saveOverrides,getGlobalOverrides,saveGlobalOverrides,globalOverridesForProgram,applyOverrides,applyGlobalOverrides,validate,sourceText};
 })();
