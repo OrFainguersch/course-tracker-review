@@ -431,8 +431,8 @@ select option[value=""]{color:#8a9bad}
 @media(max-width:760px){.packagePathEditor{grid-template-columns:1fr 1fr}}@media(max-width:430px){.packagePathEditor{grid-template-columns:1fr}}
 </style><style>
 .advancedSequence{display:grid;gap:10px}.advancedSequence>.settingBox{margin:0}.advancedStepLabel{display:flex;align-items:center;gap:10px;margin:4px 0 8px}.advancedStepLabel>span{display:grid;place-items:center;width:28px;height:28px;border-radius:999px;background:#e8f3ff;color:#176bb3;font-weight:900;font-size:12px}.advancedStepLabel b{display:block;color:#173b60;font-size:13px}.advancedStepLabel small{display:block;color:#7c8fa3;font-size:10px;margin-top:2px}.advancedSectorPicker{margin-top:14px}.scopedArchitectureLabel{margin-top:18px}.advancedScopeGrid{align-items:start}.advancedScopeGrid>.settingBox{align-self:start}.advancedScopeGrid .editableRow{min-height:0}
-.advancedEditBar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding:12px 14px;border:1px solid #dce7f1;border-radius:14px;background:#fff}.advancedEditBar b{display:block;color:#173b60;font-size:13px}.advancedEditBar small{display:block;color:#7c8fa3;font-size:10px;margin-top:2px}.advancedEditFieldset{border:0;padding:0;margin:0;min-width:0}.advancedEditFieldset:disabled input,.advancedEditFieldset:disabled select{opacity:1;background:#f7f9fb;color:#566d82;border-color:#e5ebf1}.advancedEditFieldset:disabled .cfgCompactAdd,.advancedEditFieldset:disabled #cfgAddPhase,.advancedEditFieldset:disabled #cfgAddPlatform,.advancedEditFieldset:disabled [data-cfg-remove],.advancedEditFieldset:disabled [data-phase-remove],.advancedEditFieldset:disabled [data-platform-remove]{display:none!important}
-@media(max-width:760px){.advancedStepLabel{align-items:flex-start}.advancedSectorPicker #typeWorkspace{width:100%}.advancedEditBar{align-items:flex-start;flex-direction:column}.advancedEditBar .btn{width:100%}}
+.advancedEditFieldset{border:0;padding:0;margin:0;min-width:0}.advancedEditFieldset:disabled input,.advancedEditFieldset:disabled select{opacity:1;background:#f7f9fb;color:#566d82;border-color:#e5ebf1}.advancedEditFieldset:disabled .cfgCompactAdd,.advancedEditFieldset:disabled #cfgAddPhase,.advancedEditFieldset:disabled #cfgAddPlatform,.advancedEditFieldset:disabled [data-cfg-remove],.advancedEditFieldset:disabled [data-phase-remove],.advancedEditFieldset:disabled [data-platform-remove]{display:none!important}.advancedArchitectureActions{margin-top:12px}
+@media(max-width:760px){.advancedStepLabel{align-items:flex-start}.advancedSectorPicker #typeWorkspace{width:100%}.advancedArchitectureActions .btn{width:100%}}
 </style><style>
 #courseBuilderSubmit:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.35)}
 </style><style>
@@ -492,19 +492,19 @@ select option[value=""]{color:#8a9bad}
 .courseDetailsInline{margin-top:9px}.courseDetailsStep .wizardStepBody>label,.courseIdentityStep .wizardStepBody>label{display:block}.addPackageChoice{border-style:dashed;background:#f8fbfe}.addPackageChoice b{color:#0875ce}.fieldHelp{display:block;margin-top:5px;color:#8192a4;font-size:9px}.courseIdentityStep .fields{margin-top:9px}
 </style></head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0627 · settings cleanup</div><div class="toast" id="toast"></div></div>
-<script src="./assets/ep-catalog.js?v=0627"></script>
-<script src="./assets/aerostar-platform.js?v=0627"></script>
-<script src="./assets/ip-catalog.js?v=0627"></script>
-<script src="./assets/technician-catalog.js?v=0627"></script>
-<script src="./assets/training-core.js?v=0627"></script>
-<script src="./assets/ep-lessons-screening.js?v=0627"></script>
-<script src="./assets/ep-lessons-rc-1.js?v=0627"></script>
-<script src="./assets/ep-lessons-rc-2.js?v=0627"></script>
-<script src="./assets/ep-lessons-half.js?v=0627"></script>
-<script src="./assets/ep-lessons-full-day-a.js?v=0627"></script>
-<script src="./assets/ep-lessons-full-day-b.js?v=0627"></script>
-<script src="./assets/ep-lessons-night.js?v=0627"></script>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0628 · sticky advanced edit</div><div class="toast" id="toast"></div></div>
+<script src="./assets/ep-catalog.js?v=0628"></script>
+<script src="./assets/aerostar-platform.js?v=0628"></script>
+<script src="./assets/ip-catalog.js?v=0628"></script>
+<script src="./assets/technician-catalog.js?v=0628"></script>
+<script src="./assets/training-core.js?v=0628"></script>
+<script src="./assets/ep-lessons-screening.js?v=0628"></script>
+<script src="./assets/ep-lessons-rc-1.js?v=0628"></script>
+<script src="./assets/ep-lessons-rc-2.js?v=0628"></script>
+<script src="./assets/ep-lessons-half.js?v=0628"></script>
+<script src="./assets/ep-lessons-full-day-a.js?v=0628"></script>
+<script src="./assets/ep-lessons-full-day-b.js?v=0628"></script>
+<script src="./assets/ep-lessons-night.js?v=0628"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentUserId='i1';
@@ -1688,7 +1688,6 @@ function settings(){
 
   if(tab==='catalog'){
     const validScope=c.courseTypes.some(x=>x.id===state.typeWorkspace),scope=validScope?state.typeWorkspace:(c.courseTypes[0]?.id||''),scopeName=cfgItem(c.courseTypes,scope)?.name||scope,advancedEditing=!!state.advancedArchitectureEditing;
-    html+='<div class="advancedEditBar"><div><b>Advanced configuration</b><small>'+(advancedEditing?'Editing is enabled. Save when you are finished.':'View only · select a sector to review it, then choose Edit to make changes.')+'</small></div><button class="btn '+(advancedEditing?'sky':'secondary')+'" id="'+(advancedEditing?'cfgSaveCatalogs':'advancedArchitectureEdit')+'">'+(advancedEditing?'Save changes':'Edit')+'</button></div>';
     html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><section class="advancedSequence" style="margin-top:14px"><div class="advancedStepLabel"><span>1</span><div><b>Define sectors</b><small>Add, rename or remove sectors first.</small></div></div>'+cfgCatalogCard('Course types','courseTypes',c.courseTypes)+'</section></fieldset>';
     html+='<section class="card settingBox advancedSectorPicker"><div class="advancedStepLabel"><span>2</span><div><b>Select sector to edit</b><small>Everything below is scoped to this sector.</small></div></div><div class="field" style="margin-top:12px"><label>Sector</label><select id="typeWorkspace" '+(advancedEditing?'disabled':'')+'>'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></section>';
     html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><div class="advancedStepLabel scopedArchitectureLabel"><span>3</span><div><b>'+(advancedEditing?'Edit ':'')+esc(scopeName)+' architecture</b><small>Phases, platforms, training types and context options belong to the selected sector.</small></div></div>';
@@ -1700,6 +1699,7 @@ function settings(){
     html+=cfgCatalogCard('Countries / customer contexts','countries',c.countries);
     html+='</div></fieldset>';
     html+='<section class="advancedPackagesFinal"><div class="advancedStepLabel"><span>4</span><div><b>Packages</b><small>Final step · create and manage the reusable Packages for '+esc(scopeName)+'.</small></div></div>'+sectorPackageAssignmentCard(scope)+advancedPackagesHtml(scope)+'</section>';
+    html+='<div class="toolbar packageSaveBar advancedArchitectureActions"><button class="btn sky" type="button" id="'+(advancedEditing?'cfgSaveCatalogs':'advancedArchitectureEdit')+'">'+(advancedEditing?'Save changes':'Edit')+'</button></div>';
   }
 
   if(tab==='profiles'){

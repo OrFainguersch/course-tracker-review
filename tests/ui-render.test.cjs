@@ -150,7 +150,9 @@ assert.doesNotMatch(advancedHtml,/data-settings-tab="packages"/,"Packages must n
 assert.match(advancedHtml,/Define sectors/);
 assert.match(advancedHtml,/Select sector to edit/);
 assert.match(advancedHtml,/EP architecture/);
+assert.match(advancedHtml,/class="toolbar packageSaveBar advancedArchitectureActions"/,"Advanced Edit must use the same sticky action bar behavior as Tailor");
 assert.match(advancedHtml,/id="advancedArchitectureEdit">Edit<\/button>/);
+assert.doesNotMatch(advancedHtml,/advancedEditBar/,"Advanced must not use a separate top Edit panel");
 assert.match(advancedHtml,/advancedEditFieldset" disabled/,"Advanced architecture must be view-only until Edit is pressed");
 assert.doesNotMatch(advancedHtml,/Save architecture/);
 assert.doesNotMatch(advancedHtml,/Reset architecture labels/);
@@ -167,6 +169,7 @@ assert.match(advancedHtml,/data-package-assign-open="EP"/);
 assert.match(advancedHtml,/data-package-assign-panel="EP" hidden/);
 vm.runInContext("state.advancedArchitectureEditing=true;render()",context);
 const advancedEditingHtml=elements.get("#content").innerHTML;
+assert.match(advancedEditingHtml,/class="toolbar packageSaveBar advancedArchitectureActions"/);
 assert.match(advancedEditingHtml,/id="cfgSaveCatalogs">Save changes<\/button>/);
 assert.match(advancedEditingHtml,/Edit EP architecture/);
 assert.doesNotMatch(advancedEditingHtml,/advancedEditFieldset" disabled/,"Edit must unlock Advanced architecture controls");
