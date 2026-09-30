@@ -118,6 +118,15 @@ assert.equal(customPkg.professionId,"EP");
 core.removeCustomPackage("EP","ep_custom_pkg_test");
 assert(!core.packageCatalog("EP").some(x=>x.id==="ep_custom_pkg_test"),"Removed custom Package must leave the sector package list");
 
+core.saveCustomPackage("EP",{id:"ep_soft_delete_test",name:"Soft Delete Package",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day",syllabi:[],criteria:[],experienceCounters:[],exams:[],progression:[],emergencyRequirementIds:[]});
+assert(core.packageCatalog("EP").some(x=>x.id==="ep_soft_delete_test"));
+core.deletePackage("EP","ep_soft_delete_test");
+assert(!core.packageCatalog("EP").some(x=>x.id==="ep_soft_delete_test"),"Deleted Package must disappear from Package catalog");
+assert.equal(core.resolvePackage("EP","ep_soft_delete_test").name,"Soft Delete Package","Existing courses must still be able to resolve a deleted Package");
+core.restorePackage("EP","ep_soft_delete_test");
+assert(core.packageCatalog("EP").some(x=>x.id==="ep_soft_delete_test"),"Restored Package must return to Package catalog");
+core.removeCustomPackage("EP","ep_soft_delete_test");
+
 core.saveOverrides("EP-TEST",{syllabi:{full_preflight:{name:"Course Preflight",minimum:2}},counters:{ep_full_day_takeoffs:{name:"Course takeoffs",minimum:5}},criteria:{flight_path_control:{name:"Course flight path",weight:30}}});
 const epCourseOverride=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"},{courseKey:"EP-TEST"});
 assert.equal(epCourseOverride.syllabi.find(x=>x.id==="full_preflight").name,"Course Preflight");

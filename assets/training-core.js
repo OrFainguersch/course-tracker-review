@@ -55,6 +55,18 @@
     const root=getCustomPackages(),list=Array.isArray(root[professionId])?root[professionId]:[],next=list.filter(x=>x.id!==packageId);
     root[professionId]=next;saveCustomPackages(root);return next.length!==list.length;
   }
+  const hiddenPackagesKey="flympus-hidden-packages";
+  function getHiddenPackages(){try{const v=JSON.parse(localStorage.getItem(hiddenPackagesKey)||"{}");return v&&typeof v==="object"&&!Array.isArray(v)?v:{}}catch{return {}}}
+  function hiddenPackagesFor(professionId){const root=getHiddenPackages(),list=root[professionId];return Array.isArray(list)?list.slice():[]}
+  function deletePackage(professionId,packageId){
+    if(!professionId||!packageId)return false;
+    const root=getHiddenPackages(),list=Array.isArray(root[professionId])?root[professionId]:[];
+    if(!list.includes(packageId))list.push(packageId);root[professionId]=list;localStorage.setItem(hiddenPackagesKey,JSON.stringify(root));return true;
+  }
+  function restorePackage(professionId,packageId){
+    const root=getHiddenPackages(),list=Array.isArray(root[professionId])?root[professionId]:[],next=list.filter(x=>x!==packageId);
+    root[professionId]=next;localStorage.setItem(hiddenPackagesKey,JSON.stringify(root));return next.length!==list.length;
+  }
   function packageBase(professionId,packageId){
     const c=catalog(professionId);if(!c||!packageId)return null;
     let p=clone(customPackagesFor(professionId).find(x=>x.id===packageId))||null;
@@ -71,8 +83,8 @@
     return p;
   }
   function packageIdsFor(professionId){
-    const c=catalog(professionId);if(!c)return[];
-    if(professionId!=="EP")return [...new Set([...(c.programs||[]).map(x=>x.id),...customPackagesFor(professionId).map(x=>x.id)])];
+    const c=catalog(professionId);if(!c)return[];const hidden=new Set(hiddenPackagesFor(professionId));
+    if(professionId!=="EP")return [...new Set([...(c.programs||[]).map(x=>x.id),...customPackagesFor(professionId).map(x=>x.id)])].filter(id=>!hidden.has(id));
     const raw=(c.programs||[]).map(x=>x.id),out=[];
     if(raw.includes("ep_screening_simulator")||raw.includes("ep_screening_rc"))out.push("ep_screening");
     ["ep_rc_new","ep_half_new","ep_full_day_new","ep_full_night_new"].forEach(id=>{if(raw.includes(id))out.push(id)});
@@ -80,7 +92,7 @@
     ["ep_full_refresh","ep_full_rtc"].forEach(id=>{if(raw.includes(id))out.push(id)});
     raw.filter(id=>!["ep_screening_simulator","ep_screening_rc",...out].includes(id)).forEach(id=>out.push(id));
     customPackagesFor(professionId).forEach(x=>{if(!out.includes(x.id))out.push(x.id)});
-    return out;
+    return out.filter(id=>!hidden.has(id));
   }
   function packageCatalog(professionId){return packageIdsFor(professionId).map(id=>packageBase(professionId,id)).filter(Boolean).map(applyGlobalOverrides)}
   function resolvePackage(professionId,packageId,opts={}){
@@ -253,5 +265,5 @@
     Object.values(catalogs).forEach(c=>(c.programs||[]).forEach(p=>{if(!p.phaseId||!p.platformId)errors.push(p.id+": missing phase/platform");const ids=new Set();(p.syllabi||[]).forEach(s=>{if(ids.has(s.id))errors.push(p.id+": duplicate syllabus "+s.id);ids.add(s.id);if(s.minimum!=null&&Number(s.minimum)<0)errors.push(p.id+": invalid minimum "+s.id)});(p.conflicts||[]).forEach(x=>warnings.push(p.id+": "+x.message))}));
     return {ok:!errors.length,errors,warnings,catalogs:Object.keys(catalogs).length,programs:Object.values(catalogs).reduce((n,c)=>n+(c.programs||[]).length,0)};
   }
-  window.FLYMPUS_TRAINING={catalogs,register,catalog,phasesFor,platformsFor,programsFor,packageBase,packageCatalog,resolvePackage,getCustomPackages,saveCustomPackages,customPackagesFor,saveCustomPackage,removeCustomPackage,resolve,resolveGuided,normalizeGuidedSelection,guidedOptions,emergencyCatalog,requiredEmergencies,getOverrides,saveOverrides,getGlobalOverrides,saveGlobalOverrides,globalOverridesForProgram,applyOverrides,applyGlobalOverrides,validate,sourceText};
+  window.FLYMPUS_TRAINING={catalogs,register,catalog,phasesFor,platformsFor,programsFor,packageBase,packageCatalog,resolvePackage,getCustomPackages,saveCustomPackages,customPackagesFor,saveCustomPackage,removeCustomPackage,getHiddenPackages,hiddenPackagesFor,deletePackage,restorePackage,resolve,resolveGuided,normalizeGuidedSelection,guidedOptions,emergencyCatalog,requiredEmergencies,getOverrides,saveOverrides,getGlobalOverrides,saveGlobalOverrides,globalOverridesForProgram,applyOverrides,applyGlobalOverrides,validate,sourceText};
 })();
