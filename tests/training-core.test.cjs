@@ -134,6 +134,13 @@ assert.equal(epCourseOverride.syllabi.find(x=>x.id==="full_preflight").minimum,2
 assert.equal(epCourseOverride.experienceCounters.find(x=>x.id==="ep_full_day_takeoffs").name,"Course takeoffs");
 assert.equal(epCourseOverride.experienceCounters.find(x=>x.id==="ep_full_day_takeoffs").minimum,5);
 assert.equal(epCourseOverride.criteria.find(x=>x.id==="flight_path_control").name,"Course flight path");
+const emergencyId=core.requiredEmergencies(epCourseOverride)[0]?.id;
+if(emergencyId){
+  core.saveOverrides("EP-TEST",{syllabi:{full_preflight:{name:"Course Preflight",minimum:2}},counters:{ep_full_day_takeoffs:{name:"Course takeoffs",minimum:5}},criteria:{flight_path_control:{name:"Course flight path",weight:30}},emergencies:{[emergencyId]:{name:"Course emergency label"}}});
+  const emergencyOverrideCourse=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"},{courseKey:"EP-TEST"});
+  assert.equal(core.requiredEmergencies(emergencyOverrideCourse).find(x=>x.id===emergencyId).name,"Course emergency label","Course emergency label override must resolve");
+  assert.notEqual(core.requiredEmergencies(core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"})).find(x=>x.id===emergencyId).name,"Course emergency label","Course emergency override must not leak");
+}
 assert.equal(core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"}).syllabi.find(x=>x.id==="full_preflight").name,"Preflight","Tailor must not mutate the source suit");
 
 core.saveOverrides("COURSE-CUSTOM",{

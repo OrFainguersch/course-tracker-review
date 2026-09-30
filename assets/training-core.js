@@ -161,6 +161,7 @@
     p.experienceCounters=mergeItems(p.experienceCounters,o.counters,custom.counters);
     p.progression=mergeItems(p.progression,o.progression,custom.progression);
     p.courseEmergencies=mergeItems(p.courseEmergencies,o.emergencies,custom.emergencies);
+    p.emergencyOverrides={...(p.emergencyOverrides||{}),...(o.emergencies||{})};
     if(Array.isArray(o.emergencyRequirementIds))p.emergencyRequirementIds=o.emergencyRequirementIds.slice();
     p.courseOverrideApplied=scope==="course"&&Object.keys(o).length>0;
     return p;
@@ -257,7 +258,7 @@
   function requiredEmergencies(program){
     if(!program)return[];
     const platformIds=program.platformId?[program.platformId]:(program.platformIds||[]);
-    const all=uniq([...platformIds.flatMap(id=>emergencyCatalog(id)),...(program.courseEmergencies||[])]);
+    const all=uniq([...platformIds.flatMap(id=>emergencyCatalog(id)),...(program.courseEmergencies||[])]).map(x=>({...x,...(program.emergencyOverrides?.[x.id]||{})}));
     const ids=program.emergencyRequirementIds;if(!Array.isArray(ids))return all;const wanted=new Set(ids);return all.filter(x=>wanted.has(x.id));
   }
   function validate(){
