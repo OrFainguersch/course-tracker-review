@@ -46,6 +46,10 @@ assert(html.includes("<span>Selected course</span>"),"Header switcher must descr
 assert(html.includes('<b id="topCourseName" aria-live="polite">&nbsp;</b>'),"Header must not hard-code Aerostar EP Course before persisted course state is restored");
 assert(html.includes("active.courseName||'Aerostar EP Course'"),"Header must restore the persisted selected course name before loading the large application scripts");
 assert(html.includes("function navIconSvg(name)")&&html.includes("class=\"navIcon\""),"Sidebar navigation must use a consistent SVG icon system instead of decorative glyphs");
+assert(html.includes('id="mobileBottomNav"')&&html.includes("function renderMobileBottomNav()"),"Mobile layout must expose the premium bottom navigation");
+assert(html.includes("['roster','roster','Roster'],['evaluation','evaluation','Evaluation'],['home','home','Home'],['planned','planned','Plan'],['more','more','More']"),"Mobile bottom navigation must use Roster, Evaluation, Home, Plan and More with Home centered");
+assert(html.includes("Mobile premium glass bottom navigation · 0673")&&html.includes("border:2px solid #d9b14e")&&html.includes("backdrop-filter:blur(14px)"),"Mobile bottom navigation must use the selected dark premium style with subtle glass and gold accent");
+assert(html.includes("data-mobile-more")&&html.includes("$('#drawer').classList.add('open')"),"More must open the full sidebar menu");
 assert(!html.includes("['settings','⚙','Course Management']"),"Course Management must not use an emoji gear in the professional navigation");
 assert(html.includes("Professional visual refinement 0661")&&html.includes(".navBtn.active{background:rgba(255,255,255,.09)")&&html.includes(".sidebarFlympusWordmark{width:172px!important"),"Sidebar styling must use the restrained professional visual layer");
 assert(html.includes("homeCourseContext cols")&&html.includes("homeCourseContextItem"),"Home hero must use the minimal labeled key-value strip instead of rounded metadata pills");
