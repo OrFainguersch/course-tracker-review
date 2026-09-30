@@ -108,7 +108,13 @@
     const out={};
     (list||[]).filter(Boolean).forEach(o=>{
       if(o.program)out.program={...(out.program||{}),...o.program};
-      for(const key of ["syllabi","exams","criteria","counters","progression"])if(o[key])out[key]={...(out[key]||{}),...o[key]};
+      for(const key of ["syllabi","exams","criteria","counters","progression","emergencies"])if(o[key])out[key]={...(out[key]||{}),...o[key]};
+      if(o.custom){
+        out.custom=out.custom||{};
+        for(const key of ["syllabi","exams","criteria","counters","progression","emergencies"]){
+          if(Array.isArray(o.custom[key]))out.custom[key]=[...(out.custom[key]||[]),...clone(o.custom[key])];
+        }
+      }
       if(Array.isArray(o.emergencyRequirementIds))out.emergencyRequirementIds=o.emergencyRequirementIds.slice();
     });
     return out;
