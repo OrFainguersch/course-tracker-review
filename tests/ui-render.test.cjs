@@ -270,11 +270,14 @@ assert.doesNotMatch(editingPackageHtml,/Done editing|Save Package|Save & Done/,"
 assert.match(editingPackageHtml,/Delete Package/);
 assert.match(editingPackageHtml,/data-delete-package="ui_custom_package"/,"Delete Package must appear while Advanced Edit is active");
 assert.match(editingPackageHtml,/data-global-package-id="ui_custom_package"[\s\S]*?<fieldset class="packageEditFieldset" >/,"Advanced Edit must unlock Package editors");
-assert.doesNotMatch(editingPackageHtml,/data-rule-table="criteria"/,"Empty criteria must not render a header-only table");
-assert.match(editingPackageHtml,/data-rule-table="emergencies"/,"Platform emergency choices remain visible even when none are required");
-assert.doesNotMatch(editingPackageHtml,/data-rule-table="counters"/,"Empty experience requirements must not render a header-only table");
-assert.doesNotMatch(editingPackageHtml,/data-rule-table="exams"/,"Empty exams must not render a header-only table");
-assert.doesNotMatch(editingPackageHtml,/data-rule-table="progression"/,"Empty progression gates must not render a header-only table");
+const customPackageStart=editingPackageHtml.indexOf('data-global-package-id="ui_custom_package"');
+const customPackageEnd=editingPackageHtml.indexOf('</form>',customPackageStart);
+const customEditingPackageHtml=editingPackageHtml.slice(customPackageStart,customPackageEnd>customPackageStart?customPackageEnd:editingPackageHtml.length);
+assert.doesNotMatch(customEditingPackageHtml,/data-rule-table="criteria"/,"Empty criteria must not render a header-only table");
+assert.match(customEditingPackageHtml,/data-rule-table="emergencies"/,"Platform emergency choices remain visible even when none are required");
+assert.doesNotMatch(customEditingPackageHtml,/data-rule-table="counters"/,"Empty experience requirements must not render a header-only table");
+assert.doesNotMatch(customEditingPackageHtml,/data-rule-table="exams"/,"Empty exams must not render a header-only table");
+assert.doesNotMatch(customEditingPackageHtml,/data-rule-table="progression"/,"Empty progression gates must not render a header-only table");
 
 vm.runInContext("FLYMPUS_TRAINING.saveGlobalOverrides('ep_full_day_new',{syllabi:{full_intro:{applicable:false}}});state.packageFocusId='ep_full_day_new';state.advancedArchitectureEditing=true;render()",context);
 const excludedSyllabusHtml=elements.get("#content").innerHTML;
