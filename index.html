@@ -986,7 +986,7 @@ function roster(){
  (manage?'<div class="manageBanner"><div><b>Manage mode</b><span> · Edit identity, photo and course membership safely.</span></div><button class="btn sky small" id="addPersonBtn">+ Add person</button></div>':'')+
  '<section class="card rosterControls"><div class="scrollTabs"><button class="seg '+(type==='TRAINEE'?'active':'')+'" data-roster-type="TRAINEE">Trainees ('+allT.length+')</button><button class="seg '+(type==='INSTRUCTOR'?'active':'')+'" data-roster-type="INSTRUCTOR">Instructors ('+allI.length+')</button></div>'+
  '<div class="rosterSearchRow"><input class="input" id="rosterSearch" placeholder="Search '+(type==='TRAINEE'?'trainees':'instructors')+'..." value="'+esc(state.search)+'"></div>'+
- (type==='TRAINEE'?'<div class="rosterFilterRow"><div class="statusSegments"><button class="'+(state.filter==='All'?'active':'')+'" data-filter="All">All</button><button class="'+(state.filter==='Active'?'active':'')+'" data-filter="Active">Active</button><button class="'+(state.filter==='Inactive'?'active':'')+'" data-filter="Inactive">Inactive</button></div></div>':'<div class="rosterFilterRow"><span class="sortHint">Course Manager first · then workload</span></div>')+
+ (type==='TRAINEE'?'<div class="rosterFilterRow"><div class="statusSegments"><button class="'+(state.filter==='All'?'active':'')+'" data-filter="All">All</button><button class="'+(state.filter==='Active'?'active':'')+'" data-filter="Active">Active</button><button class="'+(state.filter==='Inactive'?'active':'')+'" data-filter="Inactive">Inactive</button></div></div>':'')+
  '</section>'+
  '<section class="people">'+(list.length?list.map(t=>{
    if(type==='TRAINEE'){
