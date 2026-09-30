@@ -118,21 +118,23 @@
     const ids=[...(program.composedFrom||[]),program.id].filter(Boolean);
     return mergeOverrideObjects(ids.map(getGlobalOverrides));
   }
-  function applyOverrides(program,overrides){
+  function applyOverrides(program,overrides,scope="course"){
     const p=clone(program);if(!p)return null;const o=overrides||{},custom=o.custom||{};
     if(o.program)Object.assign(p,o.program);
-    const mergeItems=(base,patches,added)=>[...(base||[]),...(clone(added||[]).map(x=>({...x,courseOnly:true})))].filter(x=>patches?.[x.id]?.applicable!==false&&x.applicable!==false).map(x=>({...x,...(patches?.[x.id]||{})}));
+    const markCustom=x=>scope==="global"?({...x,packageCustom:true,courseOnly:false}):({...x,courseOnly:true});
+    const mergeItems=(base,patches,added)=>[...(base||[]),...(clone(added||[]).map(markCustom))].filter(x=>patches?.[x.id]?.applicable!==false&&x.applicable!==false).map(x=>({...x,...(patches?.[x.id]||{})}));
     p.syllabi=mergeItems(p.syllabi,o.syllabi,custom.syllabi).sort((a,b)=>(a.order||0)-(b.order||0));
     p.exams=mergeItems(p.exams,o.exams,custom.exams);
     p.criteria=mergeItems(p.criteria,o.criteria,custom.criteria);
     p.experienceCounters=mergeItems(p.experienceCounters,o.counters,custom.counters);
     p.progression=mergeItems(p.progression,o.progression,custom.progression);
-    p.courseEmergencies=mergeItems(p.courseEmergencies,null,custom.emergencies);
+    p.courseEmergencies=mergeItems(p.courseEmergencies,o.emergencies,custom.emergencies);
     if(Array.isArray(o.emergencyRequirementIds))p.emergencyRequirementIds=o.emergencyRequirementIds.slice();
-    p.courseOverrideApplied=Object.keys(o).length>0;return p;
+    p.courseOverrideApplied=scope==="course"&&Object.keys(o).length>0;
+    return p;
   }
   function applyGlobalOverrides(program){
-    const o=globalOverridesForProgram(program),p=applyOverrides(program,o);
+    const o=globalOverridesForProgram(program),p=applyOverrides(program,o,"global");
     if(p)p.globalOverrideApplied=Object.keys(o).length>0;
     return p;
   }
