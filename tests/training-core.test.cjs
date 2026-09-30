@@ -21,18 +21,13 @@ for(const profession of ["EP","IP","TECHNICIAN"]){
   assert(!phases.some(x=>x.name.toLowerCase()==="aerostar"),"Aerostar must not be a phase");
 }
 
-const epMixed=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"mixed"});
-assert(epMixed.composedFrom?.length===2,"EP Day + Night must compose parallel tracks");
-assert(epMixed.syllabi.some(x=>x.track==="day")&&epMixed.syllabi.some(x=>x.track==="night"));
-assert(core.requiredEmergencies(epMixed).length>0&&core.requiredEmergencies(epMixed).length<core.emergencyCatalog("aerostar").length,"Suit requirements must be a subset of platform QRH catalog");
 const epDay=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"});
 const epNight=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"night"});
 assert(epDay.experienceCounters.some(x=>x.kind==="TAKEOFF"&&x.track==="day"&&x.minimum===3),"Day EP must track 3 takeoffs");
 assert(epDay.experienceCounters.some(x=>x.kind==="LANDING"&&x.track==="day"&&x.minimum===3),"Day EP must track 3 full-stop landings");
 assert(epNight.experienceCounters.some(x=>x.kind==="TAKEOFF"&&x.track==="night"&&x.minimum===3),"Night EP must track 3 takeoffs");
 assert(epNight.experienceCounters.some(x=>x.kind==="LANDING"&&x.track==="night"&&x.minimum===3),"Night EP must track 3 full-stop landings");
-assert.equal(epMixed.experienceCounters.filter(x=>x.kind==="TAKEOFF").length,2,"Mixed EP must keep Day and Night takeoffs separate");
-assert.equal(epMixed.experienceCounters.filter(x=>x.kind==="LANDING").length,2,"Mixed EP must keep Day and Night landings separate");
+assert(epNight.progression.some(x=>/Full Scale Day syllabus #11/.test(x.prerequisite||"")),"Night Package must preserve its dependency on Full Scale Day");
 
 const epRcGuide=core.guidedOptions({courseType:"EP",phaseId:"ep_rc"});
 assert.equal(epRcGuide.showPhase,true);assert.equal(epRcGuide.showPlatform,false);assert.equal(epRcGuide.showTrainingKind,false);
@@ -47,11 +42,13 @@ assert(epScreening.syllabi.some(x=>x.id==="screen_sim_basics")&&epScreening.syll
 
 const epFullGuide=core.guidedOptions({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new"});
 assert.equal(epFullGuide.showPlatform,true);assert.equal(epFullGuide.showTrainingKind,true);assert.equal(epFullGuide.showTracks,true);
-assert(epFullGuide.dayNights.includes("mixed"),"EP Full Scale must allow Day + Night in the same course");
+assert.deepEqual([...epFullGuide.dayNights].sort(),["day","night"],"EP Full Scale must offer Day and Night as separate operating tracks");
+assert(!core.packageCatalog("EP").some(x=>x.id==="ep_full_new_mixed"),"EP must not expose a combined Day + Night Package");
 const epAtol=core.resolvePackage("EP","ep_full_atol");
 assert(epAtol,"ATOL must resolve as a standalone EP Package");
 assert.equal(epAtol.trainingKind,"qualification");
-assert.equal(epAtol.dayNight,"mixed");
+assert.equal(epAtol.dayNight,"shared");
+assert.equal(epAtol.contextLabel,"ATOL Qualification");
 assert.equal(epAtol.syllabi.length,4,"ATOL practical Package must contain the four source syllabus flights");
 assert(epAtol.syllabi.some(x=>x.id==="atol_day_takeover"&&x.track==="day"));
 assert(epAtol.syllabi.some(x=>x.id==="atol_night_takeover"&&x.track==="night"));

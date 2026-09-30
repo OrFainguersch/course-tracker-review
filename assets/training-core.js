@@ -88,7 +88,6 @@
     const raw=(c.programs||[]).map(x=>x.id),out=[];
     if(raw.includes("ep_screening_simulator")||raw.includes("ep_screening_rc"))out.push("ep_screening");
     ["ep_rc_new","ep_half_new","ep_full_day_new","ep_full_night_new"].forEach(id=>{if(raw.includes(id))out.push(id)});
-    if(raw.includes("ep_full_day_new")&&raw.includes("ep_full_night_new"))out.push("ep_full_new_mixed");
     ["ep_full_atol","ep_full_refresh","ep_full_rtc"].forEach(id=>{if(raw.includes(id))out.push(id)});
     raw.filter(id=>!["ep_screening_simulator","ep_screening_rc",...out].includes(id)).forEach(id=>out.push(id));
     customPackagesFor(professionId).forEach(x=>{if(!out.includes(x.id))out.push(x.id)});
@@ -225,14 +224,14 @@
     const basePrograms=c?(c.programs||[]).filter(p=>(!phaseId||p.phaseId===phaseId)&&(!s.platformId||p.platformId===s.platformId)&&(!p.countryIds?.length||p.countryIds.includes(s.country||"israel"))):[];
     const trainingKinds=[...new Set(basePrograms.map(p=>p.trainingKind).filter(Boolean))];
     const selectedPrograms=basePrograms.filter(p=>!s.trainingKind||p.trainingKind===s.trainingKind);
-    const daySet=new Set(selectedPrograms.flatMap(p=>p.dayNight==="mixed"?["day","night","mixed"]:[p.dayNight]).filter(Boolean));if(daySet.has("day")&&daySet.has("night"))daySet.add("mixed");const dayNights=[...daySet];
-    const configPrograms=selectedPrograms.filter(p=>!s.dayNight||s.dayNight==="mixed"||p.dayNight===s.dayNight||p.dayNight==="mixed");
+    const daySet=new Set(selectedPrograms.map(p=>p.dayNight).filter(x=>x==="day"||x==="night"));const dayNights=[...daySet];
+    const configPrograms=selectedPrograms.filter(p=>!s.dayNight||p.dayNight===s.dayNight||(!dayNights.length&&p.dayNight==="shared"));
     return {
       selection:s,
       showPhase:profession==="EP",
       showPlatform:profession==="IP"||profession==="TECHNICIAN"||epFull,
       showTrainingKind:profession==="IP"||profession==="TECHNICIAN"||epFull,
-      showTracks:epFull,
+      showTracks:epFull&&dayNights.length>1,
       phaseOptions:phasesFor(profession),
       platformOptions,
       trainingKinds,

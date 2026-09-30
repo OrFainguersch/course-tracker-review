@@ -224,6 +224,8 @@ window.EP_CATALOG = {
       source:"EP Course – Full scale stage (Edition F)",
       prerequisite:"Completion of the Full-Scale Day prerequisite stated in the source syllabus.",
       completion:"Complete night syllabus and pass night check flight.",
+      prerequisitePackageIds:["ep_full_day_new"],
+      progression:[{id:"night_requires_day",prerequisite:"Complete Full Scale Day syllabus #11 before starting Full Scale Night"}],
       theory:[],
       syllabi:[
         {id:"night_day_into_night",name:"Day into Night",minimum:1,mode:"INSTRUCTED",topics:"Day takeoff; day Touch-and-Go with NAV lights; night orientation / Figure-8 at 1000 ft",briefing:"UAV orientation at night"},
@@ -245,12 +247,13 @@ window.EP_CATALOG = {
     {
       id:"ep_full_atol",
       name:"EP ATOL Qualification · Full Scale · Aerostar",
-      phaseId:"ep_full", platformId:"aerostar", trainingKind:"qualification", dayNight:"mixed", contextLabel:"ATOL · Day + Night",
+      phaseId:"ep_full", platformId:"aerostar", trainingKind:"qualification", dayNight:"shared", contextLabel:"ATOL Qualification",
       source:"Aerostar EP Israeli Course Syllabus (edition 1).pdf",
       prerequisite:"EP qualification; successfully completed OJT series; 15 Aerostar solo takeoffs and 15 solo landings. Practical ATOL starts after completion of Full Scale Day syllabus #11.",
       theoryRequirement:"ATOL Theory Exam ≥80.",
       completion:"Complete the ATOL practical syllabus and pass the ATOL check flight with grade 7 or higher.",
-      sourceNote:"ATOL is a standalone post-qualification Package. The practical phase includes both Day and Night control-takeover training.",
+      sourceNote:"ATOL is a standalone post-qualification Package. Day and Night are internal ATOL syllabus stages, not a Mixed operating track.",
+      prerequisitePackageIds:["ep_full_day_new"],
       theory:[
         {no:1,name:"ATOL Course Introduction",type:"Presentation",duration:"0:30 H"},
         {no:2,name:"ATOL Systems",type:"Presentation",duration:"1:30 H"},
@@ -292,7 +295,7 @@ window.EP_CATALOG = {
     {
       id:"ep_full_rtc",
       name:"EP Return to Currency · Full Scale · Aerostar",
-      phaseId:"ep_full", platformId:"aerostar", trainingKind:"return_currency", dayNight:"mixed",
+      phaseId:"ep_full", platformId:"aerostar", trainingKind:"return_currency", dayNight:"shared", contextLabel:"Package-defined",
       source:"EP Return to Currency – Full scale stage (Edition B)",
       theory:[
         {no:1,name:"UAV Description",type:"Presentation",duration:"1:00 H"},
