@@ -224,8 +224,8 @@ assert.match(packagesHtml,/Instructor Presence/);
 assert.match(packagesHtml,/syllabusDragHandle/);
 assert.doesNotMatch(packagesHtml,/name="g_syll_order_[^"]+" type="number"/,"Order must not be manually editable");
 assert.match(packagesHtml,/type="hidden" name="g_syll_order_/);
-assert.match(packagesHtml,/data-package-edit-toggle="ui_custom_package"/);
-assert.doesNotMatch(packagesHtml,/data-delete-package="ui_custom_package"/,"Delete Package must stay hidden until Edit Package is active");
+assert.doesNotMatch(packagesHtml,/data-package-edit-toggle=/,"Package editing is controlled by the global Advanced Edit action");
+assert.doesNotMatch(packagesHtml,/data-delete-package="ui_custom_package"/,"Delete Package must stay hidden until Advanced Edit is active");
 assert.match(packagesHtml,/total planned minimum/);
 assert.doesNotMatch(packagesHtml,/packageRules syllabiRules"[^>]* open/,"Focused Package may open, but Syllabi must remain collapsed until requested");
 vm.runInContext("state.packageAddFlow='ui_custom_package:syllabi';render()",context);
@@ -275,7 +275,7 @@ assert.match(excludedSyllabusHtml,/Excluded syllabi \(<span data-excluded-syllab
 assert.match(excludedSyllabusHtml,/data-restore-syllabus="full_intro"/);
 assert.match(excludedSyllabusHtml,/data-syllabus-row="full_intro"[\s\S]*?syllabusExcludedRow|syllabusExcludedRow[\s\S]*?data-syllabus-row="full_intro"/);
 assert.match(excludedSyllabusHtml,/data-syllabus-row="full_positions_a"[\s\S]*?<span class="syllabusOrderNumber">2<\/span>/,"Active syllabus order must close the gap when Introduction is excluded");
-assert.match(excludedSyllabusHtml,/Only active syllabi are numbered/);
+assert.match(excludedSyllabusHtml,/Only included syllabi are numbered/);
 
 vm.runInContext("FLYMPUS_TRAINING.saveGlobalOverrides('ep_full_day_new',{});state.packageFocusId='ui_custom_package';state.advancedArchitectureEditing=true;render()",context);
 vm.runInContext("FLYMPUS_TRAINING.saveGlobalOverrides('ep_full_refresh',{custom:{syllabi:[{id:'ui_pkg_syll',name:'Reusable Package Syllabus',order:99,minimum:1,mode:'INSTRUCTED',instructorRequired:true,track:'day'}],criteria:[{id:'ui_pkg_criterion',name:'Reusable Package Criterion',weight:10}],emergencies:[{id:'ui_pkg_emergency',name:'Reusable Package Emergency',category:'General / Operational'}]},emergencyRequirementIds:['ui_pkg_emergency']});render()",context);

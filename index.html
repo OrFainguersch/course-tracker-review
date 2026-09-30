@@ -495,19 +495,19 @@ select option[value=""]{color:#8a9bad}
 .courseDetailsInline{margin-top:9px}.courseDetailsStep .wizardStepBody>label,.courseIdentityStep .wizardStepBody>label{display:block}.addPackageChoice{border-style:dashed;background:#f8fbfe}.addPackageChoice b{color:#0875ce}.fieldHelp{display:block;margin-top:5px;color:#8192a4;font-size:9px}.courseIdentityStep .fields{margin-top:9px}
 </style></head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0629 · unified course and package editing</div><div class="toast" id="toast"></div></div>
-<script src="./assets/ep-catalog.js?v=0629"></script>
-<script src="./assets/aerostar-platform.js?v=0629"></script>
-<script src="./assets/ip-catalog.js?v=0629"></script>
-<script src="./assets/technician-catalog.js?v=0629"></script>
-<script src="./assets/training-core.js?v=0629"></script>
-<script src="./assets/ep-lessons-screening.js?v=0629"></script>
-<script src="./assets/ep-lessons-rc-1.js?v=0629"></script>
-<script src="./assets/ep-lessons-rc-2.js?v=0629"></script>
-<script src="./assets/ep-lessons-half.js?v=0629"></script>
-<script src="./assets/ep-lessons-full-day-a.js?v=0629"></script>
-<script src="./assets/ep-lessons-full-day-b.js?v=0629"></script>
-<script src="./assets/ep-lessons-night.js?v=0629"></script>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0630 · unified editing polish</div><div class="toast" id="toast"></div></div>
+<script src="./assets/ep-catalog.js?v=0630"></script>
+<script src="./assets/aerostar-platform.js?v=0630"></script>
+<script src="./assets/ip-catalog.js?v=0630"></script>
+<script src="./assets/technician-catalog.js?v=0630"></script>
+<script src="./assets/training-core.js?v=0630"></script>
+<script src="./assets/ep-lessons-screening.js?v=0630"></script>
+<script src="./assets/ep-lessons-rc-1.js?v=0630"></script>
+<script src="./assets/ep-lessons-rc-2.js?v=0630"></script>
+<script src="./assets/ep-lessons-half.js?v=0630"></script>
+<script src="./assets/ep-lessons-full-day-a.js?v=0630"></script>
+<script src="./assets/ep-lessons-full-day-b.js?v=0630"></script>
+<script src="./assets/ep-lessons-night.js?v=0630"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentUserId='i1';
@@ -2069,7 +2069,7 @@ function bindSettings(){
       if(state.packageEditId!==form.dataset.globalPackageId||handle.disabled)return;
       e.preventDefault();e.stopPropagation();dragging=handle.closest('.packageSyllabusRow');if(!dragging)return;pointerId=e.pointerId;startY=e.clientY;moved=false;dragging.classList.add('dragging');handle.setPointerCapture?.(pointerId);
       const onMove=ev=>{if(!dragging||ev.pointerId!==pointerId)return;ev.preventDefault();if(Math.abs(ev.clientY-startY)>3)moved=true;const target=document.elementFromPoint?.(ev.clientX,ev.clientY)?.closest?.('.packageSyllabusRow');clearSyllabusDropHints(table);if(!target||target===dragging||target.parentElement!==table)return;const rect=target.getBoundingClientRect(),beforeTarget=ev.clientY<rect.top+rect.height/2;target.classList.add(beforeTarget?'dropBefore':'dropAfter');const desiredNext=beforeTarget?target:target.nextSibling;if(desiredNext===dragging||dragging.nextSibling===desiredNext)return;const before=syllabusRowPositions(table);table.insertBefore(dragging,desiredNext);refreshSyllabusMeta(form);animateSyllabusReflow(table,before)};
-      const onUp=ev=>{if(ev.pointerId!==pointerId)return;clearSyllabusDropHints(table);const settling=dragging;settling?.classList.remove('dragging');settling?.classList.add('dragSettling');setTimeout(()=>settling?.classList.remove('dragSettling'),180);refreshSyllabusMeta(form);dragging=null;pointerId=null;document.removeEventListener('pointermove',onMove);document.removeEventListener('pointerup',onUp);document.removeEventListener('pointercancel',onUp);if(moved)toast('Syllabus order updated · Save Package to keep it')};
+      const onUp=ev=>{if(ev.pointerId!==pointerId)return;clearSyllabusDropHints(table);const settling=dragging;settling?.classList.remove('dragging');settling?.classList.add('dragSettling');setTimeout(()=>settling?.classList.remove('dragSettling'),180);refreshSyllabusMeta(form);dragging=null;pointerId=null;document.removeEventListener('pointermove',onMove);document.removeEventListener('pointerup',onUp);document.removeEventListener('pointercancel',onUp);if(moved)toast('Syllabus order updated · Save changes to keep it')};
       document.addEventListener('pointermove',onMove,{passive:false});document.addEventListener('pointerup',onUp);document.addEventListener('pointercancel',onUp);
     });
     form.querySelectorAll('[data-syllabus-use]').forEach(cb=>cb.onchange=()=>{
