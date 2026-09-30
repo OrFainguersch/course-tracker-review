@@ -6,7 +6,7 @@ class ElementStub{
   constructor(){this.innerHTML="";this.textContent="";this.value="";this.dataset={};this.style={};this.classList={add(){},remove(){},toggle(){}}}
   querySelectorAll(){return[]} querySelector(){return null} addEventListener(){} click(){} appendChild(){}
 }
-const elements=new Map(["#menuBtn","#backdrop","#nav","#content","#drawer","#toast"].map(id=>[id,new ElementStub()]));
+const elements=new Map(["#menuBtn","#backdrop","#nav","#content","#drawer","#toast","#topCourseName"].map(id=>[id,new ElementStub()]));
 const document={querySelector:selector=>elements.get(selector)||null,querySelectorAll:()=>[],createElement:()=>new ElementStub()};
 const context={window:{},document,localStorage:storage(),sessionStorage:storage(),console,confirm:()=>true,setTimeout:()=>0,clearTimeout(){},Date,Math,JSON,Number,String,Array,Object,Map,Set,FormData:class{},Blob:class{},URL:{createObjectURL(){return""},revokeObjectURL(){}},location:{},navigator:{}};
 context.window=context;vm.createContext(context);
@@ -28,6 +28,8 @@ assert(html.includes(".topCourseDropdown{position:fixed;left:calc(14px + env(saf
 assert(html.includes("function positionTopCourseDropdown()"),"Quick course switcher must position its mobile menu below the real header button");
 assert(html.includes("if(open)positionTopCourseDropdown()"),"Opening the quick course switcher must position the mobile menu before interaction");
 assert(html.includes("<span>Selected course</span>"),"Header switcher must describe the selected course, not an active lifecycle state");
+assert(html.includes('<b id="topCourseName" aria-live="polite">&nbsp;</b>'),"Header must not hard-code Aerostar EP Course before persisted course state is restored");
+assert(html.includes("active.courseName||'Aerostar EP Course'"),"Header must restore the persisted selected course name before loading the large application scripts");
 assert(html.includes("function sortCourseSwitcherRows(rows,selectedKey=currentCourseId)"),"Quick course switcher needs deterministic ordering");
 assert(html.includes("View all courses →"),"Quick course switcher must link to the full My Courses screen");
 assert(!html.includes("if($('#topCourseSwitch'))$('#topCourseSwitch').onclick=()=>go('courses')"),"Top course control must no longer fake a dropdown by navigating directly to My Courses");
@@ -50,7 +52,7 @@ assert(!html.includes("Restore original Package defaults"),"Bulk Package restore
 assert(!html.includes("Revert to Package defaults"),"Bulk course revert-to-defaults must be removed");
 assert(html.includes(".packageRules>summary>span{font-size:9px;color:#8092a5}"),"Summary helper styling must target only the direct helper span so counts inside titles keep the title font");
 const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(match=>match[1]).filter(x=>x.trim());
-assert.equal(scripts.length,1);vm.runInContext(scripts[0],context,{filename:"index-inline.js"});
+assert.equal(scripts.length,2);vm.runInContext(scripts[0],context,{filename:"index-course-header-boot.js"});vm.runInContext(scripts[1],context,{filename:"index-inline.js"});
 const switcherOrder=vm.runInContext("sortCourseSwitcherRows([{key:'done',course:{startsOn:'2025-01-01'},lifecycle:{id:'COMPLETED'}},{key:'future2',course:{startsOn:'2027-03-01'},lifecycle:{id:'UPCOMING'}},{key:'current',course:{startsOn:'2024-01-01'},lifecycle:{id:'COMPLETED'}},{key:'runOld',course:{startsOn:'2026-01-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'runNew',course:{startsOn:'2026-08-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'future1',course:{startsOn:'2027-01-01'},lifecycle:{id:'UPCOMING'}}],'current').map(x=>x.key).join(',')",context);
 assert.equal(switcherOrder,"current,runNew,runOld,future1,future2,done","Quick switcher order must be Selected, In Progress newest first, Upcoming soonest first, then Completed");
 assert.match(elements.get("#content").innerHTML,/My Courses/);
