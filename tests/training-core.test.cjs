@@ -94,6 +94,22 @@ assert.equal(layeredIp.experienceCounters.find(x=>x.id==="ip_takeoffs").minimum,
 assert.equal(core.guidedOptions({courseType:"IP",platformId:"aerostar",trainingKind:"new"}).configurationOptions.find(x=>x.id==="ip_full_new_gcs_d").name,"Global IP GCS-D Package","Global package name must appear in course creation");
 core.saveGlobalOverrides("ip_full_new_gcs_d",{});
 
+core.saveGlobalOverrides("ep_full_refresh",{
+  custom:{
+    syllabi:[{id:"pkg_syll_1",name:"Package custom syllabus",order:99,minimum:1,mode:"INSTRUCTED",instructorRequired:true,track:"day"}],
+    criteria:[{id:"pkg_criterion_1",name:"Package custom criterion",weight:10}],
+    emergencies:[{id:"pkg_emergency_1",name:"Package custom emergency",category:"General / Operational"}]
+  },
+  emergencyRequirementIds:["pkg_emergency_1"]
+});
+const refreshPackage=core.resolvePackage("EP","ep_full_refresh");
+assert(refreshPackage.syllabi.some(x=>x.id==="pkg_syll_1"&&x.packageCustom===true&&x.courseOnly===false),"Global Package custom syllabus must resolve as a reusable Package item");
+assert(refreshPackage.criteria.some(x=>x.id==="pkg_criterion_1"&&x.packageCustom===true),"Global Package custom criterion must resolve");
+assert(core.requiredEmergencies(refreshPackage).some(x=>x.id==="pkg_emergency_1"),"Global Package custom emergency must resolve");
+const refreshCourse=core.resolvePackage("EP","ep_full_refresh",{courseKey:"PKG-COURSE"});
+assert(refreshCourse.syllabi.some(x=>x.id==="pkg_syll_1"),"Courses using the Package must inherit Package custom syllabus");
+core.saveGlobalOverrides("ep_full_refresh",{});
+
 core.saveOverrides("EP-TEST",{syllabi:{full_preflight:{name:"Course Preflight",minimum:2}},counters:{ep_full_day_takeoffs:{name:"Course takeoffs",minimum:5}},criteria:{flight_path_control:{name:"Course flight path",weight:30}}});
 const epCourseOverride=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"},{courseKey:"EP-TEST"});
 assert.equal(epCourseOverride.syllabi.find(x=>x.id==="full_preflight").name,"Course Preflight");
