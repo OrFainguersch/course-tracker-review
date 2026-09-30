@@ -31,7 +31,7 @@ window.EP_CATALOG = {
   ],
   platforms: [
     { id: "rc_simulator", name: "RC Simulator", phaseIds: ["ep_screening"] },
-    { id: "rc_model", name: "RC Model", phaseIds: ["ep_screening","ep_rc"] },
+    { id: "rc_model", name: "Shahak", phaseIds: ["ep_screening","ep_rc"] },
     { id: "half_scale", name: "Half Scale Trainer", phaseIds: ["ep_half"] },
     { id: "aerostar", name: "Aerostar", phaseIds: ["ep_full"] },
     { id: "orbiter3mp", name: "Orbiter 3MP", phaseIds: ["ep_full"] }

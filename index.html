@@ -496,19 +496,19 @@ select option[value=""]{color:#8a9bad}
 .courseDetailsInline{margin-top:9px}.courseDetailsStep .wizardStepBody>label,.courseIdentityStep .wizardStepBody>label{display:block}.addPackageChoice{border-style:dashed;background:#f8fbfe}.addPackageChoice b{color:#0875ce}.fieldHelp{display:block;margin-top:5px;color:#8192a4;font-size:9px}.courseIdentityStep .fields{margin-top:9px}
 </style></head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0647 · clearer selected course frame</div><div class="toast" id="toast"></div></div>
-<script src="./assets/ep-catalog.js?v=0647"></script>
-<script src="./assets/aerostar-platform.js?v=0647"></script>
-<script src="./assets/ip-catalog.js?v=0647"></script>
-<script src="./assets/technician-catalog.js?v=0647"></script>
-<script src="./assets/training-core.js?v=0647"></script>
-<script src="./assets/ep-lessons-screening.js?v=0647"></script>
-<script src="./assets/ep-lessons-rc-1.js?v=0647"></script>
-<script src="./assets/ep-lessons-rc-2.js?v=0647"></script>
-<script src="./assets/ep-lessons-half.js?v=0647"></script>
-<script src="./assets/ep-lessons-full-day-a.js?v=0647"></script>
-<script src="./assets/ep-lessons-full-day-b.js?v=0647"></script>
-<script src="./assets/ep-lessons-night.js?v=0647"></script>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0648 · durable platform names and hidden internal ids</div><div class="toast" id="toast"></div></div>
+<script src="./assets/ep-catalog.js?v=0648"></script>
+<script src="./assets/aerostar-platform.js?v=0648"></script>
+<script src="./assets/ip-catalog.js?v=0648"></script>
+<script src="./assets/technician-catalog.js?v=0648"></script>
+<script src="./assets/training-core.js?v=0648"></script>
+<script src="./assets/ep-lessons-screening.js?v=0648"></script>
+<script src="./assets/ep-lessons-rc-1.js?v=0648"></script>
+<script src="./assets/ep-lessons-rc-2.js?v=0648"></script>
+<script src="./assets/ep-lessons-half.js?v=0648"></script>
+<script src="./assets/ep-lessons-full-day-a.js?v=0648"></script>
+<script src="./assets/ep-lessons-full-day-b.js?v=0648"></script>
+<script src="./assets/ep-lessons-night.js?v=0648"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentUserId='i1';
@@ -1098,8 +1098,14 @@ function renderEmergencyPractice(edit,traineeId){
       return '<details class="emergencyGroup" data-emergency-group="'+esc(cat)+'" '+(open?'open':'')+'><summary><span class="emergencyGroupSummary"><strong>'+esc(cat)+'</strong><small>'+practiced+' of '+rows.length+' practiced previously · '+groupPast+' total occurrence'+(groupPast===1?'':'s')+'</small><span class="emergencyGroupProgress"><i style="width:'+pct+'%"></i></span></span><span class="emergencyGroupMeta compact"><span class="emergencyGroupPast" data-group-past="'+esc(cat)+'">'+groupPast+' past</span><span class="emergencyGroupTotal" data-group-total="'+esc(cat)+'">'+groupTotal+' this flight</span></span></summary><div class="emergencyRows">'+rows.map(x=>'<label class="emergencyRow '+(x.planned?'isPlanned':'')+'" data-emergency-name="'+esc(x.name.toLowerCase())+'" data-emergency-category="'+esc(cat.toLowerCase())+'" data-emergency-id-row="'+esc(x.id)+'"><span class="emergencyNameBlock"><span>'+esc(x.name)+'</span><span class="emergencyHistoryBadge '+(x.history?'has':'none')+'" data-history-id="'+esc(x.id)+'">'+(x.history?'Previously: '+x.history:'Not practiced yet')+'</span><span class="emergencyPlanTag">Planned for this sortie</span></span><input class="input emergencyCountInput" type="number" min="0" max="99" step="1" name="emid_'+esc(x.id)+'" data-emergency-id="'+esc(x.id)+'" data-emergency-category="'+esc(cat)+'" value="'+x.value+'"></label>').join('')+'</div></details>';
     }).join('')+'<div class="emergencyNoResults" id="emergencyNoResults">No emergency matches this filter.</div></div>';
 }
-function getPlatformLabels(){return safeObjectStorage('ct-review-platform-labels')}
-function savePlatformLabels(v){localStorage.setItem('ct-review-platform-labels',JSON.stringify(v||{}))}
+function getPlatformLabels(){
+  const legacy=safeObjectStorage('ct-review-platform-labels'),catalog=safeObjectStorage('ct-review-catalogs');
+  return {...(cfgDefaults().platformLabels||{}),...legacy,...(catalog.platformLabels||{})};
+}
+function savePlatformLabels(v){
+  const labels={...(v||{})};localStorage.setItem('ct-review-platform-labels',JSON.stringify(labels));
+  try{const catalog=JSON.parse(localStorage.getItem('ct-review-catalogs')||'null')||cfgDefaults();catalog.platformLabels=labels;localStorage.setItem('ct-review-catalogs',JSON.stringify(catalog))}catch{}
+}
 function getCustomPlatforms(){return safeObjectStorage('ct-review-custom-platforms')}
 function saveCustomPlatforms(v){localStorage.setItem('ct-review-custom-platforms',JSON.stringify(v||{}))}
 function sectorPlatforms(type){
@@ -1324,8 +1330,8 @@ function builderPackage(){
 }
 function advancedPlatformsCard(type){
   const platforms=sectorPlatforms(type),customIds=new Set((getCustomPlatforms()[type]||[]).map(x=>x.id));
-  return '<section class="card settingBox"><h3>Platforms</h3><p class="sub">Platforms belong to the selected sector and can be used in Package paths.</p><div class="editableList">'+
-    (platforms.length?platforms.map(x=>'<div class="editableRow"><input class="input cfgPlatformName" data-id="'+esc(x.id)+'" value="'+esc(x.name)+'"><span class="pill gray">'+esc(x.id)+'</span>'+(customIds.has(x.id)?'<button class="btn danger small" type="button" data-platform-remove="'+esc(x.id)+'">Remove</button>':'')+'</div>').join(''):'<div class="wizardEmpty compact">No platforms are defined for this sector.</div>')+
+  return '<section class="card settingBox"><h3>Platforms</h3><p class="sub">Rename the platform display name here. The internal platform identifier stays stable automatically and is intentionally hidden.</p><div class="editableList">'+
+    (platforms.length?platforms.map(x=>'<div class="editableRow"><input class="input cfgPlatformName" data-id="'+esc(x.id)+'" value="'+esc(x.name)+'">'+(customIds.has(x.id)?'<button class="btn danger small" type="button" data-platform-remove="'+esc(x.id)+'">Remove</button>':'')+'</div>').join(''):'<div class="wizardEmpty compact">No platforms are defined for this sector.</div>')+
     '</div><form class="toolbar" id="cfgAddPlatform"><input class="input" name="name" placeholder="Add platform" required><button class="btn secondary" type="submit">＋ Add platform</button></form></section>';
 }
 function advancedContextCard(type,c){
@@ -1552,6 +1558,7 @@ function cfgDefaults(){
     phases: phaseTemplates.map(x=>({id:x.id,type:x.type,name:x.name,tracking:defaultPhaseTracking(x.id)})),
     trainingKinds: trainingKinds.map((name,n)=>({id:['new','conversion','instructor','screening','refreshment','return_currency','qualification','customer_qualification'][n]||('training_'+n),name})),
     qualifications:[{id:'day',name:'Day'},{id:'night',name:'Night'},{id:'atol',name:'ATOL'}],
+    platformLabels:{rc_simulator:'RC Simulator',rc_model:'Shahak',half_scale:'Half Scale Trainer',aerostar:'Aerostar',orbiter3mp:'Orbiter 3MP'},
     dayNight: dayNight.map((name,n)=>({id:['day','night'][n]||('time_'+n),name})),
     countries: countries.map((name,n)=>({id:['israel','cyprus'][n]||('country_'+n),name})),
     syllabi: syllabi.map((name,n)=>({id:'syll_'+(n+1),courseType:ep,name,minimum:null,instructorPresence:'WITH INSTRUCTOR'})),
@@ -1561,11 +1568,11 @@ function cfgDefaults(){
 }
 function cfgGet(){
   try{
-    const raw=JSON.parse(localStorage.getItem('ct-review-catalogs')||'null');
-    if(!raw)return cfgDefaults();
+    const raw=JSON.parse(localStorage.getItem('ct-review-catalogs')||'null'),legacyPlatformLabels=safeObjectStorage('ct-review-platform-labels');
+    if(!raw){const d=cfgDefaults();d.platformLabels={...(d.platformLabels||{}),...legacyPlatformLabels};return d}
     const defaults=cfgDefaults(),c={...defaults,...raw};
     const mergeStable=(base,saved)=>[...base.map(x=>saved?.find(y=>y.id===x.id)?{...x,...saved.find(y=>y.id===x.id)}:x),...(saved||[]).filter(x=>!base.some(y=>y.id===x.id))];
-    c.courseTypes=mergeStable(defaults.courseTypes,raw.courseTypes);c.phases=mergeStable(defaults.phases,raw.phases);c.trainingKinds=mergeStable(defaults.trainingKinds,raw.trainingKinds);c.qualifications=mergeStable(defaults.qualifications,raw.qualifications);c.dayNight=mergeStable(defaults.dayNight,raw.dayNight).filter(x=>x.id!=='mixed');c.dayNight=c.dayNight.map(x=>({...x,name:c.qualifications.find(q=>q.id===x.id)?.name||x.name}));c.countries=mergeStable(defaults.countries,raw.countries);
+    c.courseTypes=mergeStable(defaults.courseTypes,raw.courseTypes);c.phases=mergeStable(defaults.phases,raw.phases);c.trainingKinds=mergeStable(defaults.trainingKinds,raw.trainingKinds);c.qualifications=mergeStable(defaults.qualifications,raw.qualifications);c.platformLabels={...(defaults.platformLabels||{}),...legacyPlatformLabels,...(raw.platformLabels||{})};c.dayNight=mergeStable(defaults.dayNight,raw.dayNight).filter(x=>x.id!=='mixed');c.dayNight=c.dayNight.map(x=>({...x,name:c.qualifications.find(q=>q.id===x.id)?.name||x.name}));c.countries=mergeStable(defaults.countries,raw.countries);
     c.phases=(c.phases||[]).map(x=>({...x,tracking:normalizePhaseTracking(x)}));
     c.syllabi=(c.syllabi||[]).map(x=>({...x,courseType:x.courseType||'EP',minimum:x.minimum===undefined?null:x.minimum,instructorPresence:x.instructorPresence||'WITH INSTRUCTOR'}));
     c.criteria=(c.criteria||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
@@ -2227,7 +2234,7 @@ function bindSettings(){
     document.querySelectorAll('.cfgPlatformName').forEach(el=>{if(el.value.trim())platformLabels[el.dataset.id]=el.value.trim()});savePlatformLabels(platformLabels);
     document.querySelectorAll('.cfgScopedName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
     document.querySelectorAll('.cfgScopedWeight').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x)x.weight=Math.max(0,Math.min(100,Number(el.value)||0))});document.querySelectorAll('.cfgEmergencyCategory').forEach(el=>{const x=cc.emergencies.find(v=>v.id===el.dataset.id);if(x)x.category=el.value||'General / Operational'});document.querySelectorAll('.cfgSyllabusMinimum').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.minimum=el.value===''?null:Math.max(0,Math.min(999,Math.floor(Number(el.value)||0)))});document.querySelectorAll('.cfgSyllabusPresence').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.instructorPresence=el.value});
-    cc.dayNight=(cc.qualifications||[]).filter(x=>x.id==='day'||x.id==='night').map(x=>({id:x.id,name:x.name}));cfgSave(cc);const activeRecord=courseByKey(currentCourseId);if(activeRecord){Object.assign(currentCourseMeta,courseRuntimeMeta(activeRecord));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta))}state.advancedArchitectureEditing=false;state.packageEditId=null;toast('Changes saved');renderPreservingManagementView();
+    cc.platformLabels={...platformLabels};cc.dayNight=(cc.qualifications||[]).filter(x=>x.id==='day'||x.id==='night').map(x=>({id:x.id,name:x.name}));cfgSave(cc);const activeRecord=courseByKey(currentCourseId);if(activeRecord){Object.assign(currentCourseMeta,courseRuntimeMeta(activeRecord));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta))}state.advancedArchitectureEditing=false;state.packageEditId=null;toast('Changes saved');renderPreservingManagementView();
   };
 
   document.querySelectorAll('[data-cfg-add-open]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-cfg-add-box]'),form=box?.querySelector('.cfgAddForm');if(!form)return;form.hidden=false;btn.hidden=true;form.querySelector('input[name="name"]')?.focus?.()});
