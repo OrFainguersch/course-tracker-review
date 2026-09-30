@@ -33,7 +33,7 @@ assert(html.includes('id="topPersonalProfileBtn"')&&html.includes('aria-label="P
 assert(html.includes('id="personalPhotoInput"')&&html.includes('id="removePersonalPhoto"'),"Personal profile editing must support changing or removing the user's photo");
 assert(html.includes("Your name, email and course role are managed by course administration."),"Self-service personal profile must keep identity and role read-only");
 assert(html.includes("function positionNotificationDropdown()"),"Notifications panel must position safely on mobile");
-assert(html.includes(".panel{display:flex;flex-direction:column}.panel #nav{flex:0 0 auto}.drawerFooter{margin-top:auto;margin-bottom:56px}"),"Mobile account card should sit lower in the drawer while remaining scroll-safe");
+assert(html.includes(".panel{display:flex;flex-direction:column;padding-bottom:calc(8px + env(safe-area-inset-bottom))}.panel #nav{flex:0 0 auto}.drawerFooter{margin-top:auto;margin-bottom:6px}"),"Mobile account card should sit close to the true bottom while respecting the safe area");
 assert(html.includes(".topNotificationDropdown,.topPersonalProfileDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right))"),"Mobile notification and personal-profile panels must stay within the viewport");
 assert(html.includes(".topCourseDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right));width:auto"),"Mobile quick course dropdown must stay inside the viewport on both sides");
 assert(html.includes("function positionTopCourseDropdown()"),"Quick course switcher must position its mobile menu below the real header button");
@@ -41,6 +41,9 @@ assert(html.includes("if(open)positionTopCourseDropdown()"),"Opening the quick c
 assert(html.includes("<span>Selected course</span>"),"Header switcher must describe the selected course, not an active lifecycle state");
 assert(html.includes('<b id="topCourseName" aria-live="polite">&nbsp;</b>'),"Header must not hard-code Aerostar EP Course before persisted course state is restored");
 assert(html.includes("active.courseName||'Aerostar EP Course'"),"Header must restore the persisted selected course name before loading the large application scripts");
+assert(html.includes("function navIconSvg(name)")&&html.includes("class=\"navIcon\""),"Sidebar navigation must use a consistent SVG icon system instead of decorative glyphs");
+assert(!html.includes("['settings','⚙','Course Settings']"),"Course Settings must not use an emoji gear in the professional navigation");
+assert(html.includes("Professional visual refinement 0661")&&html.includes(".navBtn.active{background:rgba(255,255,255,.09)")&&html.includes(".sidebarFlympusWordmark{width:172px!important"),"Sidebar styling must use the restrained professional visual layer");
 assert(html.includes("function sortCourseSwitcherRows(rows,selectedKey=currentCourseId)"),"Quick course switcher needs deterministic ordering");
 assert(html.includes("View all courses →"),"Quick course switcher must link to the full My Courses screen");
 assert(!html.includes("if($('#topCourseSwitch'))$('#topCourseSwitch').onclick=()=>go('courses')"),"Top course control must no longer fake a dropdown by navigating directly to My Courses");
