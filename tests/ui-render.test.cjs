@@ -52,6 +52,7 @@ assert(html.includes("['Type',currentCourseMeta.trainingKind||'—']"),"Home met
 assert(html.includes("currentCourseMeta.type==='IP'?'Configuration':'Qualification'"),"Day or Night must be described as a qualification rather than repeating Day as both label and value");
 assert(html.includes("showHomeQualification=currentCourseMeta.type!=='EP'||!!epQualificationId(activeProgram)"),"EP phases without a meaningful Day/Night qualification must omit that field");
 assert(!html.includes("'<p>Train. Track. Progress.</p>'+"),"The Home hero should avoid redundant slogan copy inside the course context card");
+assert(html.includes("orderedFiltered=[...filtered].sort((a,b)=>{const as=a.key===selectedCourse,bs=b.key===selectedCourse;return as===bs?0:as?-1:1})"),"My Courses must keep the selected course first while preserving the existing order of all other courses");
 assert(html.includes("function sortCourseSwitcherRows(rows,selectedKey=currentCourseId)"),"Quick course switcher needs deterministic ordering");
 assert(html.includes("View all courses →"),"Quick course switcher must link to the full My Courses screen");
 assert(!html.includes("if($('#topCourseSwitch'))$('#topCourseSwitch').onclick=()=>go('courses')"),"Top course control must no longer fake a dropdown by navigating directly to My Courses");
