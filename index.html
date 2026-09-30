@@ -438,9 +438,13 @@ select option[value=""]{color:#8a9bad}
 .courseOnlyItem{border-color:#f3cc82;background:#fffdf7}.courseOnlyMeta{display:flex;align-items:center;gap:7px}.courseOnlyAddBox{border:1px dashed #e3b75e;border-radius:14px;background:#fffaf0;padding:12px;margin-top:2px}.courseOnlyAddBox .inlineHead{align-items:flex-start}.courseOnlyAddBox .inlineHead b{color:#724f0b;font-size:12px}.courseOnlyAddBox .inlineHead p{margin:2px 0 0;color:#8a744f;font-size:9px}.courseOnlyAddFields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0}.courseOnlyAddFields .field{margin:0;min-width:0}.courseOnlyAddFields .tailorWide{grid-column:span 2}.courseOnlyAddFields input,.courseOnlyAddFields select{width:100%;min-width:0}.courseGateRow,.courseEmergencyRow{display:flex;align-items:center;justify-content:space-between;gap:10px}.courseGateRow .criterion,.courseEmergencyRow .criterion{flex:1}.tailorSectionHint{padding:0 12px;margin:0 0 8px}
 @media(max-width:680px){.courseOnlyAddFields{grid-template-columns:1fr 1fr}.courseOnlyAddFields .tailorWide{grid-column:1/-1}.courseOnlyMeta{width:100%;justify-content:space-between}.courseGateRow,.courseEmergencyRow{align-items:flex-start;flex-direction:column}}
 @media(max-width:420px){.courseOnlyAddFields{grid-template-columns:1fr}.courseOnlyAddFields .tailorWide{grid-column:auto}}
+</style><style>
+.packageEditorList{padding:10px;display:grid;gap:8px}.packageEditorItem{padding:10px;border:1px solid #e4ebf2;border-radius:12px;background:#fff}.packageCustomItem{border-color:#99c7f2;background:#f7fbff}.packageEditorHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;font-size:11px;font-weight:800}.packageCustomMeta{display:flex;align-items:center;gap:7px}.packageEditorFields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-items:end}.packageEditorFields .field{margin:0;min-width:0}.packageEditorFields .tailorWide{grid-column:span 2}.packageEditorFields input,.packageEditorFields select{width:100%;min-width:0}.packageAddBox{padding:12px;border:1px dashed #80b8e8;border-radius:13px;background:#f4faff}.packageAddBox .inlineHead{align-items:flex-start}.packageAddBox .inlineHead b{color:#1769ad;font-size:12px}.packageAddBox .inlineHead p{margin:2px 0 0;color:#66829c;font-size:9px}.packageAddFields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0}.packageAddFields .field{margin:0;min-width:0}.packageAddFields .tailorWide{grid-column:span 2}.packageAddFields input,.packageAddFields select{width:100%;min-width:0}.packageRuleStatsFull{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.packageSaveBar{position:sticky;bottom:8px;padding:10px;background:rgba(255,255,255,.95);border:1px solid #e1eaf3;border-radius:13px;z-index:3}
+@media(max-width:760px){.packageEditorFields,.packageAddFields{grid-template-columns:1fr 1fr}.packageEditorFields .tailorWide,.packageAddFields .tailorWide{grid-column:1/-1}.packageRuleStatsFull{grid-template-columns:1fr 1fr}.packageEditorHead{align-items:flex-start;flex-direction:column}.packageCustomMeta{width:100%;justify-content:space-between}}
+@media(max-width:430px){.packageEditorFields,.packageAddFields,.packageRuleStatsFull{grid-template-columns:1fr}.packageEditorFields .tailorWide,.packageAddFields .tailorWide{grid-column:auto}}
 </style></head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0611 · course-specific editor</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0612 · full package editor</div><div class="toast" id="toast"></div></div>
 <script src="./assets/ep-catalog.js?v=0610"></script>
 <script src="./assets/aerostar-platform.js?v=0610"></script>
 <script src="./assets/ip-catalog.js?v=0610"></script>
@@ -1255,21 +1259,80 @@ function progressionDisplay(x){return x?.prerequisite||x?.decisionRequired||x?.a
 function advancedPackagesHtml(type){
   const core=window.FLYMPUS_TRAINING,packages=core?.packageCatalog?.(type)||[];
   if(!packages.length)return '<section class="card settingBox"><h3>Training Packages</h3><p class="sub">No packages are defined for this sector.</p></section>';
+  const field=(label,control,wide=false)=>'<label class="field '+(wide?'tailorWide':'')+'"><span class="fieldLabel">'+label+'</span>'+control+'</label>';
+  const addBox=(kind,title,fields)=>'<div class="packageAddBox" data-global-add-box="'+kind+'"><div class="inlineHead"><div><b>＋ '+title+'</b><p>Adds a new default item to this reusable Package.</p></div><span class="pill blue">PACKAGE ITEM</span></div><div class="packageAddFields">'+fields+'</div><button class="btn secondary" type="button" data-global-add="'+kind+'">Add to Package</button></div>';
   const cards=packages.map(p=>{
-    const base=core.packageBase?.(type,p.id)||p,o=core.getGlobalOverrides?.(p.id)||{},changed=Object.keys(o).length>0;
-    const counters=(base.experienceCounters||[]).map(x=>{const v={...x,...(o.counters?.[x.id]||{})};return '<div class="globalRuleRow"><label class="globalRuleToggle"><input type="checkbox" name="g_counter_app_'+esc(x.id)+'" '+(v.applicable===false?'':'checked')+'><span>'+esc(v.name)+'</span><small>'+esc(v.unit||'count')+(v.group?' · '+esc(v.group):'')+'</small></label><input class="input" name="g_counter_name_'+esc(x.id)+'" value="'+esc(v.name)+'"><input class="input compactNumber" name="g_counter_min_'+esc(x.id)+'" type="number" min="0" step="0.1" value="'+(v.minimum==null?'':esc(v.minimum))+'" placeholder="Min"></div>'}).join('');
-    const exams=(base.exams||[]).map(x=>{const v={...x,...(o.exams?.[x.id]||{})};return '<div class="globalRuleRow"><label class="globalRuleToggle"><input type="checkbox" name="g_exam_app_'+esc(x.id)+'" '+(v.applicable===false?'':'checked')+'><span>'+esc(v.name)+'</span><small>'+esc(v.unit||'exam')+'</small></label><input class="input" name="g_exam_name_'+esc(x.id)+'" value="'+esc(v.name)+'"><input class="input compactNumber" name="g_exam_pass_'+esc(x.id)+'" type="number" min="0" step="0.1" value="'+(v.pass==null?'':esc(v.pass))+'" placeholder="Pass"></div>'}).join('');
-    const gates=(base.progression||[]).map(x=>{const v={...x,...(o.progression?.[x.id]||{})},k=progressionEditableKey(v);return '<div class="globalGateRow"><label><input type="checkbox" name="g_gate_app_'+esc(x.id)+'" '+(v.applicable===false?'':'checked')+'> <b>'+esc(x.id)+'</b></label>'+(k?'<input class="input" name="g_gate_text_'+esc(x.id)+'" value="'+esc(progressionDisplay(v))+'">':'<span>'+esc(progressionDisplay(v))+'</span>')+'</div>'}).join('');
-    return '<form class="card globalPackageCard globalPackageForm" data-global-package-id="'+esc(p.id)+'" data-global-package-type="'+esc(type)+'"><div class="globalPackageHead"><div><div class="eyebrow">REUSABLE PACKAGE</div><h3>'+esc(p.name)+'</h3><p>'+esc(packagePathLabel(type,p))+'</p></div><div class="packageBadges"><span class="pill blue">'+esc(type)+'</span>'+(changed?'<span class="pill amber">EDITED DEFAULT</span>':'<span class="pill green">DEFAULT</span>')+'</div></div>'+
-      '<div class="fields"><label class="field"><span class="fieldLabel">Package name</span><input class="input" name="g_package_name" value="'+esc(p.name)+'"></label><label class="field"><span class="fieldLabel">Package ID</span><input class="input" value="'+esc(p.id)+'" readonly></label></div>'+
-      '<div class="packagePathBox"><div class="inlineHead"><div><b>Package path</b><p class="sub">Defines where this package belongs inside '+esc(type)+'. Course creation still lets you choose the package directly.</p></div></div>'+packagePathControls(type,p,'g_')+'</div>'+
-      '<div class="packageRuleStats"><span><b>'+(base.experienceCounters||[]).length+'</b> Experience requirements</span><span><b>'+(base.exams||[]).length+'</b> Exams</span><span><b>'+(base.progression||[]).length+'</b> Progression gates</span></div>'+
-      '<details class="packageRules"><summary><b>Experience requirements ('+(base.experienceCounters||[]).length+')</b><span>Default for every course using this package</span></summary><div class="globalRules">'+(counters||'<p class="sub">No experience requirements in this package.</p>')+'</div></details>'+
-      '<details class="packageRules"><summary><b>Exams ('+(base.exams||[]).length+')</b><span>Default names and pass thresholds</span></summary><div class="globalRules">'+(exams||'<p class="sub">No exams in this package.</p>')+'</div></details>'+
-      '<details class="packageRules"><summary><b>Progression gates ('+(base.progression||[]).length+')</b><span>Default qualification gates</span></summary><div class="globalRules">'+(gates||'<p class="sub">No progression gates in this package.</p>')+'</div></details>'+
-      '<div class="toolbar"><button class="btn sky" type="submit">Save package</button><button class="btn secondary" type="button" data-reset-global-package="'+esc(p.id)+'">Reset package defaults</button></div></form>';
+    const base=core.packageBase?.(type,p.id)||p,o=core.getGlobalOverrides?.(p.id)||{},current=core.applyGlobalOverrides?.(base)||p,changed=Object.keys(o).length>0;
+    const customBadge=(x,kind)=>x.packageCustom?'<div class="packageCustomMeta"><span class="pill blue">PACKAGE CUSTOM</span><button class="btn danger small" type="button" data-global-custom-remove="'+kind+'|'+esc(x.id)+'">Remove</button></div>':'<small>Package default item</small>';
+    const syllabi=(current.syllabi||[]).map(x=>'<article class="packageEditorItem '+(x.packageCustom?'packageCustomItem':'')+'"><div class="packageEditorHead"><label><input type="checkbox" name="g_syll_app_'+esc(x.id)+'" '+(x.applicable===false?'':'checked')+'> Use in Package</label>'+customBadge(x,'syllabi')+'</div><div class="packageEditorFields">'+
+      field('Syllabus / task name','<input class="input" name="g_syll_name_'+esc(x.id)+'" value="'+esc(x.name)+'">',true)+
+      field('Order','<input class="input" name="g_syll_order_'+esc(x.id)+'" type="number" min="1" value="'+esc(x.order||1)+'">')+
+      field('Minimum','<input class="input" name="g_syll_min_'+esc(x.id)+'" type="number" min="0" value="'+(x.minimum==null?'':esc(x.minimum))+'" placeholder="None">')+
+      field('Supervision','<select name="g_syll_supervision_'+esc(x.id)+'"><option value="INSTRUCTED" '+(x.instructorRequired!==false?'selected':'')+'>With instructor</option><option value="SOLO" '+(x.instructorRequired===false?'selected':'')+'>Without instructor / Solo</option></select>')+
+      field('Track','<select name="g_syll_track_'+esc(x.id)+'"><option value="shared" '+((x.track||'shared')==='shared'?'selected':'')+'>Shared</option><option value="day" '+(x.track==='day'?'selected':'')+'>Day</option><option value="night" '+(x.track==='night'?'selected':'')+'>Night</option></select>')+
+      '</div></article>').join('');
+    const nextOrder=Math.max(0,...(current.syllabi||[]).map(x=>Number(x.order)||0))+1;
+    const syllabusAdd=addBox('syllabi','Add syllabus / practical task',
+      field('Name','<input class="input" data-add-field="name" placeholder="New syllabus / task">',true)+
+      field('Order','<input class="input" data-add-field="order" type="number" min="1" value="'+nextOrder+'">')+
+      field('Minimum','<input class="input" data-add-field="minimum" type="number" min="0" value="0">')+
+      field('Supervision','<select data-add-field="supervision"><option value="INSTRUCTED">With instructor</option><option value="SOLO">Without instructor / Solo</option></select>')+
+      field('Track','<select data-add-field="track"><option value="shared">Shared</option><option value="day">Day</option><option value="night">Night</option></select>')
+    );
+    const criteriaRows=(current.criteria||[]).map(x=>'<article class="packageEditorItem '+(x.packageCustom?'packageCustomItem':'')+'"><div class="packageEditorHead"><label><input type="checkbox" name="g_criterion_app_'+esc(x.id)+'" '+(x.applicable===false?'':'checked')+'> Use in Package</label>'+customBadge(x,'criteria')+'</div><div class="packageEditorFields">'+
+      field('Assessment criterion','<input class="input" name="g_criterion_name_'+esc(x.id)+'" value="'+esc(x.name)+'">',true)+
+      field('Weight (%)','<input class="input" name="g_criterion_weight_'+esc(x.id)+'" type="number" min="0" max="100" value="'+esc(x.weight||0)+'">')+
+      '</div></article>').join('');
+    const criteriaAdd=addBox('criteria','Add assessment criterion',
+      field('Criterion name','<input class="input" data-add-field="name" placeholder="New criterion">',true)+
+      field('Weight (%)','<input class="input" data-add-field="weight" type="number" min="0" max="100" value="10">')
+    );
+    const counters=(current.experienceCounters||[]).map(x=>'<article class="packageEditorItem '+(x.packageCustom?'packageCustomItem':'')+'"><div class="packageEditorHead"><label><input type="checkbox" name="g_counter_app_'+esc(x.id)+'" '+(x.applicable===false?'':'checked')+'> Use in Package</label>'+customBadge(x,'counters')+'</div><div class="packageEditorFields">'+
+      field('Requirement name','<input class="input" name="g_counter_name_'+esc(x.id)+'" value="'+esc(x.name)+'">',true)+
+      field('Minimum','<input class="input" name="g_counter_min_'+esc(x.id)+'" type="number" min="0" step="0.1" value="'+(x.minimum==null?'':esc(x.minimum))+'" placeholder="None">')+
+      field('Unit','<input class="input" name="g_counter_unit_'+esc(x.id)+'" value="'+esc(x.unit||'count')+'">')+
+      field('Context','<select name="g_counter_track_'+esc(x.id)+'"><option value="shared" '+((x.track||'shared')==='shared'?'selected':'')+'>Shared</option><option value="day" '+(x.track==='day'?'selected':'')+'>Day</option><option value="night" '+(x.track==='night'?'selected':'')+'>Night</option></select>')+
+      '</div></article>').join('');
+    const counterAdd=addBox('counters','Add experience requirement',
+      field('Requirement name','<input class="input" data-add-field="name" placeholder="New experience requirement">',true)+
+      field('Minimum','<input class="input" data-add-field="minimum" type="number" min="0" step="0.1" placeholder="None">')+
+      field('Unit','<input class="input" data-add-field="unit" value="count">')+
+      field('Context','<select data-add-field="track"><option value="shared">Shared</option><option value="day">Day</option><option value="night">Night</option></select>')
+    );
+    const exams=(current.exams||[]).map(x=>'<article class="packageEditorItem '+(x.packageCustom?'packageCustomItem':'')+'"><div class="packageEditorHead"><label><input type="checkbox" name="g_exam_app_'+esc(x.id)+'" '+(x.applicable===false?'':'checked')+'> Use in Package</label>'+customBadge(x,'exams')+'</div><div class="packageEditorFields">'+
+      field('Exam name','<input class="input" name="g_exam_name_'+esc(x.id)+'" value="'+esc(x.name)+'">',true)+
+      field('Pass grade','<input class="input" name="g_exam_pass_'+esc(x.id)+'" type="number" min="0" step="0.1" value="'+(x.pass==null?'':esc(x.pass))+'" placeholder="None">')+
+      '</div></article>').join('');
+    const examAdd=addBox('exams','Add exam',
+      field('Exam name','<input class="input" data-add-field="name" placeholder="New exam">',true)+
+      field('Pass grade','<input class="input" data-add-field="pass" type="number" min="0" max="100" step="0.1" value="80">')
+    );
+    const gates=(current.progression||[]).map(x=>{const k=progressionEditableKey(x);return '<article class="packageEditorItem '+(x.packageCustom?'packageCustomItem':'')+'"><div class="packageEditorHead"><label><input type="checkbox" name="g_gate_app_'+esc(x.id)+'" '+(x.applicable===false?'':'checked')+'> Use in Package</label>'+customBadge(x,'progression')+'</div><div class="packageEditorFields">'+
+      field('Progression requirement',k?'<input class="input" name="g_gate_text_'+esc(x.id)+'" value="'+esc(progressionDisplay(x))+'">':'<input class="input" value="'+esc(progressionDisplay(x))+'" readonly>',true)+
+      '</div></article>'}).join('');
+    const gateAdd=addBox('progression','Add progression gate',field('Requirement','<input class="input" data-add-field="text" placeholder="Example: Course Manager approval required">',true));
+    const allEmergency=[...core.emergencyCatalog(current.platformId),...(current.courseEmergencies||[])].filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i),required=new Set(core.requiredEmergencies(current).map(x=>x.id));
+    const emergencyRows=allEmergency.map(x=>'<article class="packageEditorItem '+(x.packageCustom?'packageCustomItem':'')+'"><div class="packageEditorHead"><label><input type="checkbox" name="g_required_emergency" value="'+esc(x.id)+'" '+(required.has(x.id)?'checked':'')+'> Required in Package</label>'+customBadge(x,'emergencies')+'</div><div class="packageEditorFields">'+
+      field('Emergency name','<input class="input" name="g_emergency_name_'+esc(x.id)+'" value="'+esc(x.name)+'">',true)+
+      field('Category','<select name="g_emergency_category_'+esc(x.id)+'">'+emergencyCategories.map(c=>'<option value="'+esc(c)+'" '+((x.category||defaultEmergencyCategory(x.name))===c?'selected':'')+'>'+esc(c)+'</option>').join('')+'</select>')+
+      '</div></article>').join('');
+    const emergencyAdd=addBox('emergencies','Add emergency requirement',
+      field('Emergency name','<input class="input" data-add-field="name" placeholder="New emergency">',true)+
+      field('Category','<select data-add-field="category">'+emergencyCategories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('')+'</select>')
+    );
+    return '<form class="card globalPackageCard globalPackageForm" data-global-package-id="'+esc(p.id)+'" data-global-package-type="'+esc(type)+'"><div class="globalPackageHead"><div><div class="eyebrow">REUSABLE PACKAGE</div><h3>'+esc(current.name)+'</h3><p>'+esc(packagePathLabel(type,current))+'</p></div><div class="packageBadges"><span class="pill blue">'+esc(type)+'</span>'+(changed?'<span class="pill amber">EDITED DEFAULT</span>':'<span class="pill green">DEFAULT</span>')+'</div></div>'+
+      '<div class="fields"><label class="field"><span class="fieldLabel">Package name</span><input class="input" name="g_package_name" value="'+esc(current.name)+'"></label><label class="field"><span class="fieldLabel">Package ID</span><input class="input" value="'+esc(p.id)+'" readonly></label></div>'+
+      '<div class="packagePathBox"><div class="inlineHead"><div><b>Package path</b><p class="sub">Defines where this Package belongs inside '+esc(type)+'.</p></div></div>'+packagePathControls(type,current,'g_')+'</div>'+
+      '<div class="packageRuleStats packageRuleStatsFull"><span><b>'+(current.syllabi||[]).length+'</b> Syllabi / tasks</span><span><b>'+(current.criteria||[]).length+'</b> Assessment criteria</span><span><b>'+required.size+'</b> Required emergencies</span><span><b>'+(current.experienceCounters||[]).length+'</b> Experience requirements</span><span><b>'+(current.exams||[]).length+'</b> Exams</span><span><b>'+(current.progression||[]).length+'</b> Progression gates</span></div>'+
+      '<details class="packageRules" open><summary><b>Syllabi / practical tasks ('+(current.syllabi||[]).length+')</b><span>Edit, disable or add</span></summary><div class="packageEditorList">'+syllabi+syllabusAdd+'</div></details>'+
+      '<details class="packageRules"><summary><b>Assessment criteria ('+(current.criteria||[]).length+')</b><span>Edit, disable or add</span></summary><div class="packageEditorList">'+criteriaRows+criteriaAdd+'</div></details>'+
+      '<details class="packageRules"><summary><b>Emergency requirements ('+required.size+')</b><span>Select, edit or add</span></summary><div class="packageEditorList">'+emergencyRows+emergencyAdd+'</div></details>'+
+      '<details class="packageRules"><summary><b>Experience requirements ('+(current.experienceCounters||[]).length+')</b><span>Edit, disable or add</span></summary><div class="packageEditorList">'+counters+counterAdd+'</div></details>'+
+      '<details class="packageRules"><summary><b>Exams ('+(current.exams||[]).length+')</b><span>Edit, disable or add</span></summary><div class="packageEditorList">'+exams+examAdd+'</div></details>'+
+      '<details class="packageRules"><summary><b>Progression gates ('+(current.progression||[]).length+')</b><span>Edit, disable or add</span></summary><div class="packageEditorList">'+gates+gateAdd+'</div></details>'+
+      '<div class="toolbar packageSaveBar"><button class="btn sky" type="submit">Save Package</button><button class="btn secondary" type="button" data-reset-global-package="'+esc(p.id)+'">Reset Package defaults</button></div></form>';
   }).join('');
-  return '<div class="sectionHead advancedPackageTitle"><div><h2>'+esc(type)+' Training Packages</h2><p>Edit reusable packages and define the path of each package. These defaults apply to courses unless that course is tailored separately.</p></div><span class="pill blue">'+packages.length+' packages</span></div><div class="globalPackageList">'+cards+'</div>';
+  return '<div class="sectionHead advancedPackageTitle"><div><h2>'+esc(type)+' Training Packages</h2><p>This is the full Package editor. Changes here become the default for every course that uses the Package; a specific course can still override them in Tailor active course.</p></div><span class="pill blue">'+packages.length+' packages</span></div><div class="globalPackageList">'+cards+'</div>';
 }
 function courseOverridesHtml(){
   const p=epCurrentProgram();if(!p)return '<div class="infoBox" style="margin-top:14px"><b>No active package</b><p>Open a course with a selected package first.</p></div>';
@@ -1873,17 +1936,51 @@ function bindSettings(){
     if(currentCourseId===key)switchCourseByKey('AEP-26',{screen:'courses',render:false,force:true});toast('Course deleted');render();
   });
   if($('#typeWorkspace'))$('#typeWorkspace').onchange=e=>{state.typeWorkspace=e.target.value;render()};
-  document.querySelectorAll('.globalPackageForm').forEach(form=>form.onsubmit=e=>{
-    e.preventDefault();const type=form.dataset.globalPackageType,id=form.dataset.globalPackageId,base=window.FLYMPUS_TRAINING?.packageBase?.(type,id);if(!base)return;
-    const fd=new FormData(form),old=window.FLYMPUS_TRAINING.getGlobalOverrides(id)||{},program={...(old.program||{}),name:String(fd.get('g_package_name')||base.name).trim()||base.name,phaseId:String(fd.get('g_phase')||base.phaseId||''),platformId:String(fd.get('g_platform')||''),trainingKind:String(fd.get('g_training')||base.trainingKind||'')};
-    if(type==='EP')program.dayNight=String(fd.get('g_daynight')||base.dayNight||'');else program.contextLabel=String(fd.get('g_context')||packageConfigurationLabel(type,base)).trim()||packageConfigurationLabel(type,base);
-    const overrides={...old,program,counters:{},exams:{},progression:{}};
-    (base.experienceCounters||[]).forEach(x=>{const min=fd.get('g_counter_min_'+x.id),name=String(fd.get('g_counter_name_'+x.id)||x.name).trim()||x.name;overrides.counters[x.id]={applicable:fd.has('g_counter_app_'+x.id),name,minimum:min===''?null:Number(min)}});
-    (base.exams||[]).forEach(x=>{const pass=fd.get('g_exam_pass_'+x.id),name=String(fd.get('g_exam_name_'+x.id)||x.name).trim()||x.name;overrides.exams[x.id]={applicable:fd.has('g_exam_app_'+x.id),name,pass:pass===''?null:Number(pass)}});
-    (base.progression||[]).forEach(x=>{const key=progressionEditableKey(x),patch={applicable:fd.has('g_gate_app_'+x.id)};if(key){const value=String(fd.get('g_gate_text_'+x.id)||'').trim();if(value)patch[key]=value}overrides.progression[x.id]=patch});
-    window.FLYMPUS_TRAINING.saveGlobalOverrides(id,overrides);toast('Package saved · courses using it inherit these defaults');render();
+  document.querySelectorAll('[data-global-add]').forEach(btn=>btn.onclick=()=>{
+    const form=btn.closest('.globalPackageForm'),box=btn.closest('[data-global-add-box]'),type=form?.dataset.globalPackageType,id=form?.dataset.globalPackageId;if(!type||!id||!box)return;
+    const value=name=>String(box.querySelector('[data-add-field="'+name+'"]')?.value||'').trim(),core=window.FLYMPUS_TRAINING,base=core.packageBase(type,id),o=core.getGlobalOverrides(id)||{};o.custom=o.custom||{};
+    const kind=btn.dataset.globalAdd;o.custom[kind]=Array.isArray(o.custom[kind])?o.custom[kind]:[];const itemId=cfgId('package_'+kind.replace(/s$/,''));let item=null;
+    if(kind==='syllabi'){
+      const name=value('name');if(!name){toast('Enter a syllabus / task name');return}
+      const minimum=value('minimum'),supervision=value('supervision')||'INSTRUCTED';item={id:itemId,name,order:Number(value('order'))||((base?.syllabi?.length||0)+1),minimum:minimum===''?null:Number(minimum),mode:supervision==='SOLO'?'SOLO':'INSTRUCTED',instructorRequired:supervision!=='SOLO',track:value('track')||'shared',optional:minimum!==''&&Number(minimum)===0};
+    }else if(kind==='criteria'){
+      const name=value('name');if(!name){toast('Enter a criterion name');return}item={id:itemId,name,weight:Number(value('weight'))||0};
+    }else if(kind==='counters'){
+      const name=value('name');if(!name){toast('Enter an experience requirement name');return}const minimum=value('minimum');item={id:itemId,name,minimum:minimum===''?null:Number(minimum),unit:value('unit')||'count',track:value('track')||'shared',kind:'CUSTOM'};
+    }else if(kind==='exams'){
+      const name=value('name');if(!name){toast('Enter an exam name');return}const pass=value('pass');item={id:itemId,name,pass:pass===''?null:Number(pass)};
+    }else if(kind==='progression'){
+      const textValue=value('text');if(!textValue){toast('Enter the progression requirement');return}item={id:itemId,prerequisite:textValue};
+    }else if(kind==='emergencies'){
+      const name=value('name');if(!name){toast('Enter an emergency name');return}item={id:itemId,name,category:value('category')||defaultEmergencyCategory(name)};
+      const current=core.applyGlobalOverrides(base),existing=Array.isArray(o.emergencyRequirementIds)?o.emergencyRequirementIds:core.requiredEmergencies(current).map(x=>x.id);o.emergencyRequirementIds=[...new Set([...existing,itemId])];
+    }
+    if(!item)return;o.custom[kind].push(item);core.saveGlobalOverrides(id,o);toast((item.name||'Item')+' added to Package');render();
   });
-  document.querySelectorAll('[data-reset-global-package]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.resetGlobalPackage;if(confirm('Reset this Package to its built-in defaults? Course-specific Tailor changes will remain.')){window.FLYMPUS_TRAINING.saveGlobalOverrides(id,{});toast('Package defaults reset');render()}});
+  document.querySelectorAll('[data-global-custom-remove]').forEach(btn=>btn.onclick=()=>{
+    const form=btn.closest('.globalPackageForm'),[kind,itemId]=String(btn.dataset.globalCustomRemove||'').split('|'),id=form?.dataset.globalPackageId;if(!id||!kind||!itemId)return;
+    const core=window.FLYMPUS_TRAINING,o=core.getGlobalOverrides(id)||{};if(!o.custom?.[kind])return;if(!confirm('Remove this custom Package item? Courses that have their own course-only copy are not changed.'))return;
+    o.custom[kind]=o.custom[kind].filter(x=>x.id!==itemId);
+    const patchKey={syllabi:'syllabi',criteria:'criteria',counters:'counters',exams:'exams',progression:'progression',emergencies:'emergencies'}[kind];if(patchKey&&o[patchKey])delete o[patchKey][itemId];
+    if(kind==='emergencies'&&Array.isArray(o.emergencyRequirementIds))o.emergencyRequirementIds=o.emergencyRequirementIds.filter(x=>x!==itemId);
+    core.saveGlobalOverrides(id,o);toast('Package item removed');render();
+  });
+  document.querySelectorAll('.globalPackageForm').forEach(form=>form.onsubmit=e=>{
+    e.preventDefault();const type=form.dataset.globalPackageType,id=form.dataset.globalPackageId,core=window.FLYMPUS_TRAINING,base=core.packageBase(type,id);if(!base)return;
+    const current=core.applyGlobalOverrides(base),fd=new FormData(form),old=core.getGlobalOverrides(id)||{},program={...(old.program||{}),name:String(fd.get('g_package_name')||current.name).trim()||current.name,phaseId:String(fd.get('g_phase')||current.phaseId||''),platformId:String(fd.get('g_platform')||''),trainingKind:String(fd.get('g_training')||current.trainingKind||'')};
+    if(type==='EP')program.dayNight=String(fd.get('g_daynight')||current.dayNight||'');else program.contextLabel=String(fd.get('g_context')||packageConfigurationLabel(type,current)).trim()||packageConfigurationLabel(type,current);
+    const overrides={...old,program,custom:old.custom||{},syllabi:{},criteria:{},emergencies:{},counters:{},exams:{},progression:{},emergencyRequirementIds:fd.getAll('g_required_emergency').map(String)};
+    (current.syllabi||[]).forEach(x=>{const min=fd.get('g_syll_min_'+x.id),supervision=String(fd.get('g_syll_supervision_'+x.id)||'INSTRUCTED'),name=String(fd.get('g_syll_name_'+x.id)||x.name).trim()||x.name;overrides.syllabi[x.id]={applicable:fd.has('g_syll_app_'+x.id),name,order:Number(fd.get('g_syll_order_'+x.id)||x.order||1),minimum:min===''?null:Number(min),instructorRequired:supervision!=='SOLO',mode:supervision==='SOLO'?'SOLO':(x.mode==='SOLO'?'INSTRUCTED':x.mode),track:String(fd.get('g_syll_track_'+x.id)||x.track||'shared')}});
+    (current.criteria||[]).forEach(x=>{const name=String(fd.get('g_criterion_name_'+x.id)||x.name).trim()||x.name;overrides.criteria[x.id]={applicable:fd.has('g_criterion_app_'+x.id),name,weight:Number(fd.get('g_criterion_weight_'+x.id)||0)}});
+    const allEmergency=[...core.emergencyCatalog(current.platformId),...(current.courseEmergencies||[])].filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i);
+    allEmergency.forEach(x=>{const name=String(fd.get('g_emergency_name_'+x.id)||x.name).trim()||x.name;overrides.emergencies[x.id]={name,category:String(fd.get('g_emergency_category_'+x.id)||x.category||defaultEmergencyCategory(name))}});
+    (current.experienceCounters||[]).forEach(x=>{const min=fd.get('g_counter_min_'+x.id),name=String(fd.get('g_counter_name_'+x.id)||x.name).trim()||x.name;overrides.counters[x.id]={applicable:fd.has('g_counter_app_'+x.id),name,minimum:min===''?null:Number(min),unit:String(fd.get('g_counter_unit_'+x.id)||x.unit||'count'),track:String(fd.get('g_counter_track_'+x.id)||x.track||'shared')}});
+    (current.exams||[]).forEach(x=>{const pass=fd.get('g_exam_pass_'+x.id),name=String(fd.get('g_exam_name_'+x.id)||x.name).trim()||x.name;overrides.exams[x.id]={applicable:fd.has('g_exam_app_'+x.id),name,pass:pass===''?null:Number(pass)}});
+    (current.progression||[]).forEach(x=>{const key=progressionEditableKey(x),patch={applicable:fd.has('g_gate_app_'+x.id)};if(key){const value=String(fd.get('g_gate_text_'+x.id)||'').trim();if(value)patch[key]=value}overrides.progression[x.id]=patch});
+    core.saveGlobalOverrides(id,overrides);toast('Package saved · all courses using it inherit these defaults');render();
+  });
+  document.querySelectorAll('[data-reset-global-package]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.resetGlobalPackage;if(confirm('Reset this Package to its built-in defaults? Course-specific Tailor changes remain.')){window.FLYMPUS_TRAINING.saveGlobalOverrides(id,{});toast('Package defaults reset');render()}});
+
 
   if($('#cfgAddPlatform'))$('#cfgAddPlatform').onsubmit=e=>{
     e.preventDefault();const name=String(new FormData(e.currentTarget).get('name')||'').trim(),type=state.typeWorkspace||cfgGet().courseTypes[0]?.id||'';if(!name||!type)return;
