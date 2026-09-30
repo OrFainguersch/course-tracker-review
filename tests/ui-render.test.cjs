@@ -54,7 +54,7 @@ assert.match(elements.get("#content").innerHTML,/SELECTED PACKAGE/);
 assert.match(elements.get("#content").innerHTML,/After creating the course/);
 assert.match(elements.get("#content").innerHTML,/Course name required/);
 assert.match(elements.get("#content").innerHTML,/id="courseBuilderSubmit" type="submit" >Create course<\/button>/,"Selected Package should keep Create clickable so missing name gets explicit feedback");
-assert.equal(vm.runInContext("uniqueAutoCourseCode('Aerostar EP Course','EP')",context),"AEP-26-2","Automatic course codes must avoid the built-in course collision");
+assert.equal(vm.runInContext("uniqueAutoCourseCode('Aerostar External Pilot Course','EP')",context),"AEP-26-2","Automatic course codes must avoid the built-in course collision");
 vm.runInContext("state.builderCountry='cyprus';render()",context);
 assert.equal(vm.runInContext("state.builderProgram",context),"ip_full_new_gcs_d","Country changes must not clear the selected Package");
 vm.runInContext("state.settingsTab='overrides';render()",context);assert.match(elements.get("#content").innerHTML,/Tailor active course/);
