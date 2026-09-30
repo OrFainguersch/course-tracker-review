@@ -54,8 +54,8 @@ vm.runInContext("state.screen='roster';state.rosterManage=true;state.rosterType=
 assert.match(elements.get("#content").innerHTML,/Add person/);
 assert.match(elements.get("#content").innerHTML,/Remove from course/);
 vm.runInContext("updateCourseMembership('t1','TRAINEE',{removed:true});state.personEditKey=null;render()",context);
-assert.doesNotMatch(elements.get("#content").innerHTML,/Yoav Shauli/);
 assert.equal(vm.runInContext("courseTrainees().some(x=>x.id==='t1')",context),false);
+assert.match(elements.get("#content").innerHTML,/assignExistingForm/,"Removed people should be available to reassign");
 vm.runInContext("updateCourseMembership('t1','TRAINEE',{removed:false});Object.assign(currentCourseMeta,{type:'EP',phase:'Full Scale',platformId:'aerostar',trainingKind:'New Training',dayNight:'Day',country:'Israel',programId:'ep_full_day_new'});state.screen='profile';state.selectedTrainee='t1';state.profileTab='activity';render()",context);
 assert.match(elements.get("#content").innerHTML,/Experience requirements/);
 assert.match(elements.get("#content").innerHTML,/Takeoffs/);
