@@ -103,4 +103,26 @@ assert.equal(epCourseOverride.experienceCounters.find(x=>x.id==="ep_full_day_tak
 assert.equal(epCourseOverride.criteria.find(x=>x.id==="flight_path_control").name,"Course flight path");
 assert.equal(core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"}).syllabi.find(x=>x.id==="full_preflight").name,"Preflight","Tailor must not mutate the source suit");
 
+core.saveOverrides("COURSE-CUSTOM",{
+  custom:{
+    syllabi:[{id:"course_syll_1",name:"Course-only circuits",order:999,minimum:2,mode:"INSTRUCTED",instructorRequired:true,track:"day"}],
+    counters:[{id:"course_counter_1",name:"Course-only repetitions",minimum:4,unit:"count",track:"shared",kind:"CUSTOM"}],
+    criteria:[{id:"course_criterion_1",name:"Course-only airmanship",weight:15}],
+    exams:[{id:"course_exam_1",name:"Course-only exam",pass:85}],
+    progression:[{id:"course_gate_1",prerequisite:"Course Manager approval"}],
+    emergencies:[{id:"course_emergency_1",name:"Course-only emergency",category:"General / Operational"}]
+  },
+  emergencyRequirementIds:["aero_engine_cut","course_emergency_1"]
+});
+const customCourse=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"},{courseKey:"COURSE-CUSTOM"});
+assert(customCourse.syllabi.some(x=>x.id==="course_syll_1"&&x.courseOnly===true),"Course-only syllabus must resolve only in that course");
+assert(customCourse.experienceCounters.some(x=>x.id==="course_counter_1"&&x.minimum===4),"Course-only experience requirement must resolve");
+assert(customCourse.criteria.some(x=>x.id==="course_criterion_1"),"Course-only criterion must resolve");
+assert(customCourse.exams.some(x=>x.id==="course_exam_1"),"Course-only exam must resolve");
+assert(customCourse.progression.some(x=>x.id==="course_gate_1"),"Course-only progression gate must resolve");
+assert(core.requiredEmergencies(customCourse).some(x=>x.id==="course_emergency_1"),"Course-only emergency must resolve into course emergency requirements");
+const cleanCourse=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"});
+assert(!cleanCourse.syllabi.some(x=>x.id==="course_syll_1"),"Course-only syllabus must not leak into Package defaults");
+assert(!core.requiredEmergencies(cleanCourse).some(x=>x.id==="course_emergency_1"),"Course-only emergency must not leak into other courses");
+
 console.log(JSON.stringify({ok:true,catalogs:core.validate().catalogs,programs:core.validate().programs,aerostarEmergencies:core.emergencyCatalog("aerostar").length,technicianTasks:tech.syllabi.length},null,2));
