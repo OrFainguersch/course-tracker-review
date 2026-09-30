@@ -135,10 +135,12 @@
       }
     }else if(s.courseType==="TECHNICIAN"){
       s.phaseId=s.phaseId||c.phases?.[0]?.id||"";
-      s.trainingKind="new";
-      if(s.platformId){
-        const matches=programsFor(s).filter(p=>p.trainingKind==="new");
-        if(!s.programId&&matches.length)s.programId=matches[0].id;
+      if(s.platformId&&s.trainingKind){
+        const matches=programsFor(s);
+        if(!s.programId&&matches.length){
+          const preferred=matches.find(p=>p.configurationId==="engine_h_gcs_d")||matches[0];
+          s.programId=preferred.id;
+        }
         const chosen=matches.find(p=>p.id===s.programId)||matches[0];
         if(chosen&&!s.dayNight)s.dayNight=chosen.dayNight||"mixed";
       }
@@ -159,7 +161,7 @@
       selection:s,
       showPhase:profession==="EP",
       showPlatform:profession==="IP"||profession==="TECHNICIAN"||epFull,
-      showTrainingKind:profession==="IP"||epFull,
+      showTrainingKind:profession==="IP"||profession==="TECHNICIAN"||epFull,
       showTracks:epFull,
       phaseOptions:phasesFor(profession),
       platformOptions,
