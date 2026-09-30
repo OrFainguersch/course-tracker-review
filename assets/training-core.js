@@ -119,13 +119,15 @@
     return mergeOverrideObjects(ids.map(getGlobalOverrides));
   }
   function applyOverrides(program,overrides){
-    const p=clone(program);if(!p)return null;const o=overrides||{};
+    const p=clone(program);if(!p)return null;const o=overrides||{},custom=o.custom||{};
     if(o.program)Object.assign(p,o.program);
-    p.syllabi=(p.syllabi||[]).filter(x=>o.syllabi?.[x.id]?.applicable!==false).map(x=>({...x,...(o.syllabi?.[x.id]||{})})).sort((a,b)=>(a.order||0)-(b.order||0));
-    p.exams=(p.exams||[]).filter(x=>o.exams?.[x.id]?.applicable!==false).map(x=>({...x,...(o.exams?.[x.id]||{})}));
-    p.criteria=(p.criteria||[]).filter(x=>o.criteria?.[x.id]?.applicable!==false).map(x=>({...x,...(o.criteria?.[x.id]||{})}));
-    p.experienceCounters=(p.experienceCounters||[]).filter(x=>o.counters?.[x.id]?.applicable!==false).map(x=>({...x,...(o.counters?.[x.id]||{})}));
-    p.progression=(p.progression||[]).filter(x=>o.progression?.[x.id]?.applicable!==false).map(x=>({...x,...(o.progression?.[x.id]||{})}));
+    const mergeItems=(base,patches,added)=>[...(base||[]),...(clone(added||[]).map(x=>({...x,courseOnly:true})))].filter(x=>patches?.[x.id]?.applicable!==false&&x.applicable!==false).map(x=>({...x,...(patches?.[x.id]||{})}));
+    p.syllabi=mergeItems(p.syllabi,o.syllabi,custom.syllabi).sort((a,b)=>(a.order||0)-(b.order||0));
+    p.exams=mergeItems(p.exams,o.exams,custom.exams);
+    p.criteria=mergeItems(p.criteria,o.criteria,custom.criteria);
+    p.experienceCounters=mergeItems(p.experienceCounters,o.counters,custom.counters);
+    p.progression=mergeItems(p.progression,o.progression,custom.progression);
+    p.courseEmergencies=mergeItems(p.courseEmergencies,null,custom.emergencies);
     if(Array.isArray(o.emergencyRequirementIds))p.emergencyRequirementIds=o.emergencyRequirementIds.slice();
     p.courseOverrideApplied=Object.keys(o).length>0;return p;
   }
@@ -221,7 +223,7 @@
   function requiredEmergencies(program){
     if(!program)return[];
     const platformIds=program.platformId?[program.platformId]:(program.platformIds||[]);
-    const all=uniq(platformIds.flatMap(id=>emergencyCatalog(id)));
+    const all=uniq([...platformIds.flatMap(id=>emergencyCatalog(id)),...(program.courseEmergencies||[])]);
     const ids=program.emergencyRequirementIds;if(!Array.isArray(ids))return all;const wanted=new Set(ids);return all.filter(x=>wanted.has(x.id));
   }
   function validate(){
