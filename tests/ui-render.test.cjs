@@ -19,6 +19,9 @@ assert(html.includes("internal platform identifier stays stable automatically an
 assert(!html.includes("<span class=\"pill gray\">'+esc(x.id)+'</span>"),"Platform internal IDs must not be shown as user-facing pills");
 assert(html.includes("myCoursesPlatformFilter")&&html.includes("myCoursesCountryFilter"),"My Courses must filter by platform and country");
 assert(html.includes("myCoursesStatusFilter"),"My Courses must filter by lifecycle status");
+assert(html.includes("myCoursesFilters")&&html.includes("myCoursesFilterSummary"),"My Courses filters must use a compact collapsible container");
+assert(html.includes("grid-template-columns:repeat(2,minmax(0,1fr))"),"Mobile My Courses filters must stay compact in two columns where space allows");
+assert(html.includes("Number(window.innerWidth||9999)>760||state.myCoursesFiltersOpen===true"),"My Courses filter disclosure must default open on desktop and remember mobile expansion");
 assert(html.includes('aria-controls="topCourseDropdown"')&&html.includes('id="topCourseDropdown"'),"Header must contain a real course switcher dropdown");
 assert(html.includes(".topCourseDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right));width:auto"),"Mobile quick course dropdown must stay inside the viewport on both sides");
 assert(html.includes("function positionTopCourseDropdown()"),"Quick course switcher must position its mobile menu below the real header button");
@@ -52,6 +55,7 @@ assert.equal(switcherOrder,"current,runNew,runOld,future1,future2,done","Quick s
 assert.match(elements.get("#content").innerHTML,/My Courses/);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Course/);
 assert.match(elements.get("#content").innerHTML,/id="myCoursesStatusFilter"/);
+assert.match(elements.get("#content").innerHTML,/<details class="myCoursesFilters" id="myCoursesFilters"/);
 assert.match(elements.get("#content").innerHTML,/IN PROGRESS/);
 assert.doesNotMatch(elements.get("#content").innerHTML,/courseSelectedBadge|>SELECTED</,"My Courses must not show a separate SELECTED badge");
 assert.match(elements.get("#content").innerHTML,/Selected course/);
