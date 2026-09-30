@@ -45,6 +45,9 @@ assert(html.includes("function navIconSvg(name)")&&html.includes("class=\"navIco
 assert(!html.includes("['settings','⚙','Course Settings']"),"Course Settings must not use an emoji gear in the professional navigation");
 assert(html.includes("Professional visual refinement 0661")&&html.includes(".navBtn.active{background:rgba(255,255,255,.09)")&&html.includes(".sidebarFlympusWordmark{width:172px!important"),"Sidebar styling must use the restrained professional visual layer");
 assert(html.includes("homeCourseContext cols")&&html.includes("homeCourseContextItem"),"Home hero must use the minimal labeled key-value strip instead of rounded metadata pills");
+assert(html.includes(".homeCourseContext.cols5{grid-template-columns:.74fr 1.08fr 1.06fr 1.42fr .88fr}"),"Five-column Home metadata must allocate enough width to Phase and Type on mobile");
+assert(html.includes(".homeContextLabelFull.long{display:none}")&&html.includes("label==='Qualification'?'Qual.'"),"Long Qualification and Configuration labels must use compact mobile forms rather than ellipsis");
+assert(!html.includes(".homeCourseContextItem small{display:block;color:rgba(218,232,244,.67);font-size:7.5px;line-height:1.1;font-weight:800;letter-spacing:.085em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"),"Home metadata labels must not be truncated with ellipsis");
 assert(html.includes("['Type',currentCourseMeta.trainingKind||'—']"),"Home metadata should keep the short TYPE label for mobile visual balance");
 assert(html.includes("currentCourseMeta.type==='IP'?'Configuration':'Qualification'"),"Day or Night must be described as a qualification rather than repeating Day as both label and value");
 assert(html.includes("showHomeQualification=currentCourseMeta.type!=='EP'||!!epQualificationId(activeProgram)"),"EP phases without a meaningful Day/Night qualification must omit that field");
