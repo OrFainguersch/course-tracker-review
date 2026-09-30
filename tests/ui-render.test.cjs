@@ -48,10 +48,10 @@ assert(html.includes("active.courseName||'Aerostar EP Course'"),"Header must res
 assert(html.includes("function navIconSvg(name)")&&html.includes("class=\"navIcon\""),"Sidebar navigation must use a consistent SVG icon system instead of decorative glyphs");
 assert(html.includes('id="mobileBottomNav"')&&html.includes("function renderMobileBottomNav()"),"Mobile layout must expose the premium bottom navigation");
 assert(html.includes("['roster','roster','Roster'],['evaluation','evaluation','Evaluation'],['home','home','Home'],['planned','planned','Plan'],['more','more','More']"),"Mobile bottom navigation must use Roster, Evaluation, Home, Plan and More with Home centered");
-assert(html.includes("Mobile premium glass bottom navigation · 0675")&&html.includes("border:1.5px solid #d9b14e")&&html.includes("backdrop-filter:blur(10px)")&&html.includes("height:74px"),"Mobile bottom navigation must closely match the selected dark premium reference with subtle glass, gold accent and correct proportions");
+assert(html.includes("Mobile premium glass bottom navigation · 0676")&&html.includes("border:1.4px solid rgba(226,188,89,.82)")&&html.includes("height:86px")&&html.includes("width:68px;height:68px;margin-top:-31px"),"Mobile bottom navigation must closely match the supplied premium reference proportions, gold outline and centered Home bump");
 assert(html.includes("data-mobile-more")&&html.includes("$('#drawer').classList.add('open')"),"More must open the full sidebar menu");
 assert(html.includes(".mobileBottomItem .mobileBottomLabel{display:block;white-space:nowrap;overflow:visible"),"Mobile navigation labels must remain fully visible and not clip at the bottom");
-assert(html.includes("width:48px;height:48px;margin-top:-13px"),"Centered Home button must use the smaller reference-matched proportion");
+assert(html.includes("width:68px;height:68px;margin-top:-31px"),"Centered Home button must use the large reference-matched proportion");
 assert(!html.includes("['settings','⚙','Course Management']"),"Course Management must not use an emoji gear in the professional navigation");
 assert(html.includes("Professional visual refinement 0661")&&html.includes(".navBtn.active{background:rgba(255,255,255,.09)")&&html.includes(".sidebarFlympusWordmark{width:172px!important"),"Sidebar styling must use the restrained professional visual layer");
 assert(html.includes("homeCourseContext cols")&&html.includes("homeCourseContextItem"),"Home hero must use the minimal labeled key-value strip instead of rounded metadata pills");
