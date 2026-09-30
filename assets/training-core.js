@@ -155,12 +155,13 @@
     if(o.program)Object.assign(p,o.program);
     const markCustom=x=>scope==="global"?({...x,packageCustom:true,courseOnly:false}):({...x,courseOnly:true});
     const mergeItems=(base,patches,added)=>[...(base||[]),...(clone(added||[]).map(markCustom))].filter(x=>patches?.[x.id]?.applicable!==false&&x.applicable!==false).map(x=>({...x,...(patches?.[x.id]||{})}));
-    p.syllabi=mergeItems(p.syllabi,o.syllabi,custom.syllabi).sort((a,b)=>(a.order||0)-(b.order||0));
-    p.exams=mergeItems(p.exams,o.exams,custom.exams);
-    p.criteria=mergeItems(p.criteria,o.criteria,custom.criteria);
-    p.experienceCounters=mergeItems(p.experienceCounters,o.counters,custom.counters);
-    p.progression=mergeItems(p.progression,o.progression,custom.progression);
-    p.courseEmergencies=mergeItems(p.courseEmergencies,o.emergencies,custom.emergencies);
+    const ordered=list=>list.sort((a,b)=>(Number(a.order)||9999)-(Number(b.order)||9999));
+    p.syllabi=ordered(mergeItems(p.syllabi,o.syllabi,custom.syllabi));
+    p.exams=ordered(mergeItems(p.exams,o.exams,custom.exams));
+    p.criteria=ordered(mergeItems(p.criteria,o.criteria,custom.criteria));
+    p.experienceCounters=ordered(mergeItems(p.experienceCounters,o.counters,custom.counters));
+    p.progression=ordered(mergeItems(p.progression,o.progression,custom.progression));
+    p.courseEmergencies=ordered(mergeItems(p.courseEmergencies,o.emergencies,custom.emergencies));
     p.emergencyOverrides={...(p.emergencyOverrides||{}),...(o.emergencies||{})};
     if(Array.isArray(o.emergencyRequirementIds))p.emergencyRequirementIds=o.emergencyRequirementIds.slice();
     p.courseOverrideApplied=scope==="course"&&Object.keys(o).length>0;
@@ -259,7 +260,7 @@
     if(!program)return[];
     const platformIds=program.platformId?[program.platformId]:(program.platformIds||[]);
     const all=uniq([...platformIds.flatMap(id=>emergencyCatalog(id)),...(program.courseEmergencies||[])]).map(x=>({...x,...(program.emergencyOverrides?.[x.id]||{})}));
-    const ids=program.emergencyRequirementIds;if(!Array.isArray(ids))return all;const wanted=new Set(ids);return all.filter(x=>wanted.has(x.id));
+    const ordered=list=>list.sort((a,b)=>(Number(a.order)||9999)-(Number(b.order)||9999)),ids=program.emergencyRequirementIds;if(!Array.isArray(ids))return ordered(all);const wanted=new Set(ids);return ordered(all.filter(x=>wanted.has(x.id)));
   }
   function validate(){
     const errors=[],warnings=[];
