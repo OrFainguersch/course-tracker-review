@@ -409,9 +409,19 @@ select option[value=""]{color:#8a9bad}
   .tailorFields{grid-template-columns:1fr}.tailorFields .tailorWide{grid-column:auto}
 }
 </style>
+
+<style>
+/* ===== Multi-course / course access ===== */
+.topCourseSwitch{margin-left:auto;margin-right:10px;min-width:220px;max-width:360px;height:52px;padding:7px 12px;border:1px solid rgba(255,255,255,.25);border-radius:13px;background:rgba(255,255,255,.08);color:#fff;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;text-align:left;cursor:pointer;align-items:center}
+.topCourseSwitch>span{grid-column:1;font-size:9px;letter-spacing:.08em;text-transform:uppercase;opacity:.68;font-weight:800}.topCourseSwitch>b{grid-column:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}.topCourseSwitch>i{grid-column:2;grid-row:1/3;font-style:normal;font-size:15px;padding-left:8px}
+.myCoursesHead{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px}.myCourseGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}.myCourseCard{padding:18px;display:flex;flex-direction:column;gap:15px;border:1px solid #dce6f0}.myCourseCard.active{border-color:#79b8f3;box-shadow:0 0 0 2px rgba(43,139,222,.08)}.myCourseCardTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.myCourseCardTop h2{font-size:18px;margin:8px 0 4px;color:#10365e}.myCourseCardTop p{margin:0;color:#708398;font-size:11px;line-height:1.45}.courseRoleBadge{white-space:nowrap;background:#edf5fc;color:#3f6488;border-radius:999px;padding:6px 9px;font-size:9px;font-weight:850}.courseRoleBadge.manager{background:#fff0cf;color:#9a690d}.myCourseMeta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.myCourseMeta span{padding:8px;border-radius:10px;background:#f5f8fb;min-width:0}.myCourseMeta small{display:block;color:#8999aa;font-size:8px;text-transform:uppercase;font-weight:800}.myCourseMeta b{display:block;color:#2d4864;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.myCourseOpen{width:100%}
+.modalDivider{display:flex;align-items:center;gap:10px;margin:14px 0;color:#8797a9;font-size:10px;font-weight:800;text-transform:uppercase}.modalDivider:before,.modalDivider:after{content:"";height:1px;background:#e3eaf1;flex:1}
+.assignedCourseList{display:grid;gap:8px;margin-top:10px}.assignedCourseRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid #e3eaf1;border-radius:11px}.assignedCourseRow b{display:block;color:#274867;font-size:12px}.assignedCourseRow small{display:block;color:#7c8da0;font-size:9px;margin-top:2px}
+@media(max-width:760px){.topBrandCopy{display:none}.topCourseSwitch{min-width:0;max-width:none;flex:1;margin:0 8px;height:48px}.topCourseSwitch>span{display:none}.topCourseSwitch>b{grid-row:1/3;font-size:12px}.myCoursesHead{align-items:flex-start;flex-direction:column}.myCoursesHead .btn{width:100%}.myCourseGrid{grid-template-columns:1fr}.myCourseMeta{grid-template-columns:1fr 1fr}.myCourseCardTop{flex-direction:column}.courseRoleBadge{align-self:flex-start}}
+</style>
 </head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Aerostar Training</span></div></div><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0604 · mock/local only</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0605 · multi-course local review</div><div class="toast" id="toast"></div></div>
 <script src="./assets/ep-catalog.js"></script>
 <script src="./assets/aerostar-platform.js"></script>
 <script src="./assets/ip-catalog.js"></script>
@@ -426,6 +436,7 @@ select option[value=""]{color:#8a9bad}
 <script src="./assets/ep-lessons-night.js"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
+const currentUserId='i1';
 let currentCourseId=(()=>{try{return JSON.parse(localStorage.getItem('ct-review-active-course')||'{}').courseCode||'AEP-26'}catch{return 'AEP-26'}})();
 const trainees=[
 {id:'t1',name:'Yoav Shauli',initials:'YS',status:'Active',progress:85,totalFlights:29,instructedFlights:18,soloFlights:11,average:4.4,rank:1,currentSyllabus:'Complex Emergencies',nextSyllabus:'Pre-Test Preparation',startDate:'Sep 3'},
@@ -456,15 +467,31 @@ let activeCoursePreview={};try{activeCoursePreview=JSON.parse(localStorage.getIt
 const currentCourseMeta={type:'EP',phase:'RC Model',platformId:'rc_model',trainingKind:'New Training',dayNight:'Day',country:'Israel',programId:'ep_rc_new',courseName:'Aerostar EP Course',courseCode:'AEP-26',startsOn:'2026-09-01',...activeCoursePreview};
 const syllProgress=[['Basic Handling',100,'Complete'],['Figure 8',100,'Complete'],['Circuits',100,'Complete'],['Emergencies',80,'Current'],['Final Preparation',0,'Next']];
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
-const state={screen:'home',selectedTrainee:'t1',selectedInstructor:'i1',search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',...initialUiState};
+const state={screen:'courses',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',...initialUiState};
 function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace,emergencyProfileFilter:state.emergencyProfileFilter,builderType:state.builderType,builderPhase:state.builderPhase,builderPlatform:state.builderPlatform,builderTraining:state.builderTraining,builderProgram:state.builderProgram,builderDay:state.builderDay,builderCountry:state.builderCountry,builderName:state.builderName,builderCode:state.builderCode,builderStartsOn:state.builderStartsOn,libraryProfession:state.libraryProfession}))}catch{}}
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function safeArrayStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[]}catch{return []}}
 function safeObjectStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch{return {}}}
+function isDefaultReviewCourse(courseKey=currentCourseId){return String(courseKey||'')==='AEP-26'}
+function courseScopedKey(base,courseKey=currentCourseId){return base+':'+String(courseKey||'AEP-26')}
+function readCourseArray(base){
+  const key=courseScopedKey(base),raw=localStorage.getItem(key);
+  if(raw!==null)return safeArrayStorage(key);
+  if(isDefaultReviewCourse()&&localStorage.getItem(base)!==null){const legacy=safeArrayStorage(base);try{localStorage.setItem(key,JSON.stringify(legacy))}catch{}return legacy}
+  return [];
+}
+function writeCourseArray(base,value){try{localStorage.setItem(courseScopedKey(base),JSON.stringify(Array.isArray(value)?value:[]))}catch{}}
+function readCourseObject(base){
+  const key=courseScopedKey(base),raw=localStorage.getItem(key);
+  if(raw!==null)return safeObjectStorage(key);
+  if(isDefaultReviewCourse()&&localStorage.getItem(base)!==null){const legacy=safeObjectStorage(base);try{localStorage.setItem(key,JSON.stringify(legacy))}catch{}return legacy}
+  return {};
+}
+function writeCourseObject(base,value){try{localStorage.setItem(courseScopedKey(base),JSON.stringify(value&&typeof value==='object'?value:{}))}catch{}}
 
 function toast(t){const x=$('#toast');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),1700)}
-function getEvaluations(){return safeArrayStorage('ct-review-evals')}function setEvaluations(x){try{localStorage.setItem('ct-review-evals',JSON.stringify(x))}catch{}}
-const nav=[['home','⌂','Home'],['evaluation','✓','Evaluation'],['safety','◈','Safety'],['exams','▤','Exams'],['planned','▣','Planned vs Executed'],['__label','','COURSE'],['roster','♙','Course Roster'],['reports','▥','Reports'],['settings','⚙','Course Settings']];
+function getEvaluations(){return readCourseArray('ct-review-evals')}function setEvaluations(x){writeCourseArray('ct-review-evals',x)}
+const nav=[['courses','▦','My Courses'],['home','⌂','Home'],['evaluation','✓','Evaluation'],['safety','◈','Safety'],['exams','▤','Exams'],['planned','▣','Planned vs Executed'],['__label','','COURSE'],['roster','♙','Course Roster'],['reports','▥','Reports'],['settings','⚙','Course Settings']];
 function renderNav(){const n=$('#nav');n.innerHTML=nav.map(([id,ic,l])=>id==='__label'?'<div class="navLabel">'+l+'</div>':`<button class="navBtn ${state.screen===id?'active':''}" data-nav="${id}"><span>${ic}</span><span>${l}</span></button>`).join('');n.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>go(b.dataset.nav));}
 function go(screen,extra={}){Object.assign(state,extra,{screen});saveUiState();$('#drawer').classList.remove('open');render()}
 $('#menuBtn').onclick=()=>$('#drawer').classList.add('open');$('#backdrop').onclick=()=>$('#drawer').classList.remove('open');
@@ -484,6 +511,10 @@ const mockEvalHistory=[
 ];
 const mockSafetyEvents=[{date:'2026-09-11',severity:'Low'},{date:'2026-09-21',severity:'Medium'}];
 const mockExamAttempts=[{traineeId:'t1',grade:92,pass:80},{traineeId:'t2',grade:78,pass:80},{traineeId:'t3',grade:88,pass:80},{traineeId:'t4',grade:84,pass:80}];
+function courseMockEvalHistory(){return isDefaultReviewCourse()?mockEvalHistory:[]}
+function courseMockSafetyEvents(){return isDefaultReviewCourse()?mockSafetyEvents:[]}
+function courseMockExamAttempts(){return isDefaultReviewCourse()?mockExamAttempts:[]}
+function courseMockSoloRows(traineeId){return isDefaultReviewCourse()?(mockSoloBreakdown[traineeId]||[]):[]}
 const requirementProgress={
 t1:[['Required instructed flights',18,18,'count'],['Solo flights',11,10,'count'],['Emergency types practiced',6,8,'count'],['Required syllabus gates',7,8,'count']],
 t2:[['Required instructed flights',18,20,'count'],['Solo flights',6,10,'count'],['Emergency types practiced',4,8,'count'],['Required syllabus gates',5,8,'count']],
@@ -497,21 +528,21 @@ t3:{current:'Basic Emergencies B',completed:4,minimum:4,presence:'WITH INSTRUCTO
 t4:{current:'Circuits',completed:2,minimum:4,presence:'WITH INSTRUCTOR',reviewRequired:false,next:'Basic Emergencies A',optional:[]}
 };
 
-function getDailyReports(){return safeArrayStorage('ct-review-daily-reports')}
-function saveDailyReports(v){localStorage.setItem('ct-review-daily-reports',JSON.stringify(v))}
+function getDailyReports(){return readCourseArray('ct-review-daily-reports')}
+function saveDailyReports(v){writeCourseArray('ct-review-daily-reports',v)}
 function allEvaluationsForAnalytics(){
  const defs=cfgGet().emergencies;const saved=getEvaluations().map(e=>({date:e.flightDate,traineeId:e.traineeId,instructorId:e.instructorId,syllabus:e.syllabus,grade:Number(e.grade)||0,emergencies:e.emergencyCounts?Object.entries(e.emergencyCounts).flatMap(([id,n])=>Array.from({length:Number(n)||0},()=>cfgItem(defs,id)?.name)).filter(Boolean):(e.emergencies||[]).flatMap((n,i)=>Array.from({length:Number(n)||0},()=>emergencies[i])).filter(Boolean)}));
- return [...mockEvalHistory,...saved];
+ return [...courseMockEvalHistory(),...saved];
 }
 function reportBars(items,maxItems=10){const list=(items||[]).slice(0,maxItems),max=Math.max(1,...list.map(x=>x.count||0));return list.length?'<div class="reportBars">'+list.map(x=>'<div class="reportBarRow"><span>'+esc(x.name)+'</span><i><b style="width:'+Math.max(3,(x.count||0)/max*100)+'%"></b></i><strong>'+esc(x.count)+'</strong></div>').join('')+'</div>':'<p class="sub">No matching data.</p>'}
 function dist(values){const m={};values.filter(Boolean).forEach(v=>m[v]=(m[v]||0)+1);return Object.keys(m).map(name=>({name,count:m[name]})).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name))}
 function mean(values){const v=values.filter(x=>Number.isFinite(Number(x))).map(Number);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null}
 
-function getSafetyRecords(){return safeArrayStorage('ct-review-safety')}
-function saveSafetyRecords(v){localStorage.setItem('ct-review-safety',JSON.stringify(v))}
-function getExamRecords(){return safeArrayStorage('ct-review-exams')}
-function saveExamRecords(v){localStorage.setItem('ct-review-exams',JSON.stringify(v))}
-function currentActivityCounts(){return {evaluation:getEvaluations().length,safety:mockSafetyEvents.length+getSafetyRecords().length,exams:mockExamAttempts.length+getExamRecords().length,planned:getDailyReports().length,roster:trainees.length+instructors.length}}
+function getSafetyRecords(){return readCourseArray('ct-review-safety')}
+function saveSafetyRecords(v){writeCourseArray('ct-review-safety',v)}
+function getExamRecords(){return readCourseArray('ct-review-exams')}
+function saveExamRecords(v){writeCourseArray('ct-review-exams',v)}
+function currentActivityCounts(){return {evaluation:getEvaluations().length,safety:courseMockSafetyEvents().length+getSafetyRecords().length,exams:courseMockExamAttempts().length+getExamRecords().length,planned:getDailyReports().length,roster:courseTrainees().length+courseInstructors().length}}
 function home(){
  const activeT=courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active');
  const evals=allEvaluationsForAnalytics().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
@@ -520,7 +551,7 @@ function home(){
  const weekAgo=new Date();weekAgo.setDate(weekAgo.getDate()-7);
  const weeklyFlights=evals.filter(e=>{const d=new Date(e.date+'T12:00:00');return !Number.isNaN(d.getTime())&&d>=weekAgo}).length;
  const openSafety=getSafetyRecords().filter(x=>!['CLOSED','RESOLVED'].includes(String(x.status||'').toUpperCase())).length;
- const examMap=Object.fromEntries(mockExamAttempts.map(x=>[x.traineeId,x]));
+ const examMap=Object.fromEntries(courseMockExamAttempts().map(x=>[x.traineeId,x]));
  const latestBy={};evals.forEach(e=>{if(!latestBy[e.traineeId])latestBy[e.traineeId]=e});
  const attention=activeT.map(t=>{
    const prog=progressionByTrainee[t.id]||{};
@@ -629,7 +660,7 @@ function evalCard(e){return `<article class="evalItem"><div class="evalTop"><div
 function roster(){
  const allT=courseTrainees().map(t=>{const m=courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'});return {...t,status:m.status||'Active',type:'TRAINEE'}});
  const allI=courseInstructors().map(i=>{const m=courseMembershipFor(i.id,'INSTRUCTOR',{role:i.role||'INSTRUCTOR'});return {...i,role:m.role||'INSTRUCTOR',type:'INSTRUCTOR'}});
- const type=state.rosterType||'TRAINEE',base=type==='TRAINEE'?allT:allI,manage=!!state.rosterManage;
+ const type=state.rosterType||'TRAINEE',base=type==='TRAINEE'?allT:allI,manage=!!state.rosterManage,unassignedExisting=[...allTrainees().map(x=>({...x,type:'TRAINEE'})),...allInstructors().map(x=>({...x,type:'INSTRUCTOR'}))].filter(x=>!coursePersonIsAssignedTo(x,x.type,currentCourseId));
  let list=type==='TRAINEE'?base.filter(t=>state.filter==='All'||t.status===state.filter):base;
  if(state.search)list=list.filter(t=>(t.name+' '+(t.email||'')).toLowerCase().includes(state.search.toLowerCase()));
  list=list.slice().sort((a,b)=>{
@@ -667,24 +698,26 @@ function roster(){
      '<div class="rosterActions">'+(manage?'<button class="btn edit small rosterEditBtn" data-person-edit="INSTRUCTOR:'+t.id+'">✎ Edit</button>':'<button class="rosterChevron" data-instructor="'+t.id+'" aria-label="Open '+esc(t.name)+'">›</button>')+'</div>'+
    '</article>';
  }).join(''):'<div class="card empty"><h3>No matching people.</h3></div>')+'</section>'+
- (manage?'<div class="modal" id="personModal"><div class="modalCard"><div class="inlineHead"><div><h2>Add to course roster</h2><p>Adds a person to this course.</p></div><button class="btn secondary small" id="closePersonModal">✕</button></div><form id="addPersonForm"><div class="fields"><div class="field"><label>Full name</label><input class="input" name="name" required></div><div class="field"><label>Email (optional)</label><input class="input" type="email" name="email"></div><div class="field"><label>Person type</label><select name="type" required><option value="" selected disabled>Select person type</option><option value="TRAINEE">Trainee</option><option value="INSTRUCTOR">Instructor</option></select></div></div><div class="toolbar"><button class="btn sky" type="submit">Add to course</button></div></form></div></div>':'')+
+ (manage?'<div class="modal" id="personModal"><div class="modalCard"><div class="inlineHead"><div><h2>Add to course roster</h2><p>Assign an existing person or create a new one for this course.</p></div><button class="btn secondary small" id="closePersonModal">✕</button></div>'+(unassignedExisting.length?'<form id="assignExistingForm"><div class="field"><label>Existing person</label><select name="personKey" required><option value="" selected disabled>Select person</option>'+unassignedExisting.map(x=>'<option value="'+x.type+':'+x.id+'">'+(x.type==='INSTRUCTOR'?'Instructor':'Trainee')+' · '+esc(x.name)+'</option>').join('')+'</select></div><div class="toolbar"><button class="btn sky" type="submit">Add existing person</button></div></form><div class="modalDivider"><span>or create new</span></div>':'')+'<form id="addPersonForm"><div class="fields"><div class="field"><label>Full name</label><input class="input" name="name" required></div><div class="field"><label>Email (optional)</label><input class="input" type="email" name="email"></div><div class="field"><label>Person type</label><select name="type" required><option value="" selected disabled>Select person type</option><option value="TRAINEE">Trainee</option><option value="INSTRUCTOR">Instructor</option></select></div></div><div class="toolbar"><button class="btn secondary" type="submit">Create and add</button></div></form></div></div>':'')+
  personEditModal();
 }
 function getCourseMembershipState(){return safeObjectStorage('ct-review-course-memberships')}
 function saveCourseMembershipState(v){localStorage.setItem('ct-review-course-memberships',JSON.stringify(v))}
-function courseMembershipFor(personId,type,defaults={}){
-  const root=getCourseMembershipState(),course=root[currentCourseId]||{},bucket=type==='INSTRUCTOR'?(course.instructors||{}):(course.trainees||{});
+function courseMembershipForCourse(personId,type,courseKey,defaults={}){
+  const root=getCourseMembershipState(),course=root[courseKey]||{},bucket=type==='INSTRUCTOR'?(course.instructors||{}):(course.trainees||{});
   return {...defaults,...(bucket[personId]||{})};
 }
-function updateCourseMembership(personId,type,patch){
-  const root=getCourseMembershipState(),course=root[currentCourseId]||{instructors:{},trainees:{}};
+function courseMembershipFor(personId,type,defaults={}){return courseMembershipForCourse(personId,type,currentCourseId,defaults)}
+function updateCourseMembershipForCourse(courseKey,personId,type,patch){
+  const root=getCourseMembershipState(),course=root[courseKey]||{instructors:{},trainees:{}};
   course.instructors=course.instructors||{};course.trainees=course.trainees||{};
   const bucket=type==='INSTRUCTOR'?course.instructors:course.trainees;
   bucket[personId]={...(bucket[personId]||{}),...patch};
-  root[currentCourseId]=course;saveCourseMembershipState(root);
+  root[courseKey]=course;saveCourseMembershipState(root);
 }
-function getActivityEvents(){return safeArrayStorage('ct-review-activity-events')}
-function saveActivityEvents(v){localStorage.setItem('ct-review-activity-events',JSON.stringify(v))}
+function updateCourseMembership(personId,type,patch){updateCourseMembershipForCourse(currentCourseId,personId,type,patch)}
+function getActivityEvents(){return readCourseArray('ct-review-activity-events')}
+function saveActivityEvents(v){writeCourseArray('ct-review-activity-events',v)}
 function activityTotalsFor(traineeId){
   const out={TAKEOFF:0,LANDING:0,TOUCH_AND_GO:0,TRAINING_HOUR:0,TECH_ACTIVITY:0};
   getActivityEvents().filter(x=>x.traineeId===traineeId).forEach(x=>{
@@ -699,8 +732,8 @@ function activityTotalsFor(traineeId){
 function activityCounter(type){return currentCourseTrackingCounters().find(x=>x.type===type)||null}
 function activityKind(type){return activityCounter(type)?.kind||type}
 function activityLabel(type){return activityCounter(type)?.label||({TAKEOFF:'Takeoff',LANDING:'Full-stop landing',TOUCH_AND_GO:'Touch & Go',TRAINING_HOUR:'Training hour',TECH_ACTIVITY:'Technician activity'})[type]||type}
-function getSoloFlights(){return safeArrayStorage('ct-review-solo-flights')}
-function saveSoloFlights(v){localStorage.setItem('ct-review-solo-flights',JSON.stringify(v))}
+function getSoloFlights(){return readCourseArray('ct-review-solo-flights')}
+function saveSoloFlights(v){writeCourseArray('ct-review-solo-flights',v)}
 
 function getPersonOverrides(){return safeObjectStorage('ct-review-person-overrides')}
 function savePersonOverrides(v){localStorage.setItem('ct-review-person-overrides',JSON.stringify(v))}
@@ -710,12 +743,16 @@ function personOverride(id,patch){
 function applyPersonOverride(p){return {...p,...(getPersonOverrides()[p.id]||{})}}
 function allTrainees(){return [...trainees,...getRosterExtras().filter(x=>x.type==='TRAINEE')].map(applyPersonOverride)}
 function allInstructors(){return [...instructors.map(i=>({...i,type:'INSTRUCTOR',email:i.id==='i1'?'or@example.test':'nir@example.test'})),...getRosterExtras().filter(x=>x.type==='INSTRUCTOR')].map(applyPersonOverride)}
-function coursePersonIsAssigned(p,type){
-  const membership=courseMembershipFor(p.id,type,{});
+function courseHasExplicitMembership(courseKey=currentCourseId){return getDraftCourses().some(x=>(x.code||x.id)===courseKey)}
+function coursePersonIsAssignedTo(p,type,courseKey){
+  const root=getCourseMembershipState(),course=root[courseKey]||{},bucket=type==='INSTRUCTOR'?(course.instructors||{}):(course.trainees||{}),has=Object.prototype.hasOwnProperty.call(bucket,p.id),membership=bucket[p.id]||{};
   if(membership.removed===true)return false;
-  if(Array.isArray(p.courseIds)&&!p.courseIds.includes(currentCourseId))return false;
-  return true;
+  if(courseHasExplicitMembership(courseKey))return has;
+  if(has)return true;
+  if(Array.isArray(p.courseIds))return p.courseIds.includes(courseKey);
+  return isDefaultReviewCourse(courseKey);
 }
+function coursePersonIsAssigned(p,type){return coursePersonIsAssignedTo(p,type,currentCourseId)}
 function courseTrainees(){return allTrainees().filter(p=>coursePersonIsAssigned(p,'TRAINEE'))}
 function courseInstructors(){return allInstructors().filter(p=>coursePersonIsAssigned(p,'INSTRUCTOR'))}
 function personInitials(p){return String(p.name||'?').split(/\s+/).filter(Boolean).map(x=>x[0]).join('').slice(0,2).toUpperCase()}
@@ -741,13 +778,13 @@ function getRosterExtras(){return safeArrayStorage('ct-review-roster')}
 
 function instructorProfile(){
  const allI=allInstructors(),base=allI.find(x=>x.id===state.selectedInstructor)||allI[0]||applyPersonOverride(instructors[0]),membership=courseMembershipFor(base.id,'INSTRUCTOR',{role:base.role||'INSTRUCTOR'}),i={...base,role:membership.role||'INSTRUCTOR'};
- const total=Math.max(1,(i.traineeDistribution||[]).reduce((a,x)=>a+x[1],0));
+ const total=Math.max(1,(i.traineeDistribution||[]).reduce((a,x)=>a+x[1],0)),assignedCourses=instructorAssignedCourses(i.id);
  return '<div class="profileNav"><button class="profileBack" id="backRoster">‹ Course Roster</button><button class="btn edit small" data-person-edit="INSTRUCTOR:'+i.id+'">✎ Edit profile</button></div>'+
  '<section class="card profileHero"><div class="profileTop">'+personAvatar({...i,type:'INSTRUCTOR'},false)+'<div class="profileIdentity" style="min-width:0;flex:1"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h2>'+esc(i.name)+'</h2><span class="instructorRole '+(i.role==='COURSE_MANAGER'?'manager':'')+'">'+(i.role==='COURSE_MANAGER'?'Course Manager':'Instructor')+'</span></div><p>Last activity '+esc(i.lastActivity||'—')+'</p><div class="profileIdentityMeta"><span>Instructed Flights<b>'+Number(i.flights||0)+'</b></span><span>Course Share<b>'+Number(i.percent||0)+'%</b></span><span>Trainees Covered<b>'+Number(i.trainees||0)+'</b></span><span>Workload Rank<b>#'+(i.workloadRank||'—')+'</b></span></div></div></div></section>'+
  '<div class="reportsGrid" style="margin-top:12px"><section class="card settingBox"><h3>Trainees instructed</h3><p class="sub">Open a trainee directly from the instructor context.</p>'+ (i.traineeDistribution||[]).map(x=>{const t=allTrainees().find(t=>t.name===x[0]);return '<button class="peopleLink" '+(t?'data-trainee="'+t.id+'"':'')+'><span><b>'+esc(x[0])+'</b><small>'+x[1]+' instructed flights</small></span><strong>'+Math.round(x[1]/total*100)+'%</strong></button>'}).join('')+'</section>'+
  '<section class="card settingBox"><h3>Recent activity</h3><p class="sub">Instructed flights by week.</p><div class="chart">'+(i.activitySeries||[]).map(v=>'<div class="bar" data-v="'+v+'" style="height:'+Math.max(8,Math.round(v/Math.max(...i.activitySeries)*100))+'%"></div>').join('')+'</div></section>'+
  '<section class="card settingBox"><h3>Syllabi instructed</h3>'+reportBars((i.syllabusDistribution||[]).map(x=>({name:x[0],count:x[1]})),10)+'</section>'+
- '<section class="card settingBox"><h3>Workload context</h3><div class="requirementsGrid"><div class="requirementCard"><strong>#'+(i.workloadRank||'—')+'</strong><span>Workload rank</span></div><div class="requirementCard"><strong>'+Number(i.percent||0)+'%</strong><span>Course share</span></div><div class="requirementCard"><strong>'+Number(i.trainees||0)+'</strong><span>Trainees covered</span></div><div class="requirementCard"><strong>'+Number(i.flights||0)+'</strong><span>Total flights</span></div></div></section></div>'+
+ '<section class="card settingBox"><h3>Workload context</h3><div class="requirementsGrid"><div class="requirementCard"><strong>#'+(i.workloadRank||'—')+'</strong><span>Workload rank</span></div><div class="requirementCard"><strong>'+Number(i.percent||0)+'%</strong><span>Course share</span></div><div class="requirementCard"><strong>'+Number(i.trainees||0)+'</strong><span>Trainees covered</span></div><div class="requirementCard"><strong>'+Number(i.flights||0)+'</strong><span>Total flights</span></div></div></section><section class="card settingBox"><div class="inlineHead"><div><h3>Assigned courses</h3><p class="sub">This instructor only sees courses assigned to them.</p></div><span class="pill blue">'+assignedCourses.length+'</span></div><div class="assignedCourseList">'+(assignedCourses.length?assignedCourses.map(c=>'<div class="assignedCourseRow"><div><b>'+esc(c.name)+'</b><small>'+esc(c.summary||courseRuntimeMeta(c).phase||'')+'</small></div><span class="courseRoleBadge '+(c.assignedRole==='COURSE_MANAGER'?'manager':'')+'">'+(c.assignedRole==='COURSE_MANAGER'?'Course Manager':'Instructor')+'</span></div>').join(''):'<p class="sub">No assigned courses.</p>')+'</div></section></div>'+
  personEditModal();
 }
 function traineeProfile(){
@@ -856,11 +893,11 @@ function formatCourseDate(v){if(!v)return '—';const d=new Date(String(v)+'T12:
 function normalizeEmphases(v){const arr=Array.isArray(v)?v:String(v||'').split(/\n+/);return arr.map(x=>String(x).replace(/^\s*\d+[\.)-]?\s*/,'').trim()).filter(Boolean)}
 function traineeEvaluationHistory(traineeId){
  const people=allInstructors(),saved=getEvaluations().filter(x=>x.traineeId===traineeId).map(x=>({...x,date:x.flightDate,instructorName:x.instructorName||people.find(i=>i.id===x.instructorId)?.name||'Instructor',emphases:normalizeEmphases(x.emphases),source:'saved'}));
- const mock=mockEvalHistory.filter(x=>x.traineeId===traineeId).map(x=>({...x,instructorName:people.find(i=>i.id===x.instructorId)?.name||'Instructor',emphases:mockNextFlightEmphases[traineeId+'|'+x.date]||[],source:'mock'}));
+ const mock=courseMockEvalHistory().filter(x=>x.traineeId===traineeId).map(x=>({...x,instructorName:people.find(i=>i.id===x.instructorId)?.name||'Instructor',emphases:mockNextFlightEmphases[traineeId+'|'+x.date]||[],source:'mock'}));
  return [...mock,...saved].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
 }
 function traineeSoloBreakdown(t){
- const map=new Map((mockSoloBreakdown[t.id]||[]).map(x=>[x[0],Number(x[1])||0]));
+ const map=new Map(courseMockSoloRows(t.id).map(x=>[x[0],Number(x[1])||0]));
  getSoloFlights().filter(x=>x.traineeId===t.id).forEach(x=>map.set(x.syllabus,(map.get(x.syllabus)||0)+1));
  return [...map.entries()].filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
 }
@@ -880,7 +917,7 @@ function traineeGuidedSnapshot(t,prog){
 function traineeSoloSnapshot(t){
  let stages=configuredSoloStages().map(x=>({name:x.name,minimum:Number(x.minimum)||0}));
  const actual=getSoloFlights().filter(x=>x.traineeId===t.id).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
- const mockMap=new Map(mockSoloBreakdown[t.id]||[]);
+ const mockMap=new Map(courseMockSoloRows(t.id));
  if(!stages.length&&mockMap.size)stages=[...mockMap.keys()].map(name=>({name,minimum:Number(mockSoloStageMinimums[name]||Math.max(1,mockMap.get(name)||1))}));
  if(!stages.length)return null;
  const counts=new Map(stages.map(x=>[x.name,0])),dates=new Map();
@@ -940,10 +977,10 @@ function bindAutoDraft(form,name,onSaved){
  form.addEventListener('input',persist);form.addEventListener('change',persist);return persist;
 }
 function draftSavedLabel(name){const d=getActivityDraft(name);if(!d?.savedAt)return 'Auto-save ready';const dt=new Date(d.savedAt);return 'Auto-saved '+dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
-function getEmergencyPlans(){return safeObjectStorage('ct-review-emergency-plans')}
+function getEmergencyPlans(){return readCourseObject('ct-review-emergency-plans')}
 function getTraineeEmergencyPlan(traineeId){const all=getEmergencyPlans(),p=all[traineeId];return p&&Array.isArray(p.emergencyIds)?p:{emergencyIds:[],updatedAt:null}}
-function saveTraineeEmergencyPlan(traineeId,ids){const all=getEmergencyPlans();all[traineeId]={emergencyIds:[...new Set(ids.filter(Boolean))],updatedAt:new Date().toISOString()};localStorage.setItem('ct-review-emergency-plans',JSON.stringify(all))}
-function clearTraineeEmergencyPlan(traineeId){const all=getEmergencyPlans();delete all[traineeId];localStorage.setItem('ct-review-emergency-plans',JSON.stringify(all))}
+function saveTraineeEmergencyPlan(traineeId,ids){const all=getEmergencyPlans();all[traineeId]={emergencyIds:[...new Set(ids.filter(Boolean))],updatedAt:new Date().toISOString()};writeCourseObject('ct-review-emergency-plans',all)}
+function clearTraineeEmergencyPlan(traineeId){const all=getEmergencyPlans();delete all[traineeId];writeCourseObject('ct-review-emergency-plans',all)}
 function evaluationPlanIds(traineeId,edit){return edit&&Array.isArray(edit.plannedEmergencyIds)?edit.plannedEmergencyIds:(traineeId?getTraineeEmergencyPlan(traineeId).emergencyIds:[])}
 function plannedEmergencySectionHtml(traineeId,edit){
   if(!traineeId)return '<div class="plannedEvalBox"><div class="plannedEvalHead"><div><h3>Planned for this sortie</h3><p>Select a trainee to load that trainee\'s emergency plan.</p></div><span class="pill gray">0 planned</span></div></div>';
@@ -954,7 +991,7 @@ function plannedEmergencySectionHtml(traineeId,edit){
 }
 function traineeEmergencyHistory(traineeId,excludeEvalId){
   const defs=evaluationEmergencyDefs(),byId=Object.fromEntries(defs.map(x=>[x.id,0])),byName=new Map(defs.map(x=>[String(x.name).toLowerCase(),x.id]));
-  mockEvalHistory.filter(e=>e.traineeId===traineeId).forEach(e=>(e.emergencies||[]).forEach(name=>{const id=byName.get(String(name).toLowerCase());if(id)byId[id]=(byId[id]||0)+1}));
+  courseMockEvalHistory().filter(e=>e.traineeId===traineeId).forEach(e=>(e.emergencies||[]).forEach(name=>{const id=byName.get(String(name).toLowerCase());if(id)byId[id]=(byId[id]||0)+1}));
   getEvaluations().filter(e=>e.traineeId===traineeId&&e.id!==excludeEvalId).forEach(e=>{
     if(e.emergencyCounts){Object.entries(e.emergencyCounts).forEach(([id,n])=>{if(id in byId)byId[id]+=Number(n)||0});return}
     (e.emergencies||[]).forEach((n,i)=>{const legacyName=emergencies[i],id=byName.get(String(legacyName||'').toLowerCase());if(id)byId[id]+=Number(n)||0});
@@ -1201,7 +1238,7 @@ function epSyllabusBriefHtml(name){
 }
 function epTraineeProgramProgressHtml(t){
   const p=epCurrentProgram();if(!p)return '';
-  const history=traineeEvaluationHistory(t.id),solos=getSoloFlights().filter(x=>x.traineeId===t.id),mockSolo=new Map(mockSoloBreakdown[t.id]||[]);
+  const history=traineeEvaluationHistory(t.id),solos=getSoloFlights().filter(x=>x.traineeId===t.id),mockSolo=new Map(courseMockSoloRows(t.id));
   const norm=v=>window.epLessonDetailHelpers?.normalize?window.epLessonDetailHelpers.normalize(v):String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'');
   const rows=p.syllabi.map(s=>{
     const sn=norm(s.name);
@@ -1418,6 +1455,43 @@ function settings(){
 }
 function getPhaseTemplates(){try{return [...phaseTemplates,...JSON.parse(localStorage.getItem('ct-review-phases')||'[]')]}catch{return phaseTemplates}}
 function getDraftCourses(){return safeArrayStorage('ct-review-courses')}
+function courseKey(x){return String(x?.code||x?.courseCode||x?.id||'')}
+function defaultCourseRecord(){return {id:'course_default',name:'Aerostar EP Course',code:'AEP-26',summary:'EP · RC Model · RC Model · New Training · Day · Israel',startsOn:'2026-09-01',selection:{courseType:'EP',phaseId:'ep_rc',platformId:'rc_model',trainingKind:'new',programId:'ep_rc_new',dayNight:'day',country:'israel'},platformId:'rc_model',programId:'ep_rc_new',builtIn:true}}
+function allCourses(){
+  const saved=getDraftCourses(),keys=new Set(saved.map(courseKey));
+  return keys.has('AEP-26')?saved:[defaultCourseRecord(),...saved];
+}
+function courseByKey(key){return allCourses().find(x=>courseKey(x)===String(key||''))||null}
+function courseRuntimeMeta(record){
+  if(!record||courseKey(record)==='AEP-26')return {type:'EP',phase:'RC Model',platformId:'rc_model',trainingKind:'New Training',dayNight:'Day',country:'Israel',programId:'ep_rc_new',courseName:'Aerostar EP Course',courseCode:'AEP-26',startsOn:'2026-09-01'};
+  const cc=cfgGet(),sel=window.FLYMPUS_TRAINING?.normalizeGuidedSelection?.(record.selection||{})||record.selection||{},ph=cfgItem(cc.phases,sel.phaseId),tk=cfgItem(cc.trainingKinds,sel.trainingKind),dn=cfgItem(cc.dayNight,sel.dayNight),co=cfgItem(cc.countries,sel.country);
+  return {type:sel.courseType||record.type||'EP',phase:ph?.name||record.phase||sel.phaseId||'',platformId:record.platformId||sel.platformId||'',trainingKind:tk?.name||record.trainingKind||sel.trainingKind||'',dayNight:dn?.name||record.dayNight||sel.dayNight||'',country:co?.name||record.country||sel.country||'',programId:record.programId||sel.programId||'',courseName:record.name||record.courseName||'Course',courseCode:courseKey(record),startsOn:record.startsOn||''};
+}
+function instructorCourseRole(courseKeyValue,instructorId){
+  const instructor=allInstructors().find(x=>x.id===instructorId);if(!instructor)return null;
+  if(!coursePersonIsAssignedTo(instructor,'INSTRUCTOR',courseKeyValue))return null;
+  return courseMembershipForCourse(instructorId,'INSTRUCTOR',courseKeyValue,{role:isDefaultReviewCourse(courseKeyValue)?(instructor.role||'INSTRUCTOR'):'INSTRUCTOR'}).role||'INSTRUCTOR';
+}
+function instructorAssignedCourses(instructorId){
+  return allCourses().filter(c=>instructorCourseRole(courseKey(c),instructorId)).map(c=>({...c,assignedRole:instructorCourseRole(courseKey(c),instructorId)}));
+}
+function ensureMultiCourseMemberships(){
+  const root=getCourseMembershipState();let changed=false;
+  getDraftCourses().forEach(c=>{const key=courseKey(c);if(!key)return;const bucket=root[key]||(root[key]={instructors:{},trainees:{}});bucket.instructors=bucket.instructors||{};bucket.trainees=bucket.trainees||{};if(!Object.prototype.hasOwnProperty.call(bucket.instructors,currentUserId)){bucket.instructors[currentUserId]={role:'COURSE_MANAGER',removed:false};changed=true}});
+  if(changed)saveCourseMembershipState(root);
+}
+function switchCourseByKey(key,opts={}){
+  const record=courseByKey(key);if(!record)return false;
+  if(!opts.force&&!instructorCourseRole(courseKey(record),currentUserId)){toast('This course is not assigned to you');return false}
+  currentCourseId=courseKey(record);Object.assign(currentCourseMeta,courseRuntimeMeta(record));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta));
+  state.editingEval=null;state.evaluationTraineeId=null;state.selectedInstructor=currentUserId;state.selectedTrainee=courseTrainees()[0]?.id||null;state.profileTab='overview';state.reportTrainee='ALL';state.reportInstructor='ALL';state.reportSyllabus='ALL';state.screen=opts.screen||'home';saveUiState();
+  if(opts.render!==false){toast((record.name||'Course')+' opened');render()}return true;
+}
+function myCourses(){
+  const mine=instructorAssignedCourses(currentUserId),me=allInstructors().find(x=>x.id===currentUserId),active=currentCourseId;
+  return '<div class="eyebrow">COURSE ACCESS</div><div class="myCoursesHead"><div><h1 class="pageTitle">My Courses</h1><p class="sub">'+esc(me?.name||'Instructor')+' · choose the course you want to work in.</p></div><button class="btn sky" data-go="settings">+ Create course</button></div>'+
+    '<section class="myCourseGrid">'+(mine.length?mine.map(c=>{const key=courseKey(c),meta=courseRuntimeMeta(c),role=c.assignedRole==='COURSE_MANAGER'?'Course Manager':'Instructor';return '<article class="card myCourseCard '+(key===active?'active':'')+'"><div class="myCourseCardTop"><div><span class="pill '+(key===active?'green':'blue')+'">'+(key===active?'ACTIVE':'ASSIGNED')+'</span><h2>'+esc(c.name||meta.courseName)+'</h2><p>'+esc(c.summary||[meta.type,meta.phase,epPlatformLabel(meta.platformId),meta.dayNight].filter(Boolean).join(' · '))+'</p></div><span class="courseRoleBadge '+(c.assignedRole==='COURSE_MANAGER'?'manager':'')+'">'+esc(role)+'</span></div><div class="myCourseMeta"><span><small>Course code</small><b>'+esc(key)+'</b></span><span><small>Starts</small><b>'+esc(meta.startsOn?formatCourseDate(meta.startsOn):'—')+'</b></span><span><small>Sector</small><b>'+esc(meta.type||'—')+'</b></span><span><small>Phase</small><b>'+esc(meta.phase||'—')+'</b></span></div><button class="btn '+(key===active?'secondary':'sky')+' myCourseOpen" data-switch-course="'+esc(key)+'">'+(key===active?'Open active course':'Open course')+'</button></article>'}).join(''):'<div class="card empty"><h3>No courses assigned</h3><p>Ask a Course Manager to add you to a course.</p></div>')+'</section>';
+}
 function getSettings(){try{return JSON.parse(localStorage.getItem('ct-review-settings')||'{}')}catch{return {}}}function saveSettings(x){try{localStorage.setItem('ct-review-settings',JSON.stringify(x))}catch{}}
 
 function plannedVsExecuted(){
@@ -1443,7 +1517,7 @@ function safetyScreen(){
  const local=getSafetyRecords(),draft=getActivityDraft('safety');
  return '<div class="eyebrow">SAFETY</div><h1 class="pageTitle">Safety</h1><p class="sub">Report events quickly, classify severity and keep a clear history.</p>'+
  '<div class="twoCol"><section class="card formCard"><div class="formTitle"><h2>New safety event</h2><span class="autoDraftNote" id="safetyDraftBadge">'+(draft?draftSavedLabel('safety'):'Auto-save ready')+'</span></div><form id="safetyForm"><div class="fields"><div class="field"><label>Date</label><input class="input" name="date" type="date" required value="'+new Date().toISOString().slice(0,10)+'"></div><div class="field"><label>Trainee</label><select name="trainee"><option value="" selected>—</option>'+courseTrainees().map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('')+'</select></div><div class="field"><label>Instructor</label><select name="instructor"><option value="" selected>—</option>'+courseInstructors().map(i=>'<option value="'+i.id+'">'+esc(i.name)+'</option>').join('')+'</select></div><div class="field"><label>Severity</label><select name="severity" required><option value="" selected disabled>Select severity</option><option>Low</option><option>Medium</option><option>High</option></select></div><div class="field"><label>Classification</label><select name="classification" required><option value="" selected disabled>Select classification</option><option>Safety event</option><option>Real emergency</option><option>Operational observation</option></select></div><div class="field"><label>Event title</label><input class="input" name="title" required></div></div><div class="field" style="margin-top:10px"><label>Details</label><textarea name="details" required></textarea></div><div class="toolbar"><button class="btn sky" type="submit">Save safety event</button><button class="btn secondary discardDraft" type="button" id="discardSafetyDraft">Discard draft</button></div></form></section>'+
- '<section class="card sideCard"><h3>Recent safety events</h3><div class="draftList">'+(local.length?local.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.title)+'</b><span class="pill '+(x.severity==='High'?'amber':x.severity==='Medium'?'blue':'green')+'">'+esc(x.severity)+'</span></div><p>'+esc(x.date)+' · '+esc(x.classification)+'</p></div>').join(''):'<p class="sub">No locally added safety events yet. Two historical mock events are included in analytics.</p>')+'</div></section></div>';
+ '<section class="card sideCard"><h3>Recent safety events</h3><div class="draftList">'+(local.length?local.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.title)+'</b><span class="pill '+(x.severity==='High'?'amber':x.severity==='Medium'?'blue':'green')+'">'+esc(x.severity)+'</span></div><p>'+esc(x.date)+' · '+esc(x.classification)+'</p></div>').join(''):'<p class="sub">No safety events recorded for this course yet.</p>')+'</div></section></div>';
 }
 function examsScreen(){
  const local=getExamRecords(),draft=getActivityDraft('exams'),p=epCurrentProgram(),epExams=epTheoryExamDefs();
@@ -1461,16 +1535,16 @@ function reports(){
  if(state.reportTrainee!=='ALL')rows=rows.filter(x=>x.traineeId===state.reportTrainee);
  if(state.reportInstructor!=='ALL')rows=rows.filter(x=>x.instructorId===state.reportInstructor);
  if(state.reportSyllabus!=='ALL')rows=rows.filter(x=>x.syllabus===state.reportSyllabus);
- const avg=mean(rows.map(x=>x.grade)),passRate=mockExamAttempts.length?mockExamAttempts.filter(x=>x.grade>=x.pass).length/mockExamAttempts.length*100:null;
- const emergencyDist=dist(rows.flatMap(x=>x.emergencies||[])),syllabusDist=dist(rows.map(x=>x.syllabus)),traineeDist=dist(rows.map(x=>trainees.find(t=>t.id===x.traineeId)?.name||x.traineeId)),safetyDist=dist(mockSafetyEvents.map(x=>x.severity));
+ const examRows=[...courseMockExamAttempts(),...getExamRecords()],passRate=examRows.length?examRows.filter(x=>Number(x.grade)>=Number(x.pass)).length/examRows.length*100:null,avg=mean(rows.map(x=>x.grade));
+ const safetyRows=[...courseMockSafetyEvents(),...getSafetyRecords()],emergencyDist=dist(rows.flatMap(x=>x.emergencies||[])),syllabusDist=dist(rows.map(x=>x.syllabus)),traineeDist=dist(rows.map(x=>allTrainees().find(t=>t.id===x.traineeId)?.name||x.traineeId)),safetyDist=dist(safetyRows.map(x=>x.severity));
  const monthly=dist(rows.map(x=>String(x.date||'').slice(0,7)));
  const syllOptions=[...new Set([...(epCurrentProgram()?.syllabi||[]).map(x=>x.name),...allEvaluationsForAnalytics().map(x=>x.syllabus)])].filter(Boolean).sort();
  return '<div class="eyebrow">Reports & analytics</div><h1 class="pageTitle">Course analytics</h1><p class="sub">Analytics are scoped to the active course and its resolved training suit.</p>'+activeSuitOverviewHtml()+
- '<section class="card settingBox"><div class="inlineHead"><h3>Filters</h3><div class="reportToolbar" style="margin:0"><button class="btn secondary small" id="reportsReset">Reset</button><button class="btn secondary small" id="reportsCsv">⇩ Export CSV</button><button class="btn sky small" id="reportsPrint">Print / PDF</button></div></div><div class="reportFilters" style="margin-top:10px"><div class="field"><label>Trainee</label><select id="reportTrainee"><option value="ALL">All trainees</option>'+trainees.map(t=>'<option value="'+t.id+'" '+(state.reportTrainee===t.id?'selected':'')+'>'+esc(t.name)+'</option>').join('')+'</select></div><div class="field"><label>Instructor</label><select id="reportInstructor"><option value="ALL">All instructors</option>'+instructors.map(i=>'<option value="'+i.id+'" '+(state.reportInstructor===i.id?'selected':'')+'>'+esc(i.name)+'</option>').join('')+'</select></div><div class="field"><label>Syllabus</label><select id="reportSyllabus"><option value="ALL">All syllabi</option>'+syllOptions.map(x=>'<option '+(state.reportSyllabus===x?'selected':'')+'>'+esc(x)+'</option>').join('')+'</select></div><div class="field"><label>Matched evaluations</label><input class="input" value="'+rows.length+'" readonly></div></div></section>'+
- '<section class="reportKpis"><div><strong>'+trainees.filter(t=>t.status==='Active').length+'</strong><span>Active trainees</span></div><div><strong>'+rows.length+'</strong><span>Evaluations</span></div><div><strong>'+(avg==null?'—':avg.toFixed(1))+'</strong><span>Average grade</span></div><div><strong>'+mockSafetyEvents.length+'</strong><span>Safety events</span></div><div><strong>'+(passRate==null?'—':passRate.toFixed(0)+'%')+'</strong><span>Exam pass rate</span></div></section>'+
+ '<section class="card settingBox"><div class="inlineHead"><h3>Filters</h3><div class="reportToolbar" style="margin:0"><button class="btn secondary small" id="reportsReset">Reset</button><button class="btn secondary small" id="reportsCsv">⇩ Export CSV</button><button class="btn sky small" id="reportsPrint">Print / PDF</button></div></div><div class="reportFilters" style="margin-top:10px"><div class="field"><label>Trainee</label><select id="reportTrainee"><option value="ALL">All trainees</option>'+courseTrainees().map(t=>'<option value="'+t.id+'" '+(state.reportTrainee===t.id?'selected':'')+'>'+esc(t.name)+'</option>').join('')+'</select></div><div class="field"><label>Instructor</label><select id="reportInstructor"><option value="ALL">All instructors</option>'+courseInstructors().map(i=>'<option value="'+i.id+'" '+(state.reportInstructor===i.id?'selected':'')+'>'+esc(i.name)+'</option>').join('')+'</select></div><div class="field"><label>Syllabus</label><select id="reportSyllabus"><option value="ALL">All syllabi</option>'+syllOptions.map(x=>'<option '+(state.reportSyllabus===x?'selected':'')+'>'+esc(x)+'</option>').join('')+'</select></div><div class="field"><label>Matched evaluations</label><input class="input" value="'+rows.length+'" readonly></div></div></section>'+
+ '<section class="reportKpis"><div><strong>'+courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active').length+'</strong><span>Active trainees</span></div><div><strong>'+rows.length+'</strong><span>Evaluations</span></div><div><strong>'+(avg==null?'—':avg.toFixed(1))+'</strong><span>Average grade</span></div><div><strong>'+safetyRows.length+'</strong><span>Safety events</span></div><div><strong>'+(passRate==null?'—':passRate.toFixed(0)+'%')+'</strong><span>Exam pass rate</span></div></section>'+
  '<div class="reportsGrid"><section class="card settingBox"><h3>Emergency exposure</h3><p class="sub">Recorded emergency practice across matched evaluated flights.</p>'+reportBars(emergencyDist,10)+'</section><section class="card settingBox"><h3>Syllabus activity</h3><p class="sub">Evaluations by syllabus.</p>'+reportBars(syllabusDist,10)+'</section><section class="card settingBox"><h3>Evaluation activity by trainee</h3>'+reportBars(traineeDist,10)+'</section><section class="card settingBox"><h3>Safety severity</h3>'+reportBars(safetyDist,8)+'</section><section class="card settingBox"><h3>Monthly activity</h3>'+reportBars(monthly,12)+'</section><section class="card settingBox"><h3>Interpretation</h3><div class="infoBox"><b>Filters affect evaluation-based analytics</b><p>Safety and exam KPIs remain course-wide in this review. In the real app they can also be filtered by date, trainee, phase and configuration profile.</p></div></section></div>';
 }
-function render(){saveUiState();renderNav();const topCourse=document.querySelector('.topBrandCopy span');if(topCourse)topCourse.textContent=currentCourseMeta.courseName||course.name;let html='';try{switch(state.screen){case'home':html=home();break;case'evaluation':html=evaluation();break;case'roster':html=roster();break;case'profile':html=traineeProfile();break;case'instructor':html=instructorProfile();break;case'settings':html=settings();break;case'reports':html=reports();break;case'safety':html=safetyScreen();break;case'exams':html=examsScreen();break;case'planned':html=plannedVsExecuted();break;default:state.screen='home';html=home();break}}catch(err){console.error('Course Tracker screen render failed',state.screen,err);html='<div class="eyebrow">Review build diagnostic</div><h1 class="pageTitle">This screen failed to load</h1><section class="card settingBox"><h3>'+esc(state.screen)+'</h3><p class="sub">'+esc(err&&err.message?err.message:String(err))+'</p><div class="toolbar"><button class="btn sky" data-go="home">Back to Home</button><button class="btn danger" id="resetBrokenReviewState">Reset local review data</button></div></section>'}if(!html){state.screen='home';html=home()}$('#content').innerHTML=html;bind();}
+function render(){saveUiState();renderNav();const topCourse=document.querySelector('#topCourseName');if(topCourse)topCourse.textContent=currentCourseMeta.courseName||course.name;let html='';try{switch(state.screen){case'courses':html=myCourses();break;case'home':html=home();break;case'evaluation':html=evaluation();break;case'roster':html=roster();break;case'profile':html=traineeProfile();break;case'instructor':html=instructorProfile();break;case'settings':html=settings();break;case'reports':html=reports();break;case'safety':html=safetyScreen();break;case'exams':html=examsScreen();break;case'planned':html=plannedVsExecuted();break;default:state.screen='home';html=home();break}}catch(err){console.error('Course Tracker screen render failed',state.screen,err);html='<div class="eyebrow">Review build diagnostic</div><h1 class="pageTitle">This screen failed to load</h1><section class="card settingBox"><h3>'+esc(state.screen)+'</h3><p class="sub">'+esc(err&&err.message?err.message:String(err))+'</p><div class="toolbar"><button class="btn sky" data-go="home">Back to Home</button><button class="btn danger" id="resetBrokenReviewState">Reset local review data</button></div></section>'}if(!html){state.screen='home';html=home()}$('#content').innerHTML=html;bind();}
 
 function bindGlobalFormUx(){
   document.querySelectorAll('input[type="number"]').forEach(el=>{
@@ -1483,14 +1557,15 @@ function bindGlobalFormUx(){
     if(control&&label&&!label.querySelector('.requiredStar'))label.insertAdjacentHTML('beforeend','<span class="requiredStar">*</span>');
   });
 }
-function bind(){bindGlobalFormUx();if($('#evalSyllabusSelect')&&$('#epSyllabusBriefPanel'))$('#evalSyllabusSelect').onchange=e=>{$('#epSyllabusBriefPanel').innerHTML=epSyllabusBriefHtml(e.target.value);syncEvaluationExperienceContext()};document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.go==='evaluation')state.evaluationTraineeId=null;go(b.dataset.go)});document.querySelectorAll('[data-start-eval]').forEach(b=>b.onclick=()=>go('evaluation',{evaluationTraineeId:b.dataset.startEval}));document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;render()});document.querySelectorAll('[data-trainee]').forEach(b=>b.onclick=()=>go('profile',{selectedTrainee:b.dataset.trainee}));document.querySelectorAll('[data-instructor]').forEach(b=>b.onclick=()=>go('instructor',{selectedInstructor:b.dataset.instructor}));document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});document.querySelectorAll('[data-emergency-profile-filter]').forEach(b=>b.onclick=()=>{state.emergencyProfileFilter=b.dataset.emergencyProfileFilter;render()});document.querySelectorAll('[data-settings-tab]').forEach(b=>b.onclick=()=>{state.settingsTab=b.dataset.settingsTab;render()});document.querySelectorAll('[data-library-profession]').forEach(b=>b.onclick=()=>{state.libraryProfession=b.dataset.libraryProfession;render()});document.querySelectorAll('[data-roster-type]').forEach(b=>b.onclick=()=>{state.rosterType=b.dataset.rosterType;render()});
+function bind(){bindGlobalFormUx();if($('#topCourseSwitch'))$('#topCourseSwitch').onclick=()=>go('courses');document.querySelectorAll('[data-switch-course]').forEach(b=>b.onclick=()=>switchCourseByKey(b.dataset.switchCourse,{screen:'home'}));if($('#evalSyllabusSelect')&&$('#epSyllabusBriefPanel'))$('#evalSyllabusSelect').onchange=e=>{$('#epSyllabusBriefPanel').innerHTML=epSyllabusBriefHtml(e.target.value);syncEvaluationExperienceContext()};document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.go==='evaluation')state.evaluationTraineeId=null;go(b.dataset.go)});document.querySelectorAll('[data-start-eval]').forEach(b=>b.onclick=()=>go('evaluation',{evaluationTraineeId:b.dataset.startEval}));document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;render()});document.querySelectorAll('[data-trainee]').forEach(b=>b.onclick=()=>go('profile',{selectedTrainee:b.dataset.trainee}));document.querySelectorAll('[data-instructor]').forEach(b=>b.onclick=()=>go('instructor',{selectedInstructor:b.dataset.instructor}));document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});document.querySelectorAll('[data-emergency-profile-filter]').forEach(b=>b.onclick=()=>{state.emergencyProfileFilter=b.dataset.emergencyProfileFilter;render()});document.querySelectorAll('[data-settings-tab]').forEach(b=>b.onclick=()=>{state.settingsTab=b.dataset.settingsTab;render()});document.querySelectorAll('[data-library-profession]').forEach(b=>b.onclick=()=>{state.libraryProfession=b.dataset.libraryProfession;render()});document.querySelectorAll('[data-roster-type]').forEach(b=>b.onclick=()=>{state.rosterType=b.dataset.rosterType;render()});
 if($('#rosterSearch')){
   $('#rosterSearch').oninput=e=>{state.search=e.target.value;clearTimeout(window._rs);window._rs=setTimeout(render,120)};
   if($('#statusFilter'))$('#statusFilter').onchange=e=>{state.filter=e.target.value;render()};
   if($('#addPersonBtn'))$('#addPersonBtn').onclick=()=>{if($('#personModal'))$('#personModal').classList.add('open')};
   if($('#closePersonModal'))$('#closePersonModal').onclick=()=>{if($('#personModal'))$('#personModal').classList.remove('open')};
   if($('#personModal'))$('#personModal').onclick=e=>{if(e.target.id==='personModal')$('#personModal').classList.remove('open')};
-  if($('#addPersonForm'))$('#addPersonForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget),type=fd.get('type');const arr=getRosterExtras();const name=String(fd.get('name')).trim(),id='x_'+Date.now();arr.push({id,name,email:String(fd.get('email')||''),type,status:'Active',courseIds:[currentCourseId],initials:name.split(' ').map(x=>x[0]).join('').slice(0,2),average:type==='TRAINEE'?null:undefined,totalFlights:type==='TRAINEE'?0:undefined});localStorage.setItem('ct-review-roster',JSON.stringify(arr));updateCourseMembership(id,String(type),{removed:false,status:'Active',role:'INSTRUCTOR'});toast(name+' added to the course');render()}
+  if($('#addPersonForm'))$('#addPersonForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget),type=fd.get('type');const arr=getRosterExtras();const name=String(fd.get('name')).trim(),id='x_'+Date.now();arr.push({id,name,email:String(fd.get('email')||''),type,status:'Active',courseIds:[currentCourseId],initials:name.split(' ').map(x=>x[0]).join('').slice(0,2),average:type==='TRAINEE'?null:undefined,totalFlights:type==='TRAINEE'?0:undefined});localStorage.setItem('ct-review-roster',JSON.stringify(arr));updateCourseMembership(id,String(type),type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});toast(name+' added to the course');render()}
+  if($('#assignExistingForm'))$('#assignExistingForm').onsubmit=e=>{e.preventDefault();const key=String(new FormData(e.currentTarget).get('personKey')||''),parts=key.split(':'),type=parts[0],id=parts.slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id);if(!p)return;updateCourseMembership(id,type,type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});toast(p.name+' assigned to '+(currentCourseMeta.courseName||'course'));render()}
 }
 if($('#toggleRosterManage'))$('#toggleRosterManage').onclick=()=>{state.rosterManage=!state.rosterManage;state.personEditKey=null;render()};
 document.querySelectorAll('[data-person-edit]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();state.personEditKey=btn.dataset.personEdit;state.personPhotoDraft=undefined;render()});
@@ -1629,22 +1704,21 @@ function bindSettings(){
     const fd=new FormData(e.currentTarget),raw={courseType:state.builderType||'',phaseId:state.builderPhase||'',platformId:state.builderPlatform||'',trainingKind:state.builderTraining||'',programId:state.builderProgram||'',dayNight:state.builderDay||'',country:String(fd.get('country')||state.builderCountry||'israel')},sel=window.FLYMPUS_TRAINING?.normalizeGuidedSelection?.(raw)||raw;
     const program=epProgramResolve(raw);if(!program){toast('Complete the guided course path first');return}
     const cc=cfgGet(),ct=cfgItem(cc.courseTypes,sel.courseType),ph=cfgItem(cc.phases,sel.phaseId),tk=cfgItem(cc.trainingKinds,sel.trainingKind),dn=cfgItem(cc.dayNight,sel.dayNight),co=cfgItem(cc.countries,sel.country),arr=getDraftCourses(),name=String(fd.get('name')||state.builderName||'').trim();if(!name){toast('Course name is required');return}
-    const code=String(fd.get('code')||state.builderCode||'').trim()||builderAutoCode(name,sel.courseType),activityRequirements=(program.experienceCounters||[]).map(x=>({type:x.id,label:x.name,unit:x.unit,required:x.minimum==null?null:Number(x.minimum),source:x.source||null})),emergencyCount=window.FLYMPUS_TRAINING?.requiredEmergencies(program).length||0,syllabusCount=program.syllabi?.length||0,criteriaCount=window.FLYMPUS_TRAINING?.catalog(sel.courseType)?.criteria?.length||0;
-    const createdCourse={id:cfgId('course'),name,code,summary:[ct?.name,ph?.name,resolvedPlatformLabel(program),tk?.name,dn?.name,co?.name].filter(Boolean).join(' · '),startsOn:String(fd.get('startsOn')||state.builderStartsOn||new Date().toISOString().slice(0,10)),selection:sel,platformId:sel.platformId||program.platformId||'',programId:sel.programId||program.id,profileId:null,syllabusCount,criteriaCount,emergencyCount,activityRequirements,activityRequirementCount:activityRequirements.length,snapshot:JSON.parse(JSON.stringify(program))};
-    arr.unshift(createdCourse);localStorage.setItem('ct-review-courses',JSON.stringify(arr));
+    const code=String(fd.get('code')||state.builderCode||'').trim()||builderAutoCode(name,sel.courseType);if(allCourses().some(x=>courseKey(x)===code)){toast('Course code already exists · choose another code');return}const activityRequirements=(program.experienceCounters||[]).map(x=>({type:x.id,label:x.name,unit:x.unit,required:x.minimum==null?null:Number(x.minimum),source:x.source||null})),emergencyCount=window.FLYMPUS_TRAINING?.requiredEmergencies(program).length||0,syllabusCount=program.syllabi?.length||0,criteriaCount=window.FLYMPUS_TRAINING?.catalog(sel.courseType)?.criteria?.length||0;
+    const createdCourse={id:cfgId('course'),name,code,summary:[ct?.name,ph?.name,resolvedPlatformLabel(program),tk?.name,dn?.name,co?.name].filter(Boolean).join(' · '),startsOn:String(fd.get('startsOn')||state.builderStartsOn||new Date().toISOString().slice(0,10)),selection:sel,platformId:sel.platformId||program.platformId||'',programId:sel.programId||program.id,profileId:null,syllabusCount,criteriaCount,emergencyCount,activityRequirements,activityRequirementCount:activityRequirements.length,createdBy:currentUserId,snapshot:JSON.parse(JSON.stringify(program))};
+    arr.unshift(createdCourse);localStorage.setItem('ct-review-courses',JSON.stringify(arr));updateCourseMembershipForCourse(code,currentUserId,'INSTRUCTOR',{role:'COURSE_MANAGER',removed:false});
     Object.assign(currentCourseMeta,{type:sel.courseType,phase:ph?.name||sel.phaseId,platformId:createdCourse.platformId,trainingKind:tk?.name||sel.trainingKind,dayNight:dn?.name||sel.dayNight,country:co?.name||sel.country,programId:createdCourse.programId,courseName:name,courseCode:code,startsOn:createdCourse.startsOn});currentCourseId=code;
     localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta));state.settingsTab='overrides';state.builderName='';state.builderCode='';state.builderStartsOn='';toast('Course created · review or tailor its defaults');render();
   };
 
   document.querySelectorAll('[data-open-course-draft]').forEach(btn=>btn.onclick=()=>{
-    const d=getDraftCourses().find(x=>x.id===btn.dataset.openCourseDraft);if(!d?.selection)return;
-    const cc=cfgGet(),sel=window.FLYMPUS_TRAINING?.normalizeGuidedSelection?.(d.selection)||d.selection,ph=cfgItem(cc.phases,sel.phaseId),tk=cfgItem(cc.trainingKinds,sel.trainingKind),dn=cfgItem(cc.dayNight,sel.dayNight),co=cfgItem(cc.countries,sel.country);
-    Object.assign(currentCourseMeta,{type:sel.courseType,phase:ph?.name||sel.phaseId,platformId:sel.platformId||'',trainingKind:tk?.name||sel.trainingKind,dayNight:dn?.name||sel.dayNight,country:co?.name||sel.country,programId:d.programId||null,courseName:d.name||course.name,courseCode:d.code||'',startsOn:d.startsOn||''});currentCourseId=d.code||d.id||'AEP-26';
-    localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta));state.screen='home';toast((d.name||'Course')+' opened with its training suit');render();
+    const d=getDraftCourses().find(x=>x.id===btn.dataset.openCourseDraft);if(!d)return;switchCourseByKey(courseKey(d),{screen:'home'});
   });
-    document.querySelectorAll('[data-delete-course-draft]').forEach(btn=>btn.onclick=()=>{
-    const arr=getDraftCourses().filter(x=>x.id!==btn.dataset.deleteCourseDraft);
-    localStorage.setItem('ct-review-courses',JSON.stringify(arr));toast('Course deleted');render();
+  document.querySelectorAll('[data-delete-course-draft]').forEach(btn=>btn.onclick=()=>{
+    const d=getDraftCourses().find(x=>x.id===btn.dataset.deleteCourseDraft);if(!d)return;if(!confirm('Delete '+d.name+'? Course-specific review data will no longer be shown.'))return;
+    const key=courseKey(d),arr=getDraftCourses().filter(x=>x.id!==btn.dataset.deleteCourseDraft);localStorage.setItem('ct-review-courses',JSON.stringify(arr));
+    const root=getCourseMembershipState();delete root[key];saveCourseMembershipState(root);['ct-review-evals','ct-review-safety','ct-review-exams','ct-review-daily-reports','ct-review-activity-events','ct-review-solo-flights','ct-review-emergency-plans'].forEach(base=>localStorage.removeItem(courseScopedKey(base,key)));localStorage.removeItem('flympus-course-overrides:'+key);
+    if(currentCourseId===key)switchCourseByKey('AEP-26',{screen:'courses',render:false,force:true});toast('Course deleted');render();
   });
   if($('#typeWorkspace'))$('#typeWorkspace').onchange=e=>{state.typeWorkspace=e.target.value;state.phaseScope=e.target.value;render()};
   if($('#phaseScope'))$('#phaseScope').onchange=e=>{state.phaseScope=e.target.value;state.typeWorkspace=e.target.value;render()};
@@ -1704,6 +1778,8 @@ function bindSettings(){
   document.querySelectorAll('[data-profile-edit]').forEach(btn=>btn.onclick=()=>{state.editProfileId=btn.dataset.profileEdit;render()});
   document.querySelectorAll('[data-profile-delete]').forEach(btn=>btn.onclick=()=>{cfgProfilesSave(cfgProfilesGet().filter(x=>x.id!==btn.dataset.profileDelete));if(state.editProfileId===btn.dataset.profileDelete)state.editProfileId=null;toast('Profile deleted');render()});
 }
+ensureMultiCourseMemberships();
+if(!courseByKey(currentCourseId)||!instructorCourseRole(currentCourseId,currentUserId)){const first=instructorAssignedCourses(currentUserId)[0];if(first)switchCourseByKey(courseKey(first),{screen:state.screen,render:false,force:true})}
 render();
 </script>
 </body>
