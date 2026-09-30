@@ -993,7 +993,7 @@ function roster(){
      const active=t.status==='Active',avg=t.average==null?'—':Number(t.average).toFixed(1),progress=Math.max(0,Math.min(100,Number(t.progress||0)));
      return '<article class="card personCard '+(manage?'manageCard':'')+'">'+
        personAvatar(t,false)+
-       '<div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b><span class="pill '+(active?'green':'amber')+'">'+esc(t.status)+'</span>'+(t.rank?'<span class="rankBadge">#'+t.rank+'</span>':'')+'</div>'+
+       '<div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b><span class="pill '+(active?'green':'gray')+'">'+esc(t.status)+'</span>'+(t.rank?'<span class="rankBadge">#'+t.rank+'</span>':'')+'</div>'+
        '<div class="rosterStats"><div><span class="rosterStatLabel">Average Grade</span><span class="rosterStatValue">'+avg+'</span></div><div><span class="rosterStatLabel">Progress · '+progress+'%</span><div class="miniProgress"><i style="width:'+progress+'%"></i></div></div></div></div>'+
        '<div class="rosterActions">'+(manage?'<button class="btn edit small rosterEditBtn" data-person-edit="TRAINEE:'+t.id+'">✎ Edit</button>':'<button class="rosterChevron" data-trainee="'+t.id+'" aria-label="Open '+esc(t.name)+'">›</button>')+'</div>'+
      '</article>';
