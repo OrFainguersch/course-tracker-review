@@ -110,6 +110,14 @@ const refreshCourse=core.resolvePackage("EP","ep_full_refresh",{courseKey:"PKG-C
 assert(refreshCourse.syllabi.some(x=>x.id==="pkg_syll_1"),"Courses using the Package must inherit Package custom syllabus");
 core.saveGlobalOverrides("ep_full_refresh",{});
 
+core.saveCustomPackage("EP",{id:"ep_custom_pkg_test",name:"EP · Custom Package",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day",theory:[],syllabi:[],criteria:[],experienceCounters:[],exams:[],progression:[],emergencyRequirementIds:[],courseEmergencies:[]});
+assert(core.packageCatalog("EP").some(x=>x.id==="ep_custom_pkg_test"),"Custom Package must be associated with its sector");
+const customPkg=core.resolvePackage("EP","ep_custom_pkg_test");
+assert.equal(customPkg.name,"EP · Custom Package");
+assert.equal(customPkg.professionId,"EP");
+core.removeCustomPackage("EP","ep_custom_pkg_test");
+assert(!core.packageCatalog("EP").some(x=>x.id==="ep_custom_pkg_test"),"Removed custom Package must leave the sector package list");
+
 core.saveOverrides("EP-TEST",{syllabi:{full_preflight:{name:"Course Preflight",minimum:2}},counters:{ep_full_day_takeoffs:{name:"Course takeoffs",minimum:5}},criteria:{flight_path_control:{name:"Course flight path",weight:30}}});
 const epCourseOverride=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"},{courseKey:"EP-TEST"});
 assert.equal(epCourseOverride.syllabi.find(x=>x.id==="full_preflight").name,"Course Preflight");
