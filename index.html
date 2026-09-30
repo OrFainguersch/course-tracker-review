@@ -462,21 +462,25 @@ select option[value=""]{color:#8a9bad}
 </style><style>
 /* ===== Smooth syllabus drag + compact add rows ===== */
 .packageSyllabusRow{transition:background-color 160ms ease,box-shadow 160ms ease,opacity 160ms ease}.packageSyllabusRow.dragging{transform:scale(1.006);box-shadow:0 12px 30px rgba(26,72,112,.24);background:#edf7ff;opacity:.97}.packageSyllabusRow.dragSettling{animation:syllabusSettle 180ms cubic-bezier(.2,.8,.2,1)}.packageSyllabusRow.dropBefore{box-shadow:inset 0 3px 0 #2c8ddd}.packageSyllabusRow.dropAfter{box-shadow:inset 0 -3px 0 #2c8ddd}.syllabusDragHandle{transition:transform 140ms ease,box-shadow 140ms ease,background-color 140ms ease}.syllabusDragHandle:hover{transform:scale(1.06);box-shadow:0 3px 10px rgba(32,91,134,.14);background:#f7fbff}.packageSyllabusRow.dragging .syllabusDragHandle{transform:scale(1.08);background:#e8f4ff}@keyframes syllabusSettle{0%{transform:scale(1.006)}55%{transform:scale(.997)}100%{transform:scale(1)}}.compactAddBox{margin-top:10px;border:0;background:transparent;padding:0}.packageAddTrigger{width:auto}.packageAddPanel{margin-top:8px;padding:10px;border:1px dashed #80b8e8;border-radius:12px;background:#f7fbff;animation:addRowOpen 150ms ease-out}.packageAddPanel[hidden]{display:none}.packageAddActions{margin-top:8px}.packageAddPanel .packageAddFields{margin:0}@keyframes addRowOpen{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+</style><style>
+/* ===== Compact Add controls in Advanced catalogs ===== */
+.cfgCompactAdd{margin-top:10px}.cfgAddPanel{margin-top:8px;display:flex;gap:8px;align-items:center}.cfgAddPanel[hidden]{display:none}.cfgAddPanel .input{flex:1;min-width:180px}
+@media(max-width:560px){.cfgAddPanel{align-items:stretch;flex-direction:column}.cfgAddPanel .btn{width:100%}.cfgAddPanel .input{min-width:0;width:100%}}
 </style></head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0618 · smooth drag and compact add</div><div class="toast" id="toast"></div></div>
-<script src="./assets/ep-catalog.js?v=0618"></script>
-<script src="./assets/aerostar-platform.js?v=0618"></script>
-<script src="./assets/ip-catalog.js?v=0618"></script>
-<script src="./assets/technician-catalog.js?v=0618"></script>
-<script src="./assets/training-core.js?v=0618"></script>
-<script src="./assets/ep-lessons-screening.js?v=0618"></script>
-<script src="./assets/ep-lessons-rc-1.js?v=0618"></script>
-<script src="./assets/ep-lessons-rc-2.js?v=0618"></script>
-<script src="./assets/ep-lessons-half.js?v=0618"></script>
-<script src="./assets/ep-lessons-full-day-a.js?v=0618"></script>
-<script src="./assets/ep-lessons-full-day-b.js?v=0618"></script>
-<script src="./assets/ep-lessons-night.js?v=0618"></script>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0619 · compact catalog add</div><div class="toast" id="toast"></div></div>
+<script src="./assets/ep-catalog.js?v=0619"></script>
+<script src="./assets/aerostar-platform.js?v=0619"></script>
+<script src="./assets/ip-catalog.js?v=0619"></script>
+<script src="./assets/technician-catalog.js?v=0619"></script>
+<script src="./assets/training-core.js?v=0619"></script>
+<script src="./assets/ep-lessons-screening.js?v=0619"></script>
+<script src="./assets/ep-lessons-rc-1.js?v=0619"></script>
+<script src="./assets/ep-lessons-rc-2.js?v=0619"></script>
+<script src="./assets/ep-lessons-half.js?v=0619"></script>
+<script src="./assets/ep-lessons-full-day-a.js?v=0619"></script>
+<script src="./assets/ep-lessons-full-day-b.js?v=0619"></script>
+<script src="./assets/ep-lessons-night.js?v=0619"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentUserId='i1';
@@ -1564,7 +1568,7 @@ function cfgId(prefix){return prefix+'_'+Date.now()+'_'+Math.random().toString(3
 function cfgCatalogCard(title,key,list){
   return '<section class="card settingBox"><h3>'+esc(title)+'</h3><div class="editableList">'+
     list.map(x=>'<div class="editableRow"><input class="input cfgName" data-kind="'+key+'" data-id="'+x.id+'" value="'+esc(x.name)+'"><button class="btn danger small" data-cfg-remove="'+key+'|'+x.id+'">Remove</button></div>').join('')+
-    '</div><form class="toolbar cfgAddForm" data-kind="'+key+'"><input class="input" name="name" placeholder="Add '+esc(title.toLowerCase())+'" required><button class="btn secondary" type="submit">＋ Add</button></form></section>';
+    '</div><div class="cfgCompactAdd" data-cfg-add-box="'+key+'"><button class="btn secondary" type="button" data-cfg-add-open="'+key+'">＋ Add</button><form class="toolbar cfgAddForm cfgAddPanel" data-kind="'+key+'" hidden><input class="input" name="name" placeholder="Add '+esc(title.toLowerCase())+'" required><button class="btn sky" type="submit">Add</button><button class="btn secondary" type="button" data-cfg-add-cancel="'+key+'">Cancel</button></form></div></section>';
 }
 
 function cfgTypeScopedCard(title,key,list,type,kind){
@@ -2092,6 +2096,8 @@ function bindSettings(){
     cfgSave(cc);toast('Advanced architecture saved');render();
   };
 
+  document.querySelectorAll('[data-cfg-add-open]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-cfg-add-box]'),form=box?.querySelector('.cfgAddForm');if(!form)return;form.hidden=false;btn.hidden=true;form.querySelector('input[name="name"]')?.focus?.()});
+  document.querySelectorAll('[data-cfg-add-cancel]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-cfg-add-box]'),form=box?.querySelector('.cfgAddForm'),trigger=box?.querySelector('[data-cfg-add-open]');if(form){form.reset?.();form.hidden=true}if(trigger)trigger.hidden=false});
   document.querySelectorAll('.cfgAddForm').forEach(form=>form.onsubmit=e=>{
     e.preventDefault();const cc=cfgGet(),kind=form.dataset.kind,name=String(new FormData(form).get('name')||'').trim();if(!name)return;
     const prefix={courseTypes:'type',trainingKinds:'training',dayNight:'time',countries:'country'}[kind]||'item';
