@@ -42,16 +42,29 @@
   function mergePrograms(a,b){
     return mergeProgramList([a,b],{name:a.name.replace(/Day\s*·?\s*/i,"")+" · Day + Night",dayNight:"mixed",platformId:a.platformId});
   }
+  const customPackagesKey="flympus-custom-packages";
+  function getCustomPackages(){try{const v=JSON.parse(localStorage.getItem(customPackagesKey)||"{}");return v&&typeof v==="object"&&!Array.isArray(v)?v:{}}catch{return {}}}
+  function saveCustomPackages(value){localStorage.setItem(customPackagesKey,JSON.stringify(value||{}))}
+  function customPackagesFor(professionId){const root=getCustomPackages(),list=root[professionId];return Array.isArray(list)?clone(list):[]}
+  function saveCustomPackage(professionId,packageDef){
+    if(!professionId||!packageDef?.id)return null;
+    const root=getCustomPackages(),list=Array.isArray(root[professionId])?root[professionId]:[],idx=list.findIndex(x=>x.id===packageDef.id),next={...clone(packageDef),professionId,customPackage:true};
+    if(idx>=0)list[idx]=next;else list.push(next);root[professionId]=list;saveCustomPackages(root);return clone(next);
+  }
+  function removeCustomPackage(professionId,packageId){
+    const root=getCustomPackages(),list=Array.isArray(root[professionId])?root[professionId]:[],next=list.filter(x=>x.id!==packageId);
+    root[professionId]=next;saveCustomPackages(root);return next.length!==list.length;
+  }
   function packageBase(professionId,packageId){
     const c=catalog(professionId);if(!c||!packageId)return null;
-    let p=null;
+    let p=clone(customPackagesFor(professionId).find(x=>x.id===packageId))||null;
     if(professionId==="EP"&&packageId==="ep_screening"){
       const parts=(c.programs||[]).filter(x=>x.phaseId==="ep_screening");
       p=mergeProgramList(parts,{id:"ep_screening",name:"EP Screening · Simulator + Live RC",phaseId:"ep_screening",trainingKind:"screening",dayNight:"day",platformId:""});
     }else if(professionId==="EP"&&packageId==="ep_full_new_mixed"){
       const parts=(c.programs||[]).filter(x=>x.phaseId==="ep_full"&&x.trainingKind==="new"&&(x.dayNight==="day"||x.dayNight==="night"));
       p=mergeProgramList(parts,{id:"ep_full_new_mixed",name:"EP Course · Full Scale · Aerostar · Day + Night",phaseId:"ep_full",trainingKind:"new",dayNight:"mixed",platformId:"aerostar"});
-    }else p=clone((c.programs||[]).find(x=>x.id===packageId));
+    }else if(!p)p=clone((c.programs||[]).find(x=>x.id===packageId));
     if(!p)return null;
     if(professionId==="EP")p=normalizeEp(p);
     p.criteria=p.criteria||clone(c.criteria||[]);
@@ -59,13 +72,14 @@
   }
   function packageIdsFor(professionId){
     const c=catalog(professionId);if(!c)return[];
-    if(professionId!=="EP")return (c.programs||[]).map(x=>x.id);
+    if(professionId!=="EP")return [...new Set([...(c.programs||[]).map(x=>x.id),...customPackagesFor(professionId).map(x=>x.id)])];
     const raw=(c.programs||[]).map(x=>x.id),out=[];
     if(raw.includes("ep_screening_simulator")||raw.includes("ep_screening_rc"))out.push("ep_screening");
     ["ep_rc_new","ep_half_new","ep_full_day_new","ep_full_night_new"].forEach(id=>{if(raw.includes(id))out.push(id)});
     if(raw.includes("ep_full_day_new")&&raw.includes("ep_full_night_new"))out.push("ep_full_new_mixed");
     ["ep_full_refresh","ep_full_rtc"].forEach(id=>{if(raw.includes(id))out.push(id)});
     raw.filter(id=>!["ep_screening_simulator","ep_screening_rc",...out].includes(id)).forEach(id=>out.push(id));
+    customPackagesFor(professionId).forEach(x=>{if(!out.includes(x.id))out.push(x.id)});
     return out;
   }
   function packageCatalog(professionId){return packageIdsFor(professionId).map(id=>packageBase(professionId,id)).filter(Boolean).map(applyGlobalOverrides)}
@@ -239,5 +253,5 @@
     Object.values(catalogs).forEach(c=>(c.programs||[]).forEach(p=>{if(!p.phaseId||!p.platformId)errors.push(p.id+": missing phase/platform");const ids=new Set();(p.syllabi||[]).forEach(s=>{if(ids.has(s.id))errors.push(p.id+": duplicate syllabus "+s.id);ids.add(s.id);if(s.minimum!=null&&Number(s.minimum)<0)errors.push(p.id+": invalid minimum "+s.id)});(p.conflicts||[]).forEach(x=>warnings.push(p.id+": "+x.message))}));
     return {ok:!errors.length,errors,warnings,catalogs:Object.keys(catalogs).length,programs:Object.values(catalogs).reduce((n,c)=>n+(c.programs||[]).length,0)};
   }
-  window.FLYMPUS_TRAINING={catalogs,register,catalog,phasesFor,platformsFor,programsFor,packageBase,packageCatalog,resolvePackage,resolve,resolveGuided,normalizeGuidedSelection,guidedOptions,emergencyCatalog,requiredEmergencies,getOverrides,saveOverrides,getGlobalOverrides,saveGlobalOverrides,globalOverridesForProgram,applyOverrides,applyGlobalOverrides,validate,sourceText};
+  window.FLYMPUS_TRAINING={catalogs,register,catalog,phasesFor,platformsFor,programsFor,packageBase,packageCatalog,resolvePackage,getCustomPackages,saveCustomPackages,customPackagesFor,saveCustomPackage,removeCustomPackage,resolve,resolveGuided,normalizeGuidedSelection,guidedOptions,emergencyCatalog,requiredEmergencies,getOverrides,saveOverrides,getGlobalOverrides,saveGlobalOverrides,globalOverridesForProgram,applyOverrides,applyGlobalOverrides,validate,sourceText};
 })();
