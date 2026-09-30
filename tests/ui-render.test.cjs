@@ -59,6 +59,7 @@ assert(html.includes("function courseMetaIconSvg(kind)")&&html.includes("courseM
 assert(html.includes("linear-gradient(135deg,#0a6fbd 0%,#1590eb 54%,#0863a9 100%)"),"Selected action must use the approved polished blue gradient");
 assert(html.includes("myCourseRoleDivider")&&html.includes("background:rgba(255,255,255,.78)"),"Course role must show the requested white separator between the icon and role text");
 assert(html.includes(".myCourseRoleInline.manager")&&html.includes(".myCourseRoleInline.instructor"),"Course Manager and Instructor must have clearly distinct role treatments");
+assert(!html.includes("background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.10)"),"Course role label must not be enclosed in a capsule frame");
 assert(html.includes("countryTile=tile('country','Country',meta.country,showContext?'':'countryWide')"),"Country must pair with Qualification or Configuration when that context field exists");
 assert(html.includes("myCourseOpen selectAction"),"Unselected course action must use the white selectable state");
 assert(html.includes("myCourseSelectedDivider"),"My Courses must render a blue divider immediately after the selected course when other courses follow");
