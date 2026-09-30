@@ -165,7 +165,7 @@
       platformOptions,
       trainingKinds,
       dayNights,
-      configurationOptions:configPrograms,
+      configurationOptions:configPrograms.map(applyGlobalOverrides),
       canResolve:!!resolveGuided(s)
     };
   }
