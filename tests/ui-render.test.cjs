@@ -86,9 +86,9 @@ vm.runInContext("state.settingsTab='catalog';state.typeWorkspace='EP';state.phas
 assert.match(elements.get("#content").innerHTML,/Training Packages/);
 assert.match(elements.get("#content").innerHTML,/Training tracks · Day \/ Night/);
 assert.match(elements.get("#content").innerHTML,/globalPackageForm/);
-assert.doesNotMatch(elements.get("#content").innerHTML,/EP syllabi/);
-assert.doesNotMatch(elements.get("#content").innerHTML,/assessment criteria/);
-assert.doesNotMatch(elements.get("#content").innerHTML,/EP emergencies/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/data-kind="syllabi"/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/data-kind="criteria"/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/data-kind="emergencies"/);
 vm.runInContext("state.typeWorkspace='IP';state.phaseScope='IP';render()",context);
 assert.match(elements.get("#content").innerHTML,/Control-station configuration/);
 assert.match(elements.get("#content").innerHTML,/GCS-D/);
