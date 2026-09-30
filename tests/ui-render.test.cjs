@@ -26,6 +26,7 @@ assert(html.includes("Number(window.innerWidth||9999)>760||state.myCoursesFilter
 assert(html.includes('aria-controls="topCourseDropdown"')&&html.includes('id="topCourseDropdown"'),"Header must contain a real course switcher dropdown");
 assert(html.includes('id="topNotificationBtn"')&&html.includes('aria-label="Notifications"'),"Header must expose an accessible notifications bell");
 assert(html.includes('id="topNotificationDropdown"')&&html.includes("No new notifications"),"Notifications bell must open a notification panel with an empty state");
+assert(html.includes("<span>Personal</span>")&&html.includes("across all courses"),"Notifications must be personal to the user rather than scoped to the selected course");
 assert(html.includes("function positionNotificationDropdown()"),"Notifications panel must position safely on mobile");
 assert(html.includes(".topNotificationDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right))"),"Mobile notifications panel must stay within the viewport");
 assert(html.includes(".topCourseDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right));width:auto"),"Mobile quick course dropdown must stay inside the viewport on both sides");
