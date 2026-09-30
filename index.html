@@ -656,6 +656,107 @@ html,body{background:#f5f7fa}
 }
 </style>
 <style>
+/* ===== Mobile package tables: preserve desktop table quality, use readable cards on phones ===== */
+@media(max-width:760px){
+  .packageSyllabusSection{padding:8px}
+  .packageSyllabusTable:not(.ruleEditorTable){border:0!important;overflow:visible!important;background:transparent}
+  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusHeader{display:none!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusRow{
+    display:grid!important;
+    grid-template-columns:44px minmax(0,1fr) minmax(86px,.72fr)!important;
+    grid-template-rows:auto auto auto auto;
+    align-items:stretch;
+    margin:0 0 10px;
+    border:1px solid #d8e4ee!important;
+    border-radius:13px!important;
+    overflow:hidden!important;
+    background:#fff!important;
+    box-shadow:0 2px 7px rgba(22,62,96,.045);
+  }
+  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell{
+    min-width:0!important;
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    align-content:center;
+    gap:4px!important;
+    padding:9px 10px!important;
+    border-right:1px solid #e5edf4!important;
+    border-bottom:1px solid #e5edf4!important;
+    background:#fff;
+  }
+  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell:before{
+    content:attr(data-label);
+    display:block;
+    margin:0;
+    color:#7890a6;
+    font-size:8px;
+    line-height:1.15;
+    font-weight:850;
+    letter-spacing:.055em;
+    text-transform:uppercase;
+  }
+  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell input.input,
+  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell select{
+    width:100%!important;
+    min-width:0!important;
+    height:39px!important;
+    padding:7px 8px!important;
+    border:0!important;
+    border-radius:8px!important;
+    background:#f7f9fb!important;
+    color:#324b63!important;
+    font-size:12px!important;
+  }
+  .packageSyllabusTable:not(.ruleEditorTable) .useCell{
+    grid-column:1!important;
+    grid-row:1/5!important;
+    display:grid!important;
+    place-items:center!important;
+    align-content:center!important;
+    padding:8px 5px!important;
+    background:#fbfdff!important;
+    border-bottom:0!important;
+  }
+  .packageSyllabusTable:not(.ruleEditorTable) .useCell:before{margin-bottom:6px}
+  .packageSyllabusTable:not(.ruleEditorTable) .useCell input{width:19px!important;height:19px!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .orderCell{
+    grid-column:2/4!important;
+    grid-row:1!important;
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    gap:8px!important;
+  }
+  .packageSyllabusTable:not(.ruleEditorTable) .orderCell:before{display:none!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .seriesCell{grid-column:2!important;grid-row:2!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .minimumCell{grid-column:3!important;grid-row:2!important;border-right:0!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .supervisionCell{grid-column:2!important;grid-row:3!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .trackCell{grid-column:3!important;grid-row:3!important;border-right:0!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .statusCell{
+    grid-column:2/4!important;
+    grid-row:4!important;
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:8px!important;
+    border-right:0!important;
+    border-bottom:0!important;
+    min-height:42px;
+  }
+  .packageSyllabusTable:not(.ruleEditorTable) .statusCell:before{display:block!important;flex:0 0 auto}
+  .packageSyllabusTable:not(.ruleEditorTable) .statusCell small{margin-left:auto;text-align:right}
+  .packageSyllabusFooter{padding:4px 2px 8px}
+}
+@media(max-width:390px){
+  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusRow{grid-template-columns:40px minmax(0,1fr) minmax(78px,.68fr)!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell{padding:8px!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell input.input,
+  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell select{font-size:11.5px!important;padding:6px!important}
+}
+</style>
+<style>
 /* ===== Global compact date + responsive form guard · 0683 ===== */
 form,.formCard,.twoCol,.fields,.field,.settingBox,.wizardStepBody{min-width:0}
 form input,form select,form textarea{max-width:100%;min-width:0}
@@ -1791,7 +1892,6 @@ function courseOverridesHtml(){
 
   const customCount=Object.values(o.custom||{}).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0),editing=state.courseTailorEditing===true;
   return '<form id="courseOverridesForm" class="card settingBox courseTailorAligned '+(editing?'courseTailorEditing':'')+'" style="margin-top:14px"><div class="inlineHead"><div><div class="eyebrow">COURSE-SPECIFIC PACKAGE</div><h3>Tailor active course · '+esc(p.name)+'</h3><p class="sub">Same editor structure as Packages. Changes here apply only to this course.</p></div></div>'+picker+
-    '<div class="packageRuleStats packageRuleStatsFull" style="margin-top:12px"><span><b>'+activeSyllabi.length+'</b> Syllabi / tasks</span><span><b>'+criteriaActive.length+'</b> Assessment criteria</span><span><b>'+required.size+'</b> Required emergencies</span><span><b>'+counterActive.length+'</b> Experience requirements</span><span><b>'+examActive.length+'</b> Exams</span><span><b>'+gateActive.length+'</b> Progression gates</span></div>'+
     '<fieldset class="courseTailorEditFieldset" '+(editing?'':'disabled')+'>'+lifecycleEditor+'<details class="packageRules"><summary><b>Package settings for this course</b><span>Course-only path/name override</span></summary><div class="packageEditorList"><article class="packageEditorItem"><div class="fields"><label class="field"><span class="fieldLabel">Package name in this course</span><input class="input" name="course_package_name" value="'+esc(o.program?.name||p.name)+'"></label></div><div class="packagePathBox"><b>Course-specific package path</b>'+packagePathControls(currentCourseMeta.type,p,'course_')+'</div></article></div></details>'+
     '<details class="packageRules syllabiRules courseSyllabiRules" '+(courseSyllabusFlow?'open':'')+'><summary><b>Syllabi / practical tasks (<span data-course-active-syllabus-count>'+activeSyllabi.length+'</span>)</b><span><span data-course-excluded-syllabus-count>'+excludedSyllabi.length+'</span> excluded · Drag ☰ to reorder</span></summary><div class="packageSyllabusSection"><div class="packageSyllabusTable courseSyllabusTable"><div class="packageSyllabusHeader"><span>Use</span><span>Order / Move</span><span>Series / Syllabus</span><span>Minimum</span><span>Instructor Presence</span><span>Track</span><span>Status</span></div>'+syllabusRows+'</div><div class="packageSyllabusFooter"><span><b data-course-syllabus-minimum-total>'+syllabusMinimumTotal+'</b> total planned minimum</span><small>Only included syllabi are numbered.</small></div><details class="excludedSyllabiBox" '+(excludedSyllabi.length?'':'hidden')+'><summary><b>Excluded syllabi (<span data-course-excluded-syllabus-count>'+excludedSyllabi.length+'</span>)</b><span>Restore any item to this course</span></summary><div class="excludedSyllabusList">'+excludedRows+'</div></details>'+syllabusAdd+'</div></details>'+
     '<details class="packageRules"><summary><b>Assessment criteria ('+criteriaActive.length+')</b><span>'+(orderedCriteria.length-criteriaActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+gradingSettings+table('criteria',['Use','Order / Move','Assessment criterion','Weight (%)','Status'],criterionItems,'48px 92px minmax(250px,1.6fr) 120px minmax(140px,.7fr)')+criterionAdd+'</details>'+
