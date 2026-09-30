@@ -12,6 +12,7 @@ const context={window:{},document,localStorage:storage(),sessionStorage:storage(
 context.window=context;vm.createContext(context);
 for(const file of ["assets/ep-catalog.js","assets/aerostar-platform.js","assets/ip-catalog.js","assets/technician-catalog.js","assets/training-core.js","assets/ep-lessons-screening.js","assets/ep-lessons-rc-1.js","assets/ep-lessons-rc-2.js","assets/ep-lessons-half.js","assets/ep-lessons-full-day-a.js","assets/ep-lessons-full-day-b.js","assets/ep-lessons-night.js"]){vm.runInContext(fs.readFileSync(file,"utf8"),context,{filename:file})}
 const html=fs.readFileSync("index.html","utf8");
+assert(html.includes("myCoursesSectorFilter")&&html.includes("myCoursesPhaseFilter")&&html.includes("myCoursesTrainingFilter")&&html.includes("myCoursesRoleFilter"),"My Courses must expose filters for sector, phase, training type and role");
 assert(html.includes("function renderPreservingManagementView(update)"),"Management edit mode needs a view-preserving renderer");
 assert(html.includes("overflowAnchor='none'"),"Management Edit must disable native scroll anchoring while the view is rebuilt");
 assert(html.includes("anchorSelector='.card,.packageRules,.advancedStepLabel,.personCard,.rosterControls,.trainingStatusStack'"),"Management Edit must preserve a visible content anchor, not only the absolute scrollTop");
@@ -26,11 +27,20 @@ const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].ma
 assert.equal(scripts.length,1);vm.runInContext(scripts[0],context,{filename:"index-inline.js"});
 assert.match(elements.get("#content").innerHTML,/My Courses/);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Course/);
+assert.match(elements.get("#content").innerHTML,/id="myCoursesSectorFilter"/);
+assert.match(elements.get("#content").innerHTML,/id="myCoursesPhaseFilter"/);
+assert.match(elements.get("#content").innerHTML,/id="myCoursesTrainingFilter"/);
+assert.match(elements.get("#content").innerHTML,/id="myCoursesRoleFilter"/);
 assert.equal(vm.runInContext("instructorAssignedCourses(currentUserId).length",context),1);
 vm.runInContext("go('home')",context);assert(elements.get("#content").innerHTML.length>1000,"Home must render");
 vm.runInContext(`localStorage.setItem('ct-review-courses',JSON.stringify([{id:'course_multi',name:'Aerostar EP Night 2027',code:'EP-NIGHT-27',summary:'EP · Full Scale · Aerostar · Night',startsOn:'2027-01-10',selection:{courseType:'EP',phaseId:'ep_full',platformId:'aerostar',trainingKind:'new',dayNight:'night',country:'israel'},platformId:'aerostar',programId:'ep_full_night_new'}]));updateCourseMembershipForCourse('EP-NIGHT-27',currentUserId,'INSTRUCTOR',{role:'COURSE_MANAGER',removed:false});state.screen='courses';render()`,context);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Night 2027/);
 assert.equal(vm.runInContext("instructorAssignedCourses(currentUserId).length",context),2);
+vm.runInContext("state.myCoursesPhase='Full Scale';render()",context);
+assert.match(elements.get("#content").innerHTML,/Aerostar EP Night 2027/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/Aerostar EP Course/);
+assert.match(elements.get("#content").innerHTML,/1 of 2 courses shown/);
+vm.runInContext("state.myCoursesPhase='ALL';render()",context);
 assert.equal(vm.runInContext("instructorAssignedCourses('i2').some(x=>courseKey(x)==='EP-NIGHT-27')",context),false);
 vm.runInContext("updateCourseMembershipForCourse('EP-NIGHT-27','i2','INSTRUCTOR',{role:'INSTRUCTOR',removed:false})",context);
 assert.equal(vm.runInContext("instructorAssignedCourses('i2').some(x=>courseKey(x)==='EP-NIGHT-27')",context),true);
