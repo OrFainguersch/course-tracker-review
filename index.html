@@ -214,6 +214,14 @@ main{padding:16px 14px calc(30px + env(safe-area-inset-bottom));max-width:1220px
 .rankBadge{padding:5px 8px;border-radius:10px;background:#eaf4ff;color:#126cc2;font-size:10px;font-weight:900}
 .rosterChevron{border:0;background:transparent;color:#6e8aa7;font-size:25px;padding:8px}.rosterEditBtn{min-width:70px}
 .manageBanner{border-radius:16px}.manageBanner span{font-size:10px}
+.rosterManageDock,.rosterManageDockSpacer{display:none}
+@media(max-width:759px){
+  .rosterManageTopDone{display:none!important}
+  .rosterManageDock{position:fixed;left:18px;right:18px;bottom:calc(94px + env(safe-area-inset-bottom));z-index:47;height:52px;border:1px solid #0f69ad;border-radius:15px;background:#176fae;color:#fff;box-shadow:0 10px 26px rgba(8,49,88,.24);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;letter-spacing:.01em;-webkit-tap-highlight-color:transparent}
+  .rosterManageDock:active{transform:translateY(1px)}
+  .rosterManageDock:focus-visible{outline:3px solid #8fd0ff;outline-offset:2px}
+  .rosterManageDockSpacer{display:block;height:62px}
+}
 .instructorRole{margin-top:4px}
 
 /* profile */
@@ -974,7 +982,7 @@ function roster(){
    }
    return String(a.name).localeCompare(String(b.name),undefined,{sensitivity:'base'});
  });
- return '<div class="rosterTopbar"><div><div class="eyebrow">PEOPLE</div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div><button class="btn '+(manage?'secondary':'edit')+'" id="toggleRosterManage">'+(manage?'Done':'✎ Manage')+'</button></div>'+
+ return '<div class="rosterTopbar"><div><div class="eyebrow">PEOPLE</div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div><button class="btn '+(manage?'secondary rosterManageTopDone':'edit')+'" id="toggleRosterManage">'+(manage?'Done':'✎ Manage')+'</button></div>'+
  (manage?'<div class="manageBanner"><div><b>Manage mode</b><span> · Edit identity, photo and course membership safely.</span></div><button class="btn sky small" id="addPersonBtn">+ Add person</button></div>':'')+
  '<section class="card rosterControls"><div class="scrollTabs"><button class="seg '+(type==='TRAINEE'?'active':'')+'" data-roster-type="TRAINEE">Trainees ('+allT.length+')</button><button class="seg '+(type==='INSTRUCTOR'?'active':'')+'" data-roster-type="INSTRUCTOR">Instructors ('+allI.length+')</button></div>'+
  '<div class="rosterSearchRow"><input class="input" id="rosterSearch" placeholder="Search '+(type==='TRAINEE'?'trainees':'instructors')+'..." value="'+esc(state.search)+'"><span class="rankBadge">⌕</span></div>'+
@@ -998,6 +1006,7 @@ function roster(){
      '<div class="rosterActions">'+(manage?'<button class="btn edit small rosterEditBtn" data-person-edit="INSTRUCTOR:'+t.id+'">✎ Edit</button>':'<button class="rosterChevron" data-instructor="'+t.id+'" aria-label="Open '+esc(t.name)+'">›</button>')+'</div>'+
    '</article>';
  }).join(''):'<div class="card empty"><h3>No matching people.</h3></div>')+'</section>'+
+ (manage?'<div class="rosterManageDockSpacer" aria-hidden="true"></div><button class="rosterManageDock" id="rosterManageDoneDock" type="button">✓ Done</button>':'')+
  (manage?'<div class="modal" id="personModal"><div class="modalCard"><div class="inlineHead"><div><h2>Add to course roster</h2><p>Assign an existing person or create a new one for this course.</p></div><button class="btn secondary small" id="closePersonModal">✕</button></div>'+(unassignedExisting.length?'<form id="assignExistingForm"><div class="field"><label>Existing person</label><select name="personKey" required><option value="" selected disabled>Select person</option>'+unassignedExisting.map(x=>'<option value="'+x.type+':'+x.id+'">'+(x.type==='INSTRUCTOR'?'Instructor':'Trainee')+' · '+esc(x.name)+'</option>').join('')+'</select></div><div class="toolbar"><button class="btn sky" type="submit">Add existing person</button></div></form><div class="modalDivider"><span>or create new</span></div>':'')+'<form id="addPersonForm"><div class="fields"><div class="field"><label>Full name</label><input class="input" name="name" required></div><div class="field"><label>Email (optional)</label><input class="input" type="email" name="email"></div><div class="field"><label>Person type</label><select name="type" required><option value="" selected disabled>Select person type</option><option value="TRAINEE">Trainee</option><option value="INSTRUCTOR">Instructor</option></select></div></div><div class="toolbar"><button class="btn secondary" type="submit">Create and add</button></div></form></div></div>':'')+
  personEditModal();
 }
@@ -2215,7 +2224,7 @@ if($('#rosterSearch')){
   if($('#addPersonForm'))$('#addPersonForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget),type=fd.get('type');const arr=getRosterExtras();const name=String(fd.get('name')).trim(),id='x_'+Date.now();arr.push({id,name,email:String(fd.get('email')||''),type,status:'Active',courseIds:[currentCourseId],initials:name.split(' ').map(x=>x[0]).join('').slice(0,2),average:type==='TRAINEE'?null:undefined,totalFlights:type==='TRAINEE'?0:undefined});localStorage.setItem('ct-review-roster',JSON.stringify(arr));updateCourseMembership(id,String(type),type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});toast(name+' added to the course');render()}
   if($('#assignExistingForm'))$('#assignExistingForm').onsubmit=e=>{e.preventDefault();const key=String(new FormData(e.currentTarget).get('personKey')||''),parts=key.split(':'),type=parts[0],id=parts.slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id);if(!p)return;updateCourseMembership(id,type,type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});toast(p.name+' assigned to '+(currentCourseMeta.courseName||'course'));render()}
 }
-if($('#toggleRosterManage'))$('#toggleRosterManage').onclick=()=>renderPreservingManagementView(()=>{state.rosterManage=!state.rosterManage;state.personEditKey=null});
+const toggleRosterManageMode=()=>renderPreservingManagementView(()=>{state.rosterManage=!state.rosterManage;state.personEditKey=null});if($('#toggleRosterManage'))$('#toggleRosterManage').onclick=toggleRosterManageMode;if($('#rosterManageDoneDock'))$('#rosterManageDoneDock').onclick=toggleRosterManageMode;
 document.querySelectorAll('[data-person-edit]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();renderPreservingManagementView(()=>{state.personEditKey=btn.dataset.personEdit;state.personPhotoDraft=undefined})});
 if($('#closeEditPerson'))$('#closeEditPerson').onclick=()=>{state.personEditKey=null;state.personPhotoDraft=undefined;render()};
 if($('#cancelEditPerson'))$('#cancelEditPerson').onclick=()=>{state.personEditKey=null;state.personPhotoDraft=undefined;render()};
