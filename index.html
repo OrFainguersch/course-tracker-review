@@ -495,19 +495,19 @@ select option[value=""]{color:#8a9bad}
 .courseDetailsInline{margin-top:9px}.courseDetailsStep .wizardStepBody>label,.courseIdentityStep .wizardStepBody>label{display:block}.addPackageChoice{border-style:dashed;background:#f8fbfe}.addPackageChoice b{color:#0875ce}.fieldHelp{display:block;margin-top:5px;color:#8192a4;font-size:9px}.courseIdentityStep .fields{margin-top:9px}
 </style></head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0640 · package category filter and gate removal</div><div class="toast" id="toast"></div></div>
-<script src="./assets/ep-catalog.js?v=0640"></script>
-<script src="./assets/aerostar-platform.js?v=0640"></script>
-<script src="./assets/ip-catalog.js?v=0640"></script>
-<script src="./assets/technician-catalog.js?v=0640"></script>
-<script src="./assets/training-core.js?v=0640"></script>
-<script src="./assets/ep-lessons-screening.js?v=0640"></script>
-<script src="./assets/ep-lessons-rc-1.js?v=0640"></script>
-<script src="./assets/ep-lessons-rc-2.js?v=0640"></script>
-<script src="./assets/ep-lessons-half.js?v=0640"></script>
-<script src="./assets/ep-lessons-full-day-a.js?v=0640"></script>
-<script src="./assets/ep-lessons-full-day-b.js?v=0640"></script>
-<script src="./assets/ep-lessons-night.js?v=0640"></script>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0641 · stable management editing and simpler actions</div><div class="toast" id="toast"></div></div>
+<script src="./assets/ep-catalog.js?v=0641"></script>
+<script src="./assets/aerostar-platform.js?v=0641"></script>
+<script src="./assets/ip-catalog.js?v=0641"></script>
+<script src="./assets/technician-catalog.js?v=0641"></script>
+<script src="./assets/training-core.js?v=0641"></script>
+<script src="./assets/ep-lessons-screening.js?v=0641"></script>
+<script src="./assets/ep-lessons-rc-1.js?v=0641"></script>
+<script src="./assets/ep-lessons-rc-2.js?v=0641"></script>
+<script src="./assets/ep-lessons-half.js?v=0641"></script>
+<script src="./assets/ep-lessons-full-day-a.js?v=0641"></script>
+<script src="./assets/ep-lessons-full-day-b.js?v=0641"></script>
+<script src="./assets/ep-lessons-night.js?v=0641"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentUserId='i1';
@@ -1360,7 +1360,7 @@ function advancedPackagesHtml(type){
   const cell=(label,html,cls='')=>'<div class="packageSyllabusCell '+cls+'" data-label="'+esc(label)+'">'+html+'</div>';
   const table=(kind,columns,rows,cols)=>rows&&String(rows).trim()?'<div class="packageSyllabusSection ruleEditorSection"><div class="packageSyllabusTable ruleEditorTable" data-rule-table="'+kind+'" style="--rule-cols:'+cols+'"><div class="packageSyllabusHeader">'+columns.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div>'+rows+'</div></div>':'';
   const cards=packages.map(p=>{
-    const base=core.packageBase?.(type,p.id)||p,o=core.getGlobalOverrides?.(p.id)||{},current=core.applyGlobalOverrides?.(base)||p,changed=Object.keys(o).length>0;
+    const base=core.packageBase?.(type,p.id)||p,o=core.getGlobalOverrides?.(p.id)||{},current=core.applyGlobalOverrides?.(base)||p;
     const customBadge=(x,kind)=>x.packageCustom?'<div class="packageCustomMeta"><span class="pill blue">PACKAGE CUSTOM</span><button class="btn danger small" type="button" data-global-custom-remove="'+kind+'|'+esc(x.id)+'">Remove</button></div>':'<small>Package default item</small>';
     const editorOverrides=core.globalOverridesForProgram?.(base)||o;
     const allSyllabi=mergeEditor(base.syllabi,editorOverrides.custom?.syllabi,editorOverrides.syllabi),orderedSyllabi=allSyllabi.filter(x=>x.applicable!==false),excludedSyllabi=allSyllabi.filter(x=>x.applicable===false);
@@ -1392,7 +1392,7 @@ function advancedPackagesHtml(type){
     const emergencyAdd=addBox('emergencies','Add emergency requirement',field('Emergency name','<input class="input" data-add-field="name" placeholder="New emergency">',true)+field('Category','<select data-add-field="category">'+emergencyCategories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('')+'</select>'));
 
     const editing=!!state.advancedArchitectureEditing,focused=state.packageFocusId===p.id;
-    return '<form class="card globalPackageCard globalPackageForm '+(focused?'packageFocused ':'')+(editing?'packageEditing':'')+'" data-global-package-id="'+esc(p.id)+'" data-global-package-type="'+esc(type)+'"><details class="packageEditorShell" '+(focused?'open':'')+'><summary class="packageShellSummary"><div class="globalPackageHead"><div><div class="eyebrow">REUSABLE PACKAGE</div><h3>'+esc(current.name)+'</h3><p>'+esc(packagePathLabel(type,current))+'</p></div><div class="packageHeaderActions">'+(editing?'<div class="packageActionButtons">'+(changed?'<button class="btn secondary small" type="button" data-reset-global-package="'+esc(p.id)+'">Restore original Package defaults</button>':'')+'<button class="btn danger small" type="button" data-delete-package="'+esc(p.id)+'" data-package-sector="'+esc(type)+'">Delete Package</button></div>':'')+'</div></div><div class="packageSummaryStats"><span><b>'+orderedSyllabi.length+'</b> Syllabi</span><span><b>'+criteriaActive.length+'</b> Criteria</span><span><b>'+required.size+'</b> Emergencies</span><span><b>'+counterActive.length+'</b> Experience</span><span><b>'+examActive.length+'</b> Exams</span></div></summary><fieldset class="packageEditFieldset" '+(editing?'':'disabled')+'><div class="packageEditorBody">'+
+    return '<form class="card globalPackageCard globalPackageForm '+(focused?'packageFocused ':'')+(editing?'packageEditing':'')+'" data-global-package-id="'+esc(p.id)+'" data-global-package-type="'+esc(type)+'"><details class="packageEditorShell" '+(focused?'open':'')+'><summary class="packageShellSummary"><div class="globalPackageHead"><div><div class="eyebrow">REUSABLE PACKAGE</div><h3>'+esc(current.name)+'</h3><p>'+esc(packagePathLabel(type,current))+'</p></div><div class="packageHeaderActions">'+(editing?'<div class="packageActionButtons"><button class="btn danger small" type="button" data-delete-package="'+esc(p.id)+'" data-package-sector="'+esc(type)+'">Delete Package</button></div>':'')+'</div></div><div class="packageSummaryStats"><span><b>'+orderedSyllabi.length+'</b> Syllabi</span><span><b>'+criteriaActive.length+'</b> Criteria</span><span><b>'+required.size+'</b> Emergencies</span><span><b>'+counterActive.length+'</b> Experience</span><span><b>'+examActive.length+'</b> Exams</span></div></summary><fieldset class="packageEditFieldset" '+(editing?'':'disabled')+'><div class="packageEditorBody">'+
       '<div class="fields"><label class="field"><span class="fieldLabel">Package name</span><input class="input" name="g_package_name" value="'+esc(current.name)+'"></label><label class="field"><span class="fieldLabel">Package ID</span><input class="input" value="'+esc(p.id)+'" readonly></label></div>'+
       '<div class="packagePathBox"><div class="inlineHead"><div><b>Package path</b><p class="sub">Defines where this Package belongs inside '+esc(type)+'.</p></div></div>'+packagePathControls(type,current,'g_')+'</div>'+
       '<div class="packageRuleStats packageRuleStatsFull"><span><b>'+orderedSyllabi.length+'</b> Syllabi / tasks</span><span><b>'+criteriaActive.length+'</b> Assessment criteria</span><span><b>'+required.size+'</b> Required emergencies</span><span><b>'+counterActive.length+'</b> Experience requirements</span><span><b>'+examActive.length+'</b> Exams</span><span><b>'+gateActive.length+'</b> Progression gates</span></div>'+
@@ -1461,7 +1461,7 @@ function courseOverridesHtml(){
   const orderedEmergencies=orderItems(emergencies),emergencyItems=orderedEmergencies.map((x,i)=>'<div class="packageSyllabusRow ruleEditorRow '+(x.courseOnly?'packageCustomItem ':'')+(!required.has(x.id)?'ruleDisabledRow':'')+'" data-rule-row="emergencies|'+esc(x.id)+'">'+cell('Use','<input type="checkbox" name="requiredEmergency" value="'+esc(x.id)+'" '+(required.has(x.id)?'checked':'')+'>','useCell')+cell('Order / Move','<button class="syllabusDragHandle ruleDragHandle" type="button" title="Drag to reorder">☰</button><span class="ruleOrderNumber">'+(i+1)+'</span><input type="hidden" name="course_emergency_order_'+esc(x.id)+'" value="'+(i+1)+'">','ruleOrderCell')+cell('Emergency','<input class="input" name="course_emergency_name_'+esc(x.id)+'" value="'+esc(x.name)+'">')+cell('Category','<select name="course_emergency_category_'+esc(x.id)+'">'+emergencyCategories.map(c=>'<option value="'+esc(c)+'" '+((x.category||defaultEmergencyCategory(x.name))===c?'selected':'')+'>'+esc(c)+'</option>').join('')+'</select>')+cell('Status',origin(x,'emergencies'),'statusCell')+'</div>').join('');
   const emergencyAdd=addBox('emergencies','Add emergency requirement',field('Emergency name','<input class="input" data-add-field="name" placeholder="New emergency">',true)+field('Category','<select data-add-field="category">'+emergencyCategories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('')+'</select>'));
 
-  const customCount=Object.values(o.custom||{}).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0),editing=state.courseTailorEditing===true,hasCourseOverrides=Object.keys(o||{}).length>0;
+  const customCount=Object.values(o.custom||{}).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0),editing=state.courseTailorEditing===true;
   return '<form id="courseOverridesForm" class="card settingBox courseTailorAligned '+(editing?'courseTailorEditing':'')+'" style="margin-top:14px"><div class="inlineHead"><div><div class="eyebrow">COURSE-SPECIFIC PACKAGE</div><h3>Tailor active course · '+esc(p.name)+'</h3><p class="sub">Same editor structure as Packages. Changes here apply only to this course.</p></div><span class="pill amber">'+customCount+' COURSE-ONLY ITEMS</span></div>'+picker+
     '<div class="packageRuleStats packageRuleStatsFull" style="margin-top:12px"><span><b>'+activeSyllabi.length+'</b> Syllabi / tasks</span><span><b>'+criteriaActive.length+'</b> Assessment criteria</span><span><b>'+required.size+'</b> Required emergencies</span><span><b>'+counterActive.length+'</b> Experience requirements</span><span><b>'+examActive.length+'</b> Exams</span><span><b>'+gateActive.length+'</b> Progression gates</span></div>'+
     '<fieldset class="courseTailorEditFieldset" '+(editing?'':'disabled')+'><details class="packageRules"><summary><b>Package settings for this course</b><span>Course-only path/name override</span></summary><div class="packageEditorList"><article class="packageEditorItem"><div class="fields"><label class="field"><span class="fieldLabel">Package name in this course</span><input class="input" name="course_package_name" value="'+esc(o.program?.name||p.name)+'"></label></div><div class="packagePathBox"><b>Course-specific package path</b>'+packagePathControls(currentCourseMeta.type,p,'course_')+'</div></article></div></details>'+
@@ -1471,7 +1471,7 @@ function courseOverridesHtml(){
     '<details class="packageRules"><summary><b>Experience requirements ('+counterActive.length+')</b><span>'+(orderedCounters.length-counterActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('counters',['Use','Order / Move','Requirement','Minimum','Unit','Context','Status'],counterItems,'48px 92px minmax(220px,1.4fr) 100px 110px 120px minmax(130px,.7fr)')+counterAdd+'</details>'+
     '<details class="packageRules"><summary><b>Exams ('+examActive.length+')</b><span>'+(orderedExams.length-examActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('exams',['Use','Order / Move','Exam','Pass grade','Status'],examItems,'48px 92px minmax(260px,1.6fr) 120px minmax(140px,.7fr)')+examAdd+'</details>'+
     '<details class="packageRules"><summary><b>Progression gates ('+gateActive.length+')</b><span>'+(orderedGates.length-gateActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('progression',['Use','Order / Move','Progression requirement','Status'],gateItems,'48px 92px minmax(320px,1.8fr) minmax(140px,.7fr)')+gateAdd+'</details></fieldset>'+
-    '<div class="toolbar packageSaveBar courseTailorActions">'+(editing?'<button class="btn sky" type="submit">Save changes</button>'+(hasCourseOverrides?'<button class="btn danger" type="button" id="resetCourseOverrides">Revert to Package defaults</button>':''):'<button class="btn sky" type="button" id="courseTailorEdit">Edit active course</button>')+'</div></form>';
+    '<div class="toolbar packageSaveBar courseTailorActions">'+(editing?'<button class="btn sky" type="submit">Save changes</button>':'<button class="btn sky" type="button" id="courseTailorEdit">Edit active course</button>')+'</div></form>';
 }
 function epCurrentSuitSummaryHtml(){
   const p=epCurrentProgram(),em=evaluationEmergencyDefs();
@@ -1799,6 +1799,17 @@ function reports(){
 }
 function render(){saveUiState();renderNav();const topCourse=document.querySelector('#topCourseName');if(topCourse)topCourse.textContent=currentCourseMeta.courseName||course.name;let html='';try{switch(state.screen){case'courses':html=myCourses();break;case'home':html=home();break;case'evaluation':html=evaluation();break;case'roster':html=roster();break;case'profile':html=traineeProfile();break;case'instructor':html=instructorProfile();break;case'settings':html=settings();break;case'reports':html=reports();break;case'safety':html=safetyScreen();break;case'exams':html=examsScreen();break;case'planned':html=plannedVsExecuted();break;default:state.screen='home';html=home();break}}catch(err){console.error('Course Tracker screen render failed',state.screen,err);html='<div class="eyebrow">Review build diagnostic</div><h1 class="pageTitle">This screen failed to load</h1><section class="card settingBox"><h3>'+esc(state.screen)+'</h3><p class="sub">'+esc(err&&err.message?err.message:String(err))+'</p><div class="toolbar"><button class="btn sky" data-go="home">Back to Home</button><button class="btn danger" id="resetBrokenReviewState">Reset local review data</button></div></section>'}if(!html){state.screen='home';html=home()}$('#content').innerHTML=html;bind();}
 
+function renderPreservingManagementView(update){
+  const root=$('#content'),scrollTop=Number(window.scrollY||document.documentElement?.scrollTop||document.body?.scrollTop||0),openStates=root?[...root.querySelectorAll('details')].map(x=>!!x.open):[];
+  if(typeof update==='function')update();
+  render();
+  const restore=()=>{
+    const next=$('#content');if(next)openStates.forEach((open,i)=>{const d=next.querySelectorAll('details')[i];if(d)d.open=open});
+    try{if(typeof window.scrollTo==='function')window.scrollTo(0,scrollTop);else if(document.documentElement)document.documentElement.scrollTop=scrollTop}catch{}
+  };
+  restore();if(typeof window.requestAnimationFrame==='function')window.requestAnimationFrame(restore);
+}
+
 function bindGlobalFormUx(){
   document.querySelectorAll('input[type="number"]').forEach(el=>{
     el.addEventListener('focus',()=>{if(String(el.value)==='0')setTimeout(()=>{try{el.select()}catch{}},0)});
@@ -1820,8 +1831,8 @@ if($('#rosterSearch')){
   if($('#addPersonForm'))$('#addPersonForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget),type=fd.get('type');const arr=getRosterExtras();const name=String(fd.get('name')).trim(),id='x_'+Date.now();arr.push({id,name,email:String(fd.get('email')||''),type,status:'Active',courseIds:[currentCourseId],initials:name.split(' ').map(x=>x[0]).join('').slice(0,2),average:type==='TRAINEE'?null:undefined,totalFlights:type==='TRAINEE'?0:undefined});localStorage.setItem('ct-review-roster',JSON.stringify(arr));updateCourseMembership(id,String(type),type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});toast(name+' added to the course');render()}
   if($('#assignExistingForm'))$('#assignExistingForm').onsubmit=e=>{e.preventDefault();const key=String(new FormData(e.currentTarget).get('personKey')||''),parts=key.split(':'),type=parts[0],id=parts.slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id);if(!p)return;updateCourseMembership(id,type,type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});toast(p.name+' assigned to '+(currentCourseMeta.courseName||'course'));render()}
 }
-if($('#toggleRosterManage'))$('#toggleRosterManage').onclick=()=>{state.rosterManage=!state.rosterManage;state.personEditKey=null;render()};
-document.querySelectorAll('[data-person-edit]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();state.personEditKey=btn.dataset.personEdit;state.personPhotoDraft=undefined;render()});
+if($('#toggleRosterManage'))$('#toggleRosterManage').onclick=()=>renderPreservingManagementView(()=>{state.rosterManage=!state.rosterManage;state.personEditKey=null});
+document.querySelectorAll('[data-person-edit]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();renderPreservingManagementView(()=>{state.personEditKey=btn.dataset.personEdit;state.personPhotoDraft=undefined})});
 if($('#closeEditPerson'))$('#closeEditPerson').onclick=()=>{state.personEditKey=null;state.personPhotoDraft=undefined;render()};
 if($('#cancelEditPerson'))$('#cancelEditPerson').onclick=()=>{state.personEditKey=null;state.personPhotoDraft=undefined;render()};
 if($('#editPersonModal'))$('#editPersonModal').onclick=e=>{if(e.target.id==='editPersonModal'){state.personEditKey=null;state.personPhotoDraft=undefined;render()}};
@@ -1924,7 +1935,7 @@ f.onsubmit=e=>{e.preventDefault();const fd=new FormData(f),list=getEvaluations()
 
 function bindSettings(){
   const c=cfgGet();
-  if($('#courseTailorEdit'))$('#courseTailorEdit').onclick=()=>{state.courseTailorEditing=true;state.courseAddFlow=null;render()};
+  if($('#courseTailorEdit'))$('#courseTailorEdit').onclick=()=>renderPreservingManagementView(()=>{state.courseTailorEditing=true;state.courseAddFlow=null});
   if($('#tailorCourseSelect'))$('#tailorCourseSelect').onchange=e=>{const key=e.target.value;if(!key||key===currentCourseId)return;switchCourseByKey(key,{screen:'settings',render:false});state.settingsTab='overrides';state.courseTailorEditing=false;state.courseAddFlow=null;toast((currentCourseMeta.courseName||'Course')+' selected for Tailor');render()};
   document.querySelectorAll('[data-course-add-open]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-course-add-box]'),panel=box?.querySelector('[data-course-add-panel]');if(!panel)return;panel.hidden=false;btn.hidden=true;if(btn.dataset.courseAddOpen==='syllabi'){state.courseAddFlow='syllabi';const section=box.closest('.courseSyllabiRules');if(section)section.open=true}panel.querySelector('input,select')?.focus?.()});
   document.querySelectorAll('[data-course-add-cancel]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-course-add-box]'),panel=box?.querySelector('[data-course-add-panel]'),trigger=box?.querySelector('[data-course-add-open]');if(panel)panel.hidden=true;if(trigger)trigger.hidden=false;if(btn.dataset.courseAddCancel==='syllabi')state.courseAddFlow=null});
@@ -1975,9 +1986,8 @@ function bindSettings(){
     m.exams.forEach(x=>{const v=fd.get('exam_pass_'+x.id),name=String(fd.get('exam_name_'+x.id)||x.name).trim()||x.name;overrides.exams[x.id]={applicable:fd.has('exam_app_'+x.id),name,order:Number(fd.get('exam_order_'+x.id)||x.order||999),pass:v===''?null:Number(v)}});
     m.progression.forEach(x=>{const k=progressionEditableKey(x),patch={applicable:fd.has('gate_'+x.id),order:Number(fd.get('gate_order_'+x.id)||x.order||999)};if(k){const value=String(fd.get('gate_text_'+x.id)||'').trim();if(value)patch[k]=value}overrides.progression[x.id]=patch});
     m.emergencies.forEach(x=>{const name=String(fd.get('course_emergency_name_'+x.id)||x.name).trim()||x.name;overrides.emergencies[x.id]={name,order:Number(fd.get('course_emergency_order_'+x.id)||x.order||999),category:String(fd.get('course_emergency_category_'+x.id)||x.category||defaultEmergencyCategory(name))}});
-    window.FLYMPUS_TRAINING.saveOverrides(currentCourseMeta.courseCode||currentCourseId,overrides);const rec=courseByKey(currentCourseId);if(rec){Object.assign(currentCourseMeta,courseRuntimeMeta(rec));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta))}state.courseAddFlow=null;state.courseTailorEditing=false;toast('Changes saved');render();
+    window.FLYMPUS_TRAINING.saveOverrides(currentCourseMeta.courseCode||currentCourseId,overrides);const rec=courseByKey(currentCourseId);if(rec){Object.assign(currentCourseMeta,courseRuntimeMeta(rec));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta))}state.courseAddFlow=null;state.courseTailorEditing=false;toast('Changes saved');renderPreservingManagementView();
   };
-  if($('#resetCourseOverrides'))$('#resetCourseOverrides').onclick=()=>{if(confirm('Remove all course-specific changes and return this course to the current reusable Package defaults? Existing evaluation history is not deleted.')){window.FLYMPUS_TRAINING.saveOverrides(currentCourseMeta.courseCode||currentCourseId,{});state.courseAddFlow=null;state.courseTailorEditing=false;toast('Course reverted to Package defaults');render()}};
   const rememberBuilderInputs=()=>{
     if($('#builderName'))state.builderName=$('#builderName').value;
     if($('#builderCode'))state.builderCode=$('#builderCode').value;
@@ -2148,13 +2158,12 @@ function bindSettings(){
     mergeEditor(base.experienceCounters,editorOverrides.custom?.counters,editorOverrides.counters).forEach(x=>{const min=fd.get('g_counter_min_'+x.id),name=String(fd.get('g_counter_name_'+x.id)||x.name).trim()||x.name;overrides.counters[x.id]={applicable:fd.has('g_counter_app_'+x.id),name,order:Number(fd.get('g_counter_order_'+x.id)||x.order||999),minimum:min===''?null:Number(min),unit:String(fd.get('g_counter_unit_'+x.id)||x.unit||'count'),track:String(fd.get('g_counter_track_'+x.id)||x.track||'shared')}});
     mergeEditor(base.exams,editorOverrides.custom?.exams,editorOverrides.exams).forEach(x=>{const pass=fd.get('g_exam_pass_'+x.id),name=String(fd.get('g_exam_name_'+x.id)||x.name).trim()||x.name;overrides.exams[x.id]={applicable:fd.has('g_exam_app_'+x.id),name,order:Number(fd.get('g_exam_order_'+x.id)||x.order||999),pass:pass===''?null:Number(pass)}});
     mergeEditor(base.progression,editorOverrides.custom?.progression,editorOverrides.progression).forEach(x=>{const key=progressionEditableKey(x),patch={applicable:fd.has('g_gate_app_'+x.id),order:Number(fd.get('g_gate_order_'+x.id)||x.order||999)};if(key){const value=String(fd.get('g_gate_text_'+x.id)||'').trim();if(value)patch[key]=value}overrides.progression[x.id]=patch});
-    core.saveGlobalOverrides(id,overrides);form.dataset.dirty='0';if(!quiet)toast('Package changes saved');if(renderAfter)render();return true;
+    core.saveGlobalOverrides(id,overrides);form.dataset.dirty='0';if(!quiet)toast('Package changes saved');if(renderAfter)renderPreservingManagementView();return true;
   };
   document.querySelectorAll('.globalPackageForm').forEach(form=>{form.onsubmit=e=>{e.preventDefault();saveGlobalPackageForm(form)};form.addEventListener('input',()=>{if(state.advancedArchitectureEditing)form.dataset.dirty='1'});form.addEventListener('change',()=>{if(state.advancedArchitectureEditing)form.dataset.dirty='1'})});
-  document.querySelectorAll('[data-reset-global-package]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.resetGlobalPackage;if(confirm('Remove all saved edits to this Package and restore its original baseline? Course-specific Tailor changes remain.')){window.FLYMPUS_TRAINING.saveGlobalOverrides(id,{});toast('Original Package defaults restored');render()}});
 
 
-  if($('#advancedArchitectureEdit'))$('#advancedArchitectureEdit').onclick=()=>{state.advancedArchitectureEditing=true;render()};
+  if($('#advancedArchitectureEdit'))$('#advancedArchitectureEdit').onclick=()=>renderPreservingManagementView(()=>{state.advancedArchitectureEditing=true});
 
   if($('#cfgAddPlatform'))$('#cfgAddPlatform').onsubmit=e=>{
     e.preventDefault();const name=String(new FormData(e.currentTarget).get('name')||'').trim(),type=state.typeWorkspace||cfgGet().courseTypes[0]?.id||'';if(!name||!type)return;
@@ -2174,7 +2183,7 @@ function bindSettings(){
     document.querySelectorAll('.cfgPlatformName').forEach(el=>{if(el.value.trim())platformLabels[el.dataset.id]=el.value.trim()});savePlatformLabels(platformLabels);
     document.querySelectorAll('.cfgScopedName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
     document.querySelectorAll('.cfgScopedWeight').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x)x.weight=Math.max(0,Math.min(100,Number(el.value)||0))});document.querySelectorAll('.cfgEmergencyCategory').forEach(el=>{const x=cc.emergencies.find(v=>v.id===el.dataset.id);if(x)x.category=el.value||'General / Operational'});document.querySelectorAll('.cfgSyllabusMinimum').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.minimum=el.value===''?null:Math.max(0,Math.min(999,Math.floor(Number(el.value)||0)))});document.querySelectorAll('.cfgSyllabusPresence').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.instructorPresence=el.value});
-    cc.dayNight=(cc.qualifications||[]).filter(x=>x.id==='day'||x.id==='night').map(x=>({id:x.id,name:x.name}));cfgSave(cc);state.advancedArchitectureEditing=false;state.packageEditId=null;toast('Changes saved');render();
+    cc.dayNight=(cc.qualifications||[]).filter(x=>x.id==='day'||x.id==='night').map(x=>({id:x.id,name:x.name}));cfgSave(cc);state.advancedArchitectureEditing=false;state.packageEditId=null;toast('Changes saved');renderPreservingManagementView();
   };
 
   document.querySelectorAll('[data-cfg-add-open]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-cfg-add-box]'),form=box?.querySelector('.cfgAddForm');if(!form)return;form.hidden=false;btn.hidden=true;form.querySelector('input[name="name"]')?.focus?.()});
