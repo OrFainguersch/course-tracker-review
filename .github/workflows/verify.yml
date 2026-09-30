@@ -1,9 +1,13 @@
 name: Verify FLYMPUS review
 
+# Verification is intentionally NOT triggered by direct pushes to main.
+# The review site is updated directly on main, and frequent incremental pushes
+# previously created transient failed runs and duplicate GitHub email alerts.
+# Verification remains available for pull requests and on-demand manual runs.
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
   pull_request:
+    branches: [main]
 
 concurrency:
   group: flympus-verify-${{ github.ref }}
