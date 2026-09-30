@@ -89,7 +89,7 @@
     if(raw.includes("ep_screening_simulator")||raw.includes("ep_screening_rc"))out.push("ep_screening");
     ["ep_rc_new","ep_half_new","ep_full_day_new","ep_full_night_new"].forEach(id=>{if(raw.includes(id))out.push(id)});
     if(raw.includes("ep_full_day_new")&&raw.includes("ep_full_night_new"))out.push("ep_full_new_mixed");
-    ["ep_full_refresh","ep_full_rtc"].forEach(id=>{if(raw.includes(id))out.push(id)});
+    ["ep_full_atol","ep_full_refresh","ep_full_rtc"].forEach(id=>{if(raw.includes(id))out.push(id)});
     raw.filter(id=>!["ep_screening_simulator","ep_screening_rc",...out].includes(id)).forEach(id=>out.push(id));
     customPackagesFor(professionId).forEach(x=>{if(!out.includes(x.id))out.push(x.id)});
     return out.filter(id=>!hidden.has(id));

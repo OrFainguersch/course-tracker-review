@@ -243,6 +243,36 @@ window.EP_CATALOG = {
       totalFlights:"Approx. 19"
     },
     {
+      id:"ep_full_atol",
+      name:"EP ATOL Qualification · Full Scale · Aerostar",
+      phaseId:"ep_full", platformId:"aerostar", trainingKind:"qualification", dayNight:"mixed", contextLabel:"ATOL · Day + Night",
+      source:"Aerostar EP Israeli Course Syllabus (edition 1).pdf",
+      prerequisite:"EP qualification; successfully completed OJT series; 15 Aerostar solo takeoffs and 15 solo landings. Practical ATOL starts after completion of Full Scale Day syllabus #11.",
+      theoryRequirement:"ATOL Theory Exam ≥80.",
+      completion:"Complete the ATOL practical syllabus and pass the ATOL check flight with grade 7 or higher.",
+      sourceNote:"ATOL is a standalone post-qualification Package. The practical phase includes both Day and Night control-takeover training.",
+      theory:[
+        {no:1,name:"ATOL Course Introduction",type:"Presentation",duration:"0:30 H"},
+        {no:2,name:"ATOL Systems",type:"Presentation",duration:"1:30 H"},
+        {no:3,name:"ATOL Circuit Pattern",type:"Presentation",duration:"1:30 H"},
+        {no:4,name:"ATOL Theory Exam",type:"Exam",duration:"1:00 H"}
+      ],
+      exams:[{id:"atol_theory_exam",name:"ATOL Theory Exam",pass:80,unit:"percent",gate:true}],
+      syllabi:[
+        {id:"atol_day_control_takeover",name:"Day Control Takeover",minimum:1,mode:"INSTRUCTED",track:"day",topics:"Pre-planned control takeovers in all flight positions; bank; high speed; low speed; high flare; no flare",briefing:"Taking control"},
+        {id:"atol_day_takeover",name:"ATOL Day Control Takeover",minimum:1,mode:"INSTRUCTED",track:"day",topics:"Pre-planned control takeovers during ATOL takeoff; landing roll; final leg",briefing:"ATOL"},
+        {id:"atol_night_takeover",name:"ATOL Night Control Takeover",minimum:1,mode:"INSTRUCTED",track:"night",topics:"Pre-planned control takeovers during ATOL takeoff; landing roll; final leg",briefing:"ATOL"},
+        {id:"atol_check",name:"ATOL Day / Night Check Flight",minimum:1,mode:"CHECK",track:"shared",topics:"All previous ATOL control-takeover topics",remarks:"May be performed by day or by night"}
+      ],
+      progression:[
+        {id:"atol_gate_ep_qualified",prerequisite:"EP qualification completed"},
+        {id:"atol_gate_ojt",prerequisite:"OJT series completed successfully"},
+        {id:"atol_gate_experience",prerequisite:"15 Aerostar solo takeoffs and 15 solo landings accumulated"},
+        {id:"atol_gate_practical",prerequisite:"Before practical ATOL: Full Scale Day syllabus #11 completed"}
+      ],
+      totalFlights:"Minimum 4; lessons may be repeated according to trainee performance"
+    },
+    {
       id:"ep_full_refresh",
       name:"EP Refreshment · Full Scale · Aerostar",
       phaseId:"ep_full", platformId:"aerostar", trainingKind:"refreshment", dayNight:"day",

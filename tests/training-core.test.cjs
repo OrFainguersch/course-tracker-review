@@ -48,6 +48,16 @@ assert(epScreening.syllabi.some(x=>x.id==="screen_sim_basics")&&epScreening.syll
 const epFullGuide=core.guidedOptions({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new"});
 assert.equal(epFullGuide.showPlatform,true);assert.equal(epFullGuide.showTrainingKind,true);assert.equal(epFullGuide.showTracks,true);
 assert(epFullGuide.dayNights.includes("mixed"),"EP Full Scale must allow Day + Night in the same course");
+const epAtol=core.resolvePackage("EP","ep_full_atol");
+assert(epAtol,"ATOL must resolve as a standalone EP Package");
+assert.equal(epAtol.trainingKind,"qualification");
+assert.equal(epAtol.dayNight,"mixed");
+assert.equal(epAtol.syllabi.length,4,"ATOL practical Package must contain the four source syllabus flights");
+assert(epAtol.syllabi.some(x=>x.id==="atol_day_takeover"&&x.track==="day"));
+assert(epAtol.syllabi.some(x=>x.id==="atol_night_takeover"&&x.track==="night"));
+assert(epAtol.exams.some(x=>x.id==="atol_theory_exam"&&x.pass===80),"ATOL Theory Exam must require 80");
+assert(epAtol.progression.some(x=>/15 Aerostar solo takeoffs/.test(x.prerequisite||"")),"ATOL experience prerequisite must be preserved");
+assert(core.packageCatalog("EP").some(x=>x.id==="ep_full_atol"),"ATOL Package must appear in the EP reusable Package catalog");
 
 const ipGuide=core.guidedOptions({courseType:"IP"});
 assert.equal(ipGuide.showPhase,false);assert.equal(ipGuide.showPlatform,true);assert.equal(ipGuide.showTrainingKind,true);assert.equal(ipGuide.showTracks,false);

@@ -495,19 +495,19 @@ select option[value=""]{color:#8a9bad}
 .courseDetailsInline{margin-top:9px}.courseDetailsStep .wizardStepBody>label,.courseIdentityStep .wizardStepBody>label{display:block}.addPackageChoice{border-style:dashed;background:#f8fbfe}.addPackageChoice b{color:#0875ce}.fieldHelp{display:block;margin-top:5px;color:#8192a4;font-size:9px}.courseIdentityStep .fields{margin-top:9px}
 </style></head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0634 · remove duplicate course list and empty rule tables</div><div class="toast" id="toast"></div></div>
-<script src="./assets/ep-catalog.js?v=0634"></script>
-<script src="./assets/aerostar-platform.js?v=0634"></script>
-<script src="./assets/ip-catalog.js?v=0634"></script>
-<script src="./assets/technician-catalog.js?v=0634"></script>
-<script src="./assets/training-core.js?v=0634"></script>
-<script src="./assets/ep-lessons-screening.js?v=0634"></script>
-<script src="./assets/ep-lessons-rc-1.js?v=0634"></script>
-<script src="./assets/ep-lessons-rc-2.js?v=0634"></script>
-<script src="./assets/ep-lessons-half.js?v=0634"></script>
-<script src="./assets/ep-lessons-full-day-a.js?v=0634"></script>
-<script src="./assets/ep-lessons-full-day-b.js?v=0634"></script>
-<script src="./assets/ep-lessons-night.js?v=0634"></script>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0635 · package contexts and ATOL qualification</div><div class="toast" id="toast"></div></div>
+<script src="./assets/ep-catalog.js?v=0635"></script>
+<script src="./assets/aerostar-platform.js?v=0635"></script>
+<script src="./assets/ip-catalog.js?v=0635"></script>
+<script src="./assets/technician-catalog.js?v=0635"></script>
+<script src="./assets/training-core.js?v=0635"></script>
+<script src="./assets/ep-lessons-screening.js?v=0635"></script>
+<script src="./assets/ep-lessons-rc-1.js?v=0635"></script>
+<script src="./assets/ep-lessons-rc-2.js?v=0635"></script>
+<script src="./assets/ep-lessons-half.js?v=0635"></script>
+<script src="./assets/ep-lessons-full-day-a.js?v=0635"></script>
+<script src="./assets/ep-lessons-full-day-b.js?v=0635"></script>
+<script src="./assets/ep-lessons-night.js?v=0635"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentUserId='i1';
@@ -534,7 +534,7 @@ const phaseTemplates=[
 {id:'ip_full',type:'IP',name:'Full Scale'},
 {id:'tech_full',type:'TECHNICIAN',name:'Full Scale'}
 ];
-const trainingKinds=['New Training','Conversion','Flight Instructor Training','Screening','Refreshment','Return to Currency','Customer-specific Qualification'];
+const trainingKinds=['New Training','Conversion','Flight Instructor Training','Screening','Refreshment','Return to Currency','Qualification','Customer-specific Qualification'];
 const dayNight=['Day','Night','Mixed / Day+Night'];
 const countries=['Israel','Cyprus'];
 let activeCoursePreview={};try{activeCoursePreview=JSON.parse(localStorage.getItem('ct-review-active-course')||'{}')||{}}catch{}
@@ -1106,7 +1106,7 @@ function sectorPlatforms(type){
   return [...base,...custom].filter(x=>x?.id&&!seen.has(x.id)&&seen.add(x.id)).map(x=>({...x,name:getPlatformLabels()[x.id]||x.name}));
 }
 function epPlatformLabel(id){return getPlatformLabels()[id]||window.FLYMPUS_PLATFORMS?.[id]?.name||Object.values(window.FLYMPUS_TRAINING?.catalogs||{}).flatMap(x=>x.platforms||[]).find(x=>x.id===id)?.name||Object.values(getCustomPlatforms()).flat().find(x=>x.id===id)?.name||id||'—'}
-function epTrainingIdFromName(name){return ({'New Training':'new','Conversion':'conversion','Flight Instructor Training':'instructor','Screening':'screening','Refreshment':'refreshment','Return to Currency':'return_currency','Customer-specific Qualification':'customer_qualification'})[name]||name||''}
+function epTrainingIdFromName(name){return ({'New Training':'new','Conversion':'conversion','Flight Instructor Training':'instructor','Screening':'screening','Refreshment':'refreshment','Return to Currency':'return_currency','Qualification':'qualification','Customer-specific Qualification':'customer_qualification'})[name]||name||''}
 function epDayIdFromName(name){return ({'Day':'day','Night':'night','Mixed / Day+Night':'mixed'})[name]||name||''}
 function epProgramResolve(sel){
   return window.FLYMPUS_TRAINING?.resolveGuided?.(sel||{})||window.FLYMPUS_TRAINING?.resolve(sel||{})||null;
@@ -1315,9 +1315,9 @@ function advancedPlatformsCard(type){
 }
 function advancedContextCard(type,c){
   const cat=window.FLYMPUS_TRAINING?.catalog(type),programs=cat?.programs||[];
-  if(type==='EP')return cfgCatalogCard('Training tracks · Day / Night','dayNight',c.dayNight);
-  const title=type==='IP'?'Control-station configuration':'System configuration';
-  const desc=type==='IP'?'Day / Night does not select the IP package. The meaningful discriminator is the GCS / qualification package.':'Day / Night does not select the Technician package. The meaningful discriminator is the engine / GCS or qualification package.';
+  if(type==='EP')return cfgCatalogCard('Package configuration · Operating track','dayNight',c.dayNight);
+  const title=type==='IP'?'Package configuration · Control station / qualification':'Package configuration · System / qualification';
+  const desc=type==='IP'?'The Package context is defined by its control-station or qualification configuration; Day / Night is not the Package selector.':'The Package context is defined by its system or qualification configuration; Day / Night is not the Package selector.';
   const rows=[...new Set(programs.map(p=>packageConfigurationLabel(type,p)).filter(Boolean))];
   return '<section class="card settingBox"><h3>'+title+'</h3><p class="sub">'+desc+' Edit reusable defaults in Training Packages below.</p><div class="contextReferenceList">'+rows.map(x=>'<span class="contextReference">'+esc(x)+'</span>').join('')+'</div></section>';
 }
@@ -1530,7 +1530,7 @@ function cfgDefaults(){
   return {
     courseTypes: courseTypes.map(x=>({id:x.id,name:x.name})),
     phases: phaseTemplates.map(x=>({id:x.id,type:x.type,name:x.name,tracking:defaultPhaseTracking(x.id)})),
-    trainingKinds: trainingKinds.map((name,n)=>({id:['new','conversion','instructor','screening','refreshment','return_currency','customer_qualification'][n]||('training_'+n),name})),
+    trainingKinds: trainingKinds.map((name,n)=>({id:['new','conversion','instructor','screening','refreshment','return_currency','qualification','customer_qualification'][n]||('training_'+n),name})),
     dayNight: dayNight.map((name,n)=>({id:['day','night','mixed'][n]||('time_'+n),name})),
     countries: countries.map((name,n)=>({id:['israel','cyprus'][n]||('country_'+n),name})),
     syllabi: syllabi.map((name,n)=>({id:'syll_'+(n+1),courseType:ep,name,minimum:null,instructorPresence:'WITH INSTRUCTOR'})),
