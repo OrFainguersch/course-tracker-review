@@ -159,7 +159,7 @@ const editingPackageHtml=elements.get("#content").innerHTML;
 assert.match(editingPackageHtml,/packageEditing/);
 assert.match(editingPackageHtml,/Done editing/);
 assert.match(editingPackageHtml,/Delete Package/);
-assert.doesNotMatch(editingPackageHtml,/packageEditFieldset" disabled/);
+assert.match(editingPackageHtml,/data-global-package-id="ui_custom_package"[\s\S]*?<fieldset class="packageEditFieldset" >/,"The selected Package editor must be enabled while editing");
 vm.runInContext("FLYMPUS_TRAINING.saveGlobalOverrides('ep_full_refresh',{custom:{syllabi:[{id:'ui_pkg_syll',name:'Reusable Package Syllabus',order:99,minimum:1,mode:'INSTRUCTED',instructorRequired:true,track:'day'}],criteria:[{id:'ui_pkg_criterion',name:'Reusable Package Criterion',weight:10}],emergencies:[{id:'ui_pkg_emergency',name:'Reusable Package Emergency',category:'General / Operational'}]},emergencyRequirementIds:['ui_pkg_emergency']});render()",context);
 assert.match(elements.get("#content").innerHTML,/Reusable Package Syllabus/);
 assert.match(elements.get("#content").innerHTML,/Reusable Package Criterion/);
