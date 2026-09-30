@@ -31,6 +31,7 @@ assert.equal(vm.runInContext("getEvaluations().some(x=>x.id==='multi_eval')",con
 vm.runInContext("switchCourseByKey('EP-NIGHT-27',{render:false})",context);
 assert.equal(vm.runInContext("getEvaluations().some(x=>x.id==='multi_eval')",context),true,"Course data must return when switching back");
 vm.runInContext("switchCourseByKey('AEP-26',{render:false,force:true});go('settings')",context);assert.match(elements.get("#content").innerHTML,/Course Settings/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/ACTIVE PACKAGE/,"Course Settings must not repeat the large Active Package overview");
 assert.match(elements.get("#content").innerHTML,/Create a course/);
 assert.match(elements.get("#content").innerHTML,/Sector/);
 assert.match(elements.get("#content").innerHTML,/Tailor active course/);
