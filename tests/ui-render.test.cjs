@@ -48,10 +48,11 @@ assert(html.includes("active.courseName||'Aerostar EP Course'"),"Header must res
 assert(html.includes("function navIconSvg(name)")&&html.includes("class=\"navIcon\""),"Sidebar navigation must use a consistent SVG icon system instead of decorative glyphs");
 assert(html.includes('id="mobileBottomNav"')&&html.includes("function renderMobileBottomNav()"),"Mobile layout must expose the premium bottom navigation");
 assert(html.includes("['roster','roster','Roster'],['evaluation','evaluation','Evaluation'],['home','home','Home'],['planned','planned','Plan'],['more','more','More']"),"Mobile bottom navigation must use Roster, Evaluation, Home, Plan and More with Home centered");
-assert(html.includes("Mobile premium glass bottom navigation · 0676")&&html.includes("border:1.4px solid rgba(226,188,89,.82)")&&html.includes("height:86px")&&html.includes("width:68px;height:68px;margin-top:-31px"),"Mobile bottom navigation must closely match the supplied premium reference proportions, gold outline and centered Home bump");
+assert(html.includes("Mobile reference bottom navigation · 0677")&&html.includes("border:1.25px solid rgba(228,184,73,.88)")&&html.includes("height:78px")&&html.includes("width:60px;height:60px;margin-top:-25px"),"Mobile bottom navigation must match the supplied reference proportions, gold outline and centered Home bump");
+assert(html.includes("font-size:10.4px")&&html.includes("width:100%;white-space:nowrap;overflow:visible;text-align:center"),"Mobile navigation labels must remain readable and unclipped");
 assert(html.includes("data-mobile-more")&&html.includes("$('#drawer').classList.add('open')"),"More must open the full sidebar menu");
-assert(html.includes(".mobileBottomItem .mobileBottomLabel{display:block;white-space:nowrap;overflow:visible"),"Mobile navigation labels must remain fully visible and not clip at the bottom");
-assert(html.includes("width:68px;height:68px;margin-top:-31px"),"Centered Home button must use the large reference-matched proportion");
+assert(html.includes(".mobileBottomItem .mobileBottomLabel{display:block;width:100%;white-space:nowrap;overflow:visible"),"Mobile navigation labels must remain fully visible and not clip at the bottom");
+assert(html.includes("width:60px;height:60px;margin-top:-25px"),"Centered Home button must use the reference-matched proportion");
 assert(!html.includes("['settings','⚙','Course Management']"),"Course Management must not use an emoji gear in the professional navigation");
 assert(html.includes("Professional visual refinement 0661")&&html.includes(".navBtn.active{background:rgba(255,255,255,.09)")&&html.includes(".sidebarFlympusWordmark{width:172px!important"),"Sidebar styling must use the restrained professional visual layer");
 assert(html.includes("homeCourseContext cols")&&html.includes("homeCourseContextItem"),"Home hero must use the minimal labeled key-value strip instead of rounded metadata pills");
