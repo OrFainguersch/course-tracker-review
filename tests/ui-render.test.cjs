@@ -99,7 +99,7 @@ assert.match(elements.get("#content").innerHTML,/1 of 2 courses shown/);
 vm.runInContext("state.myCoursesPhase='ALL';render()",context);
 vm.runInContext("const labels=getPlatformLabels();labels.rc_model='RC Trainer';savePlatformLabels(labels);render()",context);
 assert.match(elements.get("#content").innerHTML,/<small>Platform<\/small><b>RC Trainer<\/b>/,"Edited platform labels must propagate into the My Courses metadata tile immediately");
-vm.runInContext("const labels=getPlatformLabels();delete labels.rc_model;savePlatformLabels(labels);render()",context);
+vm.runInContext("const labels2=getPlatformLabels();delete labels2.rc_model;savePlatformLabels(labels2);render()",context);
 assert.equal(vm.runInContext("instructorAssignedCourses('i2').some(x=>courseKey(x)==='EP-NIGHT-27')",context),false);
 vm.runInContext("updateCourseMembershipForCourse('EP-NIGHT-27','i2','INSTRUCTOR',{role:'INSTRUCTOR',removed:false})",context);
 assert.equal(vm.runInContext("instructorAssignedCourses('i2').some(x=>courseKey(x)==='EP-NIGHT-27')",context),true);
