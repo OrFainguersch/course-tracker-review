@@ -19,6 +19,9 @@ assert(!html.includes("<span class=\"pill gray\">'+esc(x.id)+'</span>"),"Platfor
 assert(html.includes("myCoursesPlatformFilter")&&html.includes("myCoursesCountryFilter"),"My Courses must filter by platform and country");
 assert(html.includes("myCoursesStatusFilter"),"My Courses must filter by lifecycle status");
 assert(html.includes('aria-controls="topCourseDropdown"')&&html.includes('id="topCourseDropdown"'),"Header must contain a real course switcher dropdown");
+assert(html.includes(".topCourseDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right));width:auto"),"Mobile quick course dropdown must stay inside the viewport on both sides");
+assert(html.includes("function positionTopCourseDropdown()"),"Quick course switcher must position its mobile menu below the real header button");
+assert(html.includes("if(open)positionTopCourseDropdown()"),"Opening the quick course switcher must position the mobile menu before interaction");
 assert(html.includes("<span>Selected course</span>"),"Header switcher must describe the selected course, not an active lifecycle state");
 assert(html.includes("function sortCourseSwitcherRows(rows,selectedKey=currentCourseId)"),"Quick course switcher needs deterministic ordering");
 assert(html.includes("View all courses →"),"Quick course switcher must link to the full My Courses screen");
