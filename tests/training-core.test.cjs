@@ -55,8 +55,12 @@ const ipAuto=core.resolveGuided({courseType:"IP",platformId:"aerostar",trainingK
 assert.equal(ipAuto.id,"ip_full_new_gcs_d");assert.equal(ipAuto.phaseId,"ip_full");assert.equal(ipAuto.platformId,"aerostar");
 
 const techGuide=core.guidedOptions({courseType:"TECHNICIAN"});
-assert.equal(techGuide.showPhase,false);assert.equal(techGuide.showPlatform,true);assert.equal(techGuide.showTrainingKind,false);assert.equal(techGuide.showTracks,false);
-const techAuto=core.resolveGuided({courseType:"TECHNICIAN",platformId:"aerostar"});
+assert.equal(techGuide.showPhase,false);assert.equal(techGuide.showPlatform,true);assert.equal(techGuide.showTrainingKind,true);assert.equal(techGuide.showTracks,false);
+const techNewGuide=core.guidedOptions({courseType:"TECHNICIAN",platformId:"aerostar",trainingKind:"new"});
+assert(techNewGuide.configurationOptions.some(x=>x.configurationId==="engine_h_gcs_d")&&techNewGuide.configurationOptions.some(x=>x.configurationId==="engine_d_gcs_c"),"Technician New Training must expose system packages instead of Day/Night");
+const techQualGuide=core.guidedOptions({courseType:"TECHNICIAN",platformId:"aerostar",trainingKind:"customer_qualification"});
+assert(techQualGuide.configurationOptions.some(x=>x.id==="tech_full_brakes")&&techQualGuide.configurationOptions.some(x=>x.id==="tech_full_commint"),"Technician qualification packages must be selectable");
+const techAuto=core.resolveGuided({courseType:"TECHNICIAN",platformId:"aerostar",trainingKind:"new"});
 assert.equal(techAuto.id,"tech_full_new");assert.equal(techAuto.phaseId,"tech_full");assert.equal(techAuto.trainingKind,"new");
 
 const ipC=core.resolve({courseType:"IP",phaseId:"ip_full",platformId:"aerostar",trainingKind:"new",programId:"ip_full_new_gcs_c",dayNight:"mixed"});
@@ -77,6 +81,18 @@ assert.equal(overridden.syllabi.find(x=>x.id==="ip_basic_knobs").minimum,7);
 assert.equal(overridden.syllabi.find(x=>x.id==="ip_basic_knobs").instructorRequired,false);
 assert.equal(core.resolve({courseType:"IP",phaseId:"ip_full",platformId:"aerostar",trainingKind:"new",programId:"ip_full_new_gcs_d",dayNight:"mixed"}).syllabi.find(x=>x.id==="ip_basic_knobs").minimum,original,"Course override must not mutate base source");
 assert.equal(core.requiredEmergencies(overridden).map(x=>x.id).join(","),"aero_single_ins");
+
+core.saveGlobalOverrides("ip_full_new_gcs_d",{program:{name:"Global IP GCS-D Package"},counters:{ip_takeoffs:{name:"Global takeoffs",minimum:6}},exams:{ip_exam_theory:{pass:83}}});
+const globalIp=core.resolve({courseType:"IP",phaseId:"ip_full",platformId:"aerostar",trainingKind:"new",programId:"ip_full_new_gcs_d",dayNight:"mixed"});
+assert.equal(globalIp.name,"Global IP GCS-D Package");
+assert.equal(globalIp.experienceCounters.find(x=>x.id==="ip_takeoffs").minimum,6);
+assert.equal(globalIp.exams.find(x=>x.id==="ip_exam_theory").pass,83);
+core.saveOverrides("GLOBAL-COURSE",{program:{name:"Course-only Package"},counters:{ip_takeoffs:{minimum:9}}});
+const layeredIp=core.resolve({courseType:"IP",phaseId:"ip_full",platformId:"aerostar",trainingKind:"new",programId:"ip_full_new_gcs_d",dayNight:"mixed"},{courseKey:"GLOBAL-COURSE"});
+assert.equal(layeredIp.name,"Course-only Package","Course Tailor must override the global package name");
+assert.equal(layeredIp.experienceCounters.find(x=>x.id==="ip_takeoffs").minimum,9,"Course Tailor must override global package defaults");
+assert.equal(core.guidedOptions({courseType:"IP",platformId:"aerostar",trainingKind:"new"}).configurationOptions.find(x=>x.id==="ip_full_new_gcs_d").name,"Global IP GCS-D Package","Global package name must appear in course creation");
+core.saveGlobalOverrides("ip_full_new_gcs_d",{});
 
 core.saveOverrides("EP-TEST",{syllabi:{full_preflight:{name:"Course Preflight",minimum:2}},counters:{ep_full_day_takeoffs:{name:"Course takeoffs",minimum:5}},criteria:{flight_path_control:{name:"Course flight path",weight:30}}});
 const epCourseOverride=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"},{courseKey:"EP-TEST"});
