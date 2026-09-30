@@ -195,7 +195,7 @@ assert.match(advancedCreateOpenHtml,/data-package-assign-panel="EP" >/);
 assert.match(advancedCreateOpenHtml,/id="sectorPackageForm"/);
 assert.match(advancedCreateOpenHtml,/Create & edit Package/);
 vm.runInContext("state.packageCreateOpen=null;state.advancedArchitectureEditing=false;render()",context);
-assert.match(advancedHtml,/value="EP ·/,"A suggested Package name should be prefilled after selecting a sector");
+assert.match(advancedCreateOpenHtml,/value="EP ·/,"A suggested Package name should be prefilled when Package creation is opened");
 assert.match(advancedHtml,/Training tracks · Day \/ Night/);
 assert.match(advancedHtml,/id="cfgAddPlatform"/);
 assert.match(advancedHtml,/globalPackageForm/,"Advanced must contain the full Package editor");
