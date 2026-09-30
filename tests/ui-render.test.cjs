@@ -55,7 +55,7 @@ assert.match(elements.get("#content").innerHTML,/id="myCoursesStatusFilter"/);
 assert.match(elements.get("#content").innerHTML,/IN PROGRESS/);
 assert.doesNotMatch(elements.get("#content").innerHTML,/courseSelectedBadge|>SELECTED</,"My Courses must not show a separate SELECTED badge");
 assert.match(elements.get("#content").innerHTML,/Selected course/);
-assert.match(elements.get("#content").innerHTML,/Select course/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/Select course/,"With only one assigned course there should be no alternate course action");
 assert.doesNotMatch(elements.get("#content").innerHTML,/>ACTIVE</,"My Courses must not use ACTIVE to mean the selected course");
 assert.doesNotMatch(elements.get("#content").innerHTML,/<p>EP · RC Model · [^<]*New Training[^<]*<\/p>/,"My Courses must not use the small dot-separated subtitle");
 assert.match(elements.get("#content").innerHTML,/<small>Platform<\/small><b>[^<]+<\/b>/);
@@ -78,6 +78,7 @@ vm.runInContext("go('home')",context);assert(elements.get("#content").innerHTML.
 vm.runInContext(`localStorage.setItem('ct-review-courses',JSON.stringify([{id:'course_multi',name:'Aerostar EP Night 2027',code:'EP-NIGHT-27',summary:'EP · Full Scale · Aerostar · Night',startsOn:'2027-01-10',selection:{courseType:'EP',phaseId:'ep_full',platformId:'aerostar',trainingKind:'new',dayNight:'night',country:'israel'},platformId:'aerostar',programId:'ep_full_night_new'}]));updateCourseMembershipForCourse('EP-NIGHT-27',currentUserId,'INSTRUCTOR',{role:'COURSE_MANAGER',removed:false});state.screen='courses';render()`,context);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Night 2027/);
 assert.equal(vm.runInContext("instructorAssignedCourses(currentUserId).length",context),2);
+assert.match(elements.get("#content").innerHTML,/Select course/,"An unselected assigned course must expose a Select course action");
 const quickSwitcherHtml=vm.runInContext("topCourseSwitcherItemsHtml()",context);
 assert(quickSwitcherHtml.indexOf("Aerostar EP Course")<quickSwitcherHtml.indexOf("Aerostar EP Night 2027"),"Selected course must appear first in the quick switcher");
 assert.match(quickSwitcherHtml,/UPCOMING · Course Manager · Starts/);
