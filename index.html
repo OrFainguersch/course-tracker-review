@@ -495,19 +495,19 @@ select option[value=""]{color:#8a9bad}
 .courseDetailsInline{margin-top:9px}.courseDetailsStep .wizardStepBody>label,.courseIdentityStep .wizardStepBody>label{display:block}.addPackageChoice{border-style:dashed;background:#f8fbfe}.addPackageChoice b{color:#0875ce}.fieldHelp{display:block;margin-top:5px;color:#8192a4;font-size:9px}.courseIdentityStep .fields{margin-top:9px}
 </style></head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0633 · consistent summary count typography</div><div class="toast" id="toast"></div></div>
-<script src="./assets/ep-catalog.js?v=0633"></script>
-<script src="./assets/aerostar-platform.js?v=0633"></script>
-<script src="./assets/ip-catalog.js?v=0633"></script>
-<script src="./assets/technician-catalog.js?v=0633"></script>
-<script src="./assets/training-core.js?v=0633"></script>
-<script src="./assets/ep-lessons-screening.js?v=0633"></script>
-<script src="./assets/ep-lessons-rc-1.js?v=0633"></script>
-<script src="./assets/ep-lessons-rc-2.js?v=0633"></script>
-<script src="./assets/ep-lessons-half.js?v=0633"></script>
-<script src="./assets/ep-lessons-full-day-a.js?v=0633"></script>
-<script src="./assets/ep-lessons-full-day-b.js?v=0633"></script>
-<script src="./assets/ep-lessons-night.js?v=0633"></script>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0634 · remove duplicate course list and empty rule tables</div><div class="toast" id="toast"></div></div>
+<script src="./assets/ep-catalog.js?v=0634"></script>
+<script src="./assets/aerostar-platform.js?v=0634"></script>
+<script src="./assets/ip-catalog.js?v=0634"></script>
+<script src="./assets/technician-catalog.js?v=0634"></script>
+<script src="./assets/training-core.js?v=0634"></script>
+<script src="./assets/ep-lessons-screening.js?v=0634"></script>
+<script src="./assets/ep-lessons-rc-1.js?v=0634"></script>
+<script src="./assets/ep-lessons-rc-2.js?v=0634"></script>
+<script src="./assets/ep-lessons-half.js?v=0634"></script>
+<script src="./assets/ep-lessons-full-day-a.js?v=0634"></script>
+<script src="./assets/ep-lessons-full-day-b.js?v=0634"></script>
+<script src="./assets/ep-lessons-night.js?v=0634"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
 const currentUserId='i1';
@@ -1344,7 +1344,7 @@ function advancedPackagesHtml(type){
   const orderItems=list=>[...(list||[])].sort((a,b)=>(Number(a.order)||9999)-(Number(b.order)||9999));
   const mergeEditor=(base,added,patches)=>orderItems([...(base||[]),...((added||[]).map(x=>({...x,packageCustom:true})))].filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i).map(x=>({...x,...(patches?.[x.id]||{})})));
   const cell=(label,html,cls='')=>'<div class="packageSyllabusCell '+cls+'" data-label="'+esc(label)+'">'+html+'</div>';
-  const table=(kind,columns,rows,cols)=>'<div class="packageSyllabusSection ruleEditorSection"><div class="packageSyllabusTable ruleEditorTable" data-rule-table="'+kind+'" style="--rule-cols:'+cols+'"><div class="packageSyllabusHeader">'+columns.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div>'+rows+'</div></div>';
+  const table=(kind,columns,rows,cols)=>rows&&String(rows).trim()?'<div class="packageSyllabusSection ruleEditorSection"><div class="packageSyllabusTable ruleEditorTable" data-rule-table="'+kind+'" style="--rule-cols:'+cols+'"><div class="packageSyllabusHeader">'+columns.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div>'+rows+'</div></div>':'';
   const cards=packages.map(p=>{
     const base=core.packageBase?.(type,p.id)||p,o=core.getGlobalOverrides?.(p.id)||{},current=core.applyGlobalOverrides?.(base)||p,changed=Object.keys(o).length>0;
     const customBadge=(x,kind)=>x.packageCustom?'<div class="packageCustomMeta"><span class="pill blue">PACKAGE CUSTOM</span><button class="btn danger small" type="button" data-global-custom-remove="'+kind+'|'+esc(x.id)+'">Remove</button></div>':'<small>Package default item</small>';
@@ -1417,7 +1417,7 @@ function courseOverridesHtml(){
   const addBox=(kind,title,fields)=>'<div class="packageAddBox compactAddBox" data-course-add-box="'+kind+'"><button class="btn secondary packageAddTrigger" type="button" data-course-add-open="'+kind+'">＋ '+title+'</button><div class="packageAddPanel" data-course-add-panel="'+kind+'" hidden><div class="packageAddFields">'+fields+'</div><div class="toolbar packageAddActions"><button class="btn sky small" type="button" data-course-add="'+kind+'">Add</button><button class="btn secondary small" type="button" data-course-add-cancel="'+kind+'">Cancel</button></div></div></div>';
   const orderItems=list=>[...(list||[])].sort((a,b)=>(Number(a.order)||9999)-(Number(b.order)||9999));
   const cell=(label,html,cls='')=>'<div class="packageSyllabusCell '+cls+'" data-label="'+esc(label)+'">'+html+'</div>';
-  const table=(kind,columns,rows,cols)=>'<div class="packageSyllabusSection ruleEditorSection"><div class="packageSyllabusTable ruleEditorTable" data-rule-table="'+kind+'" style="--rule-cols:'+cols+'"><div class="packageSyllabusHeader">'+columns.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div>'+rows+'</div></div>';
+  const table=(kind,columns,rows,cols)=>rows&&String(rows).trim()?'<div class="packageSyllabusSection ruleEditorSection"><div class="packageSyllabusTable ruleEditorTable" data-rule-table="'+kind+'" style="--rule-cols:'+cols+'"><div class="packageSyllabusHeader">'+columns.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div>'+rows+'</div></div>':'';
   const assigned=instructorAssignedCourses(currentUserId).filter(c=>!['inactive','closed','archived'].includes(String(c.status||c.courseStatus||'').toLowerCase())),pickerCourses=assigned.length?assigned:[courseByKey(currentCourseId)].filter(Boolean);
   const picker='<div class="tailorCoursePicker"><label class="field"><span class="fieldLabel">Course to tailor</span><select id="tailorCourseSelect">'+pickerCourses.map(c=>{const key=courseKey(c);return '<option value="'+esc(key)+'" '+(key===currentCourseId?'selected':'')+'>'+esc((c.name||courseRuntimeMeta(c).courseName)+' · '+key)+'</option>'}).join('')+'</select></label><div class="tailorCoursePickerInfo">Only active courses assigned to you are shown here. Changing the course switches the Tailor editor to that course.</div></div>';
   const activeSyllabi=orderItems(syllabi.filter(x=>x.applicable!==false)),excludedSyllabi=orderItems(syllabi.filter(x=>x.applicable===false));
@@ -1642,7 +1642,7 @@ function cfgProfileEditor(p,c){
     '<div class="toolbar"><button class="btn sky" type="submit">'+(p?'Save profile':'Create profile')+'</button>'+(p?'<button class="btn secondary" type="button" id="cfgProfileCancel">Cancel</button>':'')+'</div></form>';
 }
 function settings(){
-  const c=cfgGet(),tab=state.settingsTab==='profiles'?'builder':state.settingsTab==='packages'?'catalog':(state.settingsTab||'builder'),created=getDraftCourses();
+  const c=cfgGet(),tab=state.settingsTab==='profiles'?'builder':state.settingsTab==='packages'?'catalog':(state.settingsTab||'builder');
   const type=state.builderType||'',phases=type?c.phases.filter(x=>x.type===type):[],phase=state.builderPhase&&phases.some(x=>x.id===state.builderPhase)?state.builderPhase:'';
   const training=state.builderTraining||'',time=state.builderDay||'',country=state.builderCountry||'',platform=state.builderPlatform||'',programId=state.builderProgram||'';
   const epPlatforms=window.FLYMPUS_TRAINING?.platformsFor(type,phase)||[];
@@ -1665,7 +1665,6 @@ function settings(){
     if(selected)html+='<div class="wizardResolvedWrap">'+packagePreviewHtml(type,selected.id)+'</div>';
     if(selected)html+='<div class="wizardStep courseIdentityStep"><div class="wizardStepNo">'+(step++)+'</div><div class="wizardStepBody"><label>Course identity</label><p class="wizardHint">Suggested automatically from Sector + Country + Start date + Package. You can edit both fields if needed.</p><div class="fields"><div class="field"><label>Course name <small>suggested automatically</small></label><input class="input wizardName" id="builderName" name="name" required value="'+esc(courseName)+'"></div><div class="field"><label>Course code <small>automatic · editable</small></label><input class="input" id="builderCode" name="code" value="'+esc(courseCode)+'"><small class="fieldHelp">Used as the stable internal identifier for this course.</small></div></div></div></div>';
     html+='<div class="wizardCreateBar"><div><b>'+(selected?(courseName.trim()?'Ready to create':'Course name required'):'Select a Package')+'</b><small>'+(selected?(courseName.trim()?'Name and code are already suggested; edit them only if needed.':'Enter a course name, then press Create course.'):'Choose an existing Package or add a new one.')+'</small></div><button class="btn sky" id="courseBuilderSubmit" type="submit" '+(selected?'':'disabled')+'>'+(selected?'Create course':'Select Package')+'</button></div></form></section>';
-    html+='<section class="card sideCard courseListCard" style="margin-top:14px"><div class="inlineHead"><div><h3>Courses</h3><p class="sub" style="margin:3px 0 0">Open an existing course or continue tailoring its Package.</p></div><span class="pill blue">'+created.length+'</span></div><div class="draftList">'+(created.length?created.map(x=>'<div class="draftCourse"><div class="inlineHead"><b>'+esc(x.name)+'</b><span class="pill '+(currentCourseMeta.courseCode===x.code?'green':'gray')+'">'+(currentCourseMeta.courseCode===x.code?'ACTIVE':'SAVED')+'</span></div><p>'+esc(x.summary||'')+'</p><div class="profileMeta"><span class="pill blue">'+(x.syllabusCount||0)+' syllabi / tasks</span><span class="pill gray">'+(x.activityRequirementCount||0)+' experience requirements</span></div><div class="toolbar"><button class="btn sky small" data-open-course-draft="'+x.id+'">'+(currentCourseMeta.courseCode===x.code?'Open active course':'Open course')+'</button><button class="btn danger small" data-delete-course-draft="'+x.id+'">Delete</button></div></div>').join(''):'<div class="wizardEmpty compact">No saved courses yet.</div>')+'</div></section>';
   }
 
   if(tab==='catalog'){

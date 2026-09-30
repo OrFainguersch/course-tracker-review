@@ -45,6 +45,7 @@ assert.doesNotMatch(elements.get("#content").innerHTML,/wizardMore/,"Course deta
 assert.match(elements.get("#content").innerHTML,/data-builder-program="ep_rc_new"/);
 assert.match(elements.get("#content").innerHTML,/data-builder-program="ep_full_new_mixed"/);
 assert.match(elements.get("#content").innerHTML,/data-builder-add-package="EP"/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/courseListCard|Open an existing course or continue tailoring its Package/,"Create course must not repeat the saved Courses list");
 assert.doesNotMatch(elements.get("#content").innerHTML,/data-builder-platform=/);
 assert.doesNotMatch(elements.get("#content").innerHTML,/data-builder-training=/);
 assert.doesNotMatch(elements.get("#content").innerHTML,/Source library/);
@@ -132,9 +133,9 @@ assert.doesNotMatch(editingTailorHtml,/courseTailorDone|Done editing/);
 assert.doesNotMatch(editingTailorHtml,/id="resetCourseOverrides"/,"No saved course overrides means no rollback action");
 assert.match(editingTailorHtml,/data-rule-table="criteria"/);
 assert.match(editingTailorHtml,/data-rule-table="emergencies"/);
-assert.match(editingTailorHtml,/data-rule-table="counters"/);
-assert.match(editingTailorHtml,/data-rule-table="exams"/);
-assert.match(editingTailorHtml,/data-rule-table="progression"/);
+assert.doesNotMatch(editingTailorHtml,/data-rule-table="counters"/,"Zero experience requirements must not render an empty table header");
+assert.doesNotMatch(editingTailorHtml,/data-rule-table="exams"/,"Zero exams must not render an empty table header");
+assert.doesNotMatch(editingTailorHtml,/data-rule-table="progression"/,"Zero progression gates must not render an empty table header");
 assert.doesNotMatch(editingTailorHtml,/Syllabi \/ practical tasks \([^)]*active\)/,"Syllabi count must match the other category summaries");
 vm.runInContext("state.courseTailorEditing=false;render()",context);
 assert.match(elements.get("#content").innerHTML,/data-course-add="syllabi"/);
@@ -268,11 +269,11 @@ assert.doesNotMatch(editingPackageHtml,/Done editing|Save Package|Save & Done/,"
 assert.match(editingPackageHtml,/Delete Package/);
 assert.match(editingPackageHtml,/data-delete-package="ui_custom_package"/,"Delete Package must appear while Advanced Edit is active");
 assert.match(editingPackageHtml,/data-global-package-id="ui_custom_package"[\s\S]*?<fieldset class="packageEditFieldset" >/,"Advanced Edit must unlock Package editors");
-assert.match(editingPackageHtml,/data-rule-table="criteria"/);
-assert.match(editingPackageHtml,/data-rule-table="emergencies"/);
-assert.match(editingPackageHtml,/data-rule-table="counters"/);
-assert.match(editingPackageHtml,/data-rule-table="exams"/);
-assert.match(editingPackageHtml,/data-rule-table="progression"/);
+assert.doesNotMatch(editingPackageHtml,/data-rule-table="criteria"/,"Empty criteria must not render a header-only table");
+assert.match(editingPackageHtml,/data-rule-table="emergencies"/,"Platform emergency choices remain visible even when none are required");
+assert.doesNotMatch(editingPackageHtml,/data-rule-table="counters"/,"Empty experience requirements must not render a header-only table");
+assert.doesNotMatch(editingPackageHtml,/data-rule-table="exams"/,"Empty exams must not render a header-only table");
+assert.doesNotMatch(editingPackageHtml,/data-rule-table="progression"/,"Empty progression gates must not render a header-only table");
 
 vm.runInContext("FLYMPUS_TRAINING.saveGlobalOverrides('ep_full_day_new',{syllabi:{full_intro:{applicable:false}}});state.packageFocusId='ep_full_day_new';state.advancedArchitectureEditing=true;render()",context);
 const excludedSyllabusHtml=elements.get("#content").innerHTML;
