@@ -12,6 +12,7 @@ window.EP_CATALOG = {
     {name:"EP Course – Half Scale stage (Edition F)– Trainee.docx",kind:"Syllabus",scope:"Half Scale"},
     {name:"EP Course – Full scale stage (Edition F) – Instructor.docx",kind:"Syllabus",scope:"Full Scale · Aerostar"},
     {name:"EP Course – Full scale stage (Edition F) – Trainee.docx",kind:"Syllabus",scope:"Full Scale · Aerostar"},
+    {name:"Aerostar EP Israeli Course Syllabus (edition 1).pdf",kind:"Syllabus",scope:"Full Scale · Aerostar · Day/Night experience minima"},
     {name:"EP Refreshment – Full scale stage (Edition A) – Trainee.docx",kind:"Syllabus",scope:"Full Scale · Refreshment"},
     {name:"EP Return to Currency – Full scale stage (Edition B).docx",kind:"Syllabus",scope:"Full Scale · Return to Currency"},
     {name:"EP FLIGHT MANUAL AEROSTAR BP ENG. D.docx",kind:"Flight Manual",scope:"Aerostar"},
@@ -210,6 +211,10 @@ window.EP_CATALOG = {
         {id:"full_check_prep",name:"Check Flight Preparation",minimum:2,mode:"INSTRUCTED",topics:"Takeoff; Touch-and-Go; various engine/system emergencies; full-stop landing"},
         {id:"full_check",name:"Check Flight",minimum:1,mode:"INSTRUCTED",topics:"Takeoff; Touch-and-Go; various engine/system emergencies; full-stop landing"}
       ],
+      experienceCounters:[
+        {id:"ep_full_day_takeoffs",name:"Takeoffs",kind:"TAKEOFF",unit:"executions",minimum:3,profession:"EP",phaseId:"ep_full",platformIds:["aerostar"],track:"day",source:{document:"Aerostar EP Israeli Course Syllabus (edition 1).pdf",section:"EP qualification minima"}},
+        {id:"ep_full_day_landings",name:"Full-stop landings",kind:"LANDING",unit:"executions",minimum:3,profession:"EP",phaseId:"ep_full",platformIds:["aerostar"],track:"day",source:{document:"Aerostar EP Israeli Course Syllabus (edition 1).pdf",section:"EP qualification minima"}}
+      ],
       totalFlights:"Approx. 51"
     },
     {
@@ -230,6 +235,10 @@ window.EP_CATALOG = {
         {id:"night_emergencies",name:"Emergencies",minimum:3,mode:"INSTRUCTED",topics:"NO RPT; simulated engine cut Mid Downwind 500 ft; high altitude 1500 ft; No Xenon light; takeoff/T&G/full-stop",remarks:"Performed only after required day full-stop landings"},
         {id:"night_check_prep",name:"Check Flight Preparation",minimum:1,mode:"INSTRUCTED",topics:"All exercises in night syllabus"},
         {id:"night_check",name:"Check Flight",minimum:1,mode:"INSTRUCTED",topics:"All exercises in night syllabus"}
+      ],
+      experienceCounters:[
+        {id:"ep_full_night_takeoffs",name:"Takeoffs",kind:"TAKEOFF",unit:"executions",minimum:3,profession:"EP",phaseId:"ep_full",platformIds:["aerostar"],track:"night",source:{document:"Aerostar EP Israeli Course Syllabus (edition 1).pdf",section:"EP qualification minima"}},
+        {id:"ep_full_night_landings",name:"Full-stop landings",kind:"LANDING",unit:"executions",minimum:3,profession:"EP",phaseId:"ep_full",platformIds:["aerostar"],track:"night",source:{document:"Aerostar EP Israeli Course Syllabus (edition 1).pdf",section:"EP qualification minima"}}
       ],
       totalFlights:"Approx. 19"
     },
