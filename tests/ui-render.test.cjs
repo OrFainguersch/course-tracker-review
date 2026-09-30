@@ -20,6 +20,7 @@ assert(!html.includes("<span class=\"pill gray\">'+esc(x.id)+'</span>"),"Platfor
 assert(html.includes("myCoursesPlatformFilter")&&html.includes("myCoursesCountryFilter"),"My Courses must filter by platform and country");
 assert(html.includes("myCoursesStatusFilter"),"My Courses must filter by lifecycle status");
 assert(html.includes("myCoursesFilters")&&html.includes("myCoursesFilterSummary"),"My Courses filters must use a compact collapsible container");
+assert(!html.includes("myCoursesFilterSummaryCount"),"Compact filter header must not show a redundant courses-shown badge");
 assert(html.includes("grid-template-columns:repeat(2,minmax(0,1fr))"),"Mobile My Courses filters must stay compact in two columns where space allows");
 assert(html.includes("Number(window.innerWidth||9999)>760||state.myCoursesFiltersOpen===true"),"My Courses filter disclosure must default open on desktop and remember mobile expansion");
 assert(html.includes('aria-controls="topCourseDropdown"')&&html.includes('id="topCourseDropdown"'),"Header must contain a real course switcher dropdown");
@@ -64,7 +65,7 @@ assert.doesNotMatch(elements.get("#content").innerHTML,/>ACTIVE</,"My Courses mu
 assert.doesNotMatch(elements.get("#content").innerHTML,/<p>EP · RC Model · [^<]*New Training[^<]*<\/p>/,"My Courses must not use the small dot-separated subtitle");
 assert.match(elements.get("#content").innerHTML,/<small>Platform<\/small><b>[^<]+<\/b>/);
 assert.match(elements.get("#content").innerHTML,/<small>Training type<\/small><b>New Training<\/b>/);
-assert.match(elements.get("#content").innerHTML,/<small>Qualification<\/small><b>Day<\/b>/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/<small>Qualification<\/small>/,"RC Model must not expose Day as a user-facing qualification");
 assert.match(elements.get("#content").innerHTML,/<small>Country<\/small><b>Israel<\/b>/);
 assert.match(elements.get("#content").innerHTML,/id="myCoursesPlatformFilter"/);
 assert.match(elements.get("#content").innerHTML,/id="myCoursesCountryFilter"/);
@@ -81,6 +82,7 @@ assert.equal(vm.runInContext("instructorAssignedCourses(currentUserId).length",c
 vm.runInContext("go('home')",context);assert(elements.get("#content").innerHTML.length>1000,"Home must render");
 vm.runInContext(`localStorage.setItem('ct-review-courses',JSON.stringify([{id:'course_multi',name:'Aerostar EP Night 2027',code:'EP-NIGHT-27',summary:'EP · Full Scale · Aerostar · Night',startsOn:'2027-01-10',selection:{courseType:'EP',phaseId:'ep_full',platformId:'aerostar',trainingKind:'new',dayNight:'night',country:'israel'},platformId:'aerostar',programId:'ep_full_night_new'}]));updateCourseMembershipForCourse('EP-NIGHT-27',currentUserId,'INSTRUCTOR',{role:'COURSE_MANAGER',removed:false});state.screen='courses';render()`,context);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Night 2027/);
+assert.match(elements.get("#content").innerHTML,/<small>Qualification<\/small><b>Night<\/b>/,"Full Scale Night must keep the meaningful qualification tile");
 assert.equal(vm.runInContext("instructorAssignedCourses(currentUserId).length",context),2);
 assert.match(elements.get("#content").innerHTML,/Select course/,"An unselected assigned course must expose a Select course action");
 const quickSwitcherHtml=vm.runInContext("topCourseSwitcherItemsHtml()",context);
