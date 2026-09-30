@@ -25,11 +25,20 @@ const epMixed=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerost
 assert(epMixed.composedFrom?.length===2,"EP Day + Night must compose parallel tracks");
 assert(epMixed.syllabi.some(x=>x.track==="day")&&epMixed.syllabi.some(x=>x.track==="night"));
 assert(core.requiredEmergencies(epMixed).length>0&&core.requiredEmergencies(epMixed).length<core.emergencyCatalog("aerostar").length,"Suit requirements must be a subset of platform QRH catalog");
+const epDay=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"});
+const epNight=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"night"});
+assert(epDay.experienceCounters.some(x=>x.kind==="TAKEOFF"&&x.track==="day"&&x.minimum===3),"Day EP must track 3 takeoffs");
+assert(epDay.experienceCounters.some(x=>x.kind==="LANDING"&&x.track==="day"&&x.minimum===3),"Day EP must track 3 full-stop landings");
+assert(epNight.experienceCounters.some(x=>x.kind==="TAKEOFF"&&x.track==="night"&&x.minimum===3),"Night EP must track 3 takeoffs");
+assert(epNight.experienceCounters.some(x=>x.kind==="LANDING"&&x.track==="night"&&x.minimum===3),"Night EP must track 3 full-stop landings");
+assert.equal(epMixed.experienceCounters.filter(x=>x.kind==="TAKEOFF").length,2,"Mixed EP must keep Day and Night takeoffs separate");
+assert.equal(epMixed.experienceCounters.filter(x=>x.kind==="LANDING").length,2,"Mixed EP must keep Day and Night landings separate");
 
 const epRcGuide=core.guidedOptions({courseType:"EP",phaseId:"ep_rc"});
 assert.equal(epRcGuide.showPhase,true);assert.equal(epRcGuide.showPlatform,false);assert.equal(epRcGuide.showTrainingKind,false);
 const epRcAuto=core.resolveGuided({courseType:"EP",phaseId:"ep_rc"});
 assert.equal(epRcAuto.id,"ep_rc_new");assert.equal(epRcAuto.platformId,"rc_model");assert.equal(epRcAuto.trainingKind,"new");
+assert.equal(epRcAuto.experienceCounters.length,0,"RC must not invent a generic Flights experience counter");
 
 const epScreening=core.resolveGuided({courseType:"EP",phaseId:"ep_screening"});
 assert(epScreening.composedFrom?.length===2,"EP screening must resolve simulator + live RC as one phase package");
@@ -68,5 +77,14 @@ assert.equal(overridden.syllabi.find(x=>x.id==="ip_basic_knobs").minimum,7);
 assert.equal(overridden.syllabi.find(x=>x.id==="ip_basic_knobs").instructorRequired,false);
 assert.equal(core.resolve({courseType:"IP",phaseId:"ip_full",platformId:"aerostar",trainingKind:"new",programId:"ip_full_new_gcs_d",dayNight:"mixed"}).syllabi.find(x=>x.id==="ip_basic_knobs").minimum,original,"Course override must not mutate base source");
 assert.equal(core.requiredEmergencies(overridden).map(x=>x.id).join(","),"aero_single_ins");
+
+core.saveOverrides("EP-TEST",{syllabi:{full_preflight:{name:"Course Preflight",minimum:2}},counters:{ep_full_day_takeoffs:{name:"Course takeoffs",minimum:5}},criteria:{flight_path_control:{name:"Course flight path",weight:30}}});
+const epCourseOverride=core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"},{courseKey:"EP-TEST"});
+assert.equal(epCourseOverride.syllabi.find(x=>x.id==="full_preflight").name,"Course Preflight");
+assert.equal(epCourseOverride.syllabi.find(x=>x.id==="full_preflight").minimum,2);
+assert.equal(epCourseOverride.experienceCounters.find(x=>x.id==="ep_full_day_takeoffs").name,"Course takeoffs");
+assert.equal(epCourseOverride.experienceCounters.find(x=>x.id==="ep_full_day_takeoffs").minimum,5);
+assert.equal(epCourseOverride.criteria.find(x=>x.id==="flight_path_control").name,"Course flight path");
+assert.equal(core.resolve({courseType:"EP",phaseId:"ep_full",platformId:"aerostar",trainingKind:"new",dayNight:"day"}).syllabi.find(x=>x.id==="full_preflight").name,"Preflight","Tailor must not mutate the source suit");
 
 console.log(JSON.stringify({ok:true,catalogs:core.validate().catalogs,programs:core.validate().programs,aerostarEmergencies:core.emergencyCatalog("aerostar").length,technicianTasks:tech.syllabi.length},null,2));
