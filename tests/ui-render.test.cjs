@@ -12,7 +12,7 @@ const context={window:{},document,localStorage:storage(),sessionStorage:storage(
 context.window=context;vm.createContext(context);
 for(const file of ["assets/ep-catalog.js","assets/aerostar-platform.js","assets/ip-catalog.js","assets/technician-catalog.js","assets/training-core.js","assets/ep-lessons-screening.js","assets/ep-lessons-rc-1.js","assets/ep-lessons-rc-2.js","assets/ep-lessons-half.js","assets/ep-lessons-full-day-a.js","assets/ep-lessons-full-day-b.js","assets/ep-lessons-night.js"]){vm.runInContext(fs.readFileSync(file,"utf8"),context,{filename:file})}
 const html=fs.readFileSync("index.html","utf8");
-assert(html.includes("<small>Platform</small><b>")&&html.includes("<small>Training type</small><b>")&&html.includes("<small>Country</small><b>"),"My Courses must render course details as visible metadata tiles");
+assert(html.includes("tile('platform','Platform',platformValue)")&&html.includes("tile('training','Training type',meta.trainingKind)")&&html.includes("tile('country','Country',meta.country,'countryWide')"),"My Courses must render course details as visible metadata tiles");
 assert(html.includes("platformLabels:{rc_simulator:'RC Simulator',rc_model:'Shahak'"),"Shahak must be the default display name for rc_model");
 assert(html.includes("catalog.platformLabels=labels"),"Platform renames must persist inside the architecture catalog");
 assert(html.includes("internal platform identifier stays stable automatically and is intentionally hidden"),"Platform editor must explain stable hidden IDs");
