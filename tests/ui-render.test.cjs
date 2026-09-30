@@ -31,6 +31,10 @@ assert(html.includes("Notification preferences")&&html.includes('data-notificati
 assert(html.includes("getNotificationPreferences()")&&html.includes("saveNotificationPreferences"),"Notification preferences must persist in browser-local personal settings");
 assert(html.includes('id="topPersonalProfileBtn"')&&html.includes('aria-label="Personal profile"'),"The top-right personal avatar must open the personal profile editor");
 assert(html.includes('id="personalPhotoInput"')&&html.includes('id="removePersonalPhoto"'),"Personal profile editing must support changing or removing the user's photo");
+assert(html.includes(".personalPhotoActions .btn{flex:1;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important}"),"Personal photo action labels must be visually centered");
+assert(html.includes('id="personalCropModal"')&&html.includes('id="personalCropViewport"')&&html.includes('id="personalCropZoom"'),"Personal photo selection must open a crop-and-adjust editor");
+assert(html.includes("function personalCropDataUrl(")&&html.includes("function renderPersonalPhotoCrop()"),"Profile photo cropper must support repositioning, zooming and exporting the adjusted square");
+assert(html.includes("onpointerdown")&&html.includes("onpointermove")&&html.includes("personalCropState.zoom"),"Profile photo cropper must support touch/pointer drag and zoom adjustment");
 assert(html.includes("Your name, email and course role are managed by course administration."),"Self-service personal profile must keep identity and role read-only");
 assert(html.includes("function positionNotificationDropdown()"),"Notifications panel must position safely on mobile");
 assert(html.includes(".panel{display:flex;flex-direction:column;padding-bottom:calc(8px + env(safe-area-inset-bottom))}.panel #nav{flex:0 0 auto}.drawerFooter{margin-top:auto;margin-bottom:6px}"),"Mobile account card should sit close to the true bottom while respecting the safe area");
