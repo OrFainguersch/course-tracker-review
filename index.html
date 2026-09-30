@@ -429,9 +429,12 @@ select option[value=""]{color:#8a9bad}
 <style>
 .packagePathBox{margin-top:12px;padding:12px;border:1px solid #dfe8f1;border-radius:12px;background:#f8fbfe}.packagePathEditor{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:9px}.packageChoiceGrid .wizardChoice{text-align:left;align-items:flex-start}.packageChoiceGrid .wizardChoice small{white-space:normal;line-height:1.35}
 @media(max-width:760px){.packagePathEditor{grid-template-columns:1fr 1fr}}@media(max-width:430px){.packagePathEditor{grid-template-columns:1fr}}
+</style><style>
+.advancedSequence{display:grid;gap:10px}.advancedSequence>.settingBox{margin:0}.advancedStepLabel{display:flex;align-items:center;gap:10px;margin:4px 0 8px}.advancedStepLabel>span{display:grid;place-items:center;width:28px;height:28px;border-radius:999px;background:#e8f3ff;color:#176bb3;font-weight:900;font-size:12px}.advancedStepLabel b{display:block;color:#173b60;font-size:13px}.advancedStepLabel small{display:block;color:#7c8fa3;font-size:10px;margin-top:2px}.advancedSectorPicker{margin-top:14px}.scopedArchitectureLabel{margin-top:18px}.advancedScopeGrid{align-items:start}.advancedScopeGrid>.settingBox{align-self:start}.advancedScopeGrid .editableRow{min-height:0}
+@media(max-width:760px){.advancedStepLabel{align-items:flex-start}.advancedSectorPicker #typeWorkspace{width:100%}}
 </style></head>
 <body>
-<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0607 · direct package workflow</div><div class="toast" id="toast"></div></div>
+<div class="app"><header class="top"><button class="menuBtn" id="menuBtn">☰</button><div class="topBrand"><img class="topBrandIcon" src="./assets/flympus-icon.webp" alt="FLYMPUS logo"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-label="Switch course"><span>Active course</span><b id="topCourseName">Aerostar EP Course</b><i>⌄</i></button><div class="avatar">OF</div></header><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar">OF</div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><div class="reviewBanner">FLYMPUS Review · build 0608 · advanced sector flow</div><div class="toast" id="toast"></div></div>
 <script src="./assets/ep-catalog.js"></script>
 <script src="./assets/aerostar-platform.js"></script>
 <script src="./assets/ip-catalog.js"></script>
@@ -1035,7 +1038,13 @@ function renderEmergencyPractice(edit,traineeId){
 }
 function getPlatformLabels(){return safeObjectStorage('ct-review-platform-labels')}
 function savePlatformLabels(v){localStorage.setItem('ct-review-platform-labels',JSON.stringify(v||{}))}
-function epPlatformLabel(id){return getPlatformLabels()[id]||window.FLYMPUS_PLATFORMS?.[id]?.name||Object.values(window.FLYMPUS_TRAINING?.catalogs||{}).flatMap(x=>x.platforms||[]).find(x=>x.id===id)?.name||id||'—'}
+function getCustomPlatforms(){return safeObjectStorage('ct-review-custom-platforms')}
+function saveCustomPlatforms(v){localStorage.setItem('ct-review-custom-platforms',JSON.stringify(v||{}))}
+function sectorPlatforms(type){
+  const base=window.FLYMPUS_TRAINING?.catalog(type)?.platforms||[],custom=getCustomPlatforms()[type]||[],seen=new Set();
+  return [...base,...custom].filter(x=>x?.id&&!seen.has(x.id)&&seen.add(x.id)).map(x=>({...x,name:getPlatformLabels()[x.id]||x.name}));
+}
+function epPlatformLabel(id){return getPlatformLabels()[id]||window.FLYMPUS_PLATFORMS?.[id]?.name||Object.values(window.FLYMPUS_TRAINING?.catalogs||{}).flatMap(x=>x.platforms||[]).find(x=>x.id===id)?.name||Object.values(getCustomPlatforms()).flat().find(x=>x.id===id)?.name||id||'—'}
 function epTrainingIdFromName(name){return ({'New Training':'new','Conversion':'conversion','Flight Instructor Training':'instructor','Screening':'screening','Refreshment':'refreshment','Return to Currency':'return_currency','Customer-specific Qualification':'customer_qualification'})[name]||name||''}
 function epDayIdFromName(name){return ({'Day':'day','Night':'night','Mixed / Day+Night':'mixed'})[name]||name||''}
 function epProgramResolve(sel){
@@ -1207,7 +1216,7 @@ function packagePathLabel(type,p){
   return [type,phase,platform,training,context].filter(Boolean).join(' → ');
 }
 function packagePathControls(type,p,prefix){
-  const c=cfgGet(),phases=c.phases.filter(x=>x.type===type),platforms=window.FLYMPUS_TRAINING?.catalog(type)?.platforms||[],training=c.trainingKinds||[],field=(label,control)=>'<label class="field"><span class="fieldLabel">'+label+'</span>'+control+'</label>';
+  const c=cfgGet(),phases=c.phases.filter(x=>x.type===type),platforms=sectorPlatforms(type),training=c.trainingKinds||[],field=(label,control)=>'<label class="field"><span class="fieldLabel">'+label+'</span>'+control+'</label>';
   const phase=field('Phase','<select name="'+prefix+'phase">'+phases.map(x=>'<option value="'+esc(x.id)+'" '+(x.id===p.phaseId?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select>');
   const platform=field('Platform','<select name="'+prefix+'platform"><option value="" '+(!p.platformId?'selected':'')+'>Multi-platform / none</option>'+platforms.map(x=>'<option value="'+esc(x.id)+'" '+(x.id===p.platformId?'selected':'')+'>'+esc(epPlatformLabel(x.id))+'</option>').join('')+'</select>');
   const trainingField=field('Training type','<select name="'+prefix+'training">'+training.map(x=>'<option value="'+esc(x.id)+'" '+(x.id===p.trainingKind?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select>');
@@ -1218,10 +1227,10 @@ function builderPackage(){
   return packageFor(state.builderType||'',state.builderProgram||'');
 }
 function advancedPlatformsCard(type){
-  const cat=window.FLYMPUS_TRAINING?.catalog(type),platforms=cat?.platforms||[],labels=getPlatformLabels();
-  return '<section class="card settingBox"><h3>Platforms</h3><p class="sub">Global display names. Platform IDs and technical definitions remain stable so packages and historical records stay linked.</p><div class="editableList">'+
-    (platforms.length?platforms.map(x=>'<div class="editableRow"><input class="input cfgPlatformName" data-id="'+esc(x.id)+'" value="'+esc(labels[x.id]||x.name)+'"><span class="pill gray">'+esc(x.id)+'</span></div>').join(''):'<div class="wizardEmpty compact">No platforms are defined for this sector.</div>')+
-    '</div></section>';
+  const platforms=sectorPlatforms(type),customIds=new Set((getCustomPlatforms()[type]||[]).map(x=>x.id));
+  return '<section class="card settingBox"><h3>Platforms · '+esc(cfgItem(cfgGet().courseTypes,type)?.name||type)+'</h3><p class="sub">Platforms belong to the selected sector and can be used in Package paths.</p><div class="editableList">'+
+    (platforms.length?platforms.map(x=>'<div class="editableRow"><input class="input cfgPlatformName" data-id="'+esc(x.id)+'" value="'+esc(x.name)+'"><span class="pill gray">'+esc(x.id)+'</span>'+(customIds.has(x.id)?'<button class="btn danger small" type="button" data-platform-remove="'+esc(x.id)+'">Remove</button>':'')+'</div>').join(''):'<div class="wizardEmpty compact">No platforms are defined for this sector.</div>')+
+    '</div><form class="toolbar" id="cfgAddPlatform"><input class="input" name="name" placeholder="Add platform" required><button class="btn secondary" type="submit">＋ Add platform</button></form></section>';
 }
 function advancedContextCard(type,c){
   const cat=window.FLYMPUS_TRAINING?.catalog(type),programs=cat?.programs||[];
@@ -1436,13 +1445,11 @@ function cfgTypeScopedCard(title,key,list,type,kind){
   if(isEmergency)add+='<select name="category" required style="max-width:210px"><option value="" selected disabled>Select category</option>'+categoryOptions('')+'</select>';
   return '<section class="card settingBox"><h3>'+esc(title)+'</h3><p class="sub">Belongs only to '+esc(cfgItem(cfgGet().courseTypes,type)?.name||type)+(isSyllabus?' · Minimum 0 means optional / non-blocking.':isEmergency?' · Categories control how emergencies are grouped during Evaluation.':'')+'</p><div class="editableList">'+rows+'</div><form class="toolbar cfgScopedAdd" data-kind="'+key+'" data-course-type="'+type+'">'+add+'<button class="btn secondary" type="submit">＋ Add</button></form></section>';
 }
-function cfgPhaseCard(c){
-  const scope=state.phaseScope||state.typeWorkspace||c.courseTypes[0]?.id||'',list=c.phases.filter(x=>x.type===scope);
-  return '<section class="card settingBox"><h3>Phases by course type</h3><p class="sub">Phases define the training architecture. Experience minimums now belong to reusable Training Packages, not to the phase itself.</p><div class="field"><label>Scope type</label><select id="phaseScope">'+
-    c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+
-    '</select></div><div class="editableList" style="margin-top:10px">'+
+function cfgPhaseCard(c,scope){
+  const list=c.phases.filter(x=>x.type===scope),scopeName=cfgItem(c.courseTypes,scope)?.name||scope;
+  return '<section class="card settingBox"><h3>Phases · '+esc(scopeName)+'</h3><p class="sub">Phases belong to the sector selected above. Experience minimums belong to Training Packages, not to the phase itself.</p><div class="editableList" style="margin-top:10px">'+
     list.map(x=>'<div class="editableRow"><input class="input cfgPhaseName" data-id="'+x.id+'" value="'+esc(x.name)+'"><button class="btn danger small" data-phase-remove="'+x.id+'">Remove</button></div>').join('')+
-    '</div><form class="toolbar" id="cfgAddPhase"><input class="input" name="name" placeholder="Add phase" required><button class="btn secondary" type="submit">＋ Add</button></form></section>';
+    '</div><form class="toolbar" id="cfgAddPhase"><input class="input" name="name" placeholder="Add phase" required><button class="btn secondary" type="submit">＋ Add phase</button></form></section>';
 }
 function cfgCriteriaCard(list){
   return '<section class="card settingBox"><h3>Assessment criteria</h3><div class="editableList">'+
@@ -1500,16 +1507,17 @@ function settings(){
   }
 
   if(tab==='catalog'){
-    const scope=state.typeWorkspace||c.courseTypes[0]?.id||'',scopeName=cfgItem(c.courseTypes,scope)?.name||scope;
-    html+='<section class="card settingBox advancedIntro" style="margin-top:14px"><div class="inlineHead"><div><div class="eyebrow">GLOBAL TRAINING ARCHITECTURE</div><h3>Advanced · '+esc(scopeName)+'</h3><p class="sub" style="margin:3px 0 0">Define reusable architecture and Package defaults here. Each Package has its own path inside the selected sector.</p></div><select id="typeWorkspace" style="max-width:220px">'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div><div class="packageInheritanceFlow"><span class="active">PACKAGE DEFAULT</span><b>→</b><span>COURSE-SPECIFIC TAILOR</span></div></section>';
-    html+='<div class="settingsGrid" style="margin-top:14px">';
-    html+=cfgCatalogCard('Course types','courseTypes',c.courseTypes);
-    html+=cfgPhaseCard({...c,courseTypes:c.courseTypes});
+    const validScope=c.courseTypes.some(x=>x.id===state.typeWorkspace),scope=validScope?state.typeWorkspace:(c.courseTypes[0]?.id||''),scopeName=cfgItem(c.courseTypes,scope)?.name||scope;
+    html+='<section class="advancedSequence" style="margin-top:14px"><div class="advancedStepLabel"><span>1</span><div><b>Define sectors</b><small>Add, rename or remove sectors first.</small></div></div>'+cfgCatalogCard('Course types','courseTypes',c.courseTypes)+'</section>';
+    html+='<section class="card settingBox advancedSectorPicker"><div class="advancedStepLabel"><span>2</span><div><b>Select sector to edit</b><small>Everything below is scoped to this sector.</small></div></div><div class="field" style="margin-top:12px"><label>Sector</label><select id="typeWorkspace">'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div><div class="packageInheritanceFlow"><span class="active">PACKAGE DEFAULT</span><b>→</b><span>COURSE-SPECIFIC TAILOR</span></div></section>';
+    html+='<div class="advancedStepLabel scopedArchitectureLabel"><span>3</span><div><b>Edit '+esc(scopeName)+' architecture & Packages</b><small>Phases, platforms and Package paths below belong to the selected sector.</small></div></div>';
+    html+='<div class="settingsGrid advancedScopeGrid" style="margin-top:10px">';
+    html+=cfgPhaseCard(c,scope);
     html+=advancedPlatformsCard(scope);
     html+=cfgCatalogCard('Training types','trainingKinds',c.trainingKinds);
     html+=advancedContextCard(scope,c);
     html+=cfgCatalogCard('Countries / customer contexts','countries',c.countries);
-    html+='<section class="card settingBox"><h3>Save architecture</h3><p class="sub">Saves names for course types, phases, platforms, training types, EP Day/Night tracks and countries. Package names, paths and defaults are saved separately on each Package card below.</p><div class="toolbar"><button class="btn sky" id="cfgSaveCatalogs">Save architecture</button><button class="btn danger" id="cfgResetCatalogs">Reset architecture labels</button></div></section></div>';
+    html+='<section class="card settingBox"><h3>Save architecture</h3><p class="sub">Saves sector architecture labels and platform changes. Package names, paths and defaults are saved separately on each Package card below.</p><div class="toolbar"><button class="btn sky" id="cfgSaveCatalogs">Save architecture</button><button class="btn danger" id="cfgResetCatalogs">Reset architecture labels</button></div></section></div>';
     html+=advancedPackagesHtml(scope);
   }
 
@@ -1788,8 +1796,7 @@ function bindSettings(){
     const root=getCourseMembershipState();delete root[key];saveCourseMembershipState(root);['ct-review-evals','ct-review-safety','ct-review-exams','ct-review-daily-reports','ct-review-activity-events','ct-review-solo-flights','ct-review-emergency-plans'].forEach(base=>localStorage.removeItem(courseScopedKey(base,key)));localStorage.removeItem('flympus-course-overrides:'+key);
     if(currentCourseId===key)switchCourseByKey('AEP-26',{screen:'courses',render:false,force:true});toast('Course deleted');render();
   });
-  if($('#typeWorkspace'))$('#typeWorkspace').onchange=e=>{state.typeWorkspace=e.target.value;state.phaseScope=e.target.value;render()};
-  if($('#phaseScope'))$('#phaseScope').onchange=e=>{state.phaseScope=e.target.value;state.typeWorkspace=e.target.value;render()};
+  if($('#typeWorkspace'))$('#typeWorkspace').onchange=e=>{state.typeWorkspace=e.target.value;render()};
   document.querySelectorAll('.globalPackageForm').forEach(form=>form.onsubmit=e=>{
     e.preventDefault();const type=form.dataset.globalPackageType,id=form.dataset.globalPackageId,base=window.FLYMPUS_TRAINING?.packageBase?.(type,id);if(!base)return;
     const fd=new FormData(form),old=window.FLYMPUS_TRAINING.getGlobalOverrides(id)||{},program={...(old.program||{}),name:String(fd.get('g_package_name')||base.name).trim()||base.name,phaseId:String(fd.get('g_phase')||base.phaseId||''),platformId:String(fd.get('g_platform')||''),trainingKind:String(fd.get('g_training')||base.trainingKind||'')};
@@ -1801,6 +1808,16 @@ function bindSettings(){
     window.FLYMPUS_TRAINING.saveGlobalOverrides(id,overrides);toast('Package saved · courses using it inherit these defaults');render();
   });
   document.querySelectorAll('[data-reset-global-package]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.resetGlobalPackage;if(confirm('Reset this Package to its built-in defaults? Course-specific Tailor changes will remain.')){window.FLYMPUS_TRAINING.saveGlobalOverrides(id,{});toast('Package defaults reset');render()}});
+
+  if($('#cfgAddPlatform'))$('#cfgAddPlatform').onsubmit=e=>{
+    e.preventDefault();const name=String(new FormData(e.currentTarget).get('name')||'').trim(),type=state.typeWorkspace||cfgGet().courseTypes[0]?.id||'';if(!name||!type)return;
+    const all=getCustomPlatforms(),arr=all[type]||[],id=cfgId('platform');arr.push({id,name});all[type]=arr;saveCustomPlatforms(all);
+    const labels=getPlatformLabels();labels[id]=name;savePlatformLabels(labels);toast(name+' added to '+(cfgItem(cfgGet().courseTypes,type)?.name||type));render();
+  };
+  document.querySelectorAll('[data-platform-remove]').forEach(btn=>btn.onclick=()=>{
+    const type=state.typeWorkspace||'',id=btn.dataset.platformRemove,all=getCustomPlatforms(),arr=all[type]||[];
+    all[type]=arr.filter(x=>x.id!==id);saveCustomPlatforms(all);const labels=getPlatformLabels();delete labels[id];savePlatformLabels(labels);toast('Platform removed');render();
+  });
 
   if($('#cfgSaveCatalogs'))$('#cfgSaveCatalogs').onclick=()=>{
     const cc=cfgGet(),platformLabels=getPlatformLabels();
@@ -1827,17 +1844,17 @@ function bindSettings(){
 
   document.querySelectorAll('[data-cfg-remove]').forEach(btn=>btn.onclick=()=>{
     const [kind,id]=btn.dataset.cfgRemove.split('|'),cc=cfgGet();cc[kind]=cc[kind].filter(x=>x.id!==id);
-    if(kind==='courseTypes'){cc.phases=cc.phases.filter(x=>x.type!==id);cc.syllabi=cc.syllabi.filter(x=>x.courseType!==id);cc.criteria=cc.criteria.filter(x=>x.courseType!==id);cc.emergencies=cc.emergencies.filter(x=>x.courseType!==id)}
+    if(kind==='courseTypes'){cc.phases=cc.phases.filter(x=>x.type!==id);cc.syllabi=cc.syllabi.filter(x=>x.courseType!==id);cc.criteria=cc.criteria.filter(x=>x.courseType!==id);cc.emergencies=cc.emergencies.filter(x=>x.courseType!==id);if(state.typeWorkspace===id)state.typeWorkspace=cc.courseTypes[0]?.id||''}
     cfgSave(cc);toast('Catalog item removed');render();
   });
   document.querySelectorAll('[data-scoped-remove]').forEach(btn=>btn.onclick=()=>{const [kind,id]=btn.dataset.scopedRemove.split('|'),cc=cfgGet();cc[kind]=cc[kind].filter(x=>x.id!==id);cfgSave(cc);toast('Item removed');render()});
   document.querySelectorAll('[data-phase-remove]').forEach(btn=>btn.onclick=()=>{const cc=cfgGet();cc.phases=cc.phases.filter(x=>x.id!==btn.dataset.phaseRemove);cfgSave(cc);toast('Phase removed');render()});
   if($('#cfgAddPhase'))$('#cfgAddPhase').onsubmit=e=>{
-    e.preventDefault();const cc=cfgGet(),name=String(new FormData(e.currentTarget).get('name')||'').trim(),type=state.typeWorkspace||state.phaseScope||cc.courseTypes[0]?.id||'';if(!name||!type)return;
+    e.preventDefault();const cc=cfgGet(),name=String(new FormData(e.currentTarget).get('name')||'').trim(),type=state.typeWorkspace||cc.courseTypes[0]?.id||'';if(!name||!type)return;
     const id=cfgId('phase');cc.phases.push({id,type,name,tracking:defaultPhaseTracking(id)});cfgSave(cc);toast(name+' added to '+(cfgItem(cc.courseTypes,type)?.name||type));render();
   };
 
-  if($('#cfgResetCatalogs'))$('#cfgResetCatalogs').onclick=()=>{if(confirm('Reset architecture labels to defaults? Training Package global defaults are not affected.')){localStorage.removeItem('ct-review-catalogs');localStorage.removeItem('ct-review-platform-labels');state.phaseScope=state.typeWorkspace||null;toast('Architecture labels reset');render()}};
+  if($('#cfgResetCatalogs'))$('#cfgResetCatalogs').onclick=()=>{if(confirm('Reset architecture labels and custom platforms to defaults? Training Package defaults are not affected.')){localStorage.removeItem('ct-review-catalogs');localStorage.removeItem('ct-review-platform-labels');localStorage.removeItem('ct-review-custom-platforms');toast('Architecture reset');render()}};
 
   if($('#cfgProfileType'))$('#cfgProfileType').onchange=e=>{
     const cc=cfgGet(),type=e.target.value,ph=cc.phases.filter(x=>x.type===type),sy=cc.syllabi.filter(x=>x.courseType===type),cr=cc.criteria.filter(x=>x.courseType===type),em=cc.emergencies.filter(x=>x.courseType===type);
