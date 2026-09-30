@@ -27,6 +27,11 @@ assert(html.includes('aria-controls="topCourseDropdown"')&&html.includes('id="to
 assert(html.includes('id="topNotificationBtn"')&&html.includes('aria-label="Notifications"'),"Header must expose an accessible notifications bell");
 assert(html.includes('id="topNotificationDropdown"')&&html.includes("No new notifications"),"Notifications bell must open a notification panel with an empty state");
 assert(html.includes("<span>Personal</span>")&&html.includes("across all courses"),"Notifications must be personal to the user rather than scoped to the selected course");
+assert(html.includes("Notification preferences")&&html.includes('data-notification-pref="assignments"')&&html.includes('data-notification-pref="requiredActions"'),"Personal notifications must expose per-category preferences");
+assert(html.includes("getNotificationPreferences()")&&html.includes("saveNotificationPreferences"),"Notification preferences must persist in browser-local personal settings");
+assert(html.includes('id="topPersonalProfileBtn"')&&html.includes('aria-label="Personal profile"'),"The top-right personal avatar must open the personal profile editor");
+assert(html.includes('id="personalPhotoInput"')&&html.includes('id="removePersonalPhoto"'),"Personal profile editing must support changing or removing the user's photo");
+assert(html.includes("Your name, email and course role are managed by course administration."),"Self-service personal profile must keep identity and role read-only");
 assert(html.includes("function positionNotificationDropdown()"),"Notifications panel must position safely on mobile");
 assert(html.includes(".topNotificationDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right))"),"Mobile notifications panel must stay within the viewport");
 assert(html.includes(".topCourseDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right));width:auto"),"Mobile quick course dropdown must stay inside the viewport on both sides");
@@ -60,6 +65,12 @@ const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].ma
 assert.equal(scripts.length,2);vm.runInContext(scripts[0],context,{filename:"index-course-header-boot.js"});vm.runInContext(scripts[1],context,{filename:"index-inline.js"});
 const switcherOrder=vm.runInContext("sortCourseSwitcherRows([{key:'done',course:{startsOn:'2025-01-01'},lifecycle:{id:'COMPLETED'}},{key:'future2',course:{startsOn:'2027-03-01'},lifecycle:{id:'UPCOMING'}},{key:'current',course:{startsOn:'2024-01-01'},lifecycle:{id:'COMPLETED'}},{key:'runOld',course:{startsOn:'2026-01-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'runNew',course:{startsOn:'2026-08-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'future1',course:{startsOn:'2027-01-01'},lifecycle:{id:'UPCOMING'}}],'current').map(x=>x.key).join(',')",context);
 assert.equal(switcherOrder,"current,runNew,runOld,future1,future2,done","Quick switcher order must be Selected, In Progress newest first, Upcoming soonest first, then Completed");
+assert.deepEqual(JSON.parse(JSON.stringify(vm.runInContext("getNotificationPreferences()",context))),{assignments:true,courseUpdates:true,evaluations:true,checks:true,requiredActions:true},"Notification preference defaults must start enabled");
+vm.runInContext("saveNotificationPreferences({assignments:false,courseUpdates:true,evaluations:false,checks:true,requiredActions:true})",context);
+assert.equal(vm.runInContext("getNotificationPreferences().assignments",context),false,"Notification preferences must persist user choices");
+assert.equal(vm.runInContext("getNotificationPreferences().evaluations",context),false,"Each notification category must be independently configurable");
+vm.runInContext("personOverride(currentUserId,{photoData:'data:image/jpeg;base64,profile-test'})",context);
+assert.equal(vm.runInContext("allInstructors().find(x=>x.id===currentUserId).photoData",context),"data:image/jpeg;base64,profile-test","Personal profile photo must persist on the current user without editing name or role");
 assert.match(elements.get("#content").innerHTML,/My Courses/);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Course/);
 assert.match(elements.get("#content").innerHTML,/id="myCoursesStatusFilter"/);
