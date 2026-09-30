@@ -15,6 +15,7 @@ const html=fs.readFileSync("index.html","utf8");
 assert(html.includes("myCoursesPlatformFilter")&&html.includes("myCoursesCountryFilter"),"My Courses must filter by platform and country");
 assert(html.includes("myCoursesStatusFilter"),"My Courses must filter by lifecycle status");
 assert(html.includes("courseSelectedBadge")&&html.includes("courseStateBadge"),"Selected-course state must be visually separate from course lifecycle status");
+assert(html.includes(".myCourseCard.selected{border-color:#2b8bde;box-shadow:0 0 0 3px rgba(43,139,222,.18)"),"Selected course card needs a strong visual frame in addition to the SELECTED badge");
 assert(html.includes("function courseLifecycleStatus(record)"),"Course lifecycle status must support Upcoming, In progress and Completed");
 assert(html.includes("sectorPlatforms(sector)")&&html.includes("flatMap(x=>sectorPlatforms(x.id))"),"My Courses platform options must come from the architecture platform catalog");
 assert(html.includes("function courseSummaryFromMeta(meta)"),"Course summaries must be rebuilt from live architecture metadata");
