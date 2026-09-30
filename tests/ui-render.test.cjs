@@ -201,7 +201,7 @@ vm.runInContext("state.settingsTab='packages';state.packageWorkspace='TECHNICIAN
 assert.match(elements.get("#content").innerHTML,/TECHNICIAN Training Packages/);
 vm.runInContext("FLYMPUS_TRAINING.saveGlobalOverrides('tech_full_new',{program:{name:'Global Technician Package'}});render()",context);
 assert.match(elements.get("#content").innerHTML,/Global Technician Package/);
-assert.match(elements.get("#content").innerHTML,/EDITED DEFAULT/);
+assert.doesNotMatch(elements.get("#content").innerHTML,/EDITED DEFAULT/,"Package state badges were intentionally removed");
 vm.runInContext("FLYMPUS_TRAINING.saveGlobalOverrides('tech_full_new',{})",context);
 vm.runInContext("Object.assign(currentCourseMeta,{type:'TECHNICIAN',phase:'Full Scale',platformId:'aerostar',trainingKind:'New Training',dayNight:'Mixed \/ Day+Night',country:'Israel',programId:'tech_full_new'});state.screen='profile';state.profileTab='activity';render()",context);
 assert.match(elements.get("#content").innerHTML,/Practical experience/);
