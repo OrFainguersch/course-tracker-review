@@ -656,104 +656,134 @@ html,body{background:#f5f7fa}
 }
 </style>
 <style>
-/* ===== Mobile package tables: preserve desktop table quality, use readable cards on phones ===== */
+/* ===== Mobile package editors · clean card layout ===== */
 @media(max-width:760px){
-  .packageSyllabusSection{padding:8px}
-  .packageSyllabusTable:not(.ruleEditorTable){border:0!important;overflow:visible!important;background:transparent}
-  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusHeader{display:none!important}
+  .courseTailorAligned,.globalPackageCard,.packageEditorBody,.packageSyllabusSection,.ruleEditorSection{min-width:0!important;max-width:100%!important}
+  .packageEditorBody{padding:9px!important}
+  .packageSyllabusSection,.ruleEditorSection{padding:8px!important}
+  .packageSyllabusTable,.ruleEditorTable{border:0!important;overflow:visible!important;background:transparent!important;min-width:0!important;width:100%!important}
+  .packageSyllabusHeader,.ruleEditorTable .packageSyllabusHeader{display:none!important}
+
+  /* Syllabus / practical tasks */
   .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusRow{
     display:grid!important;
-    grid-template-columns:44px minmax(0,1fr) minmax(86px,.72fr)!important;
-    grid-template-rows:auto auto auto auto;
-    align-items:stretch;
-    margin:0 0 10px;
-    border:1px solid #d8e4ee!important;
-    border-radius:13px!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    grid-template-rows:auto auto auto auto auto!important;
+    width:100%!important;
+    min-width:0!important;
+    margin:0 0 10px!important;
+    border:1px solid #d9e4ed!important;
+    border-radius:14px!important;
     overflow:hidden!important;
     background:#fff!important;
-    box-shadow:0 2px 7px rgba(22,62,96,.045);
+    box-shadow:0 2px 7px rgba(18,51,82,.045)!important;
   }
   .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell{
     min-width:0!important;
+    width:auto!important;
+    padding:9px 10px!important;
+    border:0!important;
+    border-bottom:1px solid #e7eef4!important;
+    background:#fff!important;
     display:grid!important;
     grid-template-columns:1fr!important;
-    align-content:center;
-    gap:4px!important;
-    padding:9px 10px!important;
-    border-right:1px solid #e5edf4!important;
-    border-bottom:1px solid #e5edf4!important;
-    background:#fff;
+    align-content:center!important;
+    gap:5px!important;
   }
   .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell:before{
-    content:attr(data-label);
-    display:block;
-    margin:0;
-    color:#7890a6;
-    font-size:8px;
-    line-height:1.15;
-    font-weight:850;
-    letter-spacing:.055em;
-    text-transform:uppercase;
+    content:attr(data-label)!important;
+    display:block!important;
+    margin:0!important;
+    color:#74899d!important;
+    font-size:8.5px!important;
+    line-height:1.1!important;
+    font-weight:850!important;
+    letter-spacing:.055em!important;
+    text-transform:uppercase!important;
   }
   .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell input.input,
   .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell select{
     width:100%!important;
     min-width:0!important;
-    height:39px!important;
-    padding:7px 8px!important;
-    border:0!important;
-    border-radius:8px!important;
+    height:40px!important;
+    padding:7px 9px!important;
+    border:1px solid #edf2f6!important;
+    border-radius:9px!important;
     background:#f7f9fb!important;
-    color:#324b63!important;
-    font-size:12px!important;
+    color:#344d64!important;
+    font-size:16px!important;
+    box-sizing:border-box!important;
   }
   .packageSyllabusTable:not(.ruleEditorTable) .useCell{
-    grid-column:1!important;
-    grid-row:1/5!important;
-    display:grid!important;
-    place-items:center!important;
-    align-content:center!important;
-    padding:8px 5px!important;
-    background:#fbfdff!important;
-    border-bottom:0!important;
+    grid-column:1!important;grid-row:1!important;
+    display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;
+    min-height:48px!important;background:#fbfdff!important;border-right:1px solid #e7eef4!important;
   }
-  .packageSyllabusTable:not(.ruleEditorTable) .useCell:before{margin-bottom:6px}
-  .packageSyllabusTable:not(.ruleEditorTable) .useCell input{width:19px!important;height:19px!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .useCell:before{margin:0!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .useCell input{width:20px!important;height:20px!important;flex:0 0 20px!important}
   .packageSyllabusTable:not(.ruleEditorTable) .orderCell{
-    grid-column:2/4!important;
-    grid-row:1!important;
-    display:flex!important;
-    flex-direction:row!important;
-    align-items:center!important;
-    justify-content:flex-start!important;
-    gap:8px!important;
+    grid-column:2!important;grid-row:1!important;
+    display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-end!important;gap:9px!important;
+    min-height:48px!important;background:#fbfdff!important;border-bottom:1px solid #e7eef4!important;
   }
   .packageSyllabusTable:not(.ruleEditorTable) .orderCell:before{display:none!important}
-  .packageSyllabusTable:not(.ruleEditorTable) .seriesCell{grid-column:2!important;grid-row:2!important}
-  .packageSyllabusTable:not(.ruleEditorTable) .minimumCell{grid-column:3!important;grid-row:2!important;border-right:0!important}
-  .packageSyllabusTable:not(.ruleEditorTable) .supervisionCell{grid-column:2!important;grid-row:3!important}
-  .packageSyllabusTable:not(.ruleEditorTable) .trackCell{grid-column:3!important;grid-row:3!important;border-right:0!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .seriesCell{grid-column:1/3!important;grid-row:2!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .minimumCell{grid-column:1!important;grid-row:3!important;border-right:1px solid #e7eef4!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .trackCell{grid-column:2!important;grid-row:3!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .supervisionCell{grid-column:1/3!important;grid-row:4!important}
   .packageSyllabusTable:not(.ruleEditorTable) .statusCell{
-    grid-column:2/4!important;
-    grid-row:4!important;
-    display:flex!important;
-    flex-direction:row!important;
-    align-items:center!important;
-    justify-content:space-between!important;
-    gap:8px!important;
-    border-right:0!important;
-    border-bottom:0!important;
-    min-height:42px;
+    grid-column:1/3!important;grid-row:5!important;
+    display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
+    min-height:44px!important;border-bottom:0!important;background:#fbfdff!important;
   }
-  .packageSyllabusTable:not(.ruleEditorTable) .statusCell:before{display:block!important;flex:0 0 auto}
-  .packageSyllabusTable:not(.ruleEditorTable) .statusCell small{margin-left:auto;text-align:right}
-  .packageSyllabusFooter{padding:4px 2px 8px}
+  .packageSyllabusTable:not(.ruleEditorTable) .statusCell:before{margin:0!important;flex:0 0 auto!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .statusCell small{margin-left:auto!important;text-align:right!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .syllabusDragHandle{width:36px!important;height:36px!important}
+  .packageSyllabusFooter{padding:4px 2px 8px!important;gap:5px!important;font-size:9px!important}
+
+  /* All other Package / Tailor tables */
+  .ruleEditorTable .packageSyllabusRow{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    width:100%!important;min-width:0!important;
+    margin:0 0 10px!important;
+    border:1px solid #d9e4ed!important;border-radius:14px!important;overflow:hidden!important;
+    background:#fff!important;box-shadow:0 2px 7px rgba(18,51,82,.045)!important;
+  }
+  .ruleEditorTable .packageSyllabusCell{
+    min-width:0!important;width:auto!important;
+    grid-column:1/3!important;
+    padding:9px 10px!important;border:0!important;border-bottom:1px solid #e7eef4!important;
+    display:grid!important;grid-template-columns:1fr!important;gap:5px!important;background:#fff!important;
+  }
+  .ruleEditorTable .packageSyllabusCell:before{
+    content:attr(data-label)!important;display:block!important;
+    color:#74899d!important;font-size:8.5px!important;font-weight:850!important;letter-spacing:.055em!important;text-transform:uppercase!important;
+  }
+  .ruleEditorTable .packageSyllabusCell input.input,.ruleEditorTable .packageSyllabusCell select{
+    width:100%!important;min-width:0!important;height:40px!important;padding:7px 9px!important;
+    border:1px solid #edf2f6!important;border-radius:9px!important;background:#f7f9fb!important;color:#344d64!important;font-size:16px!important;box-sizing:border-box!important;
+  }
+  .ruleEditorTable .useCell{
+    grid-column:1!important;grid-row:1!important;
+    display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;
+    min-height:48px!important;background:#fbfdff!important;border-right:1px solid #e7eef4!important;
+  }
+  .ruleEditorTable .useCell:before{margin:0!important}
+  .ruleEditorTable .useCell input{width:20px!important;height:20px!important;flex:0 0 20px!important}
+  .ruleEditorTable .ruleOrderCell,.ruleEditorTable .orderCell{
+    grid-column:2!important;grid-row:1!important;
+    display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-end!important;gap:9px!important;
+    min-height:48px!important;background:#fbfdff!important;
+  }
+  .ruleEditorTable .ruleOrderCell:before,.ruleEditorTable .orderCell:before{display:none!important}
+  .ruleEditorTable .packageSyllabusCell:last-child{border-bottom:0!important}
+  .ruleEditorTable .syllabusDragHandle{width:36px!important;height:36px!important}
 }
 @media(max-width:390px){
-  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusRow{grid-template-columns:40px minmax(0,1fr) minmax(78px,.68fr)!important}
-  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell{padding:8px!important}
-  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell input.input,
-  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell select{font-size:11.5px!important;padding:6px!important}
+  .packageSyllabusSection,.ruleEditorSection{padding:6px!important}
+  .packageSyllabusTable:not(.ruleEditorTable) .packageSyllabusCell,
+  .ruleEditorTable .packageSyllabusCell{padding:8px!important}
 }
 </style>
 <style>
@@ -803,6 +833,10 @@ form input,form select,form textarea{max-width:100%;min-width:0}
   @keyframes datePickerDesktopOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(5px) scale(.985)}}
 }
 @media(max-width:759px){.dateDmy{font-size:16px!important}.twoCol>*,.fields>*{min-width:0;max-width:100%}}
+</style>
+<style>
+/* Native iOS date picker overlay: Safari supplies the real iPhone sheet/animation. */
+.dateCalendarNative{position:absolute!important;inset:0!important;z-index:4!important;width:100%!important;height:100%!important;min-width:0!important;margin:0!important;padding:0!important;border:0!important;opacity:0!important;cursor:pointer!important;-webkit-appearance:auto!important;appearance:auto!important}
 </style>
 </head>
 <body>
@@ -916,7 +950,8 @@ function renderDatePicker(){
   grid.innerHTML=html;grid.querySelectorAll('[data-date-value]').forEach(btn=>btn.onclick=()=>selectDateFromPicker(btn.dataset.dateValue));
 }
 function bindDmyDateInputs(){
-  document.querySelectorAll('input[type="date"]').forEach(el=>{
+  const iosDateUi=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  document.querySelectorAll('input[type="date"]:not(.dateCalendarNative)').forEach(el=>{
     const raw=el.value;el.type='text';el.classList.add('dateDmy');el.inputMode='none';el.autocomplete='off';el.maxLength=10;el.placeholder='DD/MM/YYYY';if(raw)el.value=dateInputValue(raw);
   });
   document.querySelectorAll('input.dateDmy').forEach(el=>{
@@ -926,8 +961,19 @@ function bindDmyDateInputs(){
     wrapper.className='dateCalendarField'+(el.disabled?' is-disabled':'');if(el.style.width)wrapper.style.width=el.style.width;else wrapper.style.width='100%';if(el.style.maxWidth)wrapper.style.maxWidth=el.style.maxWidth;
     icon.className='dateCalendarIcon';icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="15" rx="2"></rect><path d="M7 3.5v4M17 3.5v4M3.5 9.5h17"></path></svg>';
     parent.insertBefore(wrapper,el);wrapper.appendChild(el);wrapper.appendChild(icon);
-    el.addEventListener('click',e=>{e.preventDefault();openDatePicker(el)});el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();openDatePicker(el)}});
-    el.addEventListener('change',validate);if(el.value)validate();
+    if(iosDateUi){
+      const native=document.createElement('input'),current=normalizeDateValue(el.value)||todayIsoDate(),min=normalizeDateValue(el.getAttribute('min')||''),max=normalizeDateValue(el.getAttribute('max')||'');
+      native.type='date';native.className='dateCalendarNative';native.value=current;native.disabled=!!el.disabled;if(min)native.min=min;if(max)native.max=max;
+      native.setAttribute('aria-label',el.getAttribute('aria-label')||'Choose date');wrapper.appendChild(native);
+      native.addEventListener('focus',()=>wrapper.classList.add('is-open'));native.addEventListener('blur',()=>wrapper.classList.remove('is-open'));
+      native.addEventListener('change',()=>{if(!native.value)return;el.value=formatDateDMY(native.value);el.setCustomValidity?.('');wrapper.classList.remove('is-open');el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))});
+      el.addEventListener('change',()=>{validate();const iso=normalizeDateValue(el.value);if(iso)native.value=iso});
+    }else{
+      el.addEventListener('click',e=>{e.preventDefault();openDatePicker(el)});
+      el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();openDatePicker(el)}});
+      el.addEventListener('change',validate);
+    }
+    if(el.value)validate();
   });
 }
 function safeArrayStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[]}catch{return []}}
