@@ -3500,6 +3500,8 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
       const indicator=$('#flympusStandaloneRefreshIndicator');
       indicator?.classList.add('refreshing');
       if(graph&&!graph.fired)fireFlympusRefreshSound(graph);
+      /* Keep the pulled frame visible until navigation, but never enter the
+         release transition on the new document. */
       setTimeout(()=>location.reload(),90);
       return;
     }
@@ -3516,11 +3518,11 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
 
   window.addEventListener('pageshow',()=>{
     resetPullRefreshSound();
-    /* pageshow fires after Safari's native pull-to-refresh too. Only the Home
-       Screen app owns the custom pull animation; browser Safari must be cleaned
-       without ever entering the standalone release state. */
-    if(flympusStandaloneMode())releaseStandalonePullVisual();
-    else clearStandalonePullVisual();
+    /* A newly loaded document must start clean. Running the release animation
+       again on pageshow forces WebKit to rebuild the transformed/backdrop layers
+       for one frame and causes the visible white flash after refresh. The release
+       animation is only for a cancelled pull in the SAME document. */
+    clearStandalonePullVisual();
     flympusUiNeedsFreshContext=true;
     resetFlympusAudioSession();
   });
