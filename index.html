@@ -3063,11 +3063,10 @@ function scrollActiveBottomNavTop(root){
   bottomNavScrollPositions[root]=0;persistBottomNavScroll();
   try{window.scrollTo({top:0,left:0,behavior:'smooth'})}catch{window.scrollTo?.(0,0)}
 }
-let flympusNavAudioCtx=null,flympusNavAudioReadyPromise=null;
+let flympusNavAudioCtx=null;
 function discardFlympusNavAudioContext(){
   const old=flympusNavAudioCtx;
   flympusNavAudioCtx=null;
-  flympusNavAudioReadyPromise=null;
   if(old&&old.state!=='closed'){
     try{old.close?.()}catch{}
   }
@@ -3082,50 +3081,12 @@ function createFlympusNavAudioContext(){
 function getFlympusNavAudioContext(){
   if(!flympusNavAudioCtx||flympusNavAudioCtx.state==='closed'){
     flympusNavAudioCtx=createFlympusNavAudioContext();
-    flympusNavAudioReadyPromise=null;
   }
   return flympusNavAudioCtx;
 }
-function ensureFlympusNavAudioReady(){
-  try{
-    /* iOS Safari may leave a Web Audio context in "interrupted" after a UI,
-       page or media interruption. Re-create it on the next real user gesture
-       instead of spending one or two taps trying to revive a stale context. */
-    if(flympusNavAudioCtx&&flympusNavAudioCtx.state==='interrupted'){
-      discardFlympusNavAudioContext();
-    }
-    const ctx=getFlympusNavAudioContext();if(!ctx)return Promise.resolve(null);
-    if(ctx.state==='running')return Promise.resolve(ctx);
-    if(flympusNavAudioReadyPromise)return flympusNavAudioReadyPromise;
-    let resumeResult=null;
-    try{resumeResult=ctx.resume?.()}catch{}
-    flympusNavAudioReadyPromise=Promise.resolve(resumeResult)
-      .then(()=>{
-        if(ctx!==flympusNavAudioCtx)return null;
-        if(ctx.state==='running')return ctx;
-        if(ctx.state==='interrupted'||ctx.state==='closed')discardFlympusNavAudioContext();
-        return null;
-      })
-      .catch(()=>{
-        if(ctx===flympusNavAudioCtx&&(ctx.state==='interrupted'||ctx.state==='closed'))discardFlympusNavAudioContext();
-        return null;
-      })
-      .finally(()=>{
-        if(ctx===flympusNavAudioCtx)flympusNavAudioReadyPromise=null;
-      });
-    return flympusNavAudioReadyPromise;
-  }catch{return Promise.resolve(null)}
-}
-function armFlympusBottomNavAudio(){
-  /* Called on pointer-down so Safari unlocks/resumes audio while the finger
-     gesture is unquestionably active. The actual tone is emitted on click. */
-  return ensureFlympusNavAudioReady();
-}
 function emitFlympusNavSignature(ctx){
   if(!ctx)return;
-  /* A few milliseconds of scheduling headroom prevents the very first samples
-     being lost while iOS spins the audio output back up. */
-  const now=ctx.currentTime+.008;
+  const now=ctx.currentTime+.004;
   const master=ctx.createGain();
   master.gain.setValueAtTime(.05,now);
   master.connect(ctx.destination);
@@ -3146,16 +3107,18 @@ function emitFlympusNavSignature(ctx){
 }
 function playFlympusBottomNavSound(){
   try{
-    const ctx=getFlympusNavAudioContext();if(!ctx)return;
-    if(ctx.state==='running'){
-      emitFlympusNavSignature(ctx);
-      return;
+    /* Safari can leave Web Audio in an interrupted state. Re-create only that
+       stale context, then resume + schedule the tone synchronously inside the
+       actual finger-down gesture. Do not wait for a Promise before scheduling:
+       iOS reliably queues the scheduled nodes while resume finishes. */
+    if(flympusNavAudioCtx&&(flympusNavAudioCtx.state==='interrupted'||flympusNavAudioCtx.state==='closed')){
+      discardFlympusNavAudioContext();
     }
-    /* Never schedule into a suspended/interrupted context and hope iOS catches
-       up. Resume first, then emit exactly once when the context is confirmed. */
-    Promise.resolve(ensureFlympusNavAudioReady()).then(ready=>{
-      if(ready?.state==='running')emitFlympusNavSignature(ready);
-    }).catch(()=>{});
+    const ctx=getFlympusNavAudioContext();if(!ctx)return;
+    if(ctx.state!=='running'){
+      try{ctx.resume?.()}catch{}
+    }
+    emitFlympusNavSignature(ctx);
   }catch{}
 }
 function emitFlympusRefreshSound(ctx){
@@ -3200,11 +3163,10 @@ function emitFlympusRefreshSound(ctx){
   voice(1760,1960,.22,.115,.075);
   voice(2300,2460,.10,.145,.05);
 }
-let flympusRefreshAudioCtx=null,flympusRefreshResumePromise=null;
+let flympusRefreshAudioCtx=null;
 function discardFlympusRefreshAudioContext(){
   const old=flympusRefreshAudioCtx;
   flympusRefreshAudioCtx=null;
-  flympusRefreshResumePromise=null;
   if(old&&old.state!=='closed'){
     try{old.close?.()}catch{}
   }
@@ -3216,59 +3178,48 @@ function createFlympusRefreshAudioContext(){
     try{return new AudioCtx({latencyHint:'interactive'})}catch{return new AudioCtx()}
   }catch{return null}
 }
-function getFlympusRefreshAudioContext(){
-  if(!flympusRefreshAudioCtx||flympusRefreshAudioCtx.state==='closed'){
-    flympusRefreshAudioCtx=createFlympusRefreshAudioContext();
-    flympusRefreshResumePromise=null;
-  }
-  return flympusRefreshAudioCtx;
-}
 function armFreshFlympusRefreshAudio(){
   try{
-    /* iOS can leave a previously-used context interrupted. Recreate it during
-       the new finger gesture instead of trying to reuse a stale context. */
-    if(flympusRefreshAudioCtx&&flympusRefreshAudioCtx.state!=='running'){
-      discardFlympusRefreshAudioContext();
+    /* Every pull gets its own audio context. Reusing the context is unreliable
+       after the first iOS overscroll gesture, even when state still says running. */
+    discardFlympusRefreshAudioContext();
+    const ctx=createFlympusRefreshAudioContext();
+    flympusRefreshAudioCtx=ctx;
+    if(!ctx)return null;
+    if(ctx.state!=='running'){
+      try{ctx.resume?.()}catch{}
     }
-    const ctx=getFlympusRefreshAudioContext();if(!ctx)return Promise.resolve(null);
-    if(ctx.state==='running')return Promise.resolve(ctx);
-    flympusRefreshResumePromise=Promise.resolve(ctx.resume?.())
-      .then(()=>ctx.state==='running'?ctx:null)
-      .catch(()=>null)
-      .finally(()=>{flympusRefreshResumePromise=null});
-    return flympusRefreshResumePromise;
-  }catch{return Promise.resolve(null)}
+    return ctx;
+  }catch{return null}
 }
-function ensureFlympusRefreshAudioReady(){
-  const ctx=getFlympusRefreshAudioContext();if(!ctx)return Promise.resolve(null);
-  if(ctx.state==='running')return Promise.resolve(ctx);
-  if(!flympusRefreshResumePromise){
-    flympusRefreshResumePromise=Promise.resolve(ctx.resume?.())
-      .then(()=>ctx.state==='running'?ctx:null)
-      .catch(()=>null)
-      .finally(()=>{flympusRefreshResumePromise=null});
-  }
-  return flympusRefreshResumePromise;
-}
-function playFlympusRefreshSound(){
+function playFlympusRefreshSound(ctx=flympusRefreshAudioCtx){
   try{
-    const ctx=getFlympusRefreshAudioContext();if(!ctx)return;
-    if(ctx.state==='running'){emitFlympusRefreshSound(ctx);return}
-    ensureFlympusRefreshAudioReady().then(ready=>{if(ready)emitFlympusRefreshSound(ready)});
+    if(!ctx)return;
+    if(ctx.state!=='running'){
+      try{ctx.resume?.()}catch{}
+    }
+    /* Schedule immediately. A suspended iOS context keeps these nodes queued
+       and starts them as soon as the resume triggered by this gesture completes. */
+    emitFlympusRefreshSound(ctx);
   }catch{}
 }
 if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   window.__flympusPullRefreshSoundBound=true;
-  let pullStartY=0,pullStartX=0,pullTracking=false,pullRefreshSoundPlayed=false,pullRefreshReadyPromise=null;
-  document.addEventListener('touchstart',e=>{
+  let pullStartY=0,pullStartX=0,pullTracking=false,pullRefreshSoundPlayed=false,pullRefreshGestureCtx=null;
+  const resetPullRefreshSound=()=>{
     pullTracking=false;
     pullRefreshSoundPlayed=false;
-    pullRefreshReadyPromise=null;
-    if(window.scrollY>1)return;
+    pullRefreshGestureCtx=null;
+  };
+  document.addEventListener('touchstart',e=>{
+    resetPullRefreshSound();
+    /* iOS can settle a few pixels below zero/top after an overscroll. Treat a
+       small top offset as top so consecutive pull gestures are not rejected. */
+    const top=Math.max(0,Number(window.scrollY||document.scrollingElement?.scrollTop||document.documentElement?.scrollTop||0));
+    if(top>20)return;
     const t=e.touches?.[0];if(!t)return;
     pullStartY=t.clientY;pullStartX=t.clientX;pullTracking=true;
-    /* Arm a valid context on every fresh pull gesture. */
-    pullRefreshReadyPromise=armFreshFlympusRefreshAudio();
+    pullRefreshGestureCtx=armFreshFlympusRefreshAudio();
   },{passive:true,capture:true});
   document.addEventListener('touchmove',e=>{
     if(!pullTracking||pullRefreshSoundPlayed)return;
@@ -3276,26 +3227,24 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     const dy=t.clientY-pullStartY,dx=t.clientX-pullStartX;
     if(dy>=88&&dy>Math.abs(dx)*1.35){
       pullRefreshSoundPlayed=true;
-      const ctx=flympusRefreshAudioCtx;
-      if(ctx?.state==='running')emitFlympusRefreshSound(ctx);
-      else Promise.resolve(pullRefreshReadyPromise||ensureFlympusRefreshAudioReady()).then(ready=>{
-        if(ready?.state==='running')emitFlympusRefreshSound(ready);
-      }).catch(()=>{});
+      playFlympusRefreshSound(pullRefreshGestureCtx);
     }
   },{passive:true,capture:true});
-  const resetPullRefreshSound=()=>{
-    pullTracking=false;
-    pullRefreshSoundPlayed=false;
-    pullRefreshReadyPromise=null;
-  };
   document.addEventListener('touchend',resetPullRefreshSound,{passive:true,capture:true});
   document.addEventListener('touchcancel',resetPullRefreshSound,{passive:true,capture:true});
   window.addEventListener('pageshow',()=>{
-    pullTracking=false;pullRefreshSoundPlayed=false;pullRefreshReadyPromise=null;
-    if(flympusRefreshAudioCtx&&flympusRefreshAudioCtx.state!=='running')discardFlympusRefreshAudioContext();
+    resetPullRefreshSound();
+    if(flympusRefreshAudioCtx&&(flympusRefreshAudioCtx.state==='interrupted'||flympusRefreshAudioCtx.state==='closed')){
+      discardFlympusRefreshAudioContext();
+    }
   });
   document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='visible'&&flympusRefreshAudioCtx?.state==='interrupted')discardFlympusRefreshAudioContext();
+    if(document.visibilityState==='visible'&&flympusRefreshAudioCtx?.state==='interrupted'){
+      discardFlympusRefreshAudioContext();
+    }
+    if(document.visibilityState==='visible'&&flympusNavAudioCtx?.state==='interrupted'){
+      discardFlympusNavAudioContext();
+    }
   });
 }
 let bottomNavScrollSaveTimer=null;
@@ -5103,7 +5052,7 @@ function bindGlobalFormUx(){
     form.addEventListener('submit',e=>{if(showFormInvalid(form)){e.preventDefault();e.stopImmediatePropagation()}},true)
   });
 }
-function bind(){bindGlobalFormUx();bindDmyDateInputs();bindMultiFilters();renderPersonalIdentity();syncAttentionBadges();bindGlobalBackGesture();if($('#appBackBtn'))$('#appBackBtn').onclick=()=>goBack();if($('#exportFlympusBackup'))$('#exportFlympusBackup').onclick=async()=>{const ok=await exportFlympusBackup();if(ok)toast('FLYMPUS backup ready','success')};if($('#standaloneImportBackup'))$('#standaloneImportBackup').onclick=()=>$('#flympusBackupInput')?.click();if($('#standaloneMigrationDismiss'))$('#standaloneMigrationDismiss').onclick=()=>{localStorage.setItem('ct-review-standalone-migration-dismissed','1');render()};if($('#flympusBackupInput'))$('#flympusBackupInput').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const payload=JSON.parse(await file.text());const entries=validateFlympusBackup(payload);if(!(await siteConfirm('Replace this device\'s current FLYMPUS data with the selected backup? This imports courses, photos, records and settings.',{title:'Import FLYMPUS backup?',confirmLabel:'Import backup',tone:'primary'})))return;restoreFlympusBackup(payload);toast('Backup imported · reloading','success');setTimeout(()=>location.reload(),350)}catch(err){toast(err?.message||'Could not import this backup.','error')}finally{e.target.value=''}};const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop'),drawerPanel=drawer?.querySelector?.('.panel');if(menuBtn&&drawer)menuBtn.onclick=e=>{e?.preventDefault?.();e?.stopPropagation?.();closeAllMultiFilters(false);setDrawerOpen(!drawer.classList.contains('open'))};if(backdrop&&drawer)backdrop.onclick=()=>setDrawerOpen(false);if(drawerPanel&&drawer){let drawerSwipeStartX=0,drawerSwipeStartY=0,drawerSwipeTracking=false,drawerSwipeClaimed=false;drawerPanel.ontouchstart=e=>{if(!drawer.classList.contains('open'))return;const t=e.touches?.[0];if(!t)return;drawerSwipeStartX=t.clientX;drawerSwipeStartY=t.clientY;drawerSwipeTracking=true;drawerSwipeClaimed=false};drawerPanel.ontouchmove=e=>{if(!drawerSwipeTracking)return;const t=e.touches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY;if(dx<-12&&Math.abs(dx)>Math.abs(dy)*1.2){drawerSwipeClaimed=true;e.preventDefault?.()}};drawerPanel.ontouchend=e=>{if(!drawerSwipeTracking)return;drawerSwipeTracking=false;const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY;if(drawerSwipeClaimed&&dx<=-58&&Math.abs(dy)<=70)setDrawerOpen(false);drawerSwipeClaimed=false};drawerPanel.ontouchcancel=()=>{drawerSwipeTracking=false;drawerSwipeClaimed=false}};const mobileBottom=$('#mobileBottomNav');if(mobileBottom){mobileBottom.ontouchend=e=>{if(!e.target?.closest?.('.mobileBottomIconButton'))e.preventDefault?.()};mobileBottom.ongesturestart=e=>e.preventDefault?.();mobileBottom.ongesturechange=e=>e.preventDefault?.();mobileBottom.ongestureend=e=>e.preventDefault?.()}document.querySelectorAll('[data-mobile-nav]').forEach(b=>{const armSound=e=>{if(e?.pointerType==='mouse'&&e?.button!==0)return;armFlympusBottomNavAudio()};if(window.PointerEvent)b.onpointerdown=armSound;else b.ontouchstart=armSound;b.onclick=e=>{e?.preventDefault?.();e?.stopPropagation?.();playFlympusBottomNavSound();const target=b.dataset.mobileNav,currentRoot=bottomNavRootForScreen(state.screen);if(state.screen===target){scrollActiveBottomNavTop(target);return}if(state.screen===currentRoot)rememberBottomNavScroll();go(target);restoreBottomNavScroll(target)}});const topSwitch=$('#topCourseSwitch'),topMenu=$('#topCourseDropdown'),notificationBtn=$('#topNotificationBtn'),notificationMenu=$('#topNotificationDropdown'),profileBtn=$('#topPersonalProfileBtn'),profileMenu=$('#topPersonalProfileDropdown');if(topSwitch&&topMenu)topSwitch.onclick=e=>{e?.stopPropagation?.();closeAllMultiFilters(false);if(notificationMenu){notificationMenu.hidden=true;notificationBtn?.setAttribute?.('aria-expanded','false')}if(profileMenu){profileMenu.hidden=true;profileBtn?.setAttribute?.('aria-expanded','false')}const open=topMenu.hidden===true;topMenu.hidden=!open;topSwitch.setAttribute?.('aria-expanded',open?'true':'false');if(open)positionTopCourseDropdown()};if(notificationBtn&&notificationMenu)notificationBtn.onclick=e=>{e?.stopPropagation?.();closeAllMultiFilters(false);if(topMenu){topMenu.hidden=true;topSwitch?.setAttribute?.('aria-expanded','false')}if(profileMenu){profileMenu.hidden=true;profileBtn?.setAttribute?.('aria-expanded','false')}const open=notificationMenu.hidden===true;notificationMenu.hidden=!open;notificationBtn.setAttribute?.('aria-expanded',open?'true':'false');if(open){syncNotificationPreferenceControls();positionNotificationDropdown()}};if(profileBtn&&profileMenu)profileBtn.onclick=e=>{e?.stopPropagation?.();closeAllMultiFilters(false);if(topMenu){topMenu.hidden=true;topSwitch?.setAttribute?.('aria-expanded','false')}if(notificationMenu){notificationMenu.hidden=true;notificationBtn?.setAttribute?.('aria-expanded','false')}const open=profileMenu.hidden===true;profileMenu.hidden=!open;profileBtn.setAttribute?.('aria-expanded',open?'true':'false');if(open){renderPersonalIdentity();positionPersonalProfileDropdown()}};document.querySelectorAll('[data-notification-pref]').forEach(el=>el.onchange=()=>{const prefs=getNotificationPreferences();prefs[el.dataset.notificationPref]=!!el.checked;saveNotificationPreferences(prefs);toast('Notification preferences saved')});if($('#personalPhotoInput'))$('#personalPhotoInput').onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{await openPersonalPhotoCrop(file)}catch(err){toast('Could not process this photo')}};if($('#editPersonalPhoto'))$('#editPersonalPhoto').onclick=async()=>{const me=allInstructors().find(x=>x.id===currentUserId);if(!me?.photoData)return;try{await openPersonalPhotoCropDataUrl(me.photoData)}catch(err){toast('Could not open photo editor')}};if($('#personalCropReplaceInput'))$('#personalCropReplaceInput').onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{await openPersonalPhotoCrop(file,personalCropTarget)}catch(err){toast('Could not process this photo')}};if($('#personalCropReset'))$('#personalCropReset').onclick=()=>{if(!personalCropState)return;personalCropState.zoom=1;personalCropState.x=0;personalCropState.y=0;personalCropPointers.clear();personalCropGesture=null;renderPersonalPhotoCrop()};if($('#personalCropCancel'))$('#personalCropCancel').onclick=closePersonalPhotoCrop;if($('#personalCropClose'))$('#personalCropClose').onclick=closePersonalPhotoCrop;if($('#personalCropApply'))$('#personalCropApply').onclick=()=>{const data=personalCropDataUrl();if(!data)return;const target=personalCropTarget;if(target==='roster'){state.personPhotoDraft=data;const preview=$('#personPhotoPreview'),choose=$('#choosePersonPhotoAction'),edit=$('#editPersonPhoto'),remove=$('#removePersonPhoto');if(preview)preview.innerHTML='<img src="'+data+'" alt="">';if(choose)choose.hidden=true;if(edit)edit.hidden=false;if(remove)remove.hidden=false;closePersonalPhotoCrop();toast('Photo ready — save changes to apply')}else{if(personOverride(currentUserId,{photoData:data})){closePersonalPhotoCrop();renderPersonalIdentity();toast('Profile photo updated');render()}}};if($('#personalCropModal'))$('#personalCropModal').onclick=e=>{if(e.target?.id==='personalCropModal')closePersonalPhotoCrop()};if($('#personalCropViewport')){const v=$('#personalCropViewport');v.onpointerdown=e=>{if(!personalCropState)return;e.preventDefault?.();personalCropPointers.set(e.pointerId,{id:e.pointerId,x:e.clientX,y:e.clientY});v.setPointerCapture?.(e.pointerId);v.classList.add('dragging');startPersonalCropGesture()};v.onpointermove=e=>{if(!personalCropState||!personalCropPointers.has(e.pointerId))return;e.preventDefault?.();personalCropPointers.set(e.pointerId,{id:e.pointerId,x:e.clientX,y:e.clientY});const pts=[...personalCropPointers.values()],g=personalCropGesture;if(!g)return;if(pts.length>=2){if(g.mode!=='pinch'){startPersonalCropGesture();return}const a=pts[0],b=pts[1],mid=personalCropPointMid(a,b),ratio=personalCropPointDistance(a,b)/g.distance;personalCropState.zoom=Math.max(1,Math.min(4,g.zoom*ratio));personalCropState.x=g.x+(mid.x-g.midX);personalCropState.y=g.y+(mid.y-g.midY);renderPersonalPhotoCrop()}else if(pts.length===1){const a=pts[0];if(g.mode!=='pan'||g.pointerId!==a.id){startPersonalCropGesture();return}personalCropState.x=g.x+(a.x-g.startX);personalCropState.y=g.y+(a.y-g.startY);renderPersonalPhotoCrop()}};const endPointer=e=>{personalCropPointers.delete(e.pointerId);v.releasePointerCapture?.(e.pointerId);if(personalCropPointers.size){startPersonalCropGesture()}else{personalCropGesture=null;v.classList.remove('dragging')}};v.onpointerup=endPointer;v.onpointercancel=endPointer};if($('#removePersonalPhoto'))$('#removePersonalPhoto').onclick=()=>{personOverride(currentUserId,{photoData:null});renderPersonalIdentity();toast('Profile photo removed');render()};document.querySelectorAll('[data-quick-course]').forEach(b=>b.onclick=e=>{e?.stopPropagation?.();if(topMenu)topMenu.hidden=true;if(topSwitch)topSwitch.setAttribute?.('aria-expanded','false');switchCourseByKey(b.dataset.quickCourse,{screen:'home'})});if($('#topCourseViewAll'))$('#topCourseViewAll').onclick=e=>{e?.stopPropagation?.();if(topMenu)topMenu.hidden=true;if(topSwitch)topSwitch.setAttribute?.('aria-expanded','false');go('courses')};if(!window.__topCourseSwitcherGlobalBound&&document.addEventListener){window.__topCourseSwitcherGlobalBound=true;document.addEventListener('click',e=>{const menu=$('#topCourseDropdown'),btn=$('#topCourseSwitch'),nMenu=$('#topNotificationDropdown'),nBtn=$('#topNotificationBtn'),pMenu=$('#topPersonalProfileDropdown'),pBtn=$('#topPersonalProfileBtn');if(menu&&!menu.hidden&&!e.target?.closest?.('.topCourseSwitcherWrap')){menu.hidden=true;btn?.setAttribute?.('aria-expanded','false')}if(nMenu&&!nMenu.hidden&&!e.target?.closest?.('.topNotificationWrap')){nMenu.hidden=true;nBtn?.setAttribute?.('aria-expanded','false')}if(pMenu&&!pMenu.hidden&&!e.target?.closest?.('.topPersonalProfileWrap')){pMenu.hidden=true;pBtn?.setAttribute?.('aria-expanded','false')}});document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const menu=$('#topCourseDropdown'),btn=$('#topCourseSwitch'),nMenu=$('#topNotificationDropdown'),nBtn=$('#topNotificationBtn'),pMenu=$('#topPersonalProfileDropdown'),pBtn=$('#topPersonalProfileBtn');if(menu&&!menu.hidden){menu.hidden=true;btn?.setAttribute?.('aria-expanded','false');btn?.focus?.()}else if(nMenu&&!nMenu.hidden){nMenu.hidden=true;nBtn?.setAttribute?.('aria-expanded','false');nBtn?.focus?.()}else if(pMenu&&!pMenu.hidden){pMenu.hidden=true;pBtn?.setAttribute?.('aria-expanded','false');pBtn?.focus?.()}});const reposition=()=>{const menu=$('#topCourseDropdown'),nMenu=$('#topNotificationDropdown'),pMenu=$('#topPersonalProfileDropdown');if(menu&&!menu.hidden)positionTopCourseDropdown();if(nMenu&&!nMenu.hidden)positionNotificationDropdown();if(pMenu&&!pMenu.hidden)positionPersonalProfileDropdown()};window.addEventListener?.('resize',reposition);window.visualViewport?.addEventListener?.('resize',reposition)}document.querySelectorAll('[data-switch-course]').forEach(b=>b.onclick=()=>switchCourseByKey(b.dataset.switchCourse,{screen:'courses'}));if($('#myCoursesFilters'))$('#myCoursesFilters').ontoggle=e=>{state.myCoursesFiltersOpen=!!e.currentTarget.open;saveUiState()};[['myCoursesStatusFilter','myCoursesStatuses'],['myCoursesSectorFilter','myCoursesSectors'],['myCoursesPhaseFilter','myCoursesPhases'],['myCoursesPlatformFilter','myCoursesPlatforms'],['myCoursesTrainingFilter','myCoursesTrainings'],['myCoursesCountryFilter','myCoursesCountries'],['myCoursesRoleFilter','myCoursesRoles']].forEach(([id,key])=>{if($('#'+id))$('#'+id).addEventListener('filterapply',e=>{state[key]=e.detail?.values||[];saveUiState();render()})});if($('#myCoursesDateFrom'))$('#myCoursesDateFrom').onchange=e=>{state.myCoursesDateFrom=normalizeDateValue(e.target.value)||'';saveUiState();render()};if($('#myCoursesDateTo'))$('#myCoursesDateTo').onchange=e=>{state.myCoursesDateTo=normalizeDateValue(e.target.value)||'';saveUiState();render()};if($('#myCoursesClearFilters'))$('#myCoursesClearFilters').onclick=()=>{state.myCoursesStatuses=[];state.myCoursesSectors=[];state.myCoursesPhases=[];state.myCoursesPlatforms=[];state.myCoursesTrainings=[];state.myCoursesCountries=[];state.myCoursesRoles=[];state.myCoursesDateFrom='';state.myCoursesDateTo='';saveUiState();render()};if($('#evalSyllabusSelect'))$('#evalSyllabusSelect').addEventListener('change',syncEvaluationExperienceContext);document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.go==='evaluation')state.evaluationTraineeId=null;go(b.dataset.go)});document.querySelectorAll('[data-start-eval]').forEach(b=>b.onclick=()=>go('evaluation',{evaluationTraineeId:b.dataset.startEval}));document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;render()});const openPersonCard=(screen,extra)=>go(screen,extra);document.querySelectorAll('[data-trainee]').forEach(b=>{b.onclick=()=>openPersonCard('profile',{selectedTrainee:b.dataset.trainee});if(b.matches?.('.personCard'))b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault?.();b.click?.()}}});document.querySelectorAll('[data-instructor]').forEach(b=>{b.onclick=()=>openPersonCard('instructor',{selectedInstructor:b.dataset.instructor});if(b.matches?.('.personCard'))b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault?.();b.click?.()}}});document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});document.querySelectorAll('[data-emergency-profile-filter]').forEach(b=>b.onclick=()=>{state.emergencyProfileFilter=b.dataset.emergencyProfileFilter;render()});document.querySelectorAll('[data-settings-tab]').forEach(b=>b.onclick=()=>{state.settingsTab=b.dataset.settingsTab;state.courseTailorEditing=false;state.advancedArchitectureEditing=false;state.courseAddFlow=null;if(b.dataset.settingsTab==='catalog'){state.packageFocusId=null;state.packageEditId=null;state.packageAddFlow=null}render()});document.querySelectorAll('[data-library-profession]').forEach(b=>b.onclick=()=>{state.libraryProfession=b.dataset.libraryProfession;render()});document.querySelectorAll('[data-roster-type]').forEach(b=>b.onclick=()=>{state.rosterType=b.dataset.rosterType;render()});
+function bind(){bindGlobalFormUx();bindDmyDateInputs();bindMultiFilters();renderPersonalIdentity();syncAttentionBadges();bindGlobalBackGesture();if($('#appBackBtn'))$('#appBackBtn').onclick=()=>goBack();if($('#exportFlympusBackup'))$('#exportFlympusBackup').onclick=async()=>{const ok=await exportFlympusBackup();if(ok)toast('FLYMPUS backup ready','success')};if($('#standaloneImportBackup'))$('#standaloneImportBackup').onclick=()=>$('#flympusBackupInput')?.click();if($('#standaloneMigrationDismiss'))$('#standaloneMigrationDismiss').onclick=()=>{localStorage.setItem('ct-review-standalone-migration-dismissed','1');render()};if($('#flympusBackupInput'))$('#flympusBackupInput').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const payload=JSON.parse(await file.text());const entries=validateFlympusBackup(payload);if(!(await siteConfirm('Replace this device\'s current FLYMPUS data with the selected backup? This imports courses, photos, records and settings.',{title:'Import FLYMPUS backup?',confirmLabel:'Import backup',tone:'primary'})))return;restoreFlympusBackup(payload);toast('Backup imported · reloading','success');setTimeout(()=>location.reload(),350)}catch(err){toast(err?.message||'Could not import this backup.','error')}finally{e.target.value=''}};const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop'),drawerPanel=drawer?.querySelector?.('.panel');if(menuBtn&&drawer)menuBtn.onclick=e=>{e?.preventDefault?.();e?.stopPropagation?.();closeAllMultiFilters(false);setDrawerOpen(!drawer.classList.contains('open'))};if(backdrop&&drawer)backdrop.onclick=()=>setDrawerOpen(false);if(drawerPanel&&drawer){let drawerSwipeStartX=0,drawerSwipeStartY=0,drawerSwipeTracking=false,drawerSwipeClaimed=false;drawerPanel.ontouchstart=e=>{if(!drawer.classList.contains('open'))return;const t=e.touches?.[0];if(!t)return;drawerSwipeStartX=t.clientX;drawerSwipeStartY=t.clientY;drawerSwipeTracking=true;drawerSwipeClaimed=false};drawerPanel.ontouchmove=e=>{if(!drawerSwipeTracking)return;const t=e.touches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY;if(dx<-12&&Math.abs(dx)>Math.abs(dy)*1.2){drawerSwipeClaimed=true;e.preventDefault?.()}};drawerPanel.ontouchend=e=>{if(!drawerSwipeTracking)return;drawerSwipeTracking=false;const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY;if(drawerSwipeClaimed&&dx<=-58&&Math.abs(dy)<=70)setDrawerOpen(false);drawerSwipeClaimed=false};drawerPanel.ontouchcancel=()=>{drawerSwipeTracking=false;drawerSwipeClaimed=false}};const mobileBottom=$('#mobileBottomNav');if(mobileBottom){mobileBottom.ontouchend=e=>{if(!e.target?.closest?.('.mobileBottomIconButton'))e.preventDefault?.()};mobileBottom.ongesturestart=e=>e.preventDefault?.();mobileBottom.ongesturechange=e=>e.preventDefault?.();mobileBottom.ongestureend=e=>e.preventDefault?.()}document.querySelectorAll('[data-mobile-nav]').forEach(b=>{const pressSound=e=>{if(e?.pointerType==='mouse'&&e?.button!==0)return;playFlympusBottomNavSound()};if(window.PointerEvent)b.onpointerdown=pressSound;else b.ontouchstart=pressSound;b.onclick=e=>{e?.preventDefault?.();e?.stopPropagation?.();if(e?.detail===0)playFlympusBottomNavSound();const target=b.dataset.mobileNav,currentRoot=bottomNavRootForScreen(state.screen);if(state.screen===target){scrollActiveBottomNavTop(target);return}if(state.screen===currentRoot)rememberBottomNavScroll();go(target);restoreBottomNavScroll(target)}});const topSwitch=$('#topCourseSwitch'),topMenu=$('#topCourseDropdown'),notificationBtn=$('#topNotificationBtn'),notificationMenu=$('#topNotificationDropdown'),profileBtn=$('#topPersonalProfileBtn'),profileMenu=$('#topPersonalProfileDropdown');if(topSwitch&&topMenu)topSwitch.onclick=e=>{e?.stopPropagation?.();closeAllMultiFilters(false);if(notificationMenu){notificationMenu.hidden=true;notificationBtn?.setAttribute?.('aria-expanded','false')}if(profileMenu){profileMenu.hidden=true;profileBtn?.setAttribute?.('aria-expanded','false')}const open=topMenu.hidden===true;topMenu.hidden=!open;topSwitch.setAttribute?.('aria-expanded',open?'true':'false');if(open)positionTopCourseDropdown()};if(notificationBtn&&notificationMenu)notificationBtn.onclick=e=>{e?.stopPropagation?.();closeAllMultiFilters(false);if(topMenu){topMenu.hidden=true;topSwitch?.setAttribute?.('aria-expanded','false')}if(profileMenu){profileMenu.hidden=true;profileBtn?.setAttribute?.('aria-expanded','false')}const open=notificationMenu.hidden===true;notificationMenu.hidden=!open;notificationBtn.setAttribute?.('aria-expanded',open?'true':'false');if(open){syncNotificationPreferenceControls();positionNotificationDropdown()}};if(profileBtn&&profileMenu)profileBtn.onclick=e=>{e?.stopPropagation?.();closeAllMultiFilters(false);if(topMenu){topMenu.hidden=true;topSwitch?.setAttribute?.('aria-expanded','false')}if(notificationMenu){notificationMenu.hidden=true;notificationBtn?.setAttribute?.('aria-expanded','false')}const open=profileMenu.hidden===true;profileMenu.hidden=!open;profileBtn.setAttribute?.('aria-expanded',open?'true':'false');if(open){renderPersonalIdentity();positionPersonalProfileDropdown()}};document.querySelectorAll('[data-notification-pref]').forEach(el=>el.onchange=()=>{const prefs=getNotificationPreferences();prefs[el.dataset.notificationPref]=!!el.checked;saveNotificationPreferences(prefs);toast('Notification preferences saved')});if($('#personalPhotoInput'))$('#personalPhotoInput').onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{await openPersonalPhotoCrop(file)}catch(err){toast('Could not process this photo')}};if($('#editPersonalPhoto'))$('#editPersonalPhoto').onclick=async()=>{const me=allInstructors().find(x=>x.id===currentUserId);if(!me?.photoData)return;try{await openPersonalPhotoCropDataUrl(me.photoData)}catch(err){toast('Could not open photo editor')}};if($('#personalCropReplaceInput'))$('#personalCropReplaceInput').onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{await openPersonalPhotoCrop(file,personalCropTarget)}catch(err){toast('Could not process this photo')}};if($('#personalCropReset'))$('#personalCropReset').onclick=()=>{if(!personalCropState)return;personalCropState.zoom=1;personalCropState.x=0;personalCropState.y=0;personalCropPointers.clear();personalCropGesture=null;renderPersonalPhotoCrop()};if($('#personalCropCancel'))$('#personalCropCancel').onclick=closePersonalPhotoCrop;if($('#personalCropClose'))$('#personalCropClose').onclick=closePersonalPhotoCrop;if($('#personalCropApply'))$('#personalCropApply').onclick=()=>{const data=personalCropDataUrl();if(!data)return;const target=personalCropTarget;if(target==='roster'){state.personPhotoDraft=data;const preview=$('#personPhotoPreview'),choose=$('#choosePersonPhotoAction'),edit=$('#editPersonPhoto'),remove=$('#removePersonPhoto');if(preview)preview.innerHTML='<img src="'+data+'" alt="">';if(choose)choose.hidden=true;if(edit)edit.hidden=false;if(remove)remove.hidden=false;closePersonalPhotoCrop();toast('Photo ready — save changes to apply')}else{if(personOverride(currentUserId,{photoData:data})){closePersonalPhotoCrop();renderPersonalIdentity();toast('Profile photo updated');render()}}};if($('#personalCropModal'))$('#personalCropModal').onclick=e=>{if(e.target?.id==='personalCropModal')closePersonalPhotoCrop()};if($('#personalCropViewport')){const v=$('#personalCropViewport');v.onpointerdown=e=>{if(!personalCropState)return;e.preventDefault?.();personalCropPointers.set(e.pointerId,{id:e.pointerId,x:e.clientX,y:e.clientY});v.setPointerCapture?.(e.pointerId);v.classList.add('dragging');startPersonalCropGesture()};v.onpointermove=e=>{if(!personalCropState||!personalCropPointers.has(e.pointerId))return;e.preventDefault?.();personalCropPointers.set(e.pointerId,{id:e.pointerId,x:e.clientX,y:e.clientY});const pts=[...personalCropPointers.values()],g=personalCropGesture;if(!g)return;if(pts.length>=2){if(g.mode!=='pinch'){startPersonalCropGesture();return}const a=pts[0],b=pts[1],mid=personalCropPointMid(a,b),ratio=personalCropPointDistance(a,b)/g.distance;personalCropState.zoom=Math.max(1,Math.min(4,g.zoom*ratio));personalCropState.x=g.x+(mid.x-g.midX);personalCropState.y=g.y+(mid.y-g.midY);renderPersonalPhotoCrop()}else if(pts.length===1){const a=pts[0];if(g.mode!=='pan'||g.pointerId!==a.id){startPersonalCropGesture();return}personalCropState.x=g.x+(a.x-g.startX);personalCropState.y=g.y+(a.y-g.startY);renderPersonalPhotoCrop()}};const endPointer=e=>{personalCropPointers.delete(e.pointerId);v.releasePointerCapture?.(e.pointerId);if(personalCropPointers.size){startPersonalCropGesture()}else{personalCropGesture=null;v.classList.remove('dragging')}};v.onpointerup=endPointer;v.onpointercancel=endPointer};if($('#removePersonalPhoto'))$('#removePersonalPhoto').onclick=()=>{personOverride(currentUserId,{photoData:null});renderPersonalIdentity();toast('Profile photo removed');render()};document.querySelectorAll('[data-quick-course]').forEach(b=>b.onclick=e=>{e?.stopPropagation?.();if(topMenu)topMenu.hidden=true;if(topSwitch)topSwitch.setAttribute?.('aria-expanded','false');switchCourseByKey(b.dataset.quickCourse,{screen:'home'})});if($('#topCourseViewAll'))$('#topCourseViewAll').onclick=e=>{e?.stopPropagation?.();if(topMenu)topMenu.hidden=true;if(topSwitch)topSwitch.setAttribute?.('aria-expanded','false');go('courses')};if(!window.__topCourseSwitcherGlobalBound&&document.addEventListener){window.__topCourseSwitcherGlobalBound=true;document.addEventListener('click',e=>{const menu=$('#topCourseDropdown'),btn=$('#topCourseSwitch'),nMenu=$('#topNotificationDropdown'),nBtn=$('#topNotificationBtn'),pMenu=$('#topPersonalProfileDropdown'),pBtn=$('#topPersonalProfileBtn');if(menu&&!menu.hidden&&!e.target?.closest?.('.topCourseSwitcherWrap')){menu.hidden=true;btn?.setAttribute?.('aria-expanded','false')}if(nMenu&&!nMenu.hidden&&!e.target?.closest?.('.topNotificationWrap')){nMenu.hidden=true;nBtn?.setAttribute?.('aria-expanded','false')}if(pMenu&&!pMenu.hidden&&!e.target?.closest?.('.topPersonalProfileWrap')){pMenu.hidden=true;pBtn?.setAttribute?.('aria-expanded','false')}});document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const menu=$('#topCourseDropdown'),btn=$('#topCourseSwitch'),nMenu=$('#topNotificationDropdown'),nBtn=$('#topNotificationBtn'),pMenu=$('#topPersonalProfileDropdown'),pBtn=$('#topPersonalProfileBtn');if(menu&&!menu.hidden){menu.hidden=true;btn?.setAttribute?.('aria-expanded','false');btn?.focus?.()}else if(nMenu&&!nMenu.hidden){nMenu.hidden=true;nBtn?.setAttribute?.('aria-expanded','false');nBtn?.focus?.()}else if(pMenu&&!pMenu.hidden){pMenu.hidden=true;pBtn?.setAttribute?.('aria-expanded','false');pBtn?.focus?.()}});const reposition=()=>{const menu=$('#topCourseDropdown'),nMenu=$('#topNotificationDropdown'),pMenu=$('#topPersonalProfileDropdown');if(menu&&!menu.hidden)positionTopCourseDropdown();if(nMenu&&!nMenu.hidden)positionNotificationDropdown();if(pMenu&&!pMenu.hidden)positionPersonalProfileDropdown()};window.addEventListener?.('resize',reposition);window.visualViewport?.addEventListener?.('resize',reposition)}document.querySelectorAll('[data-switch-course]').forEach(b=>b.onclick=()=>switchCourseByKey(b.dataset.switchCourse,{screen:'courses'}));if($('#myCoursesFilters'))$('#myCoursesFilters').ontoggle=e=>{state.myCoursesFiltersOpen=!!e.currentTarget.open;saveUiState()};[['myCoursesStatusFilter','myCoursesStatuses'],['myCoursesSectorFilter','myCoursesSectors'],['myCoursesPhaseFilter','myCoursesPhases'],['myCoursesPlatformFilter','myCoursesPlatforms'],['myCoursesTrainingFilter','myCoursesTrainings'],['myCoursesCountryFilter','myCoursesCountries'],['myCoursesRoleFilter','myCoursesRoles']].forEach(([id,key])=>{if($('#'+id))$('#'+id).addEventListener('filterapply',e=>{state[key]=e.detail?.values||[];saveUiState();render()})});if($('#myCoursesDateFrom'))$('#myCoursesDateFrom').onchange=e=>{state.myCoursesDateFrom=normalizeDateValue(e.target.value)||'';saveUiState();render()};if($('#myCoursesDateTo'))$('#myCoursesDateTo').onchange=e=>{state.myCoursesDateTo=normalizeDateValue(e.target.value)||'';saveUiState();render()};if($('#myCoursesClearFilters'))$('#myCoursesClearFilters').onclick=()=>{state.myCoursesStatuses=[];state.myCoursesSectors=[];state.myCoursesPhases=[];state.myCoursesPlatforms=[];state.myCoursesTrainings=[];state.myCoursesCountries=[];state.myCoursesRoles=[];state.myCoursesDateFrom='';state.myCoursesDateTo='';saveUiState();render()};if($('#evalSyllabusSelect'))$('#evalSyllabusSelect').addEventListener('change',syncEvaluationExperienceContext);document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.go==='evaluation')state.evaluationTraineeId=null;go(b.dataset.go)});document.querySelectorAll('[data-start-eval]').forEach(b=>b.onclick=()=>go('evaluation',{evaluationTraineeId:b.dataset.startEval}));document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;render()});const openPersonCard=(screen,extra)=>go(screen,extra);document.querySelectorAll('[data-trainee]').forEach(b=>{b.onclick=()=>openPersonCard('profile',{selectedTrainee:b.dataset.trainee});if(b.matches?.('.personCard'))b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault?.();b.click?.()}}});document.querySelectorAll('[data-instructor]').forEach(b=>{b.onclick=()=>openPersonCard('instructor',{selectedInstructor:b.dataset.instructor});if(b.matches?.('.personCard'))b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault?.();b.click?.()}}});document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});document.querySelectorAll('[data-emergency-profile-filter]').forEach(b=>b.onclick=()=>{state.emergencyProfileFilter=b.dataset.emergencyProfileFilter;render()});document.querySelectorAll('[data-settings-tab]').forEach(b=>b.onclick=()=>{state.settingsTab=b.dataset.settingsTab;state.courseTailorEditing=false;state.advancedArchitectureEditing=false;state.courseAddFlow=null;if(b.dataset.settingsTab==='catalog'){state.packageFocusId=null;state.packageEditId=null;state.packageAddFlow=null}render()});document.querySelectorAll('[data-library-profession]').forEach(b=>b.onclick=()=>{state.libraryProfession=b.dataset.libraryProfession;render()});document.querySelectorAll('[data-roster-type]').forEach(b=>b.onclick=()=>{state.rosterType=b.dataset.rosterType;render()});
 if($('#rosterSearch')){
   $('#rosterSearch').oninput=e=>{state.search=e.target.value;clearTimeout(window._rs);window._rs=setTimeout(render,120)};
   if($('#rosterStatusFilterSingle'))$('#rosterStatusFilterSingle').onchange=e=>{const v=String(e.target.value||'ALL');state.rosterStatuses=v==='ALL'?[]:[v];saveUiState();render()};
