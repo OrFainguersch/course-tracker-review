@@ -1766,6 +1766,103 @@ form input,form select,form textarea{max-width:100%;min-width:0}
   .recordAttentionSummary{margin-top:9px!important}
 }
 </style>
+
+<style>
+/* ===== Roster manage mode · integrated action banner ===== */
+.rosterManageBanner{
+  min-height:58px!important;
+  padding:9px 10px 9px 14px!important;
+  gap:16px!important;
+}
+.rosterManageBannerCopy{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:0;
+  line-height:1.35;
+}
+.rosterManageBannerCopy b{
+  white-space:nowrap;
+  font-size:12px;
+  font-weight:900;
+}
+.rosterManageBannerCopy span{
+  min-width:0;
+  font-size:10px!important;
+}
+.rosterManageBannerActions{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.rosterManageBannerActions .btn{
+  height:38px;
+  min-height:38px;
+  margin:0;
+  padding:0 14px;
+  border-radius:10px;
+  font-size:10.5px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.rosterDoneEditing{
+  min-width:126px;
+}
+.rosterAddPerson{
+  min-width:106px;
+}
+@media(min-width:760px){
+  .rosterManageDock,
+  .rosterManageDockSpacer,
+  .rosterManageTopDone{
+    display:none!important;
+  }
+}
+@media(max-width:759px){
+  .rosterManageBanner{
+    min-height:0!important;
+    padding:11px!important;
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+  .rosterManageBannerCopy{
+    display:block;
+  }
+  .rosterManageBannerCopy b{
+    font-size:12px;
+  }
+  .rosterManageBannerCopy span{
+    display:inline;
+    font-size:9.5px!important;
+  }
+  .rosterManageBannerActions{
+    width:100%;
+    display:grid;
+    grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);
+    gap:8px;
+  }
+  .rosterManageBannerActions .btn{
+    width:100%;
+    min-width:0;
+    height:44px;
+    min-height:44px;
+    padding:0 10px;
+    font-size:11px;
+  }
+  .rosterManageDock,
+  .rosterManageDockSpacer,
+  .rosterManageTopDone{
+    display:none!important;
+  }
+}
+@media(max-width:390px){
+  .rosterManageBannerActions{
+    grid-template-columns:1fr;
+  }
+}
+</style>
 </head>
 <body>
 <div class="app"><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p><div class="deviceDataBox"><div class="deviceDataHead"><b>Device data</b><span class="deviceDataMode" id="deviceDataMode">Local</span></div><p id="deviceDataCopy">Courses, photos, evaluations and settings are stored locally on this device.</p><div class="deviceDataActions"><button class="btn secondary small" type="button" id="exportFlympusBackup">Export backup</button><label class="btn secondary small" for="flympusBackupInput" style="cursor:pointer">Import backup</label></div><p class="deviceDataHint" id="deviceDataHint">Use a backup to move the complete FLYMPUS setup between Safari and the Home Screen app.</p></div></div></div></div></header><input id="flympusBackupInput" type="file" accept=".json,application/json" hidden><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0719 · record form cleanup</div><div class="toast" id="toast"></div></div>
@@ -2435,14 +2532,14 @@ function roster(){
    else{const ma=a.role==='COURSE_MANAGER',mb=b.role==='COURSE_MANAGER';if(ma!==mb)return ma?-1:1;if(Number(a.workloadRank||999)!==Number(b.workloadRank||999))return Number(a.workloadRank||999)-Number(b.workloadRank||999)}
    return String(a.name).localeCompare(String(b.name),undefined,{sensitivity:'base'})
  });
- return '<div class="rosterTopbar"><div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div><button class="btn '+(manage?'secondary rosterManageTopDone':'edit')+'" id="toggleRosterManage">'+(manage?'Done':'✎ Manage')+'</button></div>'+
- (manage?'<div class="manageBanner"><div><b>Manage mode</b><span> · Edit identity, photo and course membership safely.</span></div><button class="btn sky small" id="addPersonBtn">+ Add person</button></div>':'')+
+ return '<div class="rosterTopbar"><div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div>'+(!manage?'<button class="btn edit" id="toggleRosterManage">✎ Manage</button>':'')+'</div>'+
+ (manage?'<div class="manageBanner rosterManageBanner"><div class="rosterManageBannerCopy"><b>Manage mode</b><span> · Edit identity, photo and course membership safely.</span></div><div class="rosterManageBannerActions"><button class="btn sky small rosterDoneEditing" id="toggleRosterManage" type="button">✓ Done editing</button><button class="btn edit small rosterAddPerson" id="addPersonBtn" type="button">+ Add person</button></div></div>':'')+
  '<section class="card rosterControls"><div class="scrollTabs"><button class="seg '+(type==='TRAINEE'?'active':'')+'" data-roster-type="TRAINEE">Trainees ('+allT.length+')</button><button class="seg '+(type==='INSTRUCTOR'?'active':'')+'" data-roster-type="INSTRUCTOR">Instructors ('+allI.length+')</button></div>'+
  '<div class="rosterSearchRow"><input class="input" id="rosterSearch" placeholder="Search '+(type==='TRAINEE'?'trainees':'instructors')+'..." value="'+esc(state.search)+'"></div>'+
  '<div class="rosterAdvancedFilters unifiedFilterGrid"><div class="unifiedFilterHeader"><b>Filters</b><small>'+esc(rosterSummary)+'</small></div>'+(type==='TRAINEE'?'<div class="field rosterSingleStatus"><label>Status</label><select id="rosterStatusFilterSingle"><option value="ALL" '+(singleStatus==='ALL'?'selected':'')+'>All</option><option value="Active" '+(singleStatus==='Active'?'selected':'')+'>Active</option><option value="Inactive" '+(singleStatus==='Inactive'?'selected':'')+'>Inactive</option></select></div>':multiFilterHtml('rosterRoleFilter','Role',genericMultiItems(['COURSE_MANAGER','INSTRUCTOR']),roleSel,'All roles')+dateRangeFilterHtml('rosterDate','Last activity',dateFrom,dateTo))+filterSelectionsHtml('',rosterSelections)+'</div></section>'+
  '<section class="people">'+(list.length?list.map(t=>{if(type==='TRAINEE'){const active=t.status==='Active',avg=t.average==null?'—':Number(t.average).toFixed(1),progress=Math.max(0,Math.min(100,Number(t.progress||0)));return '<article class="card personCard '+(manage?'manageCard':'personCardOpen')+'" '+(manage?'':'data-trainee="'+t.id+'" role="button" tabindex="0" aria-label="Open '+esc(t.name)+'"')+'>'+personAvatar(t,false)+'<div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b><span class="pill '+(active?'green':'gray')+'">'+esc(t.status)+'</span>'+(t.rank?'<span class="rankBadge">#'+t.rank+'</span>':'')+'</div><div class="rosterStats"><div><span class="rosterStatLabel">Average Grade</span><span class="rosterStatValue">'+avg+'</span></div><div><span class="rosterStatLabel">Progress · '+progress+'%</span><div class="miniProgress"><i style="width:'+progress+'%"></i></div></div></div></div><div class="rosterActions">'+(manage?'<button class="btn edit small rosterEditBtn" data-person-edit="TRAINEE:'+t.id+'">✎ Edit</button>':'<span class="rosterChevron" aria-hidden="true">›</span>')+'</div></article>'}
  const manager=t.role==='COURSE_MANAGER';return '<article class="card personCard '+(manager?'manager ':'')+(manage?'manageCard':'personCardOpen')+'" '+(manage?'':'data-instructor="'+t.id+'" role="button" tabindex="0" aria-label="Open '+esc(t.name)+'"')+'>'+personAvatar(t,false)+'<div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b><span class="instructorRole '+(manager?'manager':'')+'">'+(manager?'Course Manager':'Instructor')+'</span></div><div class="rosterStats"><div><span class="rosterStatLabel">Instructed Flights</span><span class="rosterStatValue">'+Number(t.flights||0)+'</span></div><div><span class="rosterStatLabel">Course Share</span><span class="rosterStatValue">'+Number(t.percent||0)+'%</span></div></div></div><div class="rosterActions">'+(manage?'<button class="btn edit small rosterEditBtn" data-person-edit="INSTRUCTOR:'+t.id+'">✎ Edit</button>':'<span class="rosterChevron" aria-hidden="true">›</span>')+'</div></article>'}).join(''):'<div class="card empty"><h3>No matching people.</h3></div>')+'</section>'+
- (manage?'<div class="rosterManageDockSpacer" aria-hidden="true"></div><button class="rosterManageDock" id="rosterManageDoneDock" type="button">✓ Done</button>':'')+
+
  (manage?'<div class="modal" id="personModal"><div class="modalCard"><div class="inlineHead"><div><h2>Add to course roster</h2><p>Assign an existing person or create a new one for this course.</p></div><button class="btn secondary small" id="closePersonModal">✕</button></div>'+(unassignedExisting.length?'<form id="assignExistingForm"><div class="field"><label>Existing person</label><select name="personKey" required><option value="" selected disabled>Select person</option>'+unassignedExisting.map(x=>'<option value="'+x.type+':'+x.id+'">'+(x.type==='INSTRUCTOR'?'Instructor':'Trainee')+' · '+esc(x.name)+'</option>').join('')+'</select></div><div class="toolbar"><button class="btn sky" type="submit">Add existing person</button></div></form><div class="modalDivider"><span>or create new</span></div>':'')+'<form id="addPersonForm"><div class="fields"><div class="field"><label>Full name</label><input class="input" name="name" required></div><div class="field"><label>Email (optional)</label><input class="input" type="email" name="email"></div><div class="field"><label>Person type</label><select name="type" required><option value="" selected disabled>Select person type</option><option value="TRAINEE">Trainee</option><option value="INSTRUCTOR">Instructor</option></select></div></div><div class="toolbar"><button class="btn secondary" type="submit">Create and add</button></div></form></div></div>':'')+personEditModal();
 }
 function getCourseMembershipState(){return safeObjectStorage('ct-review-course-memberships')}
@@ -3953,7 +4050,7 @@ if($('#rosterSearch')){
   if($('#addPersonForm'))$('#addPersonForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget),type=fd.get('type');const arr=getRosterExtras();const name=String(fd.get('name')).trim(),id='x_'+Date.now();arr.push({id,name,email:String(fd.get('email')||''),type,status:'Active',courseIds:[currentCourseId],initials:name.split(' ').map(x=>x[0]).join('').slice(0,2),average:type==='TRAINEE'?null:undefined,totalFlights:type==='TRAINEE'?0:undefined});localStorage.setItem('ct-review-roster',JSON.stringify(arr));updateCourseMembership(id,String(type),type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});toast(name+' added to the course');render()}
   if($('#assignExistingForm'))$('#assignExistingForm').onsubmit=e=>{e.preventDefault();const key=String(new FormData(e.currentTarget).get('personKey')||''),parts=key.split(':'),type=parts[0],id=parts.slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id);if(!p)return;updateCourseMembership(id,type,type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});toast(p.name+' assigned to '+(currentCourseMeta.courseName||'course'));render()}
 }
-const toggleRosterManageMode=()=>renderPreservingManagementView(()=>{state.rosterManage=!state.rosterManage;state.personEditKey=null});if($('#toggleRosterManage'))$('#toggleRosterManage').onclick=toggleRosterManageMode;if($('#rosterManageDoneDock'))$('#rosterManageDoneDock').onclick=toggleRosterManageMode;
+const toggleRosterManageMode=()=>renderPreservingManagementView(()=>{state.rosterManage=!state.rosterManage;state.personEditKey=null});if($('#toggleRosterManage'))$('#toggleRosterManage').onclick=toggleRosterManageMode;
 document.querySelectorAll('[data-person-edit]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();renderPreservingManagementView(()=>{state.personEditKey=btn.dataset.personEdit;state.personPhotoDraft=undefined})});
 if($('#closeEditPerson'))$('#closeEditPerson').onclick=()=>{state.personEditKey=null;state.personPhotoDraft=undefined;render()};
 if($('#cancelEditPerson'))$('#cancelEditPerson').onclick=()=>{state.personEditKey=null;state.personPhotoDraft=undefined;render()};
