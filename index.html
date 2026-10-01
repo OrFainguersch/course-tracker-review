@@ -2591,6 +2591,19 @@ body::before{
 </style>
 
 <style>
+/* ===== Bottom dock · slower hide/show motion ===== */
+.mobileBottomNav{
+  transition:transform .42s cubic-bezier(.32,.72,0,1)!important;
+}
+.mobileBottomNav.dockHidden{
+  transition-duration:.46s!important;
+}
+@media(prefers-reduced-motion:reduce){
+  .mobileBottomNav{transition:none!important}
+}
+</style>
+
+<style>
 /* ===== iOS Home Screen standalone pull-to-refresh ===== */
 @media(max-width:899px){
   body.flympusStandalonePull::before,
