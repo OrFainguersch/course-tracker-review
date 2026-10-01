@@ -1220,7 +1220,7 @@ function multiFilterHtml(id,label,items,selected=[],allLabel='All'){
  const summary=!selectedItems.length?allLabel:selectedItems.length===1?selectedItems[0].label:selectedItems.length+' selected';
  const groups=[];clean.forEach(item=>{const group=String(item.group||'');let bucket=groups.find(x=>x.group===group);if(!bucket){bucket={group,items:[]};groups.push(bucket)}bucket.items.push(item)});
  const option=item=>'<label class="multiFilterOption"><input type="checkbox" data-mf-value value="'+esc(item.value)+'" '+(chosen.has(String(item.value))?'checked':'')+'><span class="multiFilterCheck" aria-hidden="true">✓</span><span class="multiFilterOptionLabel">'+esc(item.label)+'</span></label>';
- return '<div class="field multiFilterField"><label>'+esc(label)+'</label><div class="multiFilter" id="'+esc(id)+'" data-all-label="'+esc(allLabel)+'" data-filter-label="'+esc(label)+'" data-open="false"><button type="button" class="multiFilterTrigger" data-mf-trigger aria-haspopup="true" aria-expanded="false"><span data-mf-summary>'+esc(summary)+'</span><span class="multiFilterChevron" aria-hidden="true"></span></button><div class="multiFilterMenu" role="dialog" aria-label="'+esc(label)+' filter" hidden><div class="multiFilterMenuHead"><div><b>'+esc(label)+'</b><small>Select one or more</small></div><button type="button" class="multiFilterClose" data-mf-close aria-label="Close '+esc(label)+' filter">×</button></div><div class="multiFilterOptions"><label class="multiFilterOption multiFilterAll"><input type="checkbox" data-mf-all '+(!selectedItems.length?'checked':'')+'><span class="multiFilterCheck" aria-hidden="true">✓</span><span class="multiFilterOptionLabel">'+esc(allLabel)+'</span></label>'+groups.map(g=>(g.group?'<div class="multiFilterGroupLabel">'+esc(g.group)+'</div>':'')+g.items.map(option).join('')).join('')+'</div><div class="multiFilterActions"><button type="button" class="btn secondary small" data-mf-clear>Clear</button><button type="button" class="btn sky small" data-mf-apply>Apply</button></div></div></div></div>'
+ return '<div class="field multiFilterField"><label>'+esc(label)+'</label><div class="multiFilter" id="'+esc(id)+'" data-all-label="'+esc(allLabel)+'" data-filter-label="'+esc(label)+'" data-applied-values="'+esc(JSON.stringify([...chosen]))+'" data-open="false"><button type="button" class="multiFilterTrigger" data-mf-trigger aria-haspopup="true" aria-expanded="false"><span data-mf-summary>'+esc(summary)+'</span><span class="multiFilterChevron" aria-hidden="true"></span></button><div class="multiFilterMenu" role="dialog" aria-label="'+esc(label)+' filter" hidden><div class="multiFilterMenuHead"><div><b>'+esc(label)+'</b><small>Select one or more</small></div><button type="button" class="multiFilterClose" data-mf-close aria-label="Close '+esc(label)+' filter">×</button></div><div class="multiFilterOptions"><label class="multiFilterOption multiFilterAll"><input type="checkbox" data-mf-all '+(!selectedItems.length?'checked':'')+'><span class="multiFilterCheck" aria-hidden="true">✓</span><span class="multiFilterOptionLabel">'+esc(allLabel)+'</span></label>'+groups.map(g=>(g.group?'<div class="multiFilterGroupLabel">'+esc(g.group)+'</div>':'')+g.items.map(option).join('')).join('')+'</div><div class="multiFilterActions"><button type="button" class="btn secondary small" data-mf-clear>Clear</button><button type="button" class="btn sky small" data-mf-apply>Apply</button></div></div></div></div>'
 }
 function dateRangeFilterHtml(prefix,label='Date range',from='',to=''){
  return '<div class="filterDateRange"><span class="filterDateRangeTitle">'+esc(label)+'</span><div class="filterDateRangeFields"><div class="field"><label>From</label><input class="input dateDmy" id="'+esc(prefix)+'From" type="text" value="'+esc(from?dateInputValue(from):'')+'" placeholder="DD/MM/YYYY"></div><div class="field"><label>To</label><input class="input dateDmy" id="'+esc(prefix)+'To" type="text" value="'+esc(to?dateInputValue(to):'')+'" placeholder="DD/MM/YYYY"></div></div></div>'
@@ -1241,8 +1241,19 @@ function positionMultiFilterMenu(root){
  const top=useBelow?Math.min(vh-maxH-pad,r.bottom+6):Math.max(pad,r.top-maxH-6);
  Object.assign(menu.style,{position:'fixed',left:left+'px',right:'auto',top:top+'px',bottom:'auto',width:width+'px',maxHeight:maxH+'px'})
 }
-function closeMultiFilter(root,apply=true){
- if(!root||root.dataset.open!=='true')return;root.dataset.open='false';const menu=root.querySelector('.multiFilterMenu'),trigger=root.querySelector('[data-mf-trigger]');if(menu)menu.hidden=true;if(trigger)trigger.setAttribute('aria-expanded','false');
+function multiFilterAppliedValues(root){
+ try{return normalizeMultiFilterValue(JSON.parse(root?.dataset?.appliedValues||'[]'))}catch{return[]}
+}
+function setMultiFilterChecks(root,values){
+ if(!root)return;const selected=new Set(normalizeMultiFilterValue(values)),all=root.querySelector('[data-mf-all]'),items=[...root.querySelectorAll('[data-mf-value]')];
+ if(all)all.checked=!selected.size;items.forEach(x=>x.checked=selected.has(String(x.value)))
+}
+function closeMultiFilter(root,apply=false){
+ if(!root||root.dataset.open!=='true')return;
+ if(!apply)setMultiFilterChecks(root,multiFilterAppliedValues(root));
+ root.dataset.open='false';const menu=root.querySelector('.multiFilterMenu'),trigger=root.querySelector('[data-mf-trigger]'),summary=root.querySelector('[data-mf-summary]'),items=[...root.querySelectorAll('[data-mf-value]')],all=root.querySelector('[data-mf-all]');
+ if(menu)menu.hidden=true;if(trigger)trigger.setAttribute('aria-expanded','false');
+ const picked=items.filter(x=>x.checked),allLabel=root.dataset.allLabel||'All';if(summary)summary.textContent=!picked.length?allLabel:picked.length===1?(picked[0].closest('label')?.querySelector('.multiFilterOptionLabel')?.textContent||'1 selected'):picked.length+' selected';
  if(apply)root.dispatchEvent(new CustomEvent('filterapply',{bubbles:true,detail:{values:multiFilterValues(root.id)}}))
 }
 function bindMultiFilters(){
@@ -1258,24 +1269,24 @@ function bindMultiFilters(){
    if(summary)summary.textContent=!picked.length?allLabel:picked.length===1?(picked[0].closest('label')?.querySelector('.multiFilterOptionLabel')?.textContent||'1 selected'):picked.length+' selected'
   };
   const open=()=>{
-   roots.forEach(other=>{if(other!==root&&other.dataset.open==='true')closeMultiFilter(other,true)});
+   roots.forEach(other=>{if(other!==root&&other.dataset.open==='true')closeMultiFilter(other,false)});
    root.dataset.open='true';if(menu)menu.hidden=false;if(trigger)trigger.setAttribute('aria-expanded','true');sync();requestAnimationFrame(()=>positionMultiFilterMenu(root))
   };
-  if(trigger)trigger.onclick=e=>{e.preventDefault();e.stopPropagation();root.dataset.open==='true'?closeMultiFilter(root,true):open()};
+  if(trigger)trigger.onclick=e=>{e.preventDefault();e.stopPropagation();root.dataset.open==='true'?closeMultiFilter(root,false):open()};
   if(all)all.onchange=()=>{if(all.checked)items.forEach(x=>x.checked=false);sync()};
   items.forEach(x=>x.onchange=()=>{if(x.checked&&all)all.checked=false;sync()});
-  root.querySelector('[data-mf-close]')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();closeMultiFilter(root,true)});
-  root.querySelector('[data-mf-clear]')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(all)all.checked=true;items.forEach(x=>x.checked=false);sync();closeMultiFilter(root,true)});
-  root.querySelector('[data-mf-apply]')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();sync();closeMultiFilter(root,true)});
+  root.querySelector('[data-mf-close]')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();closeMultiFilter(root,false)});
+  root.querySelector('[data-mf-clear]')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(all)all.checked=true;items.forEach(x=>x.checked=false);sync();root.dataset.appliedValues='[]';closeMultiFilter(root,true)});
+  root.querySelector('[data-mf-apply]')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();sync();root.dataset.appliedValues=JSON.stringify(multiFilterValues(root.id));closeMultiFilter(root,true)});
   menu?.addEventListener('click',e=>e.stopPropagation());
   sync()
  });
  if(!window._flympusMultiFilterGlobalBound){
    window._flympusMultiFilterGlobalBound=true;
-   document.addEventListener('click',e=>{document.querySelectorAll('.multiFilter[data-open="true"]').forEach(root=>{if(!root.contains(e.target))closeMultiFilter(root,true)})});
-   document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.multiFilter[data-open="true"]').forEach(root=>closeMultiFilter(root,true))});
+   document.addEventListener('click',e=>{document.querySelectorAll('.multiFilter[data-open="true"]').forEach(root=>{if(!root.contains(e.target))closeMultiFilter(root,false)})});
+   document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.multiFilter[data-open="true"]').forEach(root=>closeMultiFilter(root,false))});
    window.addEventListener('resize',()=>document.querySelectorAll('.multiFilter[data-open="true"]').forEach(positionMultiFilterMenu));
-   window.addEventListener('scroll',()=>document.querySelectorAll('.multiFilter[data-open="true"]').forEach(root=>closeMultiFilter(root,true)),{passive:true})
+   window.addEventListener('scroll',()=>document.querySelectorAll('.multiFilter[data-open="true"]').forEach(root=>closeMultiFilter(root,false)),{passive:true})
  }
 }
 function traineeFilterOptions(selected='ALL'){
