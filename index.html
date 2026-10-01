@@ -1792,25 +1792,27 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 }
 .rosterManageBannerActions{
   flex:0 0 auto;
-  display:flex;
+  display:grid;
+  grid-template-columns:repeat(2,132px);
   align-items:center;
   gap:8px;
 }
 .rosterManageBannerActions .btn{
-  height:38px;
-  min-height:38px;
+  width:132px;
+  min-width:132px;
+  height:42px;
+  min-height:42px;
   margin:0;
-  padding:0 14px;
-  border-radius:10px;
-  font-size:10.5px;
-  font-weight:900;
+  padding:0 13px;
+  border-radius:11px;
+  font-size:11px;
+  font-weight:850;
+  line-height:1;
   white-space:nowrap;
-}
-.rosterDoneEditing{
-  min-width:126px;
-}
-.rosterAddPerson{
-  min-width:106px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
 }
 @media(min-width:760px){
   .rosterManageDock,
@@ -1840,7 +1842,7 @@ form input,form select,form textarea{max-width:100%;min-width:0}
   .rosterManageBannerActions{
     width:100%;
     display:grid;
-    grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);
+    grid-template-columns:repeat(2,minmax(0,1fr));
     gap:8px;
   }
   .rosterManageBannerActions .btn{
@@ -1849,7 +1851,9 @@ form input,form select,form textarea{max-width:100%;min-width:0}
     height:44px;
     min-height:44px;
     padding:0 10px;
+    border-radius:11px;
     font-size:11px;
+    font-weight:850;
   }
   .rosterManageDock,
   .rosterManageDockSpacer,
