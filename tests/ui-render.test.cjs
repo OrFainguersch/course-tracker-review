@@ -132,6 +132,9 @@ assert(html.includes("window.scrollBy(0,delta)"),"Management Edit must compensat
 assert(html.includes("courseTailorEdit'))$('#courseTailorEdit').onclick=()=>renderPreservingManagementView"),"Tailor Edit must preserve the current view");
 assert(html.includes("advancedArchitectureEdit'))$('#advancedArchitectureEdit').onclick=()=>renderPreservingManagementView"),"Advanced Edit must preserve the current view");
 assert(html.includes("toggleRosterManage').onclick=()=>renderPreservingManagementView"),"Course Roster Manage must preserve the current view");
+assert(html.includes("personCardOpen")&&html.includes('role="button" tabindex="0" aria-label="Open ')&&html.includes("data-trainee=\"'+t.id+'\"")&&html.includes("data-instructor=\"'+t.id+'\""),"Trainee and instructor roster cards must make the whole card an accessible navigation target");
+assert(html.includes('<span class="rosterChevron" aria-hidden="true">›</span>')&&html.includes("if(b.matches?.('.personCard'))b.onkeydown"),"Roster chevrons must be decorative while the full card supports click and keyboard activation");
+assert(html.includes("manage?'manageCard':'personCardOpen'")&&html.includes("data-person-edit=\"TRAINEE:")&&html.includes("data-person-edit=\"INSTRUCTOR:"),"Roster Manage mode must keep Edit actions instead of making management cards open profiles");
 assert(!html.includes("Restore original Package defaults"),"Bulk Package restore-to-defaults must be removed");
 assert(!html.includes("Revert to Package defaults"),"Bulk course revert-to-defaults must be removed");
 assert(html.includes(".packageRules>summary>span{font-size:9px;color:#8092a5}"),"Summary helper styling must target only the direct helper span so counts inside titles keep the title font");
