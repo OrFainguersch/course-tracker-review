@@ -67,7 +67,7 @@ assert(html.includes("font-size:9.6px")&&html.includes("width:100%;white-space:n
 assert(html.includes("mobileBottomIconButton")&&html.includes("touch-action:none")&&html.includes("width:100%;height:34px")&&html.includes("padding:3px 0 7px")&&html.includes("ongesturestart=e=>e.preventDefault?.()")&&html.includes("pointer-events:none"),"Bottom-nav icon hit areas must be horizontally contiguous while zoom gestures stay suppressed");
 assert(!html.includes('data-mobile-more="true"')&&!html.includes("mobileBottomItem moreItem"),"More must not remain in the mobile bottom navigation");
 assert(html.includes("['record','evaluation','safety','exams'].includes(state.screen)?'record'"),"Record must remain the active bottom-nav destination throughout Evaluation, Safety and Exams");
-assert(html.includes("function forcePageTop()")&&html.includes("const personScreen=screen==='profile'||screen==='instructor'")&&html.includes("if(personScreen)forcePageTop()")&&html.includes("const openPersonCard=(screen,extra)=>go(screen,extra)")&&html.includes("openPersonCard('profile',{selectedTrainee:b.dataset.trainee})")&&html.includes("openPersonCard('instructor',{selectedInstructor:b.dataset.instructor})"),"Every trainee or instructor profile entry path must hard-reset the page to the top");
+assert(html.includes("function forcePageTop()")&&html.includes("const personScreen=target==='profile'||target==='instructor'")&&html.includes("if(personScreen)forcePageTop()")&&html.includes("const openPersonCard=(screen,extra)=>go(screen,extra)")&&html.includes("openPersonCard('profile',{selectedTrainee:b.dataset.trainee})")&&html.includes("openPersonCard('instructor',{selectedInstructor:b.dataset.instructor})"),"Every trainee or instructor profile entry path must hard-reset the page to the top");
 assert(!html.includes('mobileBottomShell')&&!html.includes('shellGold'),"Dark brand navigation must not retain the failed custom vector shell");
 assert(html.includes(".mobileBottomItem .mobileBottomLabel{display:block;width:100%;white-space:nowrap;overflow:visible")&&html.includes("class=\"mobileBottomLabel\" aria-hidden=\"true\""),"Mobile navigation labels must remain visible but non-interactive");
 assert(html.includes(".mobileBottomItem.homeCenter{transform:none;height:55px}")&&html.includes("width:25px;height:25px;margin:0"),"Centered Home must use the same icon size and treatment as the other tabs");
@@ -139,6 +139,16 @@ const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].ma
 assert.equal(scripts.length,2);vm.runInContext(scripts[0],context,{filename:"index-course-header-boot.js"});vm.runInContext(scripts[1],context,{filename:"index-inline.js"});
 const switcherOrder=vm.runInContext("sortCourseSwitcherRows([{key:'done',course:{startsOn:'2025-01-01'},lifecycle:{id:'COMPLETED'}},{key:'future2',course:{startsOn:'2027-03-01'},lifecycle:{id:'UPCOMING'}},{key:'current',course:{startsOn:'2024-01-01'},lifecycle:{id:'COMPLETED'}},{key:'runOld',course:{startsOn:'2026-01-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'runNew',course:{startsOn:'2026-08-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'future1',course:{startsOn:'2027-01-01'},lifecycle:{id:'UPCOMING'}}],'current').map(x=>x.key).join(',')",context);
 assert.equal(switcherOrder,"current,runNew,runOld,future1,future2,done","Quick switcher order must be Selected, In Progress newest first, Upcoming soonest first, then Completed");
+vm.runInContext("go('record');go('evaluation')",context);
+assert.equal(vm.runInContext("state.screen",context),"evaluation","Navigation should reach the requested child screen");
+assert.equal(vm.runInContext("appNavHistory.join(',')",context),"home,record","Navigation history should keep Home as the root and Record as the immediate parent");
+assert.match(elements.get("#content").innerHTML,/id="appBackBtn"/,"Every non-Home screen should render the compact back arrow");
+vm.runInContext("goBack()",context);
+assert.equal(vm.runInContext("state.screen",context),"record","First back action should return to the previous screen");
+vm.runInContext("goBack()",context);
+assert.equal(vm.runInContext("state.screen",context),"home","Repeated back navigation must terminate at Home");
+assert.equal(vm.runInContext("appNavHistory.length",context),0,"Home must clear the navigation history root");
+assert.doesNotMatch(elements.get("#content").innerHTML,/id="appBackBtn"/,"Home must not render a back arrow");
 assert.deepEqual(JSON.parse(JSON.stringify(vm.runInContext("getNotificationPreferences()",context))),{assignments:true,courseUpdates:true,evaluations:true,checks:true,requiredActions:true},"Notification preference defaults must start enabled");
 vm.runInContext("saveNotificationPreferences({assignments:false,courseUpdates:true,evaluations:false,checks:true,requiredActions:true})",context);
 assert.equal(vm.runInContext("getNotificationPreferences().assignments",context),false,"Notification preferences must persist user choices");
