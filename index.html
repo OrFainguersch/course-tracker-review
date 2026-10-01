@@ -3148,25 +3148,47 @@ function emitFlympusRefreshSound(ctx){
   voice(1760,1960,.22,.115,.075);
   voice(2300,2460,.10,.145,.05);
 }
+let flympusRefreshAudioCtx=null,flympusRefreshResumePromise=null;
+function getFlympusRefreshAudioContext(){
+  try{
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    if(!AudioCtx)return null;
+    if(!flympusRefreshAudioCtx||flympusRefreshAudioCtx.state==='closed'){
+      try{flympusRefreshAudioCtx=new AudioCtx({latencyHint:'interactive'})}catch{flympusRefreshAudioCtx=new AudioCtx()}
+      flympusRefreshResumePromise=null;
+    }
+    return flympusRefreshAudioCtx;
+  }catch{return null}
+}
+function ensureFlympusRefreshAudioReady(){
+  const ctx=getFlympusRefreshAudioContext();if(!ctx)return Promise.resolve(null);
+  if(ctx.state==='running')return Promise.resolve(ctx);
+  if(!flympusRefreshResumePromise){
+    flympusRefreshResumePromise=Promise.resolve(ctx.resume?.())
+      .then(()=>ctx.state==='running'?ctx:null)
+      .catch(()=>null)
+      .finally(()=>{flympusRefreshResumePromise=null});
+  }
+  return flympusRefreshResumePromise;
+}
 function playFlympusRefreshSound(){
   try{
-    const ctx=getFlympusNavAudioContext();if(!ctx)return;
-    if(ctx.state!=='running'){
-      try{ctx.resume?.()}catch{}
-    }
-    emitFlympusRefreshSound(ctx);
+    const ctx=getFlympusRefreshAudioContext();if(!ctx)return;
+    if(ctx.state==='running'){emitFlympusRefreshSound(ctx);return}
+    ensureFlympusRefreshAudioReady().then(ready=>{if(ready)emitFlympusRefreshSound(ready)});
   }catch{}
 }
 if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   window.__flympusPullRefreshSoundBound=true;
   let pullStartY=0,pullStartX=0,pullTracking=false,pullRefreshSoundPlayed=false;
   document.addEventListener('touchstart',e=>{
+    pullTracking=false;
+    pullRefreshSoundPlayed=false;
     if(window.scrollY>1)return;
     const t=e.touches?.[0];if(!t)return;
-    pullStartY=t.clientY;pullStartX=t.clientX;pullTracking=true;pullRefreshSoundPlayed=false;
-    /* Unlock audio while the finger is down, before the refresh threshold is crossed. */
-    const ctx=getFlympusNavAudioContext();
-    if(ctx&&ctx.state!=='running')try{ctx.resume?.()}catch{}
+    pullStartY=t.clientY;pullStartX=t.clientX;pullTracking=true;
+    /* Dedicated refresh context: unlock on every new pull gesture. */
+    ensureFlympusRefreshAudioReady();
   },{passive:true,capture:true});
   document.addEventListener('touchmove',e=>{
     if(!pullTracking||pullRefreshSoundPlayed)return;
@@ -3180,6 +3202,10 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   const resetPullRefreshSound=()=>{pullTracking=false;pullRefreshSoundPlayed=false};
   document.addEventListener('touchend',resetPullRefreshSound,{passive:true,capture:true});
   document.addEventListener('touchcancel',resetPullRefreshSound,{passive:true,capture:true});
+  window.addEventListener('pageshow',()=>{
+    pullTracking=false;pullRefreshSoundPlayed=false;
+    if(flympusRefreshAudioCtx&&flympusRefreshAudioCtx.state==='closed')flympusRefreshAudioCtx=null;
+  });
 }
 let bottomNavScrollSaveTimer=null;
 window.addEventListener('scroll',()=>{
