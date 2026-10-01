@@ -1144,6 +1144,210 @@ form input,form select,form textarea{max-width:100%;min-width:0}
   overflow:visible!important;
 }
 </style>
+
+<style>
+/* ===== Desktop parity · mobile visual system carried to large screens ===== */
+@media(min-width:900px){
+  :root{--desktop-shell:260px;--desktop-content:1280px}
+
+  /* Shell / navigation */
+  body{padding-left:var(--desktop-shell)!important;background:#f4f7fb!important}
+  .drawer{width:var(--desktop-shell)!important}
+  .panel{
+    width:var(--desktop-shell)!important;
+    background:linear-gradient(180deg,#123b63 0%,#0b3157 100%)!important;
+    padding:20px 16px 18px!important;
+    box-shadow:inset -1px 0 rgba(255,255,255,.05)
+  }
+  .brand{min-height:76px!important;padding:2px 8px 18px!important}
+  .sidebarFlympusWordmark{width:188px!important;max-width:92%!important}
+  .navLabel{padding:18px 12px 8px!important;color:#9fb3c7!important;font-size:9.5px!important;letter-spacing:.18em!important}
+  .navBtn{
+    min-height:48px!important;padding:11px 12px!important;border-radius:12px!important;
+    color:#dce8f2!important;font-size:13.5px!important;font-weight:680!important
+  }
+  .navBtn:hover,.navBtn:focus-visible{background:rgba(255,255,255,.07)!important}
+  .navBtn.active{
+    background:rgba(255,255,255,.11)!important;color:#fff!important;
+    box-shadow:inset 3px 0 0 var(--brand-gold)!important
+  }
+  .navBtn.active .navIcon{color:var(--brand-gold)!important}
+  .drawerFooter{
+    left:16px!important;right:16px!important;bottom:18px!important;
+    padding:11px!important;border-radius:14px!important;background:rgba(255,255,255,.055)!important
+  }
+  .drawerFooter b{font-size:12.5px!important}.drawerFooter small{font-size:9.5px!important}
+
+  /* Desktop header now uses the same dark branded language as mobile */
+  .top{
+    height:78px!important;padding:0 24px!important;
+    background:linear-gradient(180deg,#123b63 0%,#0b3157 100%)!important;
+    color:#fff!important;border-bottom:1px solid rgba(255,255,255,.06)!important;
+    box-shadow:0 6px 18px rgba(8,35,62,.12)!important
+  }
+  .topBrandCopy b{color:#fff!important;font-size:14px!important;font-weight:850!important}
+  .topBrandCopy span{color:#aec4d8!important;font-size:9.5px!important}
+  .topNotificationBtn{
+    width:42px!important;height:42px!important;border-radius:12px!important;
+    color:#eef7ff!important;background:rgba(255,255,255,.07)!important;
+    border-color:rgba(255,255,255,.18)!important
+  }
+  .topNotificationBtn:hover,.topNotificationBtn:focus-visible,.topNotificationBtn[aria-expanded="true"]{
+    background:rgba(255,255,255,.13)!important;border-color:rgba(255,255,255,.30)!important
+  }
+  .topNotificationDot{box-shadow:0 0 0 2px #0b3157!important}
+  .top .avatar{
+    width:42px!important;height:42px!important;background:#fff!important;color:#0b5d9c!important;
+    border:1px solid rgba(255,255,255,.25)!important;box-shadow:0 5px 14px rgba(3,20,37,.18)!important
+  }
+
+  /* Main canvas: same proportions as mobile, adapted instead of stretched */
+  main{
+    width:100%!important;max-width:var(--desktop-content)!important;
+    margin:0 auto!important;padding:30px 32px 56px!important
+  }
+  .pageTitle{font-size:31px!important;line-height:1.08!important;letter-spacing:-.028em!important;margin:7px 0 6px!important}
+  .sub{font-size:13.5px!important;line-height:1.5!important;margin-bottom:18px!important}
+  .eyebrow{font-size:10px!important}
+  .card,.homePanel{
+    border:1px solid #dce6ef!important;border-radius:18px!important;
+    box-shadow:0 7px 22px rgba(17,50,79,.065)!important
+  }
+  .btn{min-height:42px;border-radius:11px!important;font-size:12px!important}
+  .btn.small{min-height:36px!important;padding:8px 11px!important}
+  .input,select,textarea{border-radius:12px!important;font-size:12.5px!important}
+  .field label{font-size:11.5px!important;margin-bottom:6px!important}
+
+  /* Home */
+  .homeDashboard{gap:18px!important}
+  .homeDashboard .mobileHero{
+    padding:26px 28px 24px!important;min-height:0!important;border-radius:22px!important;
+    background:linear-gradient(135deg,#123b63 0%,#0b3157 100%)!important;
+    box-shadow:0 10px 26px rgba(8,44,78,.14)!important
+  }
+  .mobileHero .eyebrow{font-size:10px!important;letter-spacing:.13em!important}
+  .mobileHero .welcome{font-size:34px!important;line-height:1.08!important;margin-top:8px!important}
+  .homeCourseContext{
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important;
+    gap:8px!important;margin-top:20px!important;padding:0 0 16px!important
+  }
+  .homeCourseContext.cols4,.homeCourseContext.cols5{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important}
+  .homeCourseContextItem{
+    padding:9px 11px!important;border:1px solid rgba(255,255,255,.11)!important;
+    border-radius:10px!important;background:rgba(255,255,255,.045)!important
+  }
+  .homeCourseContextItem:first-child{padding-left:11px!important;border-left:1px solid rgba(255,255,255,.11)!important}
+  .homeCourseContextItem small{font-size:8px!important;letter-spacing:.06em!important}
+  .homeCourseContextItem b{margin-top:4px!important;font-size:11.5px!important;font-weight:800!important}
+  .mobileHero .heroMeta{font-size:11px!important;margin-top:14px!important}
+  .homeAllCoursesLink{
+    padding:7px 10px!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:9px!important;
+    background:rgba(255,255,255,.04)!important;text-decoration:none!important
+  }
+  .homeAllCoursesLink:hover,.homeAllCoursesLink:focus-visible{background:rgba(255,255,255,.09)!important;text-decoration:none!important}
+
+  .homePrimaryGrid{grid-template-columns:minmax(0,1.62fr) minmax(280px,.72fr)!important;gap:16px!important}
+  .homePanelPad{padding:18px!important}
+  .homeBlockHead{margin-bottom:12px!important}
+  .homeBlockTitle:before{width:4px!important;height:22px!important}
+  .homeBlockTitle h2{font-size:17px!important;font-weight:900!important}
+  .homeBlockTitle p{font-size:10.5px!important;margin-top:4px!important}
+  .homeDateChip{padding:8px 10px!important;font-size:10px!important;border-radius:10px!important}
+  .homePlanRow{
+    padding:13px 15px!important;grid-template-columns:62px 36px minmax(0,1fr) auto!important;gap:11px!important
+  }
+  .homePlanTime{font-size:11px!important}
+  .homeInitial{width:34px!important;height:34px!important;font-size:9.5px!important}
+  .homePlanMain b{font-size:12px!important}.homePlanMain small{font-size:10px!important;margin-top:3px!important}
+  .homeTag{padding:5px 8px!important;font-size:8.5px!important}
+  .homeQuickActions{gap:9px!important}
+  .homeQuickBtn{min-height:52px!important;padding:11px 13px!important;border-radius:12px!important;font-size:11.5px!important}
+  .homeQuickIcon{width:29px!important;height:29px!important;border-radius:9px!important}
+  .homePulseGrid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:10px!important}
+  .homePulseCard{min-height:124px!important;padding:14px 10px!important;border-radius:14px!important;background:#fbfdff!important}
+  .homePulseIcon{width:40px!important;height:40px!important;margin-bottom:8px!important}
+  .homePulseValue{font-size:22px!important}.homePulseLabel{font-size:9.8px!important}.homePulseNote{font-size:8.8px!important}
+  .homeAttentionTable th{font-size:9.5px!important;padding:9px 12px!important}
+  .homeAttentionTable td{font-size:10.5px!important;padding:11px 12px!important}
+  .homeReviewBtn{min-height:34px!important;font-size:9.5px!important}
+  .homeBottomGrid{grid-template-columns:1fr 1fr!important;gap:16px!important}
+  .homeFeedItem,.homeUpcomingItem{padding-top:11px!important;padding-bottom:11px!important}
+  .homeFeedMain b,.homeUpcomingMain b{font-size:11px!important}
+  .homeFeedMain small,.homeUpcomingMain small{font-size:9.5px!important}
+
+  /* Roster / profiles */
+  .rosterTopbar{margin-bottom:15px!important}
+  .rosterControls{padding:15px!important}
+  .rosterSearchRow{margin-top:12px!important}
+  .people{gap:12px!important}
+  .personCard{padding:14px!important;min-height:116px!important;border-radius:18px!important}
+  .personCard .personAvatarSize{width:76px!important;height:76px!important;border-radius:16px!important}
+  .personCard .personInfo b{font-size:14.5px!important}
+  .rosterStatLabel{font-size:9.5px!important}.rosterStatValue{font-size:17px!important}
+  .profileHero{padding:18px!important}.profileIdentity h2{font-size:22px!important}
+
+  /* Record / forms / history */
+  .recordChildHead{margin-bottom:14px!important}
+  .recordSingleForm{max-width:1080px!important}
+  .formCard,.safetyHistoryCard,.settingBox,.sideCard{padding:18px!important}
+  .formTitle{margin-bottom:16px!important}.formTitle h2{font-size:18px!important}
+  .fields{gap:14px!important}
+  textarea{min-height:110px!important}
+  .safetyViewTabs{margin:12px 0 16px!important}
+  .safetyViewTabs button{padding:9px 15px!important;font-size:11.5px!important}
+  .safetyHistoryItem{padding:15px 16px!important;border-radius:14px!important}
+  .safetyHistoryTop b{font-size:13px!important}
+  .safetyHistoryTop p,.safetyHistoryDetails{font-size:11px!important}
+  .safetyHistoryMeta{font-size:10.5px!important}
+  .formCompletionPanel{padding:15px 16px!important;border-radius:16px!important}
+  .formCompletionPanel .evalMissingHead b{font-size:12px!important}
+  .recordFormActions{max-width:560px!important;gap:10px!important}
+  .recordFormActions>.btn{min-height:46px!important}
+
+  /* Filters: same component proportions as mobile, just wider */
+  .unifiedFilterGrid,.reportFilters,.myCoursesFilterBar{
+    gap:12px!important;padding:16px!important;border-radius:16px!important
+  }
+  .unifiedFilterHeader b{font-size:12.5px!important}
+  .unifiedFilterHeader small{font-size:10px!important}
+  .unifiedFilterGrid .field>label,.reportFilters .field>label,.myCoursesFilterBar .field>label,.myCoursesFilterBar .fieldLabel{
+    font-size:11px!important;margin-bottom:6px!important
+  }
+  .multiFilterTrigger,.unifiedFilterGrid .input,.reportFilters .input,.myCoursesFilterBar .input{
+    height:46px!important;min-height:46px!important;font-size:12px!important
+  }
+  .unifiedFilterSelections{padding:10px 11px!important;border-radius:11px!important}
+  .filterSelectionsLabel{font-size:10px!important}
+  .filterSelectionChip{font-size:10px!important;min-width:145px!important}
+  .filterSelectionKey{padding:5px 8px!important}.filterSelectionValue{padding:7px 8px!important}
+  .multiFilterMenu{min-width:270px!important}
+  .multiFilterOption{font-size:11.5px!important;min-height:41px!important}
+
+  /* My Courses */
+  .myCoursesHead{margin-bottom:18px!important}
+  .myCoursesFilters{margin-bottom:16px!important;border-radius:16px!important}
+  .myCoursesFilterSummary{min-height:52px!important;padding:13px 16px!important}
+  .myCoursesFilterSummaryCopy b{font-size:12.5px!important}
+  .myCoursesFilterSummaryCopy small{font-size:10px!important}
+  .myCourseGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important}
+  .myCourseStatusBar{padding:14px 17px!important}
+  .myCourseTitle{padding:16px 17px 12px!important;font-size:19px!important}
+  .myCourseMeta{margin:0 17px 15px!important;gap:9px!important}
+  .myCourseMeta .courseMetaTile{padding:10px 11px!important}
+  .myCourseOpen{margin:0 17px 17px!important;min-height:46px!important}
+
+  /* Reports / settings / tables */
+  .reportKpis{gap:11px!important}.reportKpis>div{padding:16px!important;border-radius:14px!important}
+  .reportKpis strong{font-size:24px!important}.reportKpis span{font-size:10px!important}
+  .reportsGrid{gap:14px!important}
+  .dataTable th,.dataTable td{padding:12px 13px!important;font-size:11.5px!important}
+  .infoBox{padding:15px!important}
+}
+
+@media(min-width:1400px){
+  main{max-width:1340px!important}
+}
+</style>
 </head>
 <body>
 <div class="app"><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p><div class="deviceDataBox"><div class="deviceDataHead"><b>Device data</b><span class="deviceDataMode" id="deviceDataMode">Local</span></div><p id="deviceDataCopy">Courses, photos, evaluations and settings are stored locally on this device.</p><div class="deviceDataActions"><button class="btn secondary small" type="button" id="exportFlympusBackup">Export backup</button><label class="btn secondary small" for="flympusBackupInput" style="cursor:pointer">Import backup</label></div><p class="deviceDataHint" id="deviceDataHint">Use a backup to move the complete FLYMPUS setup between Safari and the Home Screen app.</p></div></div></div></div></header><input id="flympusBackupInput" type="file" accept=".json,application/json" hidden><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0719 · record form cleanup</div><div class="toast" id="toast"></div></div>
