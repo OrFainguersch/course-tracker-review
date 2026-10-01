@@ -2477,6 +2477,26 @@ body::before{
   body::before{display:none}
 }
 </style>
+
+<style>
+/* ===== Bottom dock · active capsule optical centering ===== */
+.mobileBottomIconButton{
+  top:3px!important;
+  bottom:7px!important;
+}
+@media(max-width:759px){
+  .mobileBottomIconButton{
+    top:3px!important;
+    bottom:7px!important;
+  }
+}
+@media(min-width:900px){
+  .mobileBottomIconButton{
+    top:3px!important;
+    bottom:7px!important;
+  }
+}
+</style>
 </head>
 <body>
 <div class="app"><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p><div class="deviceDataBox"><div class="deviceDataHead"><b>Device data</b><span class="deviceDataMode" id="deviceDataMode">Local</span></div><p id="deviceDataCopy">Courses, photos, evaluations and settings are stored locally on this device.</p><div class="deviceDataActions"><button class="btn secondary small" type="button" id="exportFlympusBackup">Export backup</button><label class="btn secondary small" for="flympusBackupInput" style="cursor:pointer">Import backup</label></div><p class="deviceDataHint" id="deviceDataHint">Use a backup to move the complete FLYMPUS setup between Safari and the Home Screen app.</p></div></div></div></div></header><input id="flympusBackupInput" type="file" accept=".json,application/json" hidden><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0719 · record form cleanup</div><div class="toast" id="toast"></div></div>
@@ -2916,7 +2936,8 @@ function renderMobileBottomNav(){
   const n=$('#mobileBottomNav');if(!n)return;
   n.classList.remove('dockHidden');
   bottomDockLastScrollY=Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0));
-  bottomDockDownTravel=0;bottomDockUpTravel=0;
+  bottomDockLastScrollTime=performance.now?.()||Date.now();
+  bottomDockFastTravel=0;bottomDockFastDirection=0;
   const active=state.screen==='home'?'home':(['roster','profile','instructor'].includes(state.screen)?'roster':state.screen==='planned'?'planned':['record','evaluation','safety','exams'].includes(state.screen)?'record':state.screen==='reports'?'reports':'');
   const items=[['roster','roster','Roster'],['planned','planned','Plan'],['home','home','Home'],['record','record','Record'],['reports','reports','Reports']];
   n.innerHTML=items.map(([id,icon,label])=>{const attentionKey=id==='record'?'record':id==='planned'?'planned':'';const attention=attentionKey?(id==='record'?attentionBadgeHtml('record','mobileNavAttention mobileNavRecordAttention',true):attentionBadgeHtml(attentionKey,'mobileNavAttention')):'';return '<div class="mobileBottomItem '+(id==='home'?'homeCenter ':'')+(active===id?'active':'')+'"><button class="mobileBottomIconButton" type="button" data-mobile-nav="'+id+'" aria-label="'+label+'" '+(active===id?'aria-current="page"':'')+'><span class="mobileBottomIcon">'+bottomNavIconSvg(icon,active===id)+'</span>'+attention+'<span class="mobileBottomLabel" aria-hidden="true">'+label+'</span></button></div>'}).join('');
@@ -2999,32 +3020,51 @@ window.addEventListener('scroll',()=>{
   clearTimeout(bottomNavScrollSaveTimer);
   bottomNavScrollSaveTimer=setTimeout(rememberBottomNavScroll,80);
 },{passive:true});
-let bottomDockLastScrollY=Math.max(0,Number(window.scrollY||0)),bottomDockDownTravel=0,bottomDockUpTravel=0,bottomDockTicking=false;
+let bottomDockLastScrollY=Math.max(0,Number(window.scrollY||0)),bottomDockLastScrollTime=performance.now?.()||Date.now(),bottomDockFastTravel=0,bottomDockFastDirection=0,bottomDockTicking=false;
 function setBottomDockHidden(hidden){
   const dock=$('#mobileBottomNav');if(!dock)return;
   dock.classList.toggle('dockHidden',!!hidden);
 }
 function updateBottomDockFromScroll(){
   bottomDockTicking=false;
+  const now=performance.now?.()||Date.now();
   const y=Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0));
   const delta=y-bottomDockLastScrollY;
+  const dt=Math.max(8,now-bottomDockLastScrollTime);
   bottomDockLastScrollY=y;
+  bottomDockLastScrollTime=now;
+
   if(y<=24){
-    bottomDockDownTravel=0;bottomDockUpTravel=0;setBottomDockHidden(false);return;
+    bottomDockFastTravel=0;
+    bottomDockFastDirection=0;
+    setBottomDockHidden(false);
+    return;
   }
-  if(Math.abs(delta)<1.5)return;
-  if(delta>0){
-    bottomDockDownTravel+=delta;bottomDockUpTravel=0;
-    if(bottomDockDownTravel>=38){
-      setBottomDockHidden(true);
-      bottomDockDownTravel=0;
-    }
-  }else{
-    bottomDockUpTravel+=-delta;bottomDockDownTravel=0;
-    if(bottomDockUpTravel>=12){
-      setBottomDockHidden(false);
-      bottomDockUpTravel=0;
-    }
+
+  if(Math.abs(delta)<2)return;
+
+  const direction=delta>0?1:-1;
+  const speed=Math.abs(delta)/dt; // CSS px per ms
+
+  /* Slow scrolling intentionally keeps the dock in its current state. */
+  if(speed<.55){
+    bottomDockFastTravel=0;
+    bottomDockFastDirection=0;
+    return;
+  }
+
+  if(direction!==bottomDockFastDirection){
+    bottomDockFastDirection=direction;
+    bottomDockFastTravel=0;
+  }
+  bottomDockFastTravel+=Math.abs(delta);
+
+  if(direction>0&&bottomDockFastTravel>=26){
+    setBottomDockHidden(true);
+    bottomDockFastTravel=0;
+  }else if(direction<0&&bottomDockFastTravel>=18){
+    setBottomDockHidden(false);
+    bottomDockFastTravel=0;
   }
 }
 window.addEventListener('scroll',()=>{
