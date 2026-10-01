@@ -2618,47 +2618,78 @@ body::-webkit-scrollbar{
   height:0!important;
   display:none!important;
 }
+
 .flympusPageScrollbar{
   position:fixed;
-  right:4px;
+  right:3px;
   top:var(--flympus-scrollbar-top,72px);
   bottom:var(--flympus-scrollbar-bottom,18px);
-  width:5px;
+  width:12px; /* generous invisible hit-area, compact visible rail */
   z-index:28;
-  border-radius:999px;
-  background:rgba(12,49,86,.13);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);
-  pointer-events:none;
+  pointer-events:auto;
   opacity:0;
   transition:opacity .14s ease,top .18s ease,bottom .18s ease;
-  overflow:hidden;
+  touch-action:none;
+  -webkit-user-select:none;
+  user-select:none;
 }
+
 .flympusPageScrollbar.visible{
-  opacity:.96;
+  opacity:.92;
 }
+
+.flympusPageScrollbar::before{
+  content:"";
+  position:absolute;
+  right:3px;
+  top:0;
+  bottom:0;
+  width:3px;
+  border-radius:999px;
+  background:rgba(121,136,154,.20);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.20);
+}
+
 .flympusPageScrollbarThumb{
   position:absolute;
-  left:0;
+  right:2px;
   top:0;
-  width:100%;
-  min-height:44px;
+  width:5px;
+  min-height:34px;
   border-radius:999px;
-  background:rgba(8,42,76,.72);
-  box-shadow:0 1px 4px rgba(4,25,46,.18);
+  background:rgba(143,151,160,.72);
+  box-shadow:0 1px 3px rgba(8,25,45,.10);
   transform:translate3d(0,0,0);
   will-change:transform,height;
+  cursor:grab;
+  touch-action:none;
 }
+
+.flympusPageScrollbarThumb:active,
+.flympusPageScrollbar.dragging .flympusPageScrollbarThumb{
+  cursor:grabbing;
+  background:rgba(123,132,143,.90);
+  box-shadow:0 1px 5px rgba(8,25,45,.14);
+}
+
 @media(min-width:900px){
   .flympusPageScrollbar{
-    right:8px;
-    width:7px;
-    background:rgba(12,49,86,.11);
+    right:7px;
+    width:14px;
+  }
+  .flympusPageScrollbar::before{
+    right:4px;
+    width:4px;
+    background:rgba(121,136,154,.18);
   }
   .flympusPageScrollbarThumb{
-    min-height:52px;
-    background:rgba(8,42,76,.66);
+    right:3px;
+    width:6px;
+    min-height:40px;
+    background:rgba(143,151,160,.66);
   }
 }
+
 @media(prefers-reduced-motion:reduce){
   .flympusPageScrollbar{transition:none!important}
 }
@@ -3625,10 +3656,13 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   });
 }
 let flympusPageScrollbarTicking=false;
-function updateFlympusPageScrollbar(){
-  flympusPageScrollbarTicking=false;
-  const track=$('#flympusPageScrollbar'),thumb=$('#flympusPageScrollbarThumb');
-  if(!track||!thumb)return;
+let flympusPageScrollbarMetrics=null;
+let flympusPageScrollbarDrag=null;
+
+function getFlympusPageScrollbarMetrics(){
+  const track=$('#flympusPageScrollbar');
+  const thumb=$('#flympusPageScrollbarThumb');
+  if(!track||!thumb)return null;
 
   const scroller=document.scrollingElement||document.documentElement;
   const viewport=Math.max(1,window.innerHeight||document.documentElement?.clientHeight||1);
@@ -3649,34 +3683,151 @@ function updateFlympusPageScrollbar(){
   }
 
   const trackHeight=Math.max(56,viewport-topBound-bottomBound);
-  document.documentElement?.style?.setProperty('--flympus-scrollbar-top',topBound.toFixed(1)+'px');
-  document.documentElement?.style?.setProperty('--flympus-scrollbar-bottom',bottomBound.toFixed(1)+'px');
+  const minThumb=window.innerWidth>=900?40:34;
+  const thumbHeight=Math.max(minThumb,Math.min(trackHeight,trackHeight*(viewport/content)));
+  const maxTravel=Math.max(0,trackHeight-thumbHeight);
+  const scrollTop=Math.max(0,Number(scroller?.scrollTop||window.scrollY||0));
+  const y=scrollMax>0?maxTravel*(scrollTop/scrollMax):0;
 
-  if(scrollMax<=4||trackHeight<=56){
-    track.classList.remove('visible');
+  return{
+    track,thumb,scroller,viewport,content,scrollMax,
+    topBound,bottomBound,trackHeight,thumbHeight,maxTravel,y
+  };
+}
+
+function applyFlympusPageScrollbarMetrics(m){
+  if(!m)return;
+
+  document.documentElement?.style?.setProperty('--flympus-scrollbar-top',m.topBound.toFixed(1)+'px');
+  document.documentElement?.style?.setProperty('--flympus-scrollbar-bottom',m.bottomBound.toFixed(1)+'px');
+
+  if(m.scrollMax<=4||m.trackHeight<=56){
+    m.track.classList.remove('visible');
     return;
   }
 
-  const minThumb=window.innerWidth>=900?52:44;
-  const thumbHeight=Math.max(minThumb,Math.min(trackHeight,trackHeight*(viewport/content)));
-  const maxTravel=Math.max(0,trackHeight-thumbHeight);
-  const y=maxTravel*(Math.max(0,Number(scroller?.scrollTop||window.scrollY||0))/scrollMax);
-
-  thumb.style.height=thumbHeight.toFixed(1)+'px';
-  thumb.style.transform='translate3d(0,'+Math.max(0,Math.min(maxTravel,y)).toFixed(1)+'px,0)';
-  track.classList.add('visible');
+  m.thumb.style.height=m.thumbHeight.toFixed(1)+'px';
+  m.thumb.style.transform='translate3d(0,'+Math.max(0,Math.min(m.maxTravel,m.y)).toFixed(1)+'px,0)';
+  m.track.classList.add('visible');
 }
+
+function updateFlympusPageScrollbar(){
+  flympusPageScrollbarTicking=false;
+  flympusPageScrollbarMetrics=getFlympusPageScrollbarMetrics();
+  applyFlympusPageScrollbarMetrics(flympusPageScrollbarMetrics);
+}
+
 function requestFlympusPageScrollbarUpdate(){
   if(flympusPageScrollbarTicking)return;
   flympusPageScrollbarTicking=true;
   if(typeof requestAnimationFrame==='function')requestAnimationFrame(updateFlympusPageScrollbar);
   else setTimeout(updateFlympusPageScrollbar,16);
 }
+
+function setFlympusPageScrollFromClientY(clientY,mode='thumb'){
+  const m=getFlympusPageScrollbarMetrics();
+  flympusPageScrollbarMetrics=m;
+  if(!m||m.scrollMax<=0)return;
+
+  const rect=m.track.getBoundingClientRect();
+  let yInTrack=clientY-rect.top;
+
+  if(mode==='thumb'&&flympusPageScrollbarDrag){
+    yInTrack-=flympusPageScrollbarDrag.grabOffset;
+  }else{
+    yInTrack-=m.thumbHeight/2;
+  }
+
+  const clamped=Math.max(0,Math.min(m.maxTravel,yInTrack));
+  const ratio=m.maxTravel>0?clamped/m.maxTravel:0;
+  const nextScroll=ratio*m.scrollMax;
+
+  try{
+    m.scroller.scrollTop=nextScroll;
+    if(Math.abs(Number(window.scrollY||0)-nextScroll)>1)window.scrollTo?.(0,nextScroll);
+  }catch{}
+
+  requestFlympusPageScrollbarUpdate();
+}
+
+function endFlympusPageScrollbarDrag(e){
+  const track=$('#flympusPageScrollbar');
+  const thumb=$('#flympusPageScrollbarThumb');
+
+  track?.classList.remove('dragging');
+
+  if(flympusPageScrollbarDrag&&thumb){
+    try{thumb.releasePointerCapture?.(flympusPageScrollbarDrag.pointerId)}catch{}
+  }
+
+  flympusPageScrollbarDrag=null;
+}
+
+function initFlympusPageScrollbarDrag(){
+  const track=$('#flympusPageScrollbar');
+  const thumb=$('#flympusPageScrollbarThumb');
+  if(!track||!thumb||track.__flympusDragBound)return;
+
+  track.__flympusDragBound=true;
+
+  thumb.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+
+    const m=getFlympusPageScrollbarMetrics();
+    flympusPageScrollbarMetrics=m;
+    if(!m||m.scrollMax<=0)return;
+
+    const thumbRect=thumb.getBoundingClientRect();
+    flympusPageScrollbarDrag={
+      pointerId:e.pointerId,
+      grabOffset:Math.max(0,Math.min(thumbRect.height,e.clientY-thumbRect.top))
+    };
+
+    track.classList.add('dragging');
+
+    try{thumb.setPointerCapture?.(e.pointerId)}catch{}
+
+    e.preventDefault?.();
+    e.stopPropagation?.();
+  });
+
+  thumb.addEventListener('pointermove',e=>{
+    if(!flympusPageScrollbarDrag)return;
+    if(e.pointerId!==flympusPageScrollbarDrag.pointerId)return;
+
+    setFlympusPageScrollFromClientY(e.clientY,'thumb');
+    e.preventDefault?.();
+  });
+
+  thumb.addEventListener('pointerup',endFlympusPageScrollbarDrag);
+  thumb.addEventListener('pointercancel',endFlympusPageScrollbarDrag);
+  thumb.addEventListener('lostpointercapture',endFlympusPageScrollbarDrag);
+
+  track.addEventListener('pointerdown',e=>{
+    if(e.target===thumb)return;
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+
+    setFlympusPageScrollFromClientY(e.clientY,'track');
+    e.preventDefault?.();
+  });
+}
+
 window.addEventListener('scroll',requestFlympusPageScrollbarUpdate,{passive:true});
 window.addEventListener('resize',requestFlympusPageScrollbarUpdate,{passive:true});
 window.addEventListener('orientationchange',requestFlympusPageScrollbarUpdate,{passive:true});
-window.addEventListener('pageshow',()=>setTimeout(requestFlympusPageScrollbarUpdate,0));
-setTimeout(requestFlympusPageScrollbarUpdate,0);
+
+window.addEventListener('pageshow',()=>{
+  setTimeout(()=>{
+    initFlympusPageScrollbarDrag();
+    requestFlympusPageScrollbarUpdate();
+  },0);
+});
+
+setTimeout(()=>{
+  initFlympusPageScrollbarDrag();
+  requestFlympusPageScrollbarUpdate();
+},0);
+
 setTimeout(requestFlympusPageScrollbarUpdate,120);
 
 let bottomNavScrollSaveTimer=null;
