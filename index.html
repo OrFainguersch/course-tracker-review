@@ -1162,7 +1162,7 @@ function toast(t,tone='auto'){
 }
 function controlFriendlyLabel(el){
  if(!el)return '';
- const field=el.closest?.('.field'),label=field?.querySelector?.('label,.fieldLabel')?.textContent||el.getAttribute?.('aria-label')||el.name||'';
+ const field=el.closest?.('.field'),criterion=el.closest?.('.criterion'),label=field?.querySelector?.('label,.fieldLabel')?.textContent||criterion?.querySelector?.('span')?.textContent||el.getAttribute?.('aria-label')||el.name||'';
  return String(label).replace(/\*/g,'').replace(/\s+/g,' ').trim()
 }
 function showFormInvalid(form){
