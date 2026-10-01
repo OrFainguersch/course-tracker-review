@@ -1730,13 +1730,13 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 .mobileNavAttention{
   position:absolute!important;
   left:calc(50% + 9px)!important;
-  top:-1px!important;
-  min-width:15px!important;
-  height:15px!important;
-  padding:0 3px!important;
+  top:-2px!important;
+  min-width:17px!important;
+  height:17px!important;
+  padding:0 4px!important;
   border-width:1.5px!important;
   border-color:#123b63!important;
-  font-size:7.5px!important;
+  font-size:8px!important;
   z-index:2!important
 }
 .mobileNavAttention[data-attention-dot="true"]{
@@ -2188,7 +2188,7 @@ function renderMobileBottomNav(){
   const n=$('#mobileBottomNav');if(!n)return;
   const active=state.screen==='home'?'home':(['roster','profile','instructor'].includes(state.screen)?'roster':state.screen==='planned'?'planned':['record','evaluation','safety','exams'].includes(state.screen)?'record':state.screen==='reports'?'reports':'');
   const items=[['roster','roster','Roster'],['planned','planned','Plan'],['home','home','Home'],['record','record','Record'],['reports','reports','Reports']];
-  n.innerHTML=items.map(([id,icon,label])=>{const attentionKey=id==='record'?'record':id==='planned'?'planned':'',dotOnly=id==='record';return '<div class="mobileBottomItem '+(id==='home'?'homeCenter ':'')+(active===id?'active':'')+'"><button class="mobileBottomIconButton" type="button" data-mobile-nav="'+id+'" aria-label="'+label+'" '+(active===id?'aria-current="page"':'')+'><span class="mobileBottomIcon">'+navIconSvg(icon).replace('class="navIcon"','class="mobileBottomIconInner"')+'</span>'+(attentionKey?attentionBadgeHtml(attentionKey,'mobileNavAttention',dotOnly):'')+'</button><span class="mobileBottomLabel" aria-hidden="true">'+label+'</span></div>'}).join('');
+  n.innerHTML=items.map(([id,icon,label])=>{const attentionKey=id==='record'?'record':id==='planned'?'planned':'';return '<div class="mobileBottomItem '+(id==='home'?'homeCenter ':'')+(active===id?'active':'')+'"><button class="mobileBottomIconButton" type="button" data-mobile-nav="'+id+'" aria-label="'+label+'" '+(active===id?'aria-current="page"':'')+'><span class="mobileBottomIcon">'+navIconSvg(icon).replace('class="navIcon"','class="mobileBottomIconInner"')+'</span>'+(attentionKey?attentionBadgeHtml(attentionKey,'mobileNavAttention'):'')+'</button><span class="mobileBottomLabel" aria-hidden="true">'+label+'</span></div>'}).join('');
 }
 function forcePageTop(){
   const reset=()=>{try{const scroller=document.scrollingElement||document.documentElement;if(scroller)scroller.scrollTop=0;if(document.documentElement)document.documentElement.scrollTop=0;if(document.body)document.body.scrollTop=0;window.scrollTo?.(0,0)}catch{}};
@@ -2605,7 +2605,7 @@ function traineeRecordDock(traineeId){
   ['safety','safety','Safety','safety'],
   ['exams','exams','Exam','exam']
  ];
- return '<div class="profileRecordDockWrap"><nav class="profileRecordDock" aria-label="Trainee record actions">'+items.map(x=>'<button type="button" class="profileRecordAction '+x[3]+'" '+(x[0]==='evaluation'?'data-start-eval="'+esc(traineeId)+'"':'data-go="'+x[0]+'"')+'><span class="profileRecordIcon">'+navIconSvg(x[1])+'</span><span>'+x[2]+'</span><span class="attentionBadge profileActionAttention" data-trainee-attention="'+x[0]+'" data-trainee-id="'+esc(traineeId)+'" '+(traineeDraftNeedsAttention(x[0],traineeId)?'':'hidden')+'>1</span></button>').join('')+'</nav></div>';
+ return '<div class="profileRecordDockWrap"><nav class="profileRecordDock" aria-label="Trainee record actions">'+items.map(x=>'<button type="button" class="profileRecordAction '+x[3]+'" '+(x[0]==='evaluation'?'data-start-eval="'+esc(traineeId)+'"':'data-go="'+x[0]+'"')+'><span class="profileRecordIcon">'+navIconSvg(x[1])+'</span><span>'+x[2]+'</span><span class="attentionBadge profileActionAttention" data-trainee-attention="'+x[0]+'" data-trainee-id="'+esc(traineeId)+'" '+(traineeDraftNeedsAttention(x[0],traineeId)?'':'hidden')+'>'+formatAttentionCount(traineeDraftAttentionCount(x[0],traineeId))+'</span></button>').join('')+'</nav></div>';
 }
 
 function traineeProfile(){
@@ -2790,14 +2790,14 @@ function activityDraftMeaningful(name,data){
  if(name==='exams')return ['trainee','exam','grade'].some(k=>nonEmpty(data[k]));
  if(name==='evaluation'){
    return Object.entries(data).some(([k,v])=>{
-     if(k==='date'||k==='pass')return false;
+     if(k==='date'||k==='pass'||k==='__attentionCount')return false;
      if(k==='gradeMode')return String(v)==='INSTRUCTOR';
      if(k==='changeReason')return String(v||'').trim()!==''&&String(v||'').trim()!=='Correction';
      if(k==='takeoffs'||k==='landings'||k.startsWith('emid_'))return Number(v||0)>0;
      return nonEmpty(v)
    })
  }
- return Object.entries(data).some(([k,v])=>k!=='date'&&nonEmpty(v))
+ return Object.entries(data).some(([k,v])=>k!=='date'&&k!=='__attentionCount'&&nonEmpty(v))
 }
 function getActivityDraft(name){try{const d=JSON.parse(localStorage.getItem(activityDraftKey(name))||'null');if(d?.data&&!activityDraftMeaningful(name,d.data)){localStorage.removeItem(activityDraftKey(name));return null}return d}catch{return null}}
 function saveActivityDraft(name,data){if(!activityDraftMeaningful(name,data)){localStorage.removeItem(activityDraftKey(name));return false}localStorage.setItem(activityDraftKey(name),JSON.stringify({data,savedAt:new Date().toISOString()}));return true}
@@ -2814,28 +2814,60 @@ function restoreFormDraft(form,data){
 }
 function bindAutoDraft(form,name,onSaved){
  if(!form)return()=>{};
- const persist=()=>{const data=serializeFormDraft(form),saved=saveActivityDraft(name,data);if(onSaved)onSaved(saved?data:null);syncAttentionBadges()};
- form.addEventListener('input',persist);form.addEventListener('change',persist);return persist;
+ const persist=()=>{
+   const data=serializeFormDraft(form),meaningful=activityDraftMeaningful(name,data);
+   if(meaningful)data.__attentionCount=Math.max(1,requiredControlItems(form).length);
+   const saved=saveActivityDraft(name,data);
+   if(onSaved)onSaved(saved?data:null);
+   syncAttentionBadges()
+ };
+ form.addEventListener('input',persist);form.addEventListener('change',persist);
+ const existing=getActivityDraft(name);
+ if(existing?.data){
+   const count=Math.max(1,requiredControlItems(form).length);
+   if(Number(existing.data.__attentionCount)!==count){
+     existing.data.__attentionCount=count;
+     try{localStorage.setItem(activityDraftKey(name),JSON.stringify(existing))}catch{}
+   }
+ }
+ syncAttentionBadges();
+ return persist;
 }
 function draftSavedLabel(name){const d=getActivityDraft(name);if(!d?.savedAt)return 'Auto-save ready';const dt=new Date(d.savedAt);return 'Auto-saved '+dt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
 function hasActivityDraft(name){return !!getActivityDraft(name)}
+function draftFormForAttention(name){
+ const ids={evaluation:'evalForm',safety:'safetyForm',exams:'examForm'};
+ return document.getElementById(ids[name]||'')
+}
+function draftAttentionCount(name){
+ const d=getActivityDraft(name);if(!d?.data)return 0;
+ const form=draftFormForAttention(name);
+ if(form)return Math.max(1,requiredControlItems(form).length);
+ const stored=Number(d.data.__attentionCount);
+ return Number.isFinite(stored)&&stored>0?Math.max(1,Math.floor(stored)):1
+}
+function formatAttentionCount(value){
+ const n=Math.max(0,Math.floor(Number(value)||0));
+ return n>9?'9+':String(n)
+}
 function courseAttentionCounts(){
- const evaluation=hasActivityDraft('evaluation')?1:0,safety=hasActivityDraft('safety')?1:0,exams=hasActivityDraft('exams')?1:0,planned=hasActivityDraft('planned')?1:0;
+ const evaluation=draftAttentionCount('evaluation'),safety=draftAttentionCount('safety'),exams=draftAttentionCount('exams'),planned=draftAttentionCount('planned');
  return {evaluation,safety,exams,record:evaluation+safety+exams,planned}
 }
-function traineeDraftNeedsAttention(name,traineeId){
+function traineeDraftAttentionCount(name,traineeId){
  const d=getActivityDraft(name),id=String(traineeId||''),draftTrainee=String(d?.data?.trainee||d?.data?.traineeId||'');
- return !!(d?.data&&id&&draftTrainee===id)
+ return d?.data&&id&&draftTrainee===id?draftAttentionCount(name):0
 }
-function attentionBadgeHtml(key,extraClass='',dotOnly=false){
- const n=Number(courseAttentionCounts()[key]||0),content=dotOnly?'':(n?String(n):'');
- return '<span class="attentionBadge '+extraClass+'" data-attention-badge="'+esc(key)+'" '+(dotOnly?'data-attention-dot="true" ':'')+(n?'':'hidden')+'>'+content+'</span>'
+function traineeDraftNeedsAttention(name,traineeId){return traineeDraftAttentionCount(name,traineeId)>0}
+function attentionBadgeHtml(key,extraClass=''){
+ const n=Number(courseAttentionCounts()[key]||0),content=n?formatAttentionCount(n):'';
+ return '<span class="attentionBadge '+extraClass+'" data-attention-badge="'+esc(key)+'" '+(n?'':'hidden')+'>'+content+'</span>'
 }
 function syncAttentionBadges(){
  const counts=courseAttentionCounts();
- document.querySelectorAll('[data-attention-badge]').forEach(el=>{const n=Number(counts[el.dataset.attentionBadge]||0),dot=el.dataset.attentionDot==='true';el.textContent=n?(dot?'':String(n)):'';el.hidden=!n});
- document.querySelectorAll('[data-trainee-attention]').forEach(el=>{const n=traineeDraftNeedsAttention(el.dataset.traineeAttention,el.dataset.traineeId)?1:0;el.textContent=n?'1':'';el.hidden=!n});
- document.querySelectorAll('[data-record-attention-summary]').forEach(el=>{const n=counts.record;el.hidden=!n;const copy=el.querySelector('[data-record-attention-copy]');if(copy)copy.textContent=n===1?'Unfinished entry needs attention':'Unfinished entries need attention'})
+ document.querySelectorAll('[data-attention-badge]').forEach(el=>{const n=Number(counts[el.dataset.attentionBadge]||0);el.textContent=n?formatAttentionCount(n):'';el.hidden=!n});
+ document.querySelectorAll('[data-trainee-attention]').forEach(el=>{const n=traineeDraftAttentionCount(el.dataset.traineeAttention,el.dataset.traineeId);el.textContent=n?formatAttentionCount(n):'';el.hidden=!n});
+ document.querySelectorAll('[data-record-attention-summary]').forEach(el=>{const n=counts.record;el.hidden=!n;const copy=el.querySelector('[data-record-attention-copy]');if(copy)copy.textContent=n===1?'1 item needs attention':n+' items need attention'})
 }
 function getEmergencyPlans(){return readCourseObject('ct-review-emergency-plans')}
 function getTraineeEmergencyPlan(traineeId){const all=getEmergencyPlans(),p=all[traineeId];return p&&Array.isArray(p.emergencyIds)?p:{emergencyIds:[],updatedAt:null}}
@@ -3779,7 +3811,7 @@ function recordHub(){
   ['safety','safety','Safety','safety','Log a safety event, operational observation or real emergency.'],
   ['exams','exams','Exams','exam','Record theoretical exam results against the required passing grade.']
  ];
- const attentionSummary=attention.record?'<div class="recordAttentionSummary" data-record-attention-summary>'+attentionBadgeHtml('record','recordSummaryBadge')+'<span data-record-attention-copy>'+(attention.record===1?'Unfinished entry needs attention':'Unfinished entries need attention')+'</span></div>':'';
+ const attentionSummary=attention.record?'<div class="recordAttentionSummary" data-record-attention-summary>'+attentionBadgeHtml('record','recordSummaryBadge')+'<span data-record-attention-copy>'+(attention.record===1?'1 item needs attention':attention.record+' items need attention')+'</span></div>':'';
  return '<div class="recordHubHead"><div><div class="eyebrow">COURSE RECORDING</div><h1 class="pageTitle">Record</h1><p class="sub">Choose what you want to record for '+esc(currentCourseMeta.courseName||'this course')+'.</p></div>'+attentionSummary+'</div>'+
  '<div class="recordHubGrid">'+cards.map(x=>'<button class="recordHubCard '+x[3]+'" type="button" data-go="'+x[0]+'"><span class="recordHubIcon">'+navIconSvg(x[1])+'</span><span class="recordHubCopy"><span class="recordHubTitleRow"><b>'+x[2]+'</b>'+attentionBadgeHtml(x[0],'recordCardAttention')+'</span><small>'+x[4]+'</small></span><span class="recordHubArrow">›</span></button>').join('')+'</div>';
 }
