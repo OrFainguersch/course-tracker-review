@@ -3064,13 +3064,6 @@ function scrollActiveBottomNavTop(root){
   try{window.scrollTo({top:0,left:0,behavior:'smooth'})}catch{window.scrollTo?.(0,0)}
 }
 let flympusNavAudioCtx=null;
-function discardFlympusNavAudioContext(){
-  const old=flympusNavAudioCtx;
-  flympusNavAudioCtx=null;
-  if(old&&old.state!=='closed'){
-    try{old.close?.()}catch{}
-  }
-}
 function getFlympusNavAudioContext(){
   try{
     const AudioCtx=window.AudioContext||window.webkitAudioContext;
@@ -3155,28 +3148,14 @@ function emitFlympusRefreshSound(ctx){
   voice(1760,1960,.22,.115,.075);
   voice(2300,2460,.10,.145,.05);
 }
-let flympusRefreshAudioCtx=null,flympusRefreshResumePromise=null,flympusRefreshSuspendTimer=null;
+let flympusRefreshAudioCtx=null,flympusRefreshResumePromise=null;
 function discardFlympusRefreshAudioContext(){
-  clearTimeout(flympusRefreshSuspendTimer);flympusRefreshSuspendTimer=null;
   const old=flympusRefreshAudioCtx;
   flympusRefreshAudioCtx=null;
   flympusRefreshResumePromise=null;
   if(old&&old.state!=='closed'){
     try{old.close?.()}catch{}
   }
-}
-function resetFlympusAudioAfterRefresh(ctx){
-  /* Refresh gestures can leave iOS' Web Audio output stale while the context
-     still reports "running". Give the nav its own fresh context next tap, and
-     intentionally suspend the refresh context after its 210 ms sound so the
-     next pull must resume it from a genuine touch gesture. */
-  discardFlympusNavAudioContext();
-  clearTimeout(flympusRefreshSuspendTimer);
-  flympusRefreshSuspendTimer=setTimeout(()=>{
-    flympusRefreshSuspendTimer=null;
-    if(flympusRefreshAudioCtx!==ctx||ctx?.state!=='running')return;
-    try{ctx.suspend?.()}catch{}
-  },240);
 }
 function createFlympusRefreshAudioContext(){
   try{
@@ -3194,8 +3173,9 @@ function getFlympusRefreshAudioContext(){
 }
 function armFreshFlympusRefreshAudio(){
   try{
-    clearTimeout(flympusRefreshSuspendTimer);flympusRefreshSuspendTimer=null;
-    if(flympusRefreshAudioCtx&&(flympusRefreshAudioCtx.state==='interrupted'||flympusRefreshAudioCtx.state==='closed')){
+    /* iOS can leave a previously-used context interrupted. Recreate it during
+       the new finger gesture instead of trying to reuse a stale context. */
+    if(flympusRefreshAudioCtx&&flympusRefreshAudioCtx.state!=='running'){
       discardFlympusRefreshAudioContext();
     }
     const ctx=getFlympusRefreshAudioContext();if(!ctx)return Promise.resolve(null);
@@ -3232,32 +3212,27 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     pullTracking=false;
     pullRefreshSoundPlayed=false;
     pullRefreshReadyPromise=null;
-    /* A bottom-nav tap is not a refresh gesture. In capture phase this handler
-       used to run before the nav button and could steal iOS' audio activation. */
     if(e.target?.closest?.('#mobileBottomNav'))return;
-    const startTop=Math.max(0,Number(document.scrollingElement?.scrollTop??window.scrollY??0));
-    if(startTop>160)return;
+    const top=Math.max(0,Number(document.scrollingElement?.scrollTop??window.scrollY??0));
+    if(top>12)return;
     const t=e.touches?.[0];if(!t)return;
     pullStartY=t.clientY;pullStartX=t.clientX;pullTracking=true;
-    /* Arm a valid context on every fresh pull gesture. */
+    /* Arm audio at the start of the finger gesture, before Safari takes over
+       the native pull-to-refresh interaction. */
     pullRefreshReadyPromise=armFreshFlympusRefreshAudio();
   },{passive:true,capture:true});
   document.addEventListener('touchmove',e=>{
     if(!pullTracking||pullRefreshSoundPlayed)return;
     const t=e.touches?.[0];if(!t)return;
     const dy=t.clientY-pullStartY,dx=t.clientX-pullStartX;
-    const topNow=Math.max(0,Number(document.scrollingElement?.scrollTop??window.scrollY??0));
-    if(dy>=88&&dy>Math.abs(dx)*1.35&&topNow<=4){
+    /* Sound is based on gesture progress only — roughly half of the old
+       refresh distance — not on whether Safari actually commits a reload. */
+    if(dy>=44&&dy>Math.abs(dx)*1.25){
       pullRefreshSoundPlayed=true;
       const ctx=flympusRefreshAudioCtx;
-      if(ctx?.state==='running'){
-        emitFlympusRefreshSound(ctx);
-        resetFlympusAudioAfterRefresh(ctx);
-      }else Promise.resolve(pullRefreshReadyPromise||ensureFlympusRefreshAudioReady()).then(ready=>{
-        if(ready?.state==='running'){
-          emitFlympusRefreshSound(ready);
-          resetFlympusAudioAfterRefresh(ready);
-        }
+      if(ctx?.state==='running')emitFlympusRefreshSound(ctx);
+      else Promise.resolve(pullRefreshReadyPromise||ensureFlympusRefreshAudioReady()).then(ready=>{
+        if(ready?.state==='running')emitFlympusRefreshSound(ready);
       }).catch(()=>{});
     }
   },{passive:true,capture:true});
