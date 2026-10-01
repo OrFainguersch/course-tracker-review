@@ -2624,16 +2624,34 @@ body::-webkit-scrollbar{
 }
 
 .top{
-  transition:transform .58s cubic-bezier(.32,.72,0,1)!important;
+  margin-bottom:0!important;
+  transition:
+    transform .58s cubic-bezier(.32,.72,0,1),
+    margin-bottom .58s cubic-bezier(.32,.72,0,1)!important;
   will-change:transform!important;
 }
 .top.topHidden{
   transform:translate3d(0,calc(-100% - 2px),0)!important;
+  margin-bottom:calc(0px - var(--flympus-top-chrome-height,78px))!important;
   transition-duration:.64s!important;
   pointer-events:none!important;
 }
+
+/* The navy overscroll shield sits behind the sticky header on iOS. Move it
+   away with the header as well, otherwise the controls disappear but a navy
+   strip is still left behind. */
+@media(max-width:899px){
+  body::before{
+    transition:transform .58s cubic-bezier(.32,.72,0,1)!important;
+  }
+  body.topChromeHidden::before{
+    transform:translate3d(0,calc(0px - var(--flympus-top-chrome-height,78px)),0)!important;
+    transition-duration:.64s!important;
+  }
+}
 @media(prefers-reduced-motion:reduce){
-  .top{transition:none!important}
+  .top,
+  body::before{transition:none!important}
 }
 </style>
 
@@ -3644,12 +3662,23 @@ window.addEventListener('scroll',()=>{
 },{passive:true});
 let bottomDockLastScrollY=Math.max(0,Number(window.scrollY||0)),bottomDockLastScrollTime=performance.now?.()||Date.now(),bottomDockVelocity=0,bottomDockTicking=false,bottomDockLastSwitchTime=0;
 function setBottomDockHidden(hidden){
-  const dock=$('#mobileBottomNav'),topBar=$('.top'),next=!!hidden;
+  const dock=$('#mobileBottomNav'),topBar=$('.top'),next=!!hidden,body=document.body;
   const dockChanged=!!dock&&dock.classList.contains('dockHidden')!==next;
   const topChanged=!!topBar&&topBar.classList.contains('topHidden')!==next;
-  if(!dockChanged&&!topChanged)return;
+  const bodyChanged=!!body&&body.classList.contains('topChromeHidden')!==next;
+  if(!dockChanged&&!topChanged&&!bodyChanged)return;
+
+  /* Sticky elements keep their layout slot when transformed. Remember the
+     real header height and collapse that slot while hiding so the entire blue
+     header region disappears, not only its three controls. */
+  if(topBar){
+    const topHeight=Math.max(0,topBar.getBoundingClientRect?.().height||topBar.offsetHeight||0);
+    if(topHeight)document.documentElement?.style?.setProperty('--flympus-top-chrome-height',topHeight+'px');
+  }
+
   dock?.classList.toggle('dockHidden',next);
   topBar?.classList.toggle('topHidden',next);
+  body?.classList.toggle('topChromeHidden',next);
   bottomDockLastSwitchTime=performance.now?.()||Date.now();
 }
 function updateBottomDockFromScroll(){
