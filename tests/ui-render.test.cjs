@@ -3,7 +3,7 @@ const vm=require("node:vm");
 const assert=require("node:assert/strict");
 const storage=()=>{const values=new Map();return{getItem:key=>values.get(key)||null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)}};
 class ElementStub{
-  constructor(){this.innerHTML="";this.textContent="";this.value="";this.dataset={};this.style={};this.classList={add(){},remove(){},toggle(){}}}
+  constructor(){this.innerHTML="";this.textContent="";this.value="";this.dataset={};this.style={};this._classes=new Set();this.classList={add:(...xs)=>xs.forEach(x=>this._classes.add(x)),remove:(...xs)=>xs.forEach(x=>this._classes.delete(x)),toggle:(x,force)=>{if(force===true){this._classes.add(x);return true}if(force===false){this._classes.delete(x);return false}if(this._classes.has(x)){this._classes.delete(x);return false}this._classes.add(x);return true},contains:x=>this._classes.has(x)}}
   querySelectorAll(){return[]} querySelector(){return null} addEventListener(){} click(){} appendChild(){}
 }
 const elements=new Map(["#menuBtn","#backdrop","#nav","#content","#drawer","#toast","#topCourseName"].map(id=>[id,new ElementStub()]));
@@ -76,6 +76,8 @@ assert(html.includes("function recordHub()")&&html.includes("COURSE RECORDING")&
 assert(!html.includes("function recordActionDock(active)")&&!html.includes(".recordActionDockWrap{position:sticky"),"Record entry screens must not show the floating three-action bar");
 assert(html.includes("function globalBackControl()")&&html.includes('id="appBackBtn"')&&html.includes('aria-label="Back"')&&html.includes(".recordReturnBtn{width:36px;height:36px")&&html.includes("function bindGlobalBackGesture()")&&html.includes("state.screen!=='home'")&&html.includes("startX<=56")&&html.includes("dx>=72")&&html.includes("e.preventDefault?.()"),"Every non-Home screen must provide the same compact blue back control plus a guarded left-edge swipe");
 assert(html.includes("let appNavHistory=[]")&&html.includes("function saveAppNavHistory()")&&html.includes("function goBack(){")&&html.includes("if(target==='home')appNavHistory=[]")&&html.includes("if(state.screen!=='home')html=globalBackControl()+html"),"Global navigation history must always resolve back to Home as its root");
+assert(html.includes("const appRootScreens=new Set(['courses','roster','planned','record','reports','settings'])")&&html.includes("else if(appRootScreens.has(target))appNavHistory=['home'];"),"Top-level destinations must be sibling screens whose Back action returns directly to Home");
+assert(html.includes("const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop')")&&html.includes("drawer.classList.add('open')")&&html.includes("backdrop.onclick=()=>{drawer.classList.remove('open')"),"Hamburger and backdrop handlers must be rebound on every render so the sidebar always opens and closes");
 assert(!html.includes("function recordReturnControl()")&&!html.includes("function bindRecordBackGesture()")&&!html.includes('id="backRoster"'),"Record-only and profile-only back controls must be replaced by the single global back system");
 
 assert(html.includes("function traineeRecordDock(traineeId)")&&html.includes(".profileRecordDockWrap{position:sticky;top:74px")&&html.includes("traineeRecordDock(t.id)")&&html.includes("--record-safety:#c84444"),"Trainee profiles must own the sticky Evaluation, Safety and Exam action bar with Safety in red");
@@ -152,6 +154,20 @@ vm.runInContext("goBack()",context);
 assert.equal(vm.runInContext("state.screen",context),"home","Repeated back navigation must terminate at Home");
 assert.equal(vm.runInContext("appNavHistory.length",context),0,"Home must clear the navigation history root");
 assert.doesNotMatch(elements.get("#content").innerHTML,/id="appBackBtn"/,"Home must not render a back arrow");
+vm.runInContext("go('roster');go('planned');go('record')",context);
+assert.equal(vm.runInContext("appNavHistory.join(',')",context),"home","Moving between top-level destinations must not build a sibling back-stack");
+vm.runInContext("goBack()",context);
+assert.equal(vm.runInContext("state.screen",context),"home","Back from Record after visiting Roster and Plan must return directly to Home");
+vm.runInContext("go('record');go('evaluation')",context);
+assert.equal(vm.runInContext("appNavHistory.join(',')",context),"home,record","Child workflows must still keep their immediate top-level parent");
+vm.runInContext("goBack()",context);
+assert.equal(vm.runInContext("state.screen",context),"record","Back from Evaluation must return to Record");
+vm.runInContext("goBack()",context);
+assert.equal(vm.runInContext("state.screen",context),"home","Back from Record must then return to Home");
+elements.get("#menuBtn").onclick?.({preventDefault(){},stopPropagation(){}});
+assert.equal(elements.get("#drawer").classList.contains("open"),true,"Hamburger must open the sidebar drawer");
+elements.get("#backdrop").onclick?.();
+assert.equal(elements.get("#drawer").classList.contains("open"),false,"Backdrop must close the sidebar drawer");
 assert.deepEqual(JSON.parse(JSON.stringify(vm.runInContext("getNotificationPreferences()",context))),{assignments:true,courseUpdates:true,evaluations:true,checks:true,requiredActions:true},"Notification preference defaults must start enabled");
 vm.runInContext("saveNotificationPreferences({assignments:false,courseUpdates:true,evaluations:false,checks:true,requiredActions:true})",context);
 assert.equal(vm.runInContext("getNotificationPreferences().assignments",context),false,"Notification preferences must persist user choices");
