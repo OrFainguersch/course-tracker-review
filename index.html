@@ -1935,6 +1935,7 @@ body.drawerPushOpen .backdrop{
 </style>
 
 <style>
+.mobileBottomAttentionSlot{display:contents!important}
 /* ===== Bottom navigation · full-item hit targets ===== */
 .mobileBottomNav{
   touch-action:manipulation!important;
@@ -3032,7 +3033,27 @@ function renderMobileBottomNav(){
   bottomDockVelocity=0;
   const active=state.screen==='home'?'home':(['roster','profile','instructor'].includes(state.screen)?'roster':state.screen==='planned'?'planned':['record','evaluation','safety','exams'].includes(state.screen)?'record':state.screen==='reports'?'reports':'');
   const items=[['roster','roster','Roster'],['planned','planned','Plan'],['home','home','Home'],['record','record','Record'],['reports','reports','Reports']];
-  n.innerHTML=items.map(([id,icon,label])=>{const attentionKey=id==='record'?'record':id==='planned'?'planned':'';const attention=attentionKey?(id==='record'?attentionBadgeHtml('record','mobileNavAttention mobileNavRecordAttention',true):attentionBadgeHtml(attentionKey,'mobileNavAttention')):'';return '<div class="mobileBottomItem '+(id==='home'?'homeCenter ':'')+(active===id?'active':'')+'"><button class="mobileBottomIconButton" type="button" data-mobile-nav="'+id+'" aria-label="'+label+'" '+(active===id?'aria-current="page"':'')+'><span class="mobileBottomIcon">'+bottomNavIconSvg(icon,active===id)+'</span>'+attention+'<span class="mobileBottomLabel" aria-hidden="true">'+label+'</span></button></div>'}).join('');
+  if(n.dataset.mobileNavBuilt!=='1'){
+    n.innerHTML=items.map(([id,icon,label])=>'<div class="mobileBottomItem '+(id==='home'?'homeCenter ':'')+'"><button class="mobileBottomIconButton" type="button" data-mobile-nav="'+id+'" aria-label="'+label+'"><span class="mobileBottomIcon" data-mobile-icon="'+icon+'">'+bottomNavIconSvg(icon,false)+'</span><span class="mobileBottomAttentionSlot" data-mobile-attention-slot></span><span class="mobileBottomLabel" aria-hidden="true">'+label+'</span></button></div>').join('');
+    n.dataset.mobileNavBuilt='1';
+  }
+  items.forEach(([id,icon])=>{
+    const button=n.querySelector('[data-mobile-nav="'+id+'"]');if(!button)return;
+    const item=button.closest('.mobileBottomItem'),isActive=active===id;
+    item?.classList.toggle('active',isActive);
+    if(isActive)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
+    const iconBox=button.querySelector('.mobileBottomIcon');
+    if(iconBox&&iconBox.dataset.active!==String(isActive)){
+      iconBox.innerHTML=bottomNavIconSvg(icon,isActive);
+      iconBox.dataset.active=String(isActive);
+    }
+    const slot=button.querySelector('[data-mobile-attention-slot]');
+    if(slot){
+      const attentionKey=id==='record'?'record':id==='planned'?'planned':'';
+      const attention=attentionKey?(id==='record'?attentionBadgeHtml('record','mobileNavAttention mobileNavRecordAttention',true):attentionBadgeHtml(attentionKey,'mobileNavAttention')):'';
+      if(slot.innerHTML!==attention)slot.innerHTML=attention;
+    }
+  });
 }
 function bottomNavRootForScreen(screen){
   if(screen==='roster'||screen==='profile'||screen==='instructor')return'roster';
@@ -3063,146 +3084,67 @@ function scrollActiveBottomNavTop(root){
   bottomNavScrollPositions[root]=0;persistBottomNavScroll();
   try{window.scrollTo({top:0,left:0,behavior:'smooth'})}catch{window.scrollTo?.(0,0)}
 }
-let flympusUiAudioCtx=null;
-function discardFlympusUiAudioContext(){
-  const old=flympusUiAudioCtx;
-  flympusUiAudioCtx=null;
-  if(old&&old.state!=='closed'){
-    try{old.close?.()}catch{}
-  }
-}
-function createFlympusUiAudioContext(){
+const FLYMPUS_NAV_SOUND='data:audio/wav;base64,UklGRoQEAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YWAEAAAAABYClQb+CR0KQgfgAmP92fVS7vboXOk28V/+rAv9EyoVvRAYCsgDNf6F+JzyNu4H7o/zev0ACBQPtxDDDbAImgMO/4f63/VI8sbxovUT/VoFYQzKDgYKAwMYAeYD1ALc+GLu6e60+VIE4wb/A6IDSgj7CzUIiP4P9wz3Q/vL/AX6g/ii/SYHBA1QCrQC+P0j/6QBl/89+en0mPc//z0FwgWyAzMClQMAB+MDBfsF+dz8Hvza+z//c//9/hsF3QmNBEX+H/9dADz+cP3W/On5D/s9AtcFyQIiAb8ChwIhAb0AT/6c+oX7ev/1/4j+LQDSAkwDQwO6As//eP3N/gUA9/1L/LH9zf9qARAD+wLIAP3/XwFAAev+eP2X/f79Ev+iANcATQBEAaMC9AErAFH/A/+6/vv+JP+E/qj+gAAKAs0B+wCSADgACwAWAG3/Nf4f/lr/RwBwAJoA1QDfAAAB8gATAA7//P5q/2j/PP95//X/igArATsBggDo//r/EACw/zz/DP8r/7b/bwCsAG0AXwCYAJAALwDF/27/Sf98/8b/y//P/ysAnQC3AIIANQDr/8z/2f/F/3v/Y/+z/x4AVABkAFcAPwA/AEAABQCp/4L/n//K/+n/AAAPACsAXABrAEQABADa/9D/0v/I/7n/wv/w/ykASQBDACwAHwAbAAsA5//A/7T/yv/v/wYADgAnADIAMgAnABMA/f/n/9j/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+const FLYMPUS_REFRESH_SOUND='data:audio/wav;base64,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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+let flympusNavAudioPool=null,flympusNavAudioIndex=0,flympusRefreshAudio=null;
+function makeFlympusAudio(src){
   try{
-    const AudioCtx=window.AudioContext||window.webkitAudioContext;
-    if(!AudioCtx)return null;
-    try{return new AudioCtx({latencyHint:'interactive'})}catch{return new AudioCtx()}
+    const a=new Audio(src);
+    a.preload='auto';a.playsInline=true;a.setAttribute?.('playsinline','');
+    try{a.load?.()}catch{}
+    return a;
   }catch{return null}
 }
-function getFlympusUiAudioContext(){
-  if(!flympusUiAudioCtx||flympusUiAudioCtx.state==='closed'){
-    flympusUiAudioCtx=createFlympusUiAudioContext();
-  }
-  return flympusUiAudioCtx;
+function getFlympusNavAudioPool(){
+  if(!flympusNavAudioPool)flympusNavAudioPool=[makeFlympusAudio(FLYMPUS_NAV_SOUND),makeFlympusAudio(FLYMPUS_NAV_SOUND),makeFlympusAudio(FLYMPUS_NAV_SOUND)].filter(Boolean);
+  return flympusNavAudioPool;
 }
-function primeFlympusUiAudio(){
-  try{
-    const ctx=getFlympusUiAudioContext();if(!ctx)return null;
-    /* Keep ONE Web Audio context for all FLYMPUS UI sounds. Multiple contexts
-       compete for iOS' audio session: repeated pull gestures can silence later
-       contexts and make the first nav tap after a pull merely wake audio up. */
-    if(ctx.state!=='running'){
-      try{ctx.resume?.()}catch{}
-    }
-    /* One inaudible sample is a conventional iOS Web Audio unlock. Run it on
-       every real gesture so a context that Safari suspended between gestures is
-       re-armed without creating/closing another AudioContext. */
-    try{
-      const buffer=ctx.createBuffer(1,1,22050),source=ctx.createBufferSource(),gain=ctx.createGain();
-      source.buffer=buffer;
-      gain.gain.setValueAtTime(.000001,ctx.currentTime);
-      source.connect(gain);gain.connect(ctx.destination);
-      source.start(ctx.currentTime);source.stop(ctx.currentTime+.002);
-    }catch{}
-    return ctx;
-  }catch{return null}
+function getFlympusRefreshAudio(){
+  if(!flympusRefreshAudio)flympusRefreshAudio=makeFlympusAudio(FLYMPUS_REFRESH_SOUND);
+  return flympusRefreshAudio;
 }
-function emitFlympusNavSignature(ctx){
-  if(!ctx)return;
-  /* Leave enough headroom for a just-resumed iOS audio session. currentTime
-     does not advance while suspended, so this remains correctly queued. */
-  const now=ctx.currentTime+.012;
-  const master=ctx.createGain();
-  master.gain.setValueAtTime(.05,now);
-  master.connect(ctx.destination);
-  const voice=(freq,level,delay,duration)=>{
-    const osc=ctx.createOscillator(),gain=ctx.createGain(),start=now+delay,end=start+duration;
-    osc.type='sine';osc.frequency.setValueAtTime(freq,start);
-    gain.gain.setValueAtTime(.0001,start);
-    gain.gain.linearRampToValueAtTime(level,start+.001);
-    gain.gain.exponentialRampToValueAtTime(.0001,end);
-    osc.connect(gain);gain.connect(master);
-    osc.start(start);osc.stop(end+.003);
-  };
-  /* C · FLYMPUS Signature — short, quiet, tactile. */
-  voice(610,.95,0,.034);
-  voice(1220,.20,0,.028);
-  voice(1490,.34,.005,.028);
-  voice(2260,.13,.010,.020);
+function stopFlympusRefreshAudio(){
+  const a=flympusRefreshAudio;if(!a)return;
+  try{a.loop=false;a.muted=false;a.pause();a.currentTime=0}catch{}
 }
 function playFlympusBottomNavSound(){
   try{
-    const ctx=primeFlympusUiAudio();if(!ctx)return;
-    emitFlympusNavSignature(ctx);
+    stopFlympusRefreshAudio();
+    const pool=getFlympusNavAudioPool();if(!pool.length)return;
+    const a=pool[flympusNavAudioIndex++%pool.length];
+    try{a.pause();a.currentTime=0;a.muted=false;a.volume=1}catch{}
+    const p=a.play?.();if(p?.catch)p.catch(()=>{});
   }catch{}
 }
-function emitFlympusRefreshSound(ctx){
-  if(!ctx)return;
-  const now=ctx.currentTime+.012;
-  const master=ctx.createGain();
-  master.gain.setValueAtTime(.055,now);
-  master.connect(ctx.destination);
-
-  /* Airy swish: filtered noise rising through the spectrum. */
-  const duration=.21,frames=Math.max(1,Math.floor(ctx.sampleRate*duration));
-  const noiseBuffer=ctx.createBuffer(1,frames,ctx.sampleRate);
-  const data=noiseBuffer.getChannelData(0);
-  for(let i=0;i<frames;i++)data[i]=(Math.random()*2-1);
-  const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),noiseGain=ctx.createGain();
-  noise.buffer=noiseBuffer;
-  filter.type='bandpass';
-  filter.Q.value=.7;
-  filter.frequency.setValueAtTime(650,now);
-  filter.frequency.exponentialRampToValueAtTime(2600,now+.15);
-  noiseGain.gain.setValueAtTime(.0001,now);
-  noiseGain.gain.linearRampToValueAtTime(.12,now+.035);
-  noiseGain.gain.exponentialRampToValueAtTime(.0001,now+.19);
-  noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(master);
-  noise.start(now);noise.stop(now+duration);
-
-  const voice=(f0,f1,level,delay,dur)=>{
-    const osc=ctx.createOscillator(),gain=ctx.createGain(),start=now+delay,end=start+dur;
-    osc.type='sine';
-    osc.frequency.setValueAtTime(f0,start);
-    osc.frequency.exponentialRampToValueAtTime(f1,end);
-    gain.gain.setValueAtTime(.0001,start);
-    gain.gain.linearRampToValueAtTime(level,start+.006);
-    gain.gain.exponentialRampToValueAtTime(.0001,end);
-    osc.connect(gain);gain.connect(master);
-    osc.start(start);osc.stop(end+.004);
-  };
-
-  /* C · FLYMPUS Sync, extended: dark onset → lift → clean confirmation. */
-  voice(610,690,.46,0,.07);
-  voice(760,1320,.52,.025,.12);
-  voice(1760,1960,.22,.115,.075);
-  voice(2300,2460,.10,.145,.05);
-}
-function playFlympusRefreshSound(ctx=flympusUiAudioCtx){
+function primeFlympusRefreshAudio(){
   try{
-    const ready=ctx||primeFlympusUiAudio();if(!ready)return;
-    if(ready.state!=='running'){
-      try{ready.resume?.()}catch{}
-    }
-    emitFlympusRefreshSound(ready);
+    const a=getFlympusRefreshAudio();if(!a)return null;
+    a.pause();a.currentTime=0;a.loop=true;a.muted=true;a.volume=1;
+    const p=a.play?.();if(p?.catch)p.catch(()=>{});
+    return a;
+  }catch{return null}
+}
+function fireFlympusRefreshAudio(a=getFlympusRefreshAudio()){
+  try{
+    if(!a)return;
+    a.loop=false;a.muted=false;a.volume=1;a.currentTime=0;
+    if(a.paused){const p=a.play?.();if(p?.catch)p.catch(()=>{})}
   }catch{}
 }
+getFlympusNavAudioPool();getFlympusRefreshAudio();
 if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   window.__flympusPullRefreshSoundBound=true;
-  let pullStartY=0,pullStartX=0,pullTracking=false,pullRefreshSoundPlayed=false,pullRefreshGestureCtx=null;
-  const resetPullRefreshSound=()=>{
-    pullTracking=false;
-    pullRefreshSoundPlayed=false;
-    pullRefreshGestureCtx=null;
-  };
+  let pullStartY=0,pullStartX=0,pullTracking=false,pullRefreshSoundPlayed=false,pullRefreshGestureAudio=null;
+  const resetTracking=()=>{pullTracking=false;pullRefreshSoundPlayed=false;pullRefreshGestureAudio=null};
   document.addEventListener('touchstart',e=>{
-    resetPullRefreshSound();
+    if(e.target?.closest?.('#mobileBottomNav'))return;
+    if(!pullRefreshSoundPlayed)stopFlympusRefreshAudio();
+    resetTracking();
     const top=Math.max(0,Number(window.scrollY||document.scrollingElement?.scrollTop||document.documentElement?.scrollTop||0));
     if(top>24)return;
     const t=e.touches?.[0];if(!t)return;
     pullStartY=t.clientY;pullStartX=t.clientX;pullTracking=true;
-    /* Re-arm the shared context on EVERY pull. Never create a fresh context per
-       pull: iOS begins suppressing them after repeated overscroll gestures. */
-    pullRefreshGestureCtx=primeFlympusUiAudio();
+    pullRefreshGestureAudio=primeFlympusRefreshAudio();
   },{passive:true,capture:true});
   document.addEventListener('touchmove',e=>{
     if(!pullTracking||pullRefreshSoundPlayed)return;
@@ -3210,22 +3152,17 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     const dy=t.clientY-pullStartY,dx=t.clientX-pullStartX;
     if(dy>=88&&dy>Math.abs(dx)*1.35){
       pullRefreshSoundPlayed=true;
-      playFlympusRefreshSound(pullRefreshGestureCtx);
+      fireFlympusRefreshAudio(pullRefreshGestureAudio);
     }
   },{passive:true,capture:true});
-  document.addEventListener('touchend',resetPullRefreshSound,{passive:true,capture:true});
-  document.addEventListener('touchcancel',resetPullRefreshSound,{passive:true,capture:true});
-  window.addEventListener('pageshow',()=>{
-    resetPullRefreshSound();
-    if(flympusUiAudioCtx?.state==='closed')discardFlympusUiAudioContext();
-  });
-  document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState!=='visible')return;
-    if(flympusUiAudioCtx?.state==='closed')discardFlympusUiAudioContext();
-    else if(flympusUiAudioCtx&&flympusUiAudioCtx.state!=='running'){
-      try{flympusUiAudioCtx.resume?.()}catch{}
-    }
-  });
+  const finishPull=()=>{
+    const played=pullRefreshSoundPlayed;
+    pullTracking=false;pullRefreshSoundPlayed=false;pullRefreshGestureAudio=null;
+    if(!played)stopFlympusRefreshAudio();
+  };
+  document.addEventListener('touchend',finishPull,{passive:true,capture:true});
+  document.addEventListener('touchcancel',finishPull,{passive:true,capture:true});
+  window.addEventListener('pageshow',()=>{stopFlympusRefreshAudio();resetTracking()});
 }
 let bottomNavScrollSaveTimer=null;
 window.addEventListener('scroll',()=>{
