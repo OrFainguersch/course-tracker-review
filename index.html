@@ -2593,10 +2593,10 @@ body::before{
 <style>
 /* ===== Bottom dock · slower hide/show motion ===== */
 .mobileBottomNav{
-  transition:transform .42s cubic-bezier(.32,.72,0,1)!important;
+  transition:transform .58s cubic-bezier(.32,.72,0,1)!important;
 }
 .mobileBottomNav.dockHidden{
-  transition-duration:.46s!important;
+  transition-duration:.64s!important;
 }
 @media(prefers-reduced-motion:reduce){
   .mobileBottomNav{transition:none!important}
@@ -3333,11 +3333,17 @@ resetFlympusAudioSession();
 
 if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   window.__flympusPullRefreshSoundBound=true;
-  const flympusStandaloneMode=()=>navigator.standalone===true||window.matchMedia?.('(display-mode: standalone)')?.matches===true;
-  let pullStartY=0,pullStartX=0,pullTracking=false,pullRefreshSoundPlayed=false,pullRefreshGraph=null,pullReloadArmed=false,pullReleaseTimer=null;
+  const flympusStandaloneMode=()=>!!(
+    (typeof isStandaloneApp==='function'&&isStandaloneApp())||
+    window.navigator?.standalone===true||
+    window.matchMedia?.('(display-mode: standalone)')?.matches||
+    window.matchMedia?.('(display-mode: fullscreen)')?.matches||
+    String(document.referrer||'').startsWith('ios-app://')
+  );
+  let pullStartY=0,pullStartX=0,pullOriginY=null,pullTracking=false,pullRefreshSoundPlayed=false,pullRefreshGraph=null,pullReloadArmed=false,pullReleaseTimer=null,pullStandaloneGesture=false;
 
   const setStandalonePullVisual=dy=>{
-    if(!flympusStandaloneMode())return;
+    if(!pullStandaloneGesture)return;
     const visual=Math.max(0,Math.min(78,92*(1-Math.exp(-Math.max(0,dy)/86))));
     const progress=Math.max(0,Math.min(1,dy/88));
     document.documentElement?.style?.setProperty('--flympus-standalone-pull-y',visual.toFixed(1)+'px');
@@ -3361,8 +3367,10 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
 
   const resetPullRefreshSound=()=>{
     pullTracking=false;
+    pullOriginY=null;
     pullRefreshSoundPlayed=false;
     pullReloadArmed=false;
+    pullStandaloneGesture=false;
     if(pullRefreshGraph&&!pullRefreshGraph.fired)stopFlympusRefreshSound(pullRefreshGraph);
     pullRefreshGraph=null;
   };
@@ -3371,30 +3379,42 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     resetPullRefreshSound();
     if(e.target?.closest?.('#mobileBottomNav'))return;
     const top=Math.max(0,Number(document.scrollingElement?.scrollTop??window.scrollY??0));
-    if(top>4)return;
+    const standalone=flympusStandaloneMode();
+    /* Safari native pull must begin right at the top. Home Screen mode is more
+       forgiving: a gesture started slightly below the top may continue into
+       pull-to-refresh once the page reaches scrollTop 0. */
+    if((standalone&&top>140)||(!standalone&&top>12))return;
     const t=e.touches?.[0];if(!t)return;
-    pullStartY=t.clientY;pullStartX=t.clientX;pullTracking=true;
-
-    /* Start all sound sources silently on direct finger-down. */
+    pullStartY=t.clientY;pullStartX=t.clientX;
+    pullOriginY=top<=4?t.clientY:null;
+    pullTracking=true;
+    pullStandaloneGesture=standalone;
     pullRefreshGraph=armFlympusRefreshSound();
   },{passive:true,capture:true});
 
   document.addEventListener('touchmove',e=>{
     if(!pullTracking)return;
     const t=e.touches?.[0];if(!t)return;
-    const dy=t.clientY-pullStartY,dx=t.clientX-pullStartX;
-    if(dy<=0||dy<=Math.abs(dx)*1.25)return;
+    const totalDy=t.clientY-pullStartY,dx=t.clientX-pullStartX;
+    if(totalDy<=0||totalDy<=Math.abs(dx)*1.25)return;
 
-    if(flympusStandaloneMode()){
-      /* iOS Home Screen web apps do not provide Safari's native pull-to-refresh,
-         so emulate it only there. Browser Safari remains completely native. */
-      e.preventDefault?.();
-      setStandalonePullVisual(dy);
-      pullReloadArmed=dy>=88;
+    let pullDy=totalDy;
+    if(pullStandaloneGesture){
+      const topNow=Math.max(0,Number(document.scrollingElement?.scrollTop??window.scrollY??0));
+      if(pullOriginY===null){
+        if(topNow>1)return;
+        pullOriginY=t.clientY;
+        return;
+      }
+      pullDy=t.clientY-pullOriginY;
+      if(pullDy<=0)return;
+      if(e.cancelable)e.preventDefault();
+      setStandalonePullVisual(pullDy);
+      pullReloadArmed=pullDy>=88;
       $('#flympusStandaloneRefreshIndicator')?.classList.toggle('armed',pullReloadArmed);
     }
 
-    if(!pullRefreshSoundPlayed&&dy>=44){
+    if(!pullRefreshSoundPlayed&&pullDy>=44){
       pullRefreshSoundPlayed=true;
       fireFlympusRefreshSound(pullRefreshGraph);
     }
@@ -3402,9 +3422,10 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
 
   document.addEventListener('touchend',()=>{
     if(!pullTracking)return;
-    const standalone=flympusStandaloneMode(),reload=standalone&&pullReloadArmed;
+    const reload=pullStandaloneGesture&&pullReloadArmed;
     const graph=pullRefreshGraph;
-    pullTracking=false;pullReloadArmed=false;pullRefreshGraph=null;
+    const standalone=pullStandaloneGesture;
+    pullTracking=false;pullReloadArmed=false;pullRefreshGraph=null;pullOriginY=null;pullStandaloneGesture=false;
 
     if(reload){
       const indicator=$('#flympusStandaloneRefreshIndicator');
@@ -3419,7 +3440,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   },{passive:true,capture:true});
 
   document.addEventListener('touchcancel',()=>{
-    const standalone=flympusStandaloneMode();
+    const standalone=pullStandaloneGesture;
     resetPullRefreshSound();
     if(standalone)releaseStandalonePullVisual();
   },{passive:true,capture:true});
