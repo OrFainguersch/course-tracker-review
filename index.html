@@ -3082,6 +3082,81 @@ function playFlympusBottomNavSound(){
     emitFlympusNavSignature(ctx);
   }catch{}
 }
+function emitFlympusRefreshSound(ctx){
+  if(!ctx)return;
+  const now=ctx.currentTime+.001;
+  const master=ctx.createGain();
+  master.gain.setValueAtTime(.055,now);
+  master.connect(ctx.destination);
+
+  /* Airy swish: filtered noise rising through the spectrum. */
+  const duration=.21,frames=Math.max(1,Math.floor(ctx.sampleRate*duration));
+  const noiseBuffer=ctx.createBuffer(1,frames,ctx.sampleRate);
+  const data=noiseBuffer.getChannelData(0);
+  for(let i=0;i<frames;i++)data[i]=(Math.random()*2-1);
+  const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),noiseGain=ctx.createGain();
+  noise.buffer=noiseBuffer;
+  filter.type='bandpass';
+  filter.Q.value=.7;
+  filter.frequency.setValueAtTime(650,now);
+  filter.frequency.exponentialRampToValueAtTime(2600,now+.15);
+  noiseGain.gain.setValueAtTime(.0001,now);
+  noiseGain.gain.linearRampToValueAtTime(.12,now+.035);
+  noiseGain.gain.exponentialRampToValueAtTime(.0001,now+.19);
+  noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(master);
+  noise.start(now);noise.stop(now+duration);
+
+  const voice=(f0,f1,level,delay,dur)=>{
+    const osc=ctx.createOscillator(),gain=ctx.createGain(),start=now+delay,end=start+dur;
+    osc.type='sine';
+    osc.frequency.setValueAtTime(f0,start);
+    osc.frequency.exponentialRampToValueAtTime(f1,end);
+    gain.gain.setValueAtTime(.0001,start);
+    gain.gain.linearRampToValueAtTime(level,start+.006);
+    gain.gain.exponentialRampToValueAtTime(.0001,end);
+    osc.connect(gain);gain.connect(master);
+    osc.start(start);osc.stop(end+.004);
+  };
+
+  /* C · FLYMPUS Sync, extended: dark onset → lift → clean confirmation. */
+  voice(610,690,.46,0,.07);
+  voice(760,1320,.52,.025,.12);
+  voice(1760,1960,.22,.115,.075);
+  voice(2300,2460,.10,.145,.05);
+}
+function playFlympusRefreshSound(){
+  try{
+    const ctx=getFlympusNavAudioContext();if(!ctx)return;
+    if(ctx.state!=='running'){
+      try{ctx.resume?.()}catch{}
+    }
+    emitFlympusRefreshSound(ctx);
+  }catch{}
+}
+if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
+  window.__flympusPullRefreshSoundBound=true;
+  let pullStartY=0,pullStartX=0,pullTracking=false,pullRefreshSoundPlayed=false;
+  document.addEventListener('touchstart',e=>{
+    if(window.scrollY>1)return;
+    const t=e.touches?.[0];if(!t)return;
+    pullStartY=t.clientY;pullStartX=t.clientX;pullTracking=true;pullRefreshSoundPlayed=false;
+    /* Unlock audio while the finger is down, before the refresh threshold is crossed. */
+    const ctx=getFlympusNavAudioContext();
+    if(ctx&&ctx.state!=='running')try{ctx.resume?.()}catch{}
+  },{passive:true,capture:true});
+  document.addEventListener('touchmove',e=>{
+    if(!pullTracking||pullRefreshSoundPlayed)return;
+    const t=e.touches?.[0];if(!t)return;
+    const dy=t.clientY-pullStartY,dx=t.clientX-pullStartX;
+    if(dy>=88&&dy>Math.abs(dx)*1.35){
+      pullRefreshSoundPlayed=true;
+      playFlympusRefreshSound();
+    }
+  },{passive:true,capture:true});
+  const resetPullRefreshSound=()=>{pullTracking=false;pullRefreshSoundPlayed=false};
+  document.addEventListener('touchend',resetPullRefreshSound,{passive:true,capture:true});
+  document.addEventListener('touchcancel',resetPullRefreshSound,{passive:true,capture:true});
+}
 let bottomNavScrollSaveTimer=null;
 window.addEventListener('scroll',()=>{
   if(state.screen!==bottomNavRootForScreen(state.screen))return;
