@@ -1,7 +1,7 @@
 const fs=require("node:fs");
 const vm=require("node:vm");
 const assert=require("node:assert/strict");
-const storage=()=>{const values=new Map();return{getItem:key=>values.get(key)||null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)}};
+const storage=()=>{const values=new Map();return{get length(){return values.size},key:i=>[...values.keys()][i]??null,getItem:key=>values.has(key)?values.get(key):null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key),clear:()=>values.clear()}};
 class ElementStub{
   constructor(){this.innerHTML="";this.textContent="";this.value="";this.dataset={};this.style={};this._classes=new Set();this.classList={add:(...xs)=>xs.forEach(x=>this._classes.add(x)),remove:(...xs)=>xs.forEach(x=>this._classes.delete(x)),toggle:(x,force)=>{if(force===true){this._classes.add(x);return true}if(force===false){this._classes.delete(x);return false}if(this._classes.has(x)){this._classes.delete(x);return false}this._classes.add(x);return true},contains:x=>this._classes.has(x)}}
   querySelectorAll(){return[]} querySelector(){return null} addEventListener(){} click(){} appendChild(){}
@@ -12,6 +12,11 @@ const context={window:{},document,localStorage:storage(),sessionStorage:storage(
 context.window=context;vm.createContext(context);
 for(const file of ["assets/ep-catalog.js","assets/aerostar-platform.js","assets/ip-catalog.js","assets/technician-catalog.js","assets/training-core.js","assets/ep-lessons-screening.js","assets/ep-lessons-rc-1.js","assets/ep-lessons-rc-2.js","assets/ep-lessons-half.js","assets/ep-lessons-full-day-a.js","assets/ep-lessons-full-day-b.js","assets/ep-lessons-night.js"]){vm.runInContext(fs.readFileSync(file,"utf8"),context,{filename:file})}
 const html=fs.readFileSync("index.html","utf8");
+const manifest=JSON.parse(fs.readFileSync("manifest.webmanifest","utf8"));
+assert.equal(manifest.short_name,"FLYMPUS","Web app manifest must identify FLYMPUS consistently");
+assert.equal(manifest.display,"standalone","Home Screen installation must use standalone display mode");
+assert.equal(manifest.start_url,"./","Home Screen app must start inside the same GitHub Pages scope");
+assert(html.includes('rel="manifest" href="./manifest.webmanifest"')&&html.includes('apple-mobile-web-app-title" content="FLYMPUS"'),"Index must advertise the FLYMPUS manifest and iOS app title");
 assert(html.includes("tile('platform','Platform',platformValue)")&&html.includes("tile('training','Training type',meta.trainingKind)")&&html.includes("countryTile=tile('country','Country',meta.country,showContext?'':'countryWide')"),"My Courses must render course details as visible metadata tiles");
 assert(html.includes("platformLabels:{rc_simulator:'RC Simulator',rc_model:'Shahak'"),"Shahak must be the default display name for rc_model");
 assert(html.includes("catalog.platformLabels=labels"),"Platform renames must persist inside the architecture catalog");
@@ -36,6 +41,10 @@ assert(html.includes('id="personalCropModal"')&&html.includes('id="personalCropV
 assert(html.includes("function personalCropDataUrl(")&&html.includes("function renderPersonalPhotoCrop()"),"Profile photo cropper must support repositioning, zooming and exporting the adjusted square");
 assert(html.includes("onpointerdown")&&html.includes("onpointermove")&&html.includes("personalCropState.zoom"),"Profile photo cropper must support touch/pointer drag and zoom adjustment");
 assert(html.includes("Your name, email and course role are managed by course administration."),"Self-service personal profile must keep identity and role read-only");
+assert(html.includes('id="exportFlympusBackup"')&&html.includes('id="flympusBackupInput"')&&html.includes("function flympusBackupPayload()")&&html.includes("function restoreFlympusBackup(payload)"),"Personal profile must expose full FLYMPUS device-data export and import");
+assert(html.includes("startsWith('ct-review-')")&&html.includes("startsWith('flympus-')"),"Device backup must include both review data and training-package overrides");
+assert(html.includes("function shouldShowStandaloneMigration()")&&html.includes("Bring your Safari data into FLYMPUS"),"An empty Home Screen app must explain the one-time Safari-to-app data transfer");
+assert(html.includes("navigator.storage?.persist")&&html.includes("ensurePersistentDeviceStorage();"),"The app must request persistent device storage when the browser supports it");
 assert(html.includes("function positionNotificationDropdown()"),"Notifications panel must position safely on mobile");
 assert(html.includes(".panel{display:flex;flex-direction:column;padding-bottom:calc(8px + env(safe-area-inset-bottom))}.panel #nav{flex:0 0 auto}.drawerFooter{margin-top:auto;margin-bottom:6px}"),"Mobile account card should sit close to the true bottom while respecting the safe area");
 assert(html.includes(".topNotificationDropdown,.topPersonalProfileDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right))"),"Mobile notification and personal-profile panels must stay within the viewport");
@@ -144,6 +153,10 @@ const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].ma
 assert.equal(scripts.length,2);vm.runInContext(scripts[0],context,{filename:"index-course-header-boot.js"});vm.runInContext(scripts[1],context,{filename:"index-inline.js"});
 const switcherOrder=vm.runInContext("sortCourseSwitcherRows([{key:'done',course:{startsOn:'2025-01-01'},lifecycle:{id:'COMPLETED'}},{key:'future2',course:{startsOn:'2027-03-01'},lifecycle:{id:'UPCOMING'}},{key:'current',course:{startsOn:'2024-01-01'},lifecycle:{id:'COMPLETED'}},{key:'runOld',course:{startsOn:'2026-01-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'runNew',course:{startsOn:'2026-08-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'future1',course:{startsOn:'2027-01-01'},lifecycle:{id:'UPCOMING'}}],'current').map(x=>x.key).join(',')",context);
 assert.equal(switcherOrder,"current,runNew,runOld,future1,future2,done","Quick switcher order must be Selected, In Progress newest first, Upcoming soonest first, then Completed");
+vm.runInContext("localStorage.setItem('ct-review-portability-test','alpha');localStorage.setItem('flympus-portability-test','beta');localStorage.setItem('unrelated-key','keep');const __portable=flympusBackupPayload();localStorage.removeItem('ct-review-portability-test');localStorage.removeItem('flympus-portability-test');restoreFlympusBackup(__portable)",context);
+assert.equal(context.localStorage.getItem("ct-review-portability-test"),"alpha","Backup restore must recover review-prefixed device data");
+assert.equal(context.localStorage.getItem("flympus-portability-test"),"beta","Backup restore must recover FLYMPUS package/override data");
+assert.equal(context.localStorage.getItem("unrelated-key"),"keep","Backup restore must not touch unrelated origin storage");
 vm.runInContext("go('record');go('evaluation')",context);
 assert.equal(vm.runInContext("state.screen",context),"evaluation","Navigation should reach the requested child screen");
 assert.equal(vm.runInContext("appNavHistory.join(',')",context),"home,record","Navigation history should keep Home as the root and Record as the immediate parent");
