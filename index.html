@@ -2608,6 +2608,63 @@ body::before{
 </style>
 
 <style>
+/* ===== Bounded page scrollbar ===== */
+html,body{
+  scrollbar-width:none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar{
+  width:0!important;
+  height:0!important;
+  display:none!important;
+}
+.flympusPageScrollbar{
+  position:fixed;
+  right:4px;
+  top:var(--flympus-scrollbar-top,72px);
+  bottom:var(--flympus-scrollbar-bottom,18px);
+  width:5px;
+  z-index:28;
+  border-radius:999px;
+  background:rgba(12,49,86,.13);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .14s ease,top .18s ease,bottom .18s ease;
+  overflow:hidden;
+}
+.flympusPageScrollbar.visible{
+  opacity:.96;
+}
+.flympusPageScrollbarThumb{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  min-height:44px;
+  border-radius:999px;
+  background:rgba(8,42,76,.72);
+  box-shadow:0 1px 4px rgba(4,25,46,.18);
+  transform:translate3d(0,0,0);
+  will-change:transform,height;
+}
+@media(min-width:900px){
+  .flympusPageScrollbar{
+    right:8px;
+    width:7px;
+    background:rgba(12,49,86,.11);
+  }
+  .flympusPageScrollbarThumb{
+    min-height:52px;
+    background:rgba(8,42,76,.66);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .flympusPageScrollbar{transition:none!important}
+}
+</style>
+
+<style>
 /* ===== iOS Home Screen standalone pull-to-refresh ===== */
 @media(max-width:899px){
   body.flympusStandalonePull::before,
@@ -2708,7 +2765,7 @@ body::before{
 </style>
 </head>
 <body>
-<div class="app"><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p><div class="deviceDataBox"><div class="deviceDataHead"><b>Device data</b><span class="deviceDataMode" id="deviceDataMode">Local</span></div><p id="deviceDataCopy">Courses, photos, evaluations and settings are stored locally on this device.</p><div class="deviceDataActions"><button class="btn secondary small" type="button" id="exportFlympusBackup">Export backup</button><label class="btn secondary small" for="flympusBackupInput" style="cursor:pointer">Import backup</label></div><p class="deviceDataHint" id="deviceDataHint">Use a backup to move the complete FLYMPUS setup between Safari and the Home Screen app.</p></div></div></div></div></header><input id="flympusBackupInput" type="file" accept=".json,application/json" hidden><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0719 · record form cleanup</div><div class="toast" id="toast"></div></div>
+<div class="app"><div class="flympusPageScrollbar" id="flympusPageScrollbar" aria-hidden="true"><div class="flympusPageScrollbarThumb" id="flympusPageScrollbarThumb"></div></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p><div class="deviceDataBox"><div class="deviceDataHead"><b>Device data</b><span class="deviceDataMode" id="deviceDataMode">Local</span></div><p id="deviceDataCopy">Courses, photos, evaluations and settings are stored locally on this device.</p><div class="deviceDataActions"><button class="btn secondary small" type="button" id="exportFlympusBackup">Export backup</button><label class="btn secondary small" for="flympusBackupInput" style="cursor:pointer">Import backup</label></div><p class="deviceDataHint" id="deviceDataHint">Use a backup to move the complete FLYMPUS setup between Safari and the Home Screen app.</p></div></div></div></div></header><input id="flympusBackupInput" type="file" accept=".json,application/json" hidden><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0719 · record form cleanup</div><div class="toast" id="toast"></div></div>
 <script>
 (()=>{try{
   const active=JSON.parse(localStorage.getItem('ct-review-active-course')||'{}')||{};
@@ -3567,6 +3624,61 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     resetFlympusAudioSession();
   });
 }
+let flympusPageScrollbarTicking=false;
+function updateFlympusPageScrollbar(){
+  flympusPageScrollbarTicking=false;
+  const track=$('#flympusPageScrollbar'),thumb=$('#flympusPageScrollbarThumb');
+  if(!track||!thumb)return;
+
+  const scroller=document.scrollingElement||document.documentElement;
+  const viewport=Math.max(1,window.innerHeight||document.documentElement?.clientHeight||1);
+  const content=Math.max(viewport,Number(scroller?.scrollHeight||document.body?.scrollHeight||viewport));
+  const scrollMax=Math.max(0,content-viewport);
+
+  const header=$('.top');
+  const headerRect=header?.getBoundingClientRect?.();
+  const topBound=Math.max(8,Math.min(viewport-80,(headerRect?.bottom||0)+8));
+
+  let bottomBound=16;
+  const dock=$('#mobileBottomNav');
+  if(dock){
+    const rect=dock.getBoundingClientRect?.();
+    const style=getComputedStyle(dock);
+    const visible=style.display!=='none'&&style.visibility!=='hidden'&&rect&&rect.height>0&&rect.top<viewport&&rect.bottom>0;
+    if(visible)bottomBound=Math.max(16,viewport-rect.top+10);
+  }
+
+  const trackHeight=Math.max(56,viewport-topBound-bottomBound);
+  document.documentElement?.style?.setProperty('--flympus-scrollbar-top',topBound.toFixed(1)+'px');
+  document.documentElement?.style?.setProperty('--flympus-scrollbar-bottom',bottomBound.toFixed(1)+'px');
+
+  if(scrollMax<=4||trackHeight<=56){
+    track.classList.remove('visible');
+    return;
+  }
+
+  const minThumb=window.innerWidth>=900?52:44;
+  const thumbHeight=Math.max(minThumb,Math.min(trackHeight,trackHeight*(viewport/content)));
+  const maxTravel=Math.max(0,trackHeight-thumbHeight);
+  const y=maxTravel*(Math.max(0,Number(scroller?.scrollTop||window.scrollY||0))/scrollMax);
+
+  thumb.style.height=thumbHeight.toFixed(1)+'px';
+  thumb.style.transform='translate3d(0,'+Math.max(0,Math.min(maxTravel,y)).toFixed(1)+'px,0)';
+  track.classList.add('visible');
+}
+function requestFlympusPageScrollbarUpdate(){
+  if(flympusPageScrollbarTicking)return;
+  flympusPageScrollbarTicking=true;
+  if(typeof requestAnimationFrame==='function')requestAnimationFrame(updateFlympusPageScrollbar);
+  else setTimeout(updateFlympusPageScrollbar,16);
+}
+window.addEventListener('scroll',requestFlympusPageScrollbarUpdate,{passive:true});
+window.addEventListener('resize',requestFlympusPageScrollbarUpdate,{passive:true});
+window.addEventListener('orientationchange',requestFlympusPageScrollbarUpdate,{passive:true});
+window.addEventListener('pageshow',()=>setTimeout(requestFlympusPageScrollbarUpdate,0));
+setTimeout(requestFlympusPageScrollbarUpdate,0);
+setTimeout(requestFlympusPageScrollbarUpdate,120);
+
 let bottomNavScrollSaveTimer=null;
 window.addEventListener('scroll',()=>{
   if(state.screen!==bottomNavRootForScreen(state.screen))return;
@@ -3579,6 +3691,8 @@ function setBottomDockHidden(hidden){
   if(dock.classList.contains('dockHidden')===!!hidden)return;
   dock.classList.toggle('dockHidden',!!hidden);
   bottomDockLastSwitchTime=performance.now?.()||Date.now();
+  requestFlympusPageScrollbarUpdate();
+  setTimeout(requestFlympusPageScrollbarUpdate,680);
 }
 function updateBottomDockFromScroll(){
   bottomDockTicking=false;
