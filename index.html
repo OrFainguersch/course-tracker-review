@@ -3086,8 +3086,8 @@ function scrollActiveBottomNavTop(root){
 }
 function createFlympusWavUrl(kind){
   try{
-    if(typeof Blob==='undefined'||!URL?.createObjectURL)return'';
-    const sampleRate=8000,duration=kind==='nav'?.07:.24,count=Math.max(1,Math.floor(sampleRate*duration)),samples=new Float32Array(count);
+    if(typeof Blob==='undefined'||typeof URL==='undefined'||typeof URL.createObjectURL!=='function')return'';
+    const sampleRate=8000,duration=kind==='nav'?0.07:0.24,count=Math.max(1,Math.floor(sampleRate*duration)),samples=new Float32Array(count);
     const addVoice=(f0,f1,level,delay,dur,attack=.001)=>{
       const start=Math.max(0,Math.floor(delay*sampleRate)),end=Math.min(count,Math.floor((delay+dur)*sampleRate)),k=f1&&f1!==f0?Math.log(f1/f0)/dur:0;
       for(let i=start;i<end;i++){
@@ -3120,7 +3120,7 @@ function createFlympusWavUrl(kind){
       addVoice(2300,2460,.10,.145,.05,.006);
     }
     let peak=.0001;for(let i=0;i<count;i++)peak=Math.max(peak,Math.abs(samples[i]));
-    const scale=(kind==='nav'?.18:.22)/peak,dataBytes=count*2,buffer=new ArrayBuffer(44+dataBytes),view=new DataView(buffer);
+    const scale=(kind==='nav'?0.18:0.22)/peak,dataBytes=count*2,buffer=new ArrayBuffer(44+dataBytes),view=new DataView(buffer);
     const ascii=(offset,text)=>{for(let i=0;i<text.length;i++)view.setUint8(offset+i,text.charCodeAt(i))};
     ascii(0,'RIFF');view.setUint32(4,36+dataBytes,true);ascii(8,'WAVE');ascii(12,'fmt ');
     view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,1,true);view.setUint32(24,sampleRate,true);
