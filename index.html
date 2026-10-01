@@ -3223,7 +3223,7 @@ function scrollActiveBottomNavTop(root){
   bottomNavScrollPositions[root]=0;persistBottomNavScroll();
   try{window.scrollTo({top:0,left:0,behavior:'smooth'})}catch{window.scrollTo?.(0,0)}
 }
-let flympusUiAudioCtx=null,flympusUiNeedsFreshContext=true,flympusAudioSessionResetTimer=null,flympusAudioSessionSettleTimer=null;
+let flympusUiAudioCtx=null,flympusUiNeedsFreshContext=true,flympusUiNeedsSessionRecovery=true,flympusAudioSessionRecoveryPromise=null;
 
 function setFlympusAmbientAudioSession(){
   try{
@@ -3231,33 +3231,36 @@ function setFlympusAmbientAudioSession(){
   }catch{}
 }
 
-function beginFlympusTransientAudioSession(){
+function recoverFlympusAmbientAudioSession(){
+  if(!flympusUiNeedsSessionRecovery)return Promise.resolve();
+  if(flympusAudioSessionRecoveryPromise)return flympusAudioSessionRecoveryPromise;
+  flympusUiNeedsSessionRecovery=false;
   try{
     const session=navigator.audioSession;
-    if(!session)return;
-    clearTimeout(flympusAudioSessionResetTimer);
-    clearTimeout(flympusAudioSessionSettleTimer);
-    /* A genuinely different category is important on iOS: WebKit can keep a
-       stale cached category across native reloads. "transient" is specifically
-       intended for short UI/notification sounds and still follows Silent mode. */
-    try{session.type='ambient'}catch{}
-    try{session.type='transient'}catch{}
-  }catch{}
-}
+    if(!session)return Promise.resolve();
 
-function endFlympusTransientAudioSession(delay=120){
-  clearTimeout(flympusAudioSessionSettleTimer);
-  flympusAudioSessionSettleTimer=setTimeout(()=>{
-    flympusAudioSessionSettleTimer=null;
+    /* WebKit can report a healthy/running AudioContext while its native output
+       route is stale after navigation. Reassigning the cached category is then
+       deduplicated. Make one real, task-separated category transition on the
+       first gesture, but keep every audible node muted until ambient is back so
+       the physical Ring/Silent switch remains authoritative. */
+    try{session.type='playback'}catch{}
+    flympusAudioSessionRecoveryPromise=new Promise(resolve=>{
+      setTimeout(()=>{
+        try{session.type='ambient'}catch{}
+        setTimeout(resolve,0);
+      },0);
+    });
+    return flympusAudioSessionRecoveryPromise;
+  }catch{
     setFlympusAmbientAudioSession();
-  },Math.max(0,delay));
+    return Promise.resolve();
+  }
 }
 
 function resetFlympusAudioSession(){
-  clearTimeout(flympusAudioSessionResetTimer);
-  clearTimeout(flympusAudioSessionSettleTimer);
-  flympusAudioSessionResetTimer=null;
-  flympusAudioSessionSettleTimer=null;
+  flympusUiNeedsSessionRecovery=true;
+  flympusAudioSessionRecoveryPromise=null;
   setFlympusAmbientAudioSession();
 }
 
@@ -3286,7 +3289,8 @@ function getFlympusUiAudioContext(){
 
 function prepareFlympusUiAudioGesture(){
   try{
-    beginFlympusTransientAudioSession();
+    const needsSessionWait=flympusUiNeedsSessionRecovery;
+    const sessionReady=recoverFlympusAmbientAudioSession();
 
     /* On the first real gesture after pageshow/visibility restore, never trust a
        context Safari may have carried in a stale "running but silent" session. */
@@ -3299,19 +3303,21 @@ function prepareFlympusUiAudioGesture(){
     }
 
     const ctx=getFlympusUiAudioContext();if(!ctx)return null;
-    let readyPromise=Promise.resolve(ctx);
-    if(ctx.state!=='running'){
+    const needsResumeWait=ctx.state!=='running';
+    let resumeReady=Promise.resolve(ctx);
+    if(needsResumeWait){
       try{
-        readyPromise=Promise.resolve(ctx.resume?.()).then(()=>ctx).catch(()=>ctx);
+        resumeReady=Promise.resolve(ctx.resume?.()).then(()=>ctx).catch(()=>ctx);
       }catch{}
     }
-    ctx.__flympusReadyPromise=readyPromise;
+    ctx.__flympusReadyNow=!needsSessionWait&&!needsResumeWait;
+    ctx.__flympusReadyPromise=Promise.all([sessionReady,resumeReady]).then(()=>ctx).catch(()=>ctx);
 
     /* Silent one-sample unlock, created and started inside the user's gesture. */
     try{
       const buffer=ctx.createBuffer(1,1,22050),src=ctx.createBufferSource(),gain=ctx.createGain();
       src.buffer=buffer;
-      gain.gain.setValueAtTime(.000001,ctx.currentTime);
+      gain.gain.setValueAtTime(0,ctx.currentTime);
       src.connect(gain);gain.connect(ctx.destination);
       src.start(ctx.currentTime);src.stop(ctx.currentTime+.002);
     }catch{}
@@ -3319,42 +3325,65 @@ function prepareFlympusUiAudioGesture(){
   }catch{return null}
 }
 
-function emitFlympusNavSignature(ctx){
-  if(!ctx)return;
-  const now=ctx.currentTime+.001;
+function armFlympusNavSignature(ctx){
+  if(!ctx)return null;
+  const now=ctx.currentTime;
   const master=ctx.createGain();
-  master.gain.setValueAtTime(.05,now);
+  master.gain.setValueAtTime(0,now);
   master.connect(ctx.destination);
   const voice=(freq,level,delay,duration)=>{
-    const osc=ctx.createOscillator(),gain=ctx.createGain(),start=now+delay,end=start+duration;
-    osc.type='sine';osc.frequency.setValueAtTime(freq,start);
-    gain.gain.setValueAtTime(.0001,start);
-    gain.gain.linearRampToValueAtTime(level,start+.001);
-    gain.gain.exponentialRampToValueAtTime(.0001,end);
+    const osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.type='sine';osc.frequency.setValueAtTime(freq,now);
+    gain.gain.setValueAtTime(0,now);
     osc.connect(gain);gain.connect(master);
-    osc.start(start);osc.stop(end+.003);
+    /* Starting every requested source inside touchstart preserves the original
+       iOS user activation even when resume/category recovery settles later. */
+    osc.start(now);
+    return{osc,gain,freq,level,delay,duration};
   };
-  voice(610,.95,0,.034);
-  voice(1220,.20,0,.028);
-  voice(1490,.34,.005,.028);
-  voice(2260,.13,.010,.020);
+  return{ctx,master,voices:[
+    voice(610,.95,0,.034),
+    voice(1220,.20,0,.028),
+    voice(1490,.34,.005,.028),
+    voice(2260,.13,.010,.020)
+  ],fired:false,stopped:false};
+}
+
+function stopFlympusNavSignature(graph){
+  if(!graph||graph.stopped)return;
+  graph.stopped=true;
+  graph.voices?.forEach(v=>{
+    try{v.osc?.stop?.()}catch{}
+    try{v.osc?.disconnect?.()}catch{}
+    try{v.gain?.disconnect?.()}catch{}
+  });
+  try{graph.master?.disconnect?.()}catch{}
+}
+
+function fireFlympusNavSignature(graph){
+  if(!graph||graph.fired||graph.stopped)return;
+  graph.fired=true;
+  const now=graph.ctx.currentTime+.001;
+  graph.master.gain.setValueAtTime(.05,now);
+  graph.voices.forEach(v=>{
+    const start=now+v.delay,end=start+v.duration;
+    v.osc.frequency.setValueAtTime(v.freq,start);
+    v.gain.gain.setValueAtTime(.0001,start);
+    v.gain.gain.linearRampToValueAtTime(v.level,start+.001);
+    v.gain.gain.exponentialRampToValueAtTime(.0001,end);
+    try{v.osc.stop(end+.003)}catch{}
+  });
+  setTimeout(()=>stopFlympusNavSignature(graph),90);
 }
 
 function playFlympusBottomNavSound(){
   try{
     const ctx=prepareFlympusUiAudioGesture();if(!ctx)return;
-    let played=false;
-    const emit=()=>{
-      if(played)return;
-      played=true;
-      emitFlympusNavSignature(ctx);
-      endFlympusTransientAudioSession(100);
-    };
-    if(ctx.state==='running')emit();
-    else Promise.resolve(ctx.__flympusReadyPromise).then(()=>{
-      if(ctx.state==='running')emit();
-      else endFlympusTransientAudioSession(60);
-    }).catch(()=>endFlympusTransientAudioSession(60));
+    const graph=armFlympusNavSignature(ctx);if(!graph)return;
+    if(ctx.__flympusReadyNow)fireFlympusNavSignature(graph);
+    else Promise.resolve(ctx.__flympusReadyPromise)
+      .then(()=>fireFlympusNavSignature(graph))
+      .catch(()=>stopFlympusNavSignature(graph));
   }catch{}
 }
 
@@ -3362,7 +3391,7 @@ function armFlympusRefreshSound(){
   try{
     const ctx=prepareFlympusUiAudioGesture();if(!ctx)return null;
     const master=ctx.createGain();
-    master.gain.setValueAtTime(.055,ctx.currentTime);
+    master.gain.setValueAtTime(0,ctx.currentTime);
     master.connect(ctx.destination);
 
     const noiseBuffer=ctx.createBuffer(1,Math.max(64,Math.floor(ctx.sampleRate*.08)),ctx.sampleRate);
@@ -3371,14 +3400,14 @@ function armFlympusRefreshSound(){
     const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),noiseGain=ctx.createGain();
     noise.buffer=noiseBuffer;noise.loop=true;
     filter.type='bandpass';filter.Q.value=.7;filter.frequency.setValueAtTime(650,ctx.currentTime);
-    noiseGain.gain.setValueAtTime(.0001,ctx.currentTime);
+    noiseGain.gain.setValueAtTime(0,ctx.currentTime);
     noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(master);
     noise.start(ctx.currentTime);
 
     const makeVoice=freq=>{
       const osc=ctx.createOscillator(),gain=ctx.createGain();
       osc.type='sine';osc.frequency.setValueAtTime(freq,ctx.currentTime);
-      gain.gain.setValueAtTime(.0001,ctx.currentTime);
+      gain.gain.setValueAtTime(0,ctx.currentTime);
       osc.connect(gain);gain.connect(master);
       osc.start(ctx.currentTime);
       return{osc,gain};
@@ -3387,7 +3416,7 @@ function armFlympusRefreshSound(){
     return{
       ctx,master,noise,filter,noiseGain,
       voices:[makeVoice(610),makeVoice(760),makeVoice(1760),makeVoice(2300)],
-      fired:false,stopped:false
+      fired:false,emitted:false,stopped:false
     };
   }catch{return null}
 }
@@ -3396,20 +3425,26 @@ function stopFlympusRefreshSound(graph){
   if(!graph||graph.stopped)return;
   graph.stopped=true;
   try{graph.noise?.stop?.()}catch{}
-  graph.voices?.forEach(v=>{try{v.osc?.stop?.()}catch{}});
+  try{graph.noise?.disconnect?.()}catch{}
+  try{graph.filter?.disconnect?.()}catch{}
+  try{graph.noiseGain?.disconnect?.()}catch{}
+  graph.voices?.forEach(v=>{
+    try{v.osc?.stop?.()}catch{}
+    try{v.osc?.disconnect?.()}catch{}
+    try{v.gain?.disconnect?.()}catch{}
+  });
   try{graph.master?.disconnect?.()}catch{}
-  if(!graph.fired)endFlympusTransientAudioSession(40);
 }
 
 function fireFlympusRefreshSound(graph){
-  try{
-    if(!graph||graph.fired||graph.stopped)return;
-    graph.fired=true;
+  if(!graph||graph.fired||graph.stopped)return;
+  graph.fired=true;
+  const emit=()=>{try{
+    if(graph.emitted||graph.stopped)return;
+    graph.emitted=true;
     const ctx=graph.ctx;
-    if(ctx.state!=='running'){
-      try{ctx.resume?.()}catch{}
-    }
     const now=ctx.currentTime+.002;
+    graph.master.gain.setValueAtTime(.055,now);
 
     graph.filter.frequency.cancelScheduledValues(now);
     graph.filter.frequency.setValueAtTime(650,now);
@@ -3436,8 +3471,12 @@ function fireFlympusRefreshSound(graph){
     voice(graph.voices[2],1760,1960,.22,.115,.075);
     voice(graph.voices[3],2300,2460,.10,.145,.05);
 
-    setTimeout(()=>{stopFlympusRefreshSound(graph);endFlympusTransientAudioSession(40)},280);
-  }catch{}
+    setTimeout(()=>stopFlympusRefreshSound(graph),280);
+  }catch{stopFlympusRefreshSound(graph)}};
+  if(graph.ctx.__flympusReadyNow)emit();
+  else Promise.resolve(graph.ctx.__flympusReadyPromise)
+    .then(emit)
+    .catch(()=>stopFlympusRefreshSound(graph));
 }
 
 /* Put Safari back in an ambient UI-sound session as soon as this document is

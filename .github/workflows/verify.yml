@@ -25,3 +25,5 @@ jobs:
         run: node tests/training-core.test.cjs
       - name: UI render smoke tests
         run: node tests/ui-render.test.cjs
+      - name: iOS audio lifecycle tests
+        run: node tests/ios-audio-lifecycle.test.cjs
