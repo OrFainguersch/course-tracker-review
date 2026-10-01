@@ -3063,30 +3063,54 @@ function scrollActiveBottomNavTop(root){
   bottomNavScrollPositions[root]=0;persistBottomNavScroll();
   try{window.scrollTo({top:0,left:0,behavior:'smooth'})}catch{window.scrollTo?.(0,0)}
 }
-let flympusNavAudioCtx=null;
-function discardFlympusNavAudioContext(){
-  const old=flympusNavAudioCtx;
-  flympusNavAudioCtx=null;
+let flympusUiAudioCtx=null;
+function discardFlympusUiAudioContext(){
+  const old=flympusUiAudioCtx;
+  flympusUiAudioCtx=null;
   if(old&&old.state!=='closed'){
     try{old.close?.()}catch{}
   }
 }
-function createFlympusNavAudioContext(){
+function createFlympusUiAudioContext(){
   try{
     const AudioCtx=window.AudioContext||window.webkitAudioContext;
     if(!AudioCtx)return null;
     try{return new AudioCtx({latencyHint:'interactive'})}catch{return new AudioCtx()}
   }catch{return null}
 }
-function getFlympusNavAudioContext(){
-  if(!flympusNavAudioCtx||flympusNavAudioCtx.state==='closed'){
-    flympusNavAudioCtx=createFlympusNavAudioContext();
+function getFlympusUiAudioContext(){
+  if(!flympusUiAudioCtx||flympusUiAudioCtx.state==='closed'){
+    flympusUiAudioCtx=createFlympusUiAudioContext();
   }
-  return flympusNavAudioCtx;
+  return flympusUiAudioCtx;
+}
+function primeFlympusUiAudio(){
+  try{
+    const ctx=getFlympusUiAudioContext();if(!ctx)return null;
+    /* Keep ONE Web Audio context for all FLYMPUS UI sounds. Multiple contexts
+       compete for iOS' audio session: repeated pull gestures can silence later
+       contexts and make the first nav tap after a pull merely wake audio up. */
+    if(ctx.state!=='running'){
+      try{ctx.resume?.()}catch{}
+    }
+    /* One inaudible sample is a conventional iOS Web Audio unlock. Run it on
+       every real gesture so a context that Safari suspended between gestures is
+       re-armed without creating/closing another AudioContext. */
+    try{
+      const buffer=ctx.createBuffer(1,1,22050),source=ctx.createBufferSource(),gain=ctx.createGain();
+      source.buffer=buffer;
+      gain.gain.setValueAtTime(.000001,ctx.currentTime);
+      source.connect(gain);gain.connect(ctx.destination);
+      source.start(ctx.currentTime);source.stop(ctx.currentTime+.002);
+    }catch{}
+    return ctx;
+  }catch{return null}
 }
 function emitFlympusNavSignature(ctx){
   if(!ctx)return;
-  const now=ctx.currentTime+.004;
+  /* Leave enough headroom for a just-resumed iOS audio session. currentTime
+     does not advance while suspended, so this remains correctly queued. */
+  const now=ctx.currentTime+.012;
   const master=ctx.createGain();
   master.gain.setValueAtTime(.05,now);
   master.connect(ctx.destination);
@@ -3107,23 +3131,13 @@ function emitFlympusNavSignature(ctx){
 }
 function playFlympusBottomNavSound(){
   try{
-    /* Safari can leave Web Audio in an interrupted state. Re-create only that
-       stale context, then resume + schedule the tone synchronously inside the
-       actual finger-down gesture. Do not wait for a Promise before scheduling:
-       iOS reliably queues the scheduled nodes while resume finishes. */
-    if(flympusNavAudioCtx&&(flympusNavAudioCtx.state==='interrupted'||flympusNavAudioCtx.state==='closed')){
-      discardFlympusNavAudioContext();
-    }
-    const ctx=getFlympusNavAudioContext();if(!ctx)return;
-    if(ctx.state!=='running'){
-      try{ctx.resume?.()}catch{}
-    }
+    const ctx=primeFlympusUiAudio();if(!ctx)return;
     emitFlympusNavSignature(ctx);
   }catch{}
 }
 function emitFlympusRefreshSound(ctx){
   if(!ctx)return;
-  const now=ctx.currentTime+.001;
+  const now=ctx.currentTime+.012;
   const master=ctx.createGain();
   master.gain.setValueAtTime(.055,now);
   master.connect(ctx.destination);
@@ -3163,44 +3177,13 @@ function emitFlympusRefreshSound(ctx){
   voice(1760,1960,.22,.115,.075);
   voice(2300,2460,.10,.145,.05);
 }
-let flympusRefreshAudioCtx=null;
-function discardFlympusRefreshAudioContext(){
-  const old=flympusRefreshAudioCtx;
-  flympusRefreshAudioCtx=null;
-  if(old&&old.state!=='closed'){
-    try{old.close?.()}catch{}
-  }
-}
-function createFlympusRefreshAudioContext(){
+function playFlympusRefreshSound(ctx=flympusUiAudioCtx){
   try{
-    const AudioCtx=window.AudioContext||window.webkitAudioContext;
-    if(!AudioCtx)return null;
-    try{return new AudioCtx({latencyHint:'interactive'})}catch{return new AudioCtx()}
-  }catch{return null}
-}
-function armFreshFlympusRefreshAudio(){
-  try{
-    /* Every pull gets its own audio context. Reusing the context is unreliable
-       after the first iOS overscroll gesture, even when state still says running. */
-    discardFlympusRefreshAudioContext();
-    const ctx=createFlympusRefreshAudioContext();
-    flympusRefreshAudioCtx=ctx;
-    if(!ctx)return null;
-    if(ctx.state!=='running'){
-      try{ctx.resume?.()}catch{}
+    const ready=ctx||primeFlympusUiAudio();if(!ready)return;
+    if(ready.state!=='running'){
+      try{ready.resume?.()}catch{}
     }
-    return ctx;
-  }catch{return null}
-}
-function playFlympusRefreshSound(ctx=flympusRefreshAudioCtx){
-  try{
-    if(!ctx)return;
-    if(ctx.state!=='running'){
-      try{ctx.resume?.()}catch{}
-    }
-    /* Schedule immediately. A suspended iOS context keeps these nodes queued
-       and starts them as soon as the resume triggered by this gesture completes. */
-    emitFlympusRefreshSound(ctx);
+    emitFlympusRefreshSound(ready);
   }catch{}
 }
 if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
@@ -3213,13 +3196,13 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   };
   document.addEventListener('touchstart',e=>{
     resetPullRefreshSound();
-    /* iOS can settle a few pixels below zero/top after an overscroll. Treat a
-       small top offset as top so consecutive pull gestures are not rejected. */
     const top=Math.max(0,Number(window.scrollY||document.scrollingElement?.scrollTop||document.documentElement?.scrollTop||0));
-    if(top>20)return;
+    if(top>24)return;
     const t=e.touches?.[0];if(!t)return;
     pullStartY=t.clientY;pullStartX=t.clientX;pullTracking=true;
-    pullRefreshGestureCtx=armFreshFlympusRefreshAudio();
+    /* Re-arm the shared context on EVERY pull. Never create a fresh context per
+       pull: iOS begins suppressing them after repeated overscroll gestures. */
+    pullRefreshGestureCtx=primeFlympusUiAudio();
   },{passive:true,capture:true});
   document.addEventListener('touchmove',e=>{
     if(!pullTracking||pullRefreshSoundPlayed)return;
@@ -3234,16 +3217,13 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   document.addEventListener('touchcancel',resetPullRefreshSound,{passive:true,capture:true});
   window.addEventListener('pageshow',()=>{
     resetPullRefreshSound();
-    if(flympusRefreshAudioCtx&&(flympusRefreshAudioCtx.state==='interrupted'||flympusRefreshAudioCtx.state==='closed')){
-      discardFlympusRefreshAudioContext();
-    }
+    if(flympusUiAudioCtx?.state==='closed')discardFlympusUiAudioContext();
   });
   document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='visible'&&flympusRefreshAudioCtx?.state==='interrupted'){
-      discardFlympusRefreshAudioContext();
-    }
-    if(document.visibilityState==='visible'&&flympusNavAudioCtx?.state==='interrupted'){
-      discardFlympusNavAudioContext();
+    if(document.visibilityState!=='visible')return;
+    if(flympusUiAudioCtx?.state==='closed')discardFlympusUiAudioContext();
+    else if(flympusUiAudioCtx&&flympusUiAudioCtx.state!=='running'){
+      try{flympusUiAudioCtx.resume?.()}catch{}
     }
   });
 }
