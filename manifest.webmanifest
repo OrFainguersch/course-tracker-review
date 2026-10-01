@@ -1,0 +1,18 @@
+{
+  "name": "FLYMPUS — Train. Track. Progress.",
+  "short_name": "FLYMPUS",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f8fc",
+  "theme_color": "#0b3157",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./assets/flympus-app-icon.webp",
+      "type": "image/webp",
+      "purpose": "any"
+    }
+  ]
+}
