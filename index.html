@@ -1900,9 +1900,7 @@ main,
 .mobileBottomNav,
 .reviewBanner,
 .toast{
-  translate:0 0;
   transition:translate .24s cubic-bezier(.22,.72,.22,1);
-  will-change:translate;
 }
 body.drawerPushOpen .top,
 body.drawerPushOpen main,
@@ -1984,6 +1982,106 @@ body.drawerPushOpen .backdrop{
   }
   .mobileBottomIconButton{
     min-height:56px!important;
+  }
+}
+</style>
+
+<style>
+/* ===== Roster Add Person modal · viewport-safe mobile + desktop ===== */
+body.personModalOpen{
+  overflow:hidden!important;
+}
+#personModal{
+  position:fixed!important;
+  inset:0!important;
+  z-index:300!important;
+  width:100vw!important;
+  height:100dvh!important;
+  min-height:100vh!important;
+  padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom))!important;
+  align-items:flex-end!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+  background:rgba(4,18,32,.48)!important;
+  overscroll-behavior:contain!important;
+}
+#personModal .modalCard{
+  position:relative!important;
+  width:min(620px,100%)!important;
+  max-width:100%!important;
+  max-height:calc(100dvh - max(24px,env(safe-area-inset-top)) - max(24px,env(safe-area-inset-bottom)))!important;
+  margin:0!important;
+  padding:20px 18px max(22px,calc(18px + env(safe-area-inset-bottom)))!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  border-radius:24px 24px 18px 18px!important;
+  box-shadow:0 24px 70px rgba(3,22,40,.30)!important;
+}
+#personModal .modalCard>.inlineHead{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 38px!important;
+  align-items:start!important;
+  gap:12px!important;
+  flex-wrap:nowrap!important;
+}
+#personModal .modalCard>.inlineHead>div{
+  min-width:0!important;
+}
+#personModal .modalCard>.inlineHead h2{
+  margin:0 0 6px!important;
+}
+#personModal .modalCard>.inlineHead p{
+  margin:0!important;
+  padding-right:4px!important;
+}
+#closePersonModal{
+  width:38px!important;
+  min-width:38px!important;
+  height:38px!important;
+  min-height:38px!important;
+  padding:0!important;
+  margin:0!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:11px!important;
+  line-height:1!important;
+}
+#personModal form{
+  min-width:0!important;
+}
+#personModal .field,
+#personModal .fields{
+  min-width:0!important;
+}
+#personModal .toolbar{
+  margin-bottom:0!important;
+}
+@media(max-width:759px){
+  #personModal{
+    padding-top:max(10px,env(safe-area-inset-top))!important;
+    padding-left:10px!important;
+    padding-right:10px!important;
+    padding-bottom:max(10px,env(safe-area-inset-bottom))!important;
+  }
+  #personModal .modalCard{
+    width:100%!important;
+    max-height:calc(100dvh - max(20px,env(safe-area-inset-top)) - max(20px,env(safe-area-inset-bottom)))!important;
+    padding:18px 16px max(22px,calc(18px + env(safe-area-inset-bottom)))!important;
+  }
+}
+@media(min-width:900px){
+  #personModal{
+    align-items:center!important;
+    padding:28px!important;
+  }
+  #personModal .modalCard{
+    width:min(620px,calc(100vw - 56px))!important;
+    max-height:min(760px,calc(100dvh - 56px))!important;
+    border-radius:24px!important;
+    padding:22px!important;
   }
 }
 </style>
@@ -4174,11 +4272,12 @@ if($('#rosterSearch')){
   if($('#rosterRoleFilter'))$('#rosterRoleFilter').addEventListener('filterapply',e=>{state.rosterRoles=e.detail?.values||[];saveUiState();render()});
   if($('#rosterDateFrom'))$('#rosterDateFrom').onchange=e=>{state.rosterDateFrom=normalizeDateValue(e.target.value)||'';saveUiState();render()};
   if($('#rosterDateTo'))$('#rosterDateTo').onchange=e=>{state.rosterDateTo=normalizeDateValue(e.target.value)||'';saveUiState();render()};
-  if($('#addPersonBtn'))$('#addPersonBtn').onclick=()=>{if($('#personModal'))$('#personModal').classList.add('open')};
-  if($('#closePersonModal'))$('#closePersonModal').onclick=()=>{if($('#personModal'))$('#personModal').classList.remove('open')};
-  if($('#personModal'))$('#personModal').onclick=e=>{if(e.target.id==='personModal')$('#personModal').classList.remove('open')};
-  if($('#addPersonForm'))$('#addPersonForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget),type=fd.get('type');const arr=getRosterExtras();const name=String(fd.get('name')).trim(),id='x_'+Date.now();arr.push({id,name,email:String(fd.get('email')||''),type,status:'Active',courseIds:[currentCourseId],initials:name.split(' ').map(x=>x[0]).join('').slice(0,2),average:type==='TRAINEE'?null:undefined,totalFlights:type==='TRAINEE'?0:undefined});localStorage.setItem('ct-review-roster',JSON.stringify(arr));updateCourseMembership(id,String(type),type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});toast(name+' added to the course');render()}
-  if($('#assignExistingForm'))$('#assignExistingForm').onsubmit=e=>{e.preventDefault();const key=String(new FormData(e.currentTarget).get('personKey')||''),parts=key.split(':'),type=parts[0],id=parts.slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id);if(!p)return;updateCourseMembership(id,type,type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});toast(p.name+' assigned to '+(currentCourseMeta.courseName||'course'));render()}
+  const setPersonModalOpen=open=>{const modal=$('#personModal');if(!modal)return;modal.classList.toggle('open',!!open);document.body?.classList.toggle('personModalOpen',!!open)};
+  if($('#addPersonBtn'))$('#addPersonBtn').onclick=()=>setPersonModalOpen(true);
+  if($('#closePersonModal'))$('#closePersonModal').onclick=()=>setPersonModalOpen(false);
+  if($('#personModal'))$('#personModal').onclick=e=>{if(e.target.id==='personModal')setPersonModalOpen(false)};
+  if($('#addPersonForm'))$('#addPersonForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget),type=fd.get('type');const arr=getRosterExtras();const name=String(fd.get('name')).trim(),id='x_'+Date.now();arr.push({id,name,email:String(fd.get('email')||''),type,status:'Active',courseIds:[currentCourseId],initials:name.split(' ').map(x=>x[0]).join('').slice(0,2),average:type==='TRAINEE'?null:undefined,totalFlights:type==='TRAINEE'?0:undefined});localStorage.setItem('ct-review-roster',JSON.stringify(arr));updateCourseMembership(id,String(type),type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});document.body?.classList.remove('personModalOpen');toast(name+' added to the course');render()}
+  if($('#assignExistingForm'))$('#assignExistingForm').onsubmit=e=>{e.preventDefault();const key=String(new FormData(e.currentTarget).get('personKey')||''),parts=key.split(':'),type=parts[0],id=parts.slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id);if(!p)return;updateCourseMembership(id,type,type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});document.body?.classList.remove('personModalOpen');toast(p.name+' assigned to '+(currentCourseMeta.courseName||'course'));render()}
 }
 const toggleRosterManageMode=()=>renderPreservingManagementView(()=>{state.rosterManage=!state.rosterManage;state.personEditKey=null});if($('#toggleRosterManage'))$('#toggleRosterManage').onclick=toggleRosterManageMode;
 document.querySelectorAll('[data-person-edit]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();renderPreservingManagementView(()=>{state.personEditKey=btn.dataset.personEdit;state.personPhotoDraft=undefined})});
