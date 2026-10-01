@@ -1089,27 +1089,45 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 @media(max-width:759px){.recordReturnRow{margin-bottom:6px}.recordReturnBtn{width:34px;height:34px;border-radius:11px}.recordReturnBtn svg{width:19px;height:19px}.profileRecordDockWrap{top:70px;margin-left:-4px;margin-right:-4px;padding:5px 0 7px}.profileRecordDock{padding:6px;gap:5px;border-radius:18px}.profileRecordAction{height:44px;padding:0 8px;gap:5px;font-size:10.5px;border-radius:12px}.profileRecordIcon,.profileRecordIcon .navIcon,.profileRecordIcon svg{width:20px;height:20px}.recordHubGrid{grid-template-columns:1fr;gap:9px;margin-top:12px}.recordHubCard{min-height:110px;padding:14px;grid-template-columns:40px minmax(0,1fr) auto}.recordHubIcon{width:40px;height:40px}.recordHubCopy b{font-size:14px}.safetyHistoryCard{padding:12px}.safetyHistoryFilters{grid-template-columns:1fr 1fr;gap:8px;padding:10px}.safetyHistoryFilters .safetySearchWide{grid-column:1/-1}.safetyHistoryReset{grid-column:1/-1}.safetyHistoryTop{gap:8px}}
 </style>
 <style>
-/* ===== Shared multi-select filters ===== */
-.multiFilterField{min-width:0}.multiFilter{position:relative;width:100%;z-index:4}.multiFilter[open]{z-index:40}
-.multiFilter>summary{list-style:none;min-height:40px;width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #cbd8e6;background:#fff;border-radius:12px;padding:10px 12px;color:#1d3955;font-size:11px;font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.multiFilter>summary::-webkit-details-marker{display:none}.multiFilter[open]>summary{border-color:#62aee7;box-shadow:0 0 0 3px rgba(56,189,248,.1)}
-.multiFilterChevron{font-size:16px;color:#6f8499;transition:transform .15s ease}.multiFilter[open] .multiFilterChevron{transform:rotate(180deg)}
-.multiFilterMenu{position:absolute;top:calc(100% + 6px);left:0;right:0;min-width:220px;max-height:330px;overflow:auto;padding:8px;background:#fff;border:1px solid #d8e4ee;border-radius:14px;box-shadow:0 16px 34px rgba(15,49,82,.18)}
-.multiFilterOption{display:grid!important;grid-template-columns:20px 18px minmax(0,1fr);gap:7px;align-items:center!important;margin:0!important;padding:8px 7px!important;border-radius:9px;color:#28445e!important;font-size:11px!important;font-weight:750!important;cursor:pointer}
-.multiFilterOption:hover{background:#f3f8fc}.multiFilterOption input{position:absolute;opacity:0;pointer-events:none}
-.multiFilterCheck{width:17px;height:17px;border:1.5px solid #b8c8d7;border-radius:5px;background:#fff;color:transparent;display:grid!important;place-items:center;font-size:11px;font-weight:950;margin:0!important}
-.multiFilterOption input:checked+.multiFilterCheck{border-color:#217cc2;background:#217cc2;color:#fff}.multiFilterAll{border-bottom:1px solid #edf2f6;border-radius:8px 8px 0 0;margin-bottom:4px!important}
-.multiFilterGroupLabel{padding:8px 7px 4px;color:#7890a4;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.07em}
-.multiFilterActions{position:sticky;bottom:-8px;display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:6px -8px -8px;padding:9px;background:#f7fafc;border-top:1px solid #e6edf3}.multiFilterActions .btn{min-height:34px;padding:7px 9px}
-.filterDateRange{min-width:0}.filterDateRangeTitle{display:block;margin:0 0 6px;color:#334155;font-size:12px;font-weight:800}.filterDateRangeFields{display:grid;grid-template-columns:1fr 1fr;gap:7px}.filterDateRangeFields .field label{font-size:9px;color:#71859a;margin-bottom:4px}
-.safetyHistoryFilters,.reportFilters,.myCoursesFilterBar{overflow:visible!important}.safetyHistoryFilters{grid-template-columns:minmax(190px,1.5fr) repeat(auto-fit,minmax(145px,1fr))!important}.safetySearchWide{min-width:190px}
-.rosterAdvancedFilters{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:9px;align-items:end;margin-top:10px}.rosterAdvancedFilters .filterDateRange{grid-column:span 2}
-.myCoursesFilterBar .filterDateRange{min-width:260px}
+/* ===== Unified filter system · My Courses visual language ===== */
+.multiFilterField{min-width:0}.multiFilter{position:relative;width:100%;z-index:5}.multiFilter[data-open="true"]{z-index:90}
+.multiFilterTrigger{width:100%;height:44px;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #c7d7e6;background:#fff;border-radius:12px;padding:0 12px;color:#1f3b57;font:inherit;font-size:12px;font-weight:850;text-align:left;cursor:pointer;box-shadow:none;-webkit-tap-highlight-color:transparent}
+.multiFilterTrigger:hover{border-color:#a9c5dc;background:#fcfeff}.multiFilterTrigger:focus-visible,.multiFilter[data-open="true"] .multiFilterTrigger{outline:none;border-color:#6daee0;box-shadow:0 0 0 3px rgba(43,139,222,.11)}
+.multiFilterChevron{width:8px;height:8px;flex:0 0 8px;border-right:2px solid #71879c;border-bottom:2px solid #71879c;transform:rotate(45deg) translateY(-2px);transition:transform .16s ease}
+.multiFilter[data-open="true"] .multiFilterChevron{transform:rotate(225deg) translate(-1px,-1px)}
+.multiFilterMenu{z-index:1000;overflow:auto;background:#fff;border:1px solid #bfd2e2;border-radius:14px;box-shadow:0 18px 42px rgba(16,50,82,.22);padding:0}
+.multiFilterMenu[hidden]{display:none!important}
+.multiFilterMenuHead{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;background:#f8fbfe;border-bottom:1px solid #e2ebf3}
+.multiFilterMenuHead b{display:block;color:#173b5e;font-size:12px;font-weight:900}.multiFilterMenuHead small{display:block;margin-top:2px;color:#7b8fa3;font-size:9px;font-weight:700}
+.multiFilterClose{width:30px;height:30px;flex:0 0 30px;border:1px solid #d4e0ea;border-radius:9px;background:#fff;color:#53708b;font-size:20px;line-height:1;display:grid;place-items:center;cursor:pointer}
+.multiFilterOptions{padding:6px 7px 3px}.multiFilterOption{display:grid!important;grid-template-columns:20px minmax(0,1fr);gap:9px;align-items:center!important;margin:0!important;padding:9px 7px!important;border-radius:9px;color:#28445e!important;font-size:11px!important;font-weight:780!important;cursor:pointer;min-height:39px}
+.multiFilterOption:hover{background:#f2f7fb}.multiFilterOption input{position:absolute;opacity:0;pointer-events:none}
+.multiFilterCheck{width:19px;height:19px;border:1.5px solid #afc2d3;border-radius:5px;background:#fff;color:transparent;display:grid!important;place-items:center;font-size:11px;font-weight:950;margin:0!important}
+.multiFilterOption input:checked+.multiFilterCheck{border-color:#217cc2;background:#217cc2;color:#fff}.multiFilterOption input:checked~.multiFilterOptionLabel{color:#174f7d;font-weight:900}
+.multiFilterAll{margin-bottom:3px!important;background:#f9fbfd}.multiFilterGroupLabel{margin:4px 2px 1px;padding:8px 7px 4px;border-top:1px solid #edf2f6;color:#7b8fa3;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.07em}
+.multiFilterActions{position:sticky;bottom:0;z-index:3;display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:9px 10px 10px;background:#f8fbfe;border-top:1px solid #e2ebf3}.multiFilterActions .btn{min-height:36px;padding:7px 9px}
+.unifiedFilterGrid,.reportFilters,.myCoursesFilterBar{display:grid;grid-template-columns:repeat(4,minmax(145px,1fr));gap:10px;align-items:end}
+.unifiedFilterGrid,.reportFilters{margin-top:12px;padding:12px;border:1px solid #cbddea;border-radius:16px;background:#fbfdff;box-shadow:0 2px 8px rgba(23,75,115,.04)}
+.unifiedFilterHeader{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:0 2px 2px}.unifiedFilterHeader b{color:#244663;font-size:12px;font-weight:900}.unifiedFilterHeader small{color:#73879b;font-size:9.5px;font-weight:750}
+.unifiedFilterGrid .field,.reportFilters .field,.myCoursesFilterBar .field{margin:0;min-width:0}
+.unifiedFilterGrid .field>label,.reportFilters .field>label,.myCoursesFilterBar .field>label,.myCoursesFilterBar .fieldLabel{margin:0 0 6px;color:#334b63;font-size:11px;font-weight:850}
+.unifiedFilterGrid .input,.reportFilters .input,.myCoursesFilterBar .input{height:44px;min-height:44px;padding:0 12px;border-color:#c7d7e6;border-radius:12px;font-size:12px;font-weight:700}
+.filterDateRange{min-width:0;grid-column:span 2}.filterDateRangeTitle{display:block;margin:0 0 6px;color:#334b63;font-size:11px;font-weight:850}.filterDateRangeFields{display:grid;grid-template-columns:1fr 1fr;gap:8px}.filterDateRangeFields .field label{font-size:9.5px;color:#71859a;margin-bottom:4px;font-weight:800}
+.safetySearchWide{grid-column:span 2;min-width:0}.safetyHistoryReset{height:44px;white-space:nowrap;align-self:end}
+.filterPanelCard{border:1px solid #cbddea!important;border-radius:16px!important;background:#fff!important;box-shadow:0 2px 8px rgba(23,75,115,.05)!important}.unifiedFilterPanelHead{align-items:center}.unifiedFilterPanelHead h3{margin:0;color:#244663;font-size:13px}.unifiedFilterPanelHead small{display:block;margin-top:2px;color:#73879b;font-size:9.5px;font-weight:750}
+.rosterAdvancedFilters{margin-top:12px}.rosterAdvancedFilters .filterDateRange{grid-column:span 2}
+.packageFilterBar{margin:12px 0!important;align-items:end!important}.packageFilterBar .multiFilterField{min-width:0!important}.packageFilterHint{grid-column:1/-1!important;padding:0!important;color:#788b9e!important;font-size:9.5px!important;line-height:1.4}
+.myCoursesFilters{border-color:#cbddea!important;border-radius:16px!important;background:#fff!important;box-shadow:0 2px 8px rgba(23,75,115,.05)!important}.myCoursesFilterSummary{min-height:48px;padding:12px 14px!important;background:#fbfdff!important}.myCoursesFilterSummaryCopy b{font-size:12px}.myCoursesFilterSummaryCopy small{font-size:9.5px!important}.myCoursesFilterBar{padding:13px 14px!important;background:#fbfdff!important}.myCoursesFilterCount{padding:0 14px 12px!important;background:#fbfdff!important;font-size:9.5px!important}
+@media(max-width:900px){.unifiedFilterGrid,.reportFilters,.myCoursesFilterBar{grid-template-columns:repeat(2,minmax(0,1fr))}.safetySearchWide,.filterDateRange{grid-column:1/-1}.safetyHistoryReset{grid-column:1/-1;width:100%}}
 @media(max-width:759px){
- .multiFilterMenu{position:fixed;left:16px;right:16px;top:auto;bottom:calc(92px + env(safe-area-inset-bottom));max-height:min(60vh,430px);z-index:200}
- .filterDateRangeFields{grid-template-columns:1fr 1fr}.safetyHistoryFilters{grid-template-columns:1fr 1fr!important}.safetySearchWide,.filterDateRange{grid-column:1/-1}
- .rosterAdvancedFilters{grid-template-columns:1fr}.rosterAdvancedFilters .filterDateRange{grid-column:auto}.myCoursesFilterBar .filterDateRange{min-width:0}
+ .unifiedFilterGrid,.reportFilters,.myCoursesFilterBar{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px!important;border-radius:15px}
+ .unifiedFilterHeader{padding-bottom:1px}.unifiedFilterHeader b{font-size:12px}.unifiedFilterGrid .field>label,.reportFilters .field>label,.myCoursesFilterBar .field>label,.myCoursesFilterBar .fieldLabel{font-size:11px!important;margin-bottom:5px!important}
+ .multiFilterTrigger,.unifiedFilterGrid .input,.reportFilters .input,.myCoursesFilterBar .input{height:44px!important;min-height:44px!important;font-size:12px!important}
+ .filterDateRangeFields{grid-template-columns:1fr 1fr;gap:8px}.rosterAdvancedFilters .filterDateRange{grid-column:1/-1}
+ .reportToolbar{gap:6px}.reportToolbar .btn{font-size:10px;padding:7px 8px}
+ .packageFilterBar{display:grid!important}.packageFilterHint{margin-top:-2px}
 }
+@media(max-width:360px){.unifiedFilterGrid,.reportFilters,.myCoursesFilterBar{grid-template-columns:1fr}.safetySearchWide,.filterDateRange{grid-column:auto}.filterDateRangeFields{grid-template-columns:1fr}.rosterAdvancedFilters .filterDateRange{grid-column:auto}}
 </style>
 </head>
 <body>
@@ -1201,8 +1219,8 @@ function multiFilterHtml(id,label,items,selected=[],allLabel='All'){
  const chosen=new Set(normalizeMultiFilterValue(selected)),clean=(items||[]).filter(x=>x&&x.value!=null),selectedItems=clean.filter(x=>chosen.has(String(x.value)));
  const summary=!selectedItems.length?allLabel:selectedItems.length===1?selectedItems[0].label:selectedItems.length+' selected';
  const groups=[];clean.forEach(item=>{const group=String(item.group||'');let bucket=groups.find(x=>x.group===group);if(!bucket){bucket={group,items:[]};groups.push(bucket)}bucket.items.push(item)});
- const option=item=>'<label class="multiFilterOption"><input type="checkbox" data-mf-value value="'+esc(item.value)+'" '+(chosen.has(String(item.value))?'checked':'')+'><span class="multiFilterCheck" aria-hidden="true">✓</span><span>'+esc(item.label)+'</span></label>';
- return '<div class="field multiFilterField"><label>'+esc(label)+'</label><details class="multiFilter" id="'+esc(id)+'" data-all-label="'+esc(allLabel)+'"><summary><span data-mf-summary>'+esc(summary)+'</span><span class="multiFilterChevron" aria-hidden="true">⌄</span></summary><div class="multiFilterMenu"><label class="multiFilterOption multiFilterAll"><input type="checkbox" data-mf-all '+(!selectedItems.length?'checked':'')+'><span class="multiFilterCheck" aria-hidden="true">✓</span><span>'+esc(allLabel)+'</span></label>'+groups.map(g=>(g.group?'<div class="multiFilterGroupLabel">'+esc(g.group)+'</div>':'')+g.items.map(option).join('')).join('')+'<div class="multiFilterActions"><button type="button" class="btn secondary small" data-mf-clear>Clear</button><button type="button" class="btn sky small" data-mf-apply>Apply</button></div></div></details></div>'
+ const option=item=>'<label class="multiFilterOption"><input type="checkbox" data-mf-value value="'+esc(item.value)+'" '+(chosen.has(String(item.value))?'checked':'')+'><span class="multiFilterCheck" aria-hidden="true">✓</span><span class="multiFilterOptionLabel">'+esc(item.label)+'</span></label>';
+ return '<div class="field multiFilterField"><label>'+esc(label)+'</label><div class="multiFilter" id="'+esc(id)+'" data-all-label="'+esc(allLabel)+'" data-filter-label="'+esc(label)+'" data-open="false"><button type="button" class="multiFilterTrigger" data-mf-trigger aria-haspopup="true" aria-expanded="false"><span data-mf-summary>'+esc(summary)+'</span><span class="multiFilterChevron" aria-hidden="true"></span></button><div class="multiFilterMenu" role="dialog" aria-label="'+esc(label)+' filter" hidden><div class="multiFilterMenuHead"><div><b>'+esc(label)+'</b><small>Select one or more</small></div><button type="button" class="multiFilterClose" data-mf-close aria-label="Close '+esc(label)+' filter">×</button></div><div class="multiFilterOptions"><label class="multiFilterOption multiFilterAll"><input type="checkbox" data-mf-all '+(!selectedItems.length?'checked':'')+'><span class="multiFilterCheck" aria-hidden="true">✓</span><span class="multiFilterOptionLabel">'+esc(allLabel)+'</span></label>'+groups.map(g=>(g.group?'<div class="multiFilterGroupLabel">'+esc(g.group)+'</div>':'')+g.items.map(option).join('')).join('')+'</div><div class="multiFilterActions"><button type="button" class="btn secondary small" data-mf-clear>Clear</button><button type="button" class="btn sky small" data-mf-apply>Apply</button></div></div></div></div>'
 }
 function dateRangeFilterHtml(prefix,label='Date range',from='',to=''){
  return '<div class="filterDateRange"><span class="filterDateRangeTitle">'+esc(label)+'</span><div class="filterDateRangeFields"><div class="field"><label>From</label><input class="input dateDmy" id="'+esc(prefix)+'From" type="text" value="'+esc(from?dateInputValue(from):'')+'" placeholder="DD/MM/YYYY"></div><div class="field"><label>To</label><input class="input dateDmy" id="'+esc(prefix)+'To" type="text" value="'+esc(to?dateInputValue(to):'')+'" placeholder="DD/MM/YYYY"></div></div></div>'
@@ -1216,25 +1234,49 @@ function resetMultiFilter(id,dispatch=false){
  const label=root.dataset.allLabel||'All',summary=root.querySelector('[data-mf-summary]');if(summary)summary.textContent=label;
  if(dispatch)root.dispatchEvent(new CustomEvent('filterapply',{bubbles:true,detail:{values:[]}}))
 }
+function positionMultiFilterMenu(root){
+ const trigger=root?.querySelector('[data-mf-trigger]'),menu=root?.querySelector('.multiFilterMenu');if(!trigger||!menu||menu.hidden)return;
+ const r=trigger.getBoundingClientRect(),vw=Math.max(320,window.innerWidth||320),vh=Math.max(420,window.innerHeight||420),pad=12,width=Math.min(Math.max(r.width,250),vw-pad*2),left=Math.max(pad,Math.min(r.left,vw-width-pad));
+ const below=Math.max(0,vh-r.bottom-pad),above=Math.max(0,r.top-pad),useBelow=below>=210||below>=above,maxH=Math.max(170,Math.min(360,(useBelow?below:above)-8));
+ const top=useBelow?Math.min(vh-maxH-pad,r.bottom+6):Math.max(pad,r.top-maxH-6);
+ Object.assign(menu.style,{position:'fixed',left:left+'px',right:'auto',top:top+'px',bottom:'auto',width:width+'px',maxHeight:maxH+'px'})
+}
+function closeMultiFilter(root,apply=true){
+ if(!root||root.dataset.open!=='true')return;root.dataset.open='false';const menu=root.querySelector('.multiFilterMenu'),trigger=root.querySelector('[data-mf-trigger]');if(menu)menu.hidden=true;if(trigger)trigger.setAttribute('aria-expanded','false');
+ if(apply)root.dispatchEvent(new CustomEvent('filterapply',{bubbles:true,detail:{values:multiFilterValues(root.id)}}))
+}
 function bindMultiFilters(){
  const roots=[...document.querySelectorAll('.multiFilter')];
  roots.forEach(root=>{
-  const all=root.querySelector('[data-mf-all]'),items=[...root.querySelectorAll('[data-mf-value]')],summary=root.querySelector('[data-mf-summary]');
+  const all=root.querySelector('[data-mf-all]'),items=[...root.querySelectorAll('[data-mf-value]')],summary=root.querySelector('[data-mf-summary]'),trigger=root.querySelector('[data-mf-trigger]'),menu=root.querySelector('.multiFilterMenu');
   const sync=()=>{
    const checked=items.filter(x=>x.checked);
    if(all?.checked){items.forEach(x=>x.checked=false)}
    else if(!checked.length&&all)all.checked=true;
    if(items.some(x=>x.checked)&&all)all.checked=false;
    const picked=items.filter(x=>x.checked),allLabel=root.dataset.allLabel||'All';
-   if(summary)summary.textContent=!picked.length?allLabel:picked.length===1?(picked[0].closest('label')?.querySelector('span:last-child')?.textContent||'1 selected'):picked.length+' selected';
+   if(summary)summary.textContent=!picked.length?allLabel:picked.length===1?(picked[0].closest('label')?.querySelector('.multiFilterOptionLabel')?.textContent||'1 selected'):picked.length+' selected'
   };
+  const open=()=>{
+   roots.forEach(other=>{if(other!==root&&other.dataset.open==='true')closeMultiFilter(other,true)});
+   root.dataset.open='true';if(menu)menu.hidden=false;if(trigger)trigger.setAttribute('aria-expanded','true');sync();requestAnimationFrame(()=>positionMultiFilterMenu(root))
+  };
+  if(trigger)trigger.onclick=e=>{e.preventDefault();e.stopPropagation();root.dataset.open==='true'?closeMultiFilter(root,true):open()};
   if(all)all.onchange=()=>{if(all.checked)items.forEach(x=>x.checked=false);sync()};
   items.forEach(x=>x.onchange=()=>{if(x.checked&&all)all.checked=false;sync()});
-  root.querySelector('[data-mf-clear]')?.addEventListener('click',e=>{e.preventDefault();if(all)all.checked=true;items.forEach(x=>x.checked=false);sync();root.open=false;root.dispatchEvent(new CustomEvent('filterapply',{bubbles:true,detail:{values:[]}}))});
-  root.querySelector('[data-mf-apply]')?.addEventListener('click',e=>{e.preventDefault();sync();root.open=false;root.dispatchEvent(new CustomEvent('filterapply',{bubbles:true,detail:{values:multiFilterValues(root.id)}}))});
-  root.addEventListener('toggle',()=>{if(root.open)roots.forEach(other=>{if(other!==root)other.open=false})});
+  root.querySelector('[data-mf-close]')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();closeMultiFilter(root,true)});
+  root.querySelector('[data-mf-clear]')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(all)all.checked=true;items.forEach(x=>x.checked=false);sync();closeMultiFilter(root,true)});
+  root.querySelector('[data-mf-apply]')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();sync();closeMultiFilter(root,true)});
+  menu?.addEventListener('click',e=>e.stopPropagation());
   sync()
  });
+ if(!window._flympusMultiFilterGlobalBound){
+   window._flympusMultiFilterGlobalBound=true;
+   document.addEventListener('click',e=>{document.querySelectorAll('.multiFilter[data-open="true"]').forEach(root=>{if(!root.contains(e.target))closeMultiFilter(root,true)})});
+   document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.multiFilter[data-open="true"]').forEach(root=>closeMultiFilter(root,true))});
+   window.addEventListener('resize',()=>document.querySelectorAll('.multiFilter[data-open="true"]').forEach(positionMultiFilterMenu));
+   window.addEventListener('scroll',()=>document.querySelectorAll('.multiFilter[data-open="true"]').forEach(root=>closeMultiFilter(root,true)),{passive:true})
+ }
 }
 function traineeFilterOptions(selected='ALL'){
  const trainees=courseTrainees(),isInactive=t=>String(courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status||t.status||'Active').toLowerCase()==='inactive';
@@ -1656,7 +1698,7 @@ function evaluationHistoryViewHtml(list){
  }).join('');
  const instructors=alphaByName(courseInstructors()),syllabi=evaluationSyllabusNames().slice().sort((a,b)=>String(a).localeCompare(String(b),undefined,{sensitivity:'base'}));
  return '<section class="card safetyHistoryCard"><div class="inlineHead"><div><h2>Evaluation history</h2><p class="sub">Only evaluations recorded for the active course are shown.</p></div><span class="pill blue" id="evaluationHistoryCount">'+(list||[]).length+' shown</span></div>'+
- '<div class="safetyHistoryFilters"><div class="field safetySearchWide"><label>Search</label><input class="input" id="evaluationHistorySearch" placeholder="Trainee, instructor, syllabus or comments"></div>'+
+ '<div class="safetyHistoryFilters unifiedFilterGrid"><div class="unifiedFilterHeader"><b>Filters</b><small>All evaluations</small></div><div class="field safetySearchWide"><label>Search</label><input class="input" id="evaluationHistorySearch" placeholder="Trainee, instructor, syllabus or comments"></div>'+
  multiFilterHtml('evaluationHistoryTrainee','Trainee',traineeMultiFilterItems(),[],'All trainees')+
  multiFilterHtml('evaluationHistoryInstructor','Instructor',genericMultiItems(instructors),[],'All instructors')+
  multiFilterHtml('evaluationHistorySyllabus','Syllabus',genericMultiItems(syllabi),[],'All syllabi')+
@@ -1703,7 +1745,7 @@ function roster(){
  (manage?'<div class="manageBanner"><div><b>Manage mode</b><span> · Edit identity, photo and course membership safely.</span></div><button class="btn sky small" id="addPersonBtn">+ Add person</button></div>':'')+
  '<section class="card rosterControls"><div class="scrollTabs"><button class="seg '+(type==='TRAINEE'?'active':'')+'" data-roster-type="TRAINEE">Trainees ('+allT.length+')</button><button class="seg '+(type==='INSTRUCTOR'?'active':'')+'" data-roster-type="INSTRUCTOR">Instructors ('+allI.length+')</button></div>'+
  '<div class="rosterSearchRow"><input class="input" id="rosterSearch" placeholder="Search '+(type==='TRAINEE'?'trainees':'instructors')+'..." value="'+esc(state.search)+'"></div>'+
- '<div class="rosterAdvancedFilters">'+(type==='TRAINEE'?multiFilterHtml('rosterStatusFilter','Status',genericMultiItems(['Active','Inactive']),statusSel,'All statuses'):multiFilterHtml('rosterRoleFilter','Role',genericMultiItems(['COURSE_MANAGER','INSTRUCTOR']),roleSel,'All roles'))+dateRangeFilterHtml('rosterDate',type==='TRAINEE'?'Start date':'Last activity',dateFrom,dateTo)+'</div></section>'+
+ '<div class="rosterAdvancedFilters unifiedFilterGrid"><div class="unifiedFilterHeader"><b>Filters</b><small>'+(type==='TRAINEE'?'All trainees':'All instructors')+'</small></div>'+(type==='TRAINEE'?multiFilterHtml('rosterStatusFilter','Status',genericMultiItems(['Active','Inactive']),statusSel,'All statuses'):multiFilterHtml('rosterRoleFilter','Role',genericMultiItems(['COURSE_MANAGER','INSTRUCTOR']),roleSel,'All roles'))+dateRangeFilterHtml('rosterDate',type==='TRAINEE'?'Start date':'Last activity',dateFrom,dateTo)+'</div></section>'+
  '<section class="people">'+(list.length?list.map(t=>{if(type==='TRAINEE'){const active=t.status==='Active',avg=t.average==null?'—':Number(t.average).toFixed(1),progress=Math.max(0,Math.min(100,Number(t.progress||0)));return '<article class="card personCard '+(manage?'manageCard':'personCardOpen')+'" '+(manage?'':'data-trainee="'+t.id+'" role="button" tabindex="0" aria-label="Open '+esc(t.name)+'"')+'>'+personAvatar(t,false)+'<div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b><span class="pill '+(active?'green':'gray')+'">'+esc(t.status)+'</span>'+(t.rank?'<span class="rankBadge">#'+t.rank+'</span>':'')+'</div><div class="rosterStats"><div><span class="rosterStatLabel">Average Grade</span><span class="rosterStatValue">'+avg+'</span></div><div><span class="rosterStatLabel">Progress · '+progress+'%</span><div class="miniProgress"><i style="width:'+progress+'%"></i></div></div></div></div><div class="rosterActions">'+(manage?'<button class="btn edit small rosterEditBtn" data-person-edit="TRAINEE:'+t.id+'">✎ Edit</button>':'<span class="rosterChevron" aria-hidden="true">›</span>')+'</div></article>'}
  const manager=t.role==='COURSE_MANAGER';return '<article class="card personCard '+(manager?'manager ':'')+(manage?'manageCard':'personCardOpen')+'" '+(manage?'':'data-instructor="'+t.id+'" role="button" tabindex="0" aria-label="Open '+esc(t.name)+'"')+'>'+personAvatar(t,false)+'<div class="personInfo"><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b>'+esc(t.name)+'</b><span class="instructorRole '+(manager?'manager':'')+'">'+(manager?'Course Manager':'Instructor')+'</span></div><div class="rosterStats"><div><span class="rosterStatLabel">Instructed Flights</span><span class="rosterStatValue">'+Number(t.flights||0)+'</span></div><div><span class="rosterStatLabel">Course Share</span><span class="rosterStatValue">'+Number(t.percent||0)+'%</span></div></div></div><div class="rosterActions">'+(manage?'<button class="btn edit small rosterEditBtn" data-person-edit="INSTRUCTOR:'+t.id+'">✎ Edit</button>':'<span class="rosterChevron" aria-hidden="true">›</span>')+'</div></article>'}).join(''):'<div class="card empty"><h3>No matching people.</h3></div>')+'</section>'+
  (manage?'<div class="rosterManageDockSpacer" aria-hidden="true"></div><button class="rosterManageDock" id="rosterManageDoneDock" type="button">✓ Done</button>':'')+
@@ -2467,7 +2509,7 @@ function advancedPackagesHtml(type){
   if(!allPackages.length)return '<section class="card settingBox"><h3>Training Packages</h3><p class="sub">No packages are defined for this sector.</p></section>';
   const trainingDefs=cfgGet().trainingKinds||[],categoryIds=[...new Set(allPackages.map(p=>p.trainingKind).filter(Boolean))],known=trainingDefs.filter(x=>categoryIds.includes(x.id)),unknown=categoryIds.filter(id=>!known.some(x=>x.id===id)).map(id=>({id,name:id.replace(/_/g,' ').replace(/\b\w/g,m=>m.toUpperCase())})),categories=[...known,...unknown];
   const selectedCategories=normalizeMultiFilterValue(state.packageCategoryFilters).filter(x=>categoryIds.includes(x));
-  const packages=!selectedCategories.length?allPackages:allPackages.filter(p=>selectedCategories.includes(String(p.trainingKind||''))),filterHtml=categories.length>1?'<div class="packageFilterBar">'+multiFilterHtml('packageCategoryFilter','Package category',genericMultiItems(categories),selectedCategories,'All categories')+'<small>Filter by one or more training types, for example Refreshment, Qualification or Return to Currency.</small></div>':'';
+  const packages=!selectedCategories.length?allPackages:allPackages.filter(p=>selectedCategories.includes(String(p.trainingKind||''))),filterHtml=categories.length>1?'<div class="packageFilterBar unifiedFilterGrid"><div class="unifiedFilterHeader"><b>Filters</b><small>Training Packages</small></div>'+multiFilterHtml('packageCategoryFilter','Package category',genericMultiItems(categories),selectedCategories,'All categories')+'<small class="packageFilterHint">Filter by one or more training types, for example Refreshment, Qualification or Return to Currency.</small></div>':'';
   const field=(label,control,wide=false)=>'<label class="field '+(wide?'tailorWide':'')+'"><span class="fieldLabel">'+label+'</span>'+control+'</label>';
   const addBox=(kind,title,fields)=>'<div class="packageAddBox compactAddBox" data-global-add-box="'+kind+'"><button class="btn secondary packageAddTrigger" type="button" data-global-add-open="'+kind+'">＋ '+title+'</button><div class="packageAddPanel" data-global-add-panel="'+kind+'" hidden><div class="packageAddFields">'+fields+'</div><div class="toolbar packageAddActions"><button class="btn sky small" type="button" data-global-add="'+kind+'">Add</button><button class="btn secondary small" type="button" data-global-add-cancel="'+kind+'">Cancel</button></div></div></div>';
   const orderItems=list=>[...(list||[])].sort((a,b)=>(Number(a.order)||9999)-(Number(b.order)||9999));
@@ -3045,7 +3087,7 @@ function safetyScreen(){
  if(view==='history'){
    const rows=local.map(x=>{const hay=[x.title,x.details,x.traineeName,x.instructorName,x.classification,x.severity].filter(Boolean).join(' ').toLowerCase();return '<article class="safetyHistoryItem" data-safety-history-item data-date="'+esc(normalizeDateValue(x.date)||'')+'" data-severity="'+esc(x.severity||'')+'" data-classification="'+esc(x.classification||'')+'" data-trainee="'+esc(x.traineeId||'')+'" data-instructor="'+esc(x.instructorId||'')+'" data-search="'+esc(hay)+'"><div class="safetyHistoryTop"><div><b>'+esc(x.title||'Untitled safety event')+'</b><p>'+esc(formatDateDMY(x.date))+' · '+esc(x.classification||'—')+'</p></div><span class="pill '+(x.severity==='High'?'amber':x.severity==='Medium'?'blue':'green')+'">'+esc(x.severity||'—')+'</span></div><div class="safetyHistoryMeta">'+(x.traineeName?'<span>Trainee · '+esc(x.traineeName)+'</span>':'')+(x.instructorName?'<span>Instructor · '+esc(x.instructorName)+'</span>':'')+'</div>'+(x.details?'<p class="safetyHistoryDetails">'+esc(x.details)+'</p>':'')+'</article>'}).join('');
    return head+'<section class="card safetyHistoryCard"><div class="inlineHead"><div><h2>Course safety history</h2><p class="sub">Only entries recorded for the active course are shown.</p></div><span class="pill blue" id="safetyHistoryCount">'+local.length+' shown</span></div>'+
-   '<div class="safetyHistoryFilters"><div class="field safetySearchWide"><label>Search</label><input class="input" id="safetyHistorySearch" placeholder="Title, details or name"></div>'+
+   '<div class="safetyHistoryFilters unifiedFilterGrid"><div class="unifiedFilterHeader"><b>Filters</b><small>All safety records</small></div><div class="field safetySearchWide"><label>Search</label><input class="input" id="safetyHistorySearch" placeholder="Title, details or name"></div>'+
    multiFilterHtml('safetyHistorySeverity','Severity',genericMultiItems(['High','Medium','Low']),[],'All severities')+
    multiFilterHtml('safetyHistoryClassification','Classification',genericMultiItems(['Operational observation','Real emergency','Safety event']),[],'All classifications')+
    multiFilterHtml('safetyHistoryTrainee','Trainee',traineeMultiFilterItems(),[],'All trainees')+
@@ -3066,7 +3108,7 @@ function examsScreen(){
    const rows=local.map(x=>{const passed=Number(x.grade)>=Number(x.pass),hay=[x.traineeName,x.exam].filter(Boolean).join(' ').toLowerCase();return '<article class="safetyHistoryItem" data-exam-history-item data-date="'+esc(normalizeDateValue(x.date)||'')+'" data-trainee="'+esc(x.traineeId||'')+'" data-exam="'+esc(x.exam||'')+'" data-result="'+(passed?'PASS':'FAIL')+'" data-search="'+esc(hay)+'"><div class="safetyHistoryTop"><div><b>'+esc(x.traineeName||'Trainee')+' · '+esc(x.exam||'Exam')+'</b><p>'+esc(formatDateDMY(x.date))+' · Passing grade '+Number(x.pass||0)+'%</p></div><span class="pill '+(passed?'green':'amber')+'">'+Number(x.grade||0)+'%</span></div><div class="safetyHistoryMeta"><span>Result · '+(passed?'PASS':'FAIL')+'</span><span>Required · '+Number(x.pass||0)+'%</span></div></article>'}).join('');
    const examNames=examDefs.map(x=>x.name).sort((a,b)=>String(a).localeCompare(String(b),undefined,{sensitivity:'base'}));
    return head+'<section class="card safetyHistoryCard"><div class="inlineHead"><div><h2>Exam history</h2><p class="sub">Only exam results recorded for the active course are shown.</p></div><span class="pill blue" id="examHistoryCount">'+local.length+' shown</span></div>'+
-   '<div class="safetyHistoryFilters"><div class="field safetySearchWide"><label>Search</label><input class="input" id="examHistorySearch" placeholder="Trainee or exam"></div>'+
+   '<div class="safetyHistoryFilters unifiedFilterGrid"><div class="unifiedFilterHeader"><b>Filters</b><small>All exam results</small></div><div class="field safetySearchWide"><label>Search</label><input class="input" id="examHistorySearch" placeholder="Trainee or exam"></div>'+
    multiFilterHtml('examHistoryExam','Exam',genericMultiItems(examNames),[],'All exams')+
    multiFilterHtml('examHistoryResult','Result',[{value:'PASS',label:'Pass'},{value:'FAIL',label:'Fail'}],[],'All results')+
    multiFilterHtml('examHistoryTrainee','Trainee',traineeMultiFilterItems(),[],'All trainees')+
@@ -3088,7 +3130,7 @@ function reports(){
  const monthly=dist(rows.map(x=>String(x.date||'').slice(0,7)));
  const syllOptions=[...new Set([...(epCurrentProgram()?.syllabi||[]).map(x=>x.name),...allEvaluationsForAnalytics().map(x=>x.syllabus)])].filter(Boolean).sort((a,b)=>String(a).localeCompare(String(b),undefined,{sensitivity:'base'}));
  return '<h1 class="pageTitle">Course analytics</h1><p class="sub">Analytics are scoped to the active course and its resolved training suit.</p>'+activeSuitOverviewHtml()+
- '<section class="card settingBox"><div class="inlineHead"><h3>Filters</h3><div class="reportToolbar" style="margin:0"><button class="btn secondary small" id="reportsReset">Reset</button><button class="btn secondary small" id="reportsCsv">⇩ Export CSV</button><button class="btn sky small" id="reportsPrint">Print / PDF</button></div></div><div class="reportFilters" style="margin-top:10px">'+
+ '<section class="card settingBox filterPanelCard"><div class="inlineHead unifiedFilterPanelHead"><div><h3>Filters</h3><small>Course analytics</small></div><div class="reportToolbar" style="margin:0"><button class="btn secondary small" id="reportsReset">Reset</button><button class="btn secondary small" id="reportsCsv">⇩ Export CSV</button><button class="btn sky small" id="reportsPrint">Print / PDF</button></div></div><div class="reportFilters" style="margin-top:10px">'+
  multiFilterHtml('reportTrainee','Trainee',traineeMultiFilterItems(),traineeSel,'All trainees')+
  multiFilterHtml('reportInstructor','Instructor',genericMultiItems(alphaByName(courseInstructors())),instructorSel,'All instructors')+
  multiFilterHtml('reportSyllabus','Syllabus',genericMultiItems(syllOptions),syllabusSel,'All syllabi')+
