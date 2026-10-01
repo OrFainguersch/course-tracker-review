@@ -1108,7 +1108,7 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 .multiFilterActions{position:relative;z-index:5;flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px;background:#fff;border-top:1px solid #dbe7f0;box-shadow:0 -10px 22px rgba(19,55,86,.10)}.multiFilterActions .btn{min-height:40px;padding:8px 10px;font-size:11px;font-weight:900}
 .unifiedFilterGrid,.reportFilters,.myCoursesFilterBar{display:grid;grid-template-columns:repeat(4,minmax(145px,1fr));gap:10px;align-items:end}
 .unifiedFilterGrid,.reportFilters{margin-top:12px;padding:12px;border:1px solid #cbddea;border-radius:16px;background:#fbfdff;box-shadow:0 2px 8px rgba(23,75,115,.04)}
-.unifiedFilterHeader{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:0 2px 2px}.unifiedFilterHeader b{color:#244663;font-size:12px;font-weight:900}.unifiedFilterHeader small{color:#73879b;font-size:9.5px;font-weight:750}.unifiedFilterCount{display:none!important}.unifiedFilterSelections{grid-column:1/-1;display:flex;align-items:flex-start;gap:8px;padding:9px 2px 0;border-top:1px solid #e5edf4;min-width:0}.unifiedFilterSelections[hidden]{display:none!important}.filterSelectionsLabel{flex:0 0 auto;color:#7b8ea1;font-size:9.5px;font-weight:850;padding-top:4px}.filterSelectionChips{display:flex;flex-wrap:wrap;gap:5px;min-width:0}.filterSelectionChip{display:inline-flex;align-items:center;gap:3px;max-width:100%;padding:4px 7px;border:1px solid #d7e4ee;border-radius:999px;background:#fff;color:#60778d;font-size:9.5px;font-weight:700;line-height:1.2}.filterSelectionChip b{color:#36546f;font-weight:900}
+.unifiedFilterHeader{grid-column:1/-1;order:-2;display:flex;align-items:center;gap:8px;padding:0 2px 2px}.unifiedFilterHeader b{color:#244663;font-size:12px;font-weight:900}.unifiedFilterHeader small{color:#73879b;font-size:9.5px;font-weight:750}.unifiedFilterCount{display:none!important}.unifiedFilterSelections{grid-column:1/-1;order:-1;display:flex;align-items:center;gap:9px;min-width:0;padding:9px 10px;border:1px solid #d9e7f2;border-left:3px solid #6aa7d8;border-radius:11px;background:linear-gradient(180deg,#f7fbfe,#f2f7fb)}.unifiedFilterSelections[hidden]{display:none!important}.filterSelectionsLabel{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;color:#52718d;font-size:9.5px;font-weight:900;white-space:nowrap}.filterSelectionsLabel:before{content:"";width:6px;height:6px;border-radius:50%;background:#4b94cf;box-shadow:0 0 0 3px rgba(75,148,207,.10)}.filterSelectionChips{display:flex;flex-wrap:wrap;gap:6px;min-width:0}.filterSelectionChip{display:inline-flex;align-items:center;min-width:0;max-width:100%;overflow:hidden;border:1px solid #d8e4ee;border-radius:8px;background:#fff;box-shadow:0 1px 2px rgba(28,64,96,.035);font-size:9.5px;line-height:1.2}.filterSelectionKey{flex:0 0 auto;padding:5px 6px;background:#edf5fb;color:#3f6687;font-weight:900;border-right:1px solid #dce8f1}.filterSelectionValue{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px 7px;color:#5e7489;font-weight:750}
 .unifiedFilterGrid .field,.reportFilters .field,.myCoursesFilterBar .field{margin:0;min-width:0}
 .unifiedFilterGrid .field>label,.reportFilters .field>label,.myCoursesFilterBar .field>label,.myCoursesFilterBar .fieldLabel{margin:0 0 6px;color:#334b63;font-size:11px;font-weight:850}
 .unifiedFilterGrid .input,.reportFilters .input,.myCoursesFilterBar .input{height:44px;min-height:44px;padding:0 12px;border-color:#c7d7e6;border-radius:12px;font-size:12px;font-weight:700}.rosterSingleStatus select{height:44px;min-height:44px;padding:0 36px 0 12px;border-color:#c7d7e6;border-radius:12px;font-size:12px;font-weight:850;color:#1f3b57;background-color:#fff}
@@ -1121,6 +1121,7 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 @media(max-width:900px){.unifiedFilterGrid,.reportFilters,.myCoursesFilterBar{grid-template-columns:repeat(2,minmax(0,1fr))}.safetySearchWide,.filterDateRange{grid-column:1/-1}.safetyHistoryReset{grid-column:1/-1;width:100%}}
 @media(max-width:759px){
  .unifiedFilterGrid,.reportFilters,.myCoursesFilterBar{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px!important;border-radius:15px}
+ .unifiedFilterSelections{align-items:flex-start;gap:7px;padding:8px 9px}.filterSelectionsLabel{padding-top:4px}.filterSelectionChips{gap:5px}.filterSelectionChip{max-width:100%}.filterSelectionValue{max-width:170px}
  .unifiedFilterHeader{padding-bottom:1px}.unifiedFilterHeader b{font-size:12px}.unifiedFilterGrid .field>label,.reportFilters .field>label,.myCoursesFilterBar .field>label,.myCoursesFilterBar .fieldLabel{font-size:11px!important;margin-bottom:5px!important}
  .multiFilterTrigger,.unifiedFilterGrid .input,.reportFilters .input,.myCoursesFilterBar .input{height:44px!important;min-height:44px!important;font-size:12px!important}
  .filterDateRangeFields{grid-template-columns:1fr 1fr;gap:8px}.rosterAdvancedFilters .filterDateRange{grid-column:1/-1}
@@ -1229,7 +1230,7 @@ function filterSummaryText(activeCount,shown,total,allLabel='All items'){
 function filterChoiceSummary(values,items){
  const vals=normalizeMultiFilterValue(values);if(!vals.length)return'';
  const map=new Map((items||[]).map(x=>[String(x.value??x.id??x.name),String(x.label??x.name??x.id??x.value)])),labels=vals.map(v=>map.get(String(v))||String(v));
- return labels.length<=2?labels.join(', '):labels.slice(0,2).join(', ')+' +'+(labels.length-2)
+ return labels.length===1?labels[0]:labels[0]+' +'+(labels.length-1)
 }
 function filterDateSummary(from,to){
  const a=normalizeDateValue(from),b=normalizeDateValue(to);if(!a&&!b)return'';
@@ -1237,17 +1238,17 @@ function filterDateSummary(from,to){
 }
 function filterSelectionsInnerHtml(selections){
  const clean=(selections||[]).filter(x=>x&&String(x.value||'').trim());
- return clean.map(x=>'<span class="filterSelectionChip"><b>'+esc(x.label)+':</b> '+esc(x.value)+'</span>').join('')
+ return clean.map(x=>'<span class="filterSelectionChip"><span class="filterSelectionKey">'+esc(x.label)+'</span><span class="filterSelectionValue">'+esc(x.value)+'</span></span>').join('')
 }
 function filterSelectionsHtml(id,selections=[]){
- const inner=filterSelectionsInnerHtml(selections);return '<div class="unifiedFilterSelections"'+(id?' id="'+esc(id)+'"':'')+(inner?'':' hidden')+'><span class="filterSelectionsLabel">Selected</span><div class="filterSelectionChips">'+inner+'</div></div>'
+ const inner=filterSelectionsInnerHtml(selections);return '<div class="unifiedFilterSelections"'+(id?' id="'+esc(id)+'"':'')+(inner?'':' hidden')+'><span class="filterSelectionsLabel">Active filters</span><div class="filterSelectionChips">'+inner+'</div></div>'
 }
 function updateFilterSelections(id,selections=[]){
  const el=$('#'+id);if(!el)return;const inner=filterSelectionsInnerHtml(selections),chips=el.querySelector('.filterSelectionChips');el.hidden=!inner;if(chips)chips.innerHTML=inner
 }
 function multiFilterSelectedLabels(id){
  const root=$('#'+id);if(!root)return'';const checked=[...root.querySelectorAll('[data-mf-value]:checked')],labels=checked.map(x=>x.closest('label')?.querySelector('.multiFilterOptionLabel')?.textContent||x.value);
- return labels.length<=2?labels.join(', '):labels.slice(0,2).join(', ')+' +'+(labels.length-2)
+ return labels.length===1?labels[0]:labels.length?labels[0]+' +'+(labels.length-1):''
 }
 function filterCountText(shown,total,noun='items'){
  const s=Number(shown||0),t=Number(total||0),label=t===1?noun.replace(/s$/,''):noun;
