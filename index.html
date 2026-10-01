@@ -2592,40 +2592,58 @@ body::before{
 <style>
 /* ===== Custom pull-to-refresh visual motion ===== */
 :root{--flympus-pull-y:0px;--flympus-pull-progress:0}
+@media(max-width:899px){
+  body.flympusPulling::before,
+  body.flympusPullRelease::before{
+    top:-160px!important;
+    height:340px!important;
+    background:linear-gradient(180deg,#123b63 0%,#0d3156 72%,#0b3157 100%)!important;
+  }
+}
 body.flympusPulling .top,
 body.flympusPulling main{
-  transform:translateY(var(--flympus-pull-y))!important;
+  transform:translate3d(0,var(--flympus-pull-y),0)!important;
   transition:none!important;
   will-change:transform
 }
 body.flympusPullRelease .top,
 body.flympusPullRelease main{
-  transform:translateY(0)!important;
-  transition:transform .18s cubic-bezier(.22,.72,.22,1)!important
+  transform:translate3d(0,0,0)!important;
+  transition:transform .22s cubic-bezier(.22,.76,.22,1)!important
 }
 .flympusPullIndicator{
   position:fixed;
   left:50%;
-  top:calc(8px + env(safe-area-inset-top));
+  top:calc(10px + env(safe-area-inset-top));
   z-index:44;
-  width:30px;height:30px;
+  width:32px;height:32px;
   display:grid;place-items:center;
   border-radius:50%;
-  background:rgba(255,255,255,.96);
-  border:1px solid rgba(22,58,91,.12);
-  box-shadow:0 4px 14px rgba(8,31,53,.14);
-  color:#163a5b;
-  font-size:18px;font-weight:700;
-  opacity:calc(.15 + var(--flympus-pull-progress) * .85);
-  transform:translate(-50%,calc(-44px + var(--flympus-pull-y))) rotate(calc(var(--flympus-pull-progress) * 220deg));
-  transition:opacity .08s linear;
-  pointer-events:none
+  background:rgba(13,49,86,.94);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 5px 16px rgba(3,24,44,.22);
+  color:#fff;
+  font-size:18px;font-weight:800;
+  line-height:1;
+  opacity:calc(.08 + var(--flympus-pull-progress) * .92);
+  transform:translate3d(-50%,calc(-46px + var(--flympus-pull-y)),0) rotate(calc(var(--flympus-pull-progress) * 250deg)) scale(calc(.82 + var(--flympus-pull-progress) * .18));
+  transition:opacity .06s linear,background .12s ease,border-color .12s ease,box-shadow .12s ease;
+  pointer-events:none;
+  will-change:transform,opacity
 }
 .flympusPullIndicator.armed{
-  background:#163a5b;color:#fff;
-  border-color:#163a5b
+  background:#d7b45a;
+  color:#173a5d;
+  border-color:rgba(255,255,255,.42);
+  box-shadow:0 6px 18px rgba(3,24,44,.28),0 0 0 4px rgba(215,180,90,.14)
 }
-body:not(.flympusPulling) .flympusPullIndicator{opacity:0}
+.flympusPullIndicator.refreshing{
+  animation:flympusPullSpin .58s linear infinite
+}
+@keyframes flympusPullSpin{
+  to{transform:translate3d(-50%,calc(-46px + var(--flympus-pull-y)),0) rotate(360deg) scale(1)}
+}
+body:not(.flympusPulling):not(.flympusPullRelease) .flympusPullIndicator{opacity:0}
 </style>
 </head>
 <body>
@@ -3157,92 +3175,100 @@ function playFlympusBottomNavSound(){
     emitFlympusNavSignature(ctx);
   }catch{}
 }
-function emitFlympusRefreshSound(ctx){
-  if(!ctx)return;
-  const now=ctx.currentTime+.001;
-  const master=ctx.createGain();
-  master.gain.setValueAtTime(.055,now);
-  master.connect(ctx.destination);
-
-  /* Airy swish: filtered noise rising through the spectrum. */
-  const duration=.21,frames=Math.max(1,Math.floor(ctx.sampleRate*duration));
-  const noiseBuffer=ctx.createBuffer(1,frames,ctx.sampleRate);
-  const data=noiseBuffer.getChannelData(0);
-  for(let i=0;i<frames;i++)data[i]=(Math.random()*2-1);
-  const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),noiseGain=ctx.createGain();
-  noise.buffer=noiseBuffer;
-  filter.type='bandpass';
-  filter.Q.value=.7;
-  filter.frequency.setValueAtTime(650,now);
-  filter.frequency.exponentialRampToValueAtTime(2600,now+.15);
-  noiseGain.gain.setValueAtTime(.0001,now);
-  noiseGain.gain.linearRampToValueAtTime(.12,now+.035);
-  noiseGain.gain.exponentialRampToValueAtTime(.0001,now+.19);
-  noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(master);
-  noise.start(now);noise.stop(now+duration);
-
-  const voice=(f0,f1,level,delay,dur)=>{
-    const osc=ctx.createOscillator(),gain=ctx.createGain(),start=now+delay,end=start+dur;
-    osc.type='sine';
-    osc.frequency.setValueAtTime(f0,start);
-    osc.frequency.exponentialRampToValueAtTime(f1,end);
-    gain.gain.setValueAtTime(.0001,start);
-    gain.gain.linearRampToValueAtTime(level,start+.006);
-    gain.gain.exponentialRampToValueAtTime(.0001,end);
-    osc.connect(gain);gain.connect(master);
-    osc.start(start);osc.stop(end+.004);
-  };
-
-  /* C · FLYMPUS Sync, extended: dark onset → lift → clean confirmation. */
-  voice(610,690,.46,0,.07);
-  voice(760,1320,.52,.025,.12);
-  voice(1760,1960,.22,.115,.075);
-  voice(2300,2460,.10,.145,.05);
-}
-let flympusRefreshAudioCtx=null,flympusRefreshResumePromise=null;
-function createFlympusRefreshAudioContext(){
+let flympusRefreshAudioCtx=null;
+function getFlympusRefreshAudioContext(){
   try{
     const AudioCtx=window.AudioContext||window.webkitAudioContext;
     if(!AudioCtx)return null;
-    try{return new AudioCtx({latencyHint:'interactive'})}catch{return new AudioCtx()}
+    if(!flympusRefreshAudioCtx||flympusRefreshAudioCtx.state==='closed'){
+      try{flympusRefreshAudioCtx=new AudioCtx({latencyHint:'interactive'})}catch{flympusRefreshAudioCtx=new AudioCtx()}
+    }
+    return flympusRefreshAudioCtx;
   }catch{return null}
 }
-function getFlympusRefreshAudioContext(){
-  if(!flympusRefreshAudioCtx||flympusRefreshAudioCtx.state==='closed'){
-    flympusRefreshAudioCtx=createFlympusRefreshAudioContext();
-    flympusRefreshResumePromise=null;
-  }
-  return flympusRefreshAudioCtx;
-}
-function armFlympusRefreshAudio(){
+function armFlympusRefreshSound(){
   try{
-    if(flympusRefreshAudioCtx&&flympusRefreshAudioCtx.state==='interrupted'){
-      try{flympusRefreshAudioCtx.close?.()}catch{}
-      flympusRefreshAudioCtx=null;flympusRefreshResumePromise=null;
-    }
     const ctx=getFlympusRefreshAudioContext();if(!ctx)return null;
-    if(ctx.state!=='running'){
-      try{
-        const p=ctx.resume?.();
-        if(p?.then)flympusRefreshResumePromise=Promise.resolve(p).then(()=>ctx).catch(()=>null).finally(()=>{flympusRefreshResumePromise=null});
-      }catch{}
+    if(ctx.state==='interrupted'){
+      try{ctx.close?.()}catch{}
+      flympusRefreshAudioCtx=null;
+      return armFlympusRefreshSound();
     }
-    return ctx;
+    if(ctx.state!=='running'){
+      try{ctx.resume?.()}catch{}
+    }
+
+    const master=ctx.createGain();
+    master.gain.setValueAtTime(.055,ctx.currentTime);
+    master.connect(ctx.destination);
+
+    const noiseBuffer=ctx.createBuffer(1,Math.max(32,Math.floor(ctx.sampleRate*.07)),ctx.sampleRate);
+    const data=noiseBuffer.getChannelData(0);
+    for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1);
+    const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),noiseGain=ctx.createGain();
+    noise.buffer=noiseBuffer;noise.loop=true;
+    filter.type='bandpass';filter.Q.value=.7;filter.frequency.value=650;
+    noiseGain.gain.setValueAtTime(.0001,ctx.currentTime);
+    noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(master);
+    noise.start(0);
+
+    const makeVoice=f=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.type='sine';osc.frequency.value=f;
+      gain.gain.setValueAtTime(.0001,ctx.currentTime);
+      osc.connect(gain);gain.connect(master);osc.start(0);
+      return{osc,gain};
+    };
+    const voices=[makeVoice(610),makeVoice(760),makeVoice(1760),makeVoice(2300)];
+    return{ctx,master,noise,filter,noiseGain,voices,fired:false,stopped:false};
   }catch{return null}
 }
-function fireFlympusRefreshSound(ctx=flympusRefreshAudioCtx){
+function stopFlympusRefreshSoundGraph(graph){
+  if(!graph||graph.stopped)return;
+  graph.stopped=true;
+  try{graph.noise?.stop?.()}catch{}
+  graph.voices?.forEach(v=>{try{v.osc?.stop?.()}catch{}});
+  try{graph.master?.disconnect?.()}catch{}
+}
+function fireFlympusRefreshSound(graph){
   try{
-    if(!ctx)return;
-    if(ctx.state==='running'){emitFlympusRefreshSound(ctx);return}
-    const ready=flympusRefreshResumePromise||Promise.resolve(ctx.resume?.()).then(()=>ctx).catch(()=>null);
-    Promise.resolve(ready).then(c=>{if(c?.state==='running')emitFlympusRefreshSound(c)}).catch(()=>{});
+    if(!graph||graph.fired||graph.stopped)return;
+    graph.fired=true;
+    const ctx=graph.ctx;
+    if(ctx.state!=='running'){
+      try{ctx.resume?.()}catch{}
+    }
+    const now=ctx.currentTime+.002;
+    graph.filter.frequency.cancelScheduledValues(now);
+    graph.filter.frequency.setValueAtTime(650,now);
+    graph.filter.frequency.exponentialRampToValueAtTime(2600,now+.15);
+    graph.noiseGain.gain.cancelScheduledValues(now);
+    graph.noiseGain.gain.setValueAtTime(.0001,now);
+    graph.noiseGain.gain.linearRampToValueAtTime(.12,now+.035);
+    graph.noiseGain.gain.exponentialRampToValueAtTime(.0001,now+.19);
+
+    const voice=(v,f0,f1,level,delay,dur)=>{
+      const start=now+delay,end=start+dur;
+      v.osc.frequency.cancelScheduledValues(start);
+      v.osc.frequency.setValueAtTime(f0,start);
+      v.osc.frequency.exponentialRampToValueAtTime(f1,end);
+      v.gain.gain.cancelScheduledValues(start);
+      v.gain.gain.setValueAtTime(.0001,start);
+      v.gain.gain.linearRampToValueAtTime(level,start+.006);
+      v.gain.gain.exponentialRampToValueAtTime(.0001,end);
+    };
+    voice(graph.voices[0],610,690,.46,0,.07);
+    voice(graph.voices[1],760,1320,.52,.025,.12);
+    voice(graph.voices[2],1760,1960,.22,.115,.075);
+    voice(graph.voices[3],2300,2460,.10,.145,.05);
+    setTimeout(()=>stopFlympusRefreshSoundGraph(graph),280);
   }catch{}
 }
 if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   window.__flympusPullRefreshSoundBound=true;
-  let pullStartY=0,pullStartX=0,pullTracking=false,pullRefreshSoundPlayed=false,pullReloadArmed=false,pullRefreshCtx=null,pullReleaseTimer=null;
+  let pullStartY=0,pullStartX=0,pullTracking=false,pullRefreshSoundPlayed=false,pullReloadArmed=false,pullRefreshGraph=null,pullReleaseTimer=null;
   const setPullVisual=dy=>{
-    const visual=Math.max(0,Math.min(92,dy*.72));
+    const visual=Math.max(0,Math.min(96,104*(1-Math.exp(-Math.max(0,dy)/96))));
     const progress=Math.max(0,Math.min(1,dy/88));
     document.documentElement?.style?.setProperty('--flympus-pull-y',visual.toFixed(1)+'px');
     document.documentElement?.style?.setProperty('--flympus-pull-progress',progress.toFixed(3));
@@ -3255,11 +3281,14 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     document.body?.classList.add('flympusPullRelease');
     document.documentElement?.style?.setProperty('--flympus-pull-y','0px');
     document.documentElement?.style?.setProperty('--flympus-pull-progress','0');
-    $('#flympusPullIndicator')?.classList.remove('armed');
-    pullReleaseTimer=setTimeout(()=>document.body?.classList.remove('flympusPullRelease'),190);
+    const indicator=$('#flympusPullIndicator');
+    indicator?.classList.remove('armed','refreshing');
+    pullReleaseTimer=setTimeout(()=>document.body?.classList.remove('flympusPullRelease'),230);
   };
   const resetPull=()=>{
-    pullTracking=false;pullRefreshSoundPlayed=false;pullReloadArmed=false;pullRefreshCtx=null;
+    pullTracking=false;pullRefreshSoundPlayed=false;pullReloadArmed=false;
+    if(pullRefreshGraph&&!pullRefreshGraph.fired)stopFlympusRefreshSoundGraph(pullRefreshGraph);
+    pullRefreshGraph=null;
   };
   document.addEventListener('touchstart',e=>{
     resetPull();
@@ -3268,40 +3297,44 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     if(top>3)return;
     const t=e.touches?.[0];if(!t)return;
     pullStartY=t.clientY;pullStartX=t.clientX;pullTracking=true;
-    /* Resume while the finger-down event is still an explicit user gesture. */
-    pullRefreshCtx=armFlympusRefreshAudio();
+    /* Sources are created and started SILENT here, inside the direct finger gesture.
+       This is the key to keeping the sound reliable after every real page reload. */
+    pullRefreshGraph=armFlympusRefreshSound();
   },{passive:true,capture:true});
   document.addEventListener('touchmove',e=>{
     if(!pullTracking)return;
     const t=e.touches?.[0];if(!t)return;
     const dy=t.clientY-pullStartY,dx=t.clientX-pullStartX;
     if(dy<=0||dy<=Math.abs(dx)*1.25)return;
-    /* We own only the downward gesture that started at the very top. This
-       prevents Safari's native pull-to-refresh from taking over the audio. */
     e.preventDefault?.();
     setPullVisual(dy);
     if(!pullRefreshSoundPlayed&&dy>=44){
       pullRefreshSoundPlayed=true;
-      fireFlympusRefreshSound(pullRefreshCtx);
+      fireFlympusRefreshSound(pullRefreshGraph);
     }
-    if(dy>=88)pullReloadArmed=true;
+    pullReloadArmed=dy>=88;
+    $('#flympusPullIndicator')?.classList.toggle('armed',pullReloadArmed);
   },{passive:false,capture:true});
   document.addEventListener('touchend',()=>{
     if(!pullTracking)return;
     const reload=pullReloadArmed;
-    resetPull();
+    const graph=pullRefreshGraph;
+    pullTracking=false;pullReloadArmed=false;pullRefreshGraph=null;
     if(reload){
-      /* Keep the page visually pulled while the reload starts, like native
-         pull-to-refresh, instead of snapping back before navigation. */
-      location.reload();
-    }else releasePullVisual();
+      $('#flympusPullIndicator')?.classList.add('refreshing');
+      if(graph&&!graph.fired)fireFlympusRefreshSound(graph);
+      requestAnimationFrame(()=>location.reload());
+    }else{
+      if(graph&&!graph.fired)stopFlympusRefreshSoundGraph(graph);
+      releasePullVisual();
+    }
   },{passive:true,capture:true});
   document.addEventListener('touchcancel',()=>{resetPull();releasePullVisual()},{passive:true,capture:true});
   window.addEventListener('pageshow',()=>{resetPull();releasePullVisual()});
   document.addEventListener('visibilitychange',()=>{
     if(document.visibilityState==='visible'&&flympusRefreshAudioCtx?.state==='interrupted'){
       try{flympusRefreshAudioCtx.close?.()}catch{}
-      flympusRefreshAudioCtx=null;flympusRefreshResumePromise=null;
+      flympusRefreshAudioCtx=null;
     }
   });
 }
