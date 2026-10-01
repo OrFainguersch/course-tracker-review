@@ -2077,6 +2077,113 @@ body.drawerPushOpen .backdrop{
   }
 }
 </style>
+
+<style>
+/* ===== FLYMPUS bottom dock · shared mobile + desktop visual system ===== */
+.mobileBottomNav{
+  border:1px solid rgba(255,255,255,.10)!important;
+  border-radius:999px!important;
+  background:linear-gradient(180deg,#173f67 0%,#10365d 100%)!important;
+  box-shadow:0 12px 30px rgba(5,31,55,.22),inset 0 1px 0 rgba(255,255,255,.06)!important;
+  overflow:visible!important;
+}
+.mobileBottomItem{
+  padding:0!important;
+  color:#b8c9d9!important;
+}
+.mobileBottomIconButton{
+  border-radius:999px!important;
+  background:transparent!important;
+  color:inherit!important;
+  transition:background .14s ease,color .14s ease,transform .10s ease!important;
+}
+.mobileBottomItem.active{
+  color:var(--brand-gold)!important;
+}
+.mobileBottomItem.active .mobileBottomIconButton{
+  background:rgba(255,255,255,.105)!important;
+  color:var(--brand-gold)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important;
+}
+.mobileBottomItem.active:after{
+  display:none!important;
+}
+.mobileBottomIconButton:active{
+  transform:scale(.97)!important;
+}
+.mobileBottomItem .mobileBottomIcon,
+.mobileBottomItem.homeCenter .mobileBottomIcon{
+  color:inherit!important;
+}
+.mobileBottomItem .mobileBottomLabel,
+.mobileBottomItem.homeCenter .mobileBottomLabel{
+  color:inherit!important;
+  font-weight:760!important;
+}
+.bottomNavFilled,
+.bottomNavFilled svg{
+  width:24px!important;
+  height:24px!important;
+  display:block!important;
+}
+.mobileNavAttention{
+  border-color:#173f67!important;
+}
+.mobileBottomItem.active .mobileNavAttention{
+  border-color:#244d73!important;
+}
+@media(max-width:759px){
+  main{
+    padding-bottom:calc(116px + env(safe-area-inset-bottom))!important;
+  }
+  .mobileBottomNav{
+    left:14px!important;
+    right:14px!important;
+    bottom:calc(12px + env(safe-area-inset-bottom))!important;
+    width:auto!important;
+    height:76px!important;
+    padding:7px!important;
+  }
+  .mobileBottomItem{
+    height:62px!important;
+  }
+  .mobileBottomIconButton{
+    height:62px!important;
+    min-height:62px!important;
+    padding:6px 3px 5px!important;
+    gap:4px!important;
+  }
+  .mobileBottomItem .mobileBottomLabel,
+  .mobileBottomItem.homeCenter .mobileBottomLabel{
+    font-size:9.5px!important;
+  }
+  .reviewBanner{
+    bottom:calc(101px + env(safe-area-inset-bottom))!important;
+  }
+  .toast{
+    bottom:calc(108px + env(safe-area-inset-bottom))!important;
+  }
+}
+@media(min-width:900px){
+  .mobileBottomNav{
+    height:72px!important;
+    padding:6px 12px 8px!important;
+    border-radius:999px!important;
+  }
+  .mobileBottomItem{
+    height:56px!important;
+  }
+  .mobileBottomIconButton{
+    height:56px!important;
+    min-height:56px!important;
+    padding:5px 4px 4px!important;
+    gap:3px!important;
+  }
+  .mobileBottomItem .mobileBottomLabel{
+    font-size:10px!important;
+  }
+}
+</style>
 </head>
 <body>
 <div class="app"><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p><div class="deviceDataBox"><div class="deviceDataHead"><b>Device data</b><span class="deviceDataMode" id="deviceDataMode">Local</span></div><p id="deviceDataCopy">Courses, photos, evaluations and settings are stored locally on this device.</p><div class="deviceDataActions"><button class="btn secondary small" type="button" id="exportFlympusBackup">Export backup</button><label class="btn secondary small" for="flympusBackupInput" style="cursor:pointer">Import backup</label></div><p class="deviceDataHint" id="deviceDataHint">Use a backup to move the complete FLYMPUS setup between Safari and the Home Screen app.</p></div></div></div></div></header><input id="flympusBackupInput" type="file" accept=".json,application/json" hidden><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0719 · record form cleanup</div><div class="toast" id="toast"></div></div>
@@ -2494,6 +2601,17 @@ function navIconSvg(name){
   };
   return '<span class="navIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none">'+(paths[name]||'')+'</svg></span>';
 }
+function bottomNavIconSvg(name,filled=false){
+  if(!filled)return navIconSvg(name).replace('class="navIcon"','class="mobileBottomIconInner"');
+  const filledPaths={
+    home:'<path d="M12 2.9 2.8 10.2l1.7 2.1 1.2-1v8.9h4.2v-6.1h4.2v6.1h4.2v-8.9l1.2 1 1.7-2.1L12 2.9Z" fill="currentColor" stroke="none"></path>',
+    roster:'<circle cx="9" cy="7.8" r="3.2" fill="currentColor" stroke="none"></circle><path d="M3.2 19.2c.5-3.8 2.4-5.8 5.8-5.8s5.3 2 5.8 5.8H3.2Z" fill="currentColor" stroke="none"></path><circle cx="17.2" cy="9" r="2.3" fill="currentColor" stroke="none"></circle><path d="M15.1 14.3c3-.3 4.8 1.4 5.5 4.5h-4.5c-.1-1.8-.4-3.2-1-4.5Z" fill="currentColor" stroke="none"></path>',
+    planned:'<rect x="3.4" y="4.8" width="17.2" height="15.8" rx="2.4" fill="currentColor" stroke="none"></rect><path d="M7.5 3.4v4M16.5 3.4v4M3.8 9.3h16.4" stroke="#173a5d" stroke-width="1.8" stroke-linecap="round"></path><path d="m8.5 15 2 2 4.5-4.5" fill="none" stroke="#173a5d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>',
+    record:'<rect x="5" y="4.5" width="14" height="16" rx="2.2" fill="currentColor" stroke="none"></rect><rect x="9" y="2.8" width="6" height="3.4" rx="1" fill="currentColor" stroke="none"></rect><path d="M12 9v7M8.5 12.5h7" fill="none" stroke="#173a5d" stroke-width="2" stroke-linecap="round"></path>',
+    reports:'<path d="M4 20.5h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path><rect x="5" y="12" width="3.2" height="6.5" rx=".8" fill="currentColor" stroke="none"></rect><rect x="10.4" y="8" width="3.2" height="10.5" rx=".8" fill="currentColor" stroke="none"></rect><rect x="15.8" y="4" width="3.2" height="14.5" rx=".8" fill="currentColor" stroke="none"></rect>'
+  };
+  return '<span class="mobileBottomIconInner bottomNavFilled" aria-hidden="true"><svg viewBox="0 0 24 24">'+(filledPaths[name]||'')+'</svg></span>';
+}
 function setDrawerOpen(open){
  const drawer=$('#drawer'),menuBtn=$('#menuBtn'),isOpen=!!open;
  if(drawer)drawer.classList.toggle('open',isOpen);
@@ -2505,7 +2623,7 @@ function renderMobileBottomNav(){
   const n=$('#mobileBottomNav');if(!n)return;
   const active=state.screen==='home'?'home':(['roster','profile','instructor'].includes(state.screen)?'roster':state.screen==='planned'?'planned':['record','evaluation','safety','exams'].includes(state.screen)?'record':state.screen==='reports'?'reports':'');
   const items=[['roster','roster','Roster'],['planned','planned','Plan'],['home','home','Home'],['record','record','Record'],['reports','reports','Reports']];
-  n.innerHTML=items.map(([id,icon,label])=>{const attentionKey=id==='record'?'record':id==='planned'?'planned':'';const attention=attentionKey?(id==='record'?attentionBadgeHtml('record','mobileNavAttention mobileNavRecordAttention',true):attentionBadgeHtml(attentionKey,'mobileNavAttention')):'';return '<div class="mobileBottomItem '+(id==='home'?'homeCenter ':'')+(active===id?'active':'')+'"><button class="mobileBottomIconButton" type="button" data-mobile-nav="'+id+'" aria-label="'+label+'" '+(active===id?'aria-current="page"':'')+'><span class="mobileBottomIcon">'+navIconSvg(icon).replace('class="navIcon"','class="mobileBottomIconInner"')+'</span>'+attention+'<span class="mobileBottomLabel" aria-hidden="true">'+label+'</span></button></div>'}).join('');
+  n.innerHTML=items.map(([id,icon,label])=>{const attentionKey=id==='record'?'record':id==='planned'?'planned':'';const attention=attentionKey?(id==='record'?attentionBadgeHtml('record','mobileNavAttention mobileNavRecordAttention',true):attentionBadgeHtml(attentionKey,'mobileNavAttention')):'';return '<div class="mobileBottomItem '+(id==='home'?'homeCenter ':'')+(active===id?'active':'')+'"><button class="mobileBottomIconButton" type="button" data-mobile-nav="'+id+'" aria-label="'+label+'" '+(active===id?'aria-current="page"':'')+'><span class="mobileBottomIcon">'+bottomNavIconSvg(icon,active===id)+'</span>'+attention+'<span class="mobileBottomLabel" aria-hidden="true">'+label+'</span></button></div>'}).join('');
 }
 function bottomNavRootForScreen(screen){
   if(screen==='roster'||screen==='profile'||screen==='instructor')return'roster';
@@ -2537,29 +2655,52 @@ function scrollActiveBottomNavTop(root){
   try{window.scrollTo({top:0,left:0,behavior:'smooth'})}catch{window.scrollTo?.(0,0)}
 }
 const FLYMPUS_NAV_SOUND_SRC='./assets/flympus-nav-signature.wav';
-let flympusNavAudioPool=null,flympusNavAudioIndex=0;
-function getFlympusNavAudioPool(){
-  if(flympusNavAudioPool)return flympusNavAudioPool;
+let flympusNavAudioCtx=null,flympusNavAudioBuffer=null,flympusNavAudioLoadPromise=null;
+function getFlympusNavAudioContext(){
   try{
-    flympusNavAudioPool=Array.from({length:3},()=>{
-      const a=new Audio(FLYMPUS_NAV_SOUND_SRC);
-      a.preload='auto';
-      a.volume=.16;
-      a.playsInline=true;
-      try{a.load()}catch{}
-      return a;
-    });
-  }catch{flympusNavAudioPool=[]}
-  return flympusNavAudioPool;
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    if(!AudioCtx)return null;
+    if(!flympusNavAudioCtx||flympusNavAudioCtx.state==='closed'){
+      try{flympusNavAudioCtx=new AudioCtx({latencyHint:'interactive'})}catch{flympusNavAudioCtx=new AudioCtx()}
+      flympusNavAudioBuffer=null;flympusNavAudioLoadPromise=null;
+    }
+    return flympusNavAudioCtx;
+  }catch{return null}
+}
+function preloadFlympusNavSound(){
+  const ctx=getFlympusNavAudioContext();if(!ctx)return Promise.resolve(null);
+  if(flympusNavAudioBuffer)return Promise.resolve(flympusNavAudioBuffer);
+  if(flympusNavAudioLoadPromise)return flympusNavAudioLoadPromise;
+  flympusNavAudioLoadPromise=fetch(FLYMPUS_NAV_SOUND_SRC,{cache:'force-cache'})
+    .then(r=>r.arrayBuffer())
+    .then(buf=>ctx.decodeAudioData(buf.slice(0)))
+    .then(decoded=>(flympusNavAudioBuffer=decoded))
+    .catch(()=>null)
+    .finally(()=>{flympusNavAudioLoadPromise=null});
+  return flympusNavAudioLoadPromise;
+}
+function unlockFlympusNavAudio(){
+  const ctx=getFlympusNavAudioContext();if(!ctx)return;
+  if(ctx.state!=='running')try{ctx.resume?.()}catch{}
+  preloadFlympusNavSound();
 }
 function playFlympusBottomNavSound(){
   try{
-    const pool=getFlympusNavAudioPool();if(!pool.length)return;
-    const a=pool[flympusNavAudioIndex++%pool.length];
-    try{a.pause();a.currentTime=0}catch{}
-    const p=a.play();
-    if(p&&typeof p.catch==='function')p.catch(()=>{});
+    const ctx=getFlympusNavAudioContext();if(!ctx)return;
+    if(ctx.state!=='running')try{ctx.resume?.()}catch{}
+    if(!flympusNavAudioBuffer){preloadFlympusNavSound();return}
+    const src=ctx.createBufferSource(),gain=ctx.createGain();
+    src.buffer=flympusNavAudioBuffer;
+    gain.gain.setValueAtTime(.10,ctx.currentTime);
+    src.connect(gain);gain.connect(ctx.destination);
+    src.start(ctx.currentTime);
   }catch{}
+}
+preloadFlympusNavSound();
+if(document.addEventListener&&!window.__flympusNavAudioUnlockBound){
+  window.__flympusNavAudioUnlockBound=true;
+  document.addEventListener('pointerdown',unlockFlympusNavAudio,{capture:true,passive:true});
+  document.addEventListener('touchstart',unlockFlympusNavAudio,{capture:true,passive:true});
 }
 let bottomNavScrollSaveTimer=null;
 window.addEventListener('scroll',()=>{
