@@ -4174,11 +4174,22 @@ if($('#rosterSearch')){
   if($('#rosterRoleFilter'))$('#rosterRoleFilter').addEventListener('filterapply',e=>{state.rosterRoles=e.detail?.values||[];saveUiState();render()});
   if($('#rosterDateFrom'))$('#rosterDateFrom').onchange=e=>{state.rosterDateFrom=normalizeDateValue(e.target.value)||'';saveUiState();render()};
   if($('#rosterDateTo'))$('#rosterDateTo').onchange=e=>{state.rosterDateTo=normalizeDateValue(e.target.value)||'';saveUiState();render()};
-  if($('#addPersonBtn'))$('#addPersonBtn').onclick=()=>{if($('#personModal'))$('#personModal').classList.add('open')};
-  if($('#closePersonModal'))$('#closePersonModal').onclick=()=>{if($('#personModal'))$('#personModal').classList.remove('open')};
-  if($('#personModal'))$('#personModal').onclick=e=>{if(e.target.id==='personModal')$('#personModal').classList.remove('open')};
-  if($('#addPersonForm'))$('#addPersonForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget),type=fd.get('type');const arr=getRosterExtras();const name=String(fd.get('name')).trim(),id='x_'+Date.now();arr.push({id,name,email:String(fd.get('email')||''),type,status:'Active',courseIds:[currentCourseId],initials:name.split(' ').map(x=>x[0]).join('').slice(0,2),average:type==='TRAINEE'?null:undefined,totalFlights:type==='TRAINEE'?0:undefined});localStorage.setItem('ct-review-roster',JSON.stringify(arr));updateCourseMembership(id,String(type),type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});toast(name+' added to the course');render()}
-  if($('#assignExistingForm'))$('#assignExistingForm').onsubmit=e=>{e.preventDefault();const key=String(new FormData(e.currentTarget).get('personKey')||''),parts=key.split(':'),type=parts[0],id=parts.slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id);if(!p)return;updateCourseMembership(id,type,type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});toast(p.name+' assigned to '+(currentCourseMeta.courseName||'course'));render()}
+  const setRosterPersonModalOpen=open=>{
+    const modal=$('#personModal');if(!modal)return;
+    if(open){
+      if(modal.parentElement!==document.body)document.body.appendChild(modal);
+      modal.classList.add('open');
+    }else{
+      modal.classList.remove('open');
+      const content=$('#content');
+      if(content&&modal.parentElement===document.body)content.appendChild(modal);
+    }
+  };
+  if($('#addPersonBtn'))$('#addPersonBtn').onclick=()=>setRosterPersonModalOpen(true);
+  if($('#closePersonModal'))$('#closePersonModal').onclick=()=>setRosterPersonModalOpen(false);
+  if($('#personModal'))$('#personModal').onclick=e=>{if(e.target.id==='personModal')setRosterPersonModalOpen(false)};
+  if($('#addPersonForm'))$('#addPersonForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget),type=fd.get('type');const arr=getRosterExtras();const name=String(fd.get('name')).trim(),id='x_'+Date.now();arr.push({id,name,email:String(fd.get('email')||''),type,status:'Active',courseIds:[currentCourseId],initials:name.split(' ').map(x=>x[0]).join('').slice(0,2),average:type==='TRAINEE'?null:undefined,totalFlights:type==='TRAINEE'?0:undefined});localStorage.setItem('ct-review-roster',JSON.stringify(arr));updateCourseMembership(id,String(type),type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});setRosterPersonModalOpen(false);toast(name+' added to the course');render()}
+  if($('#assignExistingForm'))$('#assignExistingForm').onsubmit=e=>{e.preventDefault();const key=String(new FormData(e.currentTarget).get('personKey')||''),parts=key.split(':'),type=parts[0],id=parts.slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id);if(!p)return;updateCourseMembership(id,type,type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});setRosterPersonModalOpen(false);toast(p.name+' assigned to '+(currentCourseMeta.courseName||'course'));render()}
 }
 const toggleRosterManageMode=()=>renderPreservingManagementView(()=>{state.rosterManage=!state.rosterManage;state.personEditKey=null});if($('#toggleRosterManage'))$('#toggleRosterManage').onclick=toggleRosterManageMode;
 document.querySelectorAll('[data-person-edit]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();renderPreservingManagementView(()=>{state.personEditKey=btn.dataset.personEdit;state.personPhotoDraft=undefined})});
