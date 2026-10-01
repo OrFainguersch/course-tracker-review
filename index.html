@@ -3391,6 +3391,9 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     String(document.referrer||'').startsWith('ios-app://')
   );
   let pullStartY=0,pullStartX=0,pullOriginY=null,pullTracking=false,pullRefreshSoundPlayed=false,pullRefreshGraph=null,pullReloadArmed=false,pullReleaseTimer=null,pullStandaloneGesture=false;
+  if(!flympusStandaloneMode()){
+    document.body?.classList.remove('flympusStandalonePull','flympusStandaloneRelease');
+  }
 
   const setStandalonePullVisual=dy=>{
     if(!pullStandaloneGesture)return;
@@ -3403,7 +3406,23 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     $('#flympusStandaloneRefreshIndicator')?.classList.toggle('armed',dy>=88);
   };
 
+  const clearStandalonePullVisual=()=>{
+    clearTimeout(pullReleaseTimer);
+    document.body?.classList.remove('flympusStandalonePull','flympusStandaloneRelease');
+    document.documentElement?.style?.setProperty('--flympus-standalone-pull-y','0px');
+    document.documentElement?.style?.setProperty('--flympus-standalone-pull-opacity','0');
+    document.documentElement?.style?.setProperty('--flympus-standalone-pull-progress','0');
+    $('#flympusStandaloneRefreshIndicator')?.classList.remove('armed','refreshing');
+  };
+
   const releaseStandalonePullVisual=()=>{
+    /* Never apply standalone release styling in normal Safari. On a native
+       Safari reload, pageshow also fires; adding this class there was the cause
+       of the large navy block covering the page after pull-to-refresh. */
+    if(!flympusStandaloneMode()){
+      clearStandalonePullVisual();
+      return;
+    }
     clearTimeout(pullReleaseTimer);
     document.body?.classList.remove('flympusStandalonePull');
     document.body?.classList.add('flympusStandaloneRelease');
@@ -3497,7 +3516,11 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
 
   window.addEventListener('pageshow',()=>{
     resetPullRefreshSound();
-    releaseStandalonePullVisual();
+    /* pageshow fires after Safari's native pull-to-refresh too. Only the Home
+       Screen app owns the custom pull animation; browser Safari must be cleaned
+       without ever entering the standalone release state. */
+    if(flympusStandaloneMode())releaseStandalonePullVisual();
+    else clearStandalonePullVisual();
     flympusUiNeedsFreshContext=true;
     resetFlympusAudioSession();
   });
