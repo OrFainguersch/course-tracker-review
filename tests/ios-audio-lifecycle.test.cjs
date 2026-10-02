@@ -58,7 +58,7 @@ const context={
   performance:{now:()=>1000},
   Date,Math,Promise,ArrayBuffer,DataView,Uint8Array,Float32Array,
   btoa:s=>Buffer.from(s,'binary').toString('base64'),
-  setTimeout:fn=>{fn();return 1},
+  setTimeout:()=>1,
   clearTimeout(){},
   console
 };
