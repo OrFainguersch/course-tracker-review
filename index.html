@@ -2753,7 +2753,10 @@ body::-webkit-scrollbar{
   animation:flympusDockPressZoomMobile .18s cubic-bezier(.20,.78,.22,1) both!important;
 }
 .mobileBottomItem.dockPressTarget .mobileBottomIconButton{
-  transform:scale(1.018)!important;
+  scale:1.018!important;
+}
+.mobileBottomItem.dockPressTarget:has(.mobileBottomHapticSwitch:active) .mobileBottomIconButton{
+  transform:scale(1)!important;
 }
 .mobileBottomItem.dockPressTarget .mobileBottomIcon{
   transform-origin:center center!important;
@@ -2769,14 +2772,14 @@ body::-webkit-scrollbar{
   100%{transform:scale(1)}
 }
 @keyframes flympusDockIconPressZoom{
-  0%{transform:scale(1)}
-  32%{transform:scale(1.115)}
-  100%{transform:scale(1)}
+  0%{scale:1}
+  32%{scale:1.115}
+  100%{scale:1}
 }
 @keyframes flympusDockLabelPressZoom{
-  0%{transform:scale(1)}
-  32%{transform:scale(1.028)}
-  100%{transform:scale(1)}
+  0%{scale:1}
+  32%{scale:1.028}
+  100%{scale:1}
 }
 @media(min-width:900px){
   .mobileBottomNav.dockPressZoom:not(.dockHidden){
