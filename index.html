@@ -2694,6 +2694,7 @@ body::-webkit-scrollbar{
   --dock-halo-y:0px;
   --dock-halo-width:0px;
   --dock-halo-height:0px;
+  --dock-halo-y-nudge:-1px;
   isolation:isolate!important;
 }
 .mobileBottomNav::before{
@@ -2706,7 +2707,7 @@ body::-webkit-scrollbar{
   border-radius:999px;
   background:rgba(255,255,255,.105);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
-  transform:translate3d(var(--dock-halo-x),var(--dock-halo-y),0);
+  transform:translate3d(var(--dock-halo-x),calc(var(--dock-halo-y) + var(--dock-halo-y-nudge)),0);
   opacity:0;
   transition:none;
   will-change:transform;
@@ -2878,6 +2879,30 @@ html.flympusHydrating #content{
   if(snapMatches&&content){
     content.innerHTML=snap.html;
     if(bottomNav&&typeof snap.navHtml==='string')bottomNav.innerHTML=snap.navHtml;
+    if(bottomNav){
+      const h=snap.halo||null;
+      if(h&&h.measured){
+        if(h.x)bottomNav.style.setProperty('--dock-halo-x',h.x);
+        if(h.y)bottomNav.style.setProperty('--dock-halo-y',h.y);
+        if(h.width)bottomNav.style.setProperty('--dock-halo-width',h.width);
+        if(h.height)bottomNav.style.setProperty('--dock-halo-height',h.height);
+        bottomNav.classList.add('dockHaloMeasured');
+        if(h.ready!==false)bottomNav.classList.add('dockHaloReady');
+      }else{
+        /* Older snapshots did not store halo geometry. Measure the restored
+           active button synchronously, before Safari gets a chance to paint a
+           halo-less frame after reload. */
+        const activeButton=bottomNav.querySelector?.('.mobileBottomItem.active .mobileBottomIconButton');
+        const navRect=bottomNav.getBoundingClientRect?.(),buttonRect=activeButton?.getBoundingClientRect?.();
+        if(navRect&&buttonRect){
+          bottomNav.style.setProperty('--dock-halo-x',(buttonRect.left-navRect.left).toFixed(2)+'px');
+          bottomNav.style.setProperty('--dock-halo-y',(buttonRect.top-navRect.top).toFixed(2)+'px');
+          bottomNav.style.setProperty('--dock-halo-width',buttonRect.width.toFixed(2)+'px');
+          bottomNav.style.setProperty('--dock-halo-height',buttonRect.height.toFixed(2)+'px');
+          bottomNav.classList.add('dockHaloMeasured','dockHaloReady');
+        }
+      }
+    }
     window.__FLYMPUS_RELOAD_SNAPSHOT__=snap;
     if(snap.topHidden){
       document.body.classList.add('topChromeHidden');
@@ -3319,7 +3344,7 @@ function setDrawerOpen(open){
  document.body?.classList.toggle('drawerPushOpen',isOpen);
  menuBtn?.setAttribute?.('aria-expanded',isOpen?'true':'false');
 }
-function renderNav(){const n=$('#nav');n.innerHTML=nav.map(([id,ic,l])=>id==='__label'?'<div class="navLabel">'+l+'</div>':`<button class="navBtn ${state.screen===id?'active':''}" data-nav="${id}">${navIconSvg(ic)}<span class="navText">${l}</span></button>`).join('');n.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{setDrawerOpen(false);go(b.dataset.nav)});}
+function renderNav(){const n=$('#nav');n.innerHTML=nav.map(([id,ic,l])=>id==='__label'?'<div class="navLabel">'+l+'</div>':`<button class="navBtn ${state.screen===id?'active':''}" data-nav="${id}">${navIconSvg(ic)}<span class="navText">${l}</span></button>`).join('');n.querySelectorAll('[data-nav]').forEach(b=>{const pressSound=bindFlympusNavPressSound(b);b.onclick=e=>{if(e?.detail===0)pressSound(e);setDrawerOpen(false);go(b.dataset.nav)}});}
 let bottomDockNavigationTransition=false,bottomDockProgrammaticRestoreUntil=0;
 function syncBottomDockHalo(animate=true){
   const n=$('#mobileBottomNav'),activeButton=n?.querySelector?.('.mobileBottomItem.active .mobileBottomIconButton');
@@ -3407,10 +3432,14 @@ function scrollActiveBottomNavTop(root){
   bottomNavScrollPositions[root]=0;persistBottomNavScroll();
   try{window.scrollTo({top:0,left:0,behavior:'smooth'})}catch{window.scrollTo?.(0,0)}
 }
-let flympusUiAudioCtx=null;
-let flympusUiNeedsRouteRecovery=true;
-let flympusUiRouteReadyPromise=Promise.resolve(null);
-const FLYMPUS_UI_AUDIO_WARMUP_MS=120;
+let flympusUiMediaRouteReady=false;
+let flympusNavAudioPool=null,flympusNavAudioIndex=0;
+let flympusRefreshAudioPool=null,flympusRefreshAudioIndex=0;
+let flympusNavMediaSrc='',flympusRefreshMediaSrc='';
+
+const FLYMPUS_UI_MEDIA_RATE=12000;
+const FLYMPUS_NAV_MEDIA_MARKER=.09;
+const FLYMPUS_REFRESH_MEDIA_MARKER=5;
 
 function setFlympusAmbientAudioSession(){
   try{
@@ -3418,271 +3447,268 @@ function setFlympusAmbientAudioSession(){
   }catch{}
 }
 
-function discardFlympusUiAudioContext(){
-  const old=flympusUiAudioCtx;
-  flympusUiAudioCtx=null;
-  if(old&&old.state!=='closed'){
-    try{old.close?.()}catch{}
+function flympusWriteAscii(view,offset,text){
+  for(let i=0;i<text.length;i++)view.setUint8(offset+i,text.charCodeAt(i)&255);
+}
+
+function flympusBytesToBase64(bytes){
+  let binary='',chunk=0x6000;
+  for(let i=0;i<bytes.length;i+=chunk){
+    const part=bytes.subarray(i,Math.min(bytes.length,i+chunk));
+    binary+=String.fromCharCode.apply(null,part);
+  }
+  return btoa(binary);
+}
+
+function flympusWavDataUri(samples,sampleRate=FLYMPUS_UI_MEDIA_RATE){
+  const frames=samples.length,buffer=new ArrayBuffer(44+frames*2),view=new DataView(buffer);
+  flympusWriteAscii(view,0,'RIFF');
+  view.setUint32(4,36+frames*2,true);
+  flympusWriteAscii(view,8,'WAVE');
+  flympusWriteAscii(view,12,'fmt ');
+  view.setUint32(16,16,true);
+  view.setUint16(20,1,true);
+  view.setUint16(22,1,true);
+  view.setUint32(24,sampleRate,true);
+  view.setUint32(28,sampleRate*2,true);
+  view.setUint16(32,2,true);
+  view.setUint16(34,16,true);
+  flympusWriteAscii(view,36,'data');
+  view.setUint32(40,frames*2,true);
+  for(let i=0;i<frames;i++){
+    const x=Math.max(-1,Math.min(1,Number(samples[i])||0));
+    view.setInt16(44+i*2,Math.round(x*32767),true);
+  }
+  return'data:audio/wav;base64,'+flympusBytesToBase64(new Uint8Array(buffer));
+}
+
+function flympusCarrierSample(t){
+  /* Real, non-zero PCM rather than mute/digital silence. It is roughly -66 dB
+     and starts/ends at zero crossings, so it opens the native media route
+     without adding an audible click before the UI sound. */
+  return Math.sin(Math.PI*2*600*t)*.0005;
+}
+
+function flympusAddTone(samples,startSec,f0,f1,level,duration,master){
+  const sr=FLYMPUS_UI_MEDIA_RATE,start=Math.max(0,Math.floor(startSec*sr)),count=Math.max(1,Math.floor(duration*sr));
+  let phase=0;
+  for(let n=0;n<count&&start+n<samples.length;n++){
+    const u=n/Math.max(1,count-1),t=n/sr;
+    const freq=f0>0&&f1>0?f0*Math.pow(f1/f0,u):f0;
+    phase+=Math.PI*2*freq/sr;
+    const attack=Math.min(1,n/Math.max(1,Math.floor(.006*sr)));
+    const decay=Math.pow(.0001,Math.max(0,(u-.06)/.94));
+    samples[start+n]+=Math.sin(phase)*level*master*attack*Math.max(.0001,decay);
   }
 }
 
-function createFlympusUiAudioContext(){
+function buildFlympusNavMediaSrc(){
+  const sr=FLYMPUS_UI_MEDIA_RATE,total=FLYMPUS_NAV_MEDIA_MARKER+.085;
+  const samples=new Float32Array(Math.ceil(total*sr));
+  const leadFrames=Math.floor(FLYMPUS_NAV_MEDIA_MARKER*sr);
+  for(let i=0;i<leadFrames;i++)samples[i]=flympusCarrierSample(i/sr);
+  const m=FLYMPUS_NAV_MEDIA_MARKER+.001,master=.05;
+  flympusAddTone(samples,m,610,610,.95,.034,master);
+  flympusAddTone(samples,m,1220,1220,.20,.028,master);
+  flympusAddTone(samples,m+.005,1490,1490,.34,.028,master);
+  flympusAddTone(samples,m+.010,2260,2260,.13,.020,master);
+  return flympusWavDataUri(samples,sr);
+}
+
+function buildFlympusRefreshMediaSrc(){
+  const sr=FLYMPUS_UI_MEDIA_RATE,soundDuration=.23,total=FLYMPUS_REFRESH_MEDIA_MARKER+soundDuration+.03;
+  const samples=new Float32Array(Math.ceil(total*sr));
+  const leadFrames=Math.floor(FLYMPUS_REFRESH_MEDIA_MARKER*sr);
+  for(let i=0;i<leadFrames;i++)samples[i]=flympusCarrierSample(i/sr);
+
+  const start=Math.floor(FLYMPUS_REFRESH_MEDIA_MARKER*sr),count=Math.floor(.21*sr),master=.055;
+  let seed=0x51f15e,lp=0;
+  for(let n=0;n<count&&start+n<samples.length;n++){
+    seed=(seed*1664525+1013904223)>>>0;
+    const raw=((seed/4294967295)*2-1);
+    const u=n/Math.max(1,count-1);
+    const cutoff=.10+.58*u;
+    lp+=cutoff*(raw-lp);
+    const attack=Math.min(1,n/Math.max(1,Math.floor(.035*sr)));
+    const tail=Math.pow(.0001,Math.max(0,(u-.16)/.84));
+    samples[start+n]+=(raw-lp*.55)*.12*master*attack*Math.max(.0001,tail);
+  }
+
+  const m=FLYMPUS_REFRESH_MEDIA_MARKER+.002;
+  flympusAddTone(samples,m,610,690,.46,.07,master);
+  flympusAddTone(samples,m+.025,760,1320,.52,.12,master);
+  flympusAddTone(samples,m+.115,1760,1960,.22,.075,master);
+  flympusAddTone(samples,m+.145,2300,2460,.10,.05,master);
+  return flympusWavDataUri(samples,sr);
+}
+
+function makeFlympusUiAudio(src){
   try{
-    const AudioCtx=window.AudioContext||window.webkitAudioContext;
-    if(!AudioCtx)return null;
-    try{return new AudioCtx({latencyHint:'interactive'})}catch{return new AudioCtx()}
+    if(!src)return null;
+    const a=document.createElement('audio');
+    a.src=src;
+    a.preload='auto';
+    a.playsInline=true;
+    a.muted=false;
+    a.volume=1;
+    a.setAttribute('playsinline','');
+    a.setAttribute('webkit-playsinline','');
+    a.setAttribute('aria-hidden','true');
+    a.tabIndex=-1;
+    a.style.display='none';
+    a.addEventListener('playing',()=>{flympusUiMediaRouteReady=true},{passive:true});
+    document.body?.appendChild?.(a);
+    try{a.load?.()}catch{}
+    return a;
   }catch{return null}
 }
 
-function getFlympusUiAudioContext(){
-  if(!flympusUiAudioCtx||flympusUiAudioCtx.state==='closed'){
-    flympusUiAudioCtx=createFlympusUiAudioContext();
+function getFlympusNavAudioPool(){
+  if(!flympusNavMediaSrc)flympusNavMediaSrc=buildFlympusNavMediaSrc();
+  if(!flympusNavAudioPool){
+    flympusNavAudioPool=[
+      makeFlympusUiAudio(flympusNavMediaSrc),
+      makeFlympusUiAudio(flympusNavMediaSrc),
+      makeFlympusUiAudio(flympusNavMediaSrc),
+      makeFlympusUiAudio(flympusNavMediaSrc)
+    ].filter(Boolean);
   }
-  return flympusUiAudioCtx;
+  return flympusNavAudioPool;
 }
 
-function recoverFlympusAmbientAudioSession(){
-  try{
-    const session=navigator.audioSession;
-    if(!session)return Promise.resolve();
-
-    /* WebKit may keep a JS-side category cache while the native/GPU audio
-       session behind it has been rebuilt. A real category transition forces the
-       native session to be re-sent. Finish on ambient so the Ring/Silent switch
-       remains authoritative for these non-essential UI sounds. */
-    try{session.type='playback'}catch{}
-    return new Promise(resolve=>{
-      setTimeout(()=>{
-        try{session.type='ambient'}catch{}
-        setTimeout(resolve,0);
-      },0);
-    });
-  }catch{
-    setFlympusAmbientAudioSession();
-    return Promise.resolve();
+function getFlympusRefreshAudioPool(){
+  if(!flympusRefreshMediaSrc)flympusRefreshMediaSrc=buildFlympusRefreshMediaSrc();
+  if(!flympusRefreshAudioPool){
+    flympusRefreshAudioPool=[
+      makeFlympusUiAudio(flympusRefreshMediaSrc),
+      makeFlympusUiAudio(flympusRefreshMediaSrc)
+    ].filter(Boolean);
   }
+  return flympusRefreshAudioPool;
 }
 
-function holdFlympusUiAudioRoute(ctx){
-  if(!ctx)return;
+function resetFlympusMediaElement(a){
+  if(!a)return;
   try{
-    /* Keep a tiny non-zero carrier alive while iOS opens the physical output
-       route. Zero/muted primers can be optimized away by WebKit. */
-    const now=ctx.currentTime;
-    const osc=ctx.createOscillator(),gain=ctx.createGain();
-    osc.type='sine';
-    osc.frequency.setValueAtTime(220,now);
-    gain.gain.setValueAtTime(.000001,now);
-    osc.connect(gain);gain.connect(ctx.destination);
-    osc.start(now);osc.stop(now+.24);
+    a.onended=null;
+    a.ontimeupdate=null;
+    a.loop=false;
+    a.muted=false;
+    a.volume=1;
+    a.pause?.();
+    a.currentTime=0;
   }catch{}
 }
 
-function prepareFlympusUiAudioGesture(){
+function warmFlympusUiAudioMedia(){
   try{
-    if(flympusUiAudioCtx&&(flympusUiAudioCtx.state==='interrupted'||flympusUiAudioCtx.state==='closed')){
-      discardFlympusUiAudioContext();
-      flympusUiNeedsRouteRecovery=true;
-    }
-
-    const ctx=getFlympusUiAudioContext();if(!ctx)return null;
-    const needsRecovery=flympusUiNeedsRouteRecovery;
-    const needsResume=ctx.state!=='running';
-
-    let resumeReady=Promise.resolve(ctx);
-    if(needsResume){
-      try{resumeReady=Promise.resolve(ctx.resume?.()).then(()=>ctx).catch(()=>ctx)}catch{}
-    }
-
-    holdFlympusUiAudioRoute(ctx);
-
-    if(needsRecovery){
-      flympusUiNeedsRouteRecovery=false;
-      const sessionReady=recoverFlympusAmbientAudioSession();
-      flympusUiRouteReadyPromise=Promise.all([sessionReady,resumeReady])
-        .then(()=>new Promise(resolve=>setTimeout(resolve,FLYMPUS_UI_AUDIO_WARMUP_MS)))
-        .then(()=>ctx)
-        .catch(()=>ctx);
-      return{ctx,readyNow:false,readyPromise:flympusUiRouteReadyPromise};
-    }
-
-    if(needsResume){
-      flympusUiRouteReadyPromise=Promise.resolve(resumeReady)
-        .then(()=>new Promise(resolve=>setTimeout(resolve,60)))
-        .then(()=>ctx)
-        .catch(()=>ctx);
-      return{ctx,readyNow:false,readyPromise:flympusUiRouteReadyPromise};
-    }
-
-    return{ctx,readyNow:true,readyPromise:Promise.resolve(ctx)};
-  }catch{return null}
+    setFlympusAmbientAudioSession();
+    getFlympusNavAudioPool();
+    getFlympusRefreshAudioPool();
+  }catch{}
 }
 
 function resetFlympusAudioSession(){
-  /* A real reload creates a new document. BFCache/foreground restores do not,
-     so explicitly discard the old context there and force the next physical
-     gesture to rebuild both the Web Audio context and native audio route. */
-  discardFlympusUiAudioContext();
-  flympusUiNeedsRouteRecovery=true;
-  flympusUiRouteReadyPromise=Promise.resolve(null);
+  flympusUiMediaRouteReady=false;
   setFlympusAmbientAudioSession();
-}
-
-function armFlympusNavSignature(ctx){
-  if(!ctx)return null;
-  const now=ctx.currentTime;
-  const master=ctx.createGain();
-  master.gain.setValueAtTime(0,now);
-  master.connect(ctx.destination);
-
-  const voice=(freq,level,delay,duration)=>{
-    const osc=ctx.createOscillator(),gain=ctx.createGain();
-    osc.type='sine';osc.frequency.setValueAtTime(freq,now);
-    gain.gain.setValueAtTime(0,now);
-    osc.connect(gain);gain.connect(master);
-    /* Start during the physical gesture; only the gain is revealed after the
-       route-recovery warm-up on the first gesture after reload. */
-    osc.start(now);
-    return{osc,gain,freq,level,delay,duration};
-  };
-
-  return{ctx,master,voices:[
-    voice(610,.95,0,.034),
-    voice(1220,.20,0,.028),
-    voice(1490,.34,.005,.028),
-    voice(2260,.13,.010,.020)
-  ],fired:false,stopped:false};
-}
-
-function stopFlympusNavSignature(graph){
-  if(!graph||graph.stopped)return;
-  graph.stopped=true;
-  graph.voices?.forEach(v=>{
-    try{v.osc?.stop?.()}catch{}
-    try{v.osc?.disconnect?.()}catch{}
-    try{v.gain?.disconnect?.()}catch{}
-  });
-  try{graph.master?.disconnect?.()}catch{}
-}
-
-function fireFlympusNavSignature(graph){
-  if(!graph||graph.fired||graph.stopped)return;
-  graph.fired=true;
-  try{
-    const now=graph.ctx.currentTime+.001;
-    graph.master.gain.setValueAtTime(.05,now);
-    graph.voices.forEach(v=>{
-      const start=now+v.delay,end=start+v.duration;
-      v.osc.frequency.setValueAtTime(v.freq,start);
-      v.gain.gain.setValueAtTime(.0001,start);
-      v.gain.gain.linearRampToValueAtTime(v.level,start+.001);
-      v.gain.gain.exponentialRampToValueAtTime(.0001,end);
-      try{v.osc.stop(end+.003)}catch{}
-    });
-    setTimeout(()=>stopFlympusNavSignature(graph),120);
-  }catch{
-    stopFlympusNavSignature(graph);
-  }
+  getFlympusNavAudioPool().forEach(resetFlympusMediaElement);
+  getFlympusRefreshAudioPool().forEach(resetFlympusMediaElement);
 }
 
 function playFlympusBottomNavSound(){
   try{
-    const route=prepareFlympusUiAudioGesture();if(!route)return;
-    const graph=armFlympusNavSignature(route.ctx);if(!graph)return;
-    if(route.readyNow)fireFlympusNavSignature(graph);
-    else Promise.resolve(route.readyPromise)
-      .then(()=>fireFlympusNavSignature(graph))
-      .catch(()=>stopFlympusNavSignature(graph));
+    setFlympusAmbientAudioSession();
+    const pool=getFlympusNavAudioPool();if(!pool.length)return;
+    const a=pool[flympusNavAudioIndex++%pool.length];
+    resetFlympusMediaElement(a);
+
+    /* On the FIRST gesture after a reload, play the same element from its real
+       non-zero lead-in. iOS opens the physical media route during that lead-in,
+       then the requested sound follows from the very same player. Once the
+       route is known healthy, later presses can seek straight to the marker. */
+    a.currentTime=flympusUiMediaRouteReady?FLYMPUS_NAV_MEDIA_MARKER:0;
+    const p=a.play?.();
+    if(p?.then)p.then(()=>{flympusUiMediaRouteReady=true}).catch(()=>{});
+    else flympusUiMediaRouteReady=true;
   }catch{}
+}
+
+function bindFlympusNavPressSound(el){
+  if(!el)return()=>{};
+  let lastSoundAt=0;
+  const press=e=>{
+    if(e?.pointerType==='mouse'&&e?.button!==0)return;
+    const now=performance.now?.()||Date.now();
+    if(now-lastSoundAt<90)return;
+    lastSoundAt=now;
+    playFlympusBottomNavSound();
+  };
+  el.ontouchstart=press;
+  if(window.PointerEvent)el.onpointerdown=e=>{if(e?.pointerType!=='touch')press(e)};
+  return press;
 }
 
 function armFlympusRefreshSound(){
   try{
-    const route=prepareFlympusUiAudioGesture();if(!route)return null;
-    const ctx=route.ctx;
-    const master=ctx.createGain();
-    master.gain.setValueAtTime(0,ctx.currentTime);
-    master.connect(ctx.destination);
+    setFlympusAmbientAudioSession();
+    const pool=getFlympusRefreshAudioPool();if(!pool.length)return null;
+    const a=pool[flympusRefreshAudioIndex++%pool.length];
+    resetFlympusMediaElement(a);
 
-    const noiseBuffer=ctx.createBuffer(1,Math.max(64,Math.floor(ctx.sampleRate*.08)),ctx.sampleRate);
-    const noiseData=noiseBuffer.getChannelData(0);
-    for(let i=0;i<noiseData.length;i++)noiseData[i]=(Math.random()*2-1);
-
-    const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),noiseGain=ctx.createGain();
-    noise.buffer=noiseBuffer;noise.loop=true;
-    filter.type='bandpass';filter.Q.value=.7;filter.frequency.setValueAtTime(650,ctx.currentTime);
-    noiseGain.gain.setValueAtTime(0,ctx.currentTime);
-    noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(master);
-    noise.start(ctx.currentTime);
-
-    const makeVoice=freq=>{
-      const osc=ctx.createOscillator(),gain=ctx.createGain();
-      osc.type='sine';osc.frequency.setValueAtTime(freq,ctx.currentTime);
-      gain.gain.setValueAtTime(0,ctx.currentTime);
-      osc.connect(gain);gain.connect(master);
-      osc.start(ctx.currentTime);
-      return{osc,gain};
+    const graph={
+      audio:a,fired:false,emitted:false,stopped:false,
+      routeStarted:false,pendingFire:false,guard:null
     };
 
-    return{
-      ctx,master,noise,filter,noiseGain,
-      voices:[makeVoice(610),makeVoice(760),makeVoice(1760),makeVoice(2300)],
-      routeReadyNow:route.readyNow,
-      routeReadyPromise:route.readyPromise,
-      fired:false,emitted:false,stopped:false
+    /* Keep the asset inside its non-zero lead-in until the pull threshold is
+       reached. This starts an actual unmuted media stream on touchstart, unlike
+       the previous muted primer which WebKit was free to optimize away. */
+    graph.guard=()=>{
+      if(graph.fired||graph.stopped)return;
+      try{
+        if(a.currentTime>=FLYMPUS_REFRESH_MEDIA_MARKER-.55)a.currentTime=.04;
+      }catch{}
     };
+    a.ontimeupdate=graph.guard;
+    a.currentTime=0;
+
+    const onStarted=()=>{
+      if(graph.stopped)return;
+      graph.routeStarted=true;
+      flympusUiMediaRouteReady=true;
+      if(graph.pendingFire)emitFlympusRefreshSound(graph);
+    };
+    const p=a.play?.();
+    if(p?.then)p.then(onStarted).catch(()=>{});
+    else onStarted();
+
+    return graph;
   }catch{return null}
 }
 
 function stopFlympusRefreshSound(graph){
   if(!graph||graph.stopped)return;
   graph.stopped=true;
-  try{graph.noise?.stop?.()}catch{}
-  try{graph.noise?.disconnect?.()}catch{}
-  try{graph.filter?.disconnect?.()}catch{}
-  try{graph.noiseGain?.disconnect?.()}catch{}
-  graph.voices?.forEach(v=>{
-    try{v.osc?.stop?.()}catch{}
-    try{v.osc?.disconnect?.()}catch{}
-    try{v.gain?.disconnect?.()}catch{}
-  });
-  try{graph.master?.disconnect?.()}catch{}
+  resetFlympusMediaElement(graph.audio);
 }
 
 function emitFlympusRefreshSound(graph){
   if(!graph||graph.emitted||graph.stopped)return;
+  if(!graph.routeStarted){
+    graph.pendingFire=true;
+    return;
+  }
+  graph.emitted=true;
+  graph.pendingFire=false;
+  const a=graph.audio;
   try{
-    graph.emitted=true;
-    const ctx=graph.ctx;
-    const now=ctx.currentTime+.002;
-    graph.master.gain.setValueAtTime(.055,now);
-
-    graph.filter.frequency.cancelScheduledValues(now);
-    graph.filter.frequency.setValueAtTime(650,now);
-    graph.filter.frequency.exponentialRampToValueAtTime(2600,now+.15);
-
-    graph.noiseGain.gain.cancelScheduledValues(now);
-    graph.noiseGain.gain.setValueAtTime(.0001,now);
-    graph.noiseGain.gain.linearRampToValueAtTime(.12,now+.035);
-    graph.noiseGain.gain.exponentialRampToValueAtTime(.0001,now+.19);
-
-    const voice=(v,f0,f1,level,delay,dur)=>{
-      const start=now+delay,end=start+dur;
-      v.osc.frequency.cancelScheduledValues(start);
-      v.osc.frequency.setValueAtTime(f0,start);
-      v.osc.frequency.exponentialRampToValueAtTime(f1,end);
-      v.gain.gain.cancelScheduledValues(start);
-      v.gain.gain.setValueAtTime(.0001,start);
-      v.gain.gain.linearRampToValueAtTime(level,start+.006);
-      v.gain.gain.exponentialRampToValueAtTime(.0001,end);
-    };
-
-    voice(graph.voices[0],610,690,.46,0,.07);
-    voice(graph.voices[1],760,1320,.52,.025,.12);
-    voice(graph.voices[2],1760,1960,.22,.115,.075);
-    voice(graph.voices[3],2300,2460,.10,.145,.05);
-
-    setTimeout(()=>stopFlympusRefreshSound(graph),700);
+    a.ontimeupdate=null;
+    a.currentTime=FLYMPUS_REFRESH_MEDIA_MARKER;
+    if(a.paused){
+      const p=a.play?.();
+      if(p?.catch)p.catch(()=>{});
+    }
+    setTimeout(()=>stopFlympusRefreshSound(graph),650);
   }catch{
     stopFlympusRefreshSound(graph);
   }
@@ -3691,14 +3717,13 @@ function emitFlympusRefreshSound(graph){
 function fireFlympusRefreshSound(graph){
   if(!graph||graph.fired||graph.stopped)return;
   graph.fired=true;
-  if(graph.routeReadyNow)emitFlympusRefreshSound(graph);
-  else Promise.resolve(graph.routeReadyPromise)
-    .then(()=>emitFlympusRefreshSound(graph))
-    .catch(()=>stopFlympusRefreshSound(graph));
+  emitFlympusRefreshSound(graph);
 }
 
-/* Do not play at boot. Just make sure the next real gesture performs a fresh
-   native-route recovery before any audible gain is revealed. */
+/* Decode/preload the tiny generated WAV assets before the first interaction.
+   No playback occurs here; playback permission is still obtained only from the
+   user's physical touch/pointer gesture. */
+warmFlympusUiAudioMedia();
 resetFlympusAudioSession();
 
 if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
@@ -5886,7 +5911,7 @@ function bindGlobalFormUx(){
     form.addEventListener('submit',e=>{if(showFormInvalid(form)){e.preventDefault();e.stopImmediatePropagation()}},true)
   });
 }
-function bind(){bindGlobalFormUx();bindDmyDateInputs();bindMultiFilters();renderPersonalIdentity();syncAttentionBadges();bindGlobalBackGesture();if($('#appBackBtn'))$('#appBackBtn').onclick=()=>goBack();if($('#exportFlympusBackup'))$('#exportFlympusBackup').onclick=async()=>{const ok=await exportFlympusBackup();if(ok)toast('FLYMPUS backup ready','success')};if($('#standaloneImportBackup'))$('#standaloneImportBackup').onclick=()=>$('#flympusBackupInput')?.click();if($('#standaloneMigrationDismiss'))$('#standaloneMigrationDismiss').onclick=()=>{localStorage.setItem('ct-review-standalone-migration-dismissed','1');render()};if($('#flympusBackupInput'))$('#flympusBackupInput').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const payload=JSON.parse(await file.text());const entries=validateFlympusBackup(payload);if(!(await siteConfirm('Replace this device\'s current FLYMPUS data with the selected backup? This imports courses, photos, records and settings.',{title:'Import FLYMPUS backup?',confirmLabel:'Import backup',tone:'primary'})))return;restoreFlympusBackup(payload);toast('Backup imported · reloading','success');setTimeout(()=>location.reload(),350)}catch(err){toast(err?.message||'Could not import this backup.','error')}finally{e.target.value=''}};const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop'),drawerPanel=drawer?.querySelector?.('.panel');if(menuBtn&&drawer)menuBtn.onclick=e=>{e?.preventDefault?.();e?.stopPropagation?.();closeAllMultiFilters(false);setDrawerOpen(!drawer.classList.contains('open'))};if(backdrop&&drawer)backdrop.onclick=()=>setDrawerOpen(false);if(drawer){let drawerSwipeStartX=0,drawerSwipeStartY=0,drawerSwipeTracking=false,drawerSwipeClaimed=false;drawer.ontouchstart=e=>{if(!drawer.classList.contains('open'))return;const t=e.touches?.[0];if(!t)return;drawerSwipeStartX=t.clientX;drawerSwipeStartY=t.clientY;drawerSwipeTracking=true;drawerSwipeClaimed=false};drawer.ontouchmove=e=>{if(!drawerSwipeTracking)return;const t=e.touches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY;if(dx<-12&&Math.abs(dx)>Math.abs(dy)*1.2){drawerSwipeClaimed=true;e.preventDefault?.()}};drawer.ontouchend=e=>{if(!drawerSwipeTracking)return;drawerSwipeTracking=false;const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY;if(drawerSwipeClaimed&&dx<=-58&&Math.abs(dy)<=70)setDrawerOpen(false);drawerSwipeClaimed=false};drawer.ontouchcancel=()=>{drawerSwipeTracking=false;drawerSwipeClaimed=false}};const mobileBottom=$('#mobileBottomNav');if(mobileBottom){mobileBottom.ontouchend=e=>{if(!e.target?.closest?.('.mobileBottomIconButton'))e.preventDefault?.()};mobileBottom.ongesturestart=e=>e.preventDefault?.();mobileBottom.ongesturechange=e=>e.preventDefault?.();mobileBottom.ongestureend=e=>e.preventDefault?.()}document.querySelectorAll('[data-mobile-nav]').forEach(b=>{let lastNavSoundAt=0;const pressSound=e=>{if(e?.pointerType==='mouse'&&e?.button!==0)return;const now=performance.now?.()||Date.now();if(now-lastNavSoundAt<90)return;lastNavSoundAt=now;playFlympusBottomNavSound()};b.ontouchstart=pressSound;if(window.PointerEvent)b.onpointerdown=e=>{if(e?.pointerType!=='touch')pressSound(e)};b.onclick=e=>{e?.preventDefault?.();e?.stopPropagation?.();if(e?.detail===0)pressSound(e);const target=b.dataset.mobileNav,currentRoot=bottomNavRootForScreen(state.screen);if(state.screen===target){scrollActiveBottomNavTop(target);return}if(state.screen===currentRoot)rememberBottomNavScroll();bottomDockNavigationTransition=true;go(target);restoreBottomNavScroll(target)}});const topSwitch=$('#topCourseSwitch'),topMenu=$('#topCourseDropdown'),notificationBtn=$('#topNotificationBtn'),notificationMenu=$('#topNotificationDropdown'),profileBtn=$('#topPersonalProfileBtn'),profileMenu=$('#topPersonalProfileDropdown');if(topSwitch&&topMenu)topSwitch.onclick=e=>{e?.stopPropagation?.();closeAllMultiFilters(false);if(notificationMenu){notificationMenu.hidden=true;notificationBtn?.setAttribute?.('aria-expanded','false')}if(profileMenu){profileMenu.hidden=true;profileBtn?.setAttribute?.('aria-expanded','false')}const open=topMenu.hidden===true;topMenu.hidden=!open;topSwitch.setAttribute?.('aria-expanded',open?'true':'false');if(open)positionTopCourseDropdown()};if(notificationBtn&&notificationMenu)notificationBtn.onclick=e=>{e?.stopPropagation?.();closeAllMultiFilters(false);if(topMenu){topMenu.hidden=true;topSwitch?.setAttribute?.('aria-expanded','false')}if(profileMenu){profileMenu.hidden=true;profileBtn?.setAttribute?.('aria-expanded','false')}const open=notificationMenu.hidden===true;notificationMenu.hidden=!open;notificationBtn.setAttribute?.('aria-expanded',open?'true':'false');if(open){syncNotificationPreferenceControls();positionNotificationDropdown()}};if(profileBtn&&profileMenu)profileBtn.onclick=e=>{e?.stopPropagation?.();closeAllMultiFilters(false);if(topMenu){topMenu.hidden=true;topSwitch?.setAttribute?.('aria-expanded','false')}if(notificationMenu){notificationMenu.hidden=true;notificationBtn?.setAttribute?.('aria-expanded','false')}const open=profileMenu.hidden===true;profileMenu.hidden=!open;profileBtn.setAttribute?.('aria-expanded',open?'true':'false');if(open){renderPersonalIdentity();positionPersonalProfileDropdown()}};document.querySelectorAll('[data-notification-pref]').forEach(el=>el.onchange=()=>{const prefs=getNotificationPreferences();prefs[el.dataset.notificationPref]=!!el.checked;saveNotificationPreferences(prefs);toast('Notification preferences saved')});if($('#personalPhotoInput'))$('#personalPhotoInput').onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{await openPersonalPhotoCrop(file)}catch(err){toast('Could not process this photo')}};if($('#editPersonalPhoto'))$('#editPersonalPhoto').onclick=async()=>{const me=allInstructors().find(x=>x.id===currentUserId);if(!me?.photoData)return;try{await openPersonalPhotoCropDataUrl(me.photoData)}catch(err){toast('Could not open photo editor')}};if($('#personalCropReplaceInput'))$('#personalCropReplaceInput').onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{await openPersonalPhotoCrop(file,personalCropTarget)}catch(err){toast('Could not process this photo')}};if($('#personalCropReset'))$('#personalCropReset').onclick=()=>{if(!personalCropState)return;personalCropState.zoom=1;personalCropState.x=0;personalCropState.y=0;personalCropPointers.clear();personalCropGesture=null;renderPersonalPhotoCrop()};if($('#personalCropCancel'))$('#personalCropCancel').onclick=closePersonalPhotoCrop;if($('#personalCropClose'))$('#personalCropClose').onclick=closePersonalPhotoCrop;if($('#personalCropApply'))$('#personalCropApply').onclick=()=>{const data=personalCropDataUrl();if(!data)return;const target=personalCropTarget;if(target==='roster'){state.personPhotoDraft=data;const preview=$('#personPhotoPreview'),choose=$('#choosePersonPhotoAction'),edit=$('#editPersonPhoto'),remove=$('#removePersonPhoto');if(preview)preview.innerHTML='<img src="'+data+'" alt="">';if(choose)choose.hidden=true;if(edit)edit.hidden=false;if(remove)remove.hidden=false;closePersonalPhotoCrop();toast('Photo ready — save changes to apply')}else{if(personOverride(currentUserId,{photoData:data})){closePersonalPhotoCrop();renderPersonalIdentity();toast('Profile photo updated');render()}}};if($('#personalCropModal'))$('#personalCropModal').onclick=e=>{if(e.target?.id==='personalCropModal')closePersonalPhotoCrop()};if($('#personalCropViewport')){const v=$('#personalCropViewport');v.onpointerdown=e=>{if(!personalCropState)return;e.preventDefault?.();personalCropPointers.set(e.pointerId,{id:e.pointerId,x:e.clientX,y:e.clientY});v.setPointerCapture?.(e.pointerId);v.classList.add('dragging');startPersonalCropGesture()};v.onpointermove=e=>{if(!personalCropState||!personalCropPointers.has(e.pointerId))return;e.preventDefault?.();personalCropPointers.set(e.pointerId,{id:e.pointerId,x:e.clientX,y:e.clientY});const pts=[...personalCropPointers.values()],g=personalCropGesture;if(!g)return;if(pts.length>=2){if(g.mode!=='pinch'){startPersonalCropGesture();return}const a=pts[0],b=pts[1],mid=personalCropPointMid(a,b),ratio=personalCropPointDistance(a,b)/g.distance;personalCropState.zoom=Math.max(1,Math.min(4,g.zoom*ratio));personalCropState.x=g.x+(mid.x-g.midX);personalCropState.y=g.y+(mid.y-g.midY);renderPersonalPhotoCrop()}else if(pts.length===1){const a=pts[0];if(g.mode!=='pan'||g.pointerId!==a.id){startPersonalCropGesture();return}personalCropState.x=g.x+(a.x-g.startX);personalCropState.y=g.y+(a.y-g.startY);renderPersonalPhotoCrop()}};const endPointer=e=>{personalCropPointers.delete(e.pointerId);v.releasePointerCapture?.(e.pointerId);if(personalCropPointers.size){startPersonalCropGesture()}else{personalCropGesture=null;v.classList.remove('dragging')}};v.onpointerup=endPointer;v.onpointercancel=endPointer};if($('#removePersonalPhoto'))$('#removePersonalPhoto').onclick=()=>{personOverride(currentUserId,{photoData:null});renderPersonalIdentity();toast('Profile photo removed');render()};document.querySelectorAll('[data-quick-course]').forEach(b=>b.onclick=e=>{e?.stopPropagation?.();if(topMenu)topMenu.hidden=true;if(topSwitch)topSwitch.setAttribute?.('aria-expanded','false');switchCourseByKey(b.dataset.quickCourse,{screen:'home'})});if($('#topCourseViewAll'))$('#topCourseViewAll').onclick=e=>{e?.stopPropagation?.();if(topMenu)topMenu.hidden=true;if(topSwitch)topSwitch.setAttribute?.('aria-expanded','false');go('courses')};if(!window.__topCourseSwitcherGlobalBound&&document.addEventListener){window.__topCourseSwitcherGlobalBound=true;document.addEventListener('click',e=>{const menu=$('#topCourseDropdown'),btn=$('#topCourseSwitch'),nMenu=$('#topNotificationDropdown'),nBtn=$('#topNotificationBtn'),pMenu=$('#topPersonalProfileDropdown'),pBtn=$('#topPersonalProfileBtn');if(menu&&!menu.hidden&&!e.target?.closest?.('.topCourseSwitcherWrap')){menu.hidden=true;btn?.setAttribute?.('aria-expanded','false')}if(nMenu&&!nMenu.hidden&&!e.target?.closest?.('.topNotificationWrap')){nMenu.hidden=true;nBtn?.setAttribute?.('aria-expanded','false')}if(pMenu&&!pMenu.hidden&&!e.target?.closest?.('.topPersonalProfileWrap')){pMenu.hidden=true;pBtn?.setAttribute?.('aria-expanded','false')}});document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const menu=$('#topCourseDropdown'),btn=$('#topCourseSwitch'),nMenu=$('#topNotificationDropdown'),nBtn=$('#topNotificationBtn'),pMenu=$('#topPersonalProfileDropdown'),pBtn=$('#topPersonalProfileBtn');if(menu&&!menu.hidden){menu.hidden=true;btn?.setAttribute?.('aria-expanded','false');btn?.focus?.()}else if(nMenu&&!nMenu.hidden){nMenu.hidden=true;nBtn?.setAttribute?.('aria-expanded','false');nBtn?.focus?.()}else if(pMenu&&!pMenu.hidden){pMenu.hidden=true;pBtn?.setAttribute?.('aria-expanded','false');pBtn?.focus?.()}});const reposition=()=>{const menu=$('#topCourseDropdown'),nMenu=$('#topNotificationDropdown'),pMenu=$('#topPersonalProfileDropdown');if(menu&&!menu.hidden)positionTopCourseDropdown();if(nMenu&&!nMenu.hidden)positionNotificationDropdown();if(pMenu&&!pMenu.hidden)positionPersonalProfileDropdown()};window.addEventListener?.('resize',reposition);window.visualViewport?.addEventListener?.('resize',reposition)}document.querySelectorAll('[data-switch-course]').forEach(b=>b.onclick=()=>switchCourseByKey(b.dataset.switchCourse,{screen:'courses'}));if($('#myCoursesFilters'))$('#myCoursesFilters').ontoggle=e=>{state.myCoursesFiltersOpen=!!e.currentTarget.open;saveUiState()};[['myCoursesStatusFilter','myCoursesStatuses'],['myCoursesSectorFilter','myCoursesSectors'],['myCoursesPhaseFilter','myCoursesPhases'],['myCoursesPlatformFilter','myCoursesPlatforms'],['myCoursesTrainingFilter','myCoursesTrainings'],['myCoursesCountryFilter','myCoursesCountries'],['myCoursesRoleFilter','myCoursesRoles']].forEach(([id,key])=>{if($('#'+id))$('#'+id).addEventListener('filterapply',e=>{state[key]=e.detail?.values||[];saveUiState();render()})});if($('#myCoursesDateFrom'))$('#myCoursesDateFrom').onchange=e=>{state.myCoursesDateFrom=normalizeDateValue(e.target.value)||'';saveUiState();render()};if($('#myCoursesDateTo'))$('#myCoursesDateTo').onchange=e=>{state.myCoursesDateTo=normalizeDateValue(e.target.value)||'';saveUiState();render()};if($('#myCoursesClearFilters'))$('#myCoursesClearFilters').onclick=()=>{state.myCoursesStatuses=[];state.myCoursesSectors=[];state.myCoursesPhases=[];state.myCoursesPlatforms=[];state.myCoursesTrainings=[];state.myCoursesCountries=[];state.myCoursesRoles=[];state.myCoursesDateFrom='';state.myCoursesDateTo='';saveUiState();render()};if($('#evalSyllabusSelect'))$('#evalSyllabusSelect').addEventListener('change',syncEvaluationExperienceContext);document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.go==='evaluation')state.evaluationTraineeId=null;go(b.dataset.go)});document.querySelectorAll('[data-start-eval]').forEach(b=>b.onclick=()=>go('evaluation',{evaluationTraineeId:b.dataset.startEval}));document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;render()});const openPersonCard=(screen,extra)=>go(screen,extra);document.querySelectorAll('[data-trainee]').forEach(b=>{b.onclick=()=>openPersonCard('profile',{selectedTrainee:b.dataset.trainee});if(b.matches?.('.personCard'))b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault?.();b.click?.()}}});document.querySelectorAll('[data-instructor]').forEach(b=>{b.onclick=()=>openPersonCard('instructor',{selectedInstructor:b.dataset.instructor});if(b.matches?.('.personCard'))b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault?.();b.click?.()}}});document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});document.querySelectorAll('[data-emergency-profile-filter]').forEach(b=>b.onclick=()=>{state.emergencyProfileFilter=b.dataset.emergencyProfileFilter;render()});document.querySelectorAll('[data-settings-tab]').forEach(b=>b.onclick=()=>{state.settingsTab=b.dataset.settingsTab;state.courseTailorEditing=false;state.advancedArchitectureEditing=false;state.courseAddFlow=null;if(b.dataset.settingsTab==='catalog'){state.packageFocusId=null;state.packageEditId=null;state.packageAddFlow=null}render()});document.querySelectorAll('[data-library-profession]').forEach(b=>b.onclick=()=>{state.libraryProfession=b.dataset.libraryProfession;render()});document.querySelectorAll('[data-roster-type]').forEach(b=>b.onclick=()=>{state.rosterType=b.dataset.rosterType;render()});
+function bind(){bindGlobalFormUx();bindDmyDateInputs();bindMultiFilters();renderPersonalIdentity();syncAttentionBadges();bindGlobalBackGesture();if($('#appBackBtn'))$('#appBackBtn').onclick=()=>goBack();if($('#exportFlympusBackup'))$('#exportFlympusBackup').onclick=async()=>{const ok=await exportFlympusBackup();if(ok)toast('FLYMPUS backup ready','success')};if($('#standaloneImportBackup'))$('#standaloneImportBackup').onclick=()=>$('#flympusBackupInput')?.click();if($('#standaloneMigrationDismiss'))$('#standaloneMigrationDismiss').onclick=()=>{localStorage.setItem('ct-review-standalone-migration-dismissed','1');render()};if($('#flympusBackupInput'))$('#flympusBackupInput').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const payload=JSON.parse(await file.text());const entries=validateFlympusBackup(payload);if(!(await siteConfirm('Replace this device\'s current FLYMPUS data with the selected backup? This imports courses, photos, records and settings.',{title:'Import FLYMPUS backup?',confirmLabel:'Import backup',tone:'primary'})))return;restoreFlympusBackup(payload);toast('Backup imported · reloading','success');setTimeout(()=>location.reload(),350)}catch(err){toast(err?.message||'Could not import this backup.','error')}finally{e.target.value=''}};const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop'),drawerPanel=drawer?.querySelector?.('.panel');if(menuBtn&&drawer)menuBtn.onclick=e=>{e?.preventDefault?.();e?.stopPropagation?.();closeAllMultiFilters(false);setDrawerOpen(!drawer.classList.contains('open'))};if(backdrop&&drawer)backdrop.onclick=()=>setDrawerOpen(false);if(drawer){let drawerSwipeStartX=0,drawerSwipeStartY=0,drawerSwipeTracking=false,drawerSwipeClaimed=false;drawer.ontouchstart=e=>{if(!drawer.classList.contains('open'))return;const t=e.touches?.[0];if(!t)return;drawerSwipeStartX=t.clientX;drawerSwipeStartY=t.clientY;drawerSwipeTracking=true;drawerSwipeClaimed=false};drawer.ontouchmove=e=>{if(!drawerSwipeTracking)return;const t=e.touches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY;if(dx<-12&&Math.abs(dx)>Math.abs(dy)*1.2){drawerSwipeClaimed=true;e.preventDefault?.()}};drawer.ontouchend=e=>{if(!drawerSwipeTracking)return;drawerSwipeTracking=false;const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY;if(drawerSwipeClaimed&&dx<=-58&&Math.abs(dy)<=70)setDrawerOpen(false);drawerSwipeClaimed=false};drawer.ontouchcancel=()=>{drawerSwipeTracking=false;drawerSwipeClaimed=false}};const mobileBottom=$('#mobileBottomNav');if(mobileBottom){mobileBottom.ontouchend=e=>{if(!e.target?.closest?.('.mobileBottomIconButton'))e.preventDefault?.()};mobileBottom.ongesturestart=e=>e.preventDefault?.();mobileBottom.ongesturechange=e=>e.preventDefault?.();mobileBottom.ongestureend=e=>e.preventDefault?.()}document.querySelectorAll('[data-mobile-nav]').forEach(b=>{const pressSound=bindFlympusNavPressSound(b);b.onclick=e=>{e?.preventDefault?.();e?.stopPropagation?.();if(e?.detail===0)pressSound(e);const target=b.dataset.mobileNav,currentRoot=bottomNavRootForScreen(state.screen);if(state.screen===target){scrollActiveBottomNavTop(target);return}if(state.screen===currentRoot)rememberBottomNavScroll();bottomDockNavigationTransition=true;go(target);restoreBottomNavScroll(target)}});const topSwitch=$('#topCourseSwitch'),topMenu=$('#topCourseDropdown'),notificationBtn=$('#topNotificationBtn'),notificationMenu=$('#topNotificationDropdown'),profileBtn=$('#topPersonalProfileBtn'),profileMenu=$('#topPersonalProfileDropdown');if(topSwitch&&topMenu)topSwitch.onclick=e=>{e?.stopPropagation?.();closeAllMultiFilters(false);if(notificationMenu){notificationMenu.hidden=true;notificationBtn?.setAttribute?.('aria-expanded','false')}if(profileMenu){profileMenu.hidden=true;profileBtn?.setAttribute?.('aria-expanded','false')}const open=topMenu.hidden===true;topMenu.hidden=!open;topSwitch.setAttribute?.('aria-expanded',open?'true':'false');if(open)positionTopCourseDropdown()};if(notificationBtn&&notificationMenu)notificationBtn.onclick=e=>{e?.stopPropagation?.();closeAllMultiFilters(false);if(topMenu){topMenu.hidden=true;topSwitch?.setAttribute?.('aria-expanded','false')}if(profileMenu){profileMenu.hidden=true;profileBtn?.setAttribute?.('aria-expanded','false')}const open=notificationMenu.hidden===true;notificationMenu.hidden=!open;notificationBtn.setAttribute?.('aria-expanded',open?'true':'false');if(open){syncNotificationPreferenceControls();positionNotificationDropdown()}};if(profileBtn&&profileMenu)profileBtn.onclick=e=>{e?.stopPropagation?.();closeAllMultiFilters(false);if(topMenu){topMenu.hidden=true;topSwitch?.setAttribute?.('aria-expanded','false')}if(notificationMenu){notificationMenu.hidden=true;notificationBtn?.setAttribute?.('aria-expanded','false')}const open=profileMenu.hidden===true;profileMenu.hidden=!open;profileBtn.setAttribute?.('aria-expanded',open?'true':'false');if(open){renderPersonalIdentity();positionPersonalProfileDropdown()}};document.querySelectorAll('[data-notification-pref]').forEach(el=>el.onchange=()=>{const prefs=getNotificationPreferences();prefs[el.dataset.notificationPref]=!!el.checked;saveNotificationPreferences(prefs);toast('Notification preferences saved')});if($('#personalPhotoInput'))$('#personalPhotoInput').onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{await openPersonalPhotoCrop(file)}catch(err){toast('Could not process this photo')}};if($('#editPersonalPhoto'))$('#editPersonalPhoto').onclick=async()=>{const me=allInstructors().find(x=>x.id===currentUserId);if(!me?.photoData)return;try{await openPersonalPhotoCropDataUrl(me.photoData)}catch(err){toast('Could not open photo editor')}};if($('#personalCropReplaceInput'))$('#personalCropReplaceInput').onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{await openPersonalPhotoCrop(file,personalCropTarget)}catch(err){toast('Could not process this photo')}};if($('#personalCropReset'))$('#personalCropReset').onclick=()=>{if(!personalCropState)return;personalCropState.zoom=1;personalCropState.x=0;personalCropState.y=0;personalCropPointers.clear();personalCropGesture=null;renderPersonalPhotoCrop()};if($('#personalCropCancel'))$('#personalCropCancel').onclick=closePersonalPhotoCrop;if($('#personalCropClose'))$('#personalCropClose').onclick=closePersonalPhotoCrop;if($('#personalCropApply'))$('#personalCropApply').onclick=()=>{const data=personalCropDataUrl();if(!data)return;const target=personalCropTarget;if(target==='roster'){state.personPhotoDraft=data;const preview=$('#personPhotoPreview'),choose=$('#choosePersonPhotoAction'),edit=$('#editPersonPhoto'),remove=$('#removePersonPhoto');if(preview)preview.innerHTML='<img src="'+data+'" alt="">';if(choose)choose.hidden=true;if(edit)edit.hidden=false;if(remove)remove.hidden=false;closePersonalPhotoCrop();toast('Photo ready — save changes to apply')}else{if(personOverride(currentUserId,{photoData:data})){closePersonalPhotoCrop();renderPersonalIdentity();toast('Profile photo updated');render()}}};if($('#personalCropModal'))$('#personalCropModal').onclick=e=>{if(e.target?.id==='personalCropModal')closePersonalPhotoCrop()};if($('#personalCropViewport')){const v=$('#personalCropViewport');v.onpointerdown=e=>{if(!personalCropState)return;e.preventDefault?.();personalCropPointers.set(e.pointerId,{id:e.pointerId,x:e.clientX,y:e.clientY});v.setPointerCapture?.(e.pointerId);v.classList.add('dragging');startPersonalCropGesture()};v.onpointermove=e=>{if(!personalCropState||!personalCropPointers.has(e.pointerId))return;e.preventDefault?.();personalCropPointers.set(e.pointerId,{id:e.pointerId,x:e.clientX,y:e.clientY});const pts=[...personalCropPointers.values()],g=personalCropGesture;if(!g)return;if(pts.length>=2){if(g.mode!=='pinch'){startPersonalCropGesture();return}const a=pts[0],b=pts[1],mid=personalCropPointMid(a,b),ratio=personalCropPointDistance(a,b)/g.distance;personalCropState.zoom=Math.max(1,Math.min(4,g.zoom*ratio));personalCropState.x=g.x+(mid.x-g.midX);personalCropState.y=g.y+(mid.y-g.midY);renderPersonalPhotoCrop()}else if(pts.length===1){const a=pts[0];if(g.mode!=='pan'||g.pointerId!==a.id){startPersonalCropGesture();return}personalCropState.x=g.x+(a.x-g.startX);personalCropState.y=g.y+(a.y-g.startY);renderPersonalPhotoCrop()}};const endPointer=e=>{personalCropPointers.delete(e.pointerId);v.releasePointerCapture?.(e.pointerId);if(personalCropPointers.size){startPersonalCropGesture()}else{personalCropGesture=null;v.classList.remove('dragging')}};v.onpointerup=endPointer;v.onpointercancel=endPointer};if($('#removePersonalPhoto'))$('#removePersonalPhoto').onclick=()=>{personOverride(currentUserId,{photoData:null});renderPersonalIdentity();toast('Profile photo removed');render()};document.querySelectorAll('[data-quick-course]').forEach(b=>b.onclick=e=>{e?.stopPropagation?.();if(topMenu)topMenu.hidden=true;if(topSwitch)topSwitch.setAttribute?.('aria-expanded','false');switchCourseByKey(b.dataset.quickCourse,{screen:'home'})});if($('#topCourseViewAll'))$('#topCourseViewAll').onclick=e=>{e?.stopPropagation?.();if(topMenu)topMenu.hidden=true;if(topSwitch)topSwitch.setAttribute?.('aria-expanded','false');go('courses')};if(!window.__topCourseSwitcherGlobalBound&&document.addEventListener){window.__topCourseSwitcherGlobalBound=true;document.addEventListener('click',e=>{const menu=$('#topCourseDropdown'),btn=$('#topCourseSwitch'),nMenu=$('#topNotificationDropdown'),nBtn=$('#topNotificationBtn'),pMenu=$('#topPersonalProfileDropdown'),pBtn=$('#topPersonalProfileBtn');if(menu&&!menu.hidden&&!e.target?.closest?.('.topCourseSwitcherWrap')){menu.hidden=true;btn?.setAttribute?.('aria-expanded','false')}if(nMenu&&!nMenu.hidden&&!e.target?.closest?.('.topNotificationWrap')){nMenu.hidden=true;nBtn?.setAttribute?.('aria-expanded','false')}if(pMenu&&!pMenu.hidden&&!e.target?.closest?.('.topPersonalProfileWrap')){pMenu.hidden=true;pBtn?.setAttribute?.('aria-expanded','false')}});document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const menu=$('#topCourseDropdown'),btn=$('#topCourseSwitch'),nMenu=$('#topNotificationDropdown'),nBtn=$('#topNotificationBtn'),pMenu=$('#topPersonalProfileDropdown'),pBtn=$('#topPersonalProfileBtn');if(menu&&!menu.hidden){menu.hidden=true;btn?.setAttribute?.('aria-expanded','false');btn?.focus?.()}else if(nMenu&&!nMenu.hidden){nMenu.hidden=true;nBtn?.setAttribute?.('aria-expanded','false');nBtn?.focus?.()}else if(pMenu&&!pMenu.hidden){pMenu.hidden=true;pBtn?.setAttribute?.('aria-expanded','false');pBtn?.focus?.()}});const reposition=()=>{const menu=$('#topCourseDropdown'),nMenu=$('#topNotificationDropdown'),pMenu=$('#topPersonalProfileDropdown');if(menu&&!menu.hidden)positionTopCourseDropdown();if(nMenu&&!nMenu.hidden)positionNotificationDropdown();if(pMenu&&!pMenu.hidden)positionPersonalProfileDropdown()};window.addEventListener?.('resize',reposition);window.visualViewport?.addEventListener?.('resize',reposition)}document.querySelectorAll('[data-switch-course]').forEach(b=>b.onclick=()=>switchCourseByKey(b.dataset.switchCourse,{screen:'courses'}));if($('#myCoursesFilters'))$('#myCoursesFilters').ontoggle=e=>{state.myCoursesFiltersOpen=!!e.currentTarget.open;saveUiState()};[['myCoursesStatusFilter','myCoursesStatuses'],['myCoursesSectorFilter','myCoursesSectors'],['myCoursesPhaseFilter','myCoursesPhases'],['myCoursesPlatformFilter','myCoursesPlatforms'],['myCoursesTrainingFilter','myCoursesTrainings'],['myCoursesCountryFilter','myCoursesCountries'],['myCoursesRoleFilter','myCoursesRoles']].forEach(([id,key])=>{if($('#'+id))$('#'+id).addEventListener('filterapply',e=>{state[key]=e.detail?.values||[];saveUiState();render()})});if($('#myCoursesDateFrom'))$('#myCoursesDateFrom').onchange=e=>{state.myCoursesDateFrom=normalizeDateValue(e.target.value)||'';saveUiState();render()};if($('#myCoursesDateTo'))$('#myCoursesDateTo').onchange=e=>{state.myCoursesDateTo=normalizeDateValue(e.target.value)||'';saveUiState();render()};if($('#myCoursesClearFilters'))$('#myCoursesClearFilters').onclick=()=>{state.myCoursesStatuses=[];state.myCoursesSectors=[];state.myCoursesPhases=[];state.myCoursesPlatforms=[];state.myCoursesTrainings=[];state.myCoursesCountries=[];state.myCoursesRoles=[];state.myCoursesDateFrom='';state.myCoursesDateTo='';saveUiState();render()};if($('#evalSyllabusSelect'))$('#evalSyllabusSelect').addEventListener('change',syncEvaluationExperienceContext);document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.go==='evaluation')state.evaluationTraineeId=null;go(b.dataset.go)});document.querySelectorAll('[data-start-eval]').forEach(b=>b.onclick=()=>go('evaluation',{evaluationTraineeId:b.dataset.startEval}));document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.filter;render()});const openPersonCard=(screen,extra)=>go(screen,extra);document.querySelectorAll('[data-trainee]').forEach(b=>{b.onclick=()=>openPersonCard('profile',{selectedTrainee:b.dataset.trainee});if(b.matches?.('.personCard'))b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault?.();b.click?.()}}});document.querySelectorAll('[data-instructor]').forEach(b=>{b.onclick=()=>openPersonCard('instructor',{selectedInstructor:b.dataset.instructor});if(b.matches?.('.personCard'))b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault?.();b.click?.()}}});document.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>{state.profileTab=b.dataset.profileTab;render()});document.querySelectorAll('[data-emergency-profile-filter]').forEach(b=>b.onclick=()=>{state.emergencyProfileFilter=b.dataset.emergencyProfileFilter;render()});document.querySelectorAll('[data-settings-tab]').forEach(b=>b.onclick=()=>{state.settingsTab=b.dataset.settingsTab;state.courseTailorEditing=false;state.advancedArchitectureEditing=false;state.courseAddFlow=null;if(b.dataset.settingsTab==='catalog'){state.packageFocusId=null;state.packageEditId=null;state.packageAddFlow=null}render()});document.querySelectorAll('[data-library-profession]').forEach(b=>b.onclick=()=>{state.libraryProfession=b.dataset.libraryProfession;render()});document.querySelectorAll('[data-roster-type]').forEach(b=>b.onclick=()=>{state.rosterType=b.dataset.rosterType;render()});
 if($('#rosterSearch')){
   $('#rosterSearch').oninput=e=>{state.search=e.target.value;clearTimeout(window._rs);window._rs=setTimeout(render,120)};
   if($('#rosterStatusFilterSingle'))$('#rosterStatusFilterSingle').onchange=e=>{const v=String(e.target.value||'ALL');state.rosterStatuses=v==='ALL'?[]:[v];saveUiState();render()};
@@ -6394,6 +6419,17 @@ function saveFlympusReloadSnapshot(){
       courseId:String(currentCourseId||'AEP-26'),
       html:content.innerHTML,
       navHtml:$('#mobileBottomNav')?.innerHTML||'',
+      halo:(()=>{
+        const dock=$('#mobileBottomNav');if(!dock)return null;
+        return{
+          measured:dock.classList.contains('dockHaloMeasured'),
+          ready:dock.classList.contains('dockHaloReady'),
+          x:dock.style.getPropertyValue('--dock-halo-x')||'',
+          y:dock.style.getPropertyValue('--dock-halo-y')||'',
+          width:dock.style.getPropertyValue('--dock-halo-width')||'',
+          height:dock.style.getPropertyValue('--dock-halo-height')||''
+        };
+      })(),
       scrollY:Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0)),
       topHidden:!!$('.top')?.classList.contains('topHidden'),
       savedAt:Date.now()
