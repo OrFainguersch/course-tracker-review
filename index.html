@@ -2685,22 +2685,39 @@ body::-webkit-scrollbar{
 </style>
 
 <style>
-/* ===== Pull-to-refresh · clean standalone implementation =====
-   Normal Safari keeps its native pull visual; installed/standalone apps use
-   this small compositor-only layer. No header pseudo-elements, no layout
-   changes, no root CSS variables and no release-state classes. */
+/* ===== Pull-to-refresh · native-like standalone physics =====
+   The blue reveal is a fixed layer BEHIND the moving header/content. It never
+   chases the finger, so even a very fast pull cannot expose a white seam. */
 .flympusPullBackdrop{
   position:fixed;
-  left:0;
-  right:0;
-  top:-240px;
-  height:240px;
+  inset:0 0 auto 0;
+  height:min(58vh,560px);
   z-index:29;
   background:#0d3156;
+  opacity:0;
   pointer-events:none;
-  transform:translate3d(0,0,0);
+  transform:translateZ(0);
+  backface-visibility:hidden;
+}
+body.flympusPullActive .flympusPullBackdrop{opacity:1}
+body.flympusPullActive .top{
+  z-index:31!important;
   will-change:transform;
 }
+body.flympusPullActive #content{
+  position:relative;
+  z-index:30;
+  background:#f5f7fa;
+  will-change:transform;
+}
+html.flympusPullRoot{
+  background:#0d3156!important;
+  overscroll-behavior-y:none!important;
+}
+html.flympusPullRoot body{
+  overscroll-behavior-y:none!important;
+}
+
 .flympusStandaloneRefreshIndicator{
   position:fixed;
   left:50%;
@@ -2709,7 +2726,7 @@ body::-webkit-scrollbar{
   width:30px;
   height:30px;
   opacity:0;
-  transform:translate3d(-50%,-72px,0) scale(.82);
+  transform:translate3d(-50%,-52px,0) scale(.82);
   pointer-events:none;
   will-change:transform,opacity;
 }
@@ -3574,7 +3591,6 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   );
 
   const pullNodes=()=>[$('.top'),$('#content')].filter(Boolean);
-  const pullBackdrop=()=>$('#flympusPullBackdrop');
   const pullIndicator=()=>$('#flympusStandaloneRefreshIndicator');
 
   let pullStartY=0,pullStartX=0,pullOriginY=null,pullTracking=false;
@@ -3582,15 +3598,20 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   let pullOffset=0,pullArmed=false,pullReturning=false,pullAnimations=[],pullFallbackRaf=null,pullFallbackTimer=null;
 
   const pullThreshold=96;
-  const pullMaxVisual=112;
+  const pullMaxVisual=108;
 
-  /* UIScrollView-like rubber-band response: close to the finger at first,
-     progressively more resistant the farther it is pulled. */
+  /* Stronger end resistance than the previous build while preserving a
+     relatively free first part of the gesture. */
   const rubberBandOffset=raw=>{
     const x=Math.max(0,Number(raw)||0);
-    const dimension=Math.max(520,Number(window.innerHeight||760));
-    const c=.55;
-    return Math.min(pullMaxVisual,(x*dimension*c)/(dimension+c*x));
+    const dimension=285;
+    const coefficient=.74;
+    return Math.min(pullMaxVisual,(x*dimension*coefficient)/(dimension+coefficient*x));
+  };
+
+  const setPullRootActive=active=>{
+    document.body?.classList.toggle('flympusPullActive',!!active);
+    document.documentElement?.classList.toggle('flympusPullRoot',!!active);
   };
 
   const cancelPullReturn=()=>{
@@ -3610,14 +3631,13 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
       el.style.removeProperty('transition');
       el.style.removeProperty('will-change');
     });
-    const bg=pullBackdrop();
-    if(bg){bg.style.removeProperty('transform');bg.style.removeProperty('will-change')}
     const indicator=pullIndicator();
     if(indicator){
       indicator.style.removeProperty('opacity');
       indicator.style.removeProperty('transform');
       indicator.classList.remove('refreshing');
     }
+    setPullRootActive(false);
   };
 
   const ensurePullChromeVisible=()=>{
@@ -3626,29 +3646,31 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     document.body?.classList.remove('topChromeHidden');
   };
 
+  const spinnerTransformForOffset=offset=>{
+    /* The spinner belongs to the revealed area, not to the page itself.
+       It only drifts a little as the page stretches. */
+    const drift=Math.min(24,Math.max(0,offset)*.27);
+    return 'translate3d(-50%,'+(-52+drift).toFixed(2)+'px,0)';
+  };
+
   const renderPull=(offset,rawDistance)=>{
     pullOffset=Math.max(0,Number(offset)||0);
-    const transform='translate3d(0,'+pullOffset.toFixed(2)+'px,0)';
+    setPullRootActive(true);
 
+    const transform='translate3d(0,'+pullOffset.toFixed(2)+'px,0)';
     pullNodes().forEach(el=>{
       el.style.setProperty('transition','none','important');
       el.style.setProperty('transform',transform);
       el.style.setProperty('will-change','transform');
     });
 
-    const bg=pullBackdrop();
-    if(bg){
-      bg.style.transform=transform;
-      bg.style.willChange='transform';
-    }
-
     const progress=Math.max(0,Math.min(1,(Number(rawDistance)||0)/pullThreshold));
     const indicator=pullIndicator();
     if(indicator){
-      const opacity=Math.max(0,Math.min(1,(progress-.12)/.58));
+      const opacity=Math.max(0,Math.min(1,(progress-.10)/.58));
       const scale=.82+progress*.18;
       indicator.style.opacity=opacity.toFixed(3);
-      indicator.style.transform='translate3d(-50%,'+(-72+pullOffset).toFixed(2)+'px,0) scale('+scale.toFixed(3)+')';
+      indicator.style.transform=spinnerTransformForOffset(pullOffset)+' scale('+scale.toFixed(3)+')';
     }
   };
 
@@ -3663,61 +3685,41 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
       el.style.removeProperty('will-change');
     });
 
-    const bg=pullBackdrop();
-    if(bg){bg.style.transform='translate3d(0,0,0)';bg.style.removeProperty('will-change')}
-
     const indicator=pullIndicator();
     if(indicator){
       indicator.style.opacity='0';
-      indicator.style.transform='translate3d(-50%,-72px,0) scale(.82)';
+      indicator.style.transform='translate3d(-50%,-52px,0) scale(.82)';
     }
 
     const complete=()=>{
       pullNodes().forEach(el=>el.style.removeProperty('transform'));
-      bg?.style.removeProperty('transform');
       indicator?.classList.remove('refreshing');
+      setPullRootActive(false);
       if(refresh)location.reload();
     };
 
-    /* Present two fully-rested frames before navigation. This prevents the last
-       spring frame from being visually cut off by standalone WebKit. */
     if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>requestAnimationFrame(complete));
     else setTimeout(complete,34);
   };
 
-  const springProfile=[
-    [0,1],
-    [32,.985],
-    [64,.945],
-    [96,.875],
-    [128,.775],
-    [160,.650],
-    [192,.515],
-    [224,.390],
-    [256,.285],
-    [288,.202],
-    [320,.140],
-    [352,.094],
-    [384,.060],
-    [416,.036],
-    [448,.019],
-    [480,.008],
-    [512,.002],
-    [540,0]
-  ];
-
-  const springRatioAt=elapsed=>{
-    const ms=Math.max(0,Math.min(540,elapsed));
-    for(let i=1;i<springProfile.length;i++){
-      const [bMs,bRatio]=springProfile[i];
-      const [aMs,aRatio]=springProfile[i-1];
-      if(ms<=bMs){
-        const u=Math.max(0,Math.min(1,(ms-aMs)/Math.max(1,bMs-aMs)));
-        return aRatio+(bRatio-aRatio)*u;
-      }
-    }
-    return 0;
+  /* Critically-damped spring with a small release velocity. It begins moving
+     immediately, then spends most of its time in the soft tail—closer to the
+     Facebook/Safari references than an S-curve. */
+  const springDuration=700;
+  const springOmega=14;
+  const springReleaseVelocity=4.2;
+  const springRatioAtMs=ms=>{
+    const t=Math.max(0,Math.min(springDuration,Number(ms)||0))/1000;
+    if(ms>=springDuration)return 0;
+    const b=springOmega-springReleaseVelocity;
+    return Math.max(0,(1+b*t)*Math.exp(-springOmega*t));
   };
+  const springProfile=(()=>{
+    const frames=[];
+    for(let ms=0;ms<springDuration;ms+=28)frames.push([ms,springRatioAtMs(ms)]);
+    frames.push([springDuration,0]);
+    return frames;
+  })();
 
   const returnPull=refresh=>{
     if(pullReturning)return;
@@ -3729,12 +3731,8 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
 
     if(from<.5){finishPullReturn(refresh);return}
 
-    /* Facebook/Safari-like settle: almost no movement on the first frame,
-       acceleration into the return, then a long critically-damped tail. */
-    const duration=540;
-    const fromTransform='translate3d(0,'+from.toFixed(2)+'px,0)';
     const motionKeyframes=springProfile.map(([ms,ratio])=>({
-      offset:Math.min(1,ms/duration),
+      offset:ms/springDuration,
       transform:'translate3d(0,'+(from*ratio).toFixed(2)+'px,0)'
     }));
 
@@ -3742,30 +3740,22 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     for(const el of pullNodes()){
       el.style.removeProperty('transition');
       if(typeof el.animate==='function'){
-        animated.push(el.animate(motionKeyframes,{duration,easing:'linear',fill:'forwards'}));
+        animated.push(el.animate(motionKeyframes,{duration:springDuration,easing:'linear',fill:'forwards'}));
       }
     }
 
-    const bg=pullBackdrop();
-    if(bg&&typeof bg.animate==='function'){
-      animated.push(bg.animate(motionKeyframes,{duration,easing:'linear',fill:'forwards'}));
-    }
-
     if(indicator&&typeof indicator.animate==='function'){
-      const startOpacity=parseFloat(getComputedStyle(indicator).opacity||'1')||1;
-      const frames=springProfile.map(([ms,ratio])=>{
-        const tail=Math.max(0,Math.min(1,(ratio-.02)/.18));
-        const opacity=refresh
-          ? (ratio>.12?startOpacity:startOpacity*tail)
-          : startOpacity*Math.min(1,ratio/.45);
-        const scale=.82+.18*Math.min(1,ratio+.15);
-        return {
-          offset:Math.min(1,ms/duration),
-          opacity:String(Math.max(0,opacity)),
-          transform:'translate3d(-50%,'+(-72+from*ratio).toFixed(2)+'px,0) scale('+scale.toFixed(3)+')'
-        };
-      });
-      animated.push(indicator.animate(frames,{duration,easing:'linear',fill:'forwards'}));
+      const startOpacity=Math.max(0,parseFloat(getComputedStyle(indicator).opacity||'1')||1);
+      const startTransform=getComputedStyle(indicator).transform;
+      animated.push(indicator.animate(
+        [
+          {offset:0,opacity:String(startOpacity),transform:startTransform},
+          {offset:.38,opacity:String(startOpacity),transform:spinnerTransformForOffset(from*.72)+' scale(.96)'},
+          {offset:.68,opacity:String(startOpacity*.72),transform:'translate3d(-50%,-47px,0) scale(.90)'},
+          {offset:1,opacity:'0',transform:'translate3d(-50%,-52px,0) scale(.82)'}
+        ],
+        {duration:springDuration,easing:'linear',fill:'forwards'}
+      ));
     }
 
     if(animated.length){
@@ -3773,16 +3763,16 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
       let done=false;
       const finish=()=>{if(done)return;done=true;finishPullReturn(refresh)};
       animated[0].finished.then(finish).catch(finish);
-      pullFallbackTimer=setTimeout(finish,duration+100);
+      pullFallbackTimer=setTimeout(finish,springDuration+110);
       return;
     }
 
     const started=performance.now?.()||Date.now();
     const frame=now=>{
       const elapsed=now-started;
-      const ratio=springRatioAt(elapsed);
+      const ratio=springRatioAtMs(elapsed);
       renderPull(from*ratio,pullThreshold*ratio);
-      if(elapsed>=duration){finishPullReturn(refresh);return}
+      if(elapsed>=springDuration){finishPullReturn(refresh);return}
       pullFallbackRaf=requestAnimationFrame(frame);
     };
     pullFallbackRaf=requestAnimationFrame(frame);
@@ -3827,14 +3817,22 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     let pullDy=totalDy;
     if(pullStandaloneGesture){
       const topNow=Math.max(0,Number(document.scrollingElement?.scrollTop??window.scrollY??0));
+
       if(pullOriginY===null){
         if(topNow>1)return;
+        /* Claim the gesture on the very first frame that reaches the top.
+           Previously we returned here without preventDefault, which allowed one
+           native rubber-band frame to open the white seam on a fast pull. */
         pullOriginY=t.clientY;
+        setPullRootActive(true);
+        if(e.cancelable)e.preventDefault();
+        renderPull(0,0);
         return;
       }
 
       pullDy=t.clientY-pullOriginY;
       if(pullDy<=0)return;
+      setPullRootActive(true);
       if(e.cancelable)e.preventDefault();
 
       renderPull(rubberBandOffset(pullDy),pullDy);
@@ -3868,6 +3866,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     const standalone=pullStandaloneGesture;
     resetPullTracking();
     if(standalone)returnPull(false);
+    else setPullRootActive(false);
   },{passive:true,capture:true});
 
   window.addEventListener('pageshow',()=>{
