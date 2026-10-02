@@ -3,19 +3,14 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 
 const html=fs.readFileSync('index.html','utf8');
-const start=html.indexOf('let flympusUiAudioCtx=null;');
+const start=html.indexOf('let flympusUiMediaRouteReady=false;');
 const end=html.indexOf('if(document.addEventListener&&!window.__flympusPullRefreshSoundBound)',start);
-assert(start>=0&&end>start,'persistent iOS audio block must remain extractable');
+assert(start>=0&&end>start,'media-based iOS audio block must remain extractable');
 const source=html.slice(start,end);
 
-const timers=[];
 const categories=[];
-const gainEvents=[];
-let contextCount=0;
-let resumeCount=0;
-let closeCount=0;
-let oscillatorStarts=0;
-let bufferStarts=0;
+const plays=[];
+const created=[];
 let currentCategory='auto';
 
 const audioSession={};
@@ -24,50 +19,46 @@ Object.defineProperty(audioSession,'type',{
   set:value=>{currentCategory=value;categories.push(value)}
 });
 
-class AudioParamStub{
-  constructor(track=false){this.track=track}
-  record(method,value){if(this.track)gainEvents.push({method,value,category:currentCategory})}
-  setValueAtTime(value){this.record('set',value)}
-  linearRampToValueAtTime(value){this.record('linear',value)}
-  exponentialRampToValueAtTime(value){this.record('exponential',value)}
-  cancelScheduledValues(){}
-}
-class NodeStub{connect(){return this}disconnect(){}}
-class GainStub extends NodeStub{constructor(){super();this.gain=new AudioParamStub(true)}}
-class OscillatorStub extends NodeStub{
-  constructor(){super();this.frequency=new AudioParamStub();this.type='sine'}
-  start(){oscillatorStarts++}
-  stop(){}
-}
-class BufferSourceStub extends NodeStub{
-  start(){bufferStarts++}
-  stop(){}
-}
-class FilterStub extends NodeStub{
-  constructor(){super();this.frequency=new AudioParamStub();this.Q={value:0};this.type='bandpass'}
-}
-class AudioContextStub{
+class AudioStub{
   constructor(){
-    contextCount++;
-    this.currentTime=1;
-    this.sampleRate=48000;
-    this.state='suspended';
-    this.destination=new NodeStub();
+    this.src='';
+    this.preload='';
+    this.playsInline=false;
+    this.muted=false;
+    this.volume=1;
+    this.currentTime=0;
+    this.paused=true;
+    this.loop=false;
+    this.style={};
+    this.listeners={};
+    created.push(this);
   }
-  resume(){resumeCount++;this.state='running';return Promise.resolve()}
-  close(){closeCount++;this.state='closed';return Promise.resolve()}
-  createGain(){return new GainStub()}
-  createOscillator(){return new OscillatorStub()}
-  createBuffer(){return{getChannelData:()=>new Float32Array(128)}}
-  createBufferSource(){return new BufferSourceStub()}
-  createBiquadFilter(){return new FilterStub()}
+  setAttribute(){}
+  addEventListener(name,fn){this.listeners[name]=fn}
+  load(){}
+  pause(){this.paused=true}
+  play(){
+    this.paused=false;
+    plays.push({audio:this,currentTime:this.currentTime,muted:this.muted,volume:this.volume,category:currentCategory});
+    if(this.listeners.playing)this.listeners.playing();
+    return Promise.resolve();
+  }
 }
 
+const body={appendChild(){}};
+const documentStub={
+  body,
+  createElement(tag){assert.equal(tag,'audio');return new AudioStub()}
+};
+
 const context={
-  window:{AudioContext:AudioContextStub},
+  window:{PointerEvent:function(){}},
   navigator:{audioSession},
-  Promise,Math,
-  setTimeout:(fn,delay=0)=>{timers.push({fn,delay});return timers.length},
+  document:documentStub,
+  performance:{now:()=>1000},
+  Date,Math,Promise,ArrayBuffer,DataView,Uint8Array,Float32Array,
+  btoa:s=>Buffer.from(s,'binary').toString('base64'),
+  setTimeout:fn=>{fn();return 1},
   clearTimeout(){},
   console
 };
@@ -75,91 +66,72 @@ context.window.window=context.window;
 vm.createContext(context);
 vm.runInContext(source,context,{filename:'index.html#audio'});
 
-async function flushAsyncTimers(){
-  for(let i=0;i<30;i++){
-    await Promise.resolve();
-    await Promise.resolve();
-    if(!timers.length)continue;
-    const batch=timers.splice(0);
-    batch.forEach(t=>t.fn());
-  }
-  await Promise.resolve();
-  await Promise.resolve();
-}
-
 (async()=>{
-  assert(source.includes("session.type='playback'")&&source.includes("session.type='ambient'"),
-    'Recovery must force a real AudioSession category transition and finish on ambient');
-  assert(source.indexOf("session.type='playback'")<source.indexOf("session.type='ambient'"),
-    'Recovery transition must visit playback before returning to ambient');
-  assert(source.includes('FLYMPUS_UI_AUDIO_WARMUP_MS=120'),
-    'First post-reload gesture must allow the native route a short warm-up');
-  assert(source.includes('holdFlympusUiAudioRoute(ctx)'),
-    'First post-reload gesture must keep a non-zero carrier alive while iOS opens output');
-  assert(!source.includes("createElement('audio')")&&!source.includes('new Audio('),
-    'Reload-safe UI audio must not depend on HTMLMediaElement playback');
+  assert(source.includes("navigator.audioSession.type='ambient'"),
+    'UI sounds must finish in ambient mode so the silent switch remains authoritative');
+  assert(!source.includes("type='playback'"),
+    'The fix must not use a playback↔ambient category bounce');
+  assert(source.includes('document.createElement(\\'audio\\')'),
+    'UI audio must use the native HTMLMediaElement route rather than WebAudio');
+  assert(!source.includes('AudioContext')&&!source.includes('webkitAudioContext'),
+    'The reload fix must no longer depend on AudioContext state');
+  assert(source.includes('FLYMPUS_NAV_MEDIA_MARKER=.09'),
+    'First nav sound must contain a short real lead-in before the audible signature');
+  assert(source.includes('FLYMPUS_REFRESH_MEDIA_MARKER=5'),
+    'Refresh asset must have a long non-zero lead-in that can stay armed during the pull');
+  assert(source.includes('return Math.sin(Math.PI*2*600*t)*.0005'),
+    'Lead-in must contain real non-zero PCM, not mute or digital silence');
 
-  const firstContextCount=contextCount;
-  const firstResumeCount=resumeCount;
-  const firstAudible=gainEvents.length;
+  const bootPlayCount=plays.length;
+  assert.equal(bootPlayCount,0,'Preloading must never play sound at boot');
 
   vm.runInContext('playFlympusBottomNavSound()',context);
+  await Promise.resolve();
+  assert.equal(plays.length,1,'First nav press must start one media element');
+  assert.equal(plays[0].currentTime,0,
+    'First nav press after reset must start from the route-opening lead-in');
+  assert.equal(plays[0].muted,false,'First nav press must never use a muted primer');
+  assert.equal(plays[0].category,'ambient','First nav press must use ambient audio');
 
-  assert.equal(contextCount-firstContextCount,1,
-    'First nav gesture after reset must create one persistent context');
-  assert.equal(resumeCount-firstResumeCount,1,
-    'First nav gesture after reset must request resume inside the physical gesture');
-  assert(!gainEvents.slice(firstAudible).some(e=>e.value>=.05),
-    'Audible nav gain must wait until the first route-recovery warm-up completes');
-
-  await flushAsyncTimers();
-
-  assert(gainEvents.slice(firstAudible).some(e=>e.value>=.05&&e.category==='ambient'),
-    'First nav gesture must become audible after route recovery and only once ambient is restored');
-  assert.equal(currentCategory,'ambient',
-    'UI sound recovery must finish Silent-switch-aware');
-
-  const reusedContextCount=contextCount;
-  const reusedAudible=gainEvents.length;
   vm.runInContext('playFlympusBottomNavSound()',context);
+  await Promise.resolve();
+  assert.equal(plays.length,2,'Second nav press must also play');
+  assert(Math.abs(plays[1].currentTime-.09)<.001,
+    'Once the native route is healthy, later nav presses must seek straight to the sound');
 
-  assert.equal(contextCount,reusedContextCount,
-    'Repeated nav gestures in the same document must reuse the recovered context');
-  assert(gainEvents.slice(reusedAudible).some(e=>e.value>=.05),
-    'Repeated nav gestures must emit immediately once the route is healthy');
+  vm.runInContext('resetFlympusAudioSession();playFlympusBottomNavSound()',context);
+  await Promise.resolve();
+  assert.equal(plays.length,3,'First nav press after another reset must still play');
+  assert.equal(plays[2].currentTime,0,
+    'Every simulated reload must restore the real lead-in on the first press');
 
-  vm.runInContext('resetFlympusAudioSession()',context);
-  assert(closeCount>=1,'pageshow/visibility reset must discard the old persistent context');
-
-  const reloadContextCount=contextCount;
-  const reloadAudible=gainEvents.length;
-  vm.runInContext('playFlympusBottomNavSound()',context);
-  assert.equal(contextCount-reloadContextCount,1,
-    'First nav gesture after a simulated reload must create a fresh persistent context');
-  assert(!gainEvents.slice(reloadAudible).some(e=>e.value>=.05),
-    'First nav sound after reload must wait for route recovery instead of being lost');
-  await flushAsyncTimers();
-  assert(gainEvents.slice(reloadAudible).some(e=>e.value>=.05&&e.category==='ambient'),
-    'First nav sound after every reload must emit after recovery');
-
-  vm.runInContext('resetFlympusAudioSession();globalThis.__refreshGraph=armFlympusRefreshSound();fireFlympusRefreshSound(globalThis.__refreshGraph)',context);
-  const refreshBefore=gainEvents.length;
-  assert.equal(vm.runInContext('__refreshGraph.fired',context),true,
-    'Pull-distance trigger must latch on the first refresh gesture');
-  await flushAsyncTimers();
-  assert.equal(vm.runInContext('__refreshGraph.emitted',context),true,
-    'First refresh gesture after reload must emit after the route is ready');
-  assert(gainEvents.slice(refreshBefore).some(e=>e.value>=.055&&e.category==='ambient'),
-    'First refresh gesture must produce audible output after recovery');
+  vm.runInContext('resetFlympusAudioSession();globalThis.__g=armFlympusRefreshSound();fireFlympusRefreshSound(globalThis.__g)',context);
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(vm.runInContext('__g.fired',context),true,
+    'Pull threshold must latch on the first refresh gesture');
+  assert.equal(vm.runInContext('__g.emitted',context),true,
+    'A threshold reached before play() settles must emit as soon as the native route starts');
+  assert(Math.abs(vm.runInContext('__g.audio.currentTime',context)-5)<.001,
+    'Refresh sound must jump from the armed lead-in to its audible marker');
+  assert(plays.slice(3).every(x=>x.muted===false),
+    'Refresh arming must use unmuted non-zero media, never a muted primer');
 
   assert(html.includes('if(!pullRefreshSoundPlayed&&pullDy>=44)'),
-    'Refresh sound must remain tied to pull distance, not reload');
+    'Refresh sound must remain tied to the 44px pull distance');
   assert(html.includes("if(e.target?.closest?.('#mobileBottomNav'))return"),
     'Pull tracking must not intercept bottom-navigation touches');
-  assert(html.includes('b.ontouchstart=pressSound'),
-    'Bottom-navigation audio must still start from the original iOS touch gesture');
+  assert(html.includes('bindFlympusNavPressSound(b)'),
+    'The same sound path must be used for mobile and desktop/drawer navigation');
 
-  console.log('iOS persistent-route audio lifecycle tests passed');
+  assert(html.includes('--dock-halo-y-nudge:-1px'),
+    'Active halo must be nudged slightly upward on every viewport');
+  assert(html.includes("halo:(()=>{"),
+    'Reload snapshot must persist active-halo geometry');
+  assert(html.includes("bottomNav.classList.add('dockHaloMeasured','dockHaloReady')"),
+    'Reload hydration must restore the halo before the first post-refresh paint');
+
+  console.log('iOS/native-media audio and dock reload lifecycle tests passed');
 })().catch(err=>{
   console.error(err);
   process.exitCode=1;
