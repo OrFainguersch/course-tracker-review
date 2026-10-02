@@ -68,14 +68,18 @@ vm.createContext(context);
 vm.runInContext(source,context,{filename:'index.html#clean-audio'});
 
 (async()=>{
-  assert(source.includes("./assets/flympus-nav-signature.wav"),
-    'Navigation must use the selected C FLYMPUS Signature WAV');
+  assert(source.includes("data:audio/wav;base64,UklGR"),
+    'Navigation must keep the selected C FLYMPUS Signature WAV embedded in-memory for low latency');
+  const embeddedMatch=source.match(/const FLYMPUS_NAV_SOUND_SRC='data:audio\/wav;base64,([^']+)'/);
+  assert(embeddedMatch,'Embedded navigation WAV must remain extractable');
+  assert(Buffer.from(embeddedMatch[1],'base64').equals(fs.readFileSync('assets/flympus-nav-signature.wav')),
+    'Embedded navigation audio bytes must exactly match the selected WAV file');
   assert(source.includes("./assets/flympus-refresh-sync.wav"),
     'Refresh must use the selected C FLYMPUS Sync WAV');
 
   const forbidden=[
     'AudioContext','webkitAudioContext','createOscillator','createGain',
-    'createBuffer','flympusWavDataUri','flympusAddTone','data:audio',
+    'createBuffer','flympusWavDataUri','flympusAddTone',
     'FLYMPUS_NAV_MEDIA_MARKER','FLYMPUS_REFRESH_MEDIA_MARKER',
     'recoverFlympus','holdFlympusUiAudioRoute'
   ];
@@ -83,8 +87,8 @@ vm.runInContext(source,context,{filename:'index.html#clean-audio'});
 
   assert.equal(plays.length,0,'Preload must not audibly play at boot');
   assert.equal(created.length,8,'Boot preload must create six nav players and two refresh players');
-  assert(created.slice(0,6).every(a=>a.src.includes('flympus-nav-signature.wav')),
-    'Every nav player must point at the selected nav WAV');
+  assert(created.slice(0,6).every(a=>a.src.startsWith('data:audio/wav;base64,UklGR')),
+    'Every nav player must use the exact in-memory selected WAV');
   assert(created.slice(6).every(a=>a.src.includes('flympus-refresh-sync.wav')),
     'Every refresh player must point at the selected refresh WAV');
 
@@ -102,8 +106,8 @@ vm.runInContext(source,context,{filename:'index.html#clean-audio'});
     await Promise.resolve();
   }
   assert.equal(plays.length,25,'Repeated nav presses must keep producing sound');
-  assert(plays.every(x=>x.src.includes('flympus-nav-signature.wav')),
-    'Repeated nav presses must never switch to another sound asset');
+  assert(plays.every(x=>x.src.startsWith('data:audio/wav;base64,UklGR')),
+    'Repeated nav presses must never switch away from the selected in-memory WAV');
   assert(plays.every(x=>x.currentTime===0),
     'Every nav press must restart the selected WAV at sample zero');
 
@@ -129,8 +133,8 @@ vm.runInContext(source,context,{filename:'index.html#clean-audio'});
   now+=500;
   vm.runInContext('playFlympusBottomNavSound()',context);
   await Promise.resolve();
-  assert(plays.at(-1).src.includes('flympus-nav-signature.wav'),
-    'First nav press after lifecycle reset must still use the selected WAV');
+  assert(plays.at(-1).src.startsWith('data:audio/wav;base64,UklGR'),
+    'First nav press after lifecycle reset must still use the selected in-memory WAV');
   assert.equal(plays.at(-1).currentTime,0,
     'First nav press after lifecycle reset must still start at sample zero');
 
@@ -150,14 +154,20 @@ vm.runInContext(source,context,{filename:'index.html#clean-audio'});
   assert(html.includes("bottomNav.classList.add('dockHaloMeasured','dockHaloReady')"),
     'Reload hydration must still restore halo before paint');
 
-  assert(html.includes("transition:transform .14s cubic-bezier(.20,.80,.20,1);"),
-    'Traveling halo should use the shortened 140ms transition');
+  assert(html.includes("class=\"mobileBottomHalo\"")&&html.includes("function ensureBottomDockHalo()"),
+    'Bottom dock must use one persistent real halo element rather than recreating a pseudo halo');
+  assert(html.includes("transition:transform .22s cubic-bezier(.22,.78,.20,1);"),
+    'Persistent halo should visibly travel between icons');
+  assert(html.includes("--dock-halo-y-nudge:-1px")&&html.includes("buttonRect.width.toFixed(2)")&&html.includes("buttonRect.height.toFixed(2)"),
+    'Traveling halo must preserve the approved size, centering and vertical nudge');
   assert(html.includes("transition:background .08s ease,color .08s ease,transform .07s ease!important;"),
     'Bottom icon press/color feedback should remain fast');
   assert(html.includes("render({fastNavigation:!!options.fastNavigation})"),
     'Bottom-nav navigation should use the fast-navigation render path');
-  assert(html.includes("setTimeout(()=>{if(token!==window.__flympusBottomNavTaskToken)return;go(target,{}, {fastNavigation:true});"),
-    'Heavy page rendering must yield one task after audio.play() so media can start promptly');
+  assert(!html.includes("setTimeout(()=>{if(token!==window.__flympusBottomNavTaskToken)return;go(target,{}, {fastNavigation:true});"),
+    'Bottom navigation must not add an extra timer before switching screens');
+  assert(html.includes("if(fast){setTimeout(()=>{saveUiState();renderTopCourseSwitcher();renderPersonalIdentity();syncNotificationPreferenceControls();bind()},0)}else bind()"),
+    'Non-critical binding and persistence should be deferred until after fast content replacement');
   assert(html.includes("item?.classList.toggle('active',active)")&&html.includes("syncBottomDockHalo(true)"),
     'Pressed bottom-nav destination must update visually before the heavy render');
 
