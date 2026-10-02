@@ -11,6 +11,7 @@ const source=html.slice(start,end);
 const mediaPlays=[];
 const mediaCreated=[];
 const fastStarts=[];
+const fastGains=[];
 let now=1000;
 let category='auto';
 
@@ -51,6 +52,14 @@ class AudioContextStub{
       get buffer(){return rec.buffer},
       connect(dest){assert(dest);rec.connected=true},
       start(t){rec.startTime=t}
+    };
+  }
+  createGain(){
+    const rec={gain:{value:1},connected:false};
+    fastGains.push(rec);
+    return{
+      gain:rec.gain,
+      connect(dest){assert(dest);rec.connected=true}
     };
   }
 }
@@ -95,6 +104,8 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Navigation click must use an AudioBufferSourceNode');
   assert(source.includes('source.start(ctx.currentTime+.001)'),
     'Navigation click must schedule essentially immediately');
+  assert(source.includes('const FLYMPUS_NAV_SOUND_VOLUME=.55'),
+    'Bottom-nav click volume must stay reduced to 55 percent across browsers');
 
   assert.equal(mediaCreated.length,4,
     'Only two HTMLAudio nav fallbacks and two refresh players should be preloaded');
@@ -106,6 +117,7 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   assert.equal(fastStarts.length,1,'First ready nav press must use the low-latency buffer path');
   assert.equal(mediaPlays.length,0,'Ready fast nav press must not also trigger delayed HTMLAudio');
   assert.equal(fastStarts[0].buffer?.decoded,true,'Fast path must use the decoded selected WAV');
+  assert.equal(fastGains[0]?.gain?.value,.55,'WebAudio navigation click must use the reduced 55 percent gain');
   assert(Math.abs(fastStarts[0].startTime-10.001)<.0001,'Fast path must start 1ms ahead');
   assert.equal(category,'ambient','Fast nav sound must remain ambient');
 
@@ -120,6 +132,8 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Suspended first tap must not be falsely consumed before AudioContext resume completes');
   assert.equal(mediaPlays.length,beforeFirstTapFallbackMedia+1,
     'Suspended first tap must use the preloaded media fallback on that same gesture');
+  assert.equal(mediaPlays.at(-1).volume,.55,
+    'HTMLAudio navigation fallback must use the same reduced 55 percent volume');
   vm.runInContext("flympusNavFastCtx.state='running'",context);
 
   for(let i=0;i<12;i++){
@@ -161,6 +175,10 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Approved slot-centered halo state must remain pinned to concrete reference commit 0666b046');
   assert(html.includes('Previous audio/post-refresh reference: commit 64960d03'),
     'Earlier audio/post-refresh reference must remain documented');
+  assert(html.includes('CROSS-PLATFORM BASELINE: halo geometry, press zoom, navigation timing and'),
+    'Reference behavior must explicitly remain cross-platform rather than iPhone-only');
+  assert(html.includes("el.ontouchstart=press")&&html.includes("el.onpointerdown=e=>{if(e?.pointerType!=='touch')press(e)}"),
+    'Bottom-nav press behavior must support touch devices and non-touch pointer browsers');
   assert(html.includes('--dock-halo-y-nudge:-1px'),
     'Approved halo vertical centering must remain unchanged');
   assert(html.includes('class="mobileBottomHalo"')&&html.includes('function ensureBottomDockHalo()'),
