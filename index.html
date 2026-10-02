@@ -2705,10 +2705,13 @@ body::-webkit-scrollbar{
     will-change:transform;
   }
 
+  /* Release uses the same pull transform and is driven frame-by-frame in JS.
+     Keeping CSS transition out of the equation avoids a compositor handoff
+     stutter in standalone WebKit. */
   body.flympusStandaloneRelease .top,
   body.flympusStandaloneRelease main{
-    transform:translate3d(0,0,0)!important;
-    transition:transform .28s cubic-bezier(.22,.76,.22,1)!important;
+    transform:translate3d(0,var(--flympus-standalone-pull-y,0px),0)!important;
+    transition:none!important;
   }
 
   /* Safari-style pull spinner: no button/circle background, just the subtle
@@ -3604,7 +3607,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     window.matchMedia?.('(display-mode: minimal-ui)')?.matches||
     String(document.referrer||'').startsWith('ios-app://')
   );
-  let pullStartY=0,pullStartX=0,pullOriginY=null,pullTracking=false,pullRefreshSoundPlayed=false,pullRefreshGraph=null,pullReloadArmed=false,pullReleaseTimer=null,pullStandaloneGesture=false;
+  let pullStartY=0,pullStartX=0,pullOriginY=null,pullTracking=false,pullRefreshSoundPlayed=false,pullRefreshGraph=null,pullReloadArmed=false,pullReleaseTimer=null,pullReleaseRaf=null,pullVisualY=0,pullStandaloneGesture=false;
   if(!flympusStandaloneMode()){
     document.body?.classList.remove('flympusStandalonePull','flympusStandaloneRelease');
   }
@@ -3613,15 +3616,22 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     if(!pullStandaloneGesture)return;
     const visual=Math.max(0,Math.min(112,128*(1-Math.exp(-Math.max(0,dy)/112))));
     const progress=Math.max(0,Math.min(1,dy/88));
-    document.documentElement?.style?.setProperty('--flympus-standalone-pull-y',visual.toFixed(1)+'px');
+    pullVisualY=visual;
+    document.documentElement?.style?.setProperty('--flympus-standalone-pull-y',visual.toFixed(2)+'px');
     document.documentElement?.style?.setProperty('--flympus-standalone-pull-opacity',(Math.max(0,Math.min(1,(progress-.18)/.58))).toFixed(3));
     document.documentElement?.style?.setProperty('--flympus-standalone-pull-progress',progress.toFixed(3));
     document.body?.classList.add('flympusStandalonePull');
+    document.body?.classList.remove('flympusStandaloneRelease');
     $('#flympusStandaloneRefreshIndicator')?.classList.toggle('armed',dy>=88);
   };
 
   const clearStandalonePullVisual=()=>{
     clearTimeout(pullReleaseTimer);
+    if(pullReleaseRaf!=null){
+      try{cancelAnimationFrame(pullReleaseRaf)}catch{}
+      pullReleaseRaf=null;
+    }
+    pullVisualY=0;
     document.body?.classList.remove('flympusStandalonePull','flympusStandaloneRelease');
     document.documentElement?.style?.setProperty('--flympus-standalone-pull-y','0px');
     document.documentElement?.style?.setProperty('--flympus-standalone-pull-opacity','0');
@@ -3630,28 +3640,62 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   };
 
   const releaseStandalonePullVisual=({refreshing=false,onComplete=null}={})=>{
-    /* Never apply standalone release styling in normal Safari. On a native
-       Safari reload, pageshow also fires; adding this class there was the cause
-       of the large navy block covering the page after pull-to-refresh. */
+    /* Run the return ourselves on requestAnimationFrame instead of switching
+       between two CSS transform states. On iOS standalone, the CSS-state swap
+       can miss a compositor frame and visibly hold/snap. Keeping one transform
+       source for the entire gesture makes the return monotonic and continuous. */
     if(!flympusStandaloneMode()){
       clearStandalonePullVisual();
       if(typeof onComplete==='function')onComplete();
       return;
     }
     clearTimeout(pullReleaseTimer);
-    document.body?.classList.remove('flympusStandalonePull');
-    document.body?.classList.add('flympusStandaloneRelease');
-    document.documentElement?.style?.setProperty('--flympus-standalone-pull-y','0px');
-    document.documentElement?.style?.setProperty('--flympus-standalone-pull-opacity','0');
-    document.documentElement?.style?.setProperty('--flympus-standalone-pull-progress','0');
+    if(pullReleaseRaf!=null){
+      try{cancelAnimationFrame(pullReleaseRaf)}catch{}
+      pullReleaseRaf=null;
+    }
+
     const indicator=$('#flympusStandaloneRefreshIndicator');
     indicator?.classList.remove('armed');
     indicator?.classList.toggle('refreshing',!!refreshing);
-    pullReleaseTimer=setTimeout(()=>{
-      document.body?.classList.remove('flympusStandaloneRelease');
+    document.body?.classList.add('flympusStandalonePull');
+    document.body?.classList.remove('flympusStandaloneRelease');
+
+    const from=Math.max(0,Number(pullVisualY||0));
+    const duration=Math.max(210,Math.min(310,205+from*.78));
+    const started=performance.now?.()||Date.now();
+
+    const finish=()=>{
+      pullReleaseRaf=null;
+      pullVisualY=0;
+      document.documentElement?.style?.setProperty('--flympus-standalone-pull-y','0px');
+      document.documentElement?.style?.setProperty('--flympus-standalone-pull-opacity','0');
+      document.documentElement?.style?.setProperty('--flympus-standalone-pull-progress','0');
+      document.body?.classList.remove('flympusStandalonePull','flympusStandaloneRelease');
       if(!refreshing)indicator?.classList.remove('refreshing');
       if(typeof onComplete==='function')onComplete();
-    },300);
+    };
+
+    if(from<.5||typeof requestAnimationFrame!=='function'){
+      finish();
+      return;
+    }
+
+    const frame=now=>{
+      const t=Math.max(0,Math.min(1,(now-started)/duration));
+      /* Smooth cubic ease-out: fast enough to feel attached to the finger,
+         but with a soft final approach instead of a hard stop. */
+      const eased=1-Math.pow(1-t,3);
+      const y=from*(1-eased);
+      pullVisualY=y;
+      document.documentElement?.style?.setProperty('--flympus-standalone-pull-y',y.toFixed(2)+'px');
+      if(!refreshing){
+        document.documentElement?.style?.setProperty('--flympus-standalone-pull-opacity',(Math.max(0,1-eased)).toFixed(3));
+      }
+      if(t>=1){finish();return}
+      pullReleaseRaf=requestAnimationFrame(frame);
+    };
+    pullReleaseRaf=requestAnimationFrame(frame);
   };
 
   const resetPullRefreshSound=()=>{
