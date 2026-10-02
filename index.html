@@ -3407,146 +3407,127 @@ function scrollActiveBottomNavTop(root){
   bottomNavScrollPositions[root]=0;persistBottomNavScroll();
   try{window.scrollTo({top:0,left:0,behavior:'smooth'})}catch{window.scrollTo?.(0,0)}
 }
-let flympusUiAudioGeneration=0;
-const FLYMPUS_NAV_SOUND='data:audio/wav;base64,UklGRoQEAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YWAEAAAAABYClQb+CR0KQgfgAmP92fVS7vboXOk28V/+rAv9EyoVvRAYCsgDNf6F+JzyNu4H7o/zev0ACBQPtxDDDbAImgMO/4f63/VI8sbxovUT/VoFYQzKDgYKAwMYAeYD1ALc+GLu6e60+VIE4wb/A6IDSgj7CzUIiP4P9wz3Q/vL/AX6g/ii/SYHBA1QCrQC+P0j/6QBl/89+en0mPc//z0FwgWyAzMClQMAB+MDBfsF+dz8Hvza+z//c//9/hsF3QmNBEX+H/9dADz+cP3W/On5D/s9AtcFyQIiAb8ChwIhAb0AT/6c+oX7ev/1/4j+LQDSAkwDQwO6As//eP3N/gUA9/1L/LH9zf9qARAD+wLIAP3/XwFAAev+eP2X/f79Ev+iANcATQBEAaMC9AErAFH/A/+6/vv+JP+E/qj+gAAKAs0B+wCSADgACwAWAG3/Nf4f/lr/RwBwAJoA1QDfAAAB8gATAA7//P5q/2j/PP95//X/igArATsBggDo//r/EACw/zz/DP8r/7b/bwCsAG0AXwCYAJAALwDF/27/Sf98/8b/y//P/ysAnQC3AIIANQDr/8z/2f/F/3v/Y/+z/x4AVABkAFcAPwA/AEAABQCp/4L/n//K/+n/AAAPACsAXABrAEQABADa/9D/0v/I/7n/wv/w/ykASQBDACwAHwAbAAsA5//A/7T/yv/v/wYADgAnADIAMgAnABMA/f/n/9j/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-const FLYMPUS_REFRESH_SOUND='data:audio/wav;base64,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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-let flympusNavAudioPool=null,flympusNavAudioIndex=0,flympusRefreshAudioPool=null,flympusRefreshAudioIndex=0;
+let flympusUiAudioGestureSerial=0;
 
 function setFlympusAmbientAudioSession(){
   try{
-    /* Keep UI sounds in the non-intrusive ambient category. Critically, do not
-       bounce playback→ambient on the first gesture: that was consuming the
-       first post-refresh interaction just to repair WebKit's route. */
     if(navigator.audioSession)navigator.audioSession.type='ambient';
   }catch{}
 }
 
-function makeFlympusUiAudio(src){
+function createFlympusGestureAudioContext(){
   try{
-    if(!src)return null;
-    const a=document.createElement('audio');
-    a.src=src;
-    a.preload='auto';
-    a.playsInline=true;
-    a.setAttribute('playsinline','');
-    a.setAttribute('webkit-playsinline','');
-    a.setAttribute('aria-hidden','true');
-    a.tabIndex=-1;
-    a.style.display='none';
-    document.body?.appendChild?.(a);
-    try{a.load?.()}catch{}
-    return a;
+    setFlympusAmbientAudioSession();
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    if(!AudioCtx)return null;
+    let ctx=null;
+    try{ctx=new AudioCtx({latencyHint:'interactive'})}catch{ctx=new AudioCtx()}
+    if(!ctx)return null;
+    ctx.__flympusGestureId=++flympusUiAudioGestureSerial;
+
+    /* Resume synchronously inside the physical touch/pointer gesture. Do not
+       await it: sources scheduled on the same stack remain tied to that user
+       activation, and context time starts once WebKit actually resumes. */
+    if(ctx.state!=='running'){
+      try{ctx.resume?.()}catch{}
+    }
+
+    /* Tiny non-zero carrier: prevents iOS from optimizing the unlock away while
+       remaining effectively inaudible. We never switch to the playback audio
+       category, so the device's Silent switch remains authoritative. */
+    try{
+      const now=ctx.currentTime;
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.type='sine';osc.frequency.setValueAtTime(220,now);
+      gain.gain.setValueAtTime(.000001,now);
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.start(now);osc.stop(now+.018);
+    }catch{}
+
+    return ctx;
   }catch{return null}
 }
 
-function getFlympusNavAudioPool(){
-  if(!flympusNavAudioPool){
-    flympusNavAudioPool=[
-      makeFlympusUiAudio(FLYMPUS_NAV_SOUND),
-      makeFlympusUiAudio(FLYMPUS_NAV_SOUND),
-      makeFlympusUiAudio(FLYMPUS_NAV_SOUND),
-      makeFlympusUiAudio(FLYMPUS_NAV_SOUND)
-    ].filter(Boolean);
-  }
-  return flympusNavAudioPool;
-}
-
-function getFlympusRefreshAudioPool(){
-  if(!flympusRefreshAudioPool){
-    flympusRefreshAudioPool=[
-      makeFlympusUiAudio(FLYMPUS_REFRESH_SOUND),
-      makeFlympusUiAudio(FLYMPUS_REFRESH_SOUND)
-    ].filter(Boolean);
-  }
-  return flympusRefreshAudioPool;
-}
-
-function resetFlympusMediaElement(a){
-  if(!a)return;
-  try{
-    a.loop=false;
-    a.muted=false;
-    a.pause?.();
-    a.currentTime=0;
-  }catch{}
-}
-
-function warmFlympusUiAudioMedia(){
-  setFlympusAmbientAudioSession();
-  getFlympusNavAudioPool();
-  getFlympusRefreshAudioPool();
+function closeFlympusGestureAudioContext(ctx,delay=0){
+  if(!ctx)return;
+  const close=()=>{
+    try{if(ctx.state!=='closed')ctx.close?.()}catch{}
+  };
+  if(delay>0)setTimeout(close,delay);else close();
 }
 
 function resetFlympusAudioSession(){
-  flympusUiAudioGeneration++;
+  /* There is intentionally no reusable AudioContext to recover. Every audible
+     gesture gets a new context, so a stale WebKit route from the previous
+     document cannot poison the next refresh/tap. */
   setFlympusAmbientAudioSession();
-  /* A reload creates a new document and therefore a new media pool. A BFCache
-     restore does not, so explicitly stop any old hidden player there. */
-  getFlympusNavAudioPool().forEach(resetFlympusMediaElement);
-  getFlympusRefreshAudioPool().forEach(resetFlympusMediaElement);
-}
-
-function playFlympusMediaNow(a){
-  if(!a)return false;
-  setFlympusAmbientAudioSession();
-  try{
-    a.loop=false;
-    a.muted=false;
-    a.pause?.();
-    a.currentTime=0;
-    const p=a.play?.();
-    if(p?.catch)p.catch(()=>{});
-    return true;
-  }catch{
-    try{
-      a.load?.();
-      a.muted=false;
-      a.currentTime=0;
-      const p=a.play?.();
-      if(p?.catch)p.catch(()=>{});
-      return true;
-    }catch{return false}
-  }
 }
 
 function playFlympusBottomNavSound(){
   try{
-    const pool=getFlympusNavAudioPool();if(!pool.length)return;
-    const a=pool[flympusNavAudioIndex++%pool.length];
-    /* This call happens synchronously on touchstart/pointerdown. MediaElement
-       playback opens the native output route on THAT same gesture, so the first
-       tap after a reload is no longer sacrificed as an AudioContext unlock. */
-    playFlympusMediaNow(a);
+    const ctx=createFlympusGestureAudioContext();if(!ctx)return;
+
+    /* If resume is still pending, currentTime is effectively frozen. Scheduling
+       30 ms ahead therefore means "30 ms after the context truly starts", not
+       30 wall-clock ms after the tap. This lets the FIRST tap after reload both
+       unlock and produce the requested sound. */
+    const now=ctx.currentTime+.030;
+    const master=ctx.createGain();
+    master.gain.setValueAtTime(.05,now);
+    master.connect(ctx.destination);
+
+    const voice=(freq,level,delay,duration)=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain(),start=now+delay,end=start+duration;
+      osc.type='sine';osc.frequency.setValueAtTime(freq,start);
+      gain.gain.setValueAtTime(.0001,start);
+      gain.gain.linearRampToValueAtTime(level,start+.001);
+      gain.gain.exponentialRampToValueAtTime(.0001,end);
+      osc.connect(gain);gain.connect(master);
+      osc.start(start);osc.stop(end+.003);
+    };
+
+    voice(610,.95,0,.034);
+    voice(1220,.20,0,.028);
+    voice(1490,.34,.005,.028);
+    voice(2260,.13,.010,.020);
+    closeFlympusGestureAudioContext(ctx,500);
   }catch{}
 }
 
 function armFlympusRefreshSound(){
   try{
-    const pool=getFlympusRefreshAudioPool();if(!pool.length)return null;
-    const a=pool[flympusRefreshAudioIndex++%pool.length];
-    setFlympusAmbientAudioSession();
-    resetFlympusMediaElement(a);
+    const ctx=createFlympusGestureAudioContext();if(!ctx)return null;
+    const master=ctx.createGain();
+    master.gain.setValueAtTime(0,ctx.currentTime);
+    master.connect(ctx.destination);
 
-    /* Start the exact refresh asset muted and looping during touchstart. This
-       binds the media route to the current physical gesture. At the distance
-       threshold we only reveal/restart an already-authorized player, which
-       remains reliable after every real page reload. */
-    a.loop=true;
-    a.muted=true;
-    a.currentTime=0;
-    let primePromise=null;
-    try{
-      primePromise=a.play?.()||null;
-      if(primePromise?.catch)primePromise.catch(()=>{});
-    }catch{}
+    const noiseBuffer=ctx.createBuffer(1,Math.max(64,Math.floor(ctx.sampleRate*.08)),ctx.sampleRate);
+    const noiseData=noiseBuffer.getChannelData(0);
+    for(let i=0;i<noiseData.length;i++)noiseData[i]=(Math.random()*2-1);
+
+    const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),noiseGain=ctx.createGain();
+    noise.buffer=noiseBuffer;noise.loop=true;
+    filter.type='bandpass';filter.Q.value=.7;filter.frequency.setValueAtTime(650,ctx.currentTime);
+    noiseGain.gain.setValueAtTime(0,ctx.currentTime);
+    noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(master);
+
+    /* Refresh sources are started during touchstart. At the 44 px threshold we
+       only change gain/frequency automation on an already-authorized graph. */
+    noise.start(ctx.currentTime);
+
+    const makeVoice=freq=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.type='sine';osc.frequency.setValueAtTime(freq,ctx.currentTime);
+      gain.gain.setValueAtTime(0,ctx.currentTime);
+      osc.connect(gain);gain.connect(master);
+      osc.start(ctx.currentTime);
+      return{osc,gain};
+    };
 
     return{
-      audio:a,
-      generation:flympusUiAudioGeneration,
-      primePromise,
-      fired:false,
-      emitted:false,
-      stopped:false
+      ctx,master,noise,filter,noiseGain,
+      voices:[makeVoice(610),makeVoice(760),makeVoice(1760),makeVoice(2300)],
+      fired:false,emitted:false,stopped:false
     };
   }catch{return null}
 }
@@ -3554,36 +3535,60 @@ function armFlympusRefreshSound(){
 function stopFlympusRefreshSound(graph){
   if(!graph||graph.stopped)return;
   graph.stopped=true;
-  resetFlympusMediaElement(graph.audio);
+  try{graph.noise?.stop?.()}catch{}
+  try{graph.noise?.disconnect?.()}catch{}
+  try{graph.filter?.disconnect?.()}catch{}
+  try{graph.noiseGain?.disconnect?.()}catch{}
+  graph.voices?.forEach(v=>{
+    try{v.osc?.stop?.()}catch{}
+    try{v.osc?.disconnect?.()}catch{}
+    try{v.gain?.disconnect?.()}catch{}
+  });
+  try{graph.master?.disconnect?.()}catch{}
+  closeFlympusGestureAudioContext(graph.ctx);
 }
 
 function fireFlympusRefreshSound(graph){
   if(!graph||graph.fired||graph.stopped)return;
   graph.fired=true;
-  const a=graph.audio;
-  if(!a){graph.stopped=true;return}
-
   try{
-    setFlympusAmbientAudioSession();
-    /* touchmove is still part of the same pull gesture. Unmute and jump to the
-       beginning while the primed media element is already playing. */
-    a.loop=false;
-    a.currentTime=0;
-    a.muted=false;
-    if(a.paused){
-      const p=a.play?.();
-      if(p?.catch)p.catch(()=>{});
-    }
+    const ctx=graph.ctx;
+    const now=ctx.currentTime+.010;
     graph.emitted=true;
-    setTimeout(()=>stopFlympusRefreshSound(graph),320);
+    graph.master.gain.setValueAtTime(.055,now);
+
+    graph.filter.frequency.cancelScheduledValues(now);
+    graph.filter.frequency.setValueAtTime(650,now);
+    graph.filter.frequency.exponentialRampToValueAtTime(2600,now+.15);
+
+    graph.noiseGain.gain.cancelScheduledValues(now);
+    graph.noiseGain.gain.setValueAtTime(.0001,now);
+    graph.noiseGain.gain.linearRampToValueAtTime(.12,now+.035);
+    graph.noiseGain.gain.exponentialRampToValueAtTime(.0001,now+.19);
+
+    const voice=(v,f0,f1,level,delay,dur)=>{
+      const start=now+delay,end=start+dur;
+      v.osc.frequency.cancelScheduledValues(start);
+      v.osc.frequency.setValueAtTime(f0,start);
+      v.osc.frequency.exponentialRampToValueAtTime(f1,end);
+      v.gain.gain.cancelScheduledValues(start);
+      v.gain.gain.setValueAtTime(.0001,start);
+      v.gain.gain.linearRampToValueAtTime(level,start+.006);
+      v.gain.gain.exponentialRampToValueAtTime(.0001,end);
+    };
+
+    voice(graph.voices[0],610,690,.46,0,.07);
+    voice(graph.voices[1],760,1320,.52,.025,.12);
+    voice(graph.voices[2],1760,1960,.22,.115,.075);
+    voice(graph.voices[3],2300,2460,.10,.145,.05);
+
+    setTimeout(()=>stopFlympusRefreshSound(graph),700);
   }catch{
     stopFlympusRefreshSound(graph);
   }
 }
 
-/* Preload/decode the tiny local WAV assets before the first interaction.
-   Nothing is played here and no user activation is consumed. */
-warmFlympusUiAudioMedia();
+/* No sound is played at boot; only establish the non-intrusive category. */
 resetFlympusAudioSession();
 
 if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
