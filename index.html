@@ -2801,6 +2801,11 @@ html.flympusHydrating .mobileBottomNav{
 html.flympusHydrating #content{
   pointer-events:none!important;
 }
+/* Standalone Safari can paint the fixed dock before JS has filled its items.
+   Never show the empty capsule during that parser/load gap. */
+.mobileBottomNav:empty{
+  visibility:hidden!important;
+}
 </style>
 </head>
 <body>
@@ -2821,14 +2826,16 @@ html.flympusHydrating #content{
   const activeCourse=String(active.courseCode||'AEP-26');
   const snapMatches=!!(snap&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse);
   const content=document.querySelector('#content');
+  const bottomNav=document.querySelector('#mobileBottomNav');
 
   if(snapMatches&&content){
     content.innerHTML=snap.html;
+    if(bottomNav&&typeof snap.navHtml==='string')bottomNav.innerHTML=snap.navHtml;
     window.__FLYMPUS_RELOAD_SNAPSHOT__=snap;
     if(snap.topHidden){
       document.body.classList.add('topChromeHidden');
       document.querySelector('.top')?.classList.add('topHidden');
-      document.querySelector('#mobileBottomNav')?.classList.add('dockHidden');
+      bottomNav?.classList.add('dockHidden');
     }
     const y=Math.max(0,Number(snap.scrollY||0));
     try{window.scrollTo(0,y)}catch{}
@@ -6093,6 +6100,7 @@ function saveFlympusReloadSnapshot(){
       screen:String(state.screen||'home'),
       courseId:String(currentCourseId||'AEP-26'),
       html:content.innerHTML,
+      navHtml:$('#mobileBottomNav')?.innerHTML||'',
       scrollY:Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0)),
       topHidden:!!$('.top')?.classList.contains('topHidden'),
       savedAt:Date.now()
