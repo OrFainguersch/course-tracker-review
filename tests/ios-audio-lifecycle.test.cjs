@@ -23,8 +23,8 @@ function assertPcmScaled(originalPath,scaledPath,gain){
     assert.equal(b.readInt16LE(i),expected,scaledPath+' must bake the requested amplitude into every PCM sample');
   }
 }
-assertPcmScaled('assets/flympus-nav-signature.wav','assets/flympus-nav-signature-31.wav',.31);
-assertPcmScaled('assets/flympus-refresh-sync.wav','assets/flympus-refresh-sync-27.wav',.27);
+assertPcmScaled('assets/flympus-nav-signature.wav','assets/flympus-nav-signature-25.wav',.25);
+assertPcmScaled('assets/flympus-refresh-sync.wav','assets/flympus-refresh-sync-22.wav',.22);
 const start=html.indexOf("const FLYMPUS_NAV_SOUND_SRC=");
 const end=html.indexOf('if(document.addEventListener&&!window.__flympusPullRefreshSoundBound)',start);
 assert(start>=0&&end>start,'audio block must remain extractable');
@@ -115,7 +115,7 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   assert(embeddedMatch,'Embedded navigation WAV must remain extractable');
   assert(Buffer.from(embeddedMatch[1],'base64').equals(fs.readFileSync('assets/flympus-nav-signature.wav')),
     'Fast navigation sound must use the exact selected C FLYMPUS Signature WAV bytes');
-  assert(source.includes("./assets/flympus-refresh-sync-27.wav"),
+  assert(source.includes("./assets/flympus-refresh-sync-22.wav"),
     'Refresh must keep the selected FLYMPUS Sync waveform with 27 percent baked amplitude');
 
   assert(source.includes("latencyHint:'interactive'"),
@@ -126,9 +126,9 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Navigation click must use an AudioBufferSourceNode');
   assert(source.includes('source.start(ctx.currentTime+.001)'),
     'Navigation click must schedule essentially immediately');
-  assert(source.includes('const FLYMPUS_NAV_SOUND_VOLUME=.31')&&source.includes('const FLYMPUS_REFRESH_SOUND_VOLUME=.27'),
-    'Bottom-nav and refresh target levels must remain 31 and 27 percent');
-  assert(source.includes("FLYMPUS_NAV_FALLBACK_SOUND_SRC='./assets/flympus-nav-signature-31.wav")&&source.includes("FLYMPUS_REFRESH_SOUND_SRC='./assets/flympus-refresh-sync-27.wav"),
+  assert(source.includes('const FLYMPUS_NAV_SOUND_VOLUME=.25')&&source.includes('const FLYMPUS_REFRESH_SOUND_VOLUME=.22'),
+    'Bottom-nav and refresh target levels must remain 25 and 22 percent');
+  assert(source.includes("FLYMPUS_NAV_FALLBACK_SOUND_SRC='./assets/flympus-nav-signature-25.wav")&&source.includes("FLYMPUS_REFRESH_SOUND_SRC='./assets/flympus-refresh-sync-22.wav"),
     'HTMLAudio paths must use physically attenuated WAV files so iOS cannot bypass the requested levels');
 
   assert.equal(mediaCreated.length,4,
@@ -141,7 +141,7 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   assert.equal(fastStarts.length,1,'First ready nav press must use the low-latency buffer path');
   assert.equal(mediaPlays.length,0,'Ready fast nav press must not also trigger delayed HTMLAudio');
   assert.equal(fastStarts[0].buffer?.decoded,true,'Fast path must use the decoded selected WAV');
-  assert.equal(fastGains[0]?.gain?.value,.31,'WebAudio navigation click must use the 31 percent gain');
+  assert.equal(fastGains[0]?.gain?.value,.25,'WebAudio navigation click must use the 25 percent gain');
   assert(Math.abs(fastStarts[0].startTime-10.001)<.0001,'Fast path must start 1ms ahead');
   assert.equal(category,'ambient','Fast nav sound must remain ambient');
 
@@ -158,8 +158,8 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Suspended first tap must use the preloaded media fallback on that same gesture');
   assert.equal(mediaPlays.at(-1).volume,1,
     'Physically attenuated HTMLAudio navigation fallback must play at unity element volume');
-  assert(mediaPlays.at(-1).src.includes('flympus-nav-signature-31.wav'),
-    'First-tap fallback must use the physically attenuated 31 percent WAV');
+  assert(mediaPlays.at(-1).src.includes('flympus-nav-signature-25.wav'),
+    'First-tap fallback must use the physically attenuated 25 percent WAV');
   vm.runInContext("flympusNavFastCtx.state='running'",context);
 
   for(let i=0;i<12;i++){
@@ -174,14 +174,14 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   await Promise.resolve();
   assert.equal(mediaPlays.length,beforeRefreshMedia+1,'Refresh touchstart must still arm HTMLAudio');
   const primer=mediaPlays.at(-1);
-  assert(primer.src.includes('flympus-refresh-sync-27.wav'),'Refresh primer must use the physically attenuated 27 percent WAV');
+  assert(primer.src.includes('flympus-refresh-sync-22.wav'),'Refresh primer must use the physically attenuated 22 percent WAV');
   assert.equal(primer.muted,true,'Refresh primer must be fully muted before a real pull reaches 44px');
   assert.equal(primer.volume,1,'Physically attenuated refresh media must remain at unity element volume');
 
   vm.runInContext('fireFlympusRefreshSound(globalThis.__g)',context);
   await Promise.resolve();
   const refresh=mediaPlays.at(-1);
-  assert(refresh.src.includes('flympus-refresh-sync-27.wav'),'Refresh fire must use the physically attenuated 27 percent WAV');
+  assert(refresh.src.includes('flympus-refresh-sync-22.wav'),'Refresh fire must use the physically attenuated 22 percent WAV');
   assert.equal(refresh.currentTime,0,'Refresh fire must restart from sample zero');
   assert.equal(refresh.volume,1,'Physically attenuated refresh media must remain at unity element volume');
   assert.equal(refresh.muted,false,'Refresh fire must unmute only at the actual pull threshold');
