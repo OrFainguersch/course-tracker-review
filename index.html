@@ -2689,9 +2689,10 @@ body::-webkit-scrollbar{
    REFERENCE BASELINE · 2026-10-02 · commit 64960d03
    Approved behavior: keep the current halo size, spacing, centering (-1px
    vertical nudge), 220ms travel and post-paint navigation timing unchanged.
-   Match the exact geometry of the old active button capsule. The halo is
-   measured from the real button rect, so its top/bottom spacing stays optically
-   identical on iPhone, other mobile devices and desktop. */
+   Match the exact geometry of the old active button capsule. Halo geometry is
+   derived from untransformed layout metrics and centered on the item's slot,
+   so press/zoom animation can never contaminate its resting position or size.
+   The approved vertical spacing remains unchanged. */
 .mobileBottomNav{
   --dock-halo-x:0px;
   --dock-halo-y:0px;
@@ -2746,39 +2747,42 @@ body::-webkit-scrollbar{
 
 /* ===== Bottom dock · Facebook reference press punch =====
    VISUAL ONLY: do not change layout, hit targets, halo measurements or the
-   approved navigation/audio timing. The dock gets a tiny 180ms zoom pulse and
-   the physically pressed destination gets a slightly stronger icon punch. */
+   approved navigation/audio timing. The dock only "breathes"; most of the
+   tactile emphasis belongs to the physically pressed icon. */
 .mobileBottomNav.dockPressZoom:not(.dockHidden){
-  transform-origin:50% 56%!important;
-  animation:flympusDockPressZoomMobile .18s cubic-bezier(.20,.78,.22,1) both!important;
+  transform-origin:50% 50%!important;
+  animation:flympusDockPressZoomMobile .165s cubic-bezier(.20,.82,.22,1) both!important;
 }
 .mobileBottomItem.dockPressTarget .mobileBottomIconButton{
-  scale:1.018!important;
+  scale:1.024!important;
 }
 .mobileBottomItem.dockPressTarget:has(.mobileBottomHapticSwitch:active) .mobileBottomIconButton{
   transform:scale(1)!important;
 }
 .mobileBottomItem.dockPressTarget .mobileBottomIcon{
   transform-origin:center center!important;
-  animation:flympusDockIconPressZoom .18s cubic-bezier(.18,.82,.20,1) both!important;
+  animation:flympusDockIconPressZoom .165s cubic-bezier(.18,.84,.20,1) both!important;
 }
 .mobileBottomItem.dockPressTarget .mobileBottomLabel{
   transform-origin:center center!important;
-  animation:flympusDockLabelPressZoom .18s cubic-bezier(.18,.82,.20,1) both!important;
+  animation:flympusDockLabelPressZoom .165s cubic-bezier(.18,.84,.20,1) both!important;
 }
 @keyframes flympusDockPressZoomMobile{
   0%{transform:scale(1)}
-  34%{transform:scale(1.022)}
+  36%{transform:scale(1.008)}
+  72%{transform:scale(1.002)}
   100%{transform:scale(1)}
 }
 @keyframes flympusDockIconPressZoom{
   0%{scale:1}
-  32%{scale:1.115}
+  34%{scale:1.075}
+  72%{scale:1.012}
   100%{scale:1}
 }
 @keyframes flympusDockLabelPressZoom{
   0%{scale:1}
-  32%{scale:1.028}
+  34%{scale:1.010}
+  72%{scale:1.003}
   100%{scale:1}
 }
 @media(min-width:900px){
@@ -2787,7 +2791,8 @@ body::-webkit-scrollbar{
   }
   @keyframes flympusDockPressZoomDesktop{
     0%{transform:translateX(-50%) scale(1)}
-    34%{transform:translateX(-50%) scale(1.018)}
+    36%{transform:translateX(-50%) scale(1.007)}
+    72%{transform:translateX(-50%) scale(1.002)}
     100%{transform:translateX(-50%) scale(1)}
   }
 }
@@ -2983,19 +2988,22 @@ html.flympusHydrating #content{
     setTimeout(()=>{
       bottomNav.classList.remove('dockPressZoom');
       pressedItem?.classList.remove('dockPressTarget');
-    },190);
+    },175);
 
     bottomNav.querySelectorAll?.('[data-mobile-nav]')?.forEach?.(candidate=>{
       const active=candidate.dataset.mobileNav===target;
       candidate.closest?.('.mobileBottomItem')?.classList.toggle('active',active);
       if(active)candidate.setAttribute('aria-current','page');else candidate.removeAttribute('aria-current');
     });
-    const navRect=bottomNav.getBoundingClientRect?.(),buttonRect=btn.getBoundingClientRect?.();
-    if(navRect&&buttonRect){
-      bottomNav.style.setProperty('--dock-halo-x',(buttonRect.left-navRect.left).toFixed(2)+'px');
-      bottomNav.style.setProperty('--dock-halo-y',(buttonRect.top-navRect.top).toFixed(2)+'px');
-      bottomNav.style.setProperty('--dock-halo-width',buttonRect.width.toFixed(2)+'px');
-      bottomNav.style.setProperty('--dock-halo-height',buttonRect.height.toFixed(2)+'px');
+    const item=btn.closest?.('.mobileBottomItem');
+    if(item&&Number(btn.offsetWidth||0)>0&&Number(btn.offsetHeight||0)>0){
+      const width=Number(btn.offsetWidth),height=Number(btn.offsetHeight);
+      const x=Number(item.offsetLeft||0)+(Number(item.offsetWidth||0)-width)/2;
+      const y=Number(item.offsetTop||0)+Number(btn.offsetTop||0)+Number(bottomNav.clientTop||0);
+      bottomNav.style.setProperty('--dock-halo-x',x.toFixed(2)+'px');
+      bottomNav.style.setProperty('--dock-halo-y',y.toFixed(2)+'px');
+      bottomNav.style.setProperty('--dock-halo-width',width.toFixed(2)+'px');
+      bottomNav.style.setProperty('--dock-halo-height',height.toFixed(2)+'px');
       bottomNav.classList.add('dockHaloMeasured','dockHaloReady');
     }
 
@@ -3520,22 +3528,50 @@ function ensureBottomDockHalo(){
   }
   return halo;
 }
+function bottomDockLayoutBox(el,dock){
+  if(!el||!dock)return null;
+  let x=0,y=0,node=el,guard=0;
+  while(node&&node!==dock&&guard++<8){
+    x+=Number(node.offsetLeft||0);
+    y+=Number(node.offsetTop||0);
+    node=node.offsetParent;
+  }
+  if(node!==dock)return null;
+  const width=Number(el.offsetWidth||0),height=Number(el.offsetHeight||0);
+  if(width<=0||height<=0)return null;
+  return{x,y,width,height};
+}
 function syncBottomDockHalo(animate=true){
   const n=$('#mobileBottomNav'),halo=ensureBottomDockHalo(),activeButton=n?.querySelector?.('.mobileBottomItem.active .mobileBottomIconButton');
-  if(!n||!halo||!activeButton)return;
+  const activeItem=activeButton?.closest?.('.mobileBottomItem');
+  if(!n||!halo||!activeButton||!activeItem)return;
 
   if(!animate)n.classList.remove('dockHaloReady');
 
-  const navRect=n.getBoundingClientRect?.(),buttonRect=activeButton.getBoundingClientRect?.();
-  if(!navRect||!buttonRect)return;
+  const buttonBox=bottomDockLayoutBox(activeButton,n),itemBox=bottomDockLayoutBox(activeItem,n);
+  let x,y,width,height;
+  if(buttonBox&&itemBox){
+    /* offset* values are layout geometry, so they stay stable while the dock
+       and pressed icon are visually scaled. Center the approved capsule width
+       on the ITEM slot instead of inheriting any transformed button rect. */
+    width=buttonBox.width;
+    height=buttonBox.height;
+    x=itemBox.x+(itemBox.width-width)/2;
+    /* Preserve the approved vertical baseline exactly: the old rect-based
+       measurement included the nav border, which is balanced by -1px nudge. */
+    y=buttonBox.y+Number(n.clientTop||0);
+  }else{
+    const navRect=n.getBoundingClientRect?.(),buttonRect=activeButton.getBoundingClientRect?.(),itemRect=activeItem.getBoundingClientRect?.();
+    if(!navRect||!buttonRect||!itemRect)return;
+    width=buttonRect.width;height=buttonRect.height;
+    x=((itemRect.left+itemRect.right)/2-navRect.left)-width/2-Number(n.clientLeft||0);
+    y=buttonRect.top-navRect.top;
+  }
 
-  /* Keep the exact geometry that was already approved: same measured button
-     width/height, same x/y origin and the existing -1px vertical nudge. Only
-     the transport changed from a pseudo-element jump to a persistent element. */
-  n.style.setProperty('--dock-halo-x',(buttonRect.left-navRect.left).toFixed(2)+'px');
-  n.style.setProperty('--dock-halo-y',(buttonRect.top-navRect.top).toFixed(2)+'px');
-  n.style.setProperty('--dock-halo-width',buttonRect.width.toFixed(2)+'px');
-  n.style.setProperty('--dock-halo-height',buttonRect.height.toFixed(2)+'px');
+  n.style.setProperty('--dock-halo-x',x.toFixed(2)+'px');
+  n.style.setProperty('--dock-halo-y',y.toFixed(2)+'px');
+  n.style.setProperty('--dock-halo-width',width.toFixed(2)+'px');
+  n.style.setProperty('--dock-halo-height',height.toFixed(2)+'px');
   n.classList.add('dockHaloMeasured');
 
   if(!n.classList.contains('dockHaloReady')){
@@ -3846,7 +3882,7 @@ function playFlympusDockPressZoom(el){
   flympusDockPressZoomTimer=setTimeout(()=>{
     dock.classList.remove('dockPressZoom');
     item.classList.remove('dockPressTarget');
-  },190);
+  },175);
 }
 
 function bindFlympusNavPressSound(el,onImmediatePress=null){
