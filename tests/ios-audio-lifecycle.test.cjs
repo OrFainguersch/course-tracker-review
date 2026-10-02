@@ -148,6 +148,12 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Traveling halo must keep the approved measured width and height');
   assert(html.includes("render({fastNavigation:!!options.fastNavigation})"),
     'Bottom navigation must keep the fast render path');
+  assert(html.includes("const flympusBottomScreenTemplates=new Map()"),
+    'Bottom-bar root screens must have an in-memory pre-render cache');
+  assert(html.includes("requestIdleCallback")&&html.includes("prewarmFlympusBottomScreens()"),
+    'Bottom-bar screens must pre-render during idle time');
+  assert(html.includes("mountFlympusFastScreen(state.screen)"),
+    'Fast bottom navigation must mount the prepared screen instead of rebuilding it when available');
 
   console.log('Low-latency nav audio, refresh audio, and traveling halo tests passed');
 })().catch(err=>{
