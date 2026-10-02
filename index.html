@@ -2699,23 +2699,16 @@ body::-webkit-scrollbar{
   }
 
   body.flympusStandalonePull .top,
-  body.flympusStandalonePull main{
-    transform:translate3d(0,var(--flympus-standalone-pull-y,0px),0)!important;
-    transition:none!important;
+  body.flympusStandalonePull main,
+  body.flympusStandaloneRelease .top,
+  body.flympusStandaloneRelease main{
     will-change:transform;
   }
 
-  /* Release uses the same pull transform and is driven frame-by-frame in JS.
-     Keeping CSS transition out of the equation avoids a compositor handoff
-     stutter in standalone WebKit. */
-  body.flympusStandaloneRelease .top,
-  body.flympusStandaloneRelease main{
-    transform:translate3d(0,var(--flympus-standalone-pull-y,0px),0)!important;
-    transition:none!important;
-  }
-
   /* Safari-style pull spinner: no button/circle background, just the subtle
-     12-segment activity indicator floating in the navy overscroll area. */
+     12-segment activity indicator floating in the navy overscroll area.
+     JS writes transform/opacity directly to this element so the return can stay
+     entirely on compositor-friendly properties without root CSS variables. */
   .flympusStandaloneRefreshIndicator{
     position:fixed;
     left:50%;
@@ -2723,10 +2716,8 @@ body::-webkit-scrollbar{
     z-index:44;
     width:30px;
     height:30px;
-    opacity:var(--flympus-standalone-pull-opacity,0);
-    transform:
-      translate3d(-50%,calc(-72px + var(--flympus-standalone-pull-y,0px)),0)
-      scale(calc(.82 + var(--flympus-standalone-pull-progress,0) * .18));
+    opacity:0;
+    transform:translate3d(-50%,-72px,0) scale(.82);
     pointer-events:none;
     will-change:transform,opacity;
   }
@@ -3607,21 +3598,36 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     window.matchMedia?.('(display-mode: minimal-ui)')?.matches||
     String(document.referrer||'').startsWith('ios-app://')
   );
-  let pullStartY=0,pullStartX=0,pullOriginY=null,pullTracking=false,pullRefreshSoundPlayed=false,pullRefreshGraph=null,pullReloadArmed=false,pullReleaseTimer=null,pullReleaseRaf=null,pullVisualY=0,pullStandaloneGesture=false;
+  let pullStartY=0,pullStartX=0,pullOriginY=null,pullTracking=false,pullRefreshSoundPlayed=false,pullRefreshGraph=null,pullReloadArmed=false,pullReleaseTimer=null,pullReleaseRaf=null,pullVisualY=0,pullStandaloneGesture=false,pullReleaseAnimations=[];
   if(!flympusStandaloneMode()){
     document.body?.classList.remove('flympusStandalonePull','flympusStandaloneRelease');
   }
 
+  const pullMotionNodes=()=>[$('.top'),$('#content')].filter(Boolean);
+  const pullIndicatorVisual=(visual,progress)=>{
+    const indicator=$('#flympusStandaloneRefreshIndicator');if(!indicator)return;
+    const opacity=Math.max(0,Math.min(1,(progress-.18)/.58));
+    const scale=.82+Math.max(0,Math.min(1,progress))*.18;
+    indicator.style.opacity=opacity.toFixed(3);
+    indicator.style.transform='translate3d(-50%,'+(-72+visual).toFixed(2)+'px,0) scale('+scale.toFixed(3)+')';
+  };
+  const applyStandalonePullY=(visual,{progress=visual/88}={})=>{
+    pullVisualY=Math.max(0,Number(visual)||0);
+    const transform='translate3d(0,'+pullVisualY.toFixed(2)+'px,0)';
+    pullMotionNodes().forEach(el=>{
+      el.style.setProperty('transition','none','important');
+      el.style.setProperty('transform',transform,'important');
+      el.style.setProperty('will-change','transform');
+    });
+    pullIndicatorVisual(pullVisualY,progress);
+  };
   const setStandalonePullVisual=dy=>{
     if(!pullStandaloneGesture)return;
     const visual=Math.max(0,Math.min(112,128*(1-Math.exp(-Math.max(0,dy)/112))));
     const progress=Math.max(0,Math.min(1,dy/88));
-    pullVisualY=visual;
-    document.documentElement?.style?.setProperty('--flympus-standalone-pull-y',visual.toFixed(2)+'px');
-    document.documentElement?.style?.setProperty('--flympus-standalone-pull-opacity',(Math.max(0,Math.min(1,(progress-.18)/.58))).toFixed(3));
-    document.documentElement?.style?.setProperty('--flympus-standalone-pull-progress',progress.toFixed(3));
     document.body?.classList.add('flympusStandalonePull');
     document.body?.classList.remove('flympusStandaloneRelease');
+    applyStandalonePullY(visual,{progress});
     $('#flympusStandaloneRefreshIndicator')?.classList.toggle('armed',dy>=88);
   };
 
@@ -3631,19 +3637,27 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
       try{cancelAnimationFrame(pullReleaseRaf)}catch{}
       pullReleaseRaf=null;
     }
+    pullReleaseAnimations.forEach(a=>{try{a.cancel()}catch{}});
+    pullReleaseAnimations=[];
     pullVisualY=0;
+    pullMotionNodes().forEach(el=>{
+      el.style.removeProperty('transform');
+      el.style.removeProperty('transition');
+      el.style.removeProperty('will-change');
+    });
     document.body?.classList.remove('flympusStandalonePull','flympusStandaloneRelease');
-    document.documentElement?.style?.setProperty('--flympus-standalone-pull-y','0px');
-    document.documentElement?.style?.setProperty('--flympus-standalone-pull-opacity','0');
-    document.documentElement?.style?.setProperty('--flympus-standalone-pull-progress','0');
-    $('#flympusStandaloneRefreshIndicator')?.classList.remove('armed','refreshing');
+    const indicator=$('#flympusStandaloneRefreshIndicator');
+    if(indicator){
+      indicator.style.removeProperty('opacity');
+      indicator.style.removeProperty('transform');
+      indicator.classList.remove('armed','refreshing');
+    }
   };
 
   const releaseStandalonePullVisual=({refreshing=false,onComplete=null}={})=>{
-    /* Run the return ourselves on requestAnimationFrame instead of switching
-       between two CSS transform states. On iOS standalone, the CSS-state swap
-       can miss a compositor frame and visibly hold/snap. Keeping one transform
-       source for the entire gesture makes the return monotonic and continuous. */
+    /* Keep the pull and return on direct element transforms. Prefer the Web
+       Animations compositor for the return; fall back to rAF only when needed.
+       This avoids recalculating a root CSS custom property every frame. */
     if(!flympusStandaloneMode()){
       clearStandalonePullVisual();
       if(typeof onComplete==='function')onComplete();
@@ -3654,6 +3668,8 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
       try{cancelAnimationFrame(pullReleaseRaf)}catch{}
       pullReleaseRaf=null;
     }
+    pullReleaseAnimations.forEach(a=>{try{a.cancel()}catch{}});
+    pullReleaseAnimations=[];
 
     const indicator=$('#flympusStandaloneRefreshIndicator');
     indicator?.classList.remove('armed');
@@ -3662,41 +3678,76 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     document.body?.classList.remove('flympusStandaloneRelease');
 
     const from=Math.max(0,Number(pullVisualY||0));
-    const duration=Math.max(210,Math.min(310,205+from*.78));
-    const started=performance.now?.()||Date.now();
+    const duration=Math.max(220,Math.min(300,210+from*.72));
+    const nodes=pullMotionNodes();
+    let finished=false;
 
     const finish=()=>{
+      if(finished)return;finished=true;
       pullReleaseRaf=null;
+      pullReleaseAnimations=[];
       pullVisualY=0;
-      document.documentElement?.style?.setProperty('--flympus-standalone-pull-y','0px');
-      document.documentElement?.style?.setProperty('--flympus-standalone-pull-opacity','0');
-      document.documentElement?.style?.setProperty('--flympus-standalone-pull-progress','0');
+      nodes.forEach(el=>{
+        el.style.setProperty('transform','translate3d(0,0,0)','important');
+        el.style.removeProperty('transition');
+        el.style.removeProperty('will-change');
+      });
+      if(indicator){
+        indicator.style.opacity='0';
+        indicator.style.transform='translate3d(-50%,-72px,0) scale(.82)';
+      }
       document.body?.classList.remove('flympusStandalonePull','flympusStandaloneRelease');
+      /* Drop temporary inline transforms on the next paint, after the resting
+         frame has already been committed. */
+      requestAnimationFrame?.(()=>nodes.forEach(el=>el.style.removeProperty('transform')));
       if(!refreshing)indicator?.classList.remove('refreshing');
       if(typeof onComplete==='function')onComplete();
     };
 
-    if(from<.5||typeof requestAnimationFrame!=='function'){
-      finish();
-      return;
+    if(from<.5){finish();return}
+
+    const fromTransform='translate3d(0,'+from.toFixed(2)+'px,0)';
+    const easing='cubic-bezier(.20,.80,.20,1)';
+
+    if(nodes.length&&nodes.every(el=>typeof el.animate==='function')){
+      nodes.forEach(el=>{
+        el.style.removeProperty('transition');
+        const a=el.animate(
+          [{transform:fromTransform},{transform:'translate3d(0,0,0)'}],
+          {duration,easing,fill:'forwards'}
+        );
+        pullReleaseAnimations.push(a);
+      });
+      if(indicator&&typeof indicator.animate==='function'){
+        const currentOpacity=getComputedStyle(indicator).opacity||'1';
+        const currentTransform=getComputedStyle(indicator).transform;
+        const a=indicator.animate(
+          [{opacity:currentOpacity,transform:currentTransform},{opacity:refreshing?currentOpacity:'0',transform:'translate3d(-50%,-72px,0) scale(.82)'}],
+          {duration,easing,fill:'forwards'}
+        );
+        pullReleaseAnimations.push(a);
+      }
+      const lead=pullReleaseAnimations[0];
+      if(lead){
+        lead.finished.then(finish).catch(()=>{if(!finished)finish()});
+        pullReleaseTimer=setTimeout(finish,duration+90);
+        return;
+      }
     }
 
+    const started=performance.now?.()||Date.now();
     const frame=now=>{
       const t=Math.max(0,Math.min(1,(now-started)/duration));
-      /* Smooth cubic ease-out: fast enough to feel attached to the finger,
-         but with a soft final approach instead of a hard stop. */
-      const eased=1-Math.pow(1-t,3);
+      const eased=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
       const y=from*(1-eased);
-      pullVisualY=y;
-      document.documentElement?.style?.setProperty('--flympus-standalone-pull-y',y.toFixed(2)+'px');
-      if(!refreshing){
-        document.documentElement?.style?.setProperty('--flympus-standalone-pull-opacity',(Math.max(0,1-eased)).toFixed(3));
-      }
+      applyStandalonePullY(y,{progress:Math.max(0,1-eased)});
       if(t>=1){finish();return}
       pullReleaseRaf=requestAnimationFrame(frame);
     };
     pullReleaseRaf=requestAnimationFrame(frame);
   };
+
+  const resetPullRefreshSound=()=>{
 
   const resetPullRefreshSound=()=>{
     pullTracking=false;
