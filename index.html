@@ -3678,7 +3678,10 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     document.body?.classList.remove('flympusStandaloneRelease');
 
     const from=Math.max(0,Number(pullVisualY||0));
-    const duration=Math.max(220,Math.min(300,210+from*.72));
+    /* Native Safari / Facebook-style return: a longer elastic settle with a
+       quick initial recovery and a deliberately soft final approach. The old
+       220–300 ms return felt like a snap on 120 Hz iPhones. */
+    const duration=Math.max(360,Math.min(470,335+from*1.05));
     const nodes=pullMotionNodes();
     let finished=false;
 
@@ -3693,21 +3696,31 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
         el.style.removeProperty('will-change');
       });
       if(indicator){
-        indicator.style.opacity='0';
         indicator.style.transform='translate3d(-50%,-72px,0) scale(.82)';
+        if(!refreshing)indicator.style.opacity='0';
       }
       document.body?.classList.remove('flympusStandalonePull','flympusStandaloneRelease');
-      /* Drop temporary inline transforms on the next paint, after the resting
-         frame has already been committed. */
-      requestAnimationFrame?.(()=>nodes.forEach(el=>el.style.removeProperty('transform')));
-      if(!refreshing)indicator?.classList.remove('refreshing');
-      if(typeof onComplete==='function')onComplete();
+
+      /* Let WebKit actually present the fully-rested frame before starting a
+         reload. Starting navigation from the animation-finished microtask can
+         cut off the last visual frame and makes the return feel abrupt. */
+      const complete=()=>{
+        nodes.forEach(el=>el.style.removeProperty('transform'));
+        if(indicator&&refreshing)indicator.style.opacity='0';
+        if(!refreshing)indicator?.classList.remove('refreshing');
+        if(typeof onComplete==='function')onComplete();
+      };
+      if(typeof requestAnimationFrame==='function'){
+        requestAnimationFrame(()=>requestAnimationFrame(complete));
+      }else{
+        setTimeout(complete,34);
+      }
     };
 
     if(from<.5){finish();return}
 
     const fromTransform='translate3d(0,'+from.toFixed(2)+'px,0)';
-    const easing='cubic-bezier(.20,.80,.20,1)';
+    const easing='cubic-bezier(.16,.86,.20,1)';
 
     if(nodes.length&&nodes.every(el=>typeof el.animate==='function')){
       nodes.forEach(el=>{
@@ -3738,7 +3751,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     const started=performance.now?.()||Date.now();
     const frame=now=>{
       const t=Math.max(0,Math.min(1,(now-started)/duration));
-      const eased=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+      const eased=1-Math.pow(1-t,4);
       const y=from*(1-eased);
       applyStandalonePullY(y,{progress:Math.max(0,1-eased)});
       if(t>=1){finish();return}
