@@ -109,12 +109,25 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   assert(Math.abs(fastStarts[0].startTime-10.001)<.0001,'Fast path must start 1ms ahead');
   assert.equal(category,'ambient','Fast nav sound must remain ambient');
 
+  /* Reproduce the real iOS first-tap state: resume() has been requested by the
+     gesture handler, but WebAudio has not reached "running" yet. */
+  now+=100;
+  const beforeFirstTapFallbackMedia=mediaPlays.length;
+  const beforeFirstTapFallbackFast=fastStarts.length;
+  vm.runInContext("flympusNavFastCtx.state='suspended';flympusNavFastCtx.resume=()=>Promise.resolve()",context);
+  vm.runInContext('playFlympusBottomNavSound()',context);
+  assert.equal(fastStarts.length,beforeFirstTapFallbackFast,
+    'Suspended first tap must not be falsely consumed before AudioContext resume completes');
+  assert.equal(mediaPlays.length,beforeFirstTapFallbackMedia+1,
+    'Suspended first tap must use the preloaded media fallback on that same gesture');
+  vm.runInContext("flympusNavFastCtx.state='running'",context);
+
   for(let i=0;i<12;i++){
     now+=100;
     vm.runInContext('playFlympusBottomNavSound()',context);
   }
   assert.equal(fastStarts.length,13,'Repeated nav presses must remain on the low-latency buffer path');
-  assert.equal(mediaPlays.length,0,'Repeated fast nav presses must not accumulate delayed media playback');
+  assert.equal(mediaPlays.length,1,'Only the simulated suspended first tap should use HTMLAudio');
 
   const beforeRefreshMedia=mediaPlays.length;
   vm.runInContext('globalThis.__g=armFlympusRefreshSound()',context);
@@ -146,6 +159,12 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Persistent halo must visibly travel between destinations');
   assert(html.includes('buttonRect.width.toFixed(2)')&&html.includes('buttonRect.height.toFixed(2)'),
     'Traveling halo must keep the approved measured width and height');
+  assert(html.includes('class="mobileBottomHapticSwitch"')&&html.includes('flympusDirectHapticOverlayHtml()'),
+    'iOS bottom-nav taps must use a real transparent WebKit switch target for direct native haptics');
+  assert(html.includes("s.ontouchstart=e=>b.ontouchstart?.(e)"),
+    'The iOS haptic overlay must forward touchstart to the existing immediate sound/navigation path');
+  assert(html.includes('triggerFlympusPortableHaptic(9)'),
+    'Pull threshold must request haptic feedback where the Vibration API exists');
   assert(html.includes("render({fastNavigation:!!options.fastNavigation})"),
     'Bottom navigation must keep the fast render path');
   assert(html.includes("const flympusBottomScreenTemplates=new Map()"),
