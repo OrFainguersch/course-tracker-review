@@ -145,29 +145,31 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   assert(Math.abs(fastStarts[0].startTime-10.001)<.0001,'Fast path must start 1ms ahead');
   assert.equal(category,'ambient','Fast nav sound must remain ambient');
 
-  /* Reproduce the real iOS first-tap state: resume() has been requested by the
-     gesture handler, but WebAudio has not reached "running" yet. */
+  /* Reproduce the real first post-refresh press with an asynchronously resuming
+     AudioContext. It must remain on WebAudio rather than falling to HTMLAudio. */
   now+=100;
-  const beforeFirstTapFallbackMedia=mediaPlays.length;
-  const beforeFirstTapFallbackFast=fastStarts.length;
-  vm.runInContext("flympusNavFastCtx.state='suspended';flympusNavFastCtx.resume=()=>Promise.resolve()",context);
+  const beforeFirstTapMedia=mediaPlays.length;
+  const beforeFirstTapFast=fastStarts.length;
+  vm.runInContext("flympusNavFastCtx.state='suspended';flympusNavFastCtx.resume=()=>new Promise(resolve=>{globalThis.__finishNavResume=()=>{flympusNavFastCtx.state='running';resolve()}})",context);
   vm.runInContext('playFlympusBottomNavSound()',context);
-  assert.equal(fastStarts.length,beforeFirstTapFallbackFast,
-    'Suspended first tap must not be falsely consumed before AudioContext resume completes');
-  assert.equal(mediaPlays.length,beforeFirstTapFallbackMedia+1,
-    'Suspended first tap must use the preloaded media fallback on that same gesture');
-  assert.equal(mediaPlays.at(-1).volume,1,
-    'Physically attenuated HTMLAudio navigation fallback must play at unity element volume');
-  assert(mediaPlays.at(-1).src.includes('flympus-nav-signature-35.wav'),
-    'First-tap fallback must use the physically attenuated 35 percent WAV');
-  vm.runInContext("flympusNavFastCtx.state='running'",context);
+  assert.equal(fastStarts.length,beforeFirstTapFast,
+    'First post-refresh press may wait only for AudioContext resume, not start early');
+  assert.equal(mediaPlays.length,beforeFirstTapMedia,
+    'First post-refresh press must not enter the slower HTMLAudio fallback');
+  vm.runInContext('__finishNavResume()',context);
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(fastStarts.length,beforeFirstTapFast+1,
+    'First post-refresh press must start its decoded WebAudio buffer immediately after resume');
+  assert.equal(mediaPlays.length,beforeFirstTapMedia,
+    'Async AudioContext resume must still avoid HTMLAudio media latency');
 
   for(let i=0;i<12;i++){
     now+=100;
     vm.runInContext('playFlympusBottomNavSound()',context);
   }
-  assert.equal(fastStarts.length,13,'Repeated nav presses must remain on the low-latency buffer path');
-  assert.equal(mediaPlays.length,1,'Only the simulated suspended first tap should use HTMLAudio');
+  assert.equal(fastStarts.length,beforeFirstTapFast+13,'Repeated nav presses must remain on the low-latency buffer path');
+  assert.equal(mediaPlays.length,beforeFirstTapMedia,'Normal navigation presses must not accumulate HTMLAudio playback');
 
   const beforeRefreshMedia=mediaPlays.length;
   vm.runInContext('globalThis.__g=armFlympusRefreshSound()',context);
@@ -199,12 +201,20 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
 
   assert(html.includes('REFERENCE BASELINE · 2026-10-02 · commit 0666b046'),
     'Approved slot-centered halo state must remain pinned to concrete reference commit 0666b046');
+  assert(html.includes('AUDIO REFERENCE BASELINE · 2026-10-02 · commit 31edf55f'),
+    'Approved stable 35/27 audio state must remain pinned to concrete reference commit 31edf55f');
   assert(html.includes('Previous audio/post-refresh reference: commit 64960d03'),
     'Earlier audio/post-refresh reference must remain documented');
   assert(html.includes('CROSS-PLATFORM BASELINE: halo geometry, press zoom, navigation timing and'),
     'Reference behavior must explicitly remain cross-platform rather than iPhone-only');
   assert(html.includes("el.ontouchstart=press")&&html.includes("el.onpointerdown=e=>{if(e?.pointerType!=='touch')press(e)}"),
     'Bottom-nav press behavior must support touch devices and non-touch pointer browsers');
+  assert(html.includes('function playEarlyNavSound')||html.includes('const playEarlyNavSound='),
+    'Hydration bridge must preload a low-latency WebAudio path for the first visible press');
+  assert(html.includes("bottomNav?.addEventListener?.('pointerdown'")&&html.includes("if(e?.pointerType!=='touch')handleEarlyBottomNavPress(e)"),
+    'Hydration bridge must cover non-touch pointer devices as well as touch');
+  assert(html.includes('__FLYMPUS_EARLY_NAV_CONTEXT__'),
+    'Runtime must be able to adopt the pre-created cross-platform hydration AudioContext');
   assert(html.includes('--dock-halo-y-nudge:-1px'),
     'Approved halo vertical centering must remain unchanged');
   assert(html.includes('class="mobileBottomHalo"')&&html.includes('function ensureBottomDockHalo()'),
