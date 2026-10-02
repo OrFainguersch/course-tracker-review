@@ -2686,7 +2686,7 @@ body::-webkit-scrollbar{
 
 <style>
 /* ===== Bottom dock · traveling active halo =====
-   REFERENCE BASELINE · 2026-10-02
+   REFERENCE BASELINE · 2026-10-02 · commit 64960d03
    Approved behavior: keep the current halo size, spacing, centering (-1px
    vertical nudge), 220ms travel and post-paint navigation timing unchanged.
    Match the exact geometry of the old active button capsule. The halo is
@@ -2742,6 +2742,59 @@ body::-webkit-scrollbar{
 }
 .mobileBottomItem:has(.mobileBottomHapticSwitch:active) .mobileBottomIconButton{
   transform:scale(.97)!important;
+}
+
+/* ===== Bottom dock · Facebook reference press punch =====
+   VISUAL ONLY: do not change layout, hit targets, halo measurements or the
+   approved navigation/audio timing. The dock gets a tiny 180ms zoom pulse and
+   the physically pressed destination gets a slightly stronger icon punch. */
+.mobileBottomNav.dockPressZoom:not(.dockHidden){
+  transform-origin:50% 56%!important;
+  animation:flympusDockPressZoomMobile .18s cubic-bezier(.20,.78,.22,1) both!important;
+}
+.mobileBottomItem.dockPressTarget .mobileBottomIconButton{
+  transform:scale(1.018)!important;
+}
+.mobileBottomItem.dockPressTarget .mobileBottomIcon{
+  transform-origin:center center!important;
+  animation:flympusDockIconPressZoom .18s cubic-bezier(.18,.82,.20,1) both!important;
+}
+.mobileBottomItem.dockPressTarget .mobileBottomLabel{
+  transform-origin:center center!important;
+  animation:flympusDockLabelPressZoom .18s cubic-bezier(.18,.82,.20,1) both!important;
+}
+@keyframes flympusDockPressZoomMobile{
+  0%{transform:scale(1)}
+  34%{transform:scale(1.022)}
+  100%{transform:scale(1)}
+}
+@keyframes flympusDockIconPressZoom{
+  0%{transform:scale(1)}
+  32%{transform:scale(1.115)}
+  100%{transform:scale(1)}
+}
+@keyframes flympusDockLabelPressZoom{
+  0%{transform:scale(1)}
+  32%{transform:scale(1.028)}
+  100%{transform:scale(1)}
+}
+@media(min-width:900px){
+  .mobileBottomNav.dockPressZoom:not(.dockHidden){
+    animation-name:flympusDockPressZoomDesktop!important;
+  }
+  @keyframes flympusDockPressZoomDesktop{
+    0%{transform:translateX(-50%) scale(1)}
+    34%{transform:translateX(-50%) scale(1.018)}
+    100%{transform:translateX(-50%) scale(1)}
+  }
+}
+.mobileBottomNav.dockHidden.dockPressZoom{animation:none!important}
+@media(prefers-reduced-motion:reduce){
+  .mobileBottomNav.dockPressZoom:not(.dockHidden),
+  .mobileBottomItem.dockPressTarget .mobileBottomIcon,
+  .mobileBottomItem.dockPressTarget .mobileBottomLabel{
+    animation:none!important;
+  }
 }
 </style>
 
@@ -2917,6 +2970,17 @@ html.flympusHydrating #content{
     if(!btn||!bottomNav?.contains?.(btn))return;
     const target=String(btn.dataset?.mobileNav||'');if(!target)return;
     window.__FLYMPUS_EARLY_NAV_TARGET__=target;
+
+    const pressedItem=btn.closest?.('.mobileBottomItem');
+    bottomNav.classList.remove('dockPressZoom');
+    bottomNav.querySelectorAll?.('.dockPressTarget')?.forEach?.(x=>x.classList.remove('dockPressTarget'));
+    void bottomNav.offsetWidth;
+    pressedItem?.classList.add('dockPressTarget');
+    bottomNav.classList.add('dockPressZoom');
+    setTimeout(()=>{
+      bottomNav.classList.remove('dockPressZoom');
+      pressedItem?.classList.remove('dockPressTarget');
+    },190);
 
     bottomNav.querySelectorAll?.('[data-mobile-nav]')?.forEach?.(candidate=>{
       const active=candidate.dataset.mobileNav===target;
@@ -3764,10 +3828,29 @@ function triggerFlympusPortableHaptic(duration=8){
   return false;
 }
 
+let flympusDockPressZoomTimer=null;
+function playFlympusDockPressZoom(el){
+  const dock=$('#mobileBottomNav'),item=el?.closest?.('.mobileBottomItem');
+  if(!dock||!item||dock.classList.contains('dockHidden'))return;
+  clearTimeout(flympusDockPressZoomTimer);
+  dock.classList.remove('dockPressZoom');
+  dock.querySelectorAll?.('.dockPressTarget')?.forEach?.(x=>x.classList.remove('dockPressTarget'));
+  /* Force only the interaction animation to restart on very rapid consecutive
+     taps. No geometry is remeasured and no navigation work is delayed. */
+  void dock.offsetWidth;
+  item.classList.add('dockPressTarget');
+  dock.classList.add('dockPressZoom');
+  flympusDockPressZoomTimer=setTimeout(()=>{
+    dock.classList.remove('dockPressZoom');
+    item.classList.remove('dockPressTarget');
+  },190);
+}
+
 function bindFlympusNavPressSound(el,onImmediatePress=null){
   if(!el)return()=>{};
   const press=e=>{
     if(e?.pointerType==='mouse'&&e?.button!==0)return;
+    playFlympusDockPressZoom(el);
     triggerFlympusPortableHaptic(7);
     playFlympusBottomNavSound();
     if(typeof onImmediatePress==='function')onImmediatePress(e);
