@@ -5866,7 +5866,122 @@ function reports(){
  '<section class="reportKpis"><div><strong>'+courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active').length+'</strong><span>Active trainees</span></div><div><strong>'+rows.length+'</strong><span>Evaluations</span></div><div><strong>'+(avg==null?'—':avg.toFixed(1))+'</strong><span>Average grade</span></div><div><strong>'+safetyRows.length+'</strong><span>Safety events</span></div><div><strong>'+(passRate==null?'—':passRate.toFixed(0)+'%')+'</strong><span>Exam pass rate</span></div></section>'+
  '<div class="reportsGrid"><section class="card settingBox"><h3>Emergency exposure</h3><p class="sub">Recorded emergency practice across matched evaluated flights.</p>'+reportBars(emergencyDist,10)+'</section><section class="card settingBox"><h3>Syllabus activity</h3><p class="sub">Evaluations by syllabus.</p>'+reportBars(syllabusDist,10)+'</section><section class="card settingBox"><h3>Evaluation activity by trainee</h3>'+reportBars(traineeDist,10)+'</section><section class="card settingBox"><h3>Safety severity</h3>'+reportBars(safetyDist,8)+'</section><section class="card settingBox"><h3>Monthly activity</h3>'+reportBars(monthly,12)+'</section><section class="card settingBox"><h3>Filter scope</h3><div class="infoBox"><b>Filters are applied consistently</b><p>Trainee and date filters also affect safety and exam KPIs; instructor and syllabus filters apply where those fields exist.</p></div></section></div>';
 }
-function render(options={}){const fast=!!options.fastNavigation;if(fast){syncNavigationActiveState()}else{saveUiState();renderNav();renderMobileBottomNav();renderTopCourseSwitcher();renderPersonalIdentity();syncNotificationPreferenceControls()}let html='';try{switch(state.screen){case'courses':html=myCourses();break;case'home':html=home();break;case'record':html=recordHub();break;case'evaluation':html=evaluation();break;case'roster':html=roster();break;case'profile':html=traineeProfile();break;case'instructor':html=instructorProfile();break;case'settings':html=settings();break;case'reports':html=reports();break;case'safety':html=safetyScreen();break;case'exams':html=examsScreen();break;case'planned':html=plannedVsExecuted();break;default:state.screen='home';html=home();break}}catch(err){console.error('Course Tracker screen render failed',state.screen,err);html='<div class="eyebrow">Review build diagnostic</div><h1 class="pageTitle">This screen failed to load</h1><section class="card settingBox"><h3>'+esc(state.screen)+'</h3><p class="sub">'+esc(err&&err.message?err.message:String(err))+'</p><div class="toolbar"><button class="btn sky" data-go="home">Back to Home</button><button class="btn danger" id="resetBrokenReviewState">Reset local review data</button></div></section>'}if(!html){state.screen='home';appNavHistory=[];saveAppNavHistory();html=home()}if(state.screen!=='home')html=globalBackControl()+html;if(shouldShowStandaloneMigration())html=standaloneMigrationHtml()+html;$('#content').innerHTML=html;if(fast){setTimeout(()=>{saveUiState();renderTopCourseSwitcher();renderPersonalIdentity();syncNotificationPreferenceControls();bind()},0)}else bind()}
+const flympusBottomScreenTemplates=new Map();
+let flympusBottomScreenPrewarmHandle=null;
+const FLYMPUS_BOTTOM_ROOT_SCREENS=['roster','planned','home','record','reports'];
+
+function buildFlympusScreenHtml(screen){
+  let html='';
+  switch(screen){
+    case'courses':html=myCourses();break;
+    case'home':html=home();break;
+    case'record':html=recordHub();break;
+    case'evaluation':html=evaluation();break;
+    case'roster':html=roster();break;
+    case'profile':html=traineeProfile();break;
+    case'instructor':html=instructorProfile();break;
+    case'settings':html=settings();break;
+    case'reports':html=reports();break;
+    case'safety':html=safetyScreen();break;
+    case'exams':html=examsScreen();break;
+    case'planned':html=plannedVsExecuted();break;
+    default:html=home();break;
+  }
+  if(screen!=='home')html=globalBackControl()+html;
+  if(shouldShowStandaloneMigration())html=standaloneMigrationHtml()+html;
+  return html;
+}
+
+function createFlympusScreenTemplate(screen){
+  try{
+    const previous=state.screen;
+    state.screen=screen;
+    const html=buildFlympusScreenHtml(screen);
+    state.screen=previous;
+    const tpl=document.createElement('template');
+    tpl.innerHTML=html;
+    flympusBottomScreenTemplates.set(screen,tpl);
+    return tpl;
+  }catch(err){
+    try{console.warn('FLYMPUS pre-render skipped',screen,err)}catch{}
+    return null;
+  }
+}
+
+function invalidateFlympusBottomScreenTemplates(){
+  flympusBottomScreenTemplates.clear();
+  if(flympusBottomScreenPrewarmHandle!=null){
+    try{
+      if(typeof cancelIdleCallback==='function')cancelIdleCallback(flympusBottomScreenPrewarmHandle);
+      else clearTimeout(flympusBottomScreenPrewarmHandle);
+    }catch{}
+    flympusBottomScreenPrewarmHandle=null;
+  }
+}
+
+function prewarmFlympusBottomScreens(){
+  if(flympusBottomScreenPrewarmHandle!=null)return;
+  const queue=FLYMPUS_BOTTOM_ROOT_SCREENS.filter(screen=>screen!==state.screen);
+  const step=deadline=>{
+    flympusBottomScreenPrewarmHandle=null;
+    const screen=queue.shift();
+    if(screen&&!flympusBottomScreenTemplates.has(screen))createFlympusScreenTemplate(screen);
+    if(!queue.length)return;
+    const schedule=()=>{
+      if(typeof requestIdleCallback==='function'){
+        flympusBottomScreenPrewarmHandle=requestIdleCallback(step,{timeout:450});
+      }else{
+        flympusBottomScreenPrewarmHandle=setTimeout(()=>step({timeRemaining:()=>8}),24);
+      }
+    };
+    if(deadline?.timeRemaining?.()>5)step(deadline);
+    else schedule();
+  };
+  if(typeof requestIdleCallback==='function'){
+    flympusBottomScreenPrewarmHandle=requestIdleCallback(step,{timeout:350});
+  }else{
+    flympusBottomScreenPrewarmHandle=setTimeout(()=>step({timeRemaining:()=>8}),24);
+  }
+}
+
+function mountFlympusFastScreen(screen){
+  const root=$('#content');
+  if(!root)return false;
+  const tpl=flympusBottomScreenTemplates.get(screen);
+  if(!tpl)return false;
+  root.replaceChildren(tpl.content.cloneNode(true));
+  return true;
+}
+
+function render(options={}){
+  const fast=!!options.fastNavigation;
+  if(fast)syncNavigationActiveState();
+  else{
+    invalidateFlympusBottomScreenTemplates();
+    saveUiState();renderNav();renderMobileBottomNav();renderTopCourseSwitcher();renderPersonalIdentity();syncNotificationPreferenceControls();
+  }
+
+  let mounted=false,html='';
+  try{
+    if(fast&&FLYMPUS_BOTTOM_ROOT_SCREENS.includes(state.screen))mounted=mountFlympusFastScreen(state.screen);
+    if(!mounted){
+      html=buildFlympusScreenHtml(state.screen);
+      if(!html){state.screen='home';appNavHistory=[];saveAppNavHistory();html=buildFlympusScreenHtml('home')}
+      $('#content').innerHTML=html;
+    }
+  }catch(err){
+    console.error('Course Tracker screen render failed',state.screen,err);
+    html='<div class="eyebrow">Review build diagnostic</div><h1 class="pageTitle">This screen failed to load</h1><section class="card settingBox"><h3>'+esc(state.screen)+'</h3><p class="sub">'+esc(err&&err.message?err.message:String(err))+'</p><div class="toolbar"><button class="btn sky" data-go="home">Back to Home</button><button class="btn danger" id="resetBrokenReviewState">Reset local review data</button></div></section>';
+    $('#content').innerHTML=html;
+  }
+
+  if(fast){
+    setTimeout(()=>{saveUiState();renderTopCourseSwitcher();renderPersonalIdentity();syncNotificationPreferenceControls();bind()},0);
+  }else{
+    bind();
+    prewarmFlympusBottomScreens();
+  }
+}
 
 function renderPreservingManagementView(update){
   const root=$('#content'),docEl=document.documentElement,body=document.body,scrollTop=Number(window.scrollY||docEl?.scrollTop||body?.scrollTop||0),openStates=root?[...root.querySelectorAll('details')].map(x=>!!x.open):[];
