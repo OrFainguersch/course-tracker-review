@@ -2682,10 +2682,19 @@ body::-webkit-scrollbar{
 <style>
 /* ===== Installed / standalone touch-app pull-to-refresh ===== */
 @media(max-width:899px), (hover:none) and (pointer:coarse){
-  body.flympusStandalonePull::before,
+  /* Fill only the gap revealed ABOVE the translated header. The old fixed
+     390px shield extended into the viewport and physically covered the header
+     and page at its original boundary, creating the horizontal navy band seen
+     during pull-to-refresh. Keep a 1px overlap under the moving header to avoid
+     a sub-pixel seam without ever crossing the controls/content. */
+  body.flympusStandalonePull::before{
+    top:-180px!important;
+    height:calc(181px + var(--flympus-standalone-pull-y,0px))!important;
+    background:#0d3156!important;
+  }
   body.flympusStandaloneRelease::before{
-    top:-170px!important;
-    height:390px!important;
+    top:-180px!important;
+    height:181px!important;
     background:#0d3156!important;
   }
 
