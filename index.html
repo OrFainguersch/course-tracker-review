@@ -3702,24 +3702,47 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     else setTimeout(complete,34);
   };
 
-  /* Critically-damped spring with a small release velocity. It begins moving
-     immediately, then spends most of its time in the soft tail—closer to the
-     Facebook/Safari references than an S-curve. */
-  const springDuration=700;
-  const springOmega=14;
-  const springReleaseVelocity=4.2;
+  /* Facebook-like release cadence from the side-by-side reference:
+     a tiny "settle/linger" immediately after finger-up, then a noticeably
+     faster recovery, followed by a long soft tail. This is intentionally not
+     a literal pause—the first ~60 ms still move by a few pixels, so it feels
+     elastic rather than sticky. */
+  const springDuration=680;
+  const springProfile=[
+    [0,1],
+    [28,.998],
+    [56,.988],
+    [84,.955],
+    [112,.885],
+    [140,.775],
+    [168,.640],
+    [196,.505],
+    [224,.385],
+    [252,.292],
+    [280,.218],
+    [320,.145],
+    [360,.096],
+    [400,.061],
+    [440,.037],
+    [480,.021],
+    [530,.010],
+    [580,.004],
+    [630,.001],
+    [680,0]
+  ];
   const springRatioAtMs=ms=>{
-    const t=Math.max(0,Math.min(springDuration,Number(ms)||0))/1000;
-    if(ms>=springDuration)return 0;
-    const b=springOmega-springReleaseVelocity;
-    return Math.max(0,(1+b*t)*Math.exp(-springOmega*t));
+    const elapsed=Math.max(0,Math.min(springDuration,Number(ms)||0));
+    if(elapsed>=springDuration)return 0;
+    for(let i=1;i<springProfile.length;i++){
+      const [bMs,bRatio]=springProfile[i];
+      const [aMs,aRatio]=springProfile[i-1];
+      if(elapsed<=bMs){
+        const u=Math.max(0,Math.min(1,(elapsed-aMs)/Math.max(1,bMs-aMs)));
+        return aRatio+(bRatio-aRatio)*u;
+      }
+    }
+    return 0;
   };
-  const springProfile=(()=>{
-    const frames=[];
-    for(let ms=0;ms<springDuration;ms+=28)frames.push([ms,springRatioAtMs(ms)]);
-    frames.push([springDuration,0]);
-    return frames;
-  })();
 
   const returnPull=refresh=>{
     if(pullReturning)return;
