@@ -2686,6 +2686,9 @@ body::-webkit-scrollbar{
 
 <style>
 /* ===== Bottom dock · traveling active halo =====
+   REFERENCE BASELINE · 2026-10-02
+   Approved behavior: keep the current halo size, spacing, centering (-1px
+   vertical nudge), 220ms travel and post-paint navigation timing unchanged.
    Match the exact geometry of the old active button capsule. The halo is
    measured from the real button rect, so its top/bottom spacing stays optically
    identical on iPhone, other mobile devices and desktop. */
@@ -2884,8 +2887,65 @@ html.flympusHydrating #content{
   const snapMatches=!!(snap&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse);
   const content=document.querySelector('#content');
   const bottomNav=document.querySelector('#mobileBottomNav');
+  window.__FLYMPUS_RUNTIME_READY__=false;
+  window.__FLYMPUS_EARLY_NAV_TARGET__='';
+  window.__FLYMPUS_EARLY_NAV_SOUND_AT__=0;
+
+  /* Reload reference behavior: the restored dock may become visible before the
+     full runtime has parsed. Capture a physical dock press in that hydration
+     window so the first tap is never dead. The real navigation is replayed as
+     soon as the runtime is ready; the approved halo geometry moves immediately. */
+  let earlyNavAudio=null;
+  const ensureEarlyNavAudio=()=>{
+    if(earlyNavAudio)return earlyNavAudio;
+    try{
+      const a=document.createElement('audio');
+      a.src='./assets/flympus-nav-signature.wav?v=audio-clean-1';
+      a.preload='auto';a.playsInline=true;a.muted=false;a.volume=1;
+      a.setAttribute('playsinline','');a.setAttribute('webkit-playsinline','');
+      a.setAttribute('aria-hidden','true');a.tabIndex=-1;
+      a.style.position='fixed';a.style.width='0';a.style.height='0';
+      a.style.opacity='0';a.style.pointerEvents='none';
+      document.body?.appendChild?.(a);try{a.load?.()}catch{}
+      earlyNavAudio=a;return a;
+    }catch{return null}
+  };
+  const handleEarlyBottomNavPress=e=>{
+    if(window.__FLYMPUS_RUNTIME_READY__)return;
+    const switchTarget=e.target?.closest?.('.mobileBottomHapticSwitch');
+    const btn=switchTarget?.closest?.('.mobileBottomItem')?.querySelector?.('[data-mobile-nav]')||e.target?.closest?.('[data-mobile-nav]');
+    if(!btn||!bottomNav?.contains?.(btn))return;
+    const target=String(btn.dataset?.mobileNav||'');if(!target)return;
+    window.__FLYMPUS_EARLY_NAV_TARGET__=target;
+
+    bottomNav.querySelectorAll?.('[data-mobile-nav]')?.forEach?.(candidate=>{
+      const active=candidate.dataset.mobileNav===target;
+      candidate.closest?.('.mobileBottomItem')?.classList.toggle('active',active);
+      if(active)candidate.setAttribute('aria-current','page');else candidate.removeAttribute('aria-current');
+    });
+    const navRect=bottomNav.getBoundingClientRect?.(),buttonRect=btn.getBoundingClientRect?.();
+    if(navRect&&buttonRect){
+      bottomNav.style.setProperty('--dock-halo-x',(buttonRect.left-navRect.left).toFixed(2)+'px');
+      bottomNav.style.setProperty('--dock-halo-y',(buttonRect.top-navRect.top).toFixed(2)+'px');
+      bottomNav.style.setProperty('--dock-halo-width',buttonRect.width.toFixed(2)+'px');
+      bottomNav.style.setProperty('--dock-halo-height',buttonRect.height.toFixed(2)+'px');
+      bottomNav.classList.add('dockHaloMeasured','dockHaloReady');
+    }
+
+    const now=performance.now?.()||Date.now();
+    if(now-Number(window.__FLYMPUS_EARLY_NAV_SOUND_AT__||0)>=72){
+      window.__FLYMPUS_EARLY_NAV_SOUND_AT__=now;
+      const a=ensureEarlyNavAudio();
+      if(a){
+        try{a.pause?.()}catch{}try{a.currentTime=0}catch{}
+        try{const p=a.play?.();if(p?.catch)p.catch(()=>{})}catch{}
+      }
+    }
+  };
+  bottomNav?.addEventListener?.('touchstart',handleEarlyBottomNavPress,{passive:true,capture:true});
 
   if(snapMatches&&content){
+    ensureEarlyNavAudio();
     content.innerHTML=snap.html;
     if(bottomNav&&typeof snap.navHtml==='string')bottomNav.innerHTML=snap.navHtml;
     if(bottomNav){
@@ -3728,16 +3788,15 @@ function armFlympusRefreshSound(){
 
     try{a.pause?.()}catch{}
     try{a.currentTime=0}catch{}
-    a.muted=false;
+    a.muted=true;
 
     const graph={audio:a,fired:false,stopped:false,armed:false};
 
     /* iOS grants media playback reliably on the initial touchstart. Prime the
-       SELECTED refresh WAV itself at effectively inaudible volume; there is no
-       synthetic carrier, generated WAV or second audio engine. At the 44 px
-       threshold we rewind this same element to sample zero and expose it at
-       normal volume. */
-    a.volume=.0001;
+       selected refresh WAV fully MUTED, not at a tiny audible volume. Ordinary
+       taps, scrolls and back-swipes therefore remain silent; only a real pull
+       crossing 44px rewinds and unmutes this already-authorized element. */
+    a.volume=1;
     const p=a.play?.();
     graph.armed=true;
     if(p?.catch)p.catch(()=>{});
@@ -3753,6 +3812,7 @@ function stopFlympusRefreshSound(graph){
   if(!a)return;
   try{a.pause?.()}catch{}
   try{a.currentTime=0}catch{}
+  try{a.muted=false}catch{}
   try{a.volume=1}catch{}
 }
 
@@ -3761,8 +3821,9 @@ function fireFlympusRefreshSound(graph){
   graph.fired=true;
   const a=graph.audio;if(!a)return;
   try{
-    a.volume=1;
     a.currentTime=0;
+    a.volume=1;
+    a.muted=false;
     const p=a.play?.();
     if(p?.catch)p.catch(()=>{});
   }catch{}
@@ -3775,12 +3836,10 @@ getFlympusNavAudioPool();
 getFlympusRefreshAudioPool();
 primeFlympusNavFastAudio();
 
-if(document.addEventListener&&!window.__flympusNavFastUnlockBound){
-  window.__flympusNavFastUnlockBound=true;
-  const unlock=()=>unlockFlympusNavFastAudio();
-  document.addEventListener('touchstart',unlock,{passive:true,capture:true});
-  if(window.PointerEvent)document.addEventListener('pointerdown',e=>{if(e?.pointerType!=='touch')unlock()},{passive:true,capture:true});
-}
+/* Navigation audio is intentionally NOT unlocked by arbitrary screen gestures.
+   Only a bottom-nav press may touch its AudioContext; pull-to-refresh owns its
+   separate muted media element. Scrolls, back-swipes and random taps are never
+   navigation-audio triggers. */
 
 if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   window.__flympusPullRefreshSoundBound=true;
@@ -6640,7 +6699,20 @@ document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden')saveFlympusReloadSnapshot();
 },{capture:true});
 
-render();
+const earlyNavTarget=String(window.__FLYMPUS_EARLY_NAV_TARGET__||'');
+window.__FLYMPUS_RUNTIME_READY__=true;
+if(['roster','planned','home','record','reports'].includes(earlyNavTarget)){
+  window.__FLYMPUS_EARLY_NAV_TARGET__='';
+  if(state.screen===earlyNavTarget){
+    render();
+    scrollActiveBottomNavTop(earlyNavTarget);
+  }else{
+    go(earlyNavTarget,{}, {fastNavigation:true});
+    restoreBottomNavScroll(earlyNavTarget);
+  }
+}else{
+  render();
+}
 
 /* If this is a real reload, keep Safari's scroll restoration under app control
    and reveal the fully rendered screen only after the exact previous viewport
