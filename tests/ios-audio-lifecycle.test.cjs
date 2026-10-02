@@ -135,7 +135,8 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   assert.equal(mediaPlays.length,beforeRefreshMedia+1,'Refresh touchstart must still arm HTMLAudio');
   const primer=mediaPlays.at(-1);
   assert(primer.src.includes('flympus-refresh-sync.wav'),'Refresh primer must use selected refresh WAV');
-  assert(primer.volume<=.0001,'Refresh primer remains effectively inaudible before 44px');
+  assert.equal(primer.muted,true,'Refresh primer must be fully muted before a real pull reaches 44px');
+  assert.equal(primer.volume,1,'Muted primer must not rely on a tiny audible volume floor');
 
   vm.runInContext('fireFlympusRefreshSound(globalThis.__g)',context);
   await Promise.resolve();
@@ -143,6 +144,7 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   assert(refresh.src.includes('flympus-refresh-sync.wav'),'Refresh fire must keep selected refresh WAV');
   assert.equal(refresh.currentTime,0,'Refresh fire must restart from sample zero');
   assert.equal(refresh.volume,1,'Refresh fire must restore full element volume');
+  assert.equal(refresh.muted,false,'Refresh fire must unmute only at the actual pull threshold');
 
   assert(html.includes('if(!pullRefreshSoundPlayed&&pullDy>=44)'),
     'Refresh sound threshold must stay 44px');
@@ -150,7 +152,13 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Actual refresh threshold must stay 96px');
   assert(html.includes("if(e.target?.closest?.('#mobileBottomNav'))return"),
     'Pull gesture must still ignore the bottom nav');
+  assert(!html.includes("document.addEventListener('touchstart',unlock"),
+    'Arbitrary screen touchstart must never unlock or trigger navigation audio');
+  assert(html.includes('Only a bottom-nav press may touch its AudioContext'),
+    'Code must document the strict audio boundary: bottom-nav only for nav audio');
 
+  assert(html.includes('REFERENCE BASELINE · 2026-10-02'),
+    'Approved near-perfect bottom-nav state must remain explicitly marked as a code reference baseline');
   assert(html.includes('--dock-halo-y-nudge:-1px'),
     'Approved halo vertical centering must remain unchanged');
   assert(html.includes('class="mobileBottomHalo"')&&html.includes('function ensureBottomDockHalo()'),
@@ -179,6 +187,10 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Physical bottom-nav presses must yield one paint before screen DOM work so audio and halo motion are not blocked');
   assert(html.includes("scheduleFlympusBottomNavigation(target);"),
     'Bottom-nav activation must use the post-paint navigation scheduler');
+  assert(html.includes('handleEarlyBottomNavPress')&&html.includes('__FLYMPUS_EARLY_NAV_TARGET__'),
+    'Reload hydration must capture the first physical bottom-nav press instead of dropping it');
+  assert(html.includes("['roster','planned','home','record','reports'].includes(earlyNavTarget)"),
+    'Queued hydration tap must be consumed as soon as the real runtime becomes ready');
 
   console.log('Low-latency nav audio, refresh audio, and traveling halo tests passed');
 })().catch(err=>{
