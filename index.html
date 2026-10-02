@@ -1,4 +1,3 @@
-<!-- FLYMPUS restore baseline: native-media-audio-0bb141e -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -3433,119 +3432,23 @@ function scrollActiveBottomNavTop(root){
   bottomNavScrollPositions[root]=0;persistBottomNavScroll();
   try{window.scrollTo({top:0,left:0,behavior:'smooth'})}catch{window.scrollTo?.(0,0)}
 }
-let flympusUiMediaRouteReady=false;
+const FLYMPUS_NAV_SOUND_SRC='./assets/flympus-nav-signature.wav?v=audio-clean-1';
+const FLYMPUS_REFRESH_SOUND_SRC='./assets/flympus-refresh-sync.wav?v=audio-clean-1';
+const FLYMPUS_NAV_POOL_SIZE=6;
+const FLYMPUS_REFRESH_POOL_SIZE=2;
+
 let flympusNavAudioPool=null,flympusNavAudioIndex=0;
 let flympusRefreshAudioPool=null,flympusRefreshAudioIndex=0;
-let flympusNavMediaSrc='',flympusRefreshMediaSrc='';
-
-const FLYMPUS_UI_MEDIA_RATE=12000;
-const FLYMPUS_NAV_MEDIA_MARKER=.09;
-const FLYMPUS_REFRESH_MEDIA_MARKER=5;
+let flympusLastNavSoundAt=0;
 
 function setFlympusAmbientAudioSession(){
+  /* Keep UI sounds in the ambient category when the browser exposes the
+     Audio Session API. No category bouncing, recovery state or WebAudio. */
+  try{if(navigator.audioSession)navigator.audioSession.type='ambient'}catch{}
+}
+
+function makeFlympusFileAudio(src){
   try{
-    if(navigator.audioSession)navigator.audioSession.type='ambient';
-  }catch{}
-}
-
-function flympusWriteAscii(view,offset,text){
-  for(let i=0;i<text.length;i++)view.setUint8(offset+i,text.charCodeAt(i)&255);
-}
-
-function flympusBytesToBase64(bytes){
-  let binary='',chunk=0x6000;
-  for(let i=0;i<bytes.length;i+=chunk){
-    const part=bytes.subarray(i,Math.min(bytes.length,i+chunk));
-    binary+=String.fromCharCode.apply(null,part);
-  }
-  return btoa(binary);
-}
-
-function flympusWavDataUri(samples,sampleRate=FLYMPUS_UI_MEDIA_RATE){
-  const frames=samples.length,buffer=new ArrayBuffer(44+frames*2),view=new DataView(buffer);
-  flympusWriteAscii(view,0,'RIFF');
-  view.setUint32(4,36+frames*2,true);
-  flympusWriteAscii(view,8,'WAVE');
-  flympusWriteAscii(view,12,'fmt ');
-  view.setUint32(16,16,true);
-  view.setUint16(20,1,true);
-  view.setUint16(22,1,true);
-  view.setUint32(24,sampleRate,true);
-  view.setUint32(28,sampleRate*2,true);
-  view.setUint16(32,2,true);
-  view.setUint16(34,16,true);
-  flympusWriteAscii(view,36,'data');
-  view.setUint32(40,frames*2,true);
-  for(let i=0;i<frames;i++){
-    const x=Math.max(-1,Math.min(1,Number(samples[i])||0));
-    view.setInt16(44+i*2,Math.round(x*32767),true);
-  }
-  return'data:audio/wav;base64,'+flympusBytesToBase64(new Uint8Array(buffer));
-}
-
-function flympusCarrierSample(t){
-  /* Real, non-zero PCM rather than mute/digital silence. It is roughly -66 dB
-     and starts/ends at zero crossings, so it opens the native media route
-     without adding an audible click before the UI sound. */
-  return Math.sin(Math.PI*2*600*t)*.0005;
-}
-
-function flympusAddTone(samples,startSec,f0,f1,level,duration,master){
-  const sr=FLYMPUS_UI_MEDIA_RATE,start=Math.max(0,Math.floor(startSec*sr)),count=Math.max(1,Math.floor(duration*sr));
-  let phase=0;
-  for(let n=0;n<count&&start+n<samples.length;n++){
-    const u=n/Math.max(1,count-1),t=n/sr;
-    const freq=f0>0&&f1>0?f0*Math.pow(f1/f0,u):f0;
-    phase+=Math.PI*2*freq/sr;
-    const attack=Math.min(1,n/Math.max(1,Math.floor(.006*sr)));
-    const decay=Math.pow(.0001,Math.max(0,(u-.06)/.94));
-    samples[start+n]+=Math.sin(phase)*level*master*attack*Math.max(.0001,decay);
-  }
-}
-
-function buildFlympusNavMediaSrc(){
-  const sr=FLYMPUS_UI_MEDIA_RATE,total=FLYMPUS_NAV_MEDIA_MARKER+.085;
-  const samples=new Float32Array(Math.ceil(total*sr));
-  const leadFrames=Math.floor(FLYMPUS_NAV_MEDIA_MARKER*sr);
-  for(let i=0;i<leadFrames;i++)samples[i]=flympusCarrierSample(i/sr);
-  const m=FLYMPUS_NAV_MEDIA_MARKER+.001,master=.05;
-  flympusAddTone(samples,m,610,610,.95,.034,master);
-  flympusAddTone(samples,m,1220,1220,.20,.028,master);
-  flympusAddTone(samples,m+.005,1490,1490,.34,.028,master);
-  flympusAddTone(samples,m+.010,2260,2260,.13,.020,master);
-  return flympusWavDataUri(samples,sr);
-}
-
-function buildFlympusRefreshMediaSrc(){
-  const sr=FLYMPUS_UI_MEDIA_RATE,soundDuration=.23,total=FLYMPUS_REFRESH_MEDIA_MARKER+soundDuration+.03;
-  const samples=new Float32Array(Math.ceil(total*sr));
-  const leadFrames=Math.floor(FLYMPUS_REFRESH_MEDIA_MARKER*sr);
-  for(let i=0;i<leadFrames;i++)samples[i]=flympusCarrierSample(i/sr);
-
-  const start=Math.floor(FLYMPUS_REFRESH_MEDIA_MARKER*sr),count=Math.floor(.21*sr),master=.055;
-  let seed=0x51f15e,lp=0;
-  for(let n=0;n<count&&start+n<samples.length;n++){
-    seed=(seed*1664525+1013904223)>>>0;
-    const raw=((seed/4294967295)*2-1);
-    const u=n/Math.max(1,count-1);
-    const cutoff=.10+.58*u;
-    lp+=cutoff*(raw-lp);
-    const attack=Math.min(1,n/Math.max(1,Math.floor(.035*sr)));
-    const tail=Math.pow(.0001,Math.max(0,(u-.16)/.84));
-    samples[start+n]+=(raw-lp*.55)*.12*master*attack*Math.max(.0001,tail);
-  }
-
-  const m=FLYMPUS_REFRESH_MEDIA_MARKER+.002;
-  flympusAddTone(samples,m,610,690,.46,.07,master);
-  flympusAddTone(samples,m+.025,760,1320,.52,.12,master);
-  flympusAddTone(samples,m+.115,1760,1960,.22,.075,master);
-  flympusAddTone(samples,m+.145,2300,2460,.10,.05,master);
-  return flympusWavDataUri(samples,sr);
-}
-
-function makeFlympusUiAudio(src){
-  try{
-    if(!src)return null;
     const a=document.createElement('audio');
     a.src=src;
     a.preload='auto';
@@ -3556,8 +3459,11 @@ function makeFlympusUiAudio(src){
     a.setAttribute('webkit-playsinline','');
     a.setAttribute('aria-hidden','true');
     a.tabIndex=-1;
-    a.style.display='none';
-    a.addEventListener('playing',()=>{flympusUiMediaRouteReady=true},{passive:true});
+    a.style.position='fixed';
+    a.style.width='0';
+    a.style.height='0';
+    a.style.opacity='0';
+    a.style.pointerEvents='none';
     document.body?.appendChild?.(a);
     try{a.load?.()}catch{}
     return a;
@@ -3565,85 +3471,64 @@ function makeFlympusUiAudio(src){
 }
 
 function getFlympusNavAudioPool(){
-  if(!flympusNavMediaSrc)flympusNavMediaSrc=buildFlympusNavMediaSrc();
   if(!flympusNavAudioPool){
-    flympusNavAudioPool=[
-      makeFlympusUiAudio(flympusNavMediaSrc),
-      makeFlympusUiAudio(flympusNavMediaSrc),
-      makeFlympusUiAudio(flympusNavMediaSrc),
-      makeFlympusUiAudio(flympusNavMediaSrc)
-    ].filter(Boolean);
+    flympusNavAudioPool=Array.from({length:FLYMPUS_NAV_POOL_SIZE},()=>makeFlympusFileAudio(FLYMPUS_NAV_SOUND_SRC)).filter(Boolean);
   }
   return flympusNavAudioPool;
 }
 
 function getFlympusRefreshAudioPool(){
-  if(!flympusRefreshMediaSrc)flympusRefreshMediaSrc=buildFlympusRefreshMediaSrc();
   if(!flympusRefreshAudioPool){
-    flympusRefreshAudioPool=[
-      makeFlympusUiAudio(flympusRefreshMediaSrc),
-      makeFlympusUiAudio(flympusRefreshMediaSrc)
-    ].filter(Boolean);
+    flympusRefreshAudioPool=Array.from({length:FLYMPUS_REFRESH_POOL_SIZE},()=>makeFlympusFileAudio(FLYMPUS_REFRESH_SOUND_SRC)).filter(Boolean);
   }
   return flympusRefreshAudioPool;
 }
 
-function resetFlympusMediaElement(a){
+function rewindFlympusFileAudio(a){
   if(!a)return;
   try{
-    a.onended=null;
-    a.ontimeupdate=null;
-    a.loop=false;
     a.muted=false;
     a.volume=1;
-    a.pause?.();
     a.currentTime=0;
   }catch{}
 }
 
-function warmFlympusUiAudioMedia(){
-  try{
-    setFlympusAmbientAudioSession();
-    getFlympusNavAudioPool();
-    getFlympusRefreshAudioPool();
-  }catch{}
-}
-
 function resetFlympusAudioSession(){
-  flympusUiMediaRouteReady=false;
   setFlympusAmbientAudioSession();
-  getFlympusNavAudioPool().forEach(resetFlympusMediaElement);
-  getFlympusRefreshAudioPool().forEach(resetFlympusMediaElement);
+  flympusLastNavSoundAt=0;
+  for(const a of [...getFlympusNavAudioPool(),...getFlympusRefreshAudioPool()]){
+    try{a.pause?.()}catch{}
+    rewindFlympusFileAudio(a);
+  }
 }
 
 function playFlympusBottomNavSound(){
   try{
     setFlympusAmbientAudioSession();
+
+    /* Sound-only overlap guard. Navigation itself never waits for audio. The
+       selected signature is ~86 ms, so this prevents two rapid icon presses
+       from acoustically combining into a different-sounding click. */
+    const now=performance.now?.()||Date.now();
+    if(now-flympusLastNavSoundAt<72)return;
+    flympusLastNavSoundAt=now;
+
     const pool=getFlympusNavAudioPool();if(!pool.length)return;
     const a=pool[flympusNavAudioIndex++%pool.length];
-    resetFlympusMediaElement(a);
-
-    /* On the FIRST gesture after a reload, play the same element from its real
-       non-zero lead-in. iOS opens the physical media route during that lead-in,
-       then the requested sound follows from the very same player. Once the
-       route is known healthy, later presses can seek straight to the marker. */
-    a.currentTime=flympusUiMediaRouteReady?FLYMPUS_NAV_MEDIA_MARKER:0;
+    rewindFlympusFileAudio(a);
     const p=a.play?.();
-    if(p?.then)p.then(()=>{flympusUiMediaRouteReady=true}).catch(()=>{});
-    else flympusUiMediaRouteReady=true;
+    if(p?.catch)p.catch(()=>{});
   }catch{}
 }
 
 function bindFlympusNavPressSound(el){
   if(!el)return()=>{};
-  let lastSoundAt=0;
   const press=e=>{
     if(e?.pointerType==='mouse'&&e?.button!==0)return;
-    const now=performance.now?.()||Date.now();
-    if(now-lastSoundAt<90)return;
-    lastSoundAt=now;
     playFlympusBottomNavSound();
   };
+  /* Physical touch/pointer starts the sound synchronously, while the existing
+     onclick remains responsible only for navigation and therefore stays fast. */
   el.ontouchstart=press;
   if(window.PointerEvent)el.onpointerdown=e=>{if(e?.pointerType!=='touch')press(e)};
   return press;
@@ -3654,34 +3539,22 @@ function armFlympusRefreshSound(){
     setFlympusAmbientAudioSession();
     const pool=getFlympusRefreshAudioPool();if(!pool.length)return null;
     const a=pool[flympusRefreshAudioIndex++%pool.length];
-    resetFlympusMediaElement(a);
 
-    const graph={
-      audio:a,fired:false,emitted:false,stopped:false,
-      routeStarted:false,pendingFire:false,guard:null
-    };
+    try{a.pause?.()}catch{}
+    try{a.currentTime=0}catch{}
+    a.muted=false;
 
-    /* Keep the asset inside its non-zero lead-in until the pull threshold is
-       reached. This starts an actual unmuted media stream on touchstart, unlike
-       the previous muted primer which WebKit was free to optimize away. */
-    graph.guard=()=>{
-      if(graph.fired||graph.stopped)return;
-      try{
-        if(a.currentTime>=FLYMPUS_REFRESH_MEDIA_MARKER-.55)a.currentTime=.04;
-      }catch{}
-    };
-    a.ontimeupdate=graph.guard;
-    a.currentTime=0;
+    const graph={audio:a,fired:false,stopped:false,armed:false};
 
-    const onStarted=()=>{
-      if(graph.stopped)return;
-      graph.routeStarted=true;
-      flympusUiMediaRouteReady=true;
-      if(graph.pendingFire)emitFlympusRefreshSound(graph);
-    };
+    /* iOS grants media playback reliably on the initial touchstart. Prime the
+       SELECTED refresh WAV itself at effectively inaudible volume; there is no
+       synthetic carrier, generated WAV or second audio engine. At the 44 px
+       threshold we rewind this same element to sample zero and expose it at
+       normal volume. */
+    a.volume=.0001;
     const p=a.play?.();
-    if(p?.then)p.then(onStarted).catch(()=>{});
-    else onStarted();
+    graph.armed=true;
+    if(p?.catch)p.catch(()=>{});
 
     return graph;
   }catch{return null}
@@ -3690,42 +3563,29 @@ function armFlympusRefreshSound(){
 function stopFlympusRefreshSound(graph){
   if(!graph||graph.stopped)return;
   graph.stopped=true;
-  resetFlympusMediaElement(graph.audio);
-}
-
-function emitFlympusRefreshSound(graph){
-  if(!graph||graph.emitted||graph.stopped)return;
-  if(!graph.routeStarted){
-    graph.pendingFire=true;
-    return;
-  }
-  graph.emitted=true;
-  graph.pendingFire=false;
   const a=graph.audio;
-  try{
-    a.ontimeupdate=null;
-    a.currentTime=FLYMPUS_REFRESH_MEDIA_MARKER;
-    if(a.paused){
-      const p=a.play?.();
-      if(p?.catch)p.catch(()=>{});
-    }
-    setTimeout(()=>stopFlympusRefreshSound(graph),650);
-  }catch{
-    stopFlympusRefreshSound(graph);
-  }
+  if(!a)return;
+  try{a.pause?.()}catch{}
+  try{a.currentTime=0}catch{}
+  try{a.volume=1}catch{}
 }
 
 function fireFlympusRefreshSound(graph){
   if(!graph||graph.fired||graph.stopped)return;
   graph.fired=true;
-  emitFlympusRefreshSound(graph);
+  const a=graph.audio;if(!a)return;
+  try{
+    a.volume=1;
+    a.currentTime=0;
+    const p=a.play?.();
+    if(p?.catch)p.catch(()=>{});
+  }catch{}
 }
 
-/* Decode/preload the tiny generated WAV assets before the first interaction.
-   No playback occurs here; playback permission is still obtained only from the
-   user's physical touch/pointer gesture. */
-warmFlympusUiAudioMedia();
-resetFlympusAudioSession();
+/* Preload only. No sound is played until an actual user touch/pointer gesture. */
+setFlympusAmbientAudioSession();
+getFlympusNavAudioPool();
+getFlympusRefreshAudioPool();
 
 if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   window.__flympusPullRefreshSoundBound=true;
