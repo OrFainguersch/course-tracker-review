@@ -104,8 +104,8 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Navigation click must use an AudioBufferSourceNode');
   assert(source.includes('source.start(ctx.currentTime+.001)'),
     'Navigation click must schedule essentially immediately');
-  assert(source.includes('const FLYMPUS_NAV_SOUND_VOLUME=.55'),
-    'Bottom-nav click volume must stay reduced to 55 percent across browsers');
+  assert(source.includes('const FLYMPUS_NAV_SOUND_VOLUME=.495')&&source.includes('const FLYMPUS_REFRESH_SOUND_VOLUME=.495'),
+    'Bottom-nav and refresh sounds must share the same 49.5 percent playback level across browsers');
 
   assert.equal(mediaCreated.length,4,
     'Only two HTMLAudio nav fallbacks and two refresh players should be preloaded');
@@ -117,7 +117,7 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   assert.equal(fastStarts.length,1,'First ready nav press must use the low-latency buffer path');
   assert.equal(mediaPlays.length,0,'Ready fast nav press must not also trigger delayed HTMLAudio');
   assert.equal(fastStarts[0].buffer?.decoded,true,'Fast path must use the decoded selected WAV');
-  assert.equal(fastGains[0]?.gain?.value,.55,'WebAudio navigation click must use the reduced 55 percent gain');
+  assert.equal(fastGains[0]?.gain?.value,.495,'WebAudio navigation click must use the 49.5 percent gain');
   assert(Math.abs(fastStarts[0].startTime-10.001)<.0001,'Fast path must start 1ms ahead');
   assert.equal(category,'ambient','Fast nav sound must remain ambient');
 
@@ -132,8 +132,8 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Suspended first tap must not be falsely consumed before AudioContext resume completes');
   assert.equal(mediaPlays.length,beforeFirstTapFallbackMedia+1,
     'Suspended first tap must use the preloaded media fallback on that same gesture');
-  assert.equal(mediaPlays.at(-1).volume,.55,
-    'HTMLAudio navigation fallback must use the same reduced 55 percent volume');
+  assert.equal(mediaPlays.at(-1).volume,.495,
+    'HTMLAudio navigation fallback must use the same 49.5 percent volume');
   vm.runInContext("flympusNavFastCtx.state='running'",context);
 
   for(let i=0;i<12;i++){
@@ -150,14 +150,14 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   const primer=mediaPlays.at(-1);
   assert(primer.src.includes('flympus-refresh-sync.wav'),'Refresh primer must use selected refresh WAV');
   assert.equal(primer.muted,true,'Refresh primer must be fully muted before a real pull reaches 44px');
-  assert.equal(primer.volume,1,'Muted primer must not rely on a tiny audible volume floor');
+  assert.equal(primer.volume,.495,'Muted refresh primer must carry the same playback level that will be exposed at the threshold');
 
   vm.runInContext('fireFlympusRefreshSound(globalThis.__g)',context);
   await Promise.resolve();
   const refresh=mediaPlays.at(-1);
   assert(refresh.src.includes('flympus-refresh-sync.wav'),'Refresh fire must keep selected refresh WAV');
   assert.equal(refresh.currentTime,0,'Refresh fire must restart from sample zero');
-  assert.equal(refresh.volume,1,'Refresh fire must restore full element volume');
+  assert.equal(refresh.volume,.495,'Refresh fire must match the bottom-nav playback level');
   assert.equal(refresh.muted,false,'Refresh fire must unmute only at the actual pull threshold');
 
   assert(html.includes('if(!pullRefreshSoundPlayed&&pullDy>=44)'),
