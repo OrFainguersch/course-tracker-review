@@ -150,6 +150,17 @@ vm.runInContext(source,context,{filename:'index.html#clean-audio'});
   assert(html.includes("bottomNav.classList.add('dockHaloMeasured','dockHaloReady')"),
     'Reload hydration must still restore halo before paint');
 
+  assert(html.includes("transition:transform .14s cubic-bezier(.20,.80,.20,1);"),
+    'Traveling halo should use the shortened 140ms transition');
+  assert(html.includes("transition:background .08s ease,color .08s ease,transform .07s ease!important;"),
+    'Bottom icon press/color feedback should remain fast');
+  assert(html.includes("render({fastNavigation:!!options.fastNavigation})"),
+    'Bottom-nav navigation should use the fast-navigation render path');
+  assert(html.includes("setTimeout(()=>{if(token!==window.__flympusBottomNavTaskToken)return;go(target,{}, {fastNavigation:true});"),
+    'Heavy page rendering must yield one task after audio.play() so media can start promptly');
+  assert(html.includes("item?.classList.toggle('active',active)")&&html.includes("syncBottomDockHalo(true)"),
+    'Pressed bottom-nav destination must update visually before the heavy render');
+
   console.log('Clean selected-WAV audio lifecycle tests passed');
 })().catch(err=>{
   console.error(err);
