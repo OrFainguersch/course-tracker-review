@@ -4,8 +4,9 @@
 
 The exact pre-native state is preserved at:
 
-- Branch: `backup/pre-native-capacitor-2026-10-02`
-- Commit: `fdcea343e2cc41a82ed95b53f803405744a78f3d`
+- Preferred branch: `backup/pre-native-capacitor-latest-2026-10-02`
+- Exact pre-native main commit: `1fef1241f815808bfedb4459d666701ae629b936`
+- Earlier audio-reference checkpoint retained as: `backup/pre-native-capacitor-2026-10-02` (`fdcea343e2cc41a82ed95b53f803405744a78f3d`)
 
 If the native-wrapper experiment is rejected, restore from that reference rather than reconstructing the previous web state manually.
 
