@@ -2686,33 +2686,38 @@ body::-webkit-scrollbar{
 
 <style>
 /* ===== Bottom dock · traveling active halo =====
-   The active capsule is owned by the persistent dock itself, not by an item,
-   so it physically glides between destinations like the reference apps. */
+   Match the exact geometry of the old active button capsule. The halo is
+   measured from the real button rect, so its top/bottom spacing stays optically
+   identical on iPhone, other mobile devices and desktop. */
 .mobileBottomNav{
-  --dock-halo-pad-x:7px;
-  --dock-halo-top:7px;
-  --dock-halo-height:62px;
-  --dock-halo-shift:200%;
+  --dock-halo-x:0px;
+  --dock-halo-y:0px;
+  --dock-halo-width:0px;
+  --dock-halo-height:0px;
   isolation:isolate!important;
 }
 .mobileBottomNav::before{
   content:"";
   position:absolute;
-  left:var(--dock-halo-pad-x);
-  top:var(--dock-halo-top);
-  width:calc((100% - (2 * var(--dock-halo-pad-x))) / 5);
+  left:0;
+  top:0;
+  width:var(--dock-halo-width);
   height:var(--dock-halo-height);
   border-radius:999px;
   background:rgba(255,255,255,.105);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
-  transform:translate3d(var(--dock-halo-shift),0,0);
+  transform:translate3d(var(--dock-halo-x),var(--dock-halo-y),0);
+  opacity:0;
   transition:none;
   will-change:transform;
   pointer-events:none;
   z-index:0;
 }
+.mobileBottomNav.dockHaloMeasured::before{
+  opacity:1;
+}
 .mobileBottomNav.dockHaloReady::before{
-  transition:transform .32s cubic-bezier(.20,.80,.20,1);
+  transition:transform .24s cubic-bezier(.20,.80,.20,1);
 }
 .mobileBottomItem{
   position:relative!important;
@@ -2721,20 +2726,6 @@ body::-webkit-scrollbar{
 .mobileBottomItem.active .mobileBottomIconButton{
   background:transparent!important;
   box-shadow:none!important;
-}
-@media(max-width:759px){
-  .mobileBottomNav{
-    --dock-halo-pad-x:7px;
-    --dock-halo-top:7px;
-    --dock-halo-height:62px;
-  }
-}
-@media(min-width:900px){
-  .mobileBottomNav{
-    --dock-halo-pad-x:12px;
-    --dock-halo-top:8px;
-    --dock-halo-height:56px;
-  }
 }
 @media(prefers-reduced-motion:reduce){
   .mobileBottomNav.dockHaloReady::before{transition:none!important}
@@ -3330,6 +3321,27 @@ function setDrawerOpen(open){
 }
 function renderNav(){const n=$('#nav');n.innerHTML=nav.map(([id,ic,l])=>id==='__label'?'<div class="navLabel">'+l+'</div>':`<button class="navBtn ${state.screen===id?'active':''}" data-nav="${id}">${navIconSvg(ic)}<span class="navText">${l}</span></button>`).join('');n.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{setDrawerOpen(false);go(b.dataset.nav)});}
 let bottomDockNavigationTransition=false,bottomDockProgrammaticRestoreUntil=0;
+function syncBottomDockHalo(animate=true){
+  const n=$('#mobileBottomNav'),activeButton=n?.querySelector?.('.mobileBottomItem.active .mobileBottomIconButton');
+  if(!n||!activeButton)return;
+
+  if(!animate)n.classList.remove('dockHaloReady');
+
+  const navRect=n.getBoundingClientRect?.(),buttonRect=activeButton.getBoundingClientRect?.();
+  if(!navRect||!buttonRect)return;
+
+  n.style.setProperty('--dock-halo-x',(buttonRect.left-navRect.left).toFixed(2)+'px');
+  n.style.setProperty('--dock-halo-y',(buttonRect.top-navRect.top).toFixed(2)+'px');
+  n.style.setProperty('--dock-halo-width',buttonRect.width.toFixed(2)+'px');
+  n.style.setProperty('--dock-halo-height',buttonRect.height.toFixed(2)+'px');
+  n.classList.add('dockHaloMeasured');
+
+  if(!n.classList.contains('dockHaloReady')){
+    const arm=()=>n.classList.add('dockHaloReady');
+    if(typeof requestAnimationFrame==='function')requestAnimationFrame(arm);
+    else setTimeout(arm,16);
+  }
+}
 function renderMobileBottomNav(){
   const n=$('#mobileBottomNav');if(!n)return;
   if(!bottomDockNavigationTransition)n.classList.remove('dockHidden');
@@ -3338,12 +3350,21 @@ function renderMobileBottomNav(){
   bottomDockVelocity=0;
   const active=state.screen==='home'?'home':(['roster','profile','instructor'].includes(state.screen)?'roster':state.screen==='planned'?'planned':['record','evaluation','safety','exams'].includes(state.screen)?'record':state.screen==='reports'?'reports':'');
   const items=[['roster','roster','Roster'],['planned','planned','Plan'],['home','home','Home'],['record','record','Record'],['reports','reports','Reports']];
-  const activeIndex=Math.max(0,items.findIndex(([id])=>id===active));
-  n.style.setProperty('--dock-halo-shift',(activeIndex*100)+'%');
-  if(!n.classList.contains('dockHaloReady')){
-    requestAnimationFrame?.(()=>n.classList.add('dockHaloReady'));
-  }
+  const hadHalo=n.classList.contains('dockHaloMeasured');
   n.innerHTML=items.map(([id,icon,label])=>{const attentionKey=id==='record'?'record':id==='planned'?'planned':'';const attention=attentionKey?(id==='record'?attentionBadgeHtml('record','mobileNavAttention mobileNavRecordAttention',true):attentionBadgeHtml(attentionKey,'mobileNavAttention')):'';return '<div class="mobileBottomItem '+(id==='home'?'homeCenter ':'')+(active===id?'active':'')+'"><button class="mobileBottomIconButton" type="button" data-mobile-nav="'+id+'" aria-label="'+label+'" '+(active===id?'aria-current="page"':'')+'><span class="mobileBottomIcon">'+bottomNavIconSvg(icon,active===id)+'</span>'+attention+'<span class="mobileBottomLabel" aria-hidden="true">'+label+'</span></button></div>'}).join('');
+  const sync=()=>syncBottomDockHalo(hadHalo);
+  if(typeof requestAnimationFrame==='function')requestAnimationFrame(sync);
+  else setTimeout(sync,0);
+}
+if(!window.__flympusDockHaloResizeBound){
+  window.__flympusDockHaloResizeBound=true;
+  let dockHaloResizeRaf=null;
+  window.addEventListener('resize',()=>{
+    if(dockHaloResizeRaf!=null)return;
+    const run=()=>{dockHaloResizeRaf=null;syncBottomDockHalo(false)};
+    if(typeof requestAnimationFrame==='function')dockHaloResizeRaf=requestAnimationFrame(run);
+    else setTimeout(run,16);
+  },{passive:true});
 }
 function bottomNavRootForScreen(screen){
   if(screen==='roster'||screen==='profile'||screen==='instructor')return'roster';
