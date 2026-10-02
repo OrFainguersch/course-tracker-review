@@ -157,8 +157,10 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   assert(html.includes('Only a bottom-nav press may touch its AudioContext'),
     'Code must document the strict audio boundary: bottom-nav only for nav audio');
 
-  assert(html.includes('REFERENCE BASELINE · 2026-10-02 · commit 64960d03'),
-    'Approved near-perfect bottom-nav state must remain pinned to concrete reference commit 64960d03');
+  assert(html.includes('REFERENCE BASELINE · 2026-10-02 · commit 0666b046'),
+    'Approved slot-centered halo state must remain pinned to concrete reference commit 0666b046');
+  assert(html.includes('Previous audio/post-refresh reference: commit 64960d03'),
+    'Earlier audio/post-refresh reference must remain documented');
   assert(html.includes('--dock-halo-y-nudge:-1px'),
     'Approved halo vertical centering must remain unchanged');
   assert(html.includes('class="mobileBottomHalo"')&&html.includes('function ensureBottomDockHalo()'),
@@ -195,10 +197,14 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Queued hydration tap must be consumed as soon as the real runtime becomes ready');
   assert(html.includes('function playFlympusDockPressZoom(el)')&&html.includes("playFlympusDockPressZoom(el);"),
     'Physical bottom-nav taps must trigger the Facebook-reference press zoom without delaying navigation');
-  assert(html.includes('36%{transform:scale(1.008)}')&&html.includes('34%{scale:1.075}'),
-    'Press punch must keep a restrained dock breath and a stronger clicked-icon emphasis');
-  assert(html.includes('scale:1.024!important')&&html.includes('34%{scale:1.010}'),
-    'Pressed item zoom must remain subtle and use independent scale so approved optical centering is never overwritten');
+  assert(html.includes('34%{transform:scale(1.018)}')&&html.includes('32%{scale:1.115}'),
+    'Normal press punch must be clearly visible while remaining below the repeat-active emphasis');
+  assert(html.includes('scale:1.036!important')&&html.includes('32%{scale:1.016}'),
+    'Normal pressed item zoom must remain geometry-safe and visibly stronger than the previous reference');
+  assert(html.includes('32%{transform:scale(1.024)}')&&html.includes('30%{scale:1.145}'),
+    'Already-active destination must receive the stronger Facebook-like repeat pulse');
+  assert(html.includes("const repeatActive=item.classList.contains('active')")&&html.includes("dock.classList.add('dockPressRepeat')"),
+    'Runtime must distinguish a repeat tap on the already-active bottom destination');
   assert(html.includes('VISUAL ONLY: do not change layout, hit targets, halo measurements'),
     'Press zoom must remain explicitly visual-only so approved halo geometry stays untouched');
   assert(html.includes('offset* values are layout geometry')&&html.includes('clientTop'),
