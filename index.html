@@ -3616,7 +3616,12 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     const transform='translate3d(0,'+pullVisualY.toFixed(2)+'px,0)';
     pullMotionNodes().forEach(el=>{
       el.style.setProperty('transition','none','important');
-      el.style.setProperty('transform',transform,'important');
+      /* Do NOT make transform !important. A CSS !important transform outranks
+         the Web Animations effect on iOS, so the element stays frozen at the
+         pulled position for the whole animation and then snaps to zero when
+         finish() runs. Keep the direct-drag transform as a normal inline style
+         so the compositor animation can take ownership on release. */
+      el.style.setProperty('transform',transform);
       el.style.setProperty('will-change','transform');
     });
     pullIndicatorVisual(pullVisualY,progress);
@@ -3691,7 +3696,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
       pullReleaseAnimations=[];
       pullVisualY=0;
       nodes.forEach(el=>{
-        el.style.setProperty('transform','translate3d(0,0,0)','important');
+        el.style.setProperty('transform','translate3d(0,0,0)');
         el.style.removeProperty('transition');
         el.style.removeProperty('will-change');
       });
