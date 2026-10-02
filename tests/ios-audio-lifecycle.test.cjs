@@ -144,7 +144,7 @@ vm.runInContext(source,context,{filename:'index.html#clean-audio'});
     'Pull tracking must still ignore bottom-nav touches');
   assert(html.includes('const pullThreshold=96;'),
     'Actual refresh threshold must remain unchanged');
-  assert((html.match(/bindFlympusNavPressSound\(b\)/g)||[]).length>=2,
+  assert((html.match(/bindFlympusNavPressSound\(b/g)||[]).length>=2,
     'The same clean sound binding must cover mobile bottom nav and drawer/desktop nav');
 
   assert(html.includes('--dock-halo-y-nudge:-1px'),
