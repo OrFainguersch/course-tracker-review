@@ -193,8 +193,10 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Queued hydration tap must be consumed as soon as the real runtime becomes ready');
   assert(html.includes('function playFlympusDockPressZoom(el)')&&html.includes("playFlympusDockPressZoom(el);"),
     'Physical bottom-nav taps must trigger the Facebook-reference press zoom without delaying navigation');
-  assert(html.includes('34%{transform:scale(1.022)}')&&html.includes('32%{transform:scale(1.115)}'),
+  assert(html.includes('34%{transform:scale(1.022)}')&&html.includes('32%{scale:1.115}'),
     'Press punch must keep the restrained dock zoom and stronger clicked-icon zoom from the reference');
+  assert(html.includes('scale:1.018!important')&&html.includes('32%{scale:1.028}'),
+    'Pressed item zoom must use independent scale so approved translateY optical centering is never overwritten');
   assert(html.includes('VISUAL ONLY: do not change layout, hit targets, halo measurements'),
     'Press zoom must remain explicitly visual-only so approved halo geometry stays untouched');
 
