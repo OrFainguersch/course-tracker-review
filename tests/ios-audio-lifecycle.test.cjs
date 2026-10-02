@@ -163,6 +163,8 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'iOS bottom-nav taps must use a real transparent WebKit switch target for direct native haptics');
   assert(html.includes("s.ontouchstart=e=>b.ontouchstart?.(e)"),
     'The iOS haptic overlay must forward touchstart to the existing immediate sound/navigation path');
+  assert(html.includes("closest?.('.mobileBottomIconButton,.mobileBottomHapticSwitch')"),
+    'Bottom-nav touchend protection must not cancel the native iOS haptic switch default action');
   assert(html.includes('triggerFlympusPortableHaptic(9)'),
     'Pull threshold must request haptic feedback where the Vibration API exists');
   assert(html.includes("render({fastNavigation:!!options.fastNavigation})"),
