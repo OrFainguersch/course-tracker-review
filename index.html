@@ -3581,6 +3581,18 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   let pullRefreshSoundPlayed=false,pullRefreshGraph=null,pullStandaloneGesture=false;
   let pullOffset=0,pullArmed=false,pullReturning=false,pullAnimations=[],pullFallbackRaf=null,pullFallbackTimer=null;
 
+  const pullThreshold=96;
+  const pullMaxVisual=112;
+
+  /* UIScrollView-like rubber-band response: close to the finger at first,
+     progressively more resistant the farther it is pulled. */
+  const rubberBandOffset=raw=>{
+    const x=Math.max(0,Number(raw)||0);
+    const dimension=Math.max(520,Number(window.innerHeight||760));
+    const c=.55;
+    return Math.min(pullMaxVisual,(x*dimension*c)/(dimension+c*x));
+  };
+
   const cancelPullReturn=()=>{
     clearTimeout(pullFallbackTimer);
     if(pullFallbackRaf!=null){try{cancelAnimationFrame(pullFallbackRaf)}catch{}}
@@ -3609,17 +3621,15 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   };
 
   const ensurePullChromeVisible=()=>{
-    /* Pulling from the top must always start from the normal, fully visible
-       page chrome. Do this directly, without starting another hide/show
-       animation that could compete with the pull transform. */
     $('.top')?.classList.remove('topHidden');
     $('#mobileBottomNav')?.classList.remove('dockHidden');
     document.body?.classList.remove('topChromeHidden');
   };
 
   const renderPull=(offset,rawDistance)=>{
-    pullOffset=Math.max(0,offset);
+    pullOffset=Math.max(0,Number(offset)||0);
     const transform='translate3d(0,'+pullOffset.toFixed(2)+'px,0)';
+
     pullNodes().forEach(el=>{
       el.style.setProperty('transition','none','important');
       el.style.setProperty('transform',transform);
@@ -3632,27 +3642,30 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
       bg.style.willChange='transform';
     }
 
-    const progress=Math.max(0,Math.min(1,rawDistance/92));
+    const progress=Math.max(0,Math.min(1,(Number(rawDistance)||0)/pullThreshold));
     const indicator=pullIndicator();
     if(indicator){
-      const opacity=Math.max(0,Math.min(1,(progress-.16)/.55));
+      const opacity=Math.max(0,Math.min(1,(progress-.12)/.58));
       const scale=.82+progress*.18;
       indicator.style.opacity=opacity.toFixed(3);
       indicator.style.transform='translate3d(-50%,'+(-72+pullOffset).toFixed(2)+'px,0) scale('+scale.toFixed(3)+')';
     }
   };
 
-  const finishPullReturn=(refresh)=>{
+  const finishPullReturn=refresh=>{
     pullOffset=0;
     pullAnimations=[];
     pullReturning=false;
+
     pullNodes().forEach(el=>{
       el.style.setProperty('transform','translate3d(0,0,0)');
       el.style.removeProperty('transition');
       el.style.removeProperty('will-change');
     });
+
     const bg=pullBackdrop();
     if(bg){bg.style.transform='translate3d(0,0,0)';bg.style.removeProperty('will-change')}
+
     const indicator=pullIndicator();
     if(indicator){
       indicator.style.opacity='0';
@@ -3663,79 +3676,113 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
       pullNodes().forEach(el=>el.style.removeProperty('transform'));
       bg?.style.removeProperty('transform');
       indicator?.classList.remove('refreshing');
-      if(refresh){
-        /* Snapshot only after the page is physically back at rest. This keeps
-           reload continuity without any special boot flag or stale pull state. */
-        try{if(typeof saveFlympusReloadSnapshot==='function')saveFlympusReloadSnapshot()}catch{}
-        location.reload();
-      }
+      if(refresh)location.reload();
     };
+
+    /* Present two fully-rested frames before navigation. This prevents the last
+       spring frame from being visually cut off by standalone WebKit. */
     if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>requestAnimationFrame(complete));
     else setTimeout(complete,34);
+  };
+
+  const springProfile=[
+    [0,1],
+    [32,.985],
+    [64,.945],
+    [96,.875],
+    [128,.775],
+    [160,.650],
+    [192,.515],
+    [224,.390],
+    [256,.285],
+    [288,.202],
+    [320,.140],
+    [352,.094],
+    [384,.060],
+    [416,.036],
+    [448,.019],
+    [480,.008],
+    [512,.002],
+    [540,0]
+  ];
+
+  const springRatioAt=elapsed=>{
+    const ms=Math.max(0,Math.min(540,elapsed));
+    for(let i=1;i<springProfile.length;i++){
+      const [bMs,bRatio]=springProfile[i];
+      const [aMs,aRatio]=springProfile[i-1];
+      if(ms<=bMs){
+        const u=Math.max(0,Math.min(1,(ms-aMs)/Math.max(1,bMs-aMs)));
+        return aRatio+(bRatio-aRatio)*u;
+      }
+    }
+    return 0;
   };
 
   const returnPull=refresh=>{
     if(pullReturning)return;
     pullReturning=true;
+
     const from=Math.max(0,pullOffset);
     const indicator=pullIndicator();
     if(refresh)indicator?.classList.add('refreshing');
 
     if(from<.5){finishPullReturn(refresh);return}
 
-    /* One uncomplicated native-like settle: decisive initial return, then a
-       long soft tail. All moving pieces use the same compositor animation. */
-    const duration=refresh?560:500;
-    const easing='cubic-bezier(.18,.82,.20,1)';
+    /* Facebook/Safari-like settle: almost no movement on the first frame,
+       acceleration into the return, then a long critically-damped tail. */
+    const duration=540;
     const fromTransform='translate3d(0,'+from.toFixed(2)+'px,0)';
+    const motionKeyframes=springProfile.map(([ms,ratio])=>({
+      offset:Math.min(1,ms/duration),
+      transform:'translate3d(0,'+(from*ratio).toFixed(2)+'px,0)'
+    }));
 
     const animated=[];
     for(const el of pullNodes()){
       el.style.removeProperty('transition');
       if(typeof el.animate==='function'){
-        animated.push(el.animate(
-          [{transform:fromTransform},{transform:'translate3d(0,0,0)'}],
-          {duration,easing,fill:'forwards'}
-        ));
+        animated.push(el.animate(motionKeyframes,{duration,easing:'linear',fill:'forwards'}));
       }
     }
 
     const bg=pullBackdrop();
     if(bg&&typeof bg.animate==='function'){
-      animated.push(bg.animate(
-        [{transform:fromTransform},{transform:'translate3d(0,0,0)'}],
-        {duration,easing,fill:'forwards'}
-      ));
+      animated.push(bg.animate(motionKeyframes,{duration,easing:'linear',fill:'forwards'}));
     }
 
     if(indicator&&typeof indicator.animate==='function'){
-      const currentOpacity=getComputedStyle(indicator).opacity||'1';
-      const currentTransform=getComputedStyle(indicator).transform;
-      animated.push(indicator.animate(
-        [
-          {offset:0,opacity:currentOpacity,transform:currentTransform},
-          {offset:.72,opacity:currentOpacity,transform:'translate3d(-50%,-66px,0) scale(.88)'},
-          {offset:1,opacity:'0',transform:'translate3d(-50%,-72px,0) scale(.82)'}
-        ],
-        {duration,easing:'linear',fill:'forwards'}
-      ));
+      const startOpacity=parseFloat(getComputedStyle(indicator).opacity||'1')||1;
+      const frames=springProfile.map(([ms,ratio])=>{
+        const tail=Math.max(0,Math.min(1,(ratio-.02)/.18));
+        const opacity=refresh
+          ? (ratio>.12?startOpacity:startOpacity*tail)
+          : startOpacity*Math.min(1,ratio/.45);
+        const scale=.82+.18*Math.min(1,ratio+.15);
+        return {
+          offset:Math.min(1,ms/duration),
+          opacity:String(Math.max(0,opacity)),
+          transform:'translate3d(-50%,'+(-72+from*ratio).toFixed(2)+'px,0) scale('+scale.toFixed(3)+')'
+        };
+      });
+      animated.push(indicator.animate(frames,{duration,easing:'linear',fill:'forwards'}));
     }
 
     if(animated.length){
       pullAnimations=animated;
-      animated[0].finished.then(()=>finishPullReturn(refresh)).catch(()=>finishPullReturn(refresh));
-      pullFallbackTimer=setTimeout(()=>finishPullReturn(refresh),duration+120);
+      let done=false;
+      const finish=()=>{if(done)return;done=true;finishPullReturn(refresh)};
+      animated[0].finished.then(finish).catch(finish);
+      pullFallbackTimer=setTimeout(finish,duration+100);
       return;
     }
 
-    /* Fallback for older engines: same curve, one rAF loop. */
     const started=performance.now?.()||Date.now();
     const frame=now=>{
-      const t=Math.max(0,Math.min(1,(now-started)/duration));
-      const eased=1-Math.pow(1-t,4);
-      const y=from*(1-eased);
-      renderPull(y,92*(1-eased));
-      if(t>=1){finishPullReturn(refresh);return}
+      const elapsed=now-started;
+      const ratio=springRatioAt(elapsed);
+      renderPull(from*ratio,pullThreshold*ratio);
+      if(elapsed>=duration){finishPullReturn(refresh);return}
       pullFallbackRaf=requestAnimationFrame(frame);
     };
     pullFallbackRaf=requestAnimationFrame(frame);
@@ -3755,15 +3802,17 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     if(pullReturning)return;
     resetPullTracking();
     if(e.target?.closest?.('#mobileBottomNav'))return;
+
     const top=Math.max(0,Number(document.scrollingElement?.scrollTop??window.scrollY??0));
     const standalone=flympusStandaloneMode();
     if((standalone&&top>120)||(!standalone&&top>12))return;
-    const t=e.touches?.[0];if(!t)return;
 
+    const t=e.touches?.[0];if(!t)return;
     pullStartY=t.clientY;pullStartX=t.clientX;
     pullOriginY=top<=2?t.clientY:null;
     pullTracking=true;
     pullStandaloneGesture=standalone;
+
     if(standalone)ensurePullChromeVisible();
     pullRefreshGraph=armFlympusRefreshSound();
   },{passive:true,capture:true});
@@ -3771,6 +3820,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   document.addEventListener('touchmove',e=>{
     if(!pullTracking)return;
     const t=e.touches?.[0];if(!t)return;
+
     const totalDy=t.clientY-pullStartY,dx=t.clientX-pullStartX;
     if(totalDy<=0||totalDy<=Math.abs(dx)*1.25)return;
 
@@ -3782,13 +3832,13 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
         pullOriginY=t.clientY;
         return;
       }
+
       pullDy=t.clientY-pullOriginY;
       if(pullDy<=0)return;
       if(e.cancelable)e.preventDefault();
 
-      const visual=Math.max(0,Math.min(116,132*(1-Math.exp(-pullDy/118))));
-      renderPull(visual,pullDy);
-      pullArmed=pullDy>=92;
+      renderPull(rubberBandOffset(pullDy),pullDy);
+      pullArmed=pullDy>=pullThreshold;
     }
 
     if(!pullRefreshSoundPlayed&&pullDy>=44){
@@ -3799,6 +3849,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
 
   document.addEventListener('touchend',()=>{
     if(!pullTracking)return;
+
     const standalone=pullStandaloneGesture;
     const refresh=standalone&&pullArmed;
     const graph=pullRefreshGraph;
