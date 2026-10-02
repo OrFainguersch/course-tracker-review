@@ -5,9 +5,9 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f4f8fc",
+  "background_color": "#0d3156",
   "theme_color": "#0b3157",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "icons": [
     {
       "src": "./assets/flympus-app-icon.webp",
