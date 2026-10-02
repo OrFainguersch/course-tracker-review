@@ -2448,7 +2448,7 @@ body.drawerPushOpen .backdrop{
 </style>
 
 <style>
-/* ===== iOS Safari top overscroll · prevent white flash ===== */
+/* ===== Touch-browser top overscroll · prevent first-paint flash ===== */
 html{
   background:#0d3156!important;
 }
@@ -2477,7 +2477,7 @@ body::before{
   transform:translateZ(0);
   backface-visibility:hidden;
 }
-@media(min-width:900px){
+@media(min-width:900px) and (hover:hover) and (pointer:fine){
   body::before{display:none}
 }
 </style>
@@ -2634,11 +2634,11 @@ body::-webkit-scrollbar{
   pointer-events:none!important;
 }
 
-/* On iPhone, never animate layout while the sticky header is moving. Changing
-   header margins/heights makes WebKit recalculate scrollY on every frame and
-   the scroll-direction detector can then reverse itself. Keep document
-   geometry stable and move the visible content on the compositor instead. */
-@media(max-width:899px){
+/* On touch/coarse-pointer devices, never animate layout while the sticky
+   header is moving. Mobile WebKit/Chromium can recalculate scrollY during
+   elastic or compositor scrolling and make the direction detector reverse.
+   Keep document geometry stable and move visible content on the compositor. */
+@media(max-width:899px), (hover:none) and (pointer:coarse){
   #content{
     transform:translate3d(0,0,0);
     transition:transform .58s cubic-bezier(.32,.72,0,1)!important;
@@ -2663,9 +2663,8 @@ body::-webkit-scrollbar{
   }
 }
 
-/* Desktop does not suffer the iOS sticky/rubber-band feedback and can safely
-   collapse the normal-flow slot. */
-@media(min-width:900px){
+/* Fine-pointer desktop browsers can safely collapse the normal-flow slot. */
+@media(min-width:900px) and (hover:hover) and (pointer:fine){
   .top.topHidden{
     margin-bottom:calc(0px - var(--flympus-top-chrome-height,78px))!important;
     transition:
@@ -2681,8 +2680,8 @@ body::-webkit-scrollbar{
 </style>
 
 <style>
-/* ===== iOS Home Screen standalone pull-to-refresh ===== */
-@media(max-width:899px){
+/* ===== Installed / standalone touch-app pull-to-refresh ===== */
+@media(max-width:899px), (hover:none) and (pointer:coarse){
   body.flympusStandalonePull::before,
   body.flympusStandaloneRelease::before{
     top:-170px!important;
@@ -2801,8 +2800,8 @@ html.flympusHydrating .mobileBottomNav{
 html.flympusHydrating #content{
   pointer-events:none!important;
 }
-/* Standalone Safari can paint the fixed dock before JS has filled its items.
-   Never show the empty capsule during that parser/load gap. */
+/* Installed/standalone browsers can paint the fixed dock before JS fills its
+   items. Never show the empty capsule during that parser/load gap. */
 .mobileBottomNav:empty{
   visibility:hidden!important;
 }
@@ -3123,7 +3122,7 @@ function bindDmyDateInputs(){
 }
 function safeArrayStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(v)?v:[]}catch{return []}}
 function safeObjectStorage(key){try{const v=JSON.parse(localStorage.getItem(key)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch{return {}}}
-function isStandaloneApp(){return !!(window.matchMedia?.('(display-mode: standalone)')?.matches||window.navigator?.standalone===true)}
+function isStandaloneApp(){return !!(window.matchMedia?.('(display-mode: standalone)')?.matches||window.matchMedia?.('(display-mode: fullscreen)')?.matches||window.matchMedia?.('(display-mode: minimal-ui)')?.matches||window.navigator?.standalone===true)}
 function flympusOwnedStorageKey(key){return String(key||'').startsWith('ct-review-')||String(key||'').startsWith('flympus-')}
 function flympusStorageKeys(){const out=[];try{for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&flympusOwnedStorageKey(key))out.push(key)}}catch{}return out.sort()}
 function flympusBackupPayload(){const data={};flympusStorageKeys().forEach(key=>{try{const value=localStorage.getItem(key);if(value!==null)data[key]=value}catch{}});return {format:'FLYMPUS_DEVICE_BACKUP',version:1,exportedAt:new Date().toISOString(),data}}
@@ -3593,6 +3592,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     window.navigator?.standalone===true||
     window.matchMedia?.('(display-mode: standalone)')?.matches||
     window.matchMedia?.('(display-mode: fullscreen)')?.matches||
+    window.matchMedia?.('(display-mode: minimal-ui)')?.matches||
     String(document.referrer||'').startsWith('ios-app://')
   );
   let pullStartY=0,pullStartX=0,pullOriginY=null,pullTracking=false,pullRefreshSoundPlayed=false,pullRefreshGraph=null,pullReloadArmed=false,pullReleaseTimer=null,pullStandaloneGesture=false;
@@ -6110,6 +6110,10 @@ function saveFlympusReloadSnapshot(){
 }
 window.addEventListener('pagehide',saveFlympusReloadSnapshot,{capture:true});
 window.addEventListener('beforeunload',saveFlympusReloadSnapshot,{capture:true});
+window.addEventListener('freeze',saveFlympusReloadSnapshot,{capture:true});
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden')saveFlympusReloadSnapshot();
+},{capture:true});
 
 render();
 
