@@ -3017,7 +3017,7 @@ html.flympusHydrating #content{
     try{
       const a=document.createElement('audio');
       a.src='./assets/flympus-nav-signature.wav?v=audio-clean-1';
-      a.preload='auto';a.playsInline=true;a.muted=false;a.volume=.495;
+      a.preload='auto';a.playsInline=true;a.muted=false;a.volume=.35;
       a.setAttribute('playsinline','');a.setAttribute('webkit-playsinline','');
       a.setAttribute('aria-hidden','true');a.tabIndex=-1;
       a.style.position='fixed';a.style.width='0';a.style.height='0';
@@ -3722,8 +3722,8 @@ const FLYMPUS_NAV_SOUND_SRC='data:audio/wav;base64,UklGRsQdAABXQVZFZm10IBAAAAABA
 const FLYMPUS_REFRESH_SOUND_SRC='./assets/flympus-refresh-sync.wav?v=audio-clean-1';
 const FLYMPUS_NAV_POOL_SIZE=2;
 const FLYMPUS_REFRESH_POOL_SIZE=2;
-const FLYMPUS_NAV_SOUND_VOLUME=.495;
-const FLYMPUS_REFRESH_SOUND_VOLUME=.495;
+const FLYMPUS_NAV_SOUND_VOLUME=.35;
+const FLYMPUS_REFRESH_SOUND_VOLUME=.30;
 
 let flympusNavAudioPool=null,flympusNavAudioIndex=0;
 let flympusRefreshAudioPool=null,flympusRefreshAudioIndex=0;
