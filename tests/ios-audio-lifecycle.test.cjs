@@ -165,8 +165,10 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Bottom dock must use one persistent traveling halo element');
   assert(html.includes('transition:transform .22s cubic-bezier(.22,.78,.20,1);'),
     'Persistent halo must visibly travel between destinations');
-  assert(html.includes('buttonRect.width.toFixed(2)')&&html.includes('buttonRect.height.toFixed(2)'),
-    'Traveling halo must keep the approved measured width and height');
+  assert(html.includes('function bottomDockLayoutBox(el,dock)')&&html.includes('width=buttonBox.width')&&html.includes('height=buttonBox.height'),
+    'Traveling halo must derive size from untransformed layout metrics');
+  assert(html.includes('x=itemBox.x+(itemBox.width-width)/2'),
+    'Traveling halo must be centered horizontally on the actual navigation slot');
   assert(html.includes('class="mobileBottomHapticSwitch"')&&html.includes('flympusDirectHapticOverlayHtml()'),
     'iOS bottom-nav taps must use a real transparent WebKit switch target for direct native haptics');
   assert(html.includes("s.ontouchstart=e=>b.ontouchstart?.(e)"),
@@ -193,12 +195,14 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Queued hydration tap must be consumed as soon as the real runtime becomes ready');
   assert(html.includes('function playFlympusDockPressZoom(el)')&&html.includes("playFlympusDockPressZoom(el);"),
     'Physical bottom-nav taps must trigger the Facebook-reference press zoom without delaying navigation');
-  assert(html.includes('34%{transform:scale(1.022)}')&&html.includes('32%{scale:1.115}'),
-    'Press punch must keep the restrained dock zoom and stronger clicked-icon zoom from the reference');
-  assert(html.includes('scale:1.018!important')&&html.includes('32%{scale:1.028}'),
-    'Pressed item zoom must use independent scale so approved translateY optical centering is never overwritten');
+  assert(html.includes('36%{transform:scale(1.008)}')&&html.includes('34%{scale:1.075}'),
+    'Press punch must keep a restrained dock breath and a stronger clicked-icon emphasis');
+  assert(html.includes('scale:1.024!important')&&html.includes('34%{scale:1.010}'),
+    'Pressed item zoom must remain subtle and use independent scale so approved optical centering is never overwritten');
   assert(html.includes('VISUAL ONLY: do not change layout, hit targets, halo measurements'),
     'Press zoom must remain explicitly visual-only so approved halo geometry stays untouched');
+  assert(html.includes('offset* values are layout geometry')&&html.includes('clientTop'),
+    'Halo geometry must remain immune to press transforms while preserving the approved vertical baseline');
 
   console.log('Low-latency nav audio, refresh audio, and traveling halo tests passed');
 })().catch(err=>{
