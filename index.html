@@ -2690,7 +2690,6 @@ body::-webkit-scrollbar{
 <style>
 /* ===== Bottom dock · traveling active halo =====
    REFERENCE BASELINE · 2026-10-02 · commit 0666b046
-   AUDIO REFERENCE BASELINE · 2026-10-02 · commit 31edf55f
    Previous audio/post-refresh reference: commit 64960d03.
    CROSS-PLATFORM BASELINE: halo geometry, press zoom, navigation timing and
    bottom-nav audio are browser-agnostic. iOS only adds its native switch
@@ -3013,16 +3012,6 @@ html.flympusHydrating #content{
      window so the first tap is never dead. The real navigation is replayed as
      soon as the runtime is ready; the approved halo geometry moves immediately. */
   let earlyNavAudio=null;
-  const warmEarlyNavAudio=a=>{
-    if(!a||a.__flympusWarmStarted)return;
-    a.__flympusWarmStarted=true;
-    try{
-      a.muted=true;a.currentTime=0;
-      const p=a.play?.();
-      const finish=()=>{try{a.pause?.()}catch{}try{a.currentTime=0}catch{}try{a.muted=false}catch{}};
-      if(p?.then)p.then(finish).catch(finish);else finish();
-    }catch{try{a.muted=false}catch{}}
-  };
   const ensureEarlyNavAudio=()=>{
     if(earlyNavAudio)return earlyNavAudio;
     try{
@@ -3034,9 +3023,7 @@ html.flympusHydrating #content{
       a.style.position='fixed';a.style.width='0';a.style.height='0';
       a.style.opacity='0';a.style.pointerEvents='none';
       document.body?.appendChild?.(a);try{a.load?.()}catch{}
-      earlyNavAudio=a;
-      warmEarlyNavAudio(a);
-      return a;
+      earlyNavAudio=a;return a;
     }catch{return null}
   };
   const handleEarlyBottomNavPress=e=>{
@@ -3088,7 +3075,6 @@ html.flympusHydrating #content{
     }
   };
   bottomNav?.addEventListener?.('touchstart',handleEarlyBottomNavPress,{passive:true,capture:true});
-  if(window.PointerEvent)bottomNav?.addEventListener?.('pointerdown',e=>{if(e?.pointerType!=='touch')handleEarlyBottomNavPress(e)},{passive:true,capture:true});
 
   if(snapMatches&&content){
     ensureEarlyNavAudio();
@@ -3868,25 +3854,9 @@ function makeFlympusFileAudio(src,volume=1){
   }catch{return null}
 }
 
-function warmFlympusNavFallback(a){
-  if(!a||a.__flympusWarmStarted)return;
-  a.__flympusWarmStarted=true;
-  try{
-    /* Muted autoplay is only a decoder warm-up. No navigation sound is emitted
-       here; the first real physical bottom-nav press still owns the audible
-       play(). This avoids the one-time HTMLMediaElement startup lag without
-       changing the approved 35% PCM level or the WebAudio path. */
-    a.muted=true;
-    a.currentTime=0;
-    const p=a.play?.();
-    const finish=()=>{try{a.pause?.()}catch{}try{a.currentTime=0}catch{}try{a.muted=false}catch{}};
-    if(p?.then)p.then(finish).catch(finish);else finish();
-  }catch{try{a.muted=false}catch{}}
-}
 function getFlympusNavAudioPool(){
   if(!flympusNavAudioPool){
     flympusNavAudioPool=Array.from({length:FLYMPUS_NAV_POOL_SIZE},()=>makeFlympusFileAudio(FLYMPUS_NAV_FALLBACK_SOUND_SRC,1)).filter(Boolean);
-    if(flympusNavAudioPool[0])warmFlympusNavFallback(flympusNavAudioPool[0]);
   }
   return flympusNavAudioPool;
 }

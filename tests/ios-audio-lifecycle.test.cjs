@@ -133,9 +133,7 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
 
   assert.equal(mediaCreated.length,4,
     'Only two HTMLAudio nav fallbacks and two refresh players should be preloaded');
-  assert.equal(mediaPlays.length,1,'Runtime may warm exactly one navigation fallback media element');
-  assert.equal(mediaPlays[0].muted,true,'Fallback warm-up must be fully muted');
-  mediaPlays.length=0;
+  assert.equal(mediaPlays.length,0,'Preload must not audibly play HTML media');
 
   vm.runInContext('unlockFlympusNavFastAudio()',context);
   await Promise.resolve();
@@ -201,18 +199,12 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
 
   assert(html.includes('REFERENCE BASELINE · 2026-10-02 · commit 0666b046'),
     'Approved slot-centered halo state must remain pinned to concrete reference commit 0666b046');
-  assert(html.includes('AUDIO REFERENCE BASELINE · 2026-10-02 · commit 31edf55f'),
-    'Approved 35 percent nav / 27 percent refresh audio must remain pinned to commit 31edf55f');
   assert(html.includes('Previous audio/post-refresh reference: commit 64960d03'),
     'Earlier audio/post-refresh reference must remain documented');
   assert(html.includes('CROSS-PLATFORM BASELINE: halo geometry, press zoom, navigation timing and'),
     'Reference behavior must explicitly remain cross-platform rather than iPhone-only');
   assert(html.includes("el.ontouchstart=press")&&html.includes("el.onpointerdown=e=>{if(e?.pointerType!=='touch')press(e)}"),
     'Bottom-nav press behavior must support touch devices and non-touch pointer browsers');
-  assert(html.includes('function warmFlympusNavFallback(a)')&&html.includes('a.muted=true'),
-    'First-tap media fallback must be decoder-warmed silently without changing its PCM level');
-  assert(html.includes("bottomNav?.addEventListener?.('pointerdown'")&&html.includes("handleEarlyBottomNavPress(e)"),
-    'Post-refresh hydration bridge must also cover non-touch pointer devices');
   assert(html.includes('--dock-halo-y-nudge:-1px'),
     'Approved halo vertical centering must remain unchanged');
   assert(html.includes('class="mobileBottomHalo"')&&html.includes('function ensureBottomDockHalo()'),
