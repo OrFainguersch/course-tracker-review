@@ -157,8 +157,8 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   assert(html.includes('Only a bottom-nav press may touch its AudioContext'),
     'Code must document the strict audio boundary: bottom-nav only for nav audio');
 
-  assert(html.includes('REFERENCE BASELINE · 2026-10-02'),
-    'Approved near-perfect bottom-nav state must remain explicitly marked as a code reference baseline');
+  assert(html.includes('REFERENCE BASELINE · 2026-10-02 · commit 64960d03'),
+    'Approved near-perfect bottom-nav state must remain pinned to concrete reference commit 64960d03');
   assert(html.includes('--dock-halo-y-nudge:-1px'),
     'Approved halo vertical centering must remain unchanged');
   assert(html.includes('class="mobileBottomHalo"')&&html.includes('function ensureBottomDockHalo()'),
@@ -191,6 +191,12 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Reload hydration must capture the first physical bottom-nav press instead of dropping it');
   assert(html.includes("['roster','planned','home','record','reports'].includes(earlyNavTarget)"),
     'Queued hydration tap must be consumed as soon as the real runtime becomes ready');
+  assert(html.includes('function playFlympusDockPressZoom(el)')&&html.includes("playFlympusDockPressZoom(el);"),
+    'Physical bottom-nav taps must trigger the Facebook-reference press zoom without delaying navigation');
+  assert(html.includes('34%{transform:scale(1.022)}')&&html.includes('32%{transform:scale(1.115)}'),
+    'Press punch must keep the restrained dock zoom and stronger clicked-icon zoom from the reference');
+  assert(html.includes('VISUAL ONLY: do not change layout, hit targets, halo measurements'),
+    'Press zoom must remain explicitly visual-only so approved halo geometry stays untouched');
 
   console.log('Low-latency nav audio, refresh audio, and traveling halo tests passed');
 })().catch(err=>{
