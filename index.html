@@ -1037,7 +1037,7 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 .myCourseRoleInline.manager svg{color:var(--brand-gold)}
 </style>
 <style>
-/* ===== Record hub + trainee action dock + course safety history · 0704 ===== */
+/* ===== Forms hub + trainee action dock + course safety history · 0704 ===== */
 .attentionBadge[hidden]{display:none!important}
 :root{
   --record-eval:#0b8f95;
@@ -1286,7 +1286,7 @@ form input,form select,form textarea{max-width:100%;min-width:0}
   .rosterStatLabel{font-size:9.5px!important}.rosterStatValue{font-size:17px!important}
   .profileHero{padding:18px!important}.profileIdentity h2{font-size:22px!important}
 
-  /* Record / forms / history */
+  /* Forms / child workflows / history */
   .recordChildHead{margin-bottom:14px!important}
   .recordSingleForm{max-width:1080px!important}
   .formCard,.safetyHistoryCard,.settingBox,.sideCard{padding:18px!important}
@@ -1749,7 +1749,7 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 }
 .mobileBottomItem.active .mobileNavAttention{border-color:#0b3157!important}
 
-/* Record hub: keep the same compact badge language as mobile on desktop. */
+/* Forms hub: keep the same compact badge language as mobile on desktop. */
 @media(min-width:900px){
   .recordHubGrid{gap:14px!important}
   .recordHubCard{
@@ -1869,7 +1869,7 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 </style>
 
 <style>
-/* ===== Bottom navigation · Record uses dot-only attention indicator ===== */
+/* ===== Bottom navigation · Forms uses dot-only attention indicator ===== */
 .mobileNavRecordAttention[data-attention-dot="true"]{
   min-width:10px!important;
   width:10px!important;
@@ -3652,7 +3652,7 @@ function renderMobileBottomNav(){
   bottomDockLastScrollTime=performance.now?.()||Date.now();
   bottomDockVelocity=0;
   const active=state.screen==='home'?'home':(['roster','profile','instructor'].includes(state.screen)?'roster':state.screen==='planned'?'planned':['record','evaluation','safety','exams'].includes(state.screen)?'record':state.screen==='reports'?'reports':'');
-  const items=[['roster','roster','Roster'],['planned','planned','Plan'],['home','home','Home'],['record','record','Record'],['reports','reports','Reports']];
+  const items=[['roster','roster','Roster'],['planned','planned','Plan'],['home','home','Home'],['record','record','Forms'],['reports','reports','Reports']];
   const hadHalo=n.classList.contains('dockHaloMeasured');
   n.innerHTML='<span class="mobileBottomHalo" aria-hidden="true"></span>'+items.map(([id,icon,label])=>{const attentionKey=id==='record'?'record':id==='planned'?'planned':'';const attention=attentionKey?(id==='record'?attentionBadgeHtml('record','mobileNavAttention mobileNavRecordAttention',true):attentionBadgeHtml(attentionKey,'mobileNavAttention')):'';return '<div class="mobileBottomItem '+(id==='home'?'homeCenter ':'')+(active===id?'active':'')+'"><button class="mobileBottomIconButton" type="button" data-mobile-nav="'+id+'" aria-label="'+label+'" '+(active===id?'aria-current="page"':'')+'><span class="mobileBottomIcon">'+bottomNavIconSvg(icon,active===id)+'</span>'+attention+'<span class="mobileBottomLabel" aria-hidden="true">'+label+'</span></button>'+flympusDirectHapticOverlayHtml()+'</div>'}).join('');
   const sync=()=>syncBottomDockHalo(hadHalo);
@@ -4867,7 +4867,7 @@ function traineeRecordDock(traineeId){
   ['safety','safety','Safety','safety'],
   ['exams','exams','Exam','exam']
  ];
- return '<div class="profileRecordDockWrap"><nav class="profileRecordDock" aria-label="Trainee record actions">'+items.map(x=>'<button type="button" class="profileRecordAction '+x[3]+'" '+(x[0]==='evaluation'?'data-start-eval="'+esc(traineeId)+'"':'data-go="'+x[0]+'"')+'><span class="profileRecordIcon">'+navIconSvg(x[1])+'</span><span>'+x[2]+'</span><span class="attentionBadge profileActionAttention" data-trainee-attention="'+x[0]+'" data-trainee-id="'+esc(traineeId)+'" '+(traineeDraftNeedsAttention(x[0],traineeId)?'':'hidden')+'>'+formatAttentionCount(traineeDraftAttentionCount(x[0],traineeId))+'</span></button>').join('')+'</nav></div>';
+ return '<div class="profileRecordDockWrap"><nav class="profileRecordDock" aria-label="Trainee forms">'+items.map(x=>'<button type="button" class="profileRecordAction '+x[3]+'" '+(x[0]==='evaluation'?'data-start-eval="'+esc(traineeId)+'"':'data-go="'+x[0]+'"')+'><span class="profileRecordIcon">'+navIconSvg(x[1])+'</span><span>'+x[2]+'</span><span class="attentionBadge profileActionAttention" data-trainee-attention="'+x[0]+'" data-trainee-id="'+esc(traineeId)+'" '+(traineeDraftNeedsAttention(x[0],traineeId)?'':'hidden')+'>'+formatAttentionCount(traineeDraftAttentionCount(x[0],traineeId))+'</span></button>').join('')+'</nav></div>';
 }
 
 function traineeProfile(){
@@ -6093,7 +6093,7 @@ function recordHub(){
   ['exams','exams','Exams','exam','Record theoretical exam results against the required passing grade.']
  ];
  const attentionSummary=attention.record?'<div class="recordAttentionSummary" data-record-attention-summary>'+attentionBadgeHtml('record','recordSummaryBadge')+'<span data-record-attention-copy>'+(attention.record===1?'1 item needs attention':attention.record+' items need attention')+'</span></div>':'';
- return '<div class="recordHubHead"><div><div class="eyebrow">COURSE RECORDING</div><h1 class="pageTitle">Record</h1><p class="sub">Choose what you want to record for '+esc(currentCourseMeta.courseName||'this course')+'.</p></div>'+attentionSummary+'</div>'+
+ return '<div class="recordHubHead"><div><div class="eyebrow">COURSE FORMS</div><h1 class="pageTitle">Forms</h1><p class="sub">Choose the form you want to complete for '+esc(currentCourseMeta.courseName||'this course')+'.</p></div>'+attentionSummary+'</div>'+
  '<div class="recordHubGrid">'+cards.map(x=>'<button class="recordHubCard '+x[3]+'" type="button" data-go="'+x[0]+'"><span class="recordHubIcon">'+navIconSvg(x[1])+'</span><span class="recordHubCopy"><span class="recordHubTitleRow"><b>'+x[2]+'</b>'+attentionBadgeHtml(x[0],'recordCardAttention')+'</span><small>'+x[4]+'</small></span><span class="recordHubArrow">›</span></button>').join('')+'</div>';
 }
 function safetyScreen(){
