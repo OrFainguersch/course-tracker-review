@@ -71,7 +71,7 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'UI sounds must finish in ambient mode so the silent switch remains authoritative');
   assert(!source.includes("type='playback'"),
     'The fix must not use a playback↔ambient category bounce');
-  assert(source.includes('document.createElement(\\'audio\\')'),
+  assert(source.includes("document.createElement('audio')"),
     'UI audio must use the native HTMLMediaElement route rather than WebAudio');
   assert(!source.includes('AudioContext')&&!source.includes('webkitAudioContext'),
     'The reload fix must no longer depend on AudioContext state');
