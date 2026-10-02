@@ -3683,10 +3683,12 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     document.body?.classList.remove('flympusStandaloneRelease');
 
     const from=Math.max(0,Number(pullVisualY||0));
-    /* Native Safari / Facebook-style return: a longer elastic settle with a
-       quick initial recovery and a deliberately soft final approach. The old
-       220–300 ms return felt like a snap on 120 Hz iPhones. */
-    const duration=Math.max(360,Math.min(470,335+from*1.05));
+    /* Reference-matched return from the user's recordings:
+       Facebook settles in roughly 0.6–0.7 s; Safari keeps a softer tail closer
+       to 0.8–0.9 s. Use a 0.76 s full-refresh return with the same gentle first
+       frames and long decay, instead of a single cubic curve that jumps too
+       quickly immediately after finger release. */
+    const duration=refreshing?760:Math.max(560,Math.min(700,520+from*1.45));
     const nodes=pullMotionNodes();
     let finished=false;
 
@@ -3725,14 +3727,49 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     if(from<.5){finish();return}
 
     const fromTransform='translate3d(0,'+from.toFixed(2)+'px,0)';
-    const easing='cubic-bezier(.16,.86,.20,1)';
+    /* Residual Y ratios sampled/averaged from the Facebook + Safari references.
+       The important part is the first 100 ms: native UIs barely move on the
+       first frame, then accelerate into the return, and only afterward decay
+       into a long soft tail. */
+    const returnProfile=[
+      [0,1],
+      [33,.92],
+      [67,.78],
+      [100,.64],
+      [133,.52],
+      [167,.42],
+      [200,.34],
+      [233,.28],
+      [267,.23],
+      [300,.19],
+      [333,.16],
+      [367,.13],
+      [400,.10],
+      [433,.075],
+      [467,.055],
+      [500,.040],
+      [550,.025],
+      [600,.015],
+      [650,.008],
+      [700,.003],
+      [760,0]
+    ];
+    const motionKeyframes=returnProfile
+      .filter(([ms])=>ms<=duration)
+      .map(([ms,ratio])=>({
+        offset:Math.min(1,ms/duration),
+        transform:'translate3d(0,'+(from*ratio).toFixed(2)+'px,0)'
+      }));
+    if(motionKeyframes[motionKeyframes.length-1]?.offset<1){
+      motionKeyframes.push({offset:1,transform:'translate3d(0,0,0)'});
+    }
 
     if(nodes.length&&nodes.every(el=>typeof el.animate==='function')){
       nodes.forEach(el=>{
         el.style.removeProperty('transition');
         const a=el.animate(
-          [{transform:fromTransform},{transform:'translate3d(0,0,0)'}],
-          {duration,easing,fill:'forwards'}
+          motionKeyframes,
+          {duration,easing:'linear',fill:'forwards'}
         );
         pullReleaseAnimations.push(a);
       });
@@ -3740,8 +3777,12 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
         const currentOpacity=getComputedStyle(indicator).opacity||'1';
         const currentTransform=getComputedStyle(indicator).transform;
         const a=indicator.animate(
-          [{opacity:currentOpacity,transform:currentTransform},{opacity:refreshing?currentOpacity:'0',transform:'translate3d(-50%,-72px,0) scale(.82)'}],
-          {duration,easing,fill:'forwards'}
+          [
+            {offset:0,opacity:currentOpacity,transform:currentTransform},
+            {offset:.72,opacity:currentOpacity,transform:'translate3d(-50%,-69px,0) scale(.86)'},
+            {offset:1,opacity:'0',transform:'translate3d(-50%,-72px,0) scale(.82)'}
+          ],
+          {duration,easing:'linear',fill:'forwards'}
         );
         pullReleaseAnimations.push(a);
       }
@@ -3754,12 +3795,23 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     }
 
     const started=performance.now?.()||Date.now();
+    const ratioAt=elapsed=>{
+      const ms=Math.max(0,Math.min(duration,elapsed));
+      for(let i=1;i<returnProfile.length;i++){
+        const [bMs,bRatio]=returnProfile[i];
+        const [aMs,aRatio]=returnProfile[i-1];
+        if(ms<=bMs){
+          const span=Math.max(1,bMs-aMs),u=(ms-aMs)/span;
+          return aRatio+(bRatio-aRatio)*Math.max(0,Math.min(1,u));
+        }
+      }
+      return 0;
+    };
     const frame=now=>{
-      const t=Math.max(0,Math.min(1,(now-started)/duration));
-      const eased=1-Math.pow(1-t,4);
-      const y=from*(1-eased);
-      applyStandalonePullY(y,{progress:Math.max(0,1-eased)});
-      if(t>=1){finish();return}
+      const elapsed=now-started;
+      const ratio=ratioAt(elapsed);
+      applyStandalonePullY(from*ratio,{progress:ratio});
+      if(elapsed>=duration){finish();return}
       pullReleaseRaf=requestAnimationFrame(frame);
     };
     pullReleaseRaf=requestAnimationFrame(frame);
