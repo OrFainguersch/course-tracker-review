@@ -2685,105 +2685,73 @@ body::-webkit-scrollbar{
 </style>
 
 <style>
-/* ===== Installed / standalone touch-app pull-to-refresh ===== */
-@media(max-width:899px), (hover:none) and (pointer:coarse){
-  /* The overscroll fill belongs to the moving header itself. Because this
-     pseudo-element travels with .top, its lower edge always meets the header
-     exactly while pulling AND while springing back. This avoids both the old
-     horizontal navy band and the one-frame gap/jolt during release. */
-  body.flympusStandalonePull .top::before,
-  body.flympusStandaloneRelease .top::before{
-    content:"";
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:calc(100% - 1px);
-    height:280px;
-    background:#0d3156;
-    pointer-events:none;
-  }
-
-  body.flympusStandalonePull .top,
-  body.flympusStandalonePull main,
-  body.flympusStandaloneRelease .top,
-  body.flympusStandaloneRelease main{
-    will-change:transform;
-  }
-
-  /* Safari-style pull spinner: no button/circle background, just the subtle
-     12-segment activity indicator floating in the navy overscroll area.
-     JS writes transform/opacity directly to this element so the return can stay
-     entirely on compositor-friendly properties without root CSS variables. */
-  .flympusStandaloneRefreshIndicator{
-    position:fixed;
-    left:50%;
-    top:calc(env(safe-area-inset-top) + 44px);
-    z-index:44;
-    width:30px;
-    height:30px;
-    opacity:0;
-    transform:translate3d(-50%,-72px,0) scale(.82);
-    pointer-events:none;
-    will-change:transform,opacity;
-  }
-
-  .flympusStandaloneRefreshIndicator span,
-  .flympusStandaloneRefreshIndicator span::before{
-    position:absolute;
-    inset:0;
-    display:block;
-    content:"";
-    border-radius:50%;
-  }
-
-  .flympusStandaloneRefreshIndicator span{
-    background:
-      conic-gradient(
-        from 0deg,
-        rgba(153,177,202,.28) 0deg 18deg,
-        transparent 18deg 30deg,
-        rgba(153,177,202,.36) 30deg 48deg,
-        transparent 48deg 60deg,
-        rgba(153,177,202,.44) 60deg 78deg,
-        transparent 78deg 90deg,
-        rgba(153,177,202,.52) 90deg 108deg,
-        transparent 108deg 120deg,
-        rgba(153,177,202,.60) 120deg 138deg,
-        transparent 138deg 150deg,
-        rgba(153,177,202,.68) 150deg 168deg,
-        transparent 168deg 180deg,
-        rgba(153,177,202,.76) 180deg 198deg,
-        transparent 198deg 210deg,
-        rgba(153,177,202,.84) 210deg 228deg,
-        transparent 228deg 240deg,
-        rgba(153,177,202,.92) 240deg 258deg,
-        transparent 258deg 270deg,
-        rgba(153,177,202,1) 270deg 288deg,
-        transparent 288deg 300deg,
-        rgba(153,177,202,.68) 300deg 318deg,
-        transparent 318deg 330deg,
-        rgba(153,177,202,.44) 330deg 348deg,
-        transparent 348deg 360deg
-      );
-    -webkit-mask:radial-gradient(circle,transparent 0 35%,#000 38% 57%,transparent 60%);
-    mask:radial-gradient(circle,transparent 0 35%,#000 38% 57%,transparent 60%);
-  }
-
-  .flympusStandaloneRefreshIndicator span::before{
-    background:radial-gradient(circle,rgba(255,255,255,.04),transparent 62%);
-  }
-
-  .flympusStandaloneRefreshIndicator.armed{
-    opacity:1!important;
-  }
-
-  .flympusStandaloneRefreshIndicator.refreshing span{
-    animation:flympusStandaloneRefreshSpin .78s linear infinite;
-  }
-
-  @keyframes flympusStandaloneRefreshSpin{
-    to{transform:rotate(360deg)}
-  }
+/* ===== Pull-to-refresh · clean standalone implementation =====
+   Normal Safari keeps its native pull visual; installed/standalone apps use
+   this small compositor-only layer. No header pseudo-elements, no layout
+   changes, no root CSS variables and no release-state classes. */
+.flympusPullBackdrop{
+  position:fixed;
+  left:0;
+  right:0;
+  top:-240px;
+  height:240px;
+  z-index:29;
+  background:#0d3156;
+  pointer-events:none;
+  transform:translate3d(0,0,0);
+  will-change:transform;
+}
+.flympusStandaloneRefreshIndicator{
+  position:fixed;
+  left:50%;
+  top:calc(env(safe-area-inset-top) + 44px);
+  z-index:44;
+  width:30px;
+  height:30px;
+  opacity:0;
+  transform:translate3d(-50%,-72px,0) scale(.82);
+  pointer-events:none;
+  will-change:transform,opacity;
+}
+.flympusStandaloneRefreshIndicator span,
+.flympusStandaloneRefreshIndicator span::before{
+  position:absolute;
+  inset:0;
+  display:block;
+  content:"";
+  border-radius:50%;
+}
+.flympusStandaloneRefreshIndicator span{
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(153,177,202,.28) 0deg 18deg,transparent 18deg 30deg,
+      rgba(153,177,202,.36) 30deg 48deg,transparent 48deg 60deg,
+      rgba(153,177,202,.44) 60deg 78deg,transparent 78deg 90deg,
+      rgba(153,177,202,.52) 90deg 108deg,transparent 108deg 120deg,
+      rgba(153,177,202,.60) 120deg 138deg,transparent 138deg 150deg,
+      rgba(153,177,202,.68) 150deg 168deg,transparent 168deg 180deg,
+      rgba(153,177,202,.76) 180deg 198deg,transparent 198deg 210deg,
+      rgba(153,177,202,.84) 210deg 228deg,transparent 228deg 240deg,
+      rgba(153,177,202,.92) 240deg 258deg,transparent 258deg 270deg,
+      rgba(153,177,202,1) 270deg 288deg,transparent 288deg 300deg,
+      rgba(153,177,202,.68) 300deg 318deg,transparent 318deg 330deg,
+      rgba(153,177,202,.44) 330deg 348deg,transparent 348deg 360deg
+    );
+  -webkit-mask:radial-gradient(circle,transparent 0 35%,#000 38% 57%,transparent 60%);
+  mask:radial-gradient(circle,transparent 0 35%,#000 38% 57%,transparent 60%);
+}
+.flympusStandaloneRefreshIndicator span::before{
+  background:radial-gradient(circle,rgba(255,255,255,.04),transparent 62%);
+}
+.flympusStandaloneRefreshIndicator.refreshing span{
+  animation:flympusStandaloneRefreshSpin .78s linear infinite;
+}
+@keyframes flympusStandaloneRefreshSpin{
+  to{transform:rotate(360deg)}
+}
+@media(prefers-reduced-motion:reduce){
+  .flympusStandaloneRefreshIndicator span{animation:none!important}
 }
 </style>
 <style>
@@ -2816,7 +2784,7 @@ html.flympusHydrating #content{
 </style>
 </head>
 <body>
-<div class="app"><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p><div class="deviceDataBox"><div class="deviceDataHead"><b>Device data</b><span class="deviceDataMode" id="deviceDataMode">Local</span></div><p id="deviceDataCopy">Courses, photos, evaluations and settings are stored locally on this device.</p><div class="deviceDataActions"><button class="btn secondary small" type="button" id="exportFlympusBackup">Export backup</button><label class="btn secondary small" for="flympusBackupInput" style="cursor:pointer">Import backup</label></div><p class="deviceDataHint" id="deviceDataHint">Use a backup to move the complete FLYMPUS setup between Safari and the Home Screen app.</p></div></div></div></div></header><input id="flympusBackupInput" type="file" accept=".json,application/json" hidden><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0719 · record form cleanup</div><div class="toast" id="toast"></div></div>
+<div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p><div class="deviceDataBox"><div class="deviceDataHead"><b>Device data</b><span class="deviceDataMode" id="deviceDataMode">Local</span></div><p id="deviceDataCopy">Courses, photos, evaluations and settings are stored locally on this device.</p><div class="deviceDataActions"><button class="btn secondary small" type="button" id="exportFlympusBackup">Export backup</button><label class="btn secondary small" for="flympusBackupInput" style="cursor:pointer">Import backup</label></div><p class="deviceDataHint" id="deviceDataHint">Use a backup to move the complete FLYMPUS setup between Safari and the Home Screen app.</p></div></div></div></div></header><input id="flympusBackupInput" type="file" accept=".json,application/json" hidden><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0719 · record form cleanup</div><div class="toast" id="toast"></div></div>
 <script>
 (()=>{try{
   /* Reload continuity: Safari may paint the document while parser-blocking
@@ -2829,12 +2797,6 @@ html.flympusHydrating #content{
   let snap=null,ui={};
   try{snap=JSON.parse(sessionStorage.getItem('ct-review-reload-snapshot')||'null')}catch{}
   try{ui=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
-  let pullRefreshBoot=false;
-  try{
-    pullRefreshBoot=sessionStorage.getItem('ct-review-pull-refresh')==='1';
-    if(pullRefreshBoot)sessionStorage.removeItem('ct-review-pull-refresh');
-  }catch{}
-  window.__FLYMPUS_PULL_REFRESH_BOOT__=pullRefreshBoot;
   const active=JSON.parse(localStorage.getItem('ct-review-active-course')||'{}')||{};
   const activeCourse=String(active.courseCode||'AEP-26');
   const snapMatches=!!(snap&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse);
@@ -2845,19 +2807,12 @@ html.flympusHydrating #content{
     content.innerHTML=snap.html;
     if(bottomNav&&typeof snap.navHtml==='string')bottomNav.innerHTML=snap.navHtml;
     window.__FLYMPUS_RELOAD_SNAPSHOT__=snap;
-    /* A pull-to-refresh always completes at the top with chrome visible. Do
-       not replay a stale auto-hide state captured milliseconds before reload;
-       that is what made the navy header jump upward after refresh. */
-    if(snap.topHidden&&!pullRefreshBoot){
+    if(snap.topHidden){
       document.body.classList.add('topChromeHidden');
       document.querySelector('.top')?.classList.add('topHidden');
       bottomNav?.classList.add('dockHidden');
-    }else{
-      document.body.classList.remove('topChromeHidden');
-      document.querySelector('.top')?.classList.remove('topHidden');
-      bottomNav?.classList.remove('dockHidden');
     }
-    const y=pullRefreshBoot?0:Math.max(0,Number(snap.scrollY||0));
+    const y=Math.max(0,Number(snap.scrollY||0));
     try{window.scrollTo(0,y)}catch{}
     requestAnimationFrame?.(()=>{try{window.scrollTo(0,y)}catch{}});
   }else if(content){
@@ -3608,6 +3563,7 @@ resetFlympusAudioSession();
 
 if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   window.__flympusPullRefreshSoundBound=true;
+
   const flympusStandaloneMode=()=>!!(
     (typeof isStandaloneApp==='function'&&isStandaloneApp())||
     window.navigator?.standalone===true||
@@ -3616,260 +3572,199 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     window.matchMedia?.('(display-mode: minimal-ui)')?.matches||
     String(document.referrer||'').startsWith('ios-app://')
   );
-  let pullStartY=0,pullStartX=0,pullOriginY=null,pullTracking=false,pullRefreshSoundPlayed=false,pullRefreshGraph=null,pullReloadArmed=false,pullReleaseTimer=null,pullReleaseRaf=null,pullVisualY=0,pullStandaloneGesture=false,pullReleaseAnimations=[];
-  if(!flympusStandaloneMode()){
-    document.body?.classList.remove('flympusStandalonePull','flympusStandaloneRelease');
-  }
 
-  const pullMotionNodes=()=>[$('.top'),$('#content')].filter(Boolean);
-  const pullIndicatorVisual=(visual,progress)=>{
-    const indicator=$('#flympusStandaloneRefreshIndicator');if(!indicator)return;
-    const opacity=Math.max(0,Math.min(1,(progress-.18)/.58));
-    const scale=.82+Math.max(0,Math.min(1,progress))*.18;
-    indicator.style.opacity=opacity.toFixed(3);
-    indicator.style.transform='translate3d(-50%,'+(-72+visual).toFixed(2)+'px,0) scale('+scale.toFixed(3)+')';
-  };
-  const applyStandalonePullY=(visual,{progress=visual/88}={})=>{
-    pullVisualY=Math.max(0,Number(visual)||0);
-    const transform='translate3d(0,'+pullVisualY.toFixed(2)+'px,0)';
-    pullMotionNodes().forEach(el=>{
-      el.style.setProperty('transition','none','important');
-      /* Do NOT make transform !important. A CSS !important transform outranks
-         the Web Animations effect on iOS, so the element stays frozen at the
-         pulled position for the whole animation and then snaps to zero when
-         finish() runs. Keep the direct-drag transform as a normal inline style
-         so the compositor animation can take ownership on release. */
-      el.style.setProperty('transform',transform);
-      el.style.setProperty('will-change','transform');
-    });
-    pullIndicatorVisual(pullVisualY,progress);
-  };
-  const setStandalonePullVisual=dy=>{
-    if(!pullStandaloneGesture)return;
-    /* Pull-to-refresh is a top-of-page interaction. Force the synchronized page
-       chrome visible before taking over transforms so an auto-hidden .top
-       cannot remain translated above the viewport underneath the pull layer. */
-    try{
-      if(typeof setBottomDockHidden==='function')setBottomDockHidden(false);
-      else{
-        $('.top')?.classList.remove('topHidden');
-        $('#mobileBottomNav')?.classList.remove('dockHidden');
-        document.body?.classList.remove('topChromeHidden');
-      }
-    }catch{}
-    const visual=Math.max(0,Math.min(112,128*(1-Math.exp(-Math.max(0,dy)/112))));
-    const progress=Math.max(0,Math.min(1,dy/88));
-    document.body?.classList.add('flympusStandalonePull');
-    document.body?.classList.remove('flympusStandaloneRelease');
-    applyStandalonePullY(visual,{progress});
-    $('#flympusStandaloneRefreshIndicator')?.classList.toggle('armed',dy>=88);
+  const pullNodes=()=>[$('.top'),$('#content')].filter(Boolean);
+  const pullBackdrop=()=>$('#flympusPullBackdrop');
+  const pullIndicator=()=>$('#flympusStandaloneRefreshIndicator');
+
+  let pullStartY=0,pullStartX=0,pullOriginY=null,pullTracking=false;
+  let pullRefreshSoundPlayed=false,pullRefreshGraph=null,pullStandaloneGesture=false;
+  let pullOffset=0,pullArmed=false,pullReturning=false,pullAnimations=[],pullFallbackRaf=null,pullFallbackTimer=null;
+
+  const cancelPullReturn=()=>{
+    clearTimeout(pullFallbackTimer);
+    if(pullFallbackRaf!=null){try{cancelAnimationFrame(pullFallbackRaf)}catch{}}
+    pullFallbackRaf=null;
+    pullAnimations.forEach(a=>{try{a.cancel()}catch{}});
+    pullAnimations=[];
+    pullReturning=false;
   };
 
-  const clearStandalonePullVisual=()=>{
-    clearTimeout(pullReleaseTimer);
-    if(pullReleaseRaf!=null){
-      try{cancelAnimationFrame(pullReleaseRaf)}catch{}
-      pullReleaseRaf=null;
-    }
-    pullReleaseAnimations.forEach(a=>{try{a.cancel()}catch{}});
-    pullReleaseAnimations=[];
-    pullVisualY=0;
-    pullMotionNodes().forEach(el=>{
+  const resetPullStyles=()=>{
+    cancelPullReturn();
+    pullOffset=0;pullArmed=false;
+    pullNodes().forEach(el=>{
       el.style.removeProperty('transform');
       el.style.removeProperty('transition');
       el.style.removeProperty('will-change');
     });
-    document.body?.classList.remove('flympusStandalonePull','flympusStandaloneRelease');
-    const indicator=$('#flympusStandaloneRefreshIndicator');
+    const bg=pullBackdrop();
+    if(bg){bg.style.removeProperty('transform');bg.style.removeProperty('will-change')}
+    const indicator=pullIndicator();
     if(indicator){
       indicator.style.removeProperty('opacity');
       indicator.style.removeProperty('transform');
-      indicator.classList.remove('armed','refreshing');
+      indicator.classList.remove('refreshing');
     }
   };
 
-  const releaseStandalonePullVisual=({refreshing=false,onComplete=null}={})=>{
-    /* Keep the pull and return on direct element transforms. Prefer the Web
-       Animations compositor for the return; fall back to rAF only when needed.
-       This avoids recalculating a root CSS custom property every frame. */
-    if(!flympusStandaloneMode()){
-      clearStandalonePullVisual();
-      if(typeof onComplete==='function')onComplete();
+  const ensurePullChromeVisible=()=>{
+    /* Pulling from the top must always start from the normal, fully visible
+       page chrome. Do this directly, without starting another hide/show
+       animation that could compete with the pull transform. */
+    $('.top')?.classList.remove('topHidden');
+    $('#mobileBottomNav')?.classList.remove('dockHidden');
+    document.body?.classList.remove('topChromeHidden');
+  };
+
+  const renderPull=(offset,rawDistance)=>{
+    pullOffset=Math.max(0,offset);
+    const transform='translate3d(0,'+pullOffset.toFixed(2)+'px,0)';
+    pullNodes().forEach(el=>{
+      el.style.setProperty('transition','none','important');
+      el.style.setProperty('transform',transform);
+      el.style.setProperty('will-change','transform');
+    });
+
+    const bg=pullBackdrop();
+    if(bg){
+      bg.style.transform=transform;
+      bg.style.willChange='transform';
+    }
+
+    const progress=Math.max(0,Math.min(1,rawDistance/92));
+    const indicator=pullIndicator();
+    if(indicator){
+      const opacity=Math.max(0,Math.min(1,(progress-.16)/.55));
+      const scale=.82+progress*.18;
+      indicator.style.opacity=opacity.toFixed(3);
+      indicator.style.transform='translate3d(-50%,'+(-72+pullOffset).toFixed(2)+'px,0) scale('+scale.toFixed(3)+')';
+    }
+  };
+
+  const finishPullReturn=(refresh)=>{
+    pullOffset=0;
+    pullAnimations=[];
+    pullReturning=false;
+    pullNodes().forEach(el=>{
+      el.style.setProperty('transform','translate3d(0,0,0)');
+      el.style.removeProperty('transition');
+      el.style.removeProperty('will-change');
+    });
+    const bg=pullBackdrop();
+    if(bg){bg.style.transform='translate3d(0,0,0)';bg.style.removeProperty('will-change')}
+    const indicator=pullIndicator();
+    if(indicator){
+      indicator.style.opacity='0';
+      indicator.style.transform='translate3d(-50%,-72px,0) scale(.82)';
+    }
+
+    const complete=()=>{
+      pullNodes().forEach(el=>el.style.removeProperty('transform'));
+      bg?.style.removeProperty('transform');
+      indicator?.classList.remove('refreshing');
+      if(refresh){
+        /* Snapshot only after the page is physically back at rest. This keeps
+           reload continuity without any special boot flag or stale pull state. */
+        try{if(typeof saveFlympusReloadSnapshot==='function')saveFlympusReloadSnapshot()}catch{}
+        location.reload();
+      }
+    };
+    if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>requestAnimationFrame(complete));
+    else setTimeout(complete,34);
+  };
+
+  const returnPull=refresh=>{
+    if(pullReturning)return;
+    pullReturning=true;
+    const from=Math.max(0,pullOffset);
+    const indicator=pullIndicator();
+    if(refresh)indicator?.classList.add('refreshing');
+
+    if(from<.5){finishPullReturn(refresh);return}
+
+    /* One uncomplicated native-like settle: decisive initial return, then a
+       long soft tail. All moving pieces use the same compositor animation. */
+    const duration=refresh?560:500;
+    const easing='cubic-bezier(.18,.82,.20,1)';
+    const fromTransform='translate3d(0,'+from.toFixed(2)+'px,0)';
+
+    const animated=[];
+    for(const el of pullNodes()){
+      el.style.removeProperty('transition');
+      if(typeof el.animate==='function'){
+        animated.push(el.animate(
+          [{transform:fromTransform},{transform:'translate3d(0,0,0)'}],
+          {duration,easing,fill:'forwards'}
+        ));
+      }
+    }
+
+    const bg=pullBackdrop();
+    if(bg&&typeof bg.animate==='function'){
+      animated.push(bg.animate(
+        [{transform:fromTransform},{transform:'translate3d(0,0,0)'}],
+        {duration,easing,fill:'forwards'}
+      ));
+    }
+
+    if(indicator&&typeof indicator.animate==='function'){
+      const currentOpacity=getComputedStyle(indicator).opacity||'1';
+      const currentTransform=getComputedStyle(indicator).transform;
+      animated.push(indicator.animate(
+        [
+          {offset:0,opacity:currentOpacity,transform:currentTransform},
+          {offset:.72,opacity:currentOpacity,transform:'translate3d(-50%,-66px,0) scale(.88)'},
+          {offset:1,opacity:'0',transform:'translate3d(-50%,-72px,0) scale(.82)'}
+        ],
+        {duration,easing:'linear',fill:'forwards'}
+      ));
+    }
+
+    if(animated.length){
+      pullAnimations=animated;
+      animated[0].finished.then(()=>finishPullReturn(refresh)).catch(()=>finishPullReturn(refresh));
+      pullFallbackTimer=setTimeout(()=>finishPullReturn(refresh),duration+120);
       return;
     }
-    clearTimeout(pullReleaseTimer);
-    if(pullReleaseRaf!=null){
-      try{cancelAnimationFrame(pullReleaseRaf)}catch{}
-      pullReleaseRaf=null;
-    }
-    pullReleaseAnimations.forEach(a=>{try{a.cancel()}catch{}});
-    pullReleaseAnimations=[];
 
-    const indicator=$('#flympusStandaloneRefreshIndicator');
-    indicator?.classList.remove('armed');
-    indicator?.classList.toggle('refreshing',!!refreshing);
-    document.body?.classList.add('flympusStandalonePull');
-    document.body?.classList.remove('flympusStandaloneRelease');
-
-    const from=Math.max(0,Number(pullVisualY||0));
-    /* Reference-matched return from the user's recordings:
-       Facebook settles in roughly 0.6–0.7 s; Safari keeps a softer tail closer
-       to 0.8–0.9 s. Use a 0.76 s full-refresh return with the same gentle first
-       frames and long decay, instead of a single cubic curve that jumps too
-       quickly immediately after finger release. */
-    const duration=refreshing?760:Math.max(560,Math.min(700,520+from*1.45));
-    const nodes=pullMotionNodes();
-    let finished=false;
-
-    const finish=()=>{
-      if(finished)return;finished=true;
-      pullReleaseRaf=null;
-      pullReleaseAnimations=[];
-      pullVisualY=0;
-      nodes.forEach(el=>{
-        el.style.setProperty('transform','translate3d(0,0,0)');
-        el.style.removeProperty('transition');
-        el.style.removeProperty('will-change');
-      });
-      if(indicator){
-        indicator.style.transform='translate3d(-50%,-72px,0) scale(.82)';
-        if(!refreshing)indicator.style.opacity='0';
-      }
-      document.body?.classList.remove('flympusStandalonePull','flympusStandaloneRelease');
-
-      /* Let WebKit actually present the fully-rested frame before starting a
-         reload. Starting navigation from the animation-finished microtask can
-         cut off the last visual frame and makes the return feel abrupt. */
-      const complete=()=>{
-        nodes.forEach(el=>el.style.removeProperty('transform'));
-        if(indicator&&refreshing)indicator.style.opacity='0';
-        if(!refreshing)indicator?.classList.remove('refreshing');
-        if(typeof onComplete==='function')onComplete();
-      };
-      if(typeof requestAnimationFrame==='function'){
-        requestAnimationFrame(()=>requestAnimationFrame(complete));
-      }else{
-        setTimeout(complete,34);
-      }
-    };
-
-    if(from<.5){finish();return}
-
-    const fromTransform='translate3d(0,'+from.toFixed(2)+'px,0)';
-    /* Residual Y ratios sampled/averaged from the Facebook + Safari references.
-       The important part is the first 100 ms: native UIs barely move on the
-       first frame, then accelerate into the return, and only afterward decay
-       into a long soft tail. */
-    const returnProfile=[
-      [0,1],
-      [33,.92],
-      [67,.78],
-      [100,.64],
-      [133,.52],
-      [167,.42],
-      [200,.34],
-      [233,.28],
-      [267,.23],
-      [300,.19],
-      [333,.16],
-      [367,.13],
-      [400,.10],
-      [433,.075],
-      [467,.055],
-      [500,.040],
-      [550,.025],
-      [600,.015],
-      [650,.008],
-      [700,.003],
-      [760,0]
-    ];
-    const motionKeyframes=returnProfile
-      .filter(([ms])=>ms<=duration)
-      .map(([ms,ratio])=>({
-        offset:Math.min(1,ms/duration),
-        transform:'translate3d(0,'+(from*ratio).toFixed(2)+'px,0)'
-      }));
-    if(motionKeyframes[motionKeyframes.length-1]?.offset<1){
-      motionKeyframes.push({offset:1,transform:'translate3d(0,0,0)'});
-    }
-
-    if(nodes.length&&nodes.every(el=>typeof el.animate==='function')){
-      nodes.forEach(el=>{
-        el.style.removeProperty('transition');
-        const a=el.animate(
-          motionKeyframes,
-          {duration,easing:'linear',fill:'forwards'}
-        );
-        pullReleaseAnimations.push(a);
-      });
-      if(indicator&&typeof indicator.animate==='function'){
-        const currentOpacity=getComputedStyle(indicator).opacity||'1';
-        const currentTransform=getComputedStyle(indicator).transform;
-        const a=indicator.animate(
-          [
-            {offset:0,opacity:currentOpacity,transform:currentTransform},
-            {offset:.72,opacity:currentOpacity,transform:'translate3d(-50%,-69px,0) scale(.86)'},
-            {offset:1,opacity:'0',transform:'translate3d(-50%,-72px,0) scale(.82)'}
-          ],
-          {duration,easing:'linear',fill:'forwards'}
-        );
-        pullReleaseAnimations.push(a);
-      }
-      const lead=pullReleaseAnimations[0];
-      if(lead){
-        lead.finished.then(finish).catch(()=>{if(!finished)finish()});
-        pullReleaseTimer=setTimeout(finish,duration+90);
-        return;
-      }
-    }
-
+    /* Fallback for older engines: same curve, one rAF loop. */
     const started=performance.now?.()||Date.now();
-    const ratioAt=elapsed=>{
-      const ms=Math.max(0,Math.min(duration,elapsed));
-      for(let i=1;i<returnProfile.length;i++){
-        const [bMs,bRatio]=returnProfile[i];
-        const [aMs,aRatio]=returnProfile[i-1];
-        if(ms<=bMs){
-          const span=Math.max(1,bMs-aMs),u=(ms-aMs)/span;
-          return aRatio+(bRatio-aRatio)*Math.max(0,Math.min(1,u));
-        }
-      }
-      return 0;
-    };
     const frame=now=>{
-      const elapsed=now-started;
-      const ratio=ratioAt(elapsed);
-      applyStandalonePullY(from*ratio,{progress:ratio});
-      if(elapsed>=duration){finish();return}
-      pullReleaseRaf=requestAnimationFrame(frame);
+      const t=Math.max(0,Math.min(1,(now-started)/duration));
+      const eased=1-Math.pow(1-t,4);
+      const y=from*(1-eased);
+      renderPull(y,92*(1-eased));
+      if(t>=1){finishPullReturn(refresh);return}
+      pullFallbackRaf=requestAnimationFrame(frame);
     };
-    pullReleaseRaf=requestAnimationFrame(frame);
+    pullFallbackRaf=requestAnimationFrame(frame);
   };
 
-  const resetPullRefreshSound=()=>{
+  const resetPullTracking=()=>{
     pullTracking=false;
     pullOriginY=null;
-    pullRefreshSoundPlayed=false;
-    pullReloadArmed=false;
     pullStandaloneGesture=false;
+    pullArmed=false;
+    pullRefreshSoundPlayed=false;
     if(pullRefreshGraph&&!pullRefreshGraph.fired)stopFlympusRefreshSound(pullRefreshGraph);
     pullRefreshGraph=null;
   };
 
   document.addEventListener('touchstart',e=>{
-    resetPullRefreshSound();
+    if(pullReturning)return;
+    resetPullTracking();
     if(e.target?.closest?.('#mobileBottomNav'))return;
     const top=Math.max(0,Number(document.scrollingElement?.scrollTop??window.scrollY??0));
     const standalone=flympusStandaloneMode();
-    /* Safari native pull must begin right at the top. Home Screen mode is more
-       forgiving: a gesture started slightly below the top may continue into
-       pull-to-refresh once the page reaches scrollTop 0. */
-    if((standalone&&top>140)||(!standalone&&top>12))return;
+    if((standalone&&top>120)||(!standalone&&top>12))return;
     const t=e.touches?.[0];if(!t)return;
+
     pullStartY=t.clientY;pullStartX=t.clientX;
-    pullOriginY=top<=4?t.clientY:null;
+    pullOriginY=top<=2?t.clientY:null;
     pullTracking=true;
     pullStandaloneGesture=standalone;
+    if(standalone)ensurePullChromeVisible();
     pullRefreshGraph=armFlympusRefreshSound();
   },{passive:true,capture:true});
 
@@ -3890,9 +3785,10 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
       pullDy=t.clientY-pullOriginY;
       if(pullDy<=0)return;
       if(e.cancelable)e.preventDefault();
-      setStandalonePullVisual(pullDy);
-      pullReloadArmed=pullDy>=88;
-      $('#flympusStandaloneRefreshIndicator')?.classList.toggle('armed',pullReloadArmed);
+
+      const visual=Math.max(0,Math.min(116,132*(1-Math.exp(-pullDy/118))));
+      renderPull(visual,pullDy);
+      pullArmed=pullDy>=92;
     }
 
     if(!pullRefreshSoundPlayed&&pullDy>=44){
@@ -3903,45 +3799,29 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
 
   document.addEventListener('touchend',()=>{
     if(!pullTracking)return;
-    const reload=pullStandaloneGesture&&pullReloadArmed;
-    const graph=pullRefreshGraph;
     const standalone=pullStandaloneGesture;
-    pullTracking=false;pullReloadArmed=false;pullRefreshGraph=null;pullOriginY=null;pullStandaloneGesture=false;
+    const refresh=standalone&&pullArmed;
+    const graph=pullRefreshGraph;
 
-    if(reload){
-      const indicator=$('#flympusStandaloneRefreshIndicator');
-      indicator?.classList.add('refreshing');
-      if(graph&&!graph.fired)fireFlympusRefreshSound(graph);
-      /* Finish the physical return first. Reloading while the pulled frame is
-         still held makes standalone WebKit appear to pause and then snap back.
-         The 300 ms release is compositor-only; navigation begins immediately
-         after the header/content arrive smoothly at their resting position. */
-      releaseStandalonePullVisual({refreshing:true,onComplete:()=>{
-        /* Tell the next document this navigation came from the custom top pull.
-           The boot snapshot must start at y=0 with both chrome bars visible. */
-        try{sessionStorage.setItem('ct-review-pull-refresh','1')}catch{}
-        location.reload();
-      }});
-      return;
-    }
+    pullTracking=false;
+    pullOriginY=null;
+    pullStandaloneGesture=false;
+    pullArmed=false;
+    pullRefreshGraph=null;
 
     if(graph&&!graph.fired)stopFlympusRefreshSound(graph);
-    if(standalone)releaseStandalonePullVisual();
+    if(standalone)returnPull(refresh);
   },{passive:true,capture:true});
 
   document.addEventListener('touchcancel',()=>{
     const standalone=pullStandaloneGesture;
-    resetPullRefreshSound();
-    if(standalone)releaseStandalonePullVisual();
+    resetPullTracking();
+    if(standalone)returnPull(false);
   },{passive:true,capture:true});
 
   window.addEventListener('pageshow',()=>{
-    resetPullRefreshSound();
-    /* A newly loaded document must start clean. Running the release animation
-       again on pageshow forces WebKit to rebuild the transformed/backdrop layers
-       for one frame and causes the visible white flash after refresh. The release
-       animation is only for a cancelled pull in the SAME document. */
-    clearStandalonePullVisual();
+    resetPullTracking();
+    resetPullStyles();
     flympusUiNeedsFreshContext=true;
     resetFlympusAudioSession();
   });
@@ -3952,6 +3832,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     resetFlympusAudioSession();
   });
 }
+
 let bottomNavScrollSaveTimer=null;
 window.addEventListener('scroll',()=>{
   if(state.screen!==bottomNavRootForScreen(state.screen))return;
@@ -6315,8 +6196,8 @@ function saveFlympusReloadSnapshot(){
       courseId:String(currentCourseId||'AEP-26'),
       html:content.innerHTML,
       navHtml:$('#mobileBottomNav')?.innerHTML||'',
-      scrollY:(()=>{try{return sessionStorage.getItem('ct-review-pull-refresh')==='1'?0:Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0))}catch{return Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0))}})(),
-      topHidden:(()=>{try{return sessionStorage.getItem('ct-review-pull-refresh')==='1'?false:!!$('.top')?.classList.contains('topHidden')}catch{return !!$('.top')?.classList.contains('topHidden')}})(),
+      scrollY:Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0)),
+      topHidden:!!$('.top')?.classList.contains('topHidden'),
       savedAt:Date.now()
     };
     sessionStorage.setItem('ct-review-reload-snapshot',JSON.stringify(snapshot));
@@ -6340,7 +6221,7 @@ render();
     document.documentElement.classList.remove('flympusHydrating');
     return;
   }
-  const y=window.__FLYMPUS_PULL_REFRESH_BOOT__?0:Math.max(0,Number(snap.scrollY||0));
+  const y=Math.max(0,Number(snap.scrollY||0));
   const restore=()=>{try{window.scrollTo(0,y)}catch{}};
   restore();
   if(typeof requestAnimationFrame==='function'){
