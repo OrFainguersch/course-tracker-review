@@ -212,6 +212,8 @@ main{padding:16px 14px calc(30px + env(safe-area-inset-bottom));max-width:1220px
 
 /* roster */
 .rosterTopbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.rosterTopbarActions{display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex:0 0 auto}
+.rosterCourseStatus{padding:6px 10px;font-size:9px;letter-spacing:.045em;white-space:nowrap}
 .rosterControls{padding:11px}.rosterSearchRow{display:grid;grid-template-columns:minmax(0,1fr);margin-top:10px}
 .rosterFilterRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
 .statusSegments{display:flex;background:#f1f5f9;border-radius:12px;padding:3px;gap:2px}
@@ -2688,6 +2690,9 @@ body::-webkit-scrollbar{
 /* ===== Bottom dock · traveling active halo =====
    REFERENCE BASELINE · 2026-10-02 · commit 0666b046
    Previous audio/post-refresh reference: commit 64960d03.
+   CROSS-PLATFORM BASELINE: halo geometry, press zoom, navigation timing and
+   bottom-nav audio are browser-agnostic. iOS only adds its native switch
+   haptic overlay; other vibration-capable browsers use navigator.vibrate().
    Approved behavior: keep the current halo size, spacing, centering (-1px
    vertical nudge), 220ms travel and post-paint navigation timing unchanged.
    Match the exact geometry of the old active button capsule. Halo geometry is
@@ -3011,7 +3016,7 @@ html.flympusHydrating #content{
     try{
       const a=document.createElement('audio');
       a.src='./assets/flympus-nav-signature.wav?v=audio-clean-1';
-      a.preload='auto';a.playsInline=true;a.muted=false;a.volume=1;
+      a.preload='auto';a.playsInline=true;a.muted=false;a.volume=.55;
       a.setAttribute('playsinline','');a.setAttribute('webkit-playsinline','');
       a.setAttribute('aria-hidden','true');a.tabIndex=-1;
       a.style.position='fixed';a.style.width='0';a.style.height='0';
@@ -3546,7 +3551,7 @@ function setDrawerOpen(open){
  document.body?.classList.toggle('drawerPushOpen',isOpen);
  menuBtn?.setAttribute?.('aria-expanded',isOpen?'true':'false');
 }
-function renderNav(){const n=$('#nav');n.innerHTML=nav.map(([id,ic,l])=>id==='__label'?'<div class="navLabel">'+l+'</div>':`<button class="navBtn ${state.screen===id?'active':''}" data-nav="${id}">${navIconSvg(ic)}<span class="navText">${l}</span></button>`).join('');n.querySelectorAll('[data-nav]').forEach(b=>{const pressSound=bindFlympusNavPressSound(b);b.onclick=e=>{if(e?.detail===0)pressSound(e);setDrawerOpen(false);go(b.dataset.nav)}});}
+function renderNav(){const n=$('#nav');n.innerHTML=nav.map(([id,ic,l])=>id==='__label'?'<div class="navLabel">'+l+'</div>':`<button class="navBtn ${state.screen===id?'active':''}" data-nav="${id}">${navIconSvg(ic)}<span class="navText">${l}</span></button>`).join('');n.querySelectorAll('[data-nav]').forEach(b=>{b.onclick=e=>{e?.preventDefault?.();setDrawerOpen(false);go(b.dataset.nav)}});}
 let bottomDockNavigationTransition=false,bottomDockProgrammaticRestoreUntil=0;
 window.__flympusBottomNavTaskToken=Number(window.__flympusBottomNavTaskToken||0);
 function scheduleFlympusBottomNavigation(target){
@@ -3716,6 +3721,7 @@ const FLYMPUS_NAV_SOUND_SRC='data:audio/wav;base64,UklGRsQdAABXQVZFZm10IBAAAAABA
 const FLYMPUS_REFRESH_SOUND_SRC='./assets/flympus-refresh-sync.wav?v=audio-clean-1';
 const FLYMPUS_NAV_POOL_SIZE=2;
 const FLYMPUS_REFRESH_POOL_SIZE=2;
+const FLYMPUS_NAV_SOUND_VOLUME=.55;
 
 let flympusNavAudioPool=null,flympusNavAudioIndex=0;
 let flympusRefreshAudioPool=null,flympusRefreshAudioIndex=0;
@@ -3806,8 +3812,15 @@ function playFlympusNavFastSound(){
       return false;
     }
     const source=ctx.createBufferSource();
+    const gain=ctx.createGain?.();
     source.buffer=buffer;
-    source.connect(ctx.destination);
+    if(gain){
+      gain.gain.value=FLYMPUS_NAV_SOUND_VOLUME;
+      source.connect(gain);
+      gain.connect(ctx.destination);
+    }else{
+      source.connect(ctx.destination);
+    }
     source.start(ctx.currentTime+.001);
     return true;
   }catch{
@@ -3815,14 +3828,14 @@ function playFlympusNavFastSound(){
   }
 }
 
-function makeFlympusFileAudio(src){
+function makeFlympusFileAudio(src,volume=1){
   try{
     const a=document.createElement('audio');
     a.src=src;
     a.preload='auto';
     a.playsInline=true;
     a.muted=false;
-    a.volume=1;
+    a.volume=volume;
     a.setAttribute('playsinline','');
     a.setAttribute('webkit-playsinline','');
     a.setAttribute('aria-hidden','true');
@@ -3840,7 +3853,7 @@ function makeFlympusFileAudio(src){
 
 function getFlympusNavAudioPool(){
   if(!flympusNavAudioPool){
-    flympusNavAudioPool=Array.from({length:FLYMPUS_NAV_POOL_SIZE},()=>makeFlympusFileAudio(FLYMPUS_NAV_SOUND_SRC)).filter(Boolean);
+    flympusNavAudioPool=Array.from({length:FLYMPUS_NAV_POOL_SIZE},()=>makeFlympusFileAudio(FLYMPUS_NAV_SOUND_SRC,FLYMPUS_NAV_SOUND_VOLUME)).filter(Boolean);
   }
   return flympusNavAudioPool;
 }
@@ -3852,11 +3865,11 @@ function getFlympusRefreshAudioPool(){
   return flympusRefreshAudioPool;
 }
 
-function rewindFlympusFileAudio(a){
+function rewindFlympusFileAudio(a,volume=1){
   if(!a)return;
   try{
     a.muted=false;
-    a.volume=1;
+    a.volume=volume;
     a.currentTime=0;
   }catch{}
 }
@@ -3868,9 +3881,13 @@ function resetFlympusAudioSession(){
     discardFlympusNavFastContext();
     primeFlympusNavFastAudio();
   }
-  for(const a of [...getFlympusNavAudioPool(),...getFlympusRefreshAudioPool()]){
+  for(const a of getFlympusNavAudioPool()){
     try{a.pause?.()}catch{}
-    rewindFlympusFileAudio(a);
+    rewindFlympusFileAudio(a,FLYMPUS_NAV_SOUND_VOLUME);
+  }
+  for(const a of getFlympusRefreshAudioPool()){
+    try{a.pause?.()}catch{}
+    rewindFlympusFileAudio(a,1);
   }
 }
 
@@ -3893,7 +3910,7 @@ function playFlympusBottomNavSound(){
     /* Decoder/context not ready yet: preserve the proven HTMLAudio fallback. */
     const pool=getFlympusNavAudioPool();if(!pool.length)return;
     const a=pool[flympusNavAudioIndex++%pool.length];
-    rewindFlympusFileAudio(a);
+    rewindFlympusFileAudio(a,FLYMPUS_NAV_SOUND_VOLUME);
     const p=a.play?.();
     if(p?.catch)p.catch(()=>{});
   }catch{}
@@ -4682,6 +4699,7 @@ function evalCard(e){return `<article class="evalItem"><div class="evalTop"><div
 function roster(){
  const allT=courseTrainees().map(t=>{const m=courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'});return {...t,status:m.status||'Active',type:'TRAINEE'}});
  const allI=courseInstructors().map(i=>{const m=courseMembershipFor(i.id,'INSTRUCTOR',{role:i.role||'INSTRUCTOR'});return {...i,role:m.role||'INSTRUCTOR',type:'INSTRUCTOR'}});
+ const courseLifecycle=courseLifecycleInfo(courseByKey(currentCourseId));
  const type=state.rosterType||'TRAINEE',base=type==='TRAINEE'?allT:allI,manage=!!state.rosterManage,unassignedExisting=alphaByName([...allTrainees().map(x=>({...x,type:'TRAINEE'})),...allInstructors().map(x=>({...x,type:'INSTRUCTOR'}))].filter(x=>!coursePersonIsAssignedTo(x,x.type,currentCourseId)));
  const statusSel=normalizeMultiFilterValue(state.rosterStatuses),roleSel=normalizeMultiFilterValue(state.rosterRoles),dateFrom=state.rosterDateFrom||'',dateTo=state.rosterDateTo||'',singleStatus=(statusSel.length===1&&['Active','Inactive'].includes(statusSel[0]))?statusSel[0]:'ALL';
  let list=base.filter(t=>type==='TRAINEE'?(singleStatus==='ALL'||String(t.status)===singleStatus):(multiFilterMatches(t.role,roleSel)&&filterDateMatches(t.lastActivity,dateFrom,dateTo)));
@@ -4697,7 +4715,7 @@ function roster(){
    else{const ma=a.role==='COURSE_MANAGER',mb=b.role==='COURSE_MANAGER';if(ma!==mb)return ma?-1:1;if(Number(a.workloadRank||999)!==Number(b.workloadRank||999))return Number(a.workloadRank||999)-Number(b.workloadRank||999)}
    return String(a.name).localeCompare(String(b.name),undefined,{sensitivity:'base'})
  });
- return '<div class="rosterTopbar"><div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div>'+(!manage?'<button class="btn edit" id="toggleRosterManage">✎ Manage</button>':'')+'</div>'+
+ return '<div class="rosterTopbar"><div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div><div class="rosterTopbarActions"><span class="courseStateBadge rosterCourseStatus '+courseLifecycle.className+'">'+esc(courseLifecycle.label)+'</span>'+(!manage?'<button class="btn edit" id="toggleRosterManage">✎ Manage</button>':'')+'</div></div>'+
  (manage?'<div class="manageBanner rosterManageBanner"><div class="rosterManageBannerCopy"><b>Manage mode</b><span> · Edit identity, photo and course membership safely.</span></div><div class="rosterManageBannerActions"><button class="btn sky small rosterDoneEditing" id="toggleRosterManage" type="button">✓ Done editing</button><button class="btn edit small rosterAddPerson" id="addPersonBtn" type="button">+ Add person</button></div></div>':'')+
  '<section class="card rosterControls"><div class="scrollTabs"><button class="seg '+(type==='TRAINEE'?'active':'')+'" data-roster-type="TRAINEE">Trainees ('+allT.length+')</button><button class="seg '+(type==='INSTRUCTOR'?'active':'')+'" data-roster-type="INSTRUCTOR">Instructors ('+allI.length+')</button></div>'+
  '<div class="rosterSearchRow"><input class="input" id="rosterSearch" placeholder="Search '+(type==='TRAINEE'?'trainees':'instructors')+'..." value="'+esc(state.search)+'"></div>'+
@@ -6151,7 +6169,7 @@ function reports(){
   syllabusSel.length?{label:'Syllabus',value:filterChoiceSummary(syllabusSel,genericMultiItems(syllOptions))}:null,
   (dateFrom||dateTo)?{label:'Date',value:filterDateSummary(dateFrom,dateTo)}:null
  ].filter(Boolean);
- return '<h1 class="pageTitle">Course analytics</h1><p class="sub">Analytics are scoped to the active course and its resolved training suit.</p>'+activeSuitOverviewHtml()+
+ return '<h1 class="pageTitle">Course analytics</h1><p class="sub">Analytics are scoped to the active course.</p>'+
  '<section class="card settingBox filterPanelCard"><div class="inlineHead unifiedFilterPanelHead"><div><h3>Filters</h3><small>'+esc(reportFilterSummary)+'</small></div><div class="reportToolbar" style="margin:0"><button class="btn secondary small" id="reportsReset">Reset</button><button class="btn secondary small" id="reportsCsv">⇩ Export CSV</button><button class="btn sky small" id="reportsPrint">Print / PDF</button></div></div><div class="reportFilters" style="margin-top:10px">'+
  multiFilterHtml('reportTrainee','Trainee',traineeMultiFilterItems(),traineeSel,'All trainees')+
  multiFilterHtml('reportInstructor','Instructor',genericMultiItems(alphaByName(courseInstructors())),instructorSel,'All instructors')+
