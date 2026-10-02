@@ -2686,7 +2686,8 @@ body::-webkit-scrollbar{
 
 <style>
 /* ===== Bottom dock · traveling active halo =====
-   REFERENCE BASELINE · 2026-10-02 · commit 64960d03
+   REFERENCE BASELINE · 2026-10-02 · commit 0666b046
+   Previous audio/post-refresh reference: commit 64960d03.
    Approved behavior: keep the current halo size, spacing, centering (-1px
    vertical nudge), 220ms travel and post-paint navigation timing unchanged.
    Match the exact geometry of the old active button capsule. Halo geometry is
@@ -2751,54 +2752,102 @@ body::-webkit-scrollbar{
    tactile emphasis belongs to the physically pressed icon. */
 .mobileBottomNav.dockPressZoom:not(.dockHidden){
   transform-origin:50% 50%!important;
-  animation:flympusDockPressZoomMobile .165s cubic-bezier(.20,.82,.22,1) both!important;
+  animation:flympusDockPressZoomMobile .19s cubic-bezier(.18,.84,.20,1) both!important;
 }
 .mobileBottomItem.dockPressTarget .mobileBottomIconButton{
-  scale:1.024!important;
+  scale:1.036!important;
 }
 .mobileBottomItem.dockPressTarget:has(.mobileBottomHapticSwitch:active) .mobileBottomIconButton{
   transform:scale(1)!important;
 }
 .mobileBottomItem.dockPressTarget .mobileBottomIcon{
   transform-origin:center center!important;
-  animation:flympusDockIconPressZoom .165s cubic-bezier(.18,.84,.20,1) both!important;
+  animation:flympusDockIconPressZoom .19s cubic-bezier(.16,.86,.18,1) both!important;
 }
 .mobileBottomItem.dockPressTarget .mobileBottomLabel{
   transform-origin:center center!important;
-  animation:flympusDockLabelPressZoom .165s cubic-bezier(.18,.84,.20,1) both!important;
+  animation:flympusDockLabelPressZoom .19s cubic-bezier(.16,.86,.18,1) both!important;
 }
 @keyframes flympusDockPressZoomMobile{
   0%{transform:scale(1)}
-  36%{transform:scale(1.008)}
-  72%{transform:scale(1.002)}
+  34%{transform:scale(1.018)}
+  68%{transform:scale(1.005)}
   100%{transform:scale(1)}
 }
 @keyframes flympusDockIconPressZoom{
   0%{scale:1}
-  34%{scale:1.075}
-  72%{scale:1.012}
+  32%{scale:1.115}
+  68%{scale:1.020}
   100%{scale:1}
 }
 @keyframes flympusDockLabelPressZoom{
   0%{scale:1}
-  34%{scale:1.010}
-  72%{scale:1.003}
+  32%{scale:1.016}
+  68%{scale:1.004}
+  100%{scale:1}
+}
+
+/* Tapping the already-selected destination needs a clearer acknowledgement
+   because there is no screen change to reinforce the press. Keep the same
+   geometry-safe animation, but make that repeat pulse slightly stronger. */
+.mobileBottomNav.dockPressRepeat:not(.dockHidden){
+  animation-name:flympusDockPressRepeatMobile!important;
+  animation-duration:.205s!important;
+}
+.mobileBottomNav.dockPressRepeat .mobileBottomItem.dockPressTarget .mobileBottomIconButton{
+  scale:1.047!important;
+}
+.mobileBottomNav.dockPressRepeat .mobileBottomItem.dockPressTarget .mobileBottomIcon{
+  animation-name:flympusDockIconPressRepeat!important;
+  animation-duration:.205s!important;
+}
+.mobileBottomNav.dockPressRepeat .mobileBottomItem.dockPressTarget .mobileBottomLabel{
+  animation-name:flympusDockLabelPressRepeat!important;
+  animation-duration:.205s!important;
+}
+@keyframes flympusDockPressRepeatMobile{
+  0%{transform:scale(1)}
+  32%{transform:scale(1.024)}
+  66%{transform:scale(1.007)}
+  100%{transform:scale(1)}
+}
+@keyframes flympusDockIconPressRepeat{
+  0%{scale:1}
+  30%{scale:1.145}
+  66%{scale:1.026}
+  100%{scale:1}
+}
+@keyframes flympusDockLabelPressRepeat{
+  0%{scale:1}
+  30%{scale:1.020}
+  66%{scale:1.005}
   100%{scale:1}
 }
 @media(min-width:900px){
   .mobileBottomNav.dockPressZoom:not(.dockHidden){
     animation-name:flympusDockPressZoomDesktop!important;
   }
+  .mobileBottomNav.dockPressRepeat:not(.dockHidden){
+    animation-name:flympusDockPressRepeatDesktop!important;
+  }
   @keyframes flympusDockPressZoomDesktop{
     0%{transform:translateX(-50%) scale(1)}
-    36%{transform:translateX(-50%) scale(1.007)}
-    72%{transform:translateX(-50%) scale(1.002)}
+    34%{transform:translateX(-50%) scale(1.015)}
+    68%{transform:translateX(-50%) scale(1.004)}
+    100%{transform:translateX(-50%) scale(1)}
+  }
+  @keyframes flympusDockPressRepeatDesktop{
+    0%{transform:translateX(-50%) scale(1)}
+    32%{transform:translateX(-50%) scale(1.020)}
+    66%{transform:translateX(-50%) scale(1.006)}
     100%{transform:translateX(-50%) scale(1)}
   }
 }
-.mobileBottomNav.dockHidden.dockPressZoom{animation:none!important}
+.mobileBottomNav.dockHidden.dockPressZoom,
+.mobileBottomNav.dockHidden.dockPressRepeat{animation:none!important}
 @media(prefers-reduced-motion:reduce){
   .mobileBottomNav.dockPressZoom:not(.dockHidden),
+  .mobileBottomNav.dockPressRepeat:not(.dockHidden),
   .mobileBottomItem.dockPressTarget .mobileBottomIcon,
   .mobileBottomItem.dockPressTarget .mobileBottomLabel{
     animation:none!important;
@@ -2980,15 +3029,17 @@ html.flympusHydrating #content{
     window.__FLYMPUS_EARLY_NAV_TARGET__=target;
 
     const pressedItem=btn.closest?.('.mobileBottomItem');
-    bottomNav.classList.remove('dockPressZoom');
+    const repeatActive=!!pressedItem?.classList.contains('active');
+    bottomNav.classList.remove('dockPressZoom','dockPressRepeat');
     bottomNav.querySelectorAll?.('.dockPressTarget')?.forEach?.(x=>x.classList.remove('dockPressTarget'));
     void bottomNav.offsetWidth;
     pressedItem?.classList.add('dockPressTarget');
     bottomNav.classList.add('dockPressZoom');
+    if(repeatActive)bottomNav.classList.add('dockPressRepeat');
     setTimeout(()=>{
-      bottomNav.classList.remove('dockPressZoom');
+      bottomNav.classList.remove('dockPressZoom','dockPressRepeat');
       pressedItem?.classList.remove('dockPressTarget');
-    },175);
+    },repeatActive?215:200);
 
     bottomNav.querySelectorAll?.('[data-mobile-nav]')?.forEach?.(candidate=>{
       const active=candidate.dataset.mobileNav===target;
@@ -3871,18 +3922,20 @@ let flympusDockPressZoomTimer=null;
 function playFlympusDockPressZoom(el){
   const dock=$('#mobileBottomNav'),item=el?.closest?.('.mobileBottomItem');
   if(!dock||!item||dock.classList.contains('dockHidden'))return;
+  const repeatActive=item.classList.contains('active');
   clearTimeout(flympusDockPressZoomTimer);
-  dock.classList.remove('dockPressZoom');
+  dock.classList.remove('dockPressZoom','dockPressRepeat');
   dock.querySelectorAll?.('.dockPressTarget')?.forEach?.(x=>x.classList.remove('dockPressTarget'));
   /* Force only the interaction animation to restart on very rapid consecutive
      taps. No geometry is remeasured and no navigation work is delayed. */
   void dock.offsetWidth;
   item.classList.add('dockPressTarget');
   dock.classList.add('dockPressZoom');
+  if(repeatActive)dock.classList.add('dockPressRepeat');
   flympusDockPressZoomTimer=setTimeout(()=>{
-    dock.classList.remove('dockPressZoom');
+    dock.classList.remove('dockPressZoom','dockPressRepeat');
     item.classList.remove('dockPressTarget');
-  },175);
+  },repeatActive?215:200);
 }
 
 function bindFlympusNavPressSound(el,onImmediatePress=null){
