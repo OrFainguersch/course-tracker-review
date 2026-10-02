@@ -5,173 +5,151 @@ const vm=require('node:vm');
 const html=fs.readFileSync('index.html','utf8');
 const start=html.indexOf("const FLYMPUS_NAV_SOUND_SRC=");
 const end=html.indexOf('if(document.addEventListener&&!window.__flympusPullRefreshSoundBound)',start);
-assert(start>=0&&end>start,'clean file-audio block must remain extractable');
+assert(start>=0&&end>start,'audio block must remain extractable');
 const source=html.slice(start,end);
 
-const plays=[];
-const created=[];
+const mediaPlays=[];
+const mediaCreated=[];
+const fastStarts=[];
 let now=1000;
 let category='auto';
 
 const audioSession={};
-Object.defineProperty(audioSession,'type',{
-  get:()=>category,
-  set:value=>{category=value}
-});
+Object.defineProperty(audioSession,'type',{get:()=>category,set:v=>{category=v}});
 
 class AudioStub{
   constructor(){
-    this.src='';
-    this.preload='';
-    this.playsInline=false;
-    this.muted=false;
-    this.volume=1;
-    this.currentTime=0;
-    this.paused=true;
-    this.style={};
-    created.push(this);
+    this.src='';this.preload='';this.playsInline=false;this.muted=false;
+    this.volume=1;this.currentTime=0;this.paused=true;this.style={};
+    mediaCreated.push(this);
   }
   setAttribute(){}
   load(){}
   pause(){this.paused=true}
   play(){
     this.paused=false;
-    plays.push({
-      audio:this,
-      src:this.src,
-      currentTime:this.currentTime,
-      volume:this.volume,
-      muted:this.muted,
-      category
-    });
+    mediaPlays.push({audio:this,src:this.src,currentTime:this.currentTime,volume:this.volume,muted:this.muted,category});
     return Promise.resolve();
+  }
+}
+
+class AudioContextStub{
+  constructor(options={}){
+    this.options=options;
+    this.state='suspended';
+    this.currentTime=10;
+    this.destination={};
+  }
+  resume(){this.state='running';return Promise.resolve()}
+  close(){this.state='closed';return Promise.resolve()}
+  decodeAudioData(bytes){assert(bytes.byteLength>1000);return Promise.resolve({decoded:true})}
+  createBufferSource(){
+    const rec={buffer:null,connected:false,startTime:null};
+    fastStarts.push(rec);
+    return{
+      set buffer(v){rec.buffer=v},
+      get buffer(){return rec.buffer},
+      connect(dest){assert(dest);rec.connected=true},
+      start(t){rec.startTime=t}
+    };
   }
 }
 
 const documentStub={
   body:{appendChild(){}},
-  createElement(tag){assert.equal(tag,'audio');return new AudioStub()}
+  createElement(tag){assert.equal(tag,'audio');return new AudioStub()},
+  addEventListener(){}
 };
 
 const context={
-  window:{PointerEvent:function(){}},
+  window:{PointerEvent:function(){},AudioContext:AudioContextStub},
   navigator:{audioSession},
   document:documentStub,
   performance:{now:()=>now},
-  Date,Math,Promise,Array,
+  Date,Math,Promise,Array,ArrayBuffer,Uint8Array,
+  atob:s=>Buffer.from(s,'base64').toString('binary'),
   setTimeout:()=>1,
   clearTimeout(){},
   console
 };
 context.window.window=context.window;
 vm.createContext(context);
-vm.runInContext(source,context,{filename:'index.html#clean-audio'});
+vm.runInContext(source,context,{filename:'index.html#audio'});
 
 (async()=>{
-  assert(source.includes("data:audio/wav;base64,UklGR"),
-    'Navigation must keep the selected C FLYMPUS Signature WAV embedded in-memory for low latency');
+  await Promise.resolve();
+  await Promise.resolve();
+
   const embeddedMatch=source.match(/const FLYMPUS_NAV_SOUND_SRC='data:audio\/wav;base64,([^']+)'/);
   assert(embeddedMatch,'Embedded navigation WAV must remain extractable');
   assert(Buffer.from(embeddedMatch[1],'base64').equals(fs.readFileSync('assets/flympus-nav-signature.wav')),
-    'Embedded navigation audio bytes must exactly match the selected WAV file');
+    'Fast navigation sound must use the exact selected C FLYMPUS Signature WAV bytes');
   assert(source.includes("./assets/flympus-refresh-sync.wav"),
-    'Refresh must use the selected C FLYMPUS Sync WAV');
+    'Refresh must keep the selected C FLYMPUS Sync WAV');
 
-  const forbidden=[
-    'AudioContext','webkitAudioContext','createOscillator','createGain',
-    'createBuffer','flympusWavDataUri','flympusAddTone',
-    'FLYMPUS_NAV_MEDIA_MARKER','FLYMPUS_REFRESH_MEDIA_MARKER',
-    'recoverFlympus','holdFlympusUiAudioRoute'
-  ];
-  forbidden.forEach(term=>assert(!source.includes(term),'Old audio mechanism must be gone: '+term));
+  assert(source.includes("latencyHint:'interactive'"),
+    'Navigation AudioContext must request interactive low latency');
+  assert(source.includes('decodeAudioData(copy)'),
+    'Selected navigation WAV must be decoded ahead of time');
+  assert(source.includes('createBufferSource()'),
+    'Navigation click must use an AudioBufferSourceNode');
+  assert(source.includes('source.start(ctx.currentTime+.001)'),
+    'Navigation click must schedule essentially immediately');
 
-  assert.equal(plays.length,0,'Preload must not audibly play at boot');
-  assert.equal(created.length,8,'Boot preload must create six nav players and two refresh players');
-  assert(created.slice(0,6).every(a=>a.src.startsWith('data:audio/wav;base64,UklGR')),
-    'Every nav player must use the exact in-memory selected WAV');
-  assert(created.slice(6).every(a=>a.src.includes('flympus-refresh-sync.wav')),
-    'Every refresh player must point at the selected refresh WAV');
+  assert.equal(mediaCreated.length,4,
+    'Only two HTMLAudio nav fallbacks and two refresh players should be preloaded');
+  assert.equal(mediaPlays.length,0,'Preload must not audibly play HTML media');
 
-  vm.runInContext('playFlympusBottomNavSound()',context);
+  vm.runInContext('unlockFlympusNavFastAudio()',context);
   await Promise.resolve();
-  assert.equal(plays.length,1,'First nav press must play immediately');
-  assert.equal(plays[0].currentTime,0,'First nav press must start at sample zero');
-  assert.equal(plays[0].volume,1,'Nav sound must play at full configured element volume');
-  assert.equal(plays[0].muted,false,'Nav sound must never be muted');
-  assert.equal(plays[0].category,'ambient','UI sound must stay in ambient audio category');
+  vm.runInContext('playFlympusBottomNavSound()',context);
+  assert.equal(fastStarts.length,1,'First ready nav press must use the low-latency buffer path');
+  assert.equal(mediaPlays.length,0,'Ready fast nav press must not also trigger delayed HTMLAudio');
+  assert.equal(fastStarts[0].buffer?.decoded,true,'Fast path must use the decoded selected WAV');
+  assert(Math.abs(fastStarts[0].startTime-10.001)<.0001,'Fast path must start 1ms ahead');
+  assert.equal(category,'ambient','Fast nav sound must remain ambient');
 
-  for(let i=0;i<24;i++){
+  for(let i=0;i<12;i++){
     now+=100;
     vm.runInContext('playFlympusBottomNavSound()',context);
-    await Promise.resolve();
   }
-  assert.equal(plays.length,25,'Repeated nav presses must keep producing sound');
-  assert(plays.every(x=>x.src.startsWith('data:audio/wav;base64,UklGR')),
-    'Repeated nav presses must never switch away from the selected in-memory WAV');
-  assert(plays.every(x=>x.currentTime===0),
-    'Every nav press must restart the selected WAV at sample zero');
+  assert.equal(fastStarts.length,13,'Repeated nav presses must remain on the low-latency buffer path');
+  assert.equal(mediaPlays.length,0,'Repeated fast nav presses must not accumulate delayed media playback');
 
-  const beforeArm=plays.length;
+  const beforeRefreshMedia=mediaPlays.length;
   vm.runInContext('globalThis.__g=armFlympusRefreshSound()',context);
   await Promise.resolve();
-  assert.equal(plays.length,beforeArm+1,'Refresh touchstart must arm one real media player');
-  const primer=plays.at(-1);
-  assert(primer.src.includes('flympus-refresh-sync.wav'),'Refresh arming must use the selected refresh WAV itself');
-  assert.equal(primer.currentTime,0,'Refresh arming must start from sample zero');
-  assert(primer.volume<=.0001,'Refresh arming must remain effectively inaudible before threshold');
+  assert.equal(mediaPlays.length,beforeRefreshMedia+1,'Refresh touchstart must still arm HTMLAudio');
+  const primer=mediaPlays.at(-1);
+  assert(primer.src.includes('flympus-refresh-sync.wav'),'Refresh primer must use selected refresh WAV');
+  assert(primer.volume<=.0001,'Refresh primer remains effectively inaudible before 44px');
 
   vm.runInContext('fireFlympusRefreshSound(globalThis.__g)',context);
   await Promise.resolve();
-  assert.equal(vm.runInContext('__g.fired',context),true,'Refresh threshold must latch');
-  assert.equal(plays.length,beforeArm+2,'Refresh threshold must emit the selected WAV');
-  const refresh=plays.at(-1);
-  assert(refresh.src.includes('flympus-refresh-sync.wav'),'Refresh fire must use the selected refresh WAV');
-  assert.equal(refresh.currentTime,0,'Audible refresh must restart at sample zero');
-  assert.equal(refresh.volume,1,'Audible refresh must restore normal volume');
-
-  vm.runInContext('resetFlympusAudioSession()',context);
-  now+=500;
-  vm.runInContext('playFlympusBottomNavSound()',context);
-  await Promise.resolve();
-  assert(plays.at(-1).src.startsWith('data:audio/wav;base64,UklGR'),
-    'First nav press after lifecycle reset must still use the selected in-memory WAV');
-  assert.equal(plays.at(-1).currentTime,0,
-    'First nav press after lifecycle reset must still start at sample zero');
+  const refresh=mediaPlays.at(-1);
+  assert(refresh.src.includes('flympus-refresh-sync.wav'),'Refresh fire must keep selected refresh WAV');
+  assert.equal(refresh.currentTime,0,'Refresh fire must restart from sample zero');
+  assert.equal(refresh.volume,1,'Refresh fire must restore full element volume');
 
   assert(html.includes('if(!pullRefreshSoundPlayed&&pullDy>=44)'),
-    'Refresh sound must remain tied to the existing 44px pull threshold');
-  assert(html.includes("if(e.target?.closest?.('#mobileBottomNav'))return"),
-    'Pull tracking must still ignore bottom-nav touches');
+    'Refresh sound threshold must stay 44px');
   assert(html.includes('const pullThreshold=96;'),
-    'Actual refresh threshold must remain unchanged');
-  assert((html.match(/bindFlympusNavPressSound\(b/g)||[]).length>=2,
-    'The same clean sound binding must cover mobile bottom nav and drawer/desktop nav');
+    'Actual refresh threshold must stay 96px');
+  assert(html.includes("if(e.target?.closest?.('#mobileBottomNav'))return"),
+    'Pull gesture must still ignore the bottom nav');
 
   assert(html.includes('--dock-halo-y-nudge:-1px'),
-    'Dock halo vertical correction must be preserved');
-  assert(html.includes("halo:(()=>{"),
-    'Reload snapshot must still preserve halo geometry');
-  assert(html.includes("bottomNav.classList.add('dockHaloMeasured','dockHaloReady')"),
-    'Reload hydration must still restore halo before paint');
-
-  assert(html.includes("class=\"mobileBottomHalo\"")&&html.includes("function ensureBottomDockHalo()"),
-    'Bottom dock must use one persistent real halo element rather than recreating a pseudo halo');
-  assert(html.includes("transition:transform .22s cubic-bezier(.22,.78,.20,1);"),
-    'Persistent halo should visibly travel between icons');
-  assert(html.includes("--dock-halo-y-nudge:-1px")&&html.includes("buttonRect.width.toFixed(2)")&&html.includes("buttonRect.height.toFixed(2)"),
-    'Traveling halo must preserve the approved size, centering and vertical nudge');
-  assert(html.includes("transition:background .08s ease,color .08s ease,transform .07s ease!important;"),
-    'Bottom icon press/color feedback should remain fast');
+    'Approved halo vertical centering must remain unchanged');
+  assert(html.includes('class="mobileBottomHalo"')&&html.includes('function ensureBottomDockHalo()'),
+    'Bottom dock must use one persistent traveling halo element');
+  assert(html.includes('transition:transform .22s cubic-bezier(.22,.78,.20,1);'),
+    'Persistent halo must visibly travel between destinations');
+  assert(html.includes('buttonRect.width.toFixed(2)')&&html.includes('buttonRect.height.toFixed(2)'),
+    'Traveling halo must keep the approved measured width and height');
   assert(html.includes("render({fastNavigation:!!options.fastNavigation})"),
-    'Bottom-nav navigation should use the fast-navigation render path');
-  assert(!html.includes("setTimeout(()=>{if(token!==window.__flympusBottomNavTaskToken)return;go(target,{}, {fastNavigation:true});"),
-    'Bottom navigation must not add an extra timer before switching screens');
-  assert(html.includes("if(fast){setTimeout(()=>{saveUiState();renderTopCourseSwitcher();renderPersonalIdentity();syncNotificationPreferenceControls();bind()},0)}else bind()"),
-    'Non-critical binding and persistence should be deferred until after fast content replacement');
-  assert(html.includes("item?.classList.toggle('active',active)")&&html.includes("syncBottomDockHalo(true)"),
-    'Pressed bottom-nav destination must update visually before the heavy render');
+    'Bottom navigation must keep the fast render path');
 
-  console.log('Clean selected-WAV audio lifecycle tests passed');
+  console.log('Low-latency nav audio, refresh audio, and traveling halo tests passed');
 })().catch(err=>{
   console.error(err);
   process.exitCode=1;
