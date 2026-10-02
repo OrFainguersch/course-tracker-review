@@ -2685,6 +2685,63 @@ body::-webkit-scrollbar{
 </style>
 
 <style>
+/* ===== Bottom dock · traveling active halo =====
+   The active capsule is owned by the persistent dock itself, not by an item,
+   so it physically glides between destinations like the reference apps. */
+.mobileBottomNav{
+  --dock-halo-pad-x:7px;
+  --dock-halo-top:7px;
+  --dock-halo-height:62px;
+  --dock-halo-shift:200%;
+  isolation:isolate!important;
+}
+.mobileBottomNav::before{
+  content:"";
+  position:absolute;
+  left:var(--dock-halo-pad-x);
+  top:var(--dock-halo-top);
+  width:calc((100% - (2 * var(--dock-halo-pad-x))) / 5);
+  height:var(--dock-halo-height);
+  border-radius:999px;
+  background:rgba(255,255,255,.105);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+  transform:translate3d(var(--dock-halo-shift),0,0);
+  transition:none;
+  will-change:transform;
+  pointer-events:none;
+  z-index:0;
+}
+.mobileBottomNav.dockHaloReady::before{
+  transition:transform .32s cubic-bezier(.20,.80,.20,1);
+}
+.mobileBottomItem{
+  position:relative!important;
+  z-index:1!important;
+}
+.mobileBottomItem.active .mobileBottomIconButton{
+  background:transparent!important;
+  box-shadow:none!important;
+}
+@media(max-width:759px){
+  .mobileBottomNav{
+    --dock-halo-pad-x:7px;
+    --dock-halo-top:7px;
+    --dock-halo-height:62px;
+  }
+}
+@media(min-width:900px){
+  .mobileBottomNav{
+    --dock-halo-pad-x:12px;
+    --dock-halo-top:8px;
+    --dock-halo-height:56px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .mobileBottomNav.dockHaloReady::before{transition:none!important}
+}
+</style>
+
+<style>
 /* ===== Pull-to-refresh · native-like standalone physics =====
    The blue reveal is a fixed layer BEHIND the moving header/content. It never
    chases the finger, so even a very fast pull cannot expose a white seam. */
@@ -2715,6 +2772,13 @@ html.flympusPullRoot{
   overscroll-behavior-y:none!important;
 }
 html.flympusPullRoot body{
+  overscroll-behavior-y:none!important;
+}
+/* In an installed app the custom pull system is the ONLY vertical overscroll
+   system. Disable WebKit's native rubber-band from page boot, not after the
+   finger has already moved, so it can never rebound underneath our transform. */
+html.flympusStandaloneApp,
+html.flympusStandaloneApp body{
   overscroll-behavior-y:none!important;
 }
 
@@ -3274,6 +3338,11 @@ function renderMobileBottomNav(){
   bottomDockVelocity=0;
   const active=state.screen==='home'?'home':(['roster','profile','instructor'].includes(state.screen)?'roster':state.screen==='planned'?'planned':['record','evaluation','safety','exams'].includes(state.screen)?'record':state.screen==='reports'?'reports':'');
   const items=[['roster','roster','Roster'],['planned','planned','Plan'],['home','home','Home'],['record','record','Record'],['reports','reports','Reports']];
+  const activeIndex=Math.max(0,items.findIndex(([id])=>id===active));
+  n.style.setProperty('--dock-halo-shift',(activeIndex*100)+'%');
+  if(!n.classList.contains('dockHaloReady')){
+    requestAnimationFrame?.(()=>n.classList.add('dockHaloReady'));
+  }
   n.innerHTML=items.map(([id,icon,label])=>{const attentionKey=id==='record'?'record':id==='planned'?'planned':'';const attention=attentionKey?(id==='record'?attentionBadgeHtml('record','mobileNavAttention mobileNavRecordAttention',true):attentionBadgeHtml(attentionKey,'mobileNavAttention')):'';return '<div class="mobileBottomItem '+(id==='home'?'homeCenter ':'')+(active===id?'active':'')+'"><button class="mobileBottomIconButton" type="button" data-mobile-nav="'+id+'" aria-label="'+label+'" '+(active===id?'aria-current="page"':'')+'><span class="mobileBottomIcon">'+bottomNavIconSvg(icon,active===id)+'</span>'+attention+'<span class="mobileBottomLabel" aria-hidden="true">'+label+'</span></button></div>'}).join('');
 }
 function bottomNavRootForScreen(screen){
@@ -3589,6 +3658,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     window.matchMedia?.('(display-mode: minimal-ui)')?.matches||
     String(document.referrer||'').startsWith('ios-app://')
   );
+  document.documentElement?.classList.toggle('flympusStandaloneApp',flympusStandaloneMode());
 
   const pullNodes=()=>[$('.top'),$('#content')].filter(Boolean);
   const pullIndicator=()=>$('#flympusStandaloneRefreshIndicator');
@@ -3826,7 +3896,10 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     pullTracking=true;
     pullStandaloneGesture=standalone;
 
-    if(standalone)ensurePullChromeVisible();
+    if(standalone){
+      ensurePullChromeVisible();
+      if(top<=2)setPullRootActive(true);
+    }
     pullRefreshGraph=armFlympusRefreshSound();
   },{passive:true,capture:true});
 
