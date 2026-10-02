@@ -2682,20 +2682,20 @@ body::-webkit-scrollbar{
 <style>
 /* ===== Installed / standalone touch-app pull-to-refresh ===== */
 @media(max-width:899px), (hover:none) and (pointer:coarse){
-  /* Fill only the gap revealed ABOVE the translated header. The old fixed
-     390px shield extended into the viewport and physically covered the header
-     and page at its original boundary, creating the horizontal navy band seen
-     during pull-to-refresh. Keep a 1px overlap under the moving header to avoid
-     a sub-pixel seam without ever crossing the controls/content. */
-  body.flympusStandalonePull::before{
-    top:-180px!important;
-    height:calc(181px + var(--flympus-standalone-pull-y,0px))!important;
-    background:#0d3156!important;
-  }
-  body.flympusStandaloneRelease::before{
-    top:-180px!important;
-    height:181px!important;
-    background:#0d3156!important;
+  /* The overscroll fill belongs to the moving header itself. Because this
+     pseudo-element travels with .top, its lower edge always meets the header
+     exactly while pulling AND while springing back. This avoids both the old
+     horizontal navy band and the one-frame gap/jolt during release. */
+  body.flympusStandalonePull .top::before,
+  body.flympusStandaloneRelease .top::before{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:calc(100% - 1px);
+    height:280px;
+    background:#0d3156;
+    pointer-events:none;
   }
 
   body.flympusStandalonePull .top,
@@ -2708,7 +2708,7 @@ body::-webkit-scrollbar{
   body.flympusStandaloneRelease .top,
   body.flympusStandaloneRelease main{
     transform:translate3d(0,0,0)!important;
-    transition:transform .24s cubic-bezier(.22,.76,.22,1)!important;
+    transition:transform .28s cubic-bezier(.22,.76,.22,1)!important;
   }
 
   /* Safari-style pull spinner: no button/circle background, just the subtle
@@ -3629,12 +3629,13 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     $('#flympusStandaloneRefreshIndicator')?.classList.remove('armed','refreshing');
   };
 
-  const releaseStandalonePullVisual=()=>{
+  const releaseStandalonePullVisual=({refreshing=false,onComplete=null}={})=>{
     /* Never apply standalone release styling in normal Safari. On a native
        Safari reload, pageshow also fires; adding this class there was the cause
        of the large navy block covering the page after pull-to-refresh. */
     if(!flympusStandaloneMode()){
       clearStandalonePullVisual();
+      if(typeof onComplete==='function')onComplete();
       return;
     }
     clearTimeout(pullReleaseTimer);
@@ -3644,8 +3645,13 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     document.documentElement?.style?.setProperty('--flympus-standalone-pull-opacity','0');
     document.documentElement?.style?.setProperty('--flympus-standalone-pull-progress','0');
     const indicator=$('#flympusStandaloneRefreshIndicator');
-    indicator?.classList.remove('armed','refreshing');
-    pullReleaseTimer=setTimeout(()=>document.body?.classList.remove('flympusStandaloneRelease'),220);
+    indicator?.classList.remove('armed');
+    indicator?.classList.toggle('refreshing',!!refreshing);
+    pullReleaseTimer=setTimeout(()=>{
+      document.body?.classList.remove('flympusStandaloneRelease');
+      if(!refreshing)indicator?.classList.remove('refreshing');
+      if(typeof onComplete==='function')onComplete();
+    },300);
   };
 
   const resetPullRefreshSound=()=>{
@@ -3714,9 +3720,11 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
       const indicator=$('#flympusStandaloneRefreshIndicator');
       indicator?.classList.add('refreshing');
       if(graph&&!graph.fired)fireFlympusRefreshSound(graph);
-      /* Keep the pulled frame visible until navigation, but never enter the
-         release transition on the new document. */
-      setTimeout(()=>location.reload(),90);
+      /* Finish the physical return first. Reloading while the pulled frame is
+         still held makes standalone WebKit appear to pause and then snap back.
+         The 300 ms release is compositor-only; navigation begins immediately
+         after the header/content arrive smoothly at their resting position. */
+      releaseStandalonePullVisual({refreshing:true,onComplete:()=>location.reload()});
       return;
     }
 
