@@ -5893,11 +5893,10 @@ function buildFlympusScreenHtml(screen){
 }
 
 function createFlympusScreenTemplate(screen){
+  const previous=state.screen;
   try{
-    const previous=state.screen;
     state.screen=screen;
     const html=buildFlympusScreenHtml(screen);
-    state.screen=previous;
     const tpl=document.createElement('template');
     tpl.innerHTML=html;
     flympusBottomScreenTemplates.set(screen,tpl);
@@ -5905,6 +5904,8 @@ function createFlympusScreenTemplate(screen){
   }catch(err){
     try{console.warn('FLYMPUS pre-render skipped',screen,err)}catch{}
     return null;
+  }finally{
+    state.screen=previous;
   }
 }
 
