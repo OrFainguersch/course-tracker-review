@@ -154,6 +154,10 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
     'Bottom-bar screens must pre-render during idle time');
   assert(html.includes("mountFlympusFastScreen(state.screen)"),
     'Fast bottom navigation must mount the prepared screen instead of rebuilding it when available');
+  assert(html.includes("function scheduleFlympusBottomNavigation(target)")&&html.includes("requestAnimationFrame(afterPaint)")&&html.includes("setTimeout(commit,0)"),
+    'Physical bottom-nav presses must yield one paint before screen DOM work so audio and halo motion are not blocked');
+  assert(html.includes("scheduleFlympusBottomNavigation(target);"),
+    'Bottom-nav activation must use the post-paint navigation scheduler');
 
   console.log('Low-latency nav audio, refresh audio, and traveling halo tests passed');
 })().catch(err=>{
