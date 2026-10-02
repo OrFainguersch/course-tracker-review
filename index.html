@@ -3094,6 +3094,13 @@ html.flympusHydrating #content{
      window so the first tap is never dead. The real navigation is replayed as
      soon as the runtime is ready; the approved halo geometry moves immediately. */
   let earlyNavAudio=null;
+  const getEarlyNativeFeedback=()=>{
+    try{
+      const cap=window.Capacitor;
+      if(!cap?.isNativePlatform?.()||!cap?.isPluginAvailable?.('FlympusNativeFeedback')||typeof cap.registerPlugin!=='function')return null;
+      return window.__FLYMPUS_NATIVE_FEEDBACK__||(window.__FLYMPUS_NATIVE_FEEDBACK__=cap.registerPlugin('FlympusNativeFeedback'));
+    }catch{return null}
+  };
   const ensureEarlyNavAudio=()=>{
     if(earlyNavAudio)return earlyNavAudio;
     try{
@@ -3151,10 +3158,25 @@ html.flympusHydrating #content{
     const now=performance.now?.()||Date.now();
     if(now-Number(window.__FLYMPUS_EARLY_NAV_SOUND_AT__||0)>=72){
       window.__FLYMPUS_EARLY_NAV_SOUND_AT__=now;
-      const a=ensureEarlyNavAudio();
-      if(a){
+      const nativeFeedback=getEarlyNativeFeedback();
+      const playWebFallback=()=>{
+        const a=ensureEarlyNavAudio();
+        if(!a)return;
         try{a.pause?.()}catch{}try{a.currentTime=0}catch{}
         try{const p=a.play?.();if(p?.catch)p.catch(()=>{})}catch{}
+      };
+      if(nativeFeedback){
+        try{
+          const hp=nativeFeedback.haptic?.({style:'light'});
+          if(hp?.catch)hp.catch(()=>{});
+        }catch{}
+        try{
+          const p=nativeFeedback.play?.({kind:'bottomNav'});
+          if(p?.catch)p.catch(playWebFallback);
+          else if(!p)playWebFallback();
+        }catch{playWebFallback()}
+      }else{
+        playWebFallback();
       }
     }
   };
@@ -3997,25 +4019,22 @@ function resetFlympusAudioSession(){
   }
 }
 
-function playFlympusBottomNavSound(){
+let flympusNativeFeedbackPlugin=null;
+function getFlympusNativeFeedbackPlugin(){
   try{
-    setFlympusAmbientAudioSession();
+    const cap=window.Capacitor;
+    if(!cap?.isNativePlatform?.()||!cap?.isPluginAvailable?.('FlympusNativeFeedback')||typeof cap.registerPlugin!=='function')return null;
+    if(!flympusNativeFeedbackPlugin){
+      flympusNativeFeedbackPlugin=window.__FLYMPUS_NATIVE_FEEDBACK__||cap.registerPlugin('FlympusNativeFeedback');
+      window.__FLYMPUS_NATIVE_FEEDBACK__=flympusNativeFeedbackPlugin;
+    }
+    return flympusNativeFeedbackPlugin;
+  }catch{return null}
+}
 
-    /* The selected signature is ~86 ms. Prevent acoustic overlap, but never
-       delay navigation itself. */
-    const now=performance.now?.()||Date.now();
-    if(now-flympusLastNavSoundAt<72)return;
-    flympusLastNavSoundAt=now;
-
-    /* Web Audio is the primary path for the short UI click because Safari's
-       HTMLMediaElement can start hundreds of ms after play(). The exact same
-       selected WAV is already decoded in memory; source.start() is scheduled
-       one millisecond ahead on the interactive context. */
+function playFlympusBottomNavWebSound(){
+  try{
     if(playFlympusNavFastSound())return;
-
-    /* Decoder/context not ready yet: use the viewport-specific baked fallback WAV (10% mobile / 65% desktop).
-       iOS may ignore HTMLMediaElement.volume, so attenuation is baked into the
-       PCM samples and the first taps cannot sound louder than WebAudio. */
     const pool=getFlympusNavAudioPool();if(!pool.length)return;
     const a=pool[flympusNavAudioIndex++%pool.length];
     rewindFlympusFileAudio(a,1);
@@ -4024,8 +4043,30 @@ function playFlympusBottomNavSound(){
   }catch{}
 }
 
+function playFlympusBottomNavSound(){
+  try{
+    setFlympusAmbientAudioSession();
+    const now=performance.now?.()||Date.now();
+    if(now-flympusLastNavSoundAt<72)return;
+    flympusLastNavSoundAt=now;
+
+    /* Capacitor wrappers use native sonification/system sound first. Browsers,
+       PWAs and any native failure automatically retain the approved web path. */
+    const nativeFeedback=getFlympusNativeFeedbackPlugin();
+    if(nativeFeedback?.play){
+      try{
+        const p=nativeFeedback.play({kind:'bottomNav'});
+        if(p?.catch)p.catch(()=>playFlympusBottomNavWebSound());
+        return;
+      }catch{}
+    }
+    playFlympusBottomNavWebSound();
+  }catch{}
+}
+
 function isFlympusIOSHapticTarget(){
   try{
+    if(getFlympusNativeFeedbackPlugin())return false;
     const ua=String(navigator.userAgent||'');
     return /iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&Number(navigator.maxTouchPoints||0)>1);
   }catch{return false}
@@ -4035,12 +4076,23 @@ function flympusDirectHapticOverlayHtml(){
   return '<input type="checkbox" switch class="mobileBottomHapticSwitch" tabindex="-1" aria-hidden="true">';
 }
 function triggerFlympusPortableHaptic(duration=8){
+  const fallback=()=>{
+    try{
+      if(typeof navigator.vibrate==='function'){
+        return !!navigator.vibrate(Math.max(1,Math.min(20,Number(duration)||8)));
+      }
+    }catch{}
+    return false;
+  };
   try{
-    if(typeof navigator.vibrate==='function'){
-      return !!navigator.vibrate(Math.max(1,Math.min(20,Number(duration)||8)));
+    const nativeFeedback=getFlympusNativeFeedbackPlugin();
+    if(nativeFeedback?.haptic){
+      const p=nativeFeedback.haptic({style:Number(duration)>=9?'medium':'light'});
+      if(p?.catch)p.catch(()=>fallback());
+      return true;
     }
   }catch{}
-  return false;
+  return fallback();
 }
 
 let flympusDockPressZoomTimer=null;
@@ -4090,7 +4142,7 @@ function armFlympusRefreshSound(){
     try{a.currentTime=0}catch{}
     a.muted=true;
 
-    const graph={audio:a,fired:false,stopped:false,armed:false};
+    const graph={audio:a,native:getFlympusNativeFeedbackPlugin(),fired:false,stopped:false,armed:false};
 
     /* iOS grants media playback reliably on the initial touchstart. Prime the
        selected 13%-amplitude refresh WAV fully MUTED. The level is baked into
@@ -4120,14 +4172,24 @@ function stopFlympusRefreshSound(graph){
 function fireFlympusRefreshSound(graph){
   if(!graph||graph.fired||graph.stopped)return;
   graph.fired=true;
-  const a=graph.audio;if(!a)return;
-  try{
-    a.currentTime=0;
-    a.volume=1;
-    a.muted=false;
-    const p=a.play?.();
-    if(p?.catch)p.catch(()=>{});
-  }catch{}
+  const playWebFallback=()=>{
+    const a=graph.audio;if(!a)return;
+    try{
+      a.currentTime=0;
+      a.volume=1;
+      a.muted=false;
+      const p=a.play?.();
+      if(p?.catch)p.catch(()=>{});
+    }catch{}
+  };
+  if(graph.native?.play){
+    try{
+      const p=graph.native.play({kind:'pullToRefresh'});
+      if(p?.catch)p.catch(playWebFallback);
+      return;
+    }catch{}
+  }
+  playWebFallback();
 }
 
 /* Decode the selected nav WAV ahead of time. The AudioContext may remain

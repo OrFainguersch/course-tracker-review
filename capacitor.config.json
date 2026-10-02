@@ -1,0 +1,6 @@
+{
+  "appId": "com.flympus.app",
+  "appName": "FLYMPUS",
+  "webDir": "native-www",
+  "loggingBehavior": "debug"
+}

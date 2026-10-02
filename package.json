@@ -1,0 +1,21 @@
+{
+  "name": "flympus",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FLYMPUS training management portal with Capacitor native wrappers.",
+  "engines": {"node": ">=22.0.0"},
+  "scripts": {
+    "native:web": "node scripts/prepare-native-web.mjs",
+    "native:add:android": "npm run native:web && npx cap add android",
+    "native:add:ios": "npm run native:web && npx cap add ios",
+    "native:sync": "npm run native:web && npx cap sync",
+    "native:doctor": "npx cap doctor"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.2",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/ios": "8.5.2",
+    "@flympus/native-feedback": "file:./native/flympus-native-feedback"
+  },
+  "devDependencies": {"@capacitor/cli": "8.5.2"}
+}
