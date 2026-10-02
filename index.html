@@ -3407,7 +3407,10 @@ function scrollActiveBottomNavTop(root){
   bottomNavScrollPositions[root]=0;persistBottomNavScroll();
   try{window.scrollTo({top:0,left:0,behavior:'smooth'})}catch{window.scrollTo?.(0,0)}
 }
-let flympusUiAudioGestureSerial=0;
+let flympusUiAudioCtx=null;
+let flympusUiNeedsRouteRecovery=true;
+let flympusUiRouteReadyPromise=Promise.resolve(null);
+const FLYMPUS_UI_AUDIO_WARMUP_MS=120;
 
 function setFlympusAmbientAudioSession(){
   try{
@@ -3415,88 +3418,188 @@ function setFlympusAmbientAudioSession(){
   }catch{}
 }
 
-function createFlympusGestureAudioContext(){
+function discardFlympusUiAudioContext(){
+  const old=flympusUiAudioCtx;
+  flympusUiAudioCtx=null;
+  if(old&&old.state!=='closed'){
+    try{old.close?.()}catch{}
+  }
+}
+
+function createFlympusUiAudioContext(){
   try{
-    setFlympusAmbientAudioSession();
     const AudioCtx=window.AudioContext||window.webkitAudioContext;
     if(!AudioCtx)return null;
-    let ctx=null;
-    try{ctx=new AudioCtx({latencyHint:'interactive'})}catch{ctx=new AudioCtx()}
-    if(!ctx)return null;
-    ctx.__flympusGestureId=++flympusUiAudioGestureSerial;
-
-    /* Resume synchronously inside the physical touch/pointer gesture. Do not
-       await it: sources scheduled on the same stack remain tied to that user
-       activation, and context time starts once WebKit actually resumes. */
-    if(ctx.state!=='running'){
-      try{ctx.resume?.()}catch{}
-    }
-
-    /* Tiny non-zero carrier: prevents iOS from optimizing the unlock away while
-       remaining effectively inaudible. We never switch to the playback audio
-       category, so the device's Silent switch remains authoritative. */
-    try{
-      const now=ctx.currentTime;
-      const osc=ctx.createOscillator(),gain=ctx.createGain();
-      osc.type='sine';osc.frequency.setValueAtTime(220,now);
-      gain.gain.setValueAtTime(.000001,now);
-      osc.connect(gain);gain.connect(ctx.destination);
-      osc.start(now);osc.stop(now+.018);
-    }catch{}
-
-    return ctx;
+    try{return new AudioCtx({latencyHint:'interactive'})}catch{return new AudioCtx()}
   }catch{return null}
 }
 
-function closeFlympusGestureAudioContext(ctx,delay=0){
+function getFlympusUiAudioContext(){
+  if(!flympusUiAudioCtx||flympusUiAudioCtx.state==='closed'){
+    flympusUiAudioCtx=createFlympusUiAudioContext();
+  }
+  return flympusUiAudioCtx;
+}
+
+function recoverFlympusAmbientAudioSession(){
+  try{
+    const session=navigator.audioSession;
+    if(!session)return Promise.resolve();
+
+    /* WebKit may keep a JS-side category cache while the native/GPU audio
+       session behind it has been rebuilt. A real category transition forces the
+       native session to be re-sent. Finish on ambient so the Ring/Silent switch
+       remains authoritative for these non-essential UI sounds. */
+    try{session.type='playback'}catch{}
+    return new Promise(resolve=>{
+      setTimeout(()=>{
+        try{session.type='ambient'}catch{}
+        setTimeout(resolve,0);
+      },0);
+    });
+  }catch{
+    setFlympusAmbientAudioSession();
+    return Promise.resolve();
+  }
+}
+
+function holdFlympusUiAudioRoute(ctx){
   if(!ctx)return;
-  const close=()=>{
-    try{if(ctx.state!=='closed')ctx.close?.()}catch{}
-  };
-  if(delay>0)setTimeout(close,delay);else close();
+  try{
+    /* Keep a tiny non-zero carrier alive while iOS opens the physical output
+       route. Zero/muted primers can be optimized away by WebKit. */
+    const now=ctx.currentTime;
+    const osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.type='sine';
+    osc.frequency.setValueAtTime(220,now);
+    gain.gain.setValueAtTime(.000001,now);
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.start(now);osc.stop(now+.24);
+  }catch{}
+}
+
+function prepareFlympusUiAudioGesture(){
+  try{
+    if(flympusUiAudioCtx&&(flympusUiAudioCtx.state==='interrupted'||flympusUiAudioCtx.state==='closed')){
+      discardFlympusUiAudioContext();
+      flympusUiNeedsRouteRecovery=true;
+    }
+
+    const ctx=getFlympusUiAudioContext();if(!ctx)return null;
+    const needsRecovery=flympusUiNeedsRouteRecovery;
+    const needsResume=ctx.state!=='running';
+
+    let resumeReady=Promise.resolve(ctx);
+    if(needsResume){
+      try{resumeReady=Promise.resolve(ctx.resume?.()).then(()=>ctx).catch(()=>ctx)}catch{}
+    }
+
+    holdFlympusUiAudioRoute(ctx);
+
+    if(needsRecovery){
+      flympusUiNeedsRouteRecovery=false;
+      const sessionReady=recoverFlympusAmbientAudioSession();
+      flympusUiRouteReadyPromise=Promise.all([sessionReady,resumeReady])
+        .then(()=>new Promise(resolve=>setTimeout(resolve,FLYMPUS_UI_AUDIO_WARMUP_MS)))
+        .then(()=>ctx)
+        .catch(()=>ctx);
+      return{ctx,readyNow:false,readyPromise:flympusUiRouteReadyPromise};
+    }
+
+    if(needsResume){
+      flympusUiRouteReadyPromise=Promise.resolve(resumeReady)
+        .then(()=>new Promise(resolve=>setTimeout(resolve,60)))
+        .then(()=>ctx)
+        .catch(()=>ctx);
+      return{ctx,readyNow:false,readyPromise:flympusUiRouteReadyPromise};
+    }
+
+    return{ctx,readyNow:true,readyPromise:Promise.resolve(ctx)};
+  }catch{return null}
 }
 
 function resetFlympusAudioSession(){
-  /* There is intentionally no reusable AudioContext to recover. Every audible
-     gesture gets a new context, so a stale WebKit route from the previous
-     document cannot poison the next refresh/tap. */
+  /* A real reload creates a new document. BFCache/foreground restores do not,
+     so explicitly discard the old context there and force the next physical
+     gesture to rebuild both the Web Audio context and native audio route. */
+  discardFlympusUiAudioContext();
+  flympusUiNeedsRouteRecovery=true;
+  flympusUiRouteReadyPromise=Promise.resolve(null);
   setFlympusAmbientAudioSession();
+}
+
+function armFlympusNavSignature(ctx){
+  if(!ctx)return null;
+  const now=ctx.currentTime;
+  const master=ctx.createGain();
+  master.gain.setValueAtTime(0,now);
+  master.connect(ctx.destination);
+
+  const voice=(freq,level,delay,duration)=>{
+    const osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.type='sine';osc.frequency.setValueAtTime(freq,now);
+    gain.gain.setValueAtTime(0,now);
+    osc.connect(gain);gain.connect(master);
+    /* Start during the physical gesture; only the gain is revealed after the
+       route-recovery warm-up on the first gesture after reload. */
+    osc.start(now);
+    return{osc,gain,freq,level,delay,duration};
+  };
+
+  return{ctx,master,voices:[
+    voice(610,.95,0,.034),
+    voice(1220,.20,0,.028),
+    voice(1490,.34,.005,.028),
+    voice(2260,.13,.010,.020)
+  ],fired:false,stopped:false};
+}
+
+function stopFlympusNavSignature(graph){
+  if(!graph||graph.stopped)return;
+  graph.stopped=true;
+  graph.voices?.forEach(v=>{
+    try{v.osc?.stop?.()}catch{}
+    try{v.osc?.disconnect?.()}catch{}
+    try{v.gain?.disconnect?.()}catch{}
+  });
+  try{graph.master?.disconnect?.()}catch{}
+}
+
+function fireFlympusNavSignature(graph){
+  if(!graph||graph.fired||graph.stopped)return;
+  graph.fired=true;
+  try{
+    const now=graph.ctx.currentTime+.001;
+    graph.master.gain.setValueAtTime(.05,now);
+    graph.voices.forEach(v=>{
+      const start=now+v.delay,end=start+v.duration;
+      v.osc.frequency.setValueAtTime(v.freq,start);
+      v.gain.gain.setValueAtTime(.0001,start);
+      v.gain.gain.linearRampToValueAtTime(v.level,start+.001);
+      v.gain.gain.exponentialRampToValueAtTime(.0001,end);
+      try{v.osc.stop(end+.003)}catch{}
+    });
+    setTimeout(()=>stopFlympusNavSignature(graph),120);
+  }catch{
+    stopFlympusNavSignature(graph);
+  }
 }
 
 function playFlympusBottomNavSound(){
   try{
-    const ctx=createFlympusGestureAudioContext();if(!ctx)return;
-
-    /* If resume is still pending, currentTime is effectively frozen. Scheduling
-       30 ms ahead therefore means "30 ms after the context truly starts", not
-       30 wall-clock ms after the tap. This lets the FIRST tap after reload both
-       unlock and produce the requested sound. */
-    const now=ctx.currentTime+.030;
-    const master=ctx.createGain();
-    master.gain.setValueAtTime(.05,now);
-    master.connect(ctx.destination);
-
-    const voice=(freq,level,delay,duration)=>{
-      const osc=ctx.createOscillator(),gain=ctx.createGain(),start=now+delay,end=start+duration;
-      osc.type='sine';osc.frequency.setValueAtTime(freq,start);
-      gain.gain.setValueAtTime(.0001,start);
-      gain.gain.linearRampToValueAtTime(level,start+.001);
-      gain.gain.exponentialRampToValueAtTime(.0001,end);
-      osc.connect(gain);gain.connect(master);
-      osc.start(start);osc.stop(end+.003);
-    };
-
-    voice(610,.95,0,.034);
-    voice(1220,.20,0,.028);
-    voice(1490,.34,.005,.028);
-    voice(2260,.13,.010,.020);
-    closeFlympusGestureAudioContext(ctx,500);
+    const route=prepareFlympusUiAudioGesture();if(!route)return;
+    const graph=armFlympusNavSignature(route.ctx);if(!graph)return;
+    if(route.readyNow)fireFlympusNavSignature(graph);
+    else Promise.resolve(route.readyPromise)
+      .then(()=>fireFlympusNavSignature(graph))
+      .catch(()=>stopFlympusNavSignature(graph));
   }catch{}
 }
 
 function armFlympusRefreshSound(){
   try{
-    const ctx=createFlympusGestureAudioContext();if(!ctx)return null;
+    const route=prepareFlympusUiAudioGesture();if(!route)return null;
+    const ctx=route.ctx;
     const master=ctx.createGain();
     master.gain.setValueAtTime(0,ctx.currentTime);
     master.connect(ctx.destination);
@@ -3510,9 +3613,6 @@ function armFlympusRefreshSound(){
     filter.type='bandpass';filter.Q.value=.7;filter.frequency.setValueAtTime(650,ctx.currentTime);
     noiseGain.gain.setValueAtTime(0,ctx.currentTime);
     noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(master);
-
-    /* Refresh sources are started during touchstart. At the 44 px threshold we
-       only change gain/frequency automation on an already-authorized graph. */
     noise.start(ctx.currentTime);
 
     const makeVoice=freq=>{
@@ -3527,6 +3627,8 @@ function armFlympusRefreshSound(){
     return{
       ctx,master,noise,filter,noiseGain,
       voices:[makeVoice(610),makeVoice(760),makeVoice(1760),makeVoice(2300)],
+      routeReadyNow:route.readyNow,
+      routeReadyPromise:route.readyPromise,
       fired:false,emitted:false,stopped:false
     };
   }catch{return null}
@@ -3545,16 +3647,14 @@ function stopFlympusRefreshSound(graph){
     try{v.gain?.disconnect?.()}catch{}
   });
   try{graph.master?.disconnect?.()}catch{}
-  closeFlympusGestureAudioContext(graph.ctx);
 }
 
-function fireFlympusRefreshSound(graph){
-  if(!graph||graph.fired||graph.stopped)return;
-  graph.fired=true;
+function emitFlympusRefreshSound(graph){
+  if(!graph||graph.emitted||graph.stopped)return;
   try{
-    const ctx=graph.ctx;
-    const now=ctx.currentTime+.010;
     graph.emitted=true;
+    const ctx=graph.ctx;
+    const now=ctx.currentTime+.002;
     graph.master.gain.setValueAtTime(.055,now);
 
     graph.filter.frequency.cancelScheduledValues(now);
@@ -3588,7 +3688,17 @@ function fireFlympusRefreshSound(graph){
   }
 }
 
-/* No sound is played at boot; only establish the non-intrusive category. */
+function fireFlympusRefreshSound(graph){
+  if(!graph||graph.fired||graph.stopped)return;
+  graph.fired=true;
+  if(graph.routeReadyNow)emitFlympusRefreshSound(graph);
+  else Promise.resolve(graph.routeReadyPromise)
+    .then(()=>emitFlympusRefreshSound(graph))
+    .catch(()=>stopFlympusRefreshSound(graph));
+}
+
+/* Do not play at boot. Just make sure the next real gesture performs a fresh
+   native-route recovery before any audible gain is revealed. */
 resetFlympusAudioSession();
 
 if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
