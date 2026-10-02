@@ -123,6 +123,9 @@ main{padding:16px 14px calc(30px + env(safe-area-inset-bottom));max-width:1220px
 .mobileHero:before{content:"";position:absolute;left:-15%;right:-15%;bottom:-45px;height:95px;border-radius:50%;background:rgba(120,173,216,.17);transform:rotate(-4deg)}
 .mobileHero:after{content:"✈";position:absolute;right:24px;bottom:25px;font-size:54px;color:rgba(255,255,255,.13);transform:rotate(-6deg)}
 .mobileHero>*{position:relative;z-index:1}.mobileHero .welcome{font-size:24px;line-height:1.05;margin:8px 0 6px;font-weight:900;letter-spacing:-.03em}.mobileHero p{margin:0;color:#d7e8f8;font-size:12px}.mobileHero .heroMeta{margin-top:12px;font-size:11px;color:#bfd7ed}
+.mobileHero .homeCourseStatusBadge{position:absolute;right:18px;top:18px;z-index:3;padding:6px 10px;font-size:8.5px;letter-spacing:.055em;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.mobileHero>.eyebrow{padding-right:104px}
+@media(min-width:900px){.mobileHero .homeCourseStatusBadge{right:22px;top:22px}}
 .homeSectionTitle{display:flex;align-items:flex-start;gap:9px;margin:22px 3px 10px}.homeSectionTitle:before{content:"";width:4px;height:20px;border-radius:99px;background:#087cf0;margin-top:2px}.homeSectionTitle h2{margin:0;color:#082f57;font-size:18px}.homeSectionTitle p{margin:3px 0 0;color:#71849a;font-size:11px}
 .mobileActivityGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .mobileActivity{
@@ -212,8 +215,6 @@ main{padding:16px 14px calc(30px + env(safe-area-inset-bottom));max-width:1220px
 
 /* roster */
 .rosterTopbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
-.rosterTopbarActions{display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex:0 0 auto}
-.rosterCourseStatus{padding:6px 10px;font-size:9px;letter-spacing:.045em;white-space:nowrap}
 .rosterControls{padding:11px}.rosterSearchRow{display:grid;grid-template-columns:minmax(0,1fr);margin-top:10px}
 .rosterFilterRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
 .statusSegments{display:flex;background:#f1f5f9;border-radius:12px;padding:3px;gap:2px}
@@ -3016,7 +3017,7 @@ html.flympusHydrating #content{
     try{
       const a=document.createElement('audio');
       a.src='./assets/flympus-nav-signature.wav?v=audio-clean-1';
-      a.preload='auto';a.playsInline=true;a.muted=false;a.volume=.55;
+      a.preload='auto';a.playsInline=true;a.muted=false;a.volume=.495;
       a.setAttribute('playsinline','');a.setAttribute('webkit-playsinline','');
       a.setAttribute('aria-hidden','true');a.tabIndex=-1;
       a.style.position='fixed';a.style.width='0';a.style.height='0';
@@ -3721,7 +3722,8 @@ const FLYMPUS_NAV_SOUND_SRC='data:audio/wav;base64,UklGRsQdAABXQVZFZm10IBAAAAABA
 const FLYMPUS_REFRESH_SOUND_SRC='./assets/flympus-refresh-sync.wav?v=audio-clean-1';
 const FLYMPUS_NAV_POOL_SIZE=2;
 const FLYMPUS_REFRESH_POOL_SIZE=2;
-const FLYMPUS_NAV_SOUND_VOLUME=.55;
+const FLYMPUS_NAV_SOUND_VOLUME=.495;
+const FLYMPUS_REFRESH_SOUND_VOLUME=.495;
 
 let flympusNavAudioPool=null,flympusNavAudioIndex=0;
 let flympusRefreshAudioPool=null,flympusRefreshAudioIndex=0;
@@ -3860,7 +3862,7 @@ function getFlympusNavAudioPool(){
 
 function getFlympusRefreshAudioPool(){
   if(!flympusRefreshAudioPool){
-    flympusRefreshAudioPool=Array.from({length:FLYMPUS_REFRESH_POOL_SIZE},()=>makeFlympusFileAudio(FLYMPUS_REFRESH_SOUND_SRC)).filter(Boolean);
+    flympusRefreshAudioPool=Array.from({length:FLYMPUS_REFRESH_POOL_SIZE},()=>makeFlympusFileAudio(FLYMPUS_REFRESH_SOUND_SRC,FLYMPUS_REFRESH_SOUND_VOLUME)).filter(Boolean);
   }
   return flympusRefreshAudioPool;
 }
@@ -3887,7 +3889,7 @@ function resetFlympusAudioSession(){
   }
   for(const a of getFlympusRefreshAudioPool()){
     try{a.pause?.()}catch{}
-    rewindFlympusFileAudio(a,1);
+    rewindFlympusFileAudio(a,FLYMPUS_REFRESH_SOUND_VOLUME);
   }
 }
 
@@ -3988,7 +3990,7 @@ function armFlympusRefreshSound(){
        selected refresh WAV fully MUTED, not at a tiny audible volume. Ordinary
        taps, scrolls and back-swipes therefore remain silent; only a real pull
        crossing 44px rewinds and unmutes this already-authorized element. */
-    a.volume=1;
+    a.volume=FLYMPUS_REFRESH_SOUND_VOLUME;
     const p=a.play?.();
     graph.armed=true;
     if(p?.catch)p.catch(()=>{});
@@ -4005,7 +4007,7 @@ function stopFlympusRefreshSound(graph){
   try{a.pause?.()}catch{}
   try{a.currentTime=0}catch{}
   try{a.muted=false}catch{}
-  try{a.volume=1}catch{}
+  try{a.volume=FLYMPUS_REFRESH_SOUND_VOLUME}catch{}
 }
 
 function fireFlympusRefreshSound(graph){
@@ -4014,7 +4016,7 @@ function fireFlympusRefreshSound(graph){
   const a=graph.audio;if(!a)return;
   try{
     a.currentTime=0;
-    a.volume=1;
+    a.volume=FLYMPUS_REFRESH_SOUND_VOLUME;
     a.muted=false;
     const p=a.play?.();
     if(p?.catch)p.catch(()=>{});
@@ -4591,6 +4593,7 @@ function home(){
    ...(showHomeQualification?[[currentCourseMeta.type==='IP'?'Configuration':'Qualification',activeCourseContextLabel()||'—']]:[])
  ];
  const homeContextHtml='<div class="homeCourseContext cols'+homeContextItems.length+'">'+homeContextItems.map(([label,value])=>{const compact=label==='Qualification'?'Qual.':label==='Configuration'?'Config.':label;return '<div class="homeCourseContextItem"><small><span class="homeContextLabelFull '+((label==='Qualification'||label==='Configuration')?'long':'')+'">'+esc(label)+'</span><span class="homeContextLabelCompact">'+esc(compact)+'</span></small><b>'+esc(value)+'</b></div>'}).join('')+'</div>';
+ const homeCourseLifecycle=courseLifecycleInfo(courseByKey(currentCourseId));
  const pickDef=(name,fallback)=>defs.find(x=>x.name===name)||defs.find(x=>!x.optional&&x.mode!=='SIMULATOR')||{name:fallback,mode:'INSTRUCTED'};
  const plan=[
    {time:'08:00',t:activeT[0],def:pickDef(activeT[0]?.currentSyllabus,'Circuits')},
@@ -4613,6 +4616,7 @@ function home(){
  ].slice(0,4);
  return '<div class="homeDashboard">'+
    '<section class="mobileHero">'+
+     '<span class="courseStateBadge homeCourseStatusBadge '+homeCourseLifecycle.className+'">'+esc(homeCourseLifecycle.label)+'</span>'+
      '<div class="eyebrow" style="color:#8bc8ff">'+esc(String(currentCourseMeta.courseName||course.name).toUpperCase())+'</div>'+
      '<div class="welcome">Welcome back, Or</div>'+
      homeContextHtml+
@@ -4699,7 +4703,6 @@ function evalCard(e){return `<article class="evalItem"><div class="evalTop"><div
 function roster(){
  const allT=courseTrainees().map(t=>{const m=courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'});return {...t,status:m.status||'Active',type:'TRAINEE'}});
  const allI=courseInstructors().map(i=>{const m=courseMembershipFor(i.id,'INSTRUCTOR',{role:i.role||'INSTRUCTOR'});return {...i,role:m.role||'INSTRUCTOR',type:'INSTRUCTOR'}});
- const courseLifecycle=courseLifecycleInfo(courseByKey(currentCourseId));
  const type=state.rosterType||'TRAINEE',base=type==='TRAINEE'?allT:allI,manage=!!state.rosterManage,unassignedExisting=alphaByName([...allTrainees().map(x=>({...x,type:'TRAINEE'})),...allInstructors().map(x=>({...x,type:'INSTRUCTOR'}))].filter(x=>!coursePersonIsAssignedTo(x,x.type,currentCourseId)));
  const statusSel=normalizeMultiFilterValue(state.rosterStatuses),roleSel=normalizeMultiFilterValue(state.rosterRoles),dateFrom=state.rosterDateFrom||'',dateTo=state.rosterDateTo||'',singleStatus=(statusSel.length===1&&['Active','Inactive'].includes(statusSel[0]))?statusSel[0]:'ALL';
  let list=base.filter(t=>type==='TRAINEE'?(singleStatus==='ALL'||String(t.status)===singleStatus):(multiFilterMatches(t.role,roleSel)&&filterDateMatches(t.lastActivity,dateFrom,dateTo)));
@@ -4715,7 +4718,7 @@ function roster(){
    else{const ma=a.role==='COURSE_MANAGER',mb=b.role==='COURSE_MANAGER';if(ma!==mb)return ma?-1:1;if(Number(a.workloadRank||999)!==Number(b.workloadRank||999))return Number(a.workloadRank||999)-Number(b.workloadRank||999)}
    return String(a.name).localeCompare(String(b.name),undefined,{sensitivity:'base'})
  });
- return '<div class="rosterTopbar"><div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div><div class="rosterTopbarActions"><span class="courseStateBadge rosterCourseStatus '+courseLifecycle.className+'">'+esc(courseLifecycle.label)+'</span>'+(!manage?'<button class="btn edit" id="toggleRosterManage">✎ Manage</button>':'')+'</div></div>'+
+ return '<div class="rosterTopbar"><div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div>'+(!manage?'<button class="btn edit" id="toggleRosterManage">✎ Manage</button>':'')+'</div>'+
  (manage?'<div class="manageBanner rosterManageBanner"><div class="rosterManageBannerCopy"><b>Manage mode</b><span> · Edit identity, photo and course membership safely.</span></div><div class="rosterManageBannerActions"><button class="btn sky small rosterDoneEditing" id="toggleRosterManage" type="button">✓ Done editing</button><button class="btn edit small rosterAddPerson" id="addPersonBtn" type="button">+ Add person</button></div></div>':'')+
  '<section class="card rosterControls"><div class="scrollTabs"><button class="seg '+(type==='TRAINEE'?'active':'')+'" data-roster-type="TRAINEE">Trainees ('+allT.length+')</button><button class="seg '+(type==='INSTRUCTOR'?'active':'')+'" data-roster-type="INSTRUCTOR">Instructors ('+allI.length+')</button></div>'+
  '<div class="rosterSearchRow"><input class="input" id="rosterSearch" placeholder="Search '+(type==='TRAINEE'?'trainees':'instructors')+'..." value="'+esc(state.search)+'"></div>'+
@@ -6169,14 +6172,14 @@ function reports(){
   syllabusSel.length?{label:'Syllabus',value:filterChoiceSummary(syllabusSel,genericMultiItems(syllOptions))}:null,
   (dateFrom||dateTo)?{label:'Date',value:filterDateSummary(dateFrom,dateTo)}:null
  ].filter(Boolean);
- return '<h1 class="pageTitle">Course analytics</h1><p class="sub">Analytics are scoped to the active course.</p>'+
+ return '<h1 class="pageTitle">Course analytics</h1><p class="sub">Analytics are scoped to the active course and its resolved training suit.</p>'+activeSuitOverviewHtml()+
  '<section class="card settingBox filterPanelCard"><div class="inlineHead unifiedFilterPanelHead"><div><h3>Filters</h3><small>'+esc(reportFilterSummary)+'</small></div><div class="reportToolbar" style="margin:0"><button class="btn secondary small" id="reportsReset">Reset</button><button class="btn secondary small" id="reportsCsv">⇩ Export CSV</button><button class="btn sky small" id="reportsPrint">Print / PDF</button></div></div><div class="reportFilters" style="margin-top:10px">'+
  multiFilterHtml('reportTrainee','Trainee',traineeMultiFilterItems(),traineeSel,'All trainees')+
  multiFilterHtml('reportInstructor','Instructor',genericMultiItems(alphaByName(courseInstructors())),instructorSel,'All instructors')+
  multiFilterHtml('reportSyllabus','Syllabus',genericMultiItems(syllOptions),syllabusSel,'All syllabi')+
  dateRangeFilterHtml('reportDate','Date range',dateFrom,dateTo)+filterSelectionsHtml('',reportSelections)+'</div></section>'+
  '<section class="reportKpis"><div><strong>'+courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active').length+'</strong><span>Active trainees</span></div><div><strong>'+rows.length+'</strong><span>Evaluations</span></div><div><strong>'+(avg==null?'—':avg.toFixed(1))+'</strong><span>Average grade</span></div><div><strong>'+safetyRows.length+'</strong><span>Safety events</span></div><div><strong>'+(passRate==null?'—':passRate.toFixed(0)+'%')+'</strong><span>Exam pass rate</span></div></section>'+
- '<div class="reportsGrid"><section class="card settingBox"><h3>Emergency exposure</h3><p class="sub">Recorded emergency practice across matched evaluated flights.</p>'+reportBars(emergencyDist,10)+'</section><section class="card settingBox"><h3>Syllabus activity</h3><p class="sub">Evaluations by syllabus.</p>'+reportBars(syllabusDist,10)+'</section><section class="card settingBox"><h3>Evaluation activity by trainee</h3>'+reportBars(traineeDist,10)+'</section><section class="card settingBox"><h3>Safety severity</h3>'+reportBars(safetyDist,8)+'</section><section class="card settingBox"><h3>Monthly activity</h3>'+reportBars(monthly,12)+'</section><section class="card settingBox"><h3>Filter scope</h3><div class="infoBox"><b>Filters are applied consistently</b><p>Trainee and date filters also affect safety and exam KPIs; instructor and syllabus filters apply where those fields exist.</p></div></section></div>';
+ '<div class="reportsGrid"><section class="card settingBox"><h3>Emergency exposure</h3><p class="sub">Recorded emergency practice across matched evaluated flights.</p>'+reportBars(emergencyDist,10)+'</section><section class="card settingBox"><h3>Syllabus activity</h3><p class="sub">Evaluations by syllabus.</p>'+reportBars(syllabusDist,10)+'</section><section class="card settingBox"><h3>Evaluation activity by trainee</h3>'+reportBars(traineeDist,10)+'</section><section class="card settingBox"><h3>Safety severity</h3>'+reportBars(safetyDist,8)+'</section><section class="card settingBox"><h3>Monthly activity</h3>'+reportBars(monthly,12)+'</section></div>';
 }
 const flympusBottomScreenTemplates=new Map();
 let flympusBottomScreenPrewarmHandle=null;
