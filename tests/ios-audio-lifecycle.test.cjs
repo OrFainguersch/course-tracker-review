@@ -129,9 +129,7 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   assert(source.includes('const FLYMPUS_NAV_SOUND_VOLUME=.31')&&source.includes('const FLYMPUS_REFRESH_SOUND_VOLUME=.27'),
     'Bottom-nav and refresh target levels must remain 31 and 27 percent');
   assert(source.includes("FLYMPUS_NAV_FALLBACK_SOUND_SRC='./assets/flympus-nav-signature-31.wav")&&source.includes("FLYMPUS_REFRESH_SOUND_SRC='./assets/flympus-refresh-sync-27.wav"),
-    'HTMLAudio paths must use physically attenuated WAV files so browsers cannot bypass the requested levels');
-  assert(source.includes('currentTime is frozen while suspended'),
-    'First post-refresh click must be scheduled before AudioContext resume');
+    'HTMLAudio paths must use physically attenuated WAV files so iOS cannot bypass the requested levels');
 
   assert.equal(mediaCreated.length,4,
     'Only two HTMLAudio nav fallbacks and two refresh players should be preloaded');
@@ -147,26 +145,29 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   assert(Math.abs(fastStarts[0].startTime-10.001)<.0001,'Fast path must start 1ms ahead');
   assert.equal(category,'ambient','Fast nav sound must remain ambient');
 
-  /* Reproduce the first post-refresh state: decoded buffer is ready while the
-     AudioContext is still suspended. The click must be queued before resume. */
+  /* Reproduce the real iOS first-tap state: resume() has been requested by the
+     gesture handler, but WebAudio has not reached "running" yet. */
   now+=100;
-  const beforeFirstTapMedia=mediaPlays.length;
-  const beforeFirstTapFast=fastStarts.length;
-  vm.runInContext("flympusNavFastCtx.state='suspended'",context);
+  const beforeFirstTapFallbackMedia=mediaPlays.length;
+  const beforeFirstTapFallbackFast=fastStarts.length;
+  vm.runInContext("flympusNavFastCtx.state='suspended';flympusNavFastCtx.resume=()=>Promise.resolve()",context);
   vm.runInContext('playFlympusBottomNavSound()',context);
-  assert.equal(fastStarts.length,beforeFirstTapFast+1,
-    'Suspended first post-refresh tap must queue WebAudio immediately');
-  assert.equal(mediaPlays.length,beforeFirstTapMedia,
-    'Suspended first post-refresh tap must not wait on HTMLAudio startup');
-  assert.equal(fastGains.at(-1)?.gain?.value,.31,
-    'Queued first post-refresh click must keep the requested 31 percent gain');
+  assert.equal(fastStarts.length,beforeFirstTapFallbackFast,
+    'Suspended first tap must not be falsely consumed before AudioContext resume completes');
+  assert.equal(mediaPlays.length,beforeFirstTapFallbackMedia+1,
+    'Suspended first tap must use the preloaded media fallback on that same gesture');
+  assert.equal(mediaPlays.at(-1).volume,1,
+    'Physically attenuated HTMLAudio navigation fallback must play at unity element volume');
+  assert(mediaPlays.at(-1).src.includes('flympus-nav-signature-31.wav'),
+    'First-tap fallback must use the physically attenuated 31 percent WAV');
+  vm.runInContext("flympusNavFastCtx.state='running'",context);
 
   for(let i=0;i<12;i++){
     now+=100;
     vm.runInContext('playFlympusBottomNavSound()',context);
   }
-  assert.equal(fastStarts.length,beforeFirstTapFast+13,'Repeated nav presses must remain on the low-latency buffer path');
-  assert.equal(mediaPlays.length,beforeFirstTapMedia,'Normal nav presses must not add HTMLAudio playback once WebAudio is available');
+  assert.equal(fastStarts.length,13,'Repeated nav presses must remain on the low-latency buffer path');
+  assert.equal(mediaPlays.length,1,'Only the simulated suspended first tap should use HTMLAudio');
 
   const beforeRefreshMedia=mediaPlays.length;
   vm.runInContext('globalThis.__g=armFlympusRefreshSound()',context);

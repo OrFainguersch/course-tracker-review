@@ -3803,48 +3803,32 @@ function unlockFlympusNavFastAudio(){
   }catch{}
 }
 
-function createFlympusNavFastSource(ctx,buffer){
-  const source=ctx.createBufferSource(),gain=ctx.createGain?.();
-  source.buffer=buffer;
-  if(gain){
-    gain.gain.value=FLYMPUS_NAV_SOUND_VOLUME;
-    source.connect(gain);
-    gain.connect(ctx.destination);
-  }else{
-    source.connect(ctx.destination);
-  }
-  return source;
-}
-
 function playFlympusNavFastSound(){
   try{
     const ctx=getFlympusNavFastContext(),buffer=flympusNavFastBuffer;
     if(!ctx||!buffer)return false;
-    if(ctx.state==='running'){
-      const source=createFlympusNavFastSource(ctx,buffer);
-      source.start(ctx.currentTime+.001);
-      return true;
+    if(ctx.state!=='running'){
+      /* iOS resume() is asynchronous on the first user gesture. If WebAudio is
+         not actually running yet, let the same physical tap use the preloaded
+         media fallback while resume unlocks the fast path for later taps. */
+      try{ctx.resume?.()}catch{}
+      return false;
     }
-    if(ctx.state==='suspended'){
-      /* Keep the first post-refresh click on the already-decoded WebAudio path.
-         currentTime is frozen while suspended, so scheduling before resume lets
-         the click begin as soon as the context is released by this gesture. */
-      const source=createFlympusNavFastSource(ctx,buffer);
-      source.start(ctx.currentTime+.001);
-      try{
-        const p=ctx.resume?.();
-        if(p?.catch)p.catch(()=>{
-          try{source.stop?.()}catch{}
-          playFlympusNavFallbackSound();
-        });
-        return true;
-      }catch{
-        try{source.stop?.()}catch{}
-        return false;
-      }
+    const source=ctx.createBufferSource();
+    const gain=ctx.createGain?.();
+    source.buffer=buffer;
+    if(gain){
+      gain.gain.value=FLYMPUS_NAV_SOUND_VOLUME;
+      source.connect(gain);
+      gain.connect(ctx.destination);
+    }else{
+      source.connect(ctx.destination);
     }
+    source.start(ctx.currentTime+.001);
+    return true;
+  }catch{
     return false;
-  }catch{return false}
+  }
 }
 
 function makeFlympusFileAudio(src,volume=1){
@@ -3910,17 +3894,6 @@ function resetFlympusAudioSession(){
   }
 }
 
-function playFlympusNavFallbackSound(){
-  try{
-    const pool=getFlympusNavAudioPool();if(!pool.length)return false;
-    const a=pool[flympusNavAudioIndex++%pool.length];
-    rewindFlympusFileAudio(a,1);
-    const p=a.play?.();
-    if(p?.catch)p.catch(()=>{});
-    return true;
-  }catch{return false}
-}
-
 function playFlympusBottomNavSound(){
   try{
     setFlympusAmbientAudioSession();
@@ -3937,9 +3910,14 @@ function playFlympusBottomNavSound(){
        one millisecond ahead on the interactive context. */
     if(playFlympusNavFastSound())return;
 
-    /* No decoded WebAudio path is available: use the physically attenuated
-       31% media fallback. */
-    playFlympusNavFallbackSound();
+    /* Decoder/context not ready yet: use the 35%-amplitude fallback WAV.
+       iOS may ignore HTMLMediaElement.volume, so attenuation is baked into the
+       PCM samples and the first taps cannot sound louder than WebAudio. */
+    const pool=getFlympusNavAudioPool();if(!pool.length)return;
+    const a=pool[flympusNavAudioIndex++%pool.length];
+    rewindFlympusFileAudio(a,1);
+    const p=a.play?.();
+    if(p?.catch)p.catch(()=>{});
   }catch{}
 }
 
