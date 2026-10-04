@@ -4172,16 +4172,17 @@ function scheduleFlympusNavFastBuffer(ctx,buffer,{wake=false}={}){
   try{
     const now=Number(ctx.currentTime||0);
     if(wake&&ctx.createOscillator&&ctx.createGain){
-      /* Browsers can leave the WebAudio graph logically "running" while the
-         physical output path has gone idle. Run an inaudible 12 ms warm-up
-         before the real click so the same first press wakes the device. */
+      /* Some browsers power the actual audio device down after inactivity even
+         while AudioContext.state still says "running". Keep the first press
+         audible by opening the output path with a short inaudible pre-roll,
+         then play the real click after the device has had time to wake. */
       const osc=ctx.createOscillator(),wakeGain=ctx.createGain();
       wakeGain.gain.value=.000001;
       osc.frequency.value=120;
       osc.connect(wakeGain);
       wakeGain.connect(ctx.destination);
       osc.start(now);
-      osc.stop(now+.012);
+      osc.stop(now+.065);
     }
     const source=ctx.createBufferSource();
     const gain=ctx.createGain?.();
@@ -4191,7 +4192,7 @@ function scheduleFlympusNavFastBuffer(ctx,buffer,{wake=false}={}){
       source.connect(gain);
       gain.connect(ctx.destination);
     }else source.connect(ctx.destination);
-    source.start(now+(wake ? .028 : .001));
+    source.start(now+(wake ? .080 : .001));
     return true;
   }catch{return false}
 }
@@ -4218,28 +4219,30 @@ function playFlympusNavFastSound(){
     const ctx=getFlympusNavFastContext();
     if(!ctx)return false;
 
-    /* resume() must be requested directly from the physical press. Schedule
-       the source before resume when possible; AudioContext.currentTime is
-       frozen while suspended, so the click will fire as soon as the graph
-       actually wakes instead of being lost on the first press. */
+    /* resume() itself is requested synchronously from the physical press so
+       autoplay policy still treats this as user-initiated. Only after resume
+       resolves do we schedule the warm-up + click. This avoids the old case
+       where the first press merely woke the context and the sound was lost. */
     if(ctx.state!=='running'){
-      let scheduled=false;
-      if(flympusNavFastBuffer)scheduled=scheduleFlympusNavFastBuffer(ctx,flympusNavFastBuffer,{wake:true});
       let resumePromise=null;
       try{resumePromise=ctx.resume?.()}catch{}
-      if(!scheduled){
-        primeFlympusNavFastAudio().then(buffer=>{
-          if(!buffer)return playFlympusNavFileFallback();
-          if(ctx!==flympusNavFastCtx)return;
-          if(!scheduleFlympusNavFastBuffer(ctx,buffer,{wake:true}))playFlympusNavFileFallback();
-        }).catch(()=>playFlympusNavFileFallback());
-      }
-      if(resumePromise?.catch)resumePromise.catch(()=>{
+      Promise.resolve(resumePromise).then(()=>primeFlympusNavFastAudio()).then(buffer=>{
+        if(ctx!==flympusNavFastCtx)return;
+        if(!buffer||ctx.state!=='running'){
+          markFlympusNavAudioNeedsWake();
+          playFlympusNavFileFallback();
+          return;
+        }
+        if(!scheduleFlympusNavFastBuffer(ctx,buffer,{wake:true})){
+          markFlympusNavAudioNeedsWake();
+          playFlympusNavFileFallback();
+        }
+      }).catch(()=>{
         markFlympusNavAudioNeedsWake();
         playFlympusNavFileFallback();
       });
       flympusNavAudioNeedsWake=false;
-      return scheduled||!!flympusNavFastDecodePromise||!!resumePromise;
+      return true;
     }
 
     if(!flympusNavFastBuffer){
