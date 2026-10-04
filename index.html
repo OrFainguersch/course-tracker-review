@@ -3572,7 +3572,7 @@ html[data-flympus-language="he"] .dataTable{direction:rtl}
 /* ===== Cross-platform Web Push settings ===== */
 .appSettingsCardHead .pushStatus{margin-inline-start:auto;flex:0 0 auto}
 .pushStatus{display:inline-flex;align-items:center;justify-content:center;min-height:25px;padding:4px 9px;border-radius:999px;background:#eef3f7;color:#60758a;font-size:9px;font-weight:900;white-space:nowrap}
-.pushStatus.ready{background:#dcfce7;color:#047857}.pushStatus.local{background:#e0f2fe;color:#0369a1}.pushStatus.off{background:#f1f5f9;color:#64748b}.pushStatus.install{background:#fff7ed;color:#c2410c}.pushStatus.blocked,.pushStatus.unsupported{background:#fff1f2;color:#be123c}
+.pushStatus.ready{background:#dcfce7;color:#047857}.pushStatus.local{background:#e0f2fe;color:#0369a1}.pushStatus.off,.pushStatus.disabled{background:#f1f5f9;color:#64748b}.pushStatus.install{background:#fff7ed;color:#c2410c}.pushStatus.blocked,.pushStatus.unsupported{background:#fff1f2;color:#be123c}
 .pushDeliveryRow{align-items:center}.pushSettingActions{display:flex;justify-content:flex-end;gap:7px;flex-wrap:wrap;max-width:420px}.pushSettingActions .btn{white-space:nowrap}
 .pushBackendNote{display:flex;gap:8px;align-items:flex-start;padding:11px 17px;background:#fbfdff;border-top:1px solid #edf2f6;color:#73879b;font-size:9px;line-height:1.45}.pushBackendNote b{color:#2a4968;white-space:nowrap}.pushBackendNote span{min-width:0}
 html[data-flympus-theme="dark"] .pushBackendNote{background:#0d1e2f!important;border-color:#294158!important;color:#9fb0bf!important}html[data-flympus-theme="dark"] .pushBackendNote b{color:#dcecf8!important}
@@ -5734,8 +5734,19 @@ function saveNotificationPreferences(v){
 }
 function syncNotificationPreferenceControls(){const prefs=getNotificationPreferences();document.querySelectorAll('[data-notification-pref]').forEach(el=>{el.checked=prefs[el.dataset.notificationPref]!==false})}
 
-const FLYMPUS_PUSH_SW='./sw.js',FLYMPUS_PUSH_CONFIG='./push-config.json';
+const FLYMPUS_PUSH_SW='./sw.js',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
 let flympusPushConfigCache=null,flympusPushConfigPromise=null;
+function getFlympusPushUserEnabled(){
+  try{
+    const raw=localStorage.getItem(FLYMPUS_PUSH_USER_ENABLED_KEY);
+    if(raw===null)return ('Notification'in window)&&Notification.permission==='granted';
+    return raw==='true'
+  }catch{return ('Notification'in window)&&Notification.permission==='granted'}
+}
+function setFlympusPushUserEnabled(value){
+  try{localStorage.setItem(FLYMPUS_PUSH_USER_ENABLED_KEY,value?'true':'false')}catch{}
+  return !!value
+}
 function flympusIsIos(){
   try{const ua=String(navigator.userAgent||'');return /iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&Number(navigator.maxTouchPoints||0)>1)}catch{return false}
 }
@@ -5811,7 +5822,7 @@ async function subscribeFlympusPushDevice(){
 }
 async function syncFlympusPushSubscription({quiet=false}={}){
   try{
-    if(!flympusPushSupported()||Notification.permission!=='granted')return false;
+    if(!getFlympusPushUserEnabled()||!flympusPushSupported()||Notification.permission!=='granted')return false;
     const registration=await registerFlympusPushServiceWorker(),cfg=await getFlympusPushConfig();
     let sub=await registration.pushManager.getSubscription();
     if(!sub&&cfg.enabled&&cfg.vapidPublicKey){
@@ -5834,7 +5845,8 @@ async function enableFlympusSystemNotifications(){
     await registerFlympusPushServiceWorker();
     let permission=Notification.permission;
     if(permission!=='granted')permission=await Notification.requestPermission();
-    if(permission!=='granted'){toast(permission==='denied'?'Notifications are blocked in device/browser settings.':'Notification permission was not granted.','error');await refreshFlympusPushSettingsUi();return}
+    if(permission!=='granted'){setFlympusPushUserEnabled(false);toast(permission==='denied'?'Notifications are blocked in device/browser settings.':'Notification permission was not granted.','error');await refreshFlympusPushSettingsUi();return}
+    setFlympusPushUserEnabled(true);
     const result=await subscribeFlympusPushDevice();
     if(result.subscription)toast('System notifications enabled on this device');
     else toast('Device notifications enabled. Background push delivery server still needs to be connected.');
@@ -5843,15 +5855,17 @@ async function enableFlympusSystemNotifications(){
 }
 async function disableFlympusSystemNotifications(){
   try{
+    setFlympusPushUserEnabled(false);
     const sub=await getFlympusPushSubscription();
     if(sub){try{await sendFlympusPushSubscriptionToBackend(sub,{remove:true})}catch{}await sub.unsubscribe?.()}
-    toast('This device was unsubscribed from FLYMPUS push notifications');
+    toast('FLYMPUS notifications disabled on this device');
     await refreshFlympusPushSettingsUi()
-  }catch(err){toast(err?.message||'Could not unsubscribe this device','error')}
+  }catch(err){toast(err?.message||'Could not disable notifications on this device','error')}
 }
 async function sendFlympusDeviceTestNotification(){
   if(flympusIsIos()&&!flympusIsStandalone()){toast('On iPhone/iPad, open the Home Screen version of FLYMPUS first.','error');return}
   if(!('Notification'in window)||!('serviceWorker'in navigator)){toast('System notifications are not supported by this browser.','error');return}
+  if(!getFlympusPushUserEnabled()){toast('Enable FLYMPUS notifications on this device before sending a test.','error');return}
   try{
     const registration=await registerFlympusPushServiceWorker();
     let permission=Notification.permission;if(permission!=='granted')permission=await Notification.requestPermission();
@@ -5862,30 +5876,31 @@ async function sendFlympusDeviceTestNotification(){
   }catch(err){toast(err?.message||'Could not send the test notification','error')}
 }
 async function getFlympusPushStatus(){
-  const supported=flympusPushSupported(),permission=('Notification'in window)?Notification.permission:'unsupported',ios=flympusIsIos(),standalone=flympusIsStandalone(),cfg=await getFlympusPushConfig(),sub=supported&&permission==='granted'?await getFlympusPushSubscription():null;
+  const supported=flympusPushSupported(),permission=('Notification'in window)?Notification.permission:'unsupported',ios=flympusIsIos(),standalone=flympusIsStandalone(),cfg=await getFlympusPushConfig(),userEnabled=getFlympusPushUserEnabled(),sub=supported&&permission==='granted'?await getFlympusPushSubscription():null;
   let state='unsupported',label='Not supported',detail='This browser does not expose the Web Push APIs.';
   if(supported){
     if(ios&&!standalone){state='install';label='Install required';detail='On iPhone/iPad, add FLYMPUS to the Home Screen and open it there to receive system notifications.'}
     else if(permission==='denied'){state='blocked';label='Blocked';detail='Notifications are blocked in the browser or device settings.'}
     else if(permission!=='granted'){state='off';label='Not enabled';detail='Enable notifications once on this device to allow system alerts.'}
+    else if(!userEnabled){state='disabled';label='Disabled in FLYMPUS';detail='The operating-system permission is still allowed, but FLYMPUS will not subscribe or send notifications on this device until you enable them again.'}
     else if(sub&&cfg.enabled&&cfg.apiBaseUrl&&cfg.vapidPublicKey){state='ready';label='Push ready';detail='This device is subscribed for background push delivery.'}
-    else if(permission==='granted'){state='local';label='Device enabled';detail='System notifications work on this device. The remote push delivery server is not connected yet.'}
+    else{state='local';label='Device enabled';detail='System notifications work on this device. The remote push delivery server is not connected yet.'}
   }
-  return {supported,permission,ios,standalone,subscription:sub,backendReady:!!(cfg.enabled&&cfg.apiBaseUrl&&cfg.vapidPublicKey),state,label,detail}
+  return {supported,permission,ios,standalone,userEnabled,subscription:sub,backendReady:!!(cfg.enabled&&cfg.apiBaseUrl&&cfg.vapidPublicKey),state,label,detail}
 }
 async function refreshFlympusPushSettingsUi(){
   const status=await getFlympusPushStatus(),root=$('[data-push-settings]');if(!root)return status;
   const badge=root.querySelector('[data-push-status]'),detail=root.querySelector('[data-push-detail]'),enable=root.querySelector('#enableSystemNotifications'),disable=root.querySelector('#disableSystemNotifications'),test=root.querySelector('#testSystemNotification');
   if(badge){badge.textContent=status.label;badge.className='pushStatus '+status.state}
   if(detail)detail.textContent=status.detail;
-  if(enable)enable.hidden=status.permission==='granted'&&status.state!=='install';
-  if(disable)disable.hidden=!status.subscription;
-  if(test)test.disabled=!(status.supported&&(!status.ios||status.standalone));
+  if(enable)enable.hidden=status.userEnabled&&status.permission==='granted'&&status.state!=='install';
+  if(disable)disable.hidden=!(status.permission==='granted'&&status.userEnabled&&status.state!=='install');
+  if(test)test.disabled=!(status.supported&&status.userEnabled&&(!status.ios||status.standalone));
   return status
 }
 function initFlympusPushClient(){
   if(!('serviceWorker'in navigator))return;
-  registerFlympusPushServiceWorker().then(()=>syncFlympusPushSubscription({quiet:true})).catch(()=>{});
+  registerFlympusPushServiceWorker().then(()=>{if(getFlympusPushUserEnabled())return syncFlympusPushSubscription({quiet:true})}).catch(()=>{});
   if(!window.__flympusPushMessageBound){
     window.__flympusPushMessageBound=true;
     navigator.serviceWorker.addEventListener('message',event=>{
