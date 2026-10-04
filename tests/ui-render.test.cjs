@@ -636,3 +636,12 @@ assert(!html.includes('id="resetLocalReviewDataFromSettings"'),
   "Destructive local review reset must not be exposed in Settings");
 assert(html.includes("Restore this device's app preferences without changing course or training data."),
   "Data & Device copy must make clear that resetting preferences does not touch training data");
+
+/* Device-relevant sound and haptic settings */
+assert(html.includes("const hapticsRelevant=isFlympusIOSHapticTarget()||(Number(navigator.maxTouchPoints||0)>0&&!!window.matchMedia?.('(hover:none) and (pointer:coarse)')?.matches)"),
+  "Settings must only expose haptic controls on touch/coarse-pointer devices or iOS haptic targets");
+assert(html.includes("(hapticsRelevant?appPreferenceSwitch('haptics','Haptic feedback'"),
+  "Desktop Settings must omit the Haptic feedback row while retaining it on relevant mobile devices");
+assert(html.includes("const feedbackTitle=hapticsRelevant?'Sounds & Haptics':'Sounds'"),
+  "Desktop Settings must label the section Sounds when haptics are not relevant");
+
