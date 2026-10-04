@@ -3171,6 +3171,36 @@ body.flympusPersonModalOpen{touch-action:none}
   #editPersonModal,#editPersonModal .modalCard{animation:none!important}
 }
 </style>
+<style>
+/* ===== Explicit Save / Discard edit actions · 2026-10-04 ===== */
+.packageSaveBar.editDecisionBar,
+.advancedArchitectureActions.editDecisionBar{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:9px;
+  flex-wrap:wrap
+}
+.editDecisionBar .btn{margin:0;min-width:132px}
+.btn.discardChanges{
+  background:#fff!important;
+  border-color:#c8d7e5!important;
+  color:#45627d!important
+}
+.btn.discardChanges:hover,.btn.discardChanges:focus-visible{
+  background:#f7fafc!important;
+  border-color:#9fb9cf!important;
+  color:#274c6d!important
+}
+.siteDialogActions.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:759px){
+  .packageSaveBar.editDecisionBar,.advancedArchitectureActions.editDecisionBar{display:grid;grid-template-columns:1fr 1fr}
+  .editDecisionBar .btn{width:100%;min-width:0}
+}
+@media(max-width:520px){
+  .siteDialogActions.three{grid-template-columns:1fr}
+}
+</style>
 </head>
 <body>
 <div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p><div class="deviceDataBox"><div class="deviceDataHead"><b>Device data</b><span class="deviceDataMode" id="deviceDataMode">Local</span></div><p id="deviceDataCopy">Courses, photos, evaluations and settings are stored locally on this device.</p><div class="deviceDataActions"><button class="btn secondary small" type="button" id="exportFlympusBackup">Export backup</button><label class="btn secondary small" for="flympusBackupInput" style="cursor:pointer">Import backup</label></div><p class="deviceDataHint" id="deviceDataHint">Use a backup to move the complete FLYMPUS setup between Safari and the Home Screen app.</p></div></div></div></div></header><input id="flympusBackupInput" type="file" accept=".json,application/json" hidden><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0726 · rank badge +2px</div><div class="toast" id="toast"></div></div>
@@ -3379,6 +3409,63 @@ const currentCourseMeta={type:'EP',phase:'RC Model',platformId:'rc_model',traini
 const syllProgress=[['Basic Handling',100,'Complete'],['Figure 8',100,'Complete'],['Circuits',100,'Complete'],['Emergencies',80,'Current'],['Final Preparation',0,'Next']];
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
 const state={screen:'home',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',rosterStatuses:[],rosterRoles:[],rosterDateFrom:'',rosterDateTo:'',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',reportTrainees:[],reportInstructors:[],reportSyllabi:[],reportDateFrom:'',reportDateTo:'',myCoursesStatuses:[],myCoursesSectors:[],myCoursesPhases:[],myCoursesPlatforms:[],myCoursesTrainings:[],myCoursesCountries:[],myCoursesRoles:[],myCoursesDateFrom:'',myCoursesDateTo:'',packageCategoryFilters:[],safetyView:'new',evaluationView:'new',examsView:'new',...initialUiState};
+let courseTailorEditSnapshot=null;
+let advancedArchitectureEditSnapshot=null;
+let courseTailorSessionDirty=false;
+let courseTailorExitAfterSave=false;
+
+function captureLocalStorageScope({keys=[],prefixes=[]}={}){
+  const names=new Set((keys||[]).filter(Boolean));
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const key=localStorage.key(i);
+      if(key&&(prefixes||[]).some(prefix=>key.startsWith(prefix)))names.add(key);
+    }
+  }catch{}
+  const values={};
+  names.forEach(key=>{try{values[key]=localStorage.getItem(key)}catch{values[key]=null}});
+  return {keys:[...names],prefixes:[...(prefixes||[])],values};
+}
+function restoreLocalStorageScope(snapshot){
+  if(!snapshot)return;
+  const current=new Set(snapshot.keys||[]);
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const key=localStorage.key(i);
+      if(key&&(snapshot.prefixes||[]).some(prefix=>key.startsWith(prefix)))current.add(key);
+    }
+  }catch{}
+  current.forEach(key=>{try{localStorage.removeItem(key)}catch{}});
+  Object.entries(snapshot.values||{}).forEach(([key,value])=>{if(value!==null)try{localStorage.setItem(key,value)}catch{}});
+}
+function captureCourseTailorSnapshot(){
+  const key=currentCourseMeta.courseCode||currentCourseId;
+  return captureLocalStorageScope({keys:['ct-review-course-lifecycle','flympus-course-overrides:'+key]});
+}
+function beginCourseTailorEditSession(){
+  courseTailorEditSnapshot=captureCourseTailorSnapshot();
+  courseTailorSessionDirty=false;
+  courseTailorExitAfterSave=false;
+}
+function refreshCourseTailorEditBaseline(){
+  courseTailorEditSnapshot=captureCourseTailorSnapshot();
+  courseTailorSessionDirty=false;
+}
+function discardCourseTailorSession(){
+  restoreLocalStorageScope(courseTailorEditSnapshot);
+  courseTailorSessionDirty=false;
+  courseTailorExitAfterSave=false;
+  state.courseAddFlow=null;
+}
+function captureAdvancedArchitectureSnapshot(){
+  return captureLocalStorageScope({
+    keys:['ct-review-catalogs','ct-review-platform-labels','ct-review-custom-platforms','flympus-custom-packages','flympus-hidden-packages'],
+    prefixes:['flympus-global-program-overrides:']
+  });
+}
+function beginAdvancedArchitectureEditSession(){advancedArchitectureEditSnapshot=captureAdvancedArchitectureSnapshot()}
+function discardAdvancedArchitectureSession(){restoreLocalStorageScope(advancedArchitectureEditSnapshot);advancedArchitectureEditSnapshot=null;state.packageAddFlow=null;state.packageCreateOpen=null}
+
 const appScreenIds=new Set(['home','courses','record','evaluation','roster','profile','instructor','settings','reports','safety','exams','planned']);
 const appRootScreens=new Set(['courses','roster','planned','record','reports','settings']);
 let appNavHistory=[];try{const stored=JSON.parse(sessionStorage.getItem('ct-review-nav-history')||'[]');if(Array.isArray(stored))appNavHistory=stored.filter(x=>appScreenIds.has(x))}catch{}
@@ -3717,6 +3804,24 @@ function siteConfirm(message,{title='Confirm action',confirmLabel='Confirm',canc
    cancel.onclick=()=>finish(false);confirm.onclick=()=>finish(true);overlay.onclick=e=>{if(e.target===overlay)finish(false)};document.addEventListener('keydown',onKey);requestAnimationFrame(()=>confirm.focus?.())
  })
 }
+function siteEditDecision(message,{title='Unsaved changes'}={}){
+ return new Promise(resolve=>{
+   document.querySelector('.siteDialogOverlay')?.remove();
+   const overlay=document.createElement('div');overlay.className='siteDialogOverlay';
+   const card=document.createElement('div');card.className='siteDialogCard';card.setAttribute('role','dialog');card.setAttribute('aria-modal','true');
+   const eyebrow=document.createElement('div');eyebrow.className='siteDialogEyebrow';eyebrow.textContent='FLYMPUS';
+   const heading=document.createElement('h3');heading.textContent=title;
+   const copy=document.createElement('p');copy.textContent=String(message||'');
+   const actions=document.createElement('div');actions.className='siteDialogActions three';
+   const keep=document.createElement('button');keep.type='button';keep.className='btn secondary';keep.textContent='Continue editing';
+   const discard=document.createElement('button');discard.type='button';discard.className='btn danger';discard.textContent='Discard changes';
+   const save=document.createElement('button');save.type='button';save.className='btn sky';save.textContent='Save changes';
+   actions.append(keep,discard,save);card.append(eyebrow,heading,copy,actions);overlay.append(card);document.body.append(overlay);
+   let settled=false;const finish=value=>{if(settled)return;settled=true;document.removeEventListener('keydown',onKey);overlay.remove();resolve(value)},onKey=e=>{if(e.key==='Escape')finish('continue')};
+   keep.onclick=()=>finish('continue');discard.onclick=()=>finish('discard');save.onclick=()=>finish('save');overlay.onclick=e=>{if(e.target===overlay)finish('continue')};document.addEventListener('keydown',onKey);requestAnimationFrame(()=>save.focus?.())
+ })
+}
+
 function getEvaluations(){return readCourseArray('ct-review-evals')}function setEvaluations(x){writeCourseArray('ct-review-evals',x)}
 const nav=[['__label','','COURSE'],['courses','courses','My Courses'],['settings','settings','Course Management']];
 function navIconSvg(name){
@@ -5040,7 +5145,7 @@ function personEditModal(){
   '<form id="editPersonForm"><div class="identityEditGrid"><div><div class="photoPreview" id="personPhotoPreview">'+photo+'</div><div class="personModalPhotoActions"><label class="btn secondary personModalBtn" id="choosePersonPhotoAction" style="cursor:pointer" '+(hasPhoto?'hidden':'')+'>Choose photo<input id="personPhotoInput" type="file" accept="image/*" style="display:none"></label><button type="button" class="btn secondary personModalBtn" id="editPersonPhoto" '+(hasPhoto?'':'hidden')+'>Edit photo</button><button type="button" class="btn secondary personModalBtn" id="removePersonPhoto" '+(hasPhoto?'':'hidden')+'>Remove photo</button></div></div>'+
   '<div class="grid"><div class="field"><label>Full name</label><input class="input" name="name" required value="'+esc(p.name||'')+'"></div><div class="field"><label>Email</label><input class="input" name="email" type="email" value="'+esc(p.email||'')+'"></div>'+
   (type==='TRAINEE'?'<div class="field"><label>Status in this course</label><select name="membership" required><option value="Active" '+(membership.status!=='Inactive'?'selected':'')+'>Active</option><option value="Inactive" '+(membership.status==='Inactive'?'selected':'')+'>Inactive</option></select></div>':'<div class="field"><label>Role in this course</label><select name="membership" required><option value="INSTRUCTOR" '+(membership.role!=='COURSE_MANAGER'?'selected':'')+'>Instructor</option><option value="COURSE_MANAGER" '+(membership.role==='COURSE_MANAGER'?'selected':'')+'>Course Manager</option></select></div>')+
-  '</div></div><p class="mutedHint">Photo is compressed and stored only in this browser for the review build.</p><div class="personModalSecondaryActions"><button type="button" class="btn danger personModalBtn" id="removePersonFromCourse">Remove from course</button><button type="button" class="btn secondary personModalBtn" id="cancelEditPerson">Cancel</button></div><div class="personModalSaveRow"><button class="btn sky personModalBtn personModalSave" type="submit">Save changes</button></div></form></div></div>';
+  '</div></div><p class="mutedHint">Photo is compressed and stored only in this browser for the review build.</p><div class="personModalSecondaryActions"><button type="button" class="btn danger personModalBtn" id="removePersonFromCourse">Remove from course</button><button type="button" class="btn secondary personModalBtn discardChanges" id="cancelEditPerson">Discard changes</button></div><div class="personModalSaveRow"><button class="btn sky personModalBtn personModalSave" type="submit">Save changes</button></div></form></div></div>';
 }
 function imageFileToSmallDataUrl(file,maxSize=420,quality=.78){
  return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>{const img=new Image();img.onerror=reject;img.onload=()=>{let w=img.width,h=img.height,scale=Math.min(1,maxSize/Math.max(w,h));w=Math.max(1,Math.round(w*scale));h=Math.max(1,Math.round(h*scale));const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,w,h);resolve(canvas.toDataURL('image/jpeg',quality))};img.src=reader.result};reader.readAsDataURL(file)})
@@ -5886,7 +5991,7 @@ function courseOverridesHtml(){
     '<details class="packageRules"><summary><b>Experience requirements ('+counterActive.length+')</b><span>'+(orderedCounters.length-counterActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('counters',['Use','Order / Move','Requirement','Minimum','Unit','Status'],counterItems,'48px 92px minmax(220px,1.4fr) 100px 110px minmax(130px,.7fr)')+counterAdd+'</details>'+
     '<details class="packageRules"><summary><b>Exams ('+examActive.length+')</b><span>'+(orderedExams.length-examActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('exams',['Use','Order / Move','Exam','Pass grade','Status'],examItems,'48px 92px minmax(260px,1.6fr) 120px minmax(140px,.7fr)')+examAdd+'</details>'+
     '<details class="packageRules"><summary><b>Progression gates ('+gateActive.length+')</b><span>'+(orderedGates.length-gateActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('progression',['Use','Order / Move','Progression requirement','Status'],gateItems,'48px 92px minmax(320px,1.8fr) minmax(140px,.7fr)')+gateAdd+'</details></fieldset>'+
-    (editing?'<div class="toolbar packageSaveBar courseTailorActions"><button class="btn sky" type="submit">Save changes</button></div><div class="courseTailorDoneDockSpacer" aria-hidden="true"></div><button class="courseTailorDoneDock" id="courseTailorDoneDock" type="button">✓ Done</button>':'')+'</form>';
+    (editing?'<div class="toolbar packageSaveBar courseTailorActions editDecisionBar"><button class="btn secondary discardChanges" type="button" id="courseTailorDiscardChanges">Discard changes</button><button class="btn sky" type="submit">Save changes</button></div><div class="courseTailorDoneDockSpacer" aria-hidden="true"></div><button class="courseTailorDoneDock" id="courseTailorDoneDock" type="button">✓ Done</button>':'')+'</form>';
 }
 function epSyllabusDefinition(name){
   const p=epCurrentProgram();if(!p||!name)return null;
@@ -6119,7 +6224,7 @@ function settings(){
     html+=cfgCatalogCard('Cancellation reasons','cancellationReasons',c.cancellationReasons,'Global list used by Planned vs Executed. One reason is stored for every cancelled flight.');
     html+='</div></fieldset>';
     html+='<section class="advancedPackagesFinal"><div class="advancedStepLabel"><span>4</span><div><b>Packages</b><small>Final step · create and manage reusable Packages.</small></div></div>'+sectorPackageAssignmentCard(scope)+advancedPackagesHtml(scope)+'</section>';
-    html+='<div class="toolbar packageSaveBar advancedArchitectureActions"><button class="btn sky" type="button" id="'+(advancedEditing?'cfgSaveCatalogs':'advancedArchitectureEdit')+'">'+(advancedEditing?'Save changes':'Edit')+'</button></div>';
+    html+='<div class="toolbar packageSaveBar advancedArchitectureActions '+(advancedEditing?'editDecisionBar':'')+'">'+(advancedEditing?'<button class="btn secondary discardChanges" type="button" id="cfgDiscardCatalogs">Discard changes</button>':'')+'<button class="btn sky" type="button" id="'+(advancedEditing?'cfgSaveCatalogs':'advancedArchitectureEdit')+'">'+(advancedEditing?'Save changes':'Edit')+'</button></div>';
   }
 
   if(tab==='profiles'){
@@ -6828,11 +6933,35 @@ f.onsubmit=e=>{e.preventDefault();const fd=new FormData(f),list=getEvaluations()
 
 function bindSettings(){
   const c=cfgGet();
-  if($('#courseTailorEdit'))$('#courseTailorEdit').onclick=()=>renderPreservingManagementView(()=>{state.courseTailorEditing=true;state.courseAddFlow=null});
-  const finishCourseTailorEditing=async()=>{const form=$('#courseOverridesForm');if(form?.dataset.dirty==='1'&&!(await siteConfirm('You have unsaved course changes. Discard them and finish editing?',{title:'Discard unsaved changes?',confirmLabel:'Discard changes',tone:'danger'})))return;renderPreservingManagementView(()=>{state.courseTailorEditing=false;state.courseAddFlow=null})};
+  if($('#courseTailorEdit'))$('#courseTailorEdit').onclick=()=>{beginCourseTailorEditSession();renderPreservingManagementView(()=>{state.courseTailorEditing=true;state.courseAddFlow=null})};
+  const finishCourseTailorEditing=async()=>{
+    const form=$('#courseOverridesForm'),dirty=courseTailorSessionDirty||form?.dataset.dirty==='1';
+    if(dirty){
+      const decision=await siteEditDecision('Save the current edits before leaving Edit mode, discard them, or continue editing.',{title:'Finish editing?'});
+      if(decision==='continue')return;
+      if(decision==='discard'){
+        discardCourseTailorSession();
+        courseTailorEditSnapshot=null;
+        renderPreservingManagementView(()=>{state.courseTailorEditing=false;state.courseAddFlow=null});
+        return;
+      }
+      if(decision==='save'){
+        courseTailorExitAfterSave=true;
+        form?.requestSubmit?.();
+        return;
+      }
+    }
+    courseTailorEditSnapshot=null;courseTailorSessionDirty=false;
+    renderPreservingManagementView(()=>{state.courseTailorEditing=false;state.courseAddFlow=null});
+  };
   if($('#courseTailorDoneTop'))$('#courseTailorDoneTop').onclick=finishCourseTailorEditing;
   if($('#courseTailorDoneDock'))$('#courseTailorDoneDock').onclick=finishCourseTailorEditing;
-  if($('#courseOverridesForm')&&state.courseTailorEditing){const markTailorDirty=()=>{$('#courseOverridesForm').dataset.dirty='1'};$('#courseOverridesForm').addEventListener('input',markTailorDirty);$('#courseOverridesForm').addEventListener('change',markTailorDirty)}
+  if($('#courseTailorDiscardChanges'))$('#courseTailorDiscardChanges').onclick=async()=>{
+    const form=$('#courseOverridesForm'),dirty=courseTailorSessionDirty||form?.dataset.dirty==='1';
+    if(dirty&&!(await siteConfirm('Discard all changes made since the last save?',{title:'Discard changes?',confirmLabel:'Discard changes',tone:'danger'})))return;
+    discardCourseTailorSession();refreshCourseTailorEditBaseline();toast('Unsaved changes discarded');renderPreservingManagementView(()=>{state.courseTailorEditing=true});
+  };
+  if($('#courseOverridesForm')&&state.courseTailorEditing){const markTailorDirty=()=>{const form=$('#courseOverridesForm');if(form)form.dataset.dirty='1';courseTailorSessionDirty=true};$('#courseOverridesForm').addEventListener('input',markTailorDirty);$('#courseOverridesForm').addEventListener('change',markTailorDirty)}
   if($('#tailorCourseSelect'))$('#tailorCourseSelect').onchange=e=>{const key=e.target.value;if(!key||key===currentCourseId)return;switchCourseByKey(key,{screen:'settings',render:false});state.settingsTab='overrides';state.courseTailorEditing=false;state.courseAddFlow=null;toast((currentCourseMeta.courseName||'Course')+' selected for Tailor');render()};
   document.querySelectorAll('[data-course-add-open]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-course-add-box]'),panel=box?.querySelector('[data-course-add-panel]');if(!panel)return;panel.hidden=false;btn.hidden=true;if(btn.dataset.courseAddOpen==='syllabi'){state.courseAddFlow='syllabi';const section=box.closest('.courseSyllabiRules');if(section)section.open=true}panel.querySelector('input,select')?.focus?.()});
   document.querySelectorAll('[data-course-add-cancel]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-course-add-box]'),panel=box?.querySelector('[data-course-add-panel]'),trigger=box?.querySelector('[data-course-add-open]');if(panel)panel.hidden=true;if(trigger)trigger.hidden=false;if(btn.dataset.courseAddCancel==='syllabi')state.courseAddFlow=null});
@@ -6860,7 +6989,7 @@ function bindSettings(){
       item={id,name,order:(courseTailorModel()?.emergencies?.length||0)+1,category:value('category')||defaultEmergencyCategory(name),courseOnly:true};
       const existing=Array.isArray(o.emergencyRequirementIds)?o.emergencyRequirementIds:window.FLYMPUS_TRAINING.requiredEmergencies(p).map(x=>x.id);o.emergencyRequirementIds=[...new Set([...existing,id])];
     }
-    if(!item)return;o.custom[kind].push(item);window.FLYMPUS_TRAINING.saveOverrides(key,o);if(kind==='syllabi'){state.courseAddFlow='syllabi';toast((item.name||'Syllabus')+' added · enter the next syllabus')}else toast(item.name||'Course-only item added');render();
+    if(!item)return;courseTailorSessionDirty=true;o.custom[kind].push(item);window.FLYMPUS_TRAINING.saveOverrides(key,o);if(kind==='syllabi'){state.courseAddFlow='syllabi';toast((item.name||'Syllabus')+' added · enter the next syllabus')}else toast(item.name||'Course-only item added');render();
   });
   document.querySelectorAll('[data-course-custom-remove]').forEach(btn=>btn.onclick=async()=>{
     const [kind,id]=String(btn.dataset.courseCustomRemove||'').split('|'),key=currentCourseMeta.courseCode||currentCourseId,o=window.FLYMPUS_TRAINING.getOverrides(key)||{};if(!kind||!id||!o.custom?.[kind])return;
@@ -6868,11 +6997,11 @@ function bindSettings(){
     o.custom[kind]=o.custom[kind].filter(x=>x.id!==id);
     const patchKey={syllabi:'syllabi',counters:'counters',criteria:'criteria',exams:'exams',progression:'progression'}[kind];if(patchKey&&o[patchKey])delete o[patchKey][id];
     if(kind==='emergencies'&&Array.isArray(o.emergencyRequirementIds))o.emergencyRequirementIds=o.emergencyRequirementIds.filter(x=>x!==id);
-    window.FLYMPUS_TRAINING.saveOverrides(key,o);toast('Course-only item removed');render();
+    courseTailorSessionDirty=true;window.FLYMPUS_TRAINING.saveOverrides(key,o);toast('Course-only item removed');render();
   });
   if($('#courseOverridesForm'))$('#courseOverridesForm').onsubmit=e=>{
     e.preventDefault();const form=e.currentTarget,fd=new FormData(form),m=courseTailorModel();if(!m)return;const {active:p,o}=m,gradingMin=Math.round(Number(fd.get('course_grade_min'))),gradingMax=Math.round(Number(fd.get('course_grade_max'))),gradingBenchmark=Number(fd.get('course_grade_benchmark'));
-    if(!Number.isFinite(gradingMin)||!Number.isFinite(gradingMax)||!Number.isFinite(gradingBenchmark)||gradingMin<0||gradingMax<=gradingMin||gradingBenchmark<gradingMin||gradingBenchmark>gradingMax){toast('Grading settings must satisfy Minimum < Maximum and Benchmark must be inside the range.','error');return}
+    if(!Number.isFinite(gradingMin)||!Number.isFinite(gradingMax)||!Number.isFinite(gradingBenchmark)||gradingMin<0||gradingMax<=gradingMin||gradingBenchmark<gradingMin||gradingBenchmark>gradingMax){courseTailorExitAfterSave=false;toast('Grading settings must satisfy Minimum < Maximum and Benchmark must be inside the range.','error');return}
     const program={...(o.program||{}),name:String(fd.get('course_package_name')||p.name).trim()||p.name,phaseId:String(fd.get('course_phase')||p.phaseId||''),platformId:String(fd.get('course_platform')||''),trainingKind:String(fd.get('course_training')||p.trainingKind||''),gradingMin,gradingBenchmark,gradingMax};
     let qualificationTrack='shared';if(currentCourseMeta.type==='EP'){const q=String(fd.get('course_qualification')||epQualificationId(p)||'');program.qualificationId=q;program.dayNight=q==='day'||q==='night'?q:(p.phaseId==='ep_full'?'shared':(p.dayNight||'shared'));program.contextLabel='';qualificationTrack=q==='day'||q==='night'?q:'shared'}else program.contextLabel=String(fd.get('course_context')||packageConfigurationLabel(currentCourseMeta.type,p)).trim()||packageConfigurationLabel(currentCourseMeta.type,p);
     const overrides={program,custom:o.custom||{},syllabi:{},counters:{},criteria:{},exams:{},progression:{},emergencies:{},emergencyRequirementIds:fd.getAll('requiredEmergency').map(String)};
@@ -6883,7 +7012,7 @@ function bindSettings(){
     m.exams.forEach(x=>{const v=fd.get('exam_pass_'+x.id),name=String(fd.get('exam_name_'+x.id)||x.name).trim()||x.name;overrides.exams[x.id]={applicable:fd.has('exam_app_'+x.id),name,order:Number(fd.get('exam_order_'+x.id)||x.order||999),pass:v===''?null:Number(v)}});
     m.progression.forEach(x=>{const k=progressionEditableKey(x),patch={applicable:fd.has('gate_'+x.id),order:Number(fd.get('gate_order_'+x.id)||x.order||999)};if(k){const value=String(fd.get('gate_text_'+x.id)||'').trim();if(value)patch[k]=value}overrides.progression[x.id]=patch});
     m.emergencies.forEach(x=>{const name=String(fd.get('course_emergency_name_'+x.id)||x.name).trim()||x.name;overrides.emergencies[x.id]={name,order:Number(fd.get('course_emergency_order_'+x.id)||x.order||999),category:String(fd.get('course_emergency_category_'+x.id)||x.category||defaultEmergencyCategory(name))}});
-    window.FLYMPUS_TRAINING.saveOverrides(currentCourseMeta.courseCode||currentCourseId,overrides);saveCourseLifecycleOverride(currentCourseId,String(fd.get('course_lifecycle')||'AUTO'));const rec=courseByKey(currentCourseId);if(rec){Object.assign(currentCourseMeta,courseRuntimeMeta(rec));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta))}state.courseAddFlow=null;state.courseTailorEditing=false;toast('Changes saved');renderPreservingManagementView();
+    window.FLYMPUS_TRAINING.saveOverrides(currentCourseMeta.courseCode||currentCourseId,overrides);saveCourseLifecycleOverride(currentCourseId,String(fd.get('course_lifecycle')||'AUTO'));const rec=courseByKey(currentCourseId);if(rec){Object.assign(currentCourseMeta,courseRuntimeMeta(rec));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta))}const exitAfterSave=courseTailorExitAfterSave;courseTailorExitAfterSave=false;state.courseAddFlow=null;courseTailorSessionDirty=false;if(exitAfterSave){courseTailorEditSnapshot=null;state.courseTailorEditing=false}else{state.courseTailorEditing=true;refreshCourseTailorEditBaseline()}toast('Changes saved');renderPreservingManagementView();
   };
   const rememberBuilderInputs=()=>{
     if($('#builderName'))state.builderName=$('#builderName').value;
@@ -7089,7 +7218,7 @@ function bindSettings(){
       const refresh=()=>{[...table.querySelectorAll('.ruleEditorRow')].forEach((row,i)=>{const n=i+1,label=row.querySelector('.ruleOrderNumber'),hidden=row.querySelector('input[type="hidden"][name*="_order_"]');if(label)label.textContent=n;if(hidden)hidden.value=n});};
       bindFlympusAnimatedReorder({
         table,handleSelector:'.ruleDragHandle',rowSelector:'.ruleEditorRow',canEdit,
-        onReorder:()=>{refresh();form.dataset.dirty='1'},
+        onReorder:()=>{refresh();form.dataset.dirty='1';if(form.id==='courseOverridesForm')courseTailorSessionDirty=true},
         onDrop:changed=>{refresh();if(changed)form.dataset.dirty='1'}
       });
       table.querySelectorAll('.useCell input[type="checkbox"]').forEach(cb=>cb.onchange=()=>{cb.closest('.ruleEditorRow')?.classList.toggle('ruleDisabledRow',!cb.checked);form.dataset.dirty='1'});
@@ -7105,11 +7234,11 @@ function bindSettings(){
         handleSelector:'.courseSyllabusDragHandle',
         rowSelector:'.packageSyllabusRow',
         canEdit:()=>state.courseTailorEditing===true,
-        onReorder:()=>refresh(),
+        onReorder:()=>{courseTailorSessionDirty=true;form.dataset.dirty='1';refresh()},
         onDrop:changed=>{refresh();if(changed)toast('Course syllabus order updated · Save active course to keep it')}
       });
       form.querySelectorAll('[data-course-syllabus-use]').forEach(cb=>cb.onchange=()=>{const row=cb.closest('.packageSyllabusRow');if(!row||!excluded)return;if(!cb.checked){row.classList.add('syllabusExcludedRow');excluded.appendChild(row);toast('Syllabus excluded from this course')}else{row.classList.remove('syllabusExcludedRow');table.appendChild(row);toast('Syllabus restored to the end of this course')}refresh()});
-      form.querySelectorAll('[data-course-restore-syllabus]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const row=btn.closest('.packageSyllabusRow'),cb=row?.querySelector('[data-course-syllabus-use]');if(!row||!cb)return;cb.checked=true;row.classList.remove('syllabusExcludedRow');table.appendChild(row);refresh();toast('Syllabus restored to this course')});
+      form.querySelectorAll('[data-course-restore-syllabus]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const row=btn.closest('.packageSyllabusRow'),cb=row?.querySelector('[data-course-syllabus-use]');if(!row||!cb)return;courseTailorSessionDirty=true;form.dataset.dirty='1';cb.checked=true;row.classList.remove('syllabusExcludedRow');table.appendChild(row);refresh();toast('Syllabus restored to this course')});
       form.querySelectorAll('input[name^="min_"]').forEach(input=>input.oninput=refresh);refresh();
     }
     bindRuleEditorTables(form,()=>state.courseTailorEditing===true);
@@ -7188,7 +7317,14 @@ function bindSettings(){
   document.querySelectorAll('.globalPackageForm').forEach(form=>{form.onsubmit=e=>{e.preventDefault();saveGlobalPackageForm(form)};form.addEventListener('input',()=>{if(state.advancedArchitectureEditing)form.dataset.dirty='1'});form.addEventListener('change',()=>{if(state.advancedArchitectureEditing)form.dataset.dirty='1'})});
 
 
-  if($('#advancedArchitectureEdit'))$('#advancedArchitectureEdit').onclick=()=>renderPreservingManagementView(()=>{state.advancedArchitectureEditing=true});
+  if($('#advancedArchitectureEdit'))$('#advancedArchitectureEdit').onclick=()=>{beginAdvancedArchitectureEditSession();renderPreservingManagementView(()=>{state.advancedArchitectureEditing=true})};
+  if($('#cfgDiscardCatalogs'))$('#cfgDiscardCatalogs').onclick=async()=>{
+    if(!(await siteConfirm('Discard all architecture and Package changes made since entering Edit mode?',{title:'Discard changes?',confirmLabel:'Discard changes',tone:'danger'})))return;
+    discardAdvancedArchitectureSession();
+    state.advancedArchitectureEditing=false;state.packageEditId=null;
+    toast('Unsaved changes discarded');
+    renderPreservingManagementView();
+  };
 
   if($('#cfgAddPlatform'))$('#cfgAddPlatform').onsubmit=e=>{
     e.preventDefault();const name=String(new FormData(e.currentTarget).get('name')||'').trim(),type=state.typeWorkspace||cfgGet().courseTypes[0]?.id||'';if(!name||!type){toast('Enter a platform name before adding it.','error');return}
@@ -7208,7 +7344,7 @@ function bindSettings(){
     document.querySelectorAll('.cfgPlatformName').forEach(el=>{if(el.value.trim())platformLabels[el.dataset.id]=el.value.trim()});savePlatformLabels(platformLabels);
     document.querySelectorAll('.cfgScopedName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
     document.querySelectorAll('.cfgScopedWeight').forEach(el=>{const x=cc.criteria.find(v=>v.id===el.dataset.id);if(x)x.weight=Math.max(0,Math.min(100,Number(el.value)||0))});document.querySelectorAll('.cfgEmergencyCategory').forEach(el=>{const x=cc.emergencies.find(v=>v.id===el.dataset.id);if(x)x.category=el.value||'General / Operational'});document.querySelectorAll('.cfgSyllabusMinimum').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.minimum=el.value===''?null:Math.max(0,Math.min(999,Math.floor(Number(el.value)||0)))});document.querySelectorAll('.cfgSyllabusPresence').forEach(el=>{const x=cc.syllabi.find(v=>v.id===el.dataset.id);if(x)x.instructorPresence=el.value});
-    cc.platformLabels={...platformLabels};cc.dayNight=(cc.qualifications||[]).filter(x=>x.id==='day'||x.id==='night').map(x=>({id:x.id,name:x.name}));cfgSave(cc);const activeRecord=courseByKey(currentCourseId);if(activeRecord){Object.assign(currentCourseMeta,courseRuntimeMeta(activeRecord));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta))}state.advancedArchitectureEditing=false;state.packageEditId=null;toast('Changes saved');renderPreservingManagementView();
+    cc.platformLabels={...platformLabels};cc.dayNight=(cc.qualifications||[]).filter(x=>x.id==='day'||x.id==='night').map(x=>({id:x.id,name:x.name}));cfgSave(cc);const activeRecord=courseByKey(currentCourseId);if(activeRecord){Object.assign(currentCourseMeta,courseRuntimeMeta(activeRecord));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta))}advancedArchitectureEditSnapshot=null;state.advancedArchitectureEditing=false;state.packageEditId=null;toast('Changes saved');renderPreservingManagementView();
   };
 
   document.querySelectorAll('[data-cfg-add-open]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-cfg-add-box]'),form=box?.querySelector('.cfgAddForm');if(!form)return;form.hidden=false;btn.hidden=true;form.querySelector('input[name="name"]')?.focus?.()});
