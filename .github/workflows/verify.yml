@@ -31,6 +31,8 @@ jobs:
         run: node tests/push-notifications.test.cjs
       - name: Authentication foundation tests
         run: node tests/auth-integration.test.cjs
+      - name: UID-scoped storage tests
+        run: node tests/storage-scope.test.cjs
       - name: Hebrew UI and RTL tests
         run: node tests/hebrew-ui.test.cjs
       - name: Hebrew i18n integration tests

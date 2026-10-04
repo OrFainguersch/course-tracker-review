@@ -208,11 +208,44 @@ html.flympusAuthPreview .app{
   font-weight:850;
   cursor:pointer
 }
+.flympusSignedInAdmin{
+  width:100%;
+  min-height:36px;
+  margin-top:10px;
+  border:1px solid #bddbf2;
+  border-radius:10px;
+  background:#edf7ff;
+  color:#176da9;
+  font-size:9.5px;
+  font-weight:900;
+  cursor:pointer
+}
+
+html.flympusUserManagementOpen body{overflow:hidden!important}
+#flympusUserManagementRoot[hidden]{display:none!important}
+#flympusUserManagementRoot{position:fixed;inset:0;z-index:10020;display:grid;place-items:center;padding:18px;color:#10263b;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.flympusUserManagementBackdrop{position:absolute;inset:0;background:rgba(5,24,43,.68);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.flympusUserManagementPanel{position:relative;width:min(980px,100%);max-height:min(90dvh,820px);display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(255,255,255,.34);border-radius:24px;background:#f6f9fc;box-shadow:0 30px 90px rgba(0,0,0,.34)}
+.flympusUserManagementPanel>header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:22px 24px;background:linear-gradient(135deg,#082f57,#0a467b);color:#fff}
+.flympusUserManagementPanel>header p{margin:0 0 5px;color:#7fd0ff;font-size:9px;font-weight:950;letter-spacing:.15em}
+.flympusUserManagementPanel>header h1{margin:0;font-size:25px;line-height:1.1}
+.flympusUserManagementPanel>header span{display:block;margin-top:6px;color:#c8dded;font-size:10.5px}
+.flympusUserManagementClose{flex:0 0 38px;width:38px;height:38px;border:1px solid rgba(255,255,255,.25);border-radius:12px;background:rgba(255,255,255,.08);color:#fff;font-size:24px;line-height:1;cursor:pointer}
+.flympusUserManagementBody{overflow:auto;padding:18px 20px 24px}
+.flympusUserManagementLoading{min-height:260px;display:grid;place-content:center;justify-items:center;gap:8px;color:#72869a;font-size:11px}
+.flympusUserSummary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.flympusUserSummary>div{padding:15px;border:1px solid #dce7f0;border-radius:15px;background:#fff;box-shadow:0 6px 18px rgba(18,60,96,.05)}
+.flympusUserSummary strong{display:block;color:#0a315c;font-size:22px}.flympusUserSummary span{display:block;margin-top:2px;color:#71859a;font-size:10px;font-weight:800}
+.flympusUserGroup{margin-top:18px}.flympusUserGroupHead{display:flex;align-items:center;gap:8px;margin-bottom:8px}.flympusUserGroupHead h2{margin:0;color:#123d64;font-size:15px}.flympusUserGroupHead span{min-width:23px;height:23px;display:grid;place-items:center;border-radius:999px;background:#e5f2fc;color:#176da9;font-size:9px;font-weight:900}
+.flympusUserList{display:grid;gap:8px}.flympusUserCard{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:11px;align-items:center;padding:12px 13px;border:1px solid #dce7f0;border-radius:15px;background:#fff}
+.flympusUserAvatar{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;background:#e7f3fd;color:#176da9;font-size:15px;font-weight:950}.flympusUserIdentity{min-width:0}.flympusUserIdentity>b{display:block;color:#143d62;font-size:11.5px}.flympusUserIdentity>span{display:block;margin-top:2px;color:#71859a;font-size:9.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.flympusUserMeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.flympusUserMeta i{padding:4px 7px;border-radius:999px;background:#eef3f7;color:#587086;font-style:normal;font-size:7.5px;font-weight:900;text-transform:uppercase}.flympusUserMeta i.status.pending{background:#fff4d8;color:#91620d}.flympusUserMeta i.status.active{background:#e4f8ee;color:#087453}.flympusUserMeta i.status.blocked{background:#ffeaec;color:#ad2636}.flympusUserMeta i.role{background:#e8efff;color:#385bb2}
+.flympusUserActions{display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap}.flympusUserAction{min-height:34px;padding:0 10px;border:1px solid #cdddea;border-radius:10px;background:#fff;color:#315b7e;font-size:8.5px;font-weight:900;cursor:pointer}.flympusUserAction.primary{border-color:#9dcef0;background:#eaf6ff;color:#116cae}.flympusUserAction.danger{border-color:#f0c6ca;background:#fff5f6;color:#b52d3d}.flympusUserAction:disabled{opacity:.5;cursor:wait}.flympusCurrentAdmin{display:inline-flex;padding:6px 9px;border-radius:999px;background:#e8f1ff;color:#315eb0;font-size:8px;font-weight:900}.flympusUserEmpty{padding:18px;border:1px dashed #cfdce8;border-radius:14px;color:#8495a5;text-align:center;font-size:10px}
 
 html[data-flympus-theme="dark"] .flympusSignedInAccount{border-color:#294158}
 html[data-flympus-theme="dark"] .flympusSignedInAccountHead b{color:#dcecf8!important}
 html[data-flympus-theme="dark"] .flympusSignedInRole{background:#17324a;color:#86c8f3}
 html[data-flympus-theme="dark"] .flympusSignedInSignOut{color:#7ec2ef}
+html[data-flympus-theme="dark"] .flympusSignedInAdmin{border-color:#31526c;background:#16324a;color:#8fd0f8}
 
 @media(max-width:520px){
   #flympusAuthRoot{place-items:end center;padding-left:12px;padding-right:12px}
@@ -221,4 +254,9 @@ html[data-flympus-theme="dark"] .flympusSignedInSignOut{color:#7ec2ef}
   .flympusAuthCard{border-radius:22px}
   .flympusAuthCardBody{padding:22px 18px}
   .flympusAuthTitle{font-size:24px}
+  #flympusUserManagementRoot{place-items:end center;padding:0}
+  .flympusUserManagementPanel{width:100%;max-height:94dvh;border-radius:24px 24px 0 0}
+  .flympusUserManagementPanel>header{padding:18px}.flympusUserManagementPanel>header h1{font-size:22px}
+  .flympusUserManagementBody{padding:14px 12px calc(18px + env(safe-area-inset-bottom))}
+  .flympusUserCard{grid-template-columns:40px minmax(0,1fr)}.flympusUserAvatar{width:40px;height:40px}.flympusUserActions{grid-column:1/-1;justify-content:stretch}.flympusUserAction{flex:1}.flympusCurrentAdmin{margin-left:51px}
 }

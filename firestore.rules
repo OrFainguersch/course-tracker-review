@@ -24,10 +24,23 @@ service cloud.firestore {
         && currentUserRecord().data.role == 'admin';
     }
 
+    function validRoleAndStatus(data) {
+      return data.role in ['user', 'admin']
+        && data.status in ['pending', 'active', 'blocked'];
+    }
+
+    function validUserShape(data) {
+      return data.keys().hasOnly([
+        'uid', 'email', 'displayName', 'photoURL', 'providerIds',
+        'role', 'status', 'createdAt', 'lastLoginAt', 'updatedAt', 'updatedBy'
+      ]) && validRoleAndStatus(data);
+    }
+
     match /users/{uid} {
       /* First sign-in may only create the caller's own pending USER record.
          A browser client can never create itself as ACTIVE or ADMIN. */
       allow create: if ownUser(uid)
+        && validUserShape(request.resource.data)
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.role == 'user'
@@ -37,12 +50,18 @@ service cloud.firestore {
 
       /* Users may refresh only non-authority profile fields. role/status/uid/email
          are immutable unless an already-active administrator performs the write. */
-      allow update: if admin()
+      allow update: if validUserShape(request.resource.data)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && (admin()
         || (ownUser(uid)
           && request.resource.data.uid == resource.data.uid
           && request.resource.data.email == resource.data.email
           && request.resource.data.role == resource.data.role
-          && request.resource.data.status == resource.data.status);
+          && request.resource.data.status == resource.data.status
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'displayName', 'photoURL', 'providerIds', 'lastLoginAt', 'updatedAt'
+          ])));
 
       allow delete: if admin();
     }

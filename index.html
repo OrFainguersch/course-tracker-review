@@ -7,6 +7,8 @@
 <meta charset="utf-8" />
 <meta name="theme-color" content="#07294c" />
 <meta name="color-scheme" content="light" />
+<script src="./firebase-config.js?v=20261004-auth2"></script>
+<script src="./storage-scope.js?v=20261004-auth2"></script>
 <script>
 /* Early preference bootstrap: keep first paint identical to the last visible
    FLYMPUS frame. iOS can report a transient system color scheme while a PWA is
@@ -4334,7 +4336,6 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
 }
 </style>
 <link rel="stylesheet" href="./auth.css?v=20261004-auth1" />
-<script src="./firebase-config.js?v=20261004-auth1"></script>
 <script>
 /* Authentication is fail-closed only after it is explicitly enabled.
    Until the Firebase project and UID-scoped data migration are ready,
@@ -10183,6 +10184,6 @@ if(['roster','planned','home','record','reports'].includes(earlyNavTarget)){
   }
 })();
 </script>
-<script type="module" src="./auth.js?v=20261004-auth1"></script>
+<script type="module" src="./auth.js?v=20261004-auth2"></script>
 </body>
 </html>

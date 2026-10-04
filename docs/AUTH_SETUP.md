@@ -1,6 +1,6 @@
 # FLYMPUS authentication setup
 
-The repository now contains a dormant authentication layer for Google and Microsoft accounts. Production enforcement is intentionally **off** until Firebase is connected and the existing device-local training data is migrated/scoped by authenticated UID.
+The repository contains Google and Microsoft Firebase Authentication, Firestore-backed account approval, an ADMIN-only User Management screen, and UID-scoped browser persistence. Production enforcement remains **off** until provider setup and first-admin bootstrap are verified.
 
 ## Cost boundary
 
@@ -12,6 +12,8 @@ Keep the Firebase project on the **Spark** plan. Do not attach a billing account
 - `auth.js` — Google/Microsoft Firebase Authentication client and pending/active user gate.
 - `auth.css` — login/pending/error UI.
 - `firestore.rules` — USER/ADMIN bootstrap rules for `users/{uid}`.
+- `storage-scope.js` — UID isolation and one-time first-admin legacy migration.
+- `docs/AUTH_DATA_MIGRATION.md` — persistence classification and migration boundary.
 - `?authPreview=1` — displays the login UI without connecting to Firebase.
 
 ## Firebase console steps required before activation
@@ -26,8 +28,8 @@ Keep the Firebase project on the **Spark** plan. Do not attach a billing account
 8. Set `enabled:true`, but keep `enforceAuth:false` while validating sign-in.
 9. Sign in once with the intended administrator account. A `users/{uid}` document is created with `role:user`, `status:pending`.
 10. In Firestore Console, bootstrap that one account by changing it to `role:admin`, `status:active`.
-11. Build the Admin > User Management UI so future approvals happen inside FLYMPUS.
-12. Scope/migrate course data by UID and membership. Only after that set `enforceAuth:true`.
+11. Verify the Admin-only User Management UI and UID isolation.
+12. Only after Google, Microsoft, the first admin and the UID migration are verified, set `enforceAuth:true`.
 
 ## Roles
 
