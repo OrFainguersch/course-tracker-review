@@ -468,8 +468,35 @@ select option[value=""]{color:#8a9bad}
 <style>
 /* ===== Reusable Training Packages / Advanced architecture ===== */
 .contextReferenceList{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.contextReference{padding:8px 10px;border:1px solid #dce7f1;border-radius:10px;background:#f7fafc;color:#385875;font-size:11px;font-weight:800}
-.advancedPackageTitle{margin-top:22px}.packageFilterBar{display:flex;align-items:flex-end;gap:10px;margin:10px 0 12px}.packageFilterBar .field{margin:0;min-width:240px}.packageFilterBar small{color:#7d8fa1;font-size:9px;padding-bottom:8px}.globalPackageList{display:grid;gap:14px}.globalPackageCard{padding:16px}.globalPackageHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.globalPackageHead h3{margin:4px 0;font-size:17px;color:#153c62}.globalPackageHead p{margin:0;color:#788b9e;font-size:10px}.packageBadges{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.packageRuleStats{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.packageRuleStats span{padding:8px 10px;background:#f5f8fb;border-radius:10px;color:#64798e;font-size:10px}.packageRuleStats b{color:#1b4f7d;font-size:13px;margin-right:4px}.packageRules{border:1px solid #e3ebf3;border-radius:12px;margin-top:8px;overflow:hidden}.packageRules>summary{padding:11px 12px;display:flex;justify-content:space-between;gap:10px;cursor:pointer;background:#fbfdff}.packageRules>summary>span{font-size:9px;color:#8092a5}.globalRules{padding:10px;display:grid;gap:8px}.globalRuleRow{display:grid;grid-template-columns:minmax(240px,1.25fr) minmax(200px,1fr) 110px;gap:8px;align-items:center;padding:8px;border:1px solid #edf1f5;border-radius:10px}.globalRuleToggle{display:grid;grid-template-columns:auto 1fr;column-gap:7px;align-items:center}.globalRuleToggle small{grid-column:2;color:#8495a6;font-size:8px}.compactNumber{max-width:110px}.globalGateRow{display:grid;grid-template-columns:minmax(210px,.6fr) minmax(260px,1.4fr);gap:8px;align-items:center;padding:8px;border:1px solid #edf1f5;border-radius:10px}.packageInheritanceFlow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}.packageInheritanceFlow span{padding:6px 9px;border:1px solid #dfe8f1;border-radius:999px;color:#718398;font-size:9px;font-weight:850}.packageInheritanceFlow span.active{background:#eaf5ff;border-color:#9bcdf6;color:#176eb9}.packageInheritanceFlow b{color:#9aabba}.advancedIntro .packageInheritanceFlow{margin-bottom:0}
-@media(max-width:760px){.packageFilterBar{align-items:stretch;flex-direction:column}.packageFilterBar .field{min-width:0;width:100%}.packageFilterBar small{padding-bottom:0}.globalPackageHead{flex-direction:column}.packageBadges{justify-content:flex-start}.globalRuleRow{grid-template-columns:1fr 1fr}.globalRuleToggle{grid-column:1/-1}.compactNumber{max-width:none}.globalGateRow{grid-template-columns:1fr}.packageRules>summary{flex-direction:column}.packageRuleStats{display:grid;grid-template-columns:1fr}.packageInheritanceFlow{gap:5px}}
+.advancedPackageTitle{margin-top:22px}.packageFilterBar{display:flex;align-items:flex-end;gap:10px;margin:10px 0 12px}.packageFilterBar .field{margin:0;min-width:240px}.packageFilterBar small{color:#7d8fa1;font-size:9px;padding-bottom:8px}.globalPackageList{display:grid;gap:14px}.globalPackageCard{padding:16px}.globalPackageHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.globalPackageHead h3{margin:4px 0;font-size:17px;color:#153c62}.globalPackageHead p{margin:0;color:#788b9e;font-size:10px}.packageBadges{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.packageRuleStats{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.packageRuleStats span{padding:8px 10px;background:#f5f8fb;border-radius:10px;color:#64798e;font-size:10px}.packageRuleStats b{color:#1b4f7d;font-size:13px;margin-right:4px}.packageRules{border:1px solid #e3ebf3;border-radius:12px;margin-top:8px;overflow:hidden}
+.packageRules>summary{
+  position:relative;
+  padding:11px 42px 11px 12px;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  cursor:pointer;
+  background:#fbfdff;
+  list-style:none
+}
+.packageRules>summary::-webkit-details-marker{display:none}
+.packageRules>summary::after{
+  content:"";
+  position:absolute;
+  right:16px;
+  top:50%;
+  width:9px;
+  height:9px;
+  border-right:3px solid #176fae;
+  border-bottom:3px solid #176fae;
+  transform:translateY(-68%) rotate(45deg);
+  transform-origin:center;
+  transition:transform .16s ease;
+  pointer-events:none
+}
+.packageRules[open]>summary::after{transform:translateY(-32%) rotate(225deg)}
+.packageRules>summary>span{font-size:9px;color:#8092a5}.globalRules{padding:10px;display:grid;gap:8px}.globalRuleRow{display:grid;grid-template-columns:minmax(240px,1.25fr) minmax(200px,1fr) 110px;gap:8px;align-items:center;padding:8px;border:1px solid #edf1f5;border-radius:10px}.globalRuleToggle{display:grid;grid-template-columns:auto 1fr;column-gap:7px;align-items:center}.globalRuleToggle small{grid-column:2;color:#8495a6;font-size:8px}.compactNumber{max-width:110px}.globalGateRow{display:grid;grid-template-columns:minmax(210px,.6fr) minmax(260px,1.4fr);gap:8px;align-items:center;padding:8px;border:1px solid #edf1f5;border-radius:10px}.packageInheritanceFlow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}.packageInheritanceFlow span{padding:6px 9px;border:1px solid #dfe8f1;border-radius:999px;color:#718398;font-size:9px;font-weight:850}.packageInheritanceFlow span.active{background:#eaf5ff;border-color:#9bcdf6;color:#176eb9}.packageInheritanceFlow b{color:#9aabba}.advancedIntro .packageInheritanceFlow{margin-bottom:0}
+@media(max-width:760px){.packageFilterBar{align-items:stretch;flex-direction:column}.packageFilterBar .field{min-width:0;width:100%}.packageFilterBar small{padding-bottom:0}.globalPackageHead{flex-direction:column}.packageBadges{justify-content:flex-start}.globalRuleRow{grid-template-columns:1fr 1fr}.globalRuleToggle{grid-column:1/-1}.compactNumber{max-width:none}.globalGateRow{grid-template-columns:1fr}.packageRules>summary{flex-direction:column;align-items:flex-start;padding-right:42px}.packageRuleStats{display:grid;grid-template-columns:1fr}.packageInheritanceFlow{gap:5px}}
 </style>
 <style>
 .packagePathBox{margin-top:12px;padding:12px;border:1px solid #dfe8f1;border-radius:12px;background:#f8fbfe}.packagePathEditor{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:9px}.packageChoiceGrid .wizardChoice{text-align:left;align-items:flex-start}.packageChoiceGrid .wizardChoice small{white-space:normal;line-height:1.35}
@@ -986,9 +1013,7 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 <style>
 /* ===== Roster person editor · professional action hierarchy ===== */
 #editPersonModal .modalCard{padding:20px}
-.personModalPhotoActions,
-.personModalSecondaryActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.personModalPhotoActions{margin-top:10px}
+.personModalPhotoActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
 .personModalPhotoActions [hidden]{display:none!important}
 .personModalBtn{
   width:100%;min-width:0;min-height:46px;height:46px;
@@ -997,24 +1022,16 @@ form input,form select,form textarea{max-width:100%;min-width:0}
   font-size:12px;font-weight:850;line-height:1.1;text-align:center;
   box-sizing:border-box;white-space:nowrap
 }
-.personModalSecondaryActions{margin-top:14px}
-.personModalSaveRow{margin-top:10px}
-.personModalSave{min-height:50px;height:50px;font-size:13px;box-shadow:0 5px 14px rgba(8,124,240,.16)}
-#editPersonModal .personModalSecondaryActions .danger{
-  background:#fff7f7;border-color:#f0c7cb;color:#b4233b
-}
-#editPersonModal .personModalSecondaryActions .secondary,
 #editPersonModal .personModalPhotoActions .secondary{
   background:#fff;border-color:#cedceb;color:#173b63
 }
 #editPersonModal .personModalBtn:active{transform:translateY(1px)}
 @media(max-width:560px){
   #editPersonModal .modalCard{padding:18px}
-  .personModalBtn{height:48px;min-height:48px;font-size:12.5px;border-radius:13px}
-  .personModalSave{height:50px;min-height:50px;font-size:13.5px}
+  .personModalBtn{height:46px;min-height:46px;font-size:12px;border-radius:13px}
 }
 @media(max-width:350px){
-  .personModalPhotoActions,.personModalSecondaryActions{grid-template-columns:1fr}
+  .personModalPhotoActions{grid-template-columns:1fr}
 }
 </style>
 
@@ -3162,16 +3179,33 @@ body.flympusPersonModalOpen{touch-action:none}
 }
 </style>
 <style>
-/* ===== Explicit Save / Discard edit actions · 2026-10-04 ===== */
-.packageSaveBar.editDecisionBar,
-.advancedArchitectureActions.editDecisionBar{
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:9px;
-  flex-wrap:wrap
+/* ===== Unified Save / Discard action language · 2026-10-04 =====
+   Rule: Discard is always left, Save is always right. Both are equal size. */
+.editDecisionBar{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(132px,168px))!important;
+  justify-content:end!important;
+  align-items:center!important;
+  gap:10px!important
 }
-.editDecisionBar .btn{margin:0;min-width:132px}
+.editDecisionBar .btn,
+.editDecisionBar .editDecisionBtn{
+  width:100%!important;
+  min-width:0!important;
+  height:46px!important;
+  min-height:46px!important;
+  margin:0!important;
+  padding:0 14px!important;
+  border-radius:13px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  font-size:12px!important;
+  font-weight:850!important;
+  line-height:1.1!important;
+  white-space:nowrap!important
+}
 .btn.discardChanges{
   background:#fff!important;
   border-color:#c8d7e5!important;
@@ -3182,10 +3216,35 @@ body.flympusPersonModalOpen{touch-action:none}
   border-color:#9fb9cf!important;
   color:#274c6d!important
 }
+.personModalDecisionBar{
+  width:100%;
+  margin-top:14px;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important
+}
+.personModalDangerZone{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid #edf2f7
+}
+.personModalDangerZone .btn{
+  width:100%;
+  min-height:42px;
+  height:42px;
+  margin:0;
+  border-radius:12px;
+  background:#fff!important;
+  border-color:#f0c7cb!important;
+  color:#b4233b!important;
+  font-size:11.5px;
+  font-weight:820;
+  box-shadow:none!important
+}
 .siteDialogActions.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:759px){
-  .packageSaveBar.editDecisionBar,.advancedArchitectureActions.editDecisionBar{display:grid;grid-template-columns:1fr 1fr}
-  .editDecisionBar .btn{width:100%;min-width:0}
+  .editDecisionBar{
+    width:100%!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important
+  }
 }
 @media(max-width:520px){
   .siteDialogActions.three{grid-template-columns:1fr}
@@ -5089,7 +5148,7 @@ function personEditModal(){
   '<form id="editPersonForm"><div class="identityEditGrid"><div><div class="photoPreview" id="personPhotoPreview">'+photo+'</div><div class="personModalPhotoActions"><label class="btn secondary personModalBtn" id="choosePersonPhotoAction" style="cursor:pointer" '+(hasPhoto?'hidden':'')+'>Choose photo<input id="personPhotoInput" type="file" accept="image/*" style="display:none"></label><button type="button" class="btn secondary personModalBtn" id="editPersonPhoto" '+(hasPhoto?'':'hidden')+'>Edit photo</button><button type="button" class="btn secondary personModalBtn" id="removePersonPhoto" '+(hasPhoto?'':'hidden')+'>Remove photo</button></div></div>'+
   '<div class="grid"><div class="field"><label>Full name</label><input class="input" name="name" required value="'+esc(p.name||'')+'"></div><div class="field"><label>Email</label><input class="input" name="email" type="email" value="'+esc(p.email||'')+'"></div>'+
   (type==='TRAINEE'?'<div class="field"><label>Status in this course</label><select name="membership" required><option value="Active" '+(membership.status!=='Inactive'?'selected':'')+'>Active</option><option value="Inactive" '+(membership.status==='Inactive'?'selected':'')+'>Inactive</option></select></div>':'<div class="field"><label>Role in this course</label><select name="membership" required><option value="INSTRUCTOR" '+(membership.role!=='COURSE_MANAGER'?'selected':'')+'>Instructor</option><option value="COURSE_MANAGER" '+(membership.role==='COURSE_MANAGER'?'selected':'')+'>Course Manager</option></select></div>')+
-  '</div></div><p class="mutedHint">Photo is compressed and stored only in this browser for the review build.</p><div class="personModalSecondaryActions"><button type="button" class="btn danger personModalBtn" id="removePersonFromCourse">Remove from course</button><button type="button" class="btn secondary personModalBtn discardChanges" id="cancelEditPerson">Discard changes</button></div><div class="personModalSaveRow"><button class="btn sky personModalBtn personModalSave" type="submit">Save changes</button></div></form></div></div>';
+  '</div></div><p class="mutedHint">Photo is compressed and stored only in this browser for the review build.</p><div class="personModalDecisionBar editDecisionBar"><button type="button" class="btn secondary personModalBtn discardChanges editDecisionBtn" id="cancelEditPerson">Discard changes</button><button class="btn sky personModalBtn personModalSave editDecisionBtn" type="submit">Save changes</button></div><div class="personModalDangerZone"><button type="button" class="btn danger personModalBtn" id="removePersonFromCourse">Remove from course</button></div></form></div></div>';
 }
 function imageFileToSmallDataUrl(file,maxSize=420,quality=.78){
  return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>{const img=new Image();img.onerror=reject;img.onload=()=>{let w=img.width,h=img.height,scale=Math.min(1,maxSize/Math.max(w,h));w=Math.max(1,Math.round(w*scale));h=Math.max(1,Math.round(h*scale));const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,w,h);resolve(canvas.toDataURL('image/jpeg',quality))};img.src=reader.result};reader.readAsDataURL(file)})
@@ -5935,7 +5994,7 @@ function courseOverridesHtml(){
     '<details class="packageRules"><summary><b>Experience requirements ('+counterActive.length+')</b><span>'+(orderedCounters.length-counterActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('counters',['Use','Order / Move','Requirement','Minimum','Unit','Status'],counterItems,'48px 92px minmax(220px,1.4fr) 100px 110px minmax(130px,.7fr)')+counterAdd+'</details>'+
     '<details class="packageRules"><summary><b>Exams ('+examActive.length+')</b><span>'+(orderedExams.length-examActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('exams',['Use','Order / Move','Exam','Pass grade','Status'],examItems,'48px 92px minmax(260px,1.6fr) 120px minmax(140px,.7fr)')+examAdd+'</details>'+
     '<details class="packageRules"><summary><b>Progression gates ('+gateActive.length+')</b><span>'+(orderedGates.length-gateActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('progression',['Use','Order / Move','Progression requirement','Status'],gateItems,'48px 92px minmax(320px,1.8fr) minmax(140px,.7fr)')+gateAdd+'</details></fieldset>'+
-    (editing?'<div class="toolbar packageSaveBar courseTailorActions editDecisionBar"><button class="btn secondary discardChanges" type="button" id="courseTailorDiscardChanges">Discard changes</button><button class="btn sky" type="submit">Save changes</button></div><div class="courseTailorDoneDockSpacer" aria-hidden="true"></div><button class="courseTailorDoneDock" id="courseTailorDoneDock" type="button">✓ Done</button>':'')+'</form>';
+    (editing?'<div class="toolbar packageSaveBar courseTailorActions editDecisionBar"><button class="btn secondary discardChanges editDecisionBtn" type="button" id="courseTailorDiscardChanges">Discard changes</button><button class="btn sky editDecisionBtn" type="submit">Save changes</button></div><div class="courseTailorDoneDockSpacer" aria-hidden="true"></div><button class="courseTailorDoneDock" id="courseTailorDoneDock" type="button">✓ Done</button>':'')+'</form>';
 }
 function epSyllabusDefinition(name){
   const p=epCurrentProgram();if(!p||!name)return null;
@@ -6168,7 +6227,7 @@ function settings(){
     html+=cfgCatalogCard('Cancellation reasons','cancellationReasons',c.cancellationReasons,'Global list used by Planned vs Executed. One reason is stored for every cancelled flight.');
     html+='</div></fieldset>';
     html+='<section class="advancedPackagesFinal"><div class="advancedStepLabel"><span>4</span><div><b>Packages</b><small>Final step · create and manage reusable Packages.</small></div></div>'+sectorPackageAssignmentCard(scope)+advancedPackagesHtml(scope)+'</section>';
-    html+='<div class="toolbar packageSaveBar advancedArchitectureActions '+(advancedEditing?'editDecisionBar':'')+'">'+(advancedEditing?'<button class="btn secondary discardChanges" type="button" id="cfgDiscardCatalogs">Discard changes</button>':'')+'<button class="btn sky" type="button" id="'+(advancedEditing?'cfgSaveCatalogs':'advancedArchitectureEdit')+'">'+(advancedEditing?'Save changes':'Edit')+'</button></div>';
+    html+='<div class="toolbar packageSaveBar advancedArchitectureActions '+(advancedEditing?'editDecisionBar':'')+'">'+(advancedEditing?'<button class="btn secondary discardChanges editDecisionBtn" type="button" id="cfgDiscardCatalogs">Discard changes</button>':'')+'<button class="btn sky '+(advancedEditing?'editDecisionBtn':'')+'" type="button" id="'+(advancedEditing?'cfgSaveCatalogs':'advancedArchitectureEdit')+'">'+(advancedEditing?'Save changes':'Edit')+'</button></div>';
   }
 
   if(tab==='profiles'){
