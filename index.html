@@ -4296,11 +4296,9 @@ html[data-flympus-language="he"] .mobileActivity .tileArrow{
 }
 html[data-flympus-language="he"] .mobileActivity .activityCount{right:auto!important;left:10px!important}
 html[data-flympus-language="he"] .homeQuickBtn{justify-content:flex-start}
-.homeWelcomeLine{display:flex!important;align-items:baseline;gap:6px;white-space:nowrap}
-.homeWelcomeLead,.homeWelcomeName{display:inline-block}
-.homeAllCoursesArrow{display:inline-block;width:1em;text-align:center}
-.homeAllCoursesArrow::before{content:"→"}
-html[data-flympus-language="he"] .homeAllCoursesArrow::before{content:"←"}
+.homeWelcomeLine{display:flex!important;align-items:baseline;gap:10px;white-space:nowrap;letter-spacing:normal!important}
+.homeWelcomeLead,.homeWelcomeName{display:inline-block;letter-spacing:-.015em}
+.homeAllCoursesArrow{display:inline-block;width:1em;text-align:center;transform:none!important}
 html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
 @media(max-width:520px){
   .homeHeroMetaLine{white-space:normal;flex-wrap:wrap;row-gap:2px}
@@ -6880,6 +6878,7 @@ function home(){
  const homeHebrew=getFlympusAppPreferences().language==='he';
  const homeWelcomeLead=homeHebrew?'ברוך שובך,':'Welcome back,';
  const homeWelcomeName=homeHebrew?'אור':'Or';
+ const homeForwardArrow=homeHebrew?'←':'→';
  const homeCountryRaw=currentCourseMeta.country||'—';
  const homeCountryLabel=homeHebrew?flympusTranslateUiString(homeCountryRaw):homeCountryRaw;
  const activeT=courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active');
@@ -6939,7 +6938,7 @@ function home(){
      '<div class="eyebrow" style="color:#8bc8ff">'+esc(String(currentCourseMeta.courseName||course.name).toUpperCase())+'</div>'+
      '<div class="welcome homeWelcomeLine" data-i18n-skip><span class="homeWelcomeLead">'+esc(homeWelcomeLead)+'</span><span class="homeWelcomeName">'+esc(homeWelcomeName)+'</span></div>'+
      homeContextHtml+
-     '<div class="heroMeta homeHeroFooter"><span class="homeHeroMetaLine"><span class="homeHeroCountry" data-i18n-skip>'+esc(homeCountryLabel)+'</span>'+(currentCourseMeta.startsOn?'<span class="homeHeroMetaSep" aria-hidden="true">·</span><span class="homeHeroStartLabel">Start date</span><bdi class="homeHeroStartDate">'+esc(formatCourseDate(currentCourseMeta.startsOn))+'</bdi>':'')+'</span><button class="homeAllCoursesLink" type="button" data-go="courses">View all courses <i class="homeAllCoursesArrow" aria-hidden="true"></i></button></div>'+
+     '<div class="heroMeta homeHeroFooter"><span class="homeHeroMetaLine"><span class="homeHeroCountry" data-i18n-skip>'+esc(homeCountryLabel)+'</span>'+(currentCourseMeta.startsOn?'<span class="homeHeroMetaSep" aria-hidden="true">·</span><span class="homeHeroStartLabel">Start date</span><bdi class="homeHeroStartDate">'+esc(formatCourseDate(currentCourseMeta.startsOn))+'</bdi>':'')+'</span><button class="homeAllCoursesLink" type="button" data-go="courses">View all courses <i class="homeAllCoursesArrow" aria-hidden="true" data-i18n-skip>'+homeForwardArrow+'</i></button></div>'+
    '</section>'+
    '<section class="homePrimaryGrid">'+
      '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Today\'s Plan</h2><p>Scheduled flights and activities for today</p></div></div><span class="homeDateChip">▣ '+esc(todayLabel)+'</span></div></div>'+
