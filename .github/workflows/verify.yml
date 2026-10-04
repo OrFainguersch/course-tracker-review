@@ -27,3 +27,5 @@ jobs:
         run: node tests/ui-render.test.cjs
       - name: iOS audio lifecycle tests
         run: node tests/ios-audio-lifecycle.test.cjs
+      - name: Web Push integration tests
+        run: node tests/push-notifications.test.cjs
