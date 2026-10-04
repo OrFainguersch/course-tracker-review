@@ -3920,7 +3920,10 @@ const FLYMPUS_HE_UI={
   'System notifications are not supported by this browser.':'התראות מערכת אינן נתמכות בדפדפן זה.','Notifications are blocked in device/browser settings.':'ההתראות חסומות בהגדרות המכשיר או הדפדפן.',
   'Notification permission was not granted.':'לא ניתנה הרשאה להתראות.','System notifications enabled on this device':'התראות מערכת הופעלו במכשיר זה',
   'Device notifications enabled. Background push delivery server still needs to be connected.':'התראות המכשיר הופעלו. עדיין יש לחבר שרת לשליחת Push ברקע.',
-  'Test notification sent to this device':'התראת בדיקה נשלחה למכשיר זה','Notifications are working on this device.':'ההתראות פועלות במכשיר זה.'
+  'Test notification sent to this device':'התראת בדיקה נשלחה למכשיר זה','Notifications are working on this device.':'ההתראות פועלות במכשיר זה.',
+  'This browser does not expose the Web Push APIs.':'הדפדפן הזה אינו מספק את ממשקי Web Push.','On iPhone/iPad, add FLYMPUS to the Home Screen and open it there to receive system notifications.':'ב-iPhone/iPad יש להוסיף את FLYMPUS למסך הבית ולפתוח אותו משם כדי לקבל התראות מערכת.',
+  'Notifications are blocked in the browser or device settings.':'ההתראות חסומות בהגדרות הדפדפן או המכשיר.','Enable notifications once on this device to allow system alerts.':'הפעל התראות פעם אחת במכשיר זה כדי לאפשר התראות מערכת.',
+  'This device is subscribed for background push delivery.':'המכשיר רשום לקבלת התראות Push גם ברקע.','System notifications work on this device. The remote push delivery server is not connected yet.':'התראות המערכת פועלות במכשיר זה. שרת ה-Push המרוחק עדיין אינו מחובר.'
 };
 const flympusI18nTextOriginal=new WeakMap(),flympusI18nAttrOriginal=new WeakMap();
 function flympusTranslateUiString(value){
@@ -5809,8 +5812,11 @@ async function subscribeFlympusPushDevice(){
 async function syncFlympusPushSubscription({quiet=false}={}){
   try{
     if(!flympusPushSupported()||Notification.permission!=='granted')return false;
-    await registerFlympusPushServiceWorker();
-    const sub=await getFlympusPushSubscription();
+    const registration=await registerFlympusPushServiceWorker(),cfg=await getFlympusPushConfig();
+    let sub=await registration.pushManager.getSubscription();
+    if(!sub&&cfg.enabled&&cfg.vapidPublicKey){
+      sub=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:flympusBase64UrlToBytes(cfg.vapidPublicKey)})
+    }
     if(sub)await sendFlympusPushSubscriptionToBackend(sub);
     return !!sub
   }catch(err){if(!quiet)toast(err?.message||'Could not sync push notifications','error');return false}
@@ -5845,6 +5851,7 @@ async function disableFlympusSystemNotifications(){
 }
 async function sendFlympusDeviceTestNotification(){
   if(flympusIsIos()&&!flympusIsStandalone()){toast('On iPhone/iPad, open the Home Screen version of FLYMPUS first.','error');return}
+  if(!('Notification'in window)||!('serviceWorker'in navigator)){toast('System notifications are not supported by this browser.','error');return}
   try{
     const registration=await registerFlympusPushServiceWorker();
     let permission=Notification.permission;if(permission!=='granted')permission=await Notification.requestPermission();
