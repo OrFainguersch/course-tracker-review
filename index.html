@@ -16,8 +16,9 @@
   const saved=JSON.parse(localStorage.getItem('flympus-app-preferences')||'{}')||{};
   const language=saved.language==='he'?'he':'en',themeMode=['light','dark','system'].includes(saved.theme)?saved.theme:'system';
   const stableRaw=String(localStorage.getItem('flympus-last-resolved-theme')||''),stable=stableRaw==='dark'||stableRaw==='light'?stableRaw:'';
+  const lastVisibleAt=Math.max(0,Number(localStorage.getItem('flympus-last-visible-theme-at')||0)),recentVisibleTheme=!!stable&&Date.now()-lastVisibleAt<=6*60*60*1000;
   const mediaDark=!!window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
-  const resolvedTheme=themeMode==='dark'?'dark':themeMode==='light'?'light':(stable||(mediaDark?'dark':'light'));
+  const resolvedTheme=themeMode==='dark'?'dark':themeMode==='light'?'light':(recentVisibleTheme?stable:(mediaDark?'dark':'light'));
   const dark=resolvedTheme==='dark',root=document.documentElement;
   root.setAttribute('data-flympus-language',language);
   root.setAttribute('lang',language);
@@ -4571,7 +4572,10 @@ function getFlympusStableResolvedTheme(){
 }
 function setFlympusStableResolvedTheme(theme){
   if(theme!=='dark'&&theme!=='light')return;
-  try{localStorage.setItem(FLYMPUS_RESOLVED_THEME_KEY,theme)}catch{}
+  try{
+    localStorage.setItem(FLYMPUS_RESOLVED_THEME_KEY,theme);
+    localStorage.setItem('flympus-last-visible-theme-at',String(Date.now()));
+  }catch{}
 }
 function resolveFlympusTheme(prefs,allowSystemProbe=true){
   const themeMode=['light','dark','system'].includes(prefs?.theme)?prefs.theme:'system';
