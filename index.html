@@ -4596,6 +4596,19 @@ Object.assign(FLYMPUS_HE_UI,{
   "Back to Home": "חזרה לבית"
 });
 
+/* ===== Hebrew split-node fragments ===== */
+Object.assign(FLYMPUS_HE_UI,{
+  "minimum flights": "טיסות מינימום",
+  "Syllabi / practical tasks (": "סילבוסים / משימות מעשיות (",
+  "excluded · Drag ☰ to reorder": "לא כלולים · גרור ☰ לשינוי סדר",
+  "Excluded syllabi (": "סילבוסים שלא נכללו (",
+  "total planned minimum": "מינימום מתוכנן כולל",
+  "Emergency": "מצב חירום",
+  "Package": "חבילה",
+  "Restore": "שחזר",
+  "Optional / non-blocking": "אופציונלי / אינו חוסם"
+});
+
 const flympusI18nTextOriginal=new WeakMap(),flympusI18nAttrOriginal=new WeakMap();
 const FLYMPUS_HE_UI_CASEFOLD=(()=>{const map=new Map();Object.entries(FLYMPUS_HE_UI).forEach(([key,value])=>{const folded=String(key).trim().toLocaleLowerCase('en');if(folded&&!map.has(folded))map.set(folded,value)});return map})();
 function flympusTranslateUiString(value){
@@ -4610,6 +4623,14 @@ function flympusTranslateUiString(value){
     else if((m=trim.match(/^(Instructed|Solo) planned flight$/)))translated=(m[1]==='Instructed'?'טיסה מודרכת מתוכננת':'טיסת סולו מתוכננת');
     else if((m=trim.match(/^(\d+(?:\.\d+)?) total planned minimum$/)))translated='מינימום מתוכנן כולל: '+m[1];
     else if((m=trim.match(/^(\d+) minimum flights$/)))translated='מינימום '+m[1]+' טיסות';
+    else if((m=trim.match(/^No (assessment criteria|emergency requirements|experience requirements|exams|progression gates|items) configured$/))){
+      const names={'assessment criteria':'קריטריוני הערכה','emergency requirements':'דרישות מצבי חירום','experience requirements':'דרישות ניסיון','exams':'מבחנים','progression gates':'שערי התקדמות','items':'פריטים'};
+      translated='לא הוגדרו '+names[m[1]];
+    }
+    else if((m=trim.match(/^This Package does not currently include any (assessment criteria|emergency requirements|experience requirements|exams|progression gates|items)\.$/))){
+      const names={'assessment criteria':'קריטריוני הערכה','emergency requirements':'דרישות מצבי חירום','experience requirements':'דרישות ניסיון','exams':'מבחנים','progression gates':'שערי התקדמות','items':'פריטים'};
+      translated='חבילה זו אינה כוללת כרגע '+names[m[1]]+'.';
+    }
     else if((m=trim.match(/^(\d+) items need attention$/)))translated=m[1]+' פריטים דורשים טיפול';
     else if((m=trim.match(/^(\d+) selected$/)))translated=m[1]+' נבחרו';
     else if((m=trim.match(/^(\d+) packages$/)))translated=m[1]+' חבילות';
