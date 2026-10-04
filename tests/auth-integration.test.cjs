@@ -18,13 +18,15 @@ assert(html.indexOf('./storage-scope.js')<html.indexOf('Early preference bootstr
 assert(html.includes("if(cfg.enabled===true&&cfg.enforceAuth===true)document.documentElement.classList.add('flympusAuthBooting')"),
   'Enforced auth must hide the app before first paint');
 
-assert(config.includes('enabled:true'),'Firebase authentication must be connected for staged sign-in verification');
-assert(config.includes('enforceAuth:false'),'Authentication enforcement must remain off until UID-scoped migration');
+assert(config.includes('enabled:true'),'Firebase authentication must be connected');
+assert(config.includes('enforceAuth:true'),'Authentication must be enforced after UID-scoped migration');
+assert(config.includes('microsoftEnabled:false'),'Microsoft authentication must remain disabled until Entra setup is complete');
 assert(!/clientSecret|client_secret|privateKey|private_key/i.test(config),'Public Firebase config must never contain server secrets');
 
 assert(auth.includes("const SDK_VERSION='12.19.0'"),'Use the currently documented Firebase CDN SDK');
 assert(auth.includes("new authSdk.GoogleAuthProvider()"),'Google sign-in provider must exist');
 assert(auth.includes("new authSdk.OAuthProvider('microsoft.com')"),'Microsoft sign-in provider must exist');
+assert(auth.includes('cfg.microsoftEnabled===true'),'Microsoft sign-in UI must be guarded by its feature flag');
 assert(auth.includes('signInWithPopup(auth,provider)'),'GitHub Pages authentication must use popup flow by default');
 assert(!auth.includes("addScope('mail.read')")&&!auth.includes("addScope('calendars.read')"),
   'FLYMPUS authentication must not request mailbox or calendar scopes');

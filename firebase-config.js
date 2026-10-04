@@ -2,11 +2,12 @@
    Firebase web config values are public identifiers, not secrets.
    Never put Microsoft client secrets, service-account keys or private keys here.
 
-   Firebase project is connected, but production authentication remains disabled
-   until the providers and Firestore security rules are ready. */
+   Google authentication is enforced in production. Microsoft authentication is
+   staged behind a feature flag until the Entra application is registered. */
 window.FLYMPUS_FIREBASE_CONFIG=Object.freeze({
   enabled:true,
-  enforceAuth:false,
+  enforceAuth:true,
+  microsoftEnabled:false,
   firebase:Object.freeze({
     apiKey:"AIzaSyAcg-KvQgauTOF_3uv7WOEhYcHqppbzT4k",
     authDomain:"flympus.firebaseapp.com",

@@ -1,8 +1,9 @@
 /* FLYMPUS Authentication foundation
-   - Google + Microsoft sign-in through Firebase Authentication
+   - Google sign-in through Firebase Authentication
+   - Microsoft sign-in remains staged behind an explicit feature flag
    - Firestore user profiles: pending/active/blocked + user/admin
    - No mail/calendar scopes are requested.
-   - Production enforcement stays off until UID-scoped data migration is ready. */
+   - Production access is enforced after UID-scoped data migration. */
 const cfg=window.FLYMPUS_FIREBASE_CONFIG||{};
 const params=new URLSearchParams(location.search);
 const preview=params.get('authPreview')==='1';
@@ -71,9 +72,12 @@ function showLoading(copy='Checking your account…'){
   shell('<div class="flympusAuthSpinner" aria-hidden="true"></div><p class="flympusAuthEyebrow">SECURE SIGN IN</p><h1 class="flympusAuthTitle">Opening FLYMPUS</h1><p class="flympusAuthCopy">'+esc(copy)+'</p>')
 }
 function providerButtons(disabled=false){
+  const microsoftButton=cfg.microsoftEnabled===true
+    ? '<button class="flympusAuthProvider" type="button" data-auth-provider="microsoft" '+(disabled?'disabled':'')+'><span class="flympusAuthProviderMark flympusMicrosoftMark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Continue with Microsoft</span><span class="flympusAuthProviderArrow" aria-hidden="true">›</span></button>'
+    : '';
   return '<div class="flympusAuthProviders">'+
     '<button class="flympusAuthProvider" type="button" data-auth-provider="google" '+(disabled?'disabled':'')+'><span class="flympusAuthProviderMark" aria-hidden="true">G</span><span>Continue with Google</span><span class="flympusAuthProviderArrow" aria-hidden="true">›</span></button>'+
-    '<button class="flympusAuthProvider" type="button" data-auth-provider="microsoft" '+(disabled?'disabled':'')+'><span class="flympusAuthProviderMark flympusMicrosoftMark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Continue with Microsoft</span><span class="flympusAuthProviderArrow" aria-hidden="true">›</span></button>'+
+    microsoftButton+
   '</div>'
 }
 function bindProviderButtons(){
@@ -82,7 +86,7 @@ function bindProviderButtons(){
 function showLogin({setupPreview=false,error=''}={}){
   api.status=setupPreview?'preview':'signed-out';
   lockApp();
-  const setup=setupPreview?statusBlock('pending','Authentication preview','The login experience is ready. Connect the free Firebase project to activate Google and Microsoft sign-in.'):'';
+  const setup=setupPreview?statusBlock('pending','Authentication preview','The Google sign-in experience is ready.'):'';
   const err=error?statusBlock('error','Sign-in failed',error):'';
   shell('<p class="flympusAuthEyebrow">FLYMPUS ACCOUNT</p>'+
     '<h1 class="flympusAuthTitle">Sign in to continue</h1>'+
@@ -127,6 +131,10 @@ function friendlyAuthError(err){
 }
 async function signInProvider(kind){
   if(!enabled||!auth||!authSdk){showLogin({setupPreview:!enabled});return}
+  if(kind==='microsoft'&&cfg.microsoftEnabled!==true){
+    showLogin({error:'Microsoft sign-in is temporarily unavailable. Continue with Google.'});
+    return
+  }
   try{
     api.status='signing-in';
     let provider;
