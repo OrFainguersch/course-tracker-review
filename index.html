@@ -3486,6 +3486,8 @@ html.flympusHighContrast .wizardChoice,
 html.flympusHighContrast .personCard{border-color:#8ea5b8!important}
 
 /* Dark mode: cover reusable surfaces used throughout Home, Roster, Forms, Reports and Course Management. */
+html[data-flympus-theme="light"]{color-scheme:light}
+html[data-flympus-theme="dark"]{color-scheme:dark}
 html[data-flympus-theme="dark"]{
   --bg:#07131f;--card:#102235;--line:#294158;--muted:#9fb0bf;--text:#eef5fb;--navy:#0b2b4a;--navy2:#dcecf8
 }
@@ -3890,7 +3892,16 @@ const FLYMPUS_HE_UI={
   'PASS':'עבר','FAIL':'נכשל','Required actions':'פעולות נדרשות','Notifications':'התראות','Notification preferences':'העדפות התראות',
   'Assignments':'הקצאות','Course updates':'עדכוני קורס','Evaluations':'הערכות','Checks':'בדיקות',
   'Profile':'פרופיל','Choose photo':'בחר תמונה','Edit photo':'ערוך תמונה','Remove photo':'הסר תמונה','Full name':'שם מלא','Email':'דוא״ל',
-  'Save changes':'שמור שינויים','Remove from course':'הסר מהקורס','Personal profile':'פרופיל אישי'
+  'Save changes':'שמור שינויים','Remove from course':'הסר מהקורס','Personal profile':'פרופיל אישי',
+  'Setting saved':'ההגדרה נשמרה','App settings restored':'הגדרות האפליקציה שוחזרו','Clear state':'נקה מצב','Reset settings':'אפס הגדרות',
+  'Clear interface state?':'לנקות את מצב הממשק?','Reset app settings?':'לאפס את הגדרות האפליקציה?','Reset local review data?':'לאפס נתוני סקירה מקומיים?',
+  'Last activity':'פעילות אחרונה','All instructors':'כל המדריכים','All trainees':'כל החניכים','All safety records':'כל רשומות הבטיחות',
+  'Syllabus':'סילבוס','All exams':'כל המבחנים','All results':'כל התוצאות','All items':'כל הפריטים','All records':'כל הרשומות',
+  'No safety entries yet.':'עדיין אין אירועי בטיחות.','New events recorded for this course will appear here.':'אירועים חדשים שיתועדו בקורס זה יופיעו כאן.',
+  'No exam results yet.':'עדיין אין תוצאות מבחנים.','New exam results recorded for this course will appear here.':'תוצאות מבחנים חדשות שיתועדו בקורס זה יופיעו כאן.',
+  'Title, details or name':'כותרת, פרטים או שם','Trainee or exam':'חניך או מבחן','Select instructor':'בחר מדריך',
+  'Course requirement':'דרישת קורס','Theory requirement':'דרישת תיאוריה','Next syllabus':'הסילבוס הבא','Program gate':'שער תכנית',
+  'Monitor progression':'מעקב אחר התקדמות','Instructor decision pending':'ממתין להחלטת מדריך','Below course average':'מתחת לממוצע הקורס','Exam below pass mark':'ציון מבחן מתחת לסף המעבר'
 };
 const flympusI18nTextOriginal=new WeakMap(),flympusI18nAttrOriginal=new WeakMap();
 function flympusTranslateUiString(value){
@@ -3906,6 +3917,14 @@ function flympusTranslateUiString(value){
     else if((m=trim.match(/^Grade (.+)$/)))translated='ציון '+m[1];
     else if((m=trim.match(/^Required · (.+)$/)))translated='נדרש · '+m[1];
     else if((m=trim.match(/^Result · (.+)$/)))translated='תוצאה · '+(FLYMPUS_HE_UI[m[1]]||m[1]);
+    else if((m=trim.match(/^(\d+) filters? applied · (\d+) of (\d+) shown$/)))translated=m[1]+' מסננים פעילים · '+m[2]+' מתוך '+m[3]+' מוצגים';
+    else if((m=trim.match(/^(.+) · (\d+) shown$/))&&FLYMPUS_HE_UI[m[1]])translated=FLYMPUS_HE_UI[m[1]]+' · '+m[2]+' מוצגים';
+    else if((m=trim.match(/^Trainee · (.+)$/)))translated='חניך · '+m[1];
+    else if((m=trim.match(/^Instructor · (.+)$/)))translated='מדריך · '+m[1];
+    else if((m=trim.match(/^Passing grade (\d+)%$/)))translated='ציון מעבר '+m[1]+'%';
+    else if((m=trim.match(/^From (.+)$/)))translated='מ־'+m[1];
+    else if((m=trim.match(/^Until (.+)$/)))translated='עד '+m[1];
+    else if((m=trim.match(/^Start date (.+)$/)))translated='תאריך התחלה '+m[1];
   }
   if(!translated)return raw;
   const lead=raw.match(/^\s*/)?.[0]||'',tail=raw.match(/\s*$/)?.[0]||'';
