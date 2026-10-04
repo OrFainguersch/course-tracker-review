@@ -596,3 +596,17 @@ assert.match(elements.get("#content").innerHTML,/Record practical task/);
 assert.match(elements.get("#content").innerHTML,/Engine Installation \/ Removal/);
 assert.match(elements.get("#content").innerHTML,/name="quantity" type="number" min="1" step="1"/);
 console.log(JSON.stringify({ok:true,myCourses:true,multiCourse:true,courseIsolation:true,instructorAssignments:true,home:true,settings:true,directPackageCourseCreation:true,inlineCourseDetails:true,suggestedCourseIdentity:true,builderAddPackageShortcut:true,createCourseValidation:true,uniqueCourseCode:true,trainingPackages:true,packagesInsideAdvanced:true,advancedPackagesLast:true,sectorPackageAssignment:true,suggestedPackageName:true,fullPackageEditor:true,packageGradingSettings:true,alignedTailorEditor:true,tailorExplicitEditMode:true,tailorGradingOverride:true,tailorDragSyllabus:true,dynamicEvaluationGradeScale:true,collapsedPackageEditor:true,compactSyllabusTable:true,dragSyllabusOrdering:true,smoothDragAnimation:true,compactAddRows:true,continuousSyllabusEntry:true,compactCatalogAdd:true,activeOrderReindex:true,excludedSyllabusRestore:true,packageEditMode:true,packageDelete:true,editOnlyPackageDelete:true,globalPackageCustomItems:true,globalPackagePath:true,globalPackageDefaults:true,coursePackageOverride:true,courseOnlyItems:true,professionContext:true,advancedOrder:true,customPlatforms:true,overrides:true,rosterMembership:true,experienceUx:true,technicianExperience:true}));
+
+
+/* Settings simplification and full appearance behavior */
+assert(html.includes('>עברית</option>'),"Hebrew language choice must display its native name even while the UI is English");
+assert(!html.includes('<b>Interface density</b>'),"Interface density row must be removed");
+assert(!html.includes('<h3>Accessibility</h3>'),"Accessibility card must be removed entirely");
+assert(html.includes("function appSettingsSectionIcon(kind)")&&html.includes("sound:'<path")&&html.includes("appearance:'<circle"),
+  "Settings categories must use topic-specific semantic icons");
+assert(html.includes("html.flympusLargeText body{font-size:17px!important}")&&html.includes("html.flympusLargeText .dataTable td"),
+  "Large text must scale body copy, controls and table content rather than only titles");
+assert(html.includes("Complete dark theme audit")&&html.includes("html[data-flympus-theme=\"dark\"] .packageSyllabusTable")&&html.includes("html[data-flympus-theme=\"dark\"] .pveExecutionOverview>div"),
+  "Dark mode must cover reusable workflow surfaces across Course Management and daily operations");
+assert(html.includes("Early preference bootstrap: prevent RTL/theme/text paint flashes on reload."),
+  "Theme and text preferences must be applied before first paint");
