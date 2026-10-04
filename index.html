@@ -4107,6 +4107,45 @@ html[data-flympus-theme="dark"] .personalCropClose{background:#172a3b!important;
 html[data-flympus-theme="dark"] .rosterShareIcon:after{background:#dceaf5!important}
 html[data-flympus-theme="dark"] .homeQuickIcon{background:rgba(255,255,255,.10)!important}
 html[data-flympus-theme="dark"] .flympusBootHero b{background:rgba(12,29,45,.94)!important;color:#eaf4fc!important}
+
+/* ===== Final Settings QA pass · haptics, large text and dark accents ===== */
+html.flympusLargeText{-webkit-text-size-adjust:112%;text-size-adjust:112%}
+html.flympusLargeText p{font-size:14px!important;line-height:1.52!important}
+html.flympusLargeText small{font-size:13px!important;line-height:1.48!important}
+html.flympusLargeText label{font-size:14px!important}
+html.flympusLargeText summary{font-size:14px!important}
+html.flympusLargeText .card,
+html.flympusLargeText .formCard,
+html.flympusLargeText .settingBox,
+html.flympusLargeText .sideCard,
+html.flympusLargeText .personCard,
+html.flympusLargeText .recordHubCard,
+html.flympusLargeText .workflowStep,
+html.flympusLargeText .packageRules{font-size:15px!important}
+html[data-flympus-theme="dark"] .pill.amber{background:#463717!important;color:#f4cd72!important}
+html[data-flympus-theme="dark"] .btn.danger,
+html[data-flympus-theme="dark"] .btn.discardChanges,
+html[data-flympus-theme="dark"] .personModalDangerZone .btn{background:#321d24!important;border-color:#74414d!important;color:#f1a6b4!important}
+html[data-flympus-theme="dark"] .toast.error:before{background:#43202a!important}
+html[data-flympus-theme="dark"] .toast.warning:before{background:#45351d!important}
+html[data-flympus-theme="dark"] .requirementCard.warn,
+html[data-flympus-theme="dark"] .syllabusDecisionOption.hold:has(input:checked),
+html[data-flympus-theme="dark"] .pveVarianceChip.short{background:#3e301c!important;border-color:#735b31!important;color:#f0ca82!important}
+html[data-flympus-theme="dark"] .personCard.manageCard,
+html[data-flympus-theme="dark"] .packageEditing .packageShellSummary,
+html[data-flympus-theme="dark"] .courseTailorAligned .packageGradingSettings{background:#0d1e2f!important;border-color:#294158!important}
+html[data-flympus-theme="dark"] .evalMissingChips button,
+html[data-flympus-theme="dark"] .packageSyllabusTable:not(.ruleEditorTable) .useCell,
+html[data-flympus-theme="dark"] .ruleEditorTable .useCell{background:#0a1b2a!important;border-color:#36516a!important;color:#e6f0f8!important}
+html[data-flympus-theme="dark"] .myCourseMeta span{background:#172a3b!important;color:#bfd0df!important}
+html[data-flympus-theme="dark"] .packageSyllabusCell input.input:focus,
+html[data-flympus-theme="dark"] .packageSyllabusCell select:focus{background:#10263a!important;border-color:#4a7598!important}
+html[data-flympus-theme="dark"] .pushStatus.off,
+html[data-flympus-theme="dark"] .pushStatus.disabled{background:#243444!important;color:#b6c5d3!important}
+html[data-flympus-theme="dark"] .pushStatus.install{background:#44341f!important;color:#efc27d!important}
+html[data-flympus-theme="dark"] .pushStatus.blocked,
+html[data-flympus-theme="dark"] .pushStatus.unsupported{background:#42212a!important;color:#efa4b4!important}
+html[data-flympus-theme="dark"] .flympusBootCard i{background:#203447!important}
 </style>
 </head>
 <body>
@@ -4354,6 +4393,10 @@ function applyFlympusAppPreferences(input){
   root?.classList.toggle('flympusHintsOff',prefs.showHints===false);
   root?.classList.toggle('flympusLargeText',prefs.largerText===true);
   root?.classList.toggle('flympusHapticsOff',prefs.haptics===false);
+  /* iOS haptics use a transparent native switch overlay. CSS removes it from
+     hit-testing, and disabled is a second hard stop so WebKit cannot emit a
+     native switch haptic after the preference is turned off. */
+  document.querySelectorAll?.('.mobileBottomHapticSwitch')?.forEach?.(el=>{el.disabled=prefs.haptics===false});
   const themeMeta=document.querySelector?.('meta[name="theme-color"]');
   if(themeMeta)themeMeta.setAttribute('content',dark?'#07131f':'#07294c');
 }
@@ -6001,7 +6044,8 @@ function isFlympusIOSHapticTarget(){
 }
 function flympusDirectHapticOverlayHtml(){
   if(!isFlympusIOSHapticTarget())return '';
-  return '<input type="checkbox" switch class="mobileBottomHapticSwitch" tabindex="-1" aria-hidden="true">';
+  const disabled=getFlympusAppPreferences().haptics===false?' disabled':'';
+  return '<input type="checkbox" switch class="mobileBottomHapticSwitch" tabindex="-1" aria-hidden="true"'+disabled+'>';
 }
 function triggerFlympusPortableHaptic(duration=8){
   try{
