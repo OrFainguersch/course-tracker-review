@@ -3653,6 +3653,72 @@ html[data-flympus-language="he"] .homePlanTime,
 html[data-flympus-language="he"] .courseMetaCopy b[data-code],
 html[data-flympus-language="he"] code{direction:ltr!important;text-align:left!important;unicode-bidi:embed}
 </style>
+<style>
+/* ===== Hebrew completeness fixes · layout mirrors the interface, not the data ===== */
+html[data-flympus-language="he"] .drawer .panel{
+  left:auto!important;right:0!important;
+  transform:translateX(102%)!important;
+  box-shadow:inset 1px 0 rgba(255,255,255,.05)!important
+}
+html[data-flympus-language="he"] .drawer.open .panel{transform:translateX(0)!important}
+html[data-flympus-language="he"] .drawerFooter{left:14px!important;right:14px!important}
+html[data-flympus-language="he"] .navBtn{text-align:right!important}
+html[data-flympus-language="he"] .navBtn.active{box-shadow:inset -3px 0 0 var(--brand-gold)!important}
+html[data-flympus-language="he"] .rankCorner{
+  right:auto!important;left:0!important;
+  padding:9px 11px 11px 9px!important;
+  border-bottom-left-radius:0!important;border-bottom-right-radius:20px!important
+}
+html[data-flympus-language="he"] .rosterTraineeHead{padding-right:0!important;padding-left:52px!important;justify-items:end!important}
+html[data-flympus-language="he"] .rosterInstructorHead .instructorRole{margin-left:0!important;margin-right:auto!important}
+html[data-flympus-language="he"] .personCard .rosterActions{justify-self:start}
+html[data-flympus-language="he"] .rosterTopbar>div{text-align:right!important}
+html[data-flympus-language="he"] .rosterAdvancedFilters .field,
+html[data-flympus-language="he"] .filterDateRange,
+html[data-flympus-language="he"] .filterDateRangeFields .field{text-align:right!important}
+html[data-flympus-language="he"] .recordHubHead>div,
+html[data-flympus-language="he"] .recordHubCopy,
+html[data-flympus-language="he"] .recordHubTitleRow{text-align:right!important;align-items:flex-start}
+html[data-flympus-language="he"] .recordHubCard{direction:rtl}
+html[data-flympus-language="he"] .recordHubArrow{transform:scaleX(-1)}
+html[data-flympus-language="he"] .courseWizardHead,
+html[data-flympus-language="he"] .wizardStepBody,
+html[data-flympus-language="he"] .wizardChoice,
+html[data-flympus-language="he"] .wizardCreateBar>div{text-align:right!important}
+html[data-flympus-language="he"] .wizardChoice{direction:rtl}
+html[data-flympus-language="he"] .homeHeroFooter,
+html[data-flympus-language="he"] .homeBlockHead,
+html[data-flympus-language="he"] .homePlanRow,
+html[data-flympus-language="he"] .homeQuickBtn,
+html[data-flympus-language="he"] .homeFeedItem,
+html[data-flympus-language="he"] .homeUpcomingItem{direction:rtl;text-align:right!important}
+html[data-flympus-language="he"] .homeAllCoursesLink{padding-right:8px;padding-left:0}
+html[data-flympus-language="he"] .homePlanTags{justify-content:flex-end}
+html[data-flympus-language="he"] .profileNav,
+html[data-flympus-language="he"] .profileTop,
+html[data-flympus-language="he"] .profileIdentity,
+html[data-flympus-language="he"] .profileIdentityMeta{text-align:right!important;direction:rtl}
+html[data-flympus-language="he"] .topCourseOptionCopy,
+html[data-flympus-language="he"] .myCourseTitle,
+html[data-flympus-language="he"] .myCourseMeta,
+html[data-flympus-language="he"] .myCourseMeta .courseMetaCopy{text-align:right!important;direction:rtl}
+html[data-flympus-language="he"] .myCourseStatusBar{direction:rtl}
+html[data-flympus-language="he"] .safetyHistoryTop,
+html[data-flympus-language="he"] .safetyHistoryMeta,
+html[data-flympus-language="he"] .reportToolbar,
+html[data-flympus-language="he"] .reportFilters,
+html[data-flympus-language="he"] .formCompletionPanel,
+html[data-flympus-language="he"] .recordFormActions{direction:rtl;text-align:right!important}
+html[data-flympus-language="he"] .multiFilterTrigger{text-align:right!important}
+html[data-flympus-language="he"] .multiFilterChevron{margin-right:auto;margin-left:0}
+html[data-flympus-language="he"] .multiFilterMenu{left:auto!important;right:0!important}
+html[data-flympus-language="he"] .siteDialogActions,
+html[data-flympus-language="he"] .modalCard .toolbar{direction:rtl}
+@media(max-width:759px){
+  html[data-flympus-language="he"] .rosterTraineeHead{padding-right:0!important;padding-left:34px!important}
+  html[data-flympus-language="he"] .rankCorner{padding:8px 10px 9px 8px!important;border-bottom-right-radius:18px!important}
+}
+</style>
 </head>
 <body>
 <div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0726 · rank badge +2px</div><div class="toast" id="toast"></div></div>
@@ -4088,6 +4154,81 @@ Object.assign(FLYMPUS_HE_UI,{
   'Close':'סגור','Continue':'המשך','Submit':'שלח','Back':'חזרה','Next':'הבא','Previous':'הקודם','View All':'הצג הכל'
 });
 
+Object.assign(FLYMPUS_HE_UI,{
+  'IN PROGRESS':'בתהליך','UPCOMING':'עתידי','COMPLETED':'הושלם','ACTIVE':'פעיל','INACTIVE':'לא פעיל','READY':'מוכן','AUTO':'אוטומטי','OPTIONAL':'אופציונלי',
+  'GUIDED FLIGHT':'טיסה מודרכת','SOLO':'סולו','COURSE FORMS':'טפסי הקורס','NEW COURSE':'קורס חדש',
+  'Manage':'ניהול','✎ Manage':'✎ ניהול','Manage mode':'מצב ניהול','✓ Done editing':'✓ סיום עריכה','+ Add person':'+ הוסף אדם',
+  'Trainees and instructors assigned to this course.':'חניכים ומדריכים המשויכים לקורס זה.',
+  'Search trainees...':'חפש חניכים...','Search instructors...':'חפש מדריכים...','All':'הכול','From':'מתאריך','To':'עד תאריך',
+  'Average Grade':'ציון ממוצע','Progress':'התקדמות','Course Share':'נתח מהקורס','No matching people.':'לא נמצאו אנשים התואמים למסננים.',
+  'Add to course roster':'הוסף לסגל הקורס','Assign an existing person or create a new one for this course.':'שייך אדם קיים או צור אדם חדש עבור קורס זה.',
+  'Existing person':'אדם קיים','Assign to course':'שייך לקורס','Create new person':'צור אדם חדש','Person type':'סוג אדם',
+  'Identity changes apply everywhere in the review. Role/status applies only to this course.':'שינויי זהות חלים בכל המערכת. התפקיד והסטטוס חלים רק בקורס זה.',
+  'Edit instructor':'עריכת מדריך','Edit trainee':'עריכת חניך','Open':'פתח','Open trainee':'פתח חניך','Open instructor':'פתח מדריך',
+  'Course Rank':'דירוג בקורס','Syllabus Progress':'התקדמות בסילבוס','Grade Trend':'מגמת ציונים','Experience progress':'התקדמות ניסיון',
+  'Overview':'סקירה','Experience':'ניסיון','Emergencies':'מצבי חירום','Safety':'בטיחות','Exams':'מבחנים','Syllabus':'סילבוס',
+  'Practiced':'תורגל','Not practiced yet':'טרם תורגל','Not performed yet':'טרם בוצע','Mark this syllabus as completed':'סמן סילבוס זה כהושלם',
+  'No saved emphases yet':'עדיין אין דגשים שמורים','Assessment Focus':'מוקדי הערכה','Next-flight emphasis':'דגש לטיסה הבאה',
+  'Add one clear emphasis per item. These will appear numbered in the trainee profile.':'הוסף דגש ברור אחד לכל פריט. הדגשים יוצגו ממוספרים בפרופיל החניך.',
+  'No evaluations yet.':'עדיין אין הערכות.','Evaluation completed':'הערכה הושלמה','Recorded':'תועד',
+  'COURSE FORMS':'טפסי הקורס','Choose the form you want to complete for this course.':'בחר את הטופס שברצונך למלא עבור קורס זה.',
+  'Record flight performance, grades, criteria and emergency practice.':'תעד ביצועי טיסה, ציונים, קריטריונים ותרגול מצבי חירום.',
+  'Log a safety event, operational observation or real emergency.':'תעד אירוע בטיחות, תצפית תפעולית או מצב חירום אמיתי.',
+  'Record theoretical exam results against the required passing grade.':'תעד תוצאות מבחן עיוני מול ציון המעבר הנדרש.',
+  'Report safety events and review the course-specific record.':'דווח אירועי בטיחות ועיין בהיסטוריה של הקורס.',
+  'Only entries recorded for the active course are shown.':'מוצגות רק רשומות שתועדו עבור הקורס הפעיל.',
+  'Untitled safety event':'אירוע בטיחות ללא כותרת','No safety entries yet.':'עדיין אין רשומות בטיחות.','New safety event':'אירוע בטיחות חדש',
+  'Record exam':'תיעוד מבחן','Course exam history':'היסטוריית מבחני הקורס','No exam results yet.':'עדיין אין תוצאות מבחנים.',
+  'Create and manage courses, tailor a selected course, and maintain reusable training Packages and course architecture.':'צור ונהל קורסים, התאם קורס נבחר ותחזק חבילות הדרכה וארכיטקטורת קורס לשימוש חוזר.',
+  '1 · Create course':'1 · יצירת קורס','2 · Tailor course':'2 · התאמת קורס','Create a course':'יצירת קורס',
+  'Choose the sector, course details and Package. FLYMPUS will then suggest the course name and code automatically.':'בחר סקטור, פרטי קורס וחבילת הדרכה. FLYMPUS יציע לאחר מכן שם וקוד לקורס באופן אוטומטי.',
+  'Choose an existing Package, or create a new one without leaving this setup flow.':'בחר חבילת הדרכה קיימת או צור חבילה חדשה בלי לצאת מתהליך ההקמה.',
+  'Choose an existing Package or add a new one.':'בחר חבילת הדרכה קיימת או הוסף חבילה חדשה.',
+  'Suggested automatically from Sector + Country + Start date + Package. You can edit both fields if needed.':'מוצע אוטומטית לפי סקטור + מדינה + תאריך התחלה + חבילה. ניתן לערוך את שני השדות לפי הצורך.',
+  'suggested automatically':'מוצע אוטומטית','automatic · editable':'אוטומטי · ניתן לעריכה',
+  'Used as the stable internal identifier for this course.':'משמש כמזהה הפנימי הקבוע של הקורס.',
+  'Name and code are already suggested; edit them only if needed.':'השם והקוד כבר הוצעו; ערוך אותם רק במידת הצורך.',
+  'Enter a course name, then press Create course.':'הזן שם קורס ולאחר מכן לחץ על יצירת קורס.',
+  'Select a Package':'בחר חבילת הדרכה','Select Package':'בחר חבילה','Ready to create':'מוכן ליצירה','Course name required':'נדרש שם קורס',
+  'Add, rename or remove sectors first.':'תחילה ניתן להוסיף, לשנות שם או להסיר סקטורים.',
+  'Everything below is scoped to this sector.':'כל מה שמופיע להלן מוגדר עבור סקטור זה.',
+  'Base definitions and source-specific variants':'הגדרות בסיס וגרסאות ייעודיות לפי מקור',
+  'Source-mapped training package':'חבילת הדרכה ממופה למקור','Package item':'פריט חבילה','Package changes saved':'שינויי החבילה נשמרו',
+  'No syllabi / practical tasks configured':'לא הוגדרו סילבוסים / משימות מעשיות',
+  'Planned for this sortie':'מתוכנן לגיחה זו','Series / Syllabus':'סדרה / סילבוס','Assessment criteria':'קריטריוני הערכה',
+  'Grading settings':'הגדרות ציונים','Maximum grade':'ציון מרבי','Minimum grade':'ציון מינימלי','Benchmark':'מדד ייחוס',
+  'Experience requirements':'דרישות ניסיון','Practical experience requirements':'דרישות ניסיון מעשי','Progression gates':'שערי התקדמות',
+  'Required before submission':'נדרש לפני שליחה','Completion:':'השלמה:','No saved plan yet':'עדיין אין תכנון שמור',
+  'Add executed solo flight':'הוסף טיסת סולו שבוצעה','Assign the completed flight to the trainee and solo syllabus actually flown.':'שייך את הטיסה שבוצעה לחניך ולסילבוס הסולו שבוצע בפועל.',
+  'Cancelled':'בוטל','No cancellations to classify':'אין ביטולים לסיווג','Set the plan first':'יש להגדיר תחילה את התכנון',
+  'Today\'s Plan':'התכנון להיום','Scheduled flights and activities for today':'טיסות ופעילויות המתוכננות להיום',
+  'Common daily tasks':'משימות יומיות נפוצות','Key indicators for current course':'מדדים מרכזיים של הקורס הנוכחי',
+  'Good standing':'מצב תקין','Needs review':'דורש בדיקה','View All':'הצג הכול','View all courses':'הצג את כל הקורסים',
+  'No Draft to Resume':'אין טיוטה להמשך','Resume Draft':'המשך טיוטה','Start Evaluation':'התחל הערכה','Log Safety Event':'דווח אירוע בטיחות',
+  'No courses assigned.':'לא הוקצו קורסים.','No courses assigned':'לא הוקצו קורסים','No courses match these filters':'אין קורסים התואמים למסננים',
+  'Clear or change a filter to show more courses.':'נקה או שנה מסנן כדי להציג קורסים נוספים.',
+  'Select course':'בחר קורס','✓ Selected':'✓ נבחר','Course code':'קוד קורס','Start date':'תאריך התחלה','Training type':'סוג הכשרה',
+  'Course status':'סטטוס הקורס','My role':'התפקיד שלי','Last activity':'פעילות אחרונה',
+  'Planned vs Executed':'מתוכנן מול מבוצע','Planned':'מתוכנן','Executed':'בוצע','Planned flights':'טיסות מתוכננות',
+  'Instructed':'מודרך','Solo':'סולו','Takeoffs':'המראות','Landings':'נחיתות','Flight minutes':'דקות טיסה',
+  'Evaluation activity by trainee':'פעילות הערכה לפי חניך','Emergency exposure':'חשיפה למצבי חירום','Syllabus activity':'פעילות לפי סילבוס',
+  'Safety severity':'חומרת אירועי בטיחות','Monthly activity':'פעילות חודשית','Export CSV':'ייצא CSV','Print / PDF':'הדפסה / PDF',
+  'No '+''+'items configured':'לא הוגדרו פריטים','Type':'סוג','Requirement':'דרישה','Assessment criterion':'קריטריון הערכה',
+  'Pass grade':'ציון מעבר','Weight (%)':'משקל (%)','Unit':'יחידה','Supervision':'פיקוח','Order / Move':'סדר / העברה','Use':'שימוש',
+  'Edit architecture':'ערוך ארכיטקטורה','Architecture':'ארכיטקטורה','Sectors':'סקטורים','Sector':'סקטור',
+  'Phases':'שלבים','Platforms':'פלטפורמות','Training types':'סוגי הכשרה','Qualifications':'הסמכות',
+  'Countries / customer contexts':'מדינות / הקשרי לקוח','Cancellation reasons':'סיבות ביטול','Emergency categories':'קטגוריות חירום',
+  '＋ Add':'＋ הוסף','✎ Edit':'✎ ערוך','✎ Edit profile':'✎ ערוך פרופיל','✎ Edit revision':'✎ ערוך גרסה','✓ Ready in Evaluation':'✓ מוכן בהערכה',
+  'Done adding':'סיום הוספה','3rd flight instructed':'כל טיסה שלישית עם מדריך','Active trainees':'חניכים פעילים',
+  'Open Advanced → Packages':'פתח מתקדם ← חבילות','Required series':'סדרות נדרשות','Optional series':'סדרות אופציונליות',
+  'Course requirement':'דרישת קורס','Theory requirement':'דרישת תיאוריה','Next syllabus':'הסילבוס הבא','Program gate':'שער תכנית',
+  'Stage Completion Gate':'שער השלמת שלב','Night Package':'חבילת לילה','Available after Day prerequisites':'זמין לאחר השלמת תנאי הקדם של יום',
+  'Next package':'החבילה הבאה','Practical syllabus':'סילבוס מעשי','Current roster':'הסגל הנוכחי',
+  'Open Safety Events':'אירועי בטיחות פתוחים','Evaluations logged':'הערכות שתועדו','Flights Completed':'טיסות שהושלמו','This Week':'השבוע',
+  'No saved emphases yet':'עדיין אין דגשים שמורים','No saved plan yet':'עדיין אין תכנון שמור','None':'ללא',
+  'Course Share':'נתח מהקורס','Instructed Flights':'טיסות עם מדריך','Active trainees':'חניכים פעילים'
+});
+
 const flympusI18nTextOriginal=new WeakMap(),flympusI18nAttrOriginal=new WeakMap();
 function flympusTranslateUiString(value){
   const raw=String(value??''),trim=raw.trim();if(!trim)return raw;
@@ -4127,6 +4268,35 @@ function flympusTranslateUiString(value){
     else if((m=trim.match(/^(.+) created for (.+)$/)))translated=m[1]+' נוצר עבור '+m[2];
     else if((m=trim.match(/^revision (\d+)$/i)))translated='גרסה '+m[1];
     else if((m=trim.match(/^(\d+) snapshots$/)))translated=m[1]+' גרסאות שמורות';
+    else if((m=trim.match(/^Welcome back,\s*(.+)$/)))translated='ברוך שובך, '+m[1];
+    else if((m=trim.match(/^(.+) · Start date (.+)$/)))translated=m[1]+' · תאריך התחלה '+m[2];
+    else if((m=trim.match(/^Choose the form you want to complete for (.+)\.$/)))translated='בחר את הטופס שברצונך למלא עבור '+m[1]+'.';
+    else if((m=trim.match(/^Trainees \((\d+)\)$/)))translated='חניכים ('+m[1]+')';
+    else if((m=trim.match(/^Instructors \((\d+)\)$/)))translated='מדריכים ('+m[1]+')';
+    else if((m=trim.match(/^Create course · (\d+)$/)))translated='יצירת קורס · '+m[1];
+    else if((m=trim.match(/^Tailor course · (\d+)$/)))translated='התאמת קורס · '+m[1];
+    else if((m=trim.match(/^Search trainees\.\.\.$/)))translated='חפש חניכים...';
+    else if((m=trim.match(/^Search instructors\.\.\.$/)))translated='חפש מדריכים...';
+    else if((m=trim.match(/^Open Advanced → Packages for (.+)$/)))translated='פתח מתקדם ← חבילות עבור '+m[1];
+    else if((m=trim.match(/^(\d+) source documents mapped into the EP architecture\.$/)))translated=m[1]+' מסמכי מקור ממופים לארכיטקטורת EP.';
+    else if((m=trim.match(/^(\d+) packages$/)))translated=m[1]+' חבילות';
+    else if((m=trim.match(/^(\d+) emergencies$/)))translated=m[1]+' מצבי חירום';
+    else if((m=trim.match(/^(\d+) criteria$/)))translated=m[1]+' קריטריונים';
+    else if((m=trim.match(/^(\d+) syllabi$/)))translated=m[1]+' סילבוסים';
+    else if((m=trim.match(/^(\d+) series$/)))translated=m[1]+' סדרות';
+    else if((m=trim.match(/^(\d+) items$/)))translated=m[1]+' פריטים';
+    else if((m=trim.match(/^(\d+) required series$/)))translated=m[1]+' סדרות נדרשות';
+    else if((m=trim.match(/^(\d+) optional$/)))translated=m[1]+' אופציונליים';
+    else if((m=trim.match(/^(\d+) solo series$/)))translated=m[1]+' סדרות סולו';
+    else if((m=trim.match(/^(\d+) total flights$/)))translated=m[1]+' טיסות בסך הכול';
+    else if((m=trim.match(/^(\d+) qualification gates complete$/)))translated=m[1]+' שערי הסמכה הושלמו';
+    else if((m=trim.match(/^(\d+) logged records$/)))translated=m[1]+' רשומות שתועדו';
+    else if((m=trim.match(/^(\d+) remaining$/)))translated='נותרו '+m[1];
+    else if((m=trim.match(/^Previously (\d+)×$/)))translated='תורגל בעבר '+m[1]+'×';
+    else if((m=trim.match(/^(\d+) instructed · (\d+) solo$/)))translated=m[1]+' מודרכות · '+m[2]+' סולו';
+    else if((m=trim.match(/^(\d+) takeoffs · (\d+) landings · (\d+) min$/)))translated=m[1]+' המראות · '+m[2]+' נחיתות · '+m[3]+' דקות';
+    else if((m=trim.match(/^(.+) · Passing grade (\d+)%$/)))translated=m[1]+' · ציון מעבר '+m[2]+'%';
+    else if((m=trim.match(/^(.+) · choose the course you want to work in\.$/)))translated=m[1]+' · בחר את הקורס שבו ברצונך לעבוד.';
   }
   if(!translated)return raw;
   const lead=raw.match(/^\s*/)?.[0]||'',tail=raw.match(/\s*$/)?.[0]||'';
