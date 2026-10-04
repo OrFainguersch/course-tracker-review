@@ -629,3 +629,10 @@ assert(!html.includes('id="clearRememberedUi"'),
   "Remembered interface state reset must not be exposed in Settings");
 assert(html.includes('id="resetAppPreferences">Reset settings to defaults</button>'),
   "Preferences reset must clearly say that it restores defaults");
+
+
+/* Settings must not expose destructive local data deletion. */
+assert(!html.includes('id="resetLocalReviewDataFromSettings"'),
+  "Destructive local review reset must not be exposed in Settings");
+assert(html.includes("Restore this device's app preferences without changing course or training data."),
+  "Data & Device copy must make clear that resetting preferences does not touch training data");
