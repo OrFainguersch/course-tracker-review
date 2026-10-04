@@ -4343,8 +4343,11 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
   const active=JSON.parse(localStorage.getItem('ct-review-active-course')||'{}')||{};
   const activeCourse=String(active.courseCode||'AEP-26');
   const root=document.documentElement,currentResolvedTheme=String(root.getAttribute('data-flympus-theme')||'light'),currentLanguage=String(root.getAttribute('data-flympus-language')||'en'),currentLargeText=root.classList.contains('flympusLargeText');
+  const localDay=(()=>{const d=new Date(),pad=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())})();
+  const viewportWidth=Math.round(window.innerWidth||document.documentElement?.clientWidth||0),viewportHeight=Math.round(window.innerHeight||document.documentElement?.clientHeight||0);
   const snapAge=Math.max(0,Date.now()-Number(snap?.savedAt||0)),snapFresh=snapAge<=15*60*1000;
-  const snapMatches=!!(snap&&snap.visualVersion===2&&snapFresh&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
+  const viewportCompatible=!snap?.viewportWidth||Math.abs(Number(snap.viewportWidth)-viewportWidth)<=2;
+  const snapMatches=!!(snap&&snap.visualVersion===3&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
   const content=document.querySelector('#content');
   const bottomNav=document.querySelector('#mobileBottomNav');
   window.__FLYMPUS_RUNTIME_READY__=false;
@@ -4468,12 +4471,16 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
       }
     }
     window.__FLYMPUS_RELOAD_SNAPSHOT__=snap;
-    if(snap.topHidden){
+    const y=Math.max(0,Number(snap.scrollY||0));
+    if(snap.topHidden&&y>64){
       document.body.classList.add('topChromeHidden');
       document.querySelector('.top')?.classList.add('topHidden');
       bottomNav?.classList.add('dockHidden');
+    }else{
+      document.body.classList.remove('topChromeHidden');
+      document.querySelector('.top')?.classList.remove('topHidden');
+      bottomNav?.classList.remove('dockHidden');
     }
-    const y=Math.max(0,Number(snap.scrollY||0));
     try{window.scrollTo(0,y)}catch{}
     requestAnimationFrame?.(()=>{try{window.scrollTo(0,y)}catch{}});
   }else if(content){
@@ -9939,18 +9946,35 @@ if(flympusPushBootScreen||flympusPushBootCourse){
 }
 initFlympusPushClient();
 
+function flympusContinuitySnapshotHtml(content){
+  try{
+    const clone=content?.cloneNode?.(true);if(!clone)return content?.innerHTML||'';
+    /* Never replay interaction-only overlays from the app switcher snapshot.
+       They are not navigation state and otherwise flash for one frame after a
+       killed/backgrounded iOS PWA is reconstructed. */
+    clone.querySelectorAll?.('.modal.open')?.forEach?.(el=>el.classList.remove('open'));
+    clone.querySelectorAll?.('.multiFilterMenu,.datePickerPanel')?.forEach?.(el=>{el.hidden=true;el.removeAttribute?.('data-open')});
+    clone.querySelectorAll?.('.fieldInvalidControl')?.forEach?.(el=>el.classList.remove('fieldInvalidControl'));
+    return clone.innerHTML
+  }catch{return content?.innerHTML||''}
+}
 function saveFlympusReloadSnapshot(){
   try{
     const content=$('#content');if(!content)return;
     const root=document.documentElement,resolvedTheme=String(root?.getAttribute('data-flympus-theme')||'light'),language=String(root?.getAttribute('data-flympus-language')||'en');
+    const d=new Date(),pad=n=>String(n).padStart(2,'0'),localDay=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+    const scrollY=Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0));
     const snapshot={
-      visualVersion:2,
+      visualVersion:3,
       screen:String(state.screen||'home'),
       courseId:String(currentCourseId||'AEP-26'),
       resolvedTheme:resolvedTheme==='dark'?'dark':'light',
       language:language==='he'?'he':'en',
       largerText:!!root?.classList.contains('flympusLargeText'),
-      html:content.innerHTML,
+      localDay,
+      viewportWidth:Math.round(window.innerWidth||document.documentElement?.clientWidth||0),
+      viewportHeight:Math.round(window.innerHeight||document.documentElement?.clientHeight||0),
+      html:flympusContinuitySnapshotHtml(content),
       navHtml:$('#mobileBottomNav')?.innerHTML||'',
       halo:(()=>{
         const dock=$('#mobileBottomNav');if(!dock)return null;
@@ -9963,8 +9987,8 @@ function saveFlympusReloadSnapshot(){
           height:dock.style.getPropertyValue('--dock-halo-height')||''
         };
       })(),
-      scrollY:Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0)),
-      topHidden:!!$('.top')?.classList.contains('topHidden'),
+      scrollY,
+      topHidden:scrollY>64&&!!$('.top')?.classList.contains('topHidden'),
       savedAt:Date.now()
     };
     sessionStorage.setItem('ct-review-reload-snapshot',JSON.stringify(snapshot));
