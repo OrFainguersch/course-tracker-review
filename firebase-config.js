@@ -5,7 +5,7 @@
    Firebase project is connected, but production authentication remains disabled
    until the providers and Firestore security rules are ready. */
 window.FLYMPUS_FIREBASE_CONFIG=Object.freeze({
-  enabled:false,
+  enabled:true,
   enforceAuth:false,
   firebase:Object.freeze({
     apiKey:"AIzaSyAcg-KvQgauTOF_3uv7WOEhYcHqppbzT4k",

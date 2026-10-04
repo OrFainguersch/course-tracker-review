@@ -18,7 +18,7 @@ assert(html.indexOf('./storage-scope.js')<html.indexOf('Early preference bootstr
 assert(html.includes("if(cfg.enabled===true&&cfg.enforceAuth===true)document.documentElement.classList.add('flympusAuthBooting')"),
   'Enforced auth must hide the app before first paint');
 
-assert(config.includes('enabled:false'),'Authentication must remain dormant until Firebase is configured');
+assert(config.includes('enabled:true'),'Firebase authentication must be connected for staged sign-in verification');
 assert(config.includes('enforceAuth:false'),'Authentication enforcement must remain off until UID-scoped migration');
 assert(!/clientSecret|client_secret|privateKey|private_key/i.test(config),'Public Firebase config must never contain server secrets');
 
