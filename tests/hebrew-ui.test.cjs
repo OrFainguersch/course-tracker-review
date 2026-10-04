@@ -41,3 +41,12 @@ assert(html.includes("html[data-flympus-language=\"he\"] .personCard.traineeRost
 assert(html.includes('"Syllabi / practical tasks (": "סילבוסים / משימות מעשיות ("'),'Split syllabus heading fragment must translate');
 assert(html.includes('"minimum flights": "טיסות מינימום"'),'Split minimum-flights label must translate');
 assert(html.includes("No (assessment criteria|emergency requirements|experience requirements|exams|progression gates|items) configured"),'Dynamic empty package states must translate');
+
+
+/* Early locale bootstrap + mirrored drawer gesture */
+const earlyLocaleIndex=html.indexOf('/* Early locale bootstrap: prevent RTL/LTR paint flash on reload. */');
+const firstStyleIndex=html.indexOf('<style>');
+assert(earlyLocaleIndex>=0 && firstStyleIndex>=0 && earlyLocaleIndex<firstStyleIndex,'Saved Hebrew dir/lang must be applied before CSS can paint');
+assert(html.includes("const drawerCloseSwipeIsRight=()=>getFlympusAppPreferences().language==='he'"),'Drawer gesture must mirror with Hebrew');
+assert(html.includes("drawerCloseSwipeIsRight()?dx>12:dx<-12"),'Hebrew drawer close swipe must claim rightward movement');
+assert(html.includes("drawerCloseSwipeIsRight()?dx>=58:dx<=-58"),'Hebrew drawer close swipe must complete to the right');
