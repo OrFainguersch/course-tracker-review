@@ -695,3 +695,15 @@ assert(html.includes("if(!ctx||!buffer||ctx.state!=='running')return false")&&ht
   "Navigation WebAudio must never queue while suspended and must be cancellable at lifecycle boundaries");
 assert(html.includes("playFlympusBottomNavSound(e);"),
   "Bottom-nav binding must pass the originating event into the audible path");
+
+
+/* Visual switches must not animate during programmatic state hydration. */
+assert(html.includes(".notificationPreferences:not(.notificationPrefsInteractive) .prefSwitch i:after{transition:none!important}"),
+  "Notification preference switches must suppress motion until their stored state is synced");
+assert(html.includes("root?.classList.remove('notificationPrefsInteractive')")&&
+  html.includes("root?.classList.add('notificationPrefsInteractive')"),
+  "Notification preference switches must arm motion only after programmatic sync");
+assert(html.includes("aria-checked=\"'+(checked?'true':'false')+'\""),
+  "App Settings switches must render accessibility state together with their checked state");
+assert(html.includes("el.setAttribute('aria-checked',el.checked?'true':'false')"),
+  "Visual switches must keep aria state aligned after real user changes");

@@ -50,3 +50,8 @@ assert(html.includes("switchLabel?.classList.remove('pushSwitchInteractive')")&&
   'Push switch animation must only be armed after verified state is painted');
 assert(html.includes("let flympusPushSettingsUiToken=0"),
   'Stale async push status checks must not repaint a newer Settings screen');
+
+
+/* All prefSwitch families should distinguish hydration from real interaction. */
+assert(html.includes('.notificationPreferences:not(.notificationPrefsInteractive) .prefSwitch i:after{transition:none!important}'),
+  'Notification preference hydration must never animate like a user change');
