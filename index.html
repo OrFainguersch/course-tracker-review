@@ -4185,7 +4185,7 @@ function scheduleFlympusNavFastBuffer(ctx,buffer,{wake=false}={}){
       source.connect(gain);
       gain.connect(ctx.destination);
     }else source.connect(ctx.destination);
-    source.start(now+(wake?.028:.001));
+    source.start(now+(wake ? .028 : .001));
     return true;
   }catch{return false}
 }
