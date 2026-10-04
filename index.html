@@ -3393,6 +3393,179 @@ html[data-flympus-theme="dark"] .myCourseTitle{color:#eaf4fc!important}
 html[data-flympus-theme="dark"] .myCourseMeta .courseMetaTile{background:#0d1e2f!important;border-color:#294158!important}
 html[data-flympus-theme="dark"] .myCourseMeta b{color:#dcecf8!important}
 </style>
+<style>
+/* ===== Global preference coverage · all primary screens ===== */
+html.flympusHintsOff .wizardHint,
+html.flympusHintsOff .fieldHelp,
+html.flympusHintsOff .mutedHint,
+html.flympusHintsOff .packageFilterHint,
+html.flympusHintsOff .notificationPrefsHint,
+html.flympusHintsOff .sub:not(.keepWhenHintsOff),
+html.flympusHintsOff .appSettingsCardHead p,
+html.flympusHintsOff .appSettingCopy small,
+html.flympusHintsOff .sectionHead p,
+html.flympusHintsOff .homeBlockTitle p,
+html.flympusHintsOff .homePulseNote{display:none!important}
+
+/* Compact mode uses the same rhythm on every primary workflow. */
+html.flympusCompact main{padding-top:12px!important}
+html.flympusCompact .sectionHead{margin-top:12px!important;margin-bottom:7px!important}
+html.flympusCompact .toolbar{gap:6px!important;margin-top:8px!important;margin-bottom:8px!important}
+html.flympusCompact .card:not(.myCourseCard):not(.appSettingsCard),
+html.flympusCompact .formCard,
+html.flympusCompact .settingBox,
+html.flympusCompact .sideCard{border-radius:14px!important}
+html.flympusCompact .formCard,
+html.flympusCompact .settingBox,
+html.flympusCompact .sideCard,
+html.flympusCompact .safetyHistoryCard{padding:12px!important}
+html.flympusCompact .fields,
+html.flympusCompact .grid,
+html.flympusCompact .twoCol,
+html.flympusCompact .people,
+html.flympusCompact .reportsGrid,
+html.flympusCompact .recordHubGrid,
+html.flympusCompact .homePrimaryGrid,
+html.flympusCompact .homePulseGrid{gap:8px!important}
+html.flympusCompact .input,
+html.flympusCompact select,
+html.flympusCompact textarea,
+html.flympusCompact .multiFilterTrigger{padding-top:9px!important;padding-bottom:9px!important;min-height:38px!important}
+html.flympusCompact .btn{padding-top:9px!important;padding-bottom:9px!important}
+html.flympusCompact .editableRow,
+html.flympusCompact .criterion,
+html.flympusCompact .appSettingRow{min-height:48px!important;padding-top:8px!important;padding-bottom:8px!important}
+html.flympusCompact .dataTable th,
+html.flympusCompact .dataTable td{padding-top:7px!important;padding-bottom:7px!important}
+html.flympusCompact .wizardStep{padding-top:12px!important;padding-bottom:12px!important}
+html.flympusCompact .personCard,
+html.flympusCompact .recordHubCard,
+html.flympusCompact .safetyHistoryItem{padding:11px!important}
+
+/* Larger text is explicit because much of the review UI uses fixed px sizes. */
+html.flympusLargeText .pageTitle{font-size:34px!important}
+html.flympusLargeText .sectionHead h2,
+html.flympusLargeText .formTitle h2,
+html.flympusLargeText .homeBlockTitle h2{font-size:21px!important}
+html.flympusLargeText .navBtn,
+html.flympusLargeText .mobileBottomLabel,
+html.flympusLargeText .btn,
+html.flympusLargeText .input,
+html.flympusLargeText select,
+html.flympusLargeText textarea{font-size:13px!important}
+html.flympusLargeText .field label,
+html.flympusLargeText .appSettingCopy b,
+html.flympusLargeText .notificationPrefCopy b,
+html.flympusLargeText .dataTable th,
+html.flympusLargeText .dataTable td{font-size:12.5px!important}
+html.flympusLargeText .sub,
+html.flympusLargeText .sectionHead p,
+html.flympusLargeText .appSettingCopy small,
+html.flympusLargeText .fieldHelp,
+html.flympusLargeText .mutedHint,
+html.flympusLargeText .homePulseNote,
+html.flympusLargeText .homePlanMain small{font-size:11px!important}
+html.flympusLargeText .homePulseValue{font-size:25px!important}
+html.flympusLargeText .homePulseLabel,
+html.flympusLargeText .homePlanMain b,
+html.flympusLargeText .myCourseMeta b{font-size:12px!important}
+
+/* Higher contrast is deliberately global, not Settings-only. */
+html.flympusHighContrast body{color:#07182a}
+html.flympusHighContrast .sub,
+html.flympusHighContrast small,
+html.flympusHighContrast .mutedHint,
+html.flympusHighContrast .fieldHelp{color:#536b80!important}
+html.flympusHighContrast .card,
+html.flympusHighContrast .input,
+html.flympusHighContrast select,
+html.flympusHighContrast textarea,
+html.flympusHighContrast .multiFilterTrigger,
+html.flympusHighContrast .dataTable,
+html.flympusHighContrast .wizardChoice,
+html.flympusHighContrast .personCard{border-color:#8ea5b8!important}
+
+/* Dark mode: cover reusable surfaces used throughout Home, Roster, Forms, Reports and Course Management. */
+html[data-flympus-theme="dark"]{
+  --bg:#07131f;--card:#102235;--line:#294158;--muted:#9fb0bf;--text:#eef5fb;--navy:#0b2b4a;--navy2:#dcecf8
+}
+html[data-flympus-theme="dark"] body,
+html[data-flympus-theme="dark"] main{background:#07131f!important;color:#eef5fb!important}
+html[data-flympus-theme="dark"] .card,
+html[data-flympus-theme="dark"] .action,
+html[data-flympus-theme="dark"] .metric,
+html[data-flympus-theme="dark"] .homePanel,
+html[data-flympus-theme="dark"] .homePulseCard,
+html[data-flympus-theme="dark"] .personCard,
+html[data-flympus-theme="dark"] .recordHubCard,
+html[data-flympus-theme="dark"] .safetyHistoryItem,
+html[data-flympus-theme="dark"] .courseWizard,
+html[data-flympus-theme="dark"] .wizardStep,
+html[data-flympus-theme="dark"] .wizardChoice,
+html[data-flympus-theme="dark"] .profileCard,
+html[data-flympus-theme="dark"] .formCompletionPanel,
+html[data-flympus-theme="dark"] .packageRules,
+html[data-flympus-theme="dark"] .editableRow,
+html[data-flympus-theme="dark"] .criterion,
+html[data-flympus-theme="dark"] .myCourseCard,
+html[data-flympus-theme="dark"] .dataTable,
+html[data-flympus-theme="dark"] .filterSelectionChip{background:#102235!important;border-color:#294158!important;color:#eaf4fc!important}
+html[data-flympus-theme="dark"] .input,
+html[data-flympus-theme="dark"] select,
+html[data-flympus-theme="dark"] textarea,
+html[data-flympus-theme="dark"] .multiFilterTrigger,
+html[data-flympus-theme="dark"] .btn.secondary,
+html[data-flympus-theme="dark"] .courseMetaTile,
+html[data-flympus-theme="dark"] .filterSelectionChip,
+html[data-flympus-theme="dark"] .multiFilterOption{background:#0b1c2c!important;border-color:#36516a!important;color:#e2edf6!important}
+html[data-flympus-theme="dark"] .dataTable th,
+html[data-flympus-theme="dark"] .multiFilterMenuHead,
+html[data-flympus-theme="dark"] .unifiedFilterSelections,
+html[data-flympus-theme="dark"] .myCoursesFilterSummary,
+html[data-flympus-theme="dark"] .appSettingsCardHead{background:#0d1e2f!important;border-color:#294158!important;color:#eaf4fc!important}
+html[data-flympus-theme="dark"] .pageTitle,
+html[data-flympus-theme="dark"] h1,
+html[data-flympus-theme="dark"] h2,
+html[data-flympus-theme="dark"] h3,
+html[data-flympus-theme="dark"] h4,
+html[data-flympus-theme="dark"] b,
+html[data-flympus-theme="dark"] label,
+html[data-flympus-theme="dark"] .myCourseTitle,
+html[data-flympus-theme="dark"] .action b{color:#eaf4fc!important}
+html[data-flympus-theme="dark"] .sub,
+html[data-flympus-theme="dark"] small,
+html[data-flympus-theme="dark"] .mutedHint,
+html[data-flympus-theme="dark"] .fieldHelp,
+html[data-flympus-theme="dark"] .detail{color:#9fb0bf!important}
+html[data-flympus-theme="dark"] .homePlanRow{background:#0d1e2f!important;border-color:#294158!important;color:#eaf4fc!important}
+html[data-flympus-theme="dark"] .homePlanRow:hover{background:#132a40!important}
+html[data-flympus-theme="dark"] .topNotificationDropdown,
+html[data-flympus-theme="dark"] .topPersonalProfileDropdown,
+html[data-flympus-theme="dark"] .siteDialogCard,
+html[data-flympus-theme="dark"] .modalCard,
+html[data-flympus-theme="dark"] .personalCropCard{background:#102235!important;border-color:#294158!important;color:#eaf4fc!important}
+
+/* Hebrew / RTL keeps numbers and technical values readable while translating navigation and controls. */
+html[data-flympus-language="he"] body{direction:rtl;text-align:right}
+html[data-flympus-language="he"] .navBtn,
+html[data-flympus-language="he"] .action,
+html[data-flympus-language="he"] .notificationPrefRow,
+html[data-flympus-language="he"] .appSettingRow,
+html[data-flympus-language="he"] .inlineHead,
+html[data-flympus-language="he"] .sectionHead,
+html[data-flympus-language="he"] .formTitle{text-align:right}
+html[data-flympus-language="he"] .navBtn{flex-direction:row}
+html[data-flympus-language="he"] .arr{margin-left:0;margin-right:auto;transform:scaleX(-1)}
+html[data-flympus-language="he"] input[type="email"],
+html[data-flympus-language="he"] input[type="number"],
+html[data-flympus-language="he"] .dateDmy,
+html[data-flympus-language="he"] .homePlanTime,
+html[data-flympus-language="he"] .courseMetaCopy b{direction:ltr;text-align:left}
+html[data-flympus-language="he"] .topNotificationDropdown,
+html[data-flympus-language="he"] .topPersonalProfileDropdown{direction:rtl;text-align:right}
+html[data-flympus-language="he"] .multiFilterMenu{direction:rtl}
+html[data-flympus-language="he"] .dataTable{direction:rtl}
+</style>
 </head>
 <body>
 <div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0726 · rank badge +2px</div><div class="toast" id="toast"></div></div>
@@ -3609,6 +3782,7 @@ const flympusAppPreferenceDefaults={
   reducedMotion:false,
   highContrast:false,
   largerText:false,
+  language:'en',
   startScreen:'home'
 };
 function getFlympusAppPreferences(){
@@ -3625,8 +3799,12 @@ function applyFlympusAppPreferences(input){
   const prefs=input||getFlympusAppPreferences(),root=document.documentElement,body=document.body;
   const themeMode=['light','dark','system'].includes(prefs.theme)?prefs.theme:'system';
   const dark=themeMode==='dark'||(themeMode==='system'&&window.matchMedia?.('(prefers-color-scheme: dark)')?.matches);
+  const language=prefs.language==='he'?'he':'en';
   root?.setAttribute('data-flympus-theme',dark?'dark':'light');
   root?.setAttribute('data-flympus-theme-mode',themeMode);
+  root?.setAttribute('data-flympus-language',language);
+  root?.setAttribute('lang',language);
+  root?.setAttribute('dir',language==='he'?'rtl':'ltr');
   root?.classList.toggle('flympusCompact',prefs.density==='compact');
   root?.classList.toggle('flympusHintsOff',prefs.showHints===false);
   root?.classList.toggle('flympusReducedMotion',prefs.reducedMotion===true);
@@ -3635,6 +3813,138 @@ function applyFlympusAppPreferences(input){
   body?.classList.toggle('flympusCompact',prefs.density==='compact');
 }
 applyFlympusAppPreferences();
+
+const FLYMPUS_HE_UI={
+  'COURSE':'קורס','APP':'אפליקציה','My Courses':'הקורסים שלי','Course Management':'ניהול קורס','Settings':'הגדרות',
+  'Roster':'סגל הקורס','Plan':'תכנון','Home':'בית','Forms':'טפסים','Reports':'דוחות',
+  'APP SETTINGS':'הגדרות אפליקציה','General':'כללי','Default landing page':'עמוד פתיחה ברירת מחדל',
+  'Interface guidance':'הכוונת ממשק','Sounds & Haptics':'צלילים ומשוב הפטי','Navigation sounds':'צלילי ניווט',
+  'Pull-to-refresh sound':'צליל משיכה לרענון','Haptic feedback':'משוב הפטי','Appearance':'מראה',
+  'Theme':'ערכת נושא','System':'לפי המערכת','Light':'בהיר','Dark':'כהה','Interface density':'צפיפות ממשק',
+  'Comfortable':'מרווח','Compact':'קומפקטי','Larger interface text':'טקסט ממשק מוגדל','Accessibility':'נגישות',
+  'Reduce motion':'הפחתת תנועה','Higher contrast':'ניגודיות מוגברת','Data & Device':'נתונים ומכשיר',
+  'Clear remembered interface state':'נקה מצב ממשק שנשמר','Reset app settings':'אפס הגדרות אפליקציה',
+  'Reset local review data':'אפס נתוני סקירה מקומיים','About FLYMPUS':'אודות FLYMPUS',
+  'Build':'גרסה','Running as':'אופן הפעלה','Storage':'אחסון','Installed web app':'אפליקציית ווב מותקנת','Browser':'דפדפן',
+  'Language':'שפה','English':'אנגלית','Hebrew':'עברית',
+  'Choose how FLYMPUS opens and how much guidance the interface shows.':'בחר כיצד FLYMPUS נפתח וכמה הסברים יוצגו בממשק.',
+  'Used when FLYMPUS opens in a new browser/app session. Refresh still stays on the current screen.':'משמש בעת פתיחת FLYMPUS בסשן חדש בדפדפן או באפליקציה. רענון רגיל נשאר במסך הנוכחי.',
+  'Show helper text, hints and explanatory notes throughout the app.':'הצג טקסטי עזרה, רמזים והסברים ברחבי האפליקציה.',
+  'Control the interaction feedback generated by this device.':'שלוט במשוב שהמכשיר מפיק בעת אינטראקציה.',
+  'Play the short FLYMPUS sound when using the primary navigation.':'השמע את צליל FLYMPUS הקצר בעת שימוש בניווט הראשי.',
+  'Play the refresh sound when the pull threshold is reached.':'השמע את צליל הרענון כאשר מגיעים לסף המשיכה.',
+  'Use vibration/haptic feedback where the browser or device supports it.':'השתמש ברטט או משוב הפטי כאשר הדפדפן או המכשיר תומכים בכך.',
+  'Keep the same FLYMPUS design language while adapting it to your device.':'שמור על שפת העיצוב של FLYMPUS תוך התאמה למכשיר שלך.',
+  'Follow the device, or choose a fixed light or dark appearance.':'פעל לפי הגדרת המכשיר או בחר תצוגה בהירה או כהה קבועה.',
+  'Compact reduces spacing in cards, tables and controls without changing content.':'מצב קומפקטי מצמצם רווחים בכרטיסים, טבלאות ופקדים בלי לשנות את התוכן.',
+  'Increase base interface text size while preserving responsive layouts.':'הגדל את טקסט הממשק תוך שמירה על פריסה רספונסיבית.',
+  'Reduce visual motion or strengthen contrast where helpful.':'הפחת תנועה חזותית או חזק את הניגודיות לפי הצורך.',
+  'Minimize non-essential transitions and animations.':'צמצם מעברים ואנימציות שאינם חיוניים.',
+  'Strengthen borders and text contrast across the interface.':'חזק גבולות וניגודיות טקסט ברחבי הממשק.',
+  'These actions affect only data stored in this browser or installed web app.':'פעולות אלה משפיעות רק על נתונים הנשמרים בדפדפן או באפליקציית הווב המותקנת.',
+  'Reset local review data removes browser-local review records and course review state. It does not change the source code or reusable GitHub build.':'איפוס נתוני הסקירה המקומיים מוחק רשומות ומצב קורס שנשמרו במכשיר בלבד. הוא אינו משנה את קוד המקור או את גרסת GitHub.',
+  'Build and device context for troubleshooting.':'פרטי גרסה ומכשיר לצורכי אבחון תקלות.',
+  'Local review data on this device':'נתוני סקירה מקומיים במכשיר זה',
+  'Personal device and interface preferences. Course configuration stays in Course Management; profile and notification preferences stay in their existing menus.':'העדפות אישיות למכשיר ולממשק. הגדרות הקורס נשארות בניהול הקורס, והפרופיל וההתראות נשארים בתפריטים הקיימים.',
+  'Use English throughout the interface.':'השתמש באנגלית בכל הממשק.',
+  'Use Hebrew throughout the interface, including right-to-left layout.':'השתמש בעברית בכל הממשק, כולל פריסה מימין לשמאל.',
+  'Course Roster':'סגל הקורס','Trainees':'חניכים','Instructors':'מדריכים','Trainee':'חניך','Instructor':'מדריך','Course Manager':'מנהל קורס',
+  'Active':'פעיל','Inactive':'לא פעיל','Status':'סטטוס','Role':'תפקיד','Search':'חיפוש','Filters':'מסננים','Reset filters':'אפס מסננים',
+  'All trainees':'כל החניכים','All instructors':'כל המדריכים','All statuses':'כל הסטטוסים','All roles':'כל התפקידים',
+  'All phases':'כל השלבים','All platforms':'כל הפלטפורמות','All training types':'כל סוגי ההכשרה','All countries':'כל המדינות',
+  'All courses':'כל הקורסים','All evaluations':'כל ההערכות','All syllabi':'כל הסילבוסים','Applied filters':'מסננים פעילים',
+  'Course status':'סטטוס הקורס','Sector':'סקטור','Sectors':'סקטורים','Phase':'שלב','Platform':'פלטפורמה','Training type':'סוג הכשרה',
+  'Country':'מדינה','My role':'התפקיד שלי','Course start date':'תאריך תחילת הקורס','Course code':'קוד קורס','Start date':'תאריך התחלה',
+  'Selected':'נבחר','Select course':'בחר קורס','In progress':'בתהליך','Upcoming':'עתידי','Completed':'הושלם',
+  'No courses match these filters':'אין קורסים התואמים למסננים','Clear or change a filter to show more courses.':'נקה או שנה מסנן כדי להציג קורסים נוספים.',
+  'No courses assigned':'לא הוקצו קורסים','Ask a Course Manager to add you to a course.':'בקש ממנהל קורס להוסיף אותך לקורס.',
+  'Welcome back, Or':'ברוך שובך, אור','View all courses':'הצג את כל הקורסים',"Today's Plan":'התכנון להיום',
+  'Scheduled flights and activities for today':'טיסות ופעילויות מתוכננות להיום','Quick Actions':'פעולות מהירות','Common daily tasks':'משימות יומיות נפוצות',
+  'Start Evaluation':'התחל הערכה','Resume Draft':'המשך טיוטה','No Draft to Resume':'אין טיוטה להמשך','Log Safety Event':'דווח אירוע בטיחות',
+  'Course Pulse':'מצב הקורס','Key indicators for current course':'מדדים מרכזיים של הקורס הנוכחי','View Reports':'הצג דוחות',
+  'Active Trainees':'חניכים פעילים','Current roster':'סגל נוכחי','Average Progress':'התקדמות ממוצעת','Course status':'סטטוס הקורס',
+  'Flights Completed':'טיסות שהושלמו','This Week':'השבוע','Evaluations logged':'הערכות שתועדו','Average Grade':'ציון ממוצע',
+  'Open Safety Events':'אירועי בטיחות פתוחים','Good standing':'מצב תקין','Needs attention':'דורש טיפול',
+  'Evaluation':'הערכה','Safety':'בטיחות','Exam':'מבחן','Exams':'מבחנים','New event':'אירוע חדש','New result':'תוצאה חדשה','History':'היסטוריה',
+  'Course safety history':'היסטוריית בטיחות הקורס','All safety records':'כל רשומות הבטיחות','Severity':'חומרה','Classification':'סיווג',
+  'All severities':'כל רמות החומרה','All classifications':'כל הסיווגים','Date range':'טווח תאריכים','Reset':'איפוס',
+  'New safety event':'אירוע בטיחות חדש','Date':'תאריך','Select trainee':'בחר חניך','Select severity':'בחר חומרה','Select classification':'בחר סיווג',
+  'Event title':'כותרת האירוע','Details':'פרטים','Submit safety event':'שלח אירוע בטיחות','Discard draft':'מחק טיוטה',
+  'Exam history':'היסטוריית מבחנים','All exam results':'כל תוצאות המבחנים','Result':'תוצאה','Pass':'עבר','Fail':'נכשל','All results':'כל התוצאות',
+  'Record exam':'תיעוד מבחן','Select exam':'בחר מבחן','Passing grade':'ציון עובר','Grade':'ציון','Submit exam result':'שלח תוצאת מבחן',
+  'Course analytics':'ניתוחי קורס','Analytics are scoped to the active course and its resolved training suit.':'הניתוחים מתייחסים לקורס הפעיל ולחליפת ההכשרה שנפתרה עבורו.',
+  'Export CSV':'ייצא CSV','Print / PDF':'הדפסה / PDF','Emergency exposure':'חשיפה למצבי חירום','Syllabus activity':'פעילות לפי סילבוס',
+  'Evaluation activity by trainee':'פעילות הערכה לפי חניך','Safety severity':'חומרת אירועי בטיחות','Monthly activity':'פעילות חודשית',
+  'Create course':'צור קורס','Tailor course':'התאמת קורס','Advanced':'מתקדם','NEW COURSE':'קורס חדש','Course details':'פרטי הקורס',
+  'Country / customer context':'מדינה / הקשר לקוח','Training Package':'חבילת הכשרה','Course identity':'זהות הקורס','Course name':'שם הקורס',
+  'Select Package':'בחר חבילה','Define sectors':'הגדרת סקטורים','Select sector to edit':'בחר סקטור לעריכה','Architecture':'ארכיטקטורה',
+  'Packages':'חבילות','Phases':'שלבים','Platforms':'פלטפורמות','Training types':'סוגי הכשרה','Qualifications':'הסמכות',
+  'Countries / customer contexts':'מדינות / הקשרי לקוח','Cancellation reasons':'סיבות ביטול','Emergency categories':'קטגוריות חירום',
+  'Emergency name':'שם מצב החירום','Category':'קטגוריה','Experience requirements':'דרישות ניסיון','Progression gates':'שערי התקדמות',
+  'Save changes':'שמור שינויים','Discard changes':'בטל שינויים','Edit':'עריכה','Add':'הוסף','Remove':'הסר','Cancel':'ביטול','Close':'סגור','Delete':'מחק',
+  'Save':'שמור','Create':'צור','Apply':'החל','Clear':'נקה','Back':'חזרה','Continue':'המשך','Submit':'שלח',
+  'Required':'נדרש','Optional':'אופציונלי','Current':'נוכחי','Next':'הבא','Locked':'נעול','Complete':'הושלם',
+  'With Instructor':'עם מדריך','Without Instructor':'ללא מדריך','Day':'יום','Night':'לילה','Qualification':'הסמכה','Configuration':'תצורה',
+  'Auto-save ready':'שמירה אוטומטית מוכנה','Draft saved':'הטיוטה נשמרה','Items need attention':'פריטים דורשים טיפול','Item needs attention':'פריט דורש טיפול',
+  'Low':'נמוכה','Medium':'בינונית','High':'גבוהה','Safety event':'אירוע בטיחות','Real emergency':'חירום אמיתי','Operational observation':'תצפית תפעולית',
+  'PASS':'עבר','FAIL':'נכשל','Required actions':'פעולות נדרשות','Notifications':'התראות','Notification preferences':'העדפות התראות',
+  'Assignments':'הקצאות','Course updates':'עדכוני קורס','Evaluations':'הערכות','Checks':'בדיקות',
+  'Profile':'פרופיל','Choose photo':'בחר תמונה','Edit photo':'ערוך תמונה','Remove photo':'הסר תמונה','Full name':'שם מלא','Email':'דוא״ל',
+  'Save changes':'שמור שינויים','Remove from course':'הסר מהקורס','Personal profile':'פרופיל אישי'
+};
+const flympusI18nTextOriginal=new WeakMap(),flympusI18nAttrOriginal=new WeakMap();
+function flympusTranslateUiString(value){
+  const raw=String(value??''),trim=raw.trim();if(!trim)return raw;
+  let translated=FLYMPUS_HE_UI[trim];
+  if(!translated){
+    let m;
+    if((m=trim.match(/^(\d+) items need attention$/)))translated=m[1]+' פריטים דורשים טיפול';
+    else if((m=trim.match(/^(\d+) selected$/)))translated=m[1]+' נבחרו';
+    else if((m=trim.match(/^(\d+) packages$/)))translated=m[1]+' חבילות';
+    else if((m=trim.match(/^(\d+) of (\d+) packages$/)))translated=m[1]+' מתוך '+m[2]+' חבילות';
+    else if((m=trim.match(/^(\d+) of (\d+) shown$/)))translated=m[1]+' מתוך '+m[2]+' מוצגים';
+    else if((m=trim.match(/^Grade (.+)$/)))translated='ציון '+m[1];
+    else if((m=trim.match(/^Required · (.+)$/)))translated='נדרש · '+m[1];
+    else if((m=trim.match(/^Result · (.+)$/)))translated='תוצאה · '+(FLYMPUS_HE_UI[m[1]]||m[1]);
+  }
+  if(!translated)return raw;
+  const lead=raw.match(/^\s*/)?.[0]||'',tail=raw.match(/\s*$/)?.[0]||'';
+  return lead+translated+tail
+}
+function applyFlympusLanguage(root=document.body){
+  const lang=getFlympusAppPreferences().language==='he'?'he':'en',scope=root||document.body;if(!scope)return;
+  const skip=node=>node?.parentElement?.closest?.('script,style,noscript,textarea,[data-i18n-skip]');
+  const walker=document.createTreeWalker(scope,NodeFilter.SHOW_TEXT);
+  let node;
+  while(node=walker.nextNode()){
+    if(skip(node))continue;
+    if(lang==='he'){
+      if(!flympusI18nTextOriginal.has(node))flympusI18nTextOriginal.set(node,node.nodeValue);
+      const original=flympusI18nTextOriginal.get(node),next=flympusTranslateUiString(original);
+      if(next!==node.nodeValue)node.nodeValue=next;
+    }else if(flympusI18nTextOriginal.has(node)){
+      const original=flympusI18nTextOriginal.get(node);if(node.nodeValue!==original)node.nodeValue=original;flympusI18nTextOriginal.delete(node)
+    }
+  }
+  const elements=[...(scope.matches?.('*')?[scope]:[]),...scope.querySelectorAll?.('*')||[]],attrs=['placeholder','title','aria-label'];
+  elements.forEach(el=>{
+    if(el.closest?.('[data-i18n-skip]'))return;
+    attrs.forEach(attr=>{
+      if(!el.hasAttribute?.(attr))return;
+      let store=flympusI18nAttrOriginal.get(el);if(!store){store={};flympusI18nAttrOriginal.set(el,store)}
+      if(lang==='he'){
+        if(!(attr in store))store[attr]=el.getAttribute(attr);
+        const next=flympusTranslateUiString(store[attr]);if(next!==el.getAttribute(attr))el.setAttribute(attr,next)
+      }else if(attr in store){el.setAttribute(attr,store[attr]);delete store[attr]}
+    })
+  })
+}
+if(!window.__flympusI18nObserverBound&&window.MutationObserver){
+  window.__flympusI18nObserverBound=true;
+  const start=()=>{if(!document.body)return;const observer=new MutationObserver(muts=>{if(getFlympusAppPreferences().language!=='he')return;muts.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType===1)applyFlympusLanguage(n);else if(n.nodeType===3&&n.parentElement)applyFlympusLanguage(n.parentElement)}))});observer.observe(document.body,{childList:true,subtree:true})};
+  if(document.body)start();else document.addEventListener('DOMContentLoaded',start,{once:true})
+}
+
 if(!window.__flympusThemePreferenceBound){
   window.__flympusThemePreferenceBound=true;
   try{window.matchMedia?.('(prefers-color-scheme: dark)')?.addEventListener?.('change',()=>{if(getFlympusAppPreferences().theme==='system')applyFlympusAppPreferences()})}catch{}
@@ -3642,7 +3952,7 @@ if(!window.__flympusThemePreferenceBound){
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
 if(!sessionStorage.getItem('ct-review-ui')){
   const landing=getFlympusAppPreferences().startScreen;
-  if(landing==='courses')initialUiState.screen='courses'
+  if(['home','courses','roster','planned','record','reports'].includes(landing))initialUiState.screen=landing
 }
 const state={screen:'home',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',rosterStatuses:[],rosterRoles:[],rosterDateFrom:'',rosterDateTo:'',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',reportTrainees:[],reportInstructors:[],reportSyllabi:[],reportDateFrom:'',reportDateTo:'',myCoursesStatuses:[],myCoursesSectors:[],myCoursesPhases:[],myCoursesPlatforms:[],myCoursesTrainings:[],myCoursesCountries:[],myCoursesRoles:[],myCoursesDateFrom:'',myCoursesDateTo:'',packageNameFilters:[],packagePhaseFilters:[],packagePlatformFilters:[],packageCategoryFilters:[],packageContextFilters:[],safetyView:'new',evaluationView:'new',examsView:'new',...initialUiState};
 let courseTailorEditSnapshot=null;
@@ -6525,13 +6835,14 @@ function appPreferenceSwitch(key,title,copy,checked){
   return '<div class="appSettingRow"><div class="appSettingCopy"><b>'+esc(title)+'</b><small>'+esc(copy)+'</small></div><label class="prefSwitch appSettingsSwitch"><input type="checkbox" data-app-pref="'+esc(key)+'" '+(checked?'checked':'')+'><i></i></label></div>'
 }
 function appPreferencesScreen(){
-  const p=getFlympusAppPreferences(),theme=['system','light','dark'].includes(p.theme)?p.theme:'system',density=p.density==='compact'?'compact':'comfortable';
+  const p=getFlympusAppPreferences(),theme=['system','light','dark'].includes(p.theme)?p.theme:'system',density=p.density==='compact'?'compact':'comfortable',language=p.language==='he'?'he':'en',startScreen=['home','courses','roster','planned','record','reports'].includes(p.startScreen)?p.startScreen:'home';
   const build=(document.querySelector('.reviewBanner')?.textContent||'FLYMPUS Review').trim();
   const mode=(window.navigator?.standalone===true||window.matchMedia?.('(display-mode: standalone)')?.matches)?'Installed web app':'Browser';
   return '<div class="appSettingsHead"><div><div class="eyebrow">APP SETTINGS</div><h1 class="pageTitle">Settings</h1><p class="sub">Personal device and interface preferences. Course configuration stays in Course Management; profile and notification preferences stay in their existing menus.</p></div></div>'+
   '<div class="appSettingsGrid">'+
     '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('home')+'</span><div><h3>General</h3><p>Choose how FLYMPUS opens and how much guidance the interface shows.</p></div></div>'+
-      '<div class="appSettingRow"><div class="appSettingCopy"><b>Default landing page</b><small>Used when FLYMPUS opens in a new browser/app session. Refresh still stays on the current screen.</small></div><select class="appSettingSelect" data-app-pref-select="startScreen"><option value="home" '+(p.startScreen!=='courses'?'selected':'')+'>Home</option><option value="courses" '+(p.startScreen==='courses'?'selected':'')+'>My Courses</option></select></div>'+
+      '<div class="appSettingRow"><div class="appSettingCopy"><b>Default landing page</b><small>Used when FLYMPUS opens in a new browser/app session. Refresh still stays on the current screen.</small></div><select class="appSettingSelect" data-app-pref-select="startScreen"><option value="home" '+(startScreen==='home'?'selected':'')+'>Home</option><option value="courses" '+(startScreen==='courses'?'selected':'')+'>My Courses</option><option value="roster" '+(startScreen==='roster'?'selected':'')+'>Roster</option><option value="planned" '+(startScreen==='planned'?'selected':'')+'>Plan</option><option value="record" '+(startScreen==='record'?'selected':'')+'>Forms</option><option value="reports" '+(startScreen==='reports'?'selected':'')+'>Reports</option></select></div>'+
+      '<div class="appSettingRow"><div class="appSettingCopy"><b>Language</b><small>'+(language==='he'?'Use Hebrew throughout the interface, including right-to-left layout.':'Use English throughout the interface.')+'</small></div><select class="appSettingSelect" data-app-pref-select="language"><option value="en" '+(language==='en'?'selected':'')+'>English</option><option value="he" '+(language==='he'?'selected':'')+'>Hebrew</option></select></div>'+
       appPreferenceSwitch('showHints','Interface guidance','Show helper text, hints and explanatory notes throughout the app.',p.showHints!==false)+
     '</section>'+
     '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('record')+'</span><div><h3>Sounds & Haptics</h3><p>Control the interaction feedback generated by this device.</p></div></div>'+
@@ -7040,8 +7351,9 @@ function render(options={}){
   }
 
   if(fast){
-    setTimeout(()=>{saveUiState();renderTopCourseSwitcher();renderPersonalIdentity();syncNotificationPreferenceControls();bind()},0);
+    setTimeout(()=>{saveUiState();renderTopCourseSwitcher();renderPersonalIdentity();syncNotificationPreferenceControls();applyFlympusLanguage(document.body);bind()},0);
   }else{
+    applyFlympusLanguage(document.body);
     bind();
     prewarmFlympusBottomScreens();
   }
@@ -7171,7 +7483,7 @@ function bindAppPreferences(){
   });
   document.querySelectorAll('[data-app-pref-select]').forEach(el=>el.onchange=()=>{
     const prefs=getFlympusAppPreferences(),key=el.dataset.appPrefSelect;prefs[key]=el.value;saveFlympusAppPreferences(prefs);
-    if(key==='theme'||key==='density')render();else toast('Setting saved')
+    if(key==='theme'||key==='density'||key==='language')render();else toast('Setting saved')
   });
   if($('#clearRememberedUi'))$('#clearRememberedUi').onclick=async()=>{
     if(!(await siteConfirm('Clear remembered screen, navigation and scroll state for this browser? Course data will not be removed.',{title:'Clear interface state?',confirmLabel:'Clear state',tone:'warning'})))return;
