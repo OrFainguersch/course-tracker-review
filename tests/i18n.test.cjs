@@ -32,3 +32,11 @@ assert(html.includes('html[data-flympus-language="he"] .rankCorner')&&html.inclu
 assert(html.includes("Choose the form you want to complete for"),'Dynamic forms copy must preserve names while translating surrounding UI');
 
 console.log('Hebrew i18n integration checks passed');
+
+
+/* full-site Hebrew audit */
+assert(html.includes('"Select one or more": "בחר אחד או יותר"'),'Generic multi-select UI must translate');
+assert(html.includes('"Primary mobile navigation": "ניווט ראשי בנייד"'),'Mobile navigation accessibility copy must translate');
+assert(html.includes('"Electrical": "חשמל"')&&html.includes('"General / Operational": "כללי / תפעולי"'),'Emergency category labels must translate');
+assert(html.includes('"Course to tailor": "קורס להתאמה"'),'Course tailoring UI must translate');
+assert(html.includes('"Recent Evaluations": "הערכות אחרונות"'),'Trainee profile UI must translate');
