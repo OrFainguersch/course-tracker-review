@@ -4090,6 +4090,8 @@ let flympusNavAudioPools={mobile:null,desktop:null},flympusNavAudioIndex=0;
 let flympusRefreshAudioPool=null,flympusRefreshAudioIndex=0;
 let flympusLastNavSoundAt=0;
 let flympusNavFastCtx=null,flympusNavFastBuffer=null,flympusNavFastBytes=null,flympusNavFastDecodePromise=null;
+let flympusNavLastAudioUseAt=0,flympusNavAudioNeedsWake=true;
+const FLYMPUS_NAV_IDLE_WAKE_MS=10000;
 
 function setFlympusAmbientAudioSession(){
   /* Keep UI sounds in the ambient category when the browser exposes the
@@ -4120,7 +4122,7 @@ function getFlympusNavFastContext(){
   try{
     const AudioCtx=window.AudioContext||window.webkitAudioContext;
     if(!AudioCtx)return null;
-    if(flympusNavFastCtx&&(flympusNavFastCtx.state==='closed'||flympusNavFastCtx.state==='interrupted')){
+    if(flympusNavFastCtx&&flympusNavFastCtx.state==='closed'){
       discardFlympusNavFastContext();
     }
     if(!flympusNavFastCtx){
@@ -4154,25 +4156,26 @@ function primeFlympusNavFastAudio(){
   return flympusNavFastDecodePromise;
 }
 
-function unlockFlympusNavFastAudio(){
-  try{
-    setFlympusAmbientAudioSession();
-    const ctx=getFlympusNavFastContext();if(!ctx)return;
-    if(ctx.state!=='running')try{ctx.resume?.()}catch{}
-    primeFlympusNavFastAudio();
-  }catch{}
+function markFlympusNavAudioNeedsWake(){
+  flympusNavAudioNeedsWake=true;
+  flympusLastNavSoundAt=0;
 }
 
-function playFlympusNavFastSound(){
+function scheduleFlympusNavFastBuffer(ctx,buffer,{wake=false}={}){
+  if(!ctx||!buffer)return false;
   try{
-    const ctx=getFlympusNavFastContext(),buffer=flympusNavFastBuffer;
-    if(!ctx||!buffer)return false;
-    if(ctx.state!=='running'){
-      /* iOS resume() is asynchronous on the first user gesture. If WebAudio is
-         not actually running yet, let the same physical tap use the preloaded
-         media fallback while resume unlocks the fast path for later taps. */
-      try{ctx.resume?.()}catch{}
-      return false;
+    const now=Number(ctx.currentTime||0);
+    if(wake&&ctx.createOscillator&&ctx.createGain){
+      /* Browsers can leave the WebAudio graph logically "running" while the
+         physical output path has gone idle. Run an inaudible 12 ms warm-up
+         before the real click so the same first press wakes the device. */
+      const osc=ctx.createOscillator(),wakeGain=ctx.createGain();
+      wakeGain.gain.value=.000001;
+      osc.frequency.value=120;
+      osc.connect(wakeGain);
+      wakeGain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now+.012);
     }
     const source=ctx.createBufferSource();
     const gain=ctx.createGain?.();
@@ -4181,11 +4184,71 @@ function playFlympusNavFastSound(){
       gain.gain.value=getFlympusNavSoundVolume();
       source.connect(gain);
       gain.connect(ctx.destination);
-    }else{
-      source.connect(ctx.destination);
-    }
-    source.start(ctx.currentTime+.001);
+    }else source.connect(ctx.destination);
+    source.start(now+(wake?.028:.001));
     return true;
+  }catch{return false}
+}
+
+function playFlympusNavFileFallback(){
+  try{
+    const pool=getFlympusNavAudioPool();if(!pool.length)return false;
+    const a=pool[flympusNavAudioIndex++%pool.length];
+    if(a.readyState<2)try{a.load?.()}catch{}
+    rewindFlympusFileAudio(a,1);
+    const p=a.play?.();
+    if(p?.catch)p.catch(()=>{});
+    return true;
+  }catch{return false}
+}
+
+function playFlympusNavFastSound(){
+  try{
+    setFlympusAmbientAudioSession();
+    const now=performance.now?.()||Date.now(),idle=flympusNavLastAudioUseAt>0&&(now-flympusNavLastAudioUseAt)>=FLYMPUS_NAV_IDLE_WAKE_MS;
+    const wake=flympusNavAudioNeedsWake||idle;
+    flympusNavLastAudioUseAt=now;
+
+    const ctx=getFlympusNavFastContext();
+    if(!ctx)return false;
+
+    /* resume() must be requested directly from the physical press. Schedule
+       the source before resume when possible; AudioContext.currentTime is
+       frozen while suspended, so the click will fire as soon as the graph
+       actually wakes instead of being lost on the first press. */
+    if(ctx.state!=='running'){
+      let scheduled=false;
+      if(flympusNavFastBuffer)scheduled=scheduleFlympusNavFastBuffer(ctx,flympusNavFastBuffer,{wake:true});
+      let resumePromise=null;
+      try{resumePromise=ctx.resume?.()}catch{}
+      if(!scheduled){
+        primeFlympusNavFastAudio().then(buffer=>{
+          if(!buffer)return playFlympusNavFileFallback();
+          if(ctx!==flympusNavFastCtx)return;
+          if(!scheduleFlympusNavFastBuffer(ctx,buffer,{wake:true}))playFlympusNavFileFallback();
+        }).catch(()=>playFlympusNavFileFallback());
+      }
+      if(resumePromise?.catch)resumePromise.catch(()=>{
+        markFlympusNavAudioNeedsWake();
+        playFlympusNavFileFallback();
+      });
+      flympusNavAudioNeedsWake=false;
+      return scheduled||!!flympusNavFastDecodePromise||!!resumePromise;
+    }
+
+    if(!flympusNavFastBuffer){
+      primeFlympusNavFastAudio().then(buffer=>{
+        if(!buffer)return playFlympusNavFileFallback();
+        if(ctx!==flympusNavFastCtx)return;
+        if(!scheduleFlympusNavFastBuffer(ctx,buffer,{wake:true}))playFlympusNavFileFallback();
+      }).catch(()=>playFlympusNavFileFallback());
+      flympusNavAudioNeedsWake=false;
+      return true;
+    }
+
+    const ok=scheduleFlympusNavFastBuffer(ctx,flympusNavFastBuffer,{wake});
+    if(ok)flympusNavAudioNeedsWake=false;
+    return ok;
   }catch{
     return false;
   }
@@ -4248,8 +4311,9 @@ function rewindFlympusFileAudio(a,volume=1){
 
 function resetFlympusAudioSession(){
   setFlympusAmbientAudioSession();
-  flympusLastNavSoundAt=0;
-  if(flympusNavFastCtx&&(flympusNavFastCtx.state==='closed'||flympusNavFastCtx.state==='interrupted')){
+  markFlympusNavAudioNeedsWake();
+  flympusNavLastAudioUseAt=0;
+  if(flympusNavFastCtx&&flympusNavFastCtx.state==='closed'){
     discardFlympusNavFastContext();
     primeFlympusNavFastAudio();
   }
@@ -4284,11 +4348,7 @@ function playFlympusBottomNavSound(){
     /* Decoder/context not ready yet: use the viewport-specific baked fallback WAV (10% mobile / 65% desktop).
        iOS may ignore HTMLMediaElement.volume, so attenuation is baked into the
        PCM samples and the first taps cannot sound louder than WebAudio. */
-    const pool=getFlympusNavAudioPool();if(!pool.length)return;
-    const a=pool[flympusNavAudioIndex++%pool.length];
-    rewindFlympusFileAudio(a,1);
-    const p=a.play?.();
-    if(p?.catch)p.catch(()=>{});
+    playFlympusNavFileFallback();
   }catch{}
 }
 
@@ -4404,6 +4464,13 @@ setFlympusAmbientAudioSession();
 getFlympusNavAudioPool();
 getFlympusRefreshAudioPool();
 primeFlympusNavFastAudio();
+if(!window.__flympusNavAudioLifecycleBound){
+  window.__flympusNavAudioLifecycleBound=true;
+  window.addEventListener('blur',markFlympusNavAudioNeedsWake,{passive:true});
+  window.addEventListener('focus',markFlympusNavAudioNeedsWake,{passive:true});
+  window.addEventListener('pagehide',markFlympusNavAudioNeedsWake,{passive:true});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible')markFlympusNavAudioNeedsWake()},{passive:true});
+}
 
 /* Navigation audio is intentionally NOT unlocked by arbitrary screen gestures.
    Only a bottom-nav press may touch its AudioContext; pull-to-refresh owns its
