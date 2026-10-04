@@ -3658,7 +3658,6 @@ html[data-flympus-language="he"] .packageShellSummary:after{right:auto;left:17px
 html[data-flympus-language="he"] .packageShellSummary .globalPackageHead,
 html[data-flympus-language="he"] .packageSummaryStats{padding-right:0;padding-left:30px}
 html[data-flympus-language="he"] .notificationPreferences>summary:after{margin-right:auto}
-html[data-flympus-language="he"] .homeAllCoursesLink i,
 html[data-flympus-language="he"] .arr{transform:scaleX(-1)}
 html[data-flympus-language="he"] input[type="email"],
 html[data-flympus-language="he"] input[type="number"],
@@ -4282,7 +4281,6 @@ html[data-flympus-language="he"] .homeHeroMetaLine{direction:rtl;text-align:righ
 html[data-flympus-language="he"] .homeHeroCountry,
 html[data-flympus-language="he"] .homeHeroStartLabel{text-align:right!important}
 html[data-flympus-language="he"] .homeAllCoursesLink i{
-  transform:none!important;
   margin-left:0!important;
   margin-right:3px!important
 }
@@ -4298,7 +4296,12 @@ html[data-flympus-language="he"] .mobileActivity .tileArrow{
 }
 html[data-flympus-language="he"] .mobileActivity .activityCount{right:auto!important;left:10px!important}
 html[data-flympus-language="he"] .homeQuickBtn{justify-content:flex-start}
-html[data-flympus-language="he"] .homeWelcomeName{margin-inline-start:.22em}
+.homeWelcomeLine{display:flex!important;align-items:baseline;gap:6px;white-space:nowrap}
+.homeWelcomeLead,.homeWelcomeName{display:inline-block}
+.homeAllCoursesArrow{display:inline-block;width:1em;text-align:center}
+.homeAllCoursesArrow::before{content:"→"}
+html[data-flympus-language="he"] .homeAllCoursesArrow::before{content:"←"}
+html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
 @media(max-width:520px){
   .homeHeroMetaLine{white-space:normal;flex-wrap:wrap;row-gap:2px}
 }
@@ -6875,8 +6878,10 @@ function saveExamRecords(v){writeCourseArray('ct-review-exams',v)}
 function currentActivityCounts(){return {evaluation:getEvaluations().length,safety:courseMockSafetyEvents().length+getSafetyRecords().length,exams:courseMockExamAttempts().length+getExamRecords().length,planned:getDailyReports().length,roster:courseTrainees().length+courseInstructors().length}}
 function home(){
  const homeHebrew=getFlympusAppPreferences().language==='he';
- const homeWelcome=homeHebrew?'ברוך שובך,\u00a0אור':'Welcome back,\u00a0Or';
- const homeForwardArrow=homeHebrew?'←':'→';
+ const homeWelcomeLead=homeHebrew?'ברוך שובך,':'Welcome back,';
+ const homeWelcomeName=homeHebrew?'אור':'Or';
+ const homeCountryRaw=currentCourseMeta.country||'—';
+ const homeCountryLabel=homeHebrew?flympusTranslateUiString(homeCountryRaw):homeCountryRaw;
  const activeT=courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active');
  const evals=allEvaluationsForAnalytics().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  const avgProgress=Math.round(mean(activeT.map(t=>Number(t.progress)||0))||0);
@@ -6932,9 +6937,9 @@ function home(){
    '<section class="mobileHero">'+
      '<span class="courseStateBadge homeCourseStatusBadge '+homeCourseLifecycle.className+'">'+esc(homeCourseLifecycle.label)+'</span>'+
      '<div class="eyebrow" style="color:#8bc8ff">'+esc(String(currentCourseMeta.courseName||course.name).toUpperCase())+'</div>'+
-     '<div class="welcome" data-i18n-skip>'+esc(homeWelcome)+'</div>'+
+     '<div class="welcome homeWelcomeLine" data-i18n-skip><span class="homeWelcomeLead">'+esc(homeWelcomeLead)+'</span><span class="homeWelcomeName">'+esc(homeWelcomeName)+'</span></div>'+
      homeContextHtml+
-     '<div class="heroMeta homeHeroFooter"><span class="homeHeroMetaLine"><span class="homeHeroCountry">'+esc(currentCourseMeta.country||'—')+'</span>'+(currentCourseMeta.startsOn?'<span class="homeHeroMetaSep" aria-hidden="true">·</span><span class="homeHeroStartLabel">Start date</span><bdi class="homeHeroStartDate">'+esc(formatCourseDate(currentCourseMeta.startsOn))+'</bdi>':'')+'</span><button class="homeAllCoursesLink" type="button" data-go="courses">View all courses <i aria-hidden="true" data-i18n-skip>'+homeForwardArrow+'</i></button></div>'+
+     '<div class="heroMeta homeHeroFooter"><span class="homeHeroMetaLine"><span class="homeHeroCountry" data-i18n-skip>'+esc(homeCountryLabel)+'</span>'+(currentCourseMeta.startsOn?'<span class="homeHeroMetaSep" aria-hidden="true">·</span><span class="homeHeroStartLabel">Start date</span><bdi class="homeHeroStartDate">'+esc(formatCourseDate(currentCourseMeta.startsOn))+'</bdi>':'')+'</span><button class="homeAllCoursesLink" type="button" data-go="courses">View all courses <i class="homeAllCoursesArrow" aria-hidden="true"></i></button></div>'+
    '</section>'+
    '<section class="homePrimaryGrid">'+
      '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Today\'s Plan</h2><p>Scheduled flights and activities for today</p></div></div><span class="homeDateChip">▣ '+esc(todayLabel)+'</span></div></div>'+
