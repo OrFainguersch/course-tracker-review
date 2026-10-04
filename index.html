@@ -481,20 +481,20 @@ select option[value=""]{color:#8a9bad}
 }
 .packageRules>summary::-webkit-details-marker{display:none}
 .packageRules>summary::after{
-  content:"";
+  content:"›";
   position:absolute;
   right:16px;
   top:50%;
-  width:9px;
-  height:9px;
-  border-right:3px solid #176fae;
-  border-bottom:3px solid #176fae;
-  transform:translateY(-68%) rotate(45deg);
+  color:#075b9e;
+  font-size:28px;
+  font-weight:400;
+  line-height:1;
+  transform:translateY(-50%) rotate(90deg);
   transform-origin:center;
   transition:transform .16s ease;
   pointer-events:none
 }
-.packageRules[open]>summary::after{transform:translateY(-32%) rotate(225deg)}
+.packageRules[open]>summary::after{transform:translateY(-50%) rotate(-90deg)}
 .packageRules>summary>span{font-size:9px;color:#8092a5}
 .packageRuleEmpty{
   margin:10px 12px 12px;
