@@ -76,11 +76,11 @@ assert(html.includes("'Israel':'ישראל'")&&html.includes("'Cyprus':'קפרי
   "Known country labels must translate in Hebrew while custom configured values stay protected");
 assert(html.includes("const homeWelcomeLead=homeHebrew?'ברוך שובך,':'Welcome back,'")&&
   html.includes("const homeWelcomeName=homeHebrew?'אור':'Or'")&&
-  html.includes(".homeWelcomeLine{display:flex!important;align-items:baseline;gap:6px"),
+  html.includes(".homeWelcomeLine{display:flex!important;align-items:baseline;gap:10px"),
   "Home greeting must use structural spacing after the comma in both languages, not whitespace or font kerning");
-assert(html.includes('.homeAllCoursesArrow::before{content:"→"}')&&
-  html.includes('html[data-flympus-language="he"] .homeAllCoursesArrow::before{content:"←"}'),
-  "Home all-courses arrow must be explicit per writing direction and never double-mirrored");
+assert(html.includes("const homeForwardArrow=homeHebrew?'←':'→'")&&
+  html.includes('class="homeAllCoursesArrow" aria-hidden="true" data-i18n-skip>'+homeForwardArrow+'</i>'),
+  "Home all-courses arrow must be rendered as an explicit glyph per writing direction, not CSS-mirrored");
 assert(html.includes('class="homeHeroMetaLine"')&&html.includes('class="homeHeroStartDate"'),
   "Home course metadata must isolate RTL labels from LTR dates");
 assert(html.includes("homeCountryLabel=homeHebrew?flympusTranslateUiString(homeCountryRaw):homeCountryRaw"),
