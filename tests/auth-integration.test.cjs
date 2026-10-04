@@ -10,8 +10,9 @@ const storage=fs.readFileSync('storage-scope.js','utf8');
 
 assert(html.includes('./firebase-config.js?v=20261004-auth2'),'Firebase config must load from the static app');
 assert(html.includes('./storage-scope.js?v=20261004-auth2'),'UID storage scope must load from the static app');
-assert(html.includes('./auth.css?v=20261004-auth1'),'Authentication UI CSS must be loaded');
-assert(html.includes('type="module" src="./auth.js?v=20261004-auth2"'),'Authentication runtime must load as a module');
+assert(html.includes('./auth.css?v=20261004-auth2'),'Authentication UI CSS must be loaded');
+assert(html.includes('type="module" src="./auth.js?v=20261004-auth3"'),'Authentication runtime must load as a module');
+assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"'),'Firebase Authentication must preload before the post-login reload');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('</head>'),'Firebase config must load before first body paint');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('Early preference bootstrap'),'Firebase config must load before any local preference access');
 assert(html.indexOf('./storage-scope.js')<html.indexOf('Early preference bootstrap'),'UID storage scope must install before application storage reads');
@@ -38,11 +39,15 @@ assert(auth.includes('openUserManagement')&&auth.includes("getDocs(firestoreSdk.
 assert(auth.includes("action==='approve'")&&auth.includes("action==='block'")&&auth.includes("action==='reactivate'"),'User Management must support approval, blocking and reactivation');
 assert(auth.includes("action==='make-admin'")&&auth.includes("action==='make-user'"),'User Management must support USER and ADMIN role changes');
 assert(auth.includes('FLYMPUS_STORAGE_SCOPE?.setUid')&&auth.includes('FLYMPUS_STORAGE_SCOPE?.clearUid'),'Authentication lifecycle must bind and clear UID-scoped browser state');
+assert(auth.includes('if(scopeChanged||migratedLegacyCount>0){location.reload();return}'),'UID selection and legacy migration must use one consolidated reload');
 assert(auth.includes("params.get('authPreview')==='1'"),'Login UI must have a safe preview mode before Firebase activation');
 assert(auth.includes("browserLocalPersistence"),'Signed-in sessions should persist on the device');
 
 assert(css.includes('html.flympusAuthBooting .app')&&css.includes('visibility:hidden!important'),
   'Auth gate must hide the underlying app while enforced authentication is unresolved');
+assert(css.includes('html.flympusUserManagementOpen body{position:fixed!important'),'User Management must freeze the page behind its modal');
+assert(css.includes('overscroll-behavior:contain')&&css.includes('touch-action:pan-y'),'User Management must contain iOS scrolling inside its own body');
+assert(html.includes("classList.contains('flympusUserManagementOpen')"),'Pull-to-refresh must ignore User Management gestures');
 
 assert(rules.includes("request.resource.data.role == 'user'"),'New users may only create USER role');
 assert(rules.includes("request.resource.data.status == 'pending'"),'New users may only create PENDING status');

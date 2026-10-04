@@ -20,6 +20,8 @@ let firestoreSdk=null;
 let authUnsubscribe=null;
 let currentUser=null;
 let currentProfile=null;
+let userManagementScrollY=0;
+let userManagementPreviousBodyTop='';
 
 const api=window.FLYMPUS_AUTH={
   status:enabled?'booting':'disabled',
@@ -234,12 +236,30 @@ function userManagementRoot(){
   el.innerHTML='<div class="flympusUserManagementBackdrop" data-user-management-close></div><section class="flympusUserManagementPanel" role="dialog" aria-modal="true" aria-labelledby="flympusUserManagementTitle"><header><div><p>ADMINISTRATION</p><h1 id="flympusUserManagementTitle">User Management</h1><span>Application access is separate from course membership and course roles.</span></div><button type="button" class="flympusUserManagementClose" data-user-management-close aria-label="Close User Management">×</button></header><div class="flympusUserManagementBody" data-user-management-body></div></section>';
   document.body.appendChild(el);
   el.querySelectorAll('[data-user-management-close]').forEach(btn=>btn.addEventListener('click',closeUserManagement));
+  let lastTouchY=0;
+  el.addEventListener('touchstart',event=>{
+    lastTouchY=Number(event.touches?.[0]?.clientY||0)
+  },{passive:true});
+  el.addEventListener('touchmove',event=>{
+    const touch=event.touches?.[0];
+    if(!touch)return;
+    const scroller=event.target?.closest?.('.flympusUserManagementBody');
+    if(!scroller){if(event.cancelable)event.preventDefault();return}
+    const nextY=Number(touch.clientY||0),dy=nextY-lastTouchY;
+    lastTouchY=nextY;
+    const max=Math.max(0,scroller.scrollHeight-scroller.clientHeight);
+    if((dy>0&&scroller.scrollTop<=0)||(dy<0&&scroller.scrollTop>=max)){
+      if(event.cancelable)event.preventDefault()
+    }
+  },{passive:false});
   return el
 }
 function closeUserManagement(){
   const el=document.getElementById('flympusUserManagementRoot');
   if(el)el.hidden=true;
-  document.documentElement.classList.remove('flympusUserManagementOpen')
+  document.documentElement.classList.remove('flympusUserManagementOpen');
+  if(document.body){document.body.style.top=userManagementPreviousBodyTop}
+  window.scrollTo(0,userManagementScrollY)
 }
 function userProviderLabel(profile){
   const providers=Array.isArray(profile?.providerIds)?profile.providerIds:[];
@@ -281,6 +301,9 @@ async function loadManagedUsers(){
 async function openUserManagement(){
   if(!api.isAdmin())return;
   const el=userManagementRoot(),body=el.querySelector('[data-user-management-body]');
+  userManagementScrollY=Math.max(0,Number(window.scrollY||document.scrollingElement?.scrollTop||0));
+  userManagementPreviousBodyTop=document.body?.style?.top||'';
+  if(document.body)document.body.style.top='-'+userManagementScrollY+'px';
   el.hidden=false;document.documentElement.classList.add('flympusUserManagementOpen');
   body.innerHTML='<div class="flympusUserManagementLoading"><div class="flympusAuthSpinner"></div><span>Loading users…</span></div>';
   try{renderUserManagement(await loadManagedUsers())}
@@ -321,12 +344,15 @@ async function handleSignedIn(user){
   try{
     const profile=normalizeProfile(await ensureUserProfile(user));
     const scopeChanged=window.FLYMPUS_STORAGE_SCOPE?.setUid?.(user.uid)===true;
-    if(scopeChanged){location.reload();return}
     if(profile.status!=='active'){showPending(user,profile);return}
+    let migratedLegacyCount=0;
     if(profile.role==='admin'){
       const migration=window.FLYMPUS_STORAGE_SCOPE?.claimLegacy?.(user.uid,{admin:true});
-      if(Number(migration?.count||0)>0){location.reload();return}
+      migratedLegacyCount=Number(migration?.count||0)
     }
+    /* A new UID scope and a legacy claim used to trigger two consecutive
+       reloads. Apply both mutations first, then rehydrate the app once. */
+    if(scopeChanged||migratedLegacyCount>0){location.reload();return}
     applyRoleContext(user,profile);
     unlockApp()
   }catch(err){
