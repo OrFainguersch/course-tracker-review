@@ -5,27 +5,37 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta charset="utf-8" />
+<meta name="theme-color" content="#07294c" />
+<meta name="color-scheme" content="light" />
 <script>
-/* Early preference bootstrap: prevent RTL/theme/text paint flashes on reload. */
+/* Early preference bootstrap: keep first paint identical to the last visible
+   FLYMPUS frame. iOS can report a transient system color scheme while a PWA is
+   backgrounded/reopened, so System theme starts from the last resolved visible
+   theme and is reconciled only after the page is actually foregrounded. */
 (()=>{try{
   const saved=JSON.parse(localStorage.getItem('flympus-app-preferences')||'{}')||{};
   const language=saved.language==='he'?'he':'en',themeMode=['light','dark','system'].includes(saved.theme)?saved.theme:'system';
-  const dark=themeMode==='dark'||(themeMode==='system'&&window.matchMedia?.('(prefers-color-scheme: dark)')?.matches);
-  const root=document.documentElement;
+  const stableRaw=String(localStorage.getItem('flympus-last-resolved-theme')||''),stable=stableRaw==='dark'||stableRaw==='light'?stableRaw:'';
+  const mediaDark=!!window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
+  const resolvedTheme=themeMode==='dark'?'dark':themeMode==='light'?'light':(stable||(mediaDark?'dark':'light'));
+  const dark=resolvedTheme==='dark',root=document.documentElement;
   root.setAttribute('data-flympus-language',language);
   root.setAttribute('lang',language);
   root.setAttribute('dir',language==='he'?'rtl':'ltr');
-  root.setAttribute('data-flympus-theme',dark?'dark':'light');
+  root.setAttribute('data-flympus-theme',resolvedTheme);
   root.setAttribute('data-flympus-theme-mode',themeMode);
+  root.style.colorScheme=resolvedTheme;
   root.classList.toggle('flympusLargeText',saved.largerText===true);
   root.classList.toggle('flympusHapticsOff',saved.haptics===false);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#07131f':'#07294c');
+  document.querySelector('meta[name="color-scheme"]')?.setAttribute('content',resolvedTheme);
+  if(themeMode!=='system')localStorage.setItem('flympus-last-resolved-theme',resolvedTheme);
 }catch{}})();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="FLYMPUS" />
-<meta name="theme-color" content="#07294c" />
 <link rel="manifest" href="./manifest.webmanifest" />
 <link rel="apple-touch-icon" href="./assets/flympus-app-icon.webp" />
 <title>FLYMPUS — Train. Track. Progress.</title>
@@ -3026,6 +3036,17 @@ html.flympusHydrating .mobileBottomNav{
 html.flympusHydrating #content{
   pointer-events:none!important;
 }
+/* App-resume guard: iOS may replay a cached frame while the page becomes live.
+   Keep theme/chrome corrections atomic so there is no one-frame transition,
+   pressed state, or dark/light cross-fade on foregrounding. */
+html.flympusResumeVisualSync *,
+html.flympusResumeVisualSync *::before,
+html.flympusResumeVisualSync *::after{
+  transition:none!important;
+}
+html[data-flympus-theme="light"]{color-scheme:light}
+html[data-flympus-theme="dark"]{color-scheme:dark}
+html[data-flympus-theme="dark"] .flympusBootCard b{background:#294158!important}
 /* Installed/standalone browsers can paint the fixed dock before JS fills its
    items. Never show the empty capsule during that parser/load gap. */
 .mobileBottomNav:empty{
@@ -4321,7 +4342,9 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
   try{ui=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
   const active=JSON.parse(localStorage.getItem('ct-review-active-course')||'{}')||{};
   const activeCourse=String(active.courseCode||'AEP-26');
-  const snapMatches=!!(snap&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse);
+  const root=document.documentElement,currentResolvedTheme=String(root.getAttribute('data-flympus-theme')||'light'),currentLanguage=String(root.getAttribute('data-flympus-language')||'en'),currentLargeText=root.classList.contains('flympusLargeText');
+  const snapAge=Math.max(0,Date.now()-Number(snap?.savedAt||0)),snapFresh=snapAge<=15*60*1000;
+  const snapMatches=!!(snap&&snap.visualVersion===2&&snapFresh&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
   const content=document.querySelector('#content');
   const bottomNav=document.querySelector('#mobileBottomNav');
   window.__FLYMPUS_RUNTIME_READY__=false;
@@ -4533,16 +4556,34 @@ function saveFlympusAppPreferences(next){
   applyFlympusAppPreferences(prefs);
   return prefs
 }
-function applyFlympusAppPreferences(input){
+const FLYMPUS_RESOLVED_THEME_KEY='flympus-last-resolved-theme';
+function getFlympusStableResolvedTheme(){
+  try{const v=String(localStorage.getItem(FLYMPUS_RESOLVED_THEME_KEY)||'');return v==='dark'||v==='light'?v:''}catch{return ''}
+}
+function setFlympusStableResolvedTheme(theme){
+  if(theme!=='dark'&&theme!=='light')return;
+  try{localStorage.setItem(FLYMPUS_RESOLVED_THEME_KEY,theme)}catch{}
+}
+function resolveFlympusTheme(prefs,allowSystemProbe=true){
+  const themeMode=['light','dark','system'].includes(prefs?.theme)?prefs.theme:'system';
+  if(themeMode==='dark'||themeMode==='light')return themeMode;
+  const rootTheme=document.documentElement?.getAttribute('data-flympus-theme');
+  const current=rootTheme==='dark'||rootTheme==='light'?rootTheme:'';
+  const stable=getFlympusStableResolvedTheme();
+  if(!allowSystemProbe||document.visibilityState==='hidden')return current||stable||'light';
+  try{return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches?'dark':'light'}catch{return current||stable||'light'}
+}
+function applyFlympusAppPreferences(input,{allowSystemProbe=true}={}){
   const prefs=input||getFlympusAppPreferences(),root=document.documentElement,body=document.body;
   const themeMode=['light','dark','system'].includes(prefs.theme)?prefs.theme:'system';
-  const dark=themeMode==='dark'||(themeMode==='system'&&window.matchMedia?.('(prefers-color-scheme: dark)')?.matches);
+  const resolvedTheme=resolveFlympusTheme(prefs,allowSystemProbe),dark=resolvedTheme==='dark';
   const language=prefs.language==='he'?'he':'en';
-  root?.setAttribute('data-flympus-theme',dark?'dark':'light');
+  root?.setAttribute('data-flympus-theme',resolvedTheme);
   root?.setAttribute('data-flympus-theme-mode',themeMode);
   root?.setAttribute('data-flympus-language',language);
   root?.setAttribute('lang',language);
   root?.setAttribute('dir',language==='he'?'rtl':'ltr');
+  if(root?.style)root.style.colorScheme=resolvedTheme;
   /* Density + accessibility controls were removed from Settings; do not leave
      previously-saved hidden modes active. */
   root?.classList.remove('flympusCompact','flympusReducedMotion','flympusHighContrast');
@@ -4556,6 +4597,9 @@ function applyFlympusAppPreferences(input){
   document.querySelectorAll?.('.mobileBottomHapticSwitch')?.forEach?.(el=>{el.disabled=prefs.haptics===false});
   const themeMeta=document.querySelector?.('meta[name="theme-color"]');
   if(themeMeta)themeMeta.setAttribute('content',dark?'#07131f':'#07294c');
+  const schemeMeta=document.querySelector?.('meta[name="color-scheme"]');
+  if(schemeMeta)schemeMeta.setAttribute('content',resolvedTheme);
+  if(themeMode!=='system'||document.visibilityState!=='hidden')setFlympusStableResolvedTheme(resolvedTheme);
 }
 applyFlympusAppPreferences();
 
@@ -5349,7 +5393,45 @@ if(!window.__flympusI18nObserverBound&&window.MutationObserver){
 
 if(!window.__flympusThemePreferenceBound){
   window.__flympusThemePreferenceBound=true;
-  try{window.matchMedia?.('(prefers-color-scheme: dark)')?.addEventListener?.('change',()=>{if(getFlympusAppPreferences().theme==='system')applyFlympusAppPreferences()})}catch{}
+  let pendingSystemThemeSync=false,resumeThemeToken=0;
+  const syncVisibleSystemTheme=()=>{
+    if(getFlympusAppPreferences().theme!=='system'){pendingSystemThemeSync=false;return}
+    if(document.visibilityState!=='visible'){pendingSystemThemeSync=true;return}
+    pendingSystemThemeSync=false;
+    applyFlympusAppPreferences(undefined,{allowSystemProbe:true});
+  };
+  const scheduleForegroundThemeSync=()=>{
+    if(getFlympusAppPreferences().theme!=='system')return;
+    if(document.visibilityState!=='visible'){pendingSystemThemeSync=true;return}
+    const token=++resumeThemeToken,root=document.documentElement;
+    root?.classList.add('flympusResumeVisualSync');
+    const finish=()=>{
+      if(token!==resumeThemeToken)return;
+      syncVisibleSystemTheme();
+      requestAnimationFrame?.(()=>root?.classList.remove('flympusResumeVisualSync'));
+    };
+    if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>requestAnimationFrame(finish));
+    else setTimeout(finish,32);
+  };
+  try{
+    const mq=window.matchMedia?.('(prefers-color-scheme: dark)');
+    mq?.addEventListener?.('change',()=>{
+      if(getFlympusAppPreferences().theme!=='system')return;
+      if(document.visibilityState!=='visible'){pendingSystemThemeSync=true;return}
+      syncVisibleSystemTheme();
+    });
+  }catch{}
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='hidden'){
+      /* Freeze the last visible theme. Never let an iOS background-only
+         color-scheme event rewrite the DOM or the next app-switcher snapshot. */
+      const current=document.documentElement?.getAttribute('data-flympus-theme');
+      if(current==='dark'||current==='light')setFlympusStableResolvedTheme(current);
+      return;
+    }
+    if(pendingSystemThemeSync||getFlympusAppPreferences().theme==='system')scheduleForegroundThemeSync();
+  },{passive:true});
+  window.addEventListener('pageshow',scheduleForegroundThemeSync,{passive:true});
 }
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
 const flympusPushBootParams=(()=>{try{return new URLSearchParams(location.search)}catch{return new URLSearchParams()}})();
@@ -9860,9 +9942,14 @@ initFlympusPushClient();
 function saveFlympusReloadSnapshot(){
   try{
     const content=$('#content');if(!content)return;
+    const root=document.documentElement,resolvedTheme=String(root?.getAttribute('data-flympus-theme')||'light'),language=String(root?.getAttribute('data-flympus-language')||'en');
     const snapshot={
+      visualVersion:2,
       screen:String(state.screen||'home'),
       courseId:String(currentCourseId||'AEP-26'),
+      resolvedTheme:resolvedTheme==='dark'?'dark':'light',
+      language:language==='he'?'he':'en',
+      largerText:!!root?.classList.contains('flympusLargeText'),
       html:content.innerHTML,
       navHtml:$('#mobileBottomNav')?.innerHTML||'',
       halo:(()=>{
