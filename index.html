@@ -1740,20 +1740,26 @@ form input,form select,form textarea{max-width:100%;min-width:0}
   font-size:8px!important
 }
 .recordSummaryBadge{
-  min-width:19px!important;
-  height:19px!important;
-  padding:0 5px!important;
+  width:24px!important;
+  min-width:24px!important;
+  height:24px!important;
+  padding:0!important;
   border:0!important;
-  box-shadow:none!important
+  border-radius:50%!important;
+  box-shadow:none!important;
+  font-size:9px!important;
+  letter-spacing:-.02em!important
 }
 .recordAttentionSummary{
-  gap:7px!important;
-  padding:7px 10px!important;
-  border:1px solid #efc3c3!important;
+  gap:8px!important;
+  min-height:38px!important;
+  padding:6px 11px 6px 7px!important;
+  border:1px solid #efb3b3!important;
+  border-radius:999px!important;
   background:#fff6f6!important;
-  color:#913838!important;
+  color:#8f2f2f!important;
   font-size:10px!important;
-  font-weight:820!important
+  font-weight:850!important
 }
 
 /* Bottom-nav attention logic must be visually identical on every viewport. */
@@ -5607,10 +5613,11 @@ function draftAttentionCount(name){
  if(Number.isFinite(stored)&&stored>0)return Math.max(1,Math.floor(stored));
  return Math.max(1,draftDataMissingCount(name,d.data))
 }
-function formatAttentionCount(value){
+function formatCompactBadgeCount(value){
  const n=Math.max(0,Math.floor(Number(value)||0));
- return n>9?'9+':String(n)
+ return n>10?'9+':String(n)
 }
+function formatAttentionCount(value){return formatCompactBadgeCount(value)}
 function courseAttentionCounts(){
  const evaluation=draftAttentionCount('evaluation'),safety=draftAttentionCount('safety'),exams=draftAttentionCount('exams'),planned=draftAttentionCount('planned');
  return {evaluation,safety,exams,record:evaluation+safety+exams,planned}
@@ -5622,13 +5629,13 @@ function traineeDraftAttentionCount(name,traineeId){
 function traineeDraftNeedsAttention(name,traineeId){return traineeDraftAttentionCount(name,traineeId)>0}
 function attentionBadgeHtml(key,extraClass='',dotOnly=false){
  const n=Number(courseAttentionCounts()[key]||0),content=n?(dotOnly?'':formatAttentionCount(n)):'';
- return '<span class="attentionBadge '+extraClass+'" data-attention-badge="'+esc(key)+'" '+(dotOnly?'data-attention-dot="true" ':'')+(n?'':'hidden')+'>'+content+'</span>'
+ return '<span class="attentionBadge '+extraClass+'" data-attention-badge="'+esc(key)+'" '+(dotOnly?'data-attention-dot="true" ':'')+(n?'aria-label="'+esc(n+' items need attention')+'" title="'+esc(n+' items need attention')+'" ':'hidden')+'>'+content+'</span>'
 }
 function syncAttentionBadges(){
  const counts=courseAttentionCounts();
  document.querySelectorAll('[data-attention-badge]').forEach(el=>{const n=Number(counts[el.dataset.attentionBadge]||0),dotOnly=el.dataset.attentionDot==='true';el.textContent=n?(dotOnly?'':formatAttentionCount(n)):'';el.hidden=!n});
  document.querySelectorAll('[data-trainee-attention]').forEach(el=>{const n=traineeDraftAttentionCount(el.dataset.traineeAttention,el.dataset.traineeId);el.textContent=n?formatAttentionCount(n):'';el.hidden=!n});
- document.querySelectorAll('[data-record-attention-summary]').forEach(el=>{const n=counts.record;el.hidden=!n;const copy=el.querySelector('[data-record-attention-copy]');if(copy)copy.textContent=n===1?'1 item needs attention':n+' items need attention'})
+ document.querySelectorAll('[data-record-attention-summary]').forEach(el=>{const n=counts.record;el.hidden=!n;const copy=el.querySelector('[data-record-attention-copy]');if(copy)copy.textContent=n===1?'Item needs attention':'Items need attention';const badge=el.querySelector('[data-attention-badge]');if(badge&&n){badge.setAttribute('aria-label',n+' items need attention');badge.setAttribute('title',n+' items need attention')}})
 }
 function getEmergencyPlans(){return readCourseObject('ct-review-emergency-plans')}
 function getTraineeEmergencyPlan(traineeId){const all=getEmergencyPlans(),p=all[traineeId];return p&&Array.isArray(p.emergencyIds)?p:{emergencyIds:[],updatedAt:null}}
@@ -6631,7 +6638,7 @@ function recordHub(){
   ['safety','safety','Safety','safety','Log a safety event, operational observation or real emergency.'],
   ['exams','exams','Exams','exam','Record theoretical exam results against the required passing grade.']
  ];
- const attentionSummary=attention.record?'<div class="recordAttentionSummary" data-record-attention-summary>'+attentionBadgeHtml('record','recordSummaryBadge')+'<span data-record-attention-copy>'+(attention.record===1?'1 item needs attention':attention.record+' items need attention')+'</span></div>':'';
+ const attentionSummary=attention.record?'<div class="recordAttentionSummary" data-record-attention-summary>'+attentionBadgeHtml('record','recordSummaryBadge')+'<span data-record-attention-copy>'+(attention.record===1?'Item needs attention':'Items need attention')+'</span></div>':'';
  return '<div class="recordHubHead"><div><div class="eyebrow">COURSE FORMS</div><h1 class="pageTitle">Forms</h1><p class="sub">Choose the form you want to complete for '+esc(currentCourseMeta.courseName||'this course')+'.</p></div>'+attentionSummary+'</div>'+
  '<div class="recordHubGrid">'+cards.map(x=>'<button class="recordHubCard '+x[3]+'" type="button" data-go="'+x[0]+'"><span class="recordHubIcon">'+navIconSvg(x[1])+'</span><span class="recordHubCopy"><span class="recordHubTitleRow"><b>'+x[2]+'</b>'+attentionBadgeHtml(x[0],'recordCardAttention')+'</span><small>'+x[4]+'</small></span><span class="recordHubArrow">›</span></button>').join('')+'</div>';
 }
