@@ -20,3 +20,18 @@ assert(html.includes("attributeFilter:['placeholder','title','aria-label']"),'Dy
 assert(html.includes("flympusI18nProtectedValues"),'Names/configured values must remain protected from UI translation');
 
 console.log('Hebrew UI/RTL integration checks passed');
+
+
+/* Full-site Hebrew audit regression coverage */
+[
+  '"Recent Activity": "פעילות אחרונה"',
+  '"Qualification Requirements": "דרישות הסמכה"',
+  '"Syllabus progression": "התקדמות בסילבוס"',
+  '"Electrical": "חשמל"',
+  '"No cancellation reasons are configured.": "לא הוגדרו סיבות ביטול."',
+  '"Only exam results recorded for the active course are shown.": "מוצגות רק תוצאות מבחנים שתועדו עבור הקורס הפעיל."'
+].forEach(x=>assert(html.includes(x), 'Missing full-site Hebrew UI translation: '+x));
+
+assert(html.includes("trim.match(/^·\\s*(.+)$/)"),'Punctuation-prefixed helper copy must still translate');
+assert(html.includes("body.drawerPushOpen .backdrop{\n  background:transparent!important;"),'Push drawer must leave the displaced page visible');
+assert(html.includes("html[data-flympus-language=\"he\"] .personCard.traineeRosterCard .rosterTraineeHead{\n  width:100%!important;"),'Hebrew trainee identity must occupy the mirrored content edge');
