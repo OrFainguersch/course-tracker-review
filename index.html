@@ -4230,9 +4230,10 @@ Object.assign(FLYMPUS_HE_UI,{
 });
 
 const flympusI18nTextOriginal=new WeakMap(),flympusI18nAttrOriginal=new WeakMap();
+const FLYMPUS_HE_UI_CASEFOLD=(()=>{const map=new Map();Object.entries(FLYMPUS_HE_UI).forEach(([key,value])=>{const folded=String(key).trim().toLocaleLowerCase('en');if(folded&&!map.has(folded))map.set(folded,value)});return map})();
 function flympusTranslateUiString(value){
   const raw=String(value??''),trim=raw.trim();if(!trim)return raw;
-  let translated=FLYMPUS_HE_UI[trim];
+  let translated=FLYMPUS_HE_UI[trim]||FLYMPUS_HE_UI_CASEFOLD.get(trim.toLocaleLowerCase('en'));
   if(!translated){
     let m;
     if((m=trim.match(/^(\d+) items need attention$/)))translated=m[1]+' פריטים דורשים טיפול';
