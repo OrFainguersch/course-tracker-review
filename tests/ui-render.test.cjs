@@ -649,6 +649,8 @@ assert(html.includes("const feedbackTitle=hapticsRelevant?'Sounds & Haptics':'So
 assert(html.includes("FLYMPUS_RESOLVED_THEME_KEY='flympus-last-resolved-theme'")&&
   html.includes("if(!allowSystemProbe||document.visibilityState==='hidden')return current||stable||'light'"),
   "System theme must freeze to the last visible resolved theme while the app is hidden");
+assert(html.includes("flympus-last-visible-theme-at")&&html.includes("Date.now()-lastVisibleAt<=6*60*60*1000"),
+  "First paint may reuse the last visible System theme only for a recent app session, not indefinitely");
 assert(html.includes("pendingSystemThemeSync=true")&&
   html.includes("window.addEventListener('pageshow',scheduleForegroundThemeSync"),
   "System theme changes that occur in the background must be deferred until a visible foreground frame");
