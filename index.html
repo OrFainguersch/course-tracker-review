@@ -3279,7 +3279,7 @@ body.flympusPersonModalOpen{touch-action:none}
 .packageFilterBar.packagePathFilters .unifiedFilterHeader,
 .packageFilterBar.packagePathFilters .packageFilterHint,
 .packageFilterBar.packagePathFilters .unifiedFilterSelections{grid-column:1/-1}
-.packageFilterBar.packagePathFilters .multiFilterField{min-width:0!important}
+.packageFilterBar.packagePathFilters .multiFilterField,.packageFilterBar.packagePathFilters .packageSectorFilterField{min-width:0!important}.packageFilterBar.packagePathFilters .packageSectorFilterField select{width:100%;height:44px;min-height:44px}
 @media(max-width:1180px){
   .packageFilterBar.packagePathFilters{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
@@ -5932,26 +5932,26 @@ function advancedPackagesHtml(type){
   const platformIdsFor=p=>{const ids=p.platformId?[p.platformId]:(p.platformIds||[]);return ids.length?ids:['__NONE__']};
   const packageRows=allPackages.map(p=>({p,id:String(p.id),phaseId:String(p.phaseId||'__NONE__'),trainingId:String(p.trainingKind||'__NONE__'),platformIds:platformIdsFor(p).map(String),contextId:String(contextKey(p))}));
   const packageIds=packageRows.map(x=>x.id),phaseIds=[...new Set(packageRows.map(x=>x.phaseId))],trainingIds=[...new Set(packageRows.map(x=>x.trainingId))],platformIds=[...new Set(packageRows.flatMap(x=>x.platformIds))],contextIds=[...new Set(packageRows.map(x=>x.contextId))];
-  const nameItems=alphaByName(allPackages.map(p=>({id:String(p.id),name:p.name||p.id}))),phaseItems=phaseIds.map(id=>({id,name:id==='__NONE__'?'No phase':(cfgItem(phaseDefs,id)?.name||id)})),platformItems=platformIds.map(id=>({id,name:id==='__NONE__'?'Multi-platform / none':(platformDefs.find(x=>String(x.id)===id)?.name||epPlatformLabel(id)||id)}));
+  const phaseItems=phaseIds.map(id=>({id,name:id==='__NONE__'?'No phase':(cfgItem(phaseDefs,id)?.name||id)})),platformItems=platformIds.map(id=>({id,name:id==='__NONE__'?'Multi-platform / none':(platformDefs.find(x=>String(x.id)===id)?.name||epPlatformLabel(id)||id)}));
   const knownTraining=trainingDefs.filter(x=>trainingIds.includes(String(x.id))),unknownTraining=trainingIds.filter(id=>id!=='__NONE__'&&!knownTraining.some(x=>String(x.id)===id)).map(id=>({id,name:id.replace(/_/g,' ').replace(/\b\w/g,m=>m.toUpperCase())})),trainingItems=[...knownTraining,...unknownTraining,...(trainingIds.includes('__NONE__')?[{id:'__NONE__',name:'No training type'}]:[])];
   const contextLabel=type==='EP'?'Qualification':type==='IP'?'Configuration / qualification':'System / qualification',contextItems=contextIds.map(id=>({id,name:id==='__NONE__'?'Not applicable':type==='EP'?(cfgItem(cfg.qualifications||[],id)?.name||id):id}));
-  const selectedNames=normalizeMultiFilterValue(state.packageNameFilters).filter(x=>packageIds.includes(x)),selectedPhases=normalizeMultiFilterValue(state.packagePhaseFilters).filter(x=>phaseIds.includes(x)),selectedPlatforms=normalizeMultiFilterValue(state.packagePlatformFilters).filter(x=>platformIds.includes(x)),selectedTraining=normalizeMultiFilterValue(state.packageCategoryFilters).filter(x=>trainingIds.includes(x)),selectedContexts=normalizeMultiFilterValue(state.packageContextFilters).filter(x=>contextIds.includes(x));
-  const matches=row=>(!selectedNames.length||selectedNames.includes(row.id))&&(!selectedPhases.length||selectedPhases.includes(row.phaseId))&&(!selectedPlatforms.length||row.platformIds.some(id=>selectedPlatforms.includes(id)))&&(!selectedTraining.length||selectedTraining.includes(row.trainingId))&&(!selectedContexts.length||selectedContexts.includes(row.contextId));
-  const visibleIds=new Set(packageRows.filter(matches).map(x=>x.id)),packages=allPackages.filter(p=>visibleIds.has(String(p.id))),activeFilters=[selectedNames,selectedPhases,selectedPlatforms,selectedTraining,selectedContexts].filter(x=>x.length).length,packageFilterSummary=filterSummaryText(activeFilters,packages.length,allPackages.length,'All packages');
+  const selectedPhases=normalizeMultiFilterValue(state.packagePhaseFilters).filter(x=>phaseIds.includes(x)),selectedPlatforms=normalizeMultiFilterValue(state.packagePlatformFilters).filter(x=>platformIds.includes(x)),selectedTraining=normalizeMultiFilterValue(state.packageCategoryFilters).filter(x=>trainingIds.includes(x)),selectedContexts=normalizeMultiFilterValue(state.packageContextFilters).filter(x=>contextIds.includes(x));
+  const matches=row=>(!selectedPhases.length||selectedPhases.includes(row.phaseId))&&(!selectedPlatforms.length||row.platformIds.some(id=>selectedPlatforms.includes(id)))&&(!selectedTraining.length||selectedTraining.includes(row.trainingId))&&(!selectedContexts.length||selectedContexts.includes(row.contextId));
+  const visibleIds=new Set(packageRows.filter(matches).map(x=>x.id)),packages=allPackages.filter(p=>visibleIds.has(String(p.id))),activeFilters=[selectedPhases,selectedPlatforms,selectedTraining,selectedContexts].filter(x=>x.length).length,packageFilterSummary=filterSummaryText(activeFilters,packages.length,allPackages.length,'All packages');
   const packageSelections=[
-    selectedNames.length&&{label:'Package',value:filterChoiceSummary(selectedNames,genericMultiItems(nameItems))},
     selectedPhases.length&&{label:'Phase',value:filterChoiceSummary(selectedPhases,genericMultiItems(phaseItems))},
     selectedPlatforms.length&&{label:'Platform',value:filterChoiceSummary(selectedPlatforms,genericMultiItems(platformItems))},
     selectedTraining.length&&{label:'Training type',value:filterChoiceSummary(selectedTraining,genericMultiItems(trainingItems))},
     selectedContexts.length&&{label:contextLabel,value:filterChoiceSummary(selectedContexts,genericMultiItems(contextItems))}
   ].filter(Boolean);
+  const sectorFilter='<div class="field packageSectorFilterField"><label>Sector</label><select id="packageSectorFilter" '+(state.advancedArchitectureEditing?'disabled':'')+'>'+cfg.courseTypes.map(x=>'<option value="'+esc(x.id)+'" '+(String(x.id)===String(type)?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
   const filterHtml='<div class="packageFilterBar unifiedFilterGrid packagePathFilters"><div class="unifiedFilterHeader"><b>Filters</b><small>'+esc(packageFilterSummary)+'</small></div>'+
-    multiFilterHtml('packageNameFilter','Package',genericMultiItems(nameItems),selectedNames,'All packages')+
+    sectorFilter+
     multiFilterHtml('packagePhaseFilter','Phase',genericMultiItems(phaseItems),selectedPhases,'All phases')+
     multiFilterHtml('packagePlatformFilter','Platform',genericMultiItems(platformItems),selectedPlatforms,'All platforms')+
     multiFilterHtml('packageTrainingFilter','Training type',genericMultiItems(trainingItems),selectedTraining,'All training types')+
     multiFilterHtml('packageContextFilter',contextLabel,genericMultiItems(contextItems),selectedContexts,'All')+
-    '<small class="packageFilterHint">Filters are built from the actual Package path. You can combine Package, Phase, Platform, Training type and '+esc(contextLabel)+'.</small>'+filterSelectionsHtml('',packageSelections)+'</div>';
+    '<small class="packageFilterHint">Filter Packages by Sector, Phase, Platform, Training type and '+esc(contextLabel)+'. Sector options come from the Sectors defined above.</small>'+filterSelectionsHtml('',packageSelections)+'</div>';
   const field=(label,control,wide=false)=>'<label class="field '+(wide?'tailorWide':'')+'"><span class="fieldLabel">'+label+'</span>'+control+'</label>';
   const addBox=(kind,title,fields)=>'<div class="packageAddBox compactAddBox" data-global-add-box="'+kind+'"><button class="btn secondary packageAddTrigger" type="button" data-global-add-open="'+kind+'">＋ '+title+'</button><div class="packageAddPanel" data-global-add-panel="'+kind+'" hidden><div class="packageAddFields">'+fields+'</div><div class="toolbar packageAddActions"><button class="btn sky small" type="button" data-global-add="'+kind+'">Add</button><button class="btn secondary small" type="button" data-global-add-cancel="'+kind+'">Cancel</button></div></div></div>';
   const orderItems=list=>[...(list||[])].sort((a,b)=>(Number(a.order)||9999)-(Number(b.order)||9999));
@@ -6219,9 +6219,10 @@ function cfgResolvedHtml(sel){
 function cfgId(prefix){return prefix+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)}
 
 function cfgCatalogCard(title,key,list,help=''){
+  const addLabel=key==='courseTypes'?'sector':title.toLowerCase();
   return '<section class="card settingBox"><h3>'+esc(title)+'</h3>'+(help?'<p class="sub">'+esc(help)+'</p>':'')+'<div class="editableList">'+
     list.map(x=>'<div class="editableRow"><input class="input cfgName" data-kind="'+key+'" data-id="'+x.id+'" value="'+esc(x.name)+'"><button class="btn danger small" data-cfg-remove="'+key+'|'+x.id+'">Remove</button></div>').join('')+
-    '</div><div class="cfgCompactAdd" data-cfg-add-box="'+key+'"><button class="btn secondary" type="button" data-cfg-add-open="'+key+'">＋ Add</button><form class="toolbar cfgAddForm cfgAddPanel" data-kind="'+key+'" hidden><input class="input" name="name" placeholder="Add '+esc(title.toLowerCase())+'" required><button class="btn sky" type="submit">Add</button><button class="btn secondary" type="button" data-cfg-add-cancel="'+key+'">Cancel</button></form></div></section>';
+    '</div><div class="cfgCompactAdd" data-cfg-add-box="'+key+'"><button class="btn secondary" type="button" data-cfg-add-open="'+key+'">＋ Add</button><form class="toolbar cfgAddForm cfgAddPanel" data-kind="'+key+'" hidden><input class="input" name="name" placeholder="Add '+esc(addLabel)+'" required><button class="btn sky" type="submit">Add</button><button class="btn secondary" type="button" data-cfg-add-cancel="'+key+'">Cancel</button></form></div></section>';
 }
 
 function cfgEmergencyCategoriesCard(c){
@@ -6326,7 +6327,7 @@ function settings(){
 
   if(tab==='catalog'){
     const validScope=c.courseTypes.some(x=>x.id===state.typeWorkspace),scope=validScope?state.typeWorkspace:(c.courseTypes[0]?.id||''),scopeName=cfgItem(c.courseTypes,scope)?.name||scope,advancedEditing=!!state.advancedArchitectureEditing;
-    html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><section class="advancedSequence" style="margin-top:14px"><div class="advancedStepLabel"><span>1</span><div><b>Define sectors</b><small>Add, rename or remove sectors first.</small></div></div>'+cfgCatalogCard('Course types','courseTypes',c.courseTypes)+'</section></fieldset>';
+    html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><section class="advancedSequence" style="margin-top:14px"><div class="advancedStepLabel"><span>1</span><div><b>Define sectors</b><small>Add, rename or remove sectors first.</small></div></div>'+cfgCatalogCard('Sectors','courseTypes',c.courseTypes)+'</section></fieldset>';
     html+='<section class="card settingBox advancedSectorPicker"><div class="advancedStepLabel"><span>2</span><div><b>Select sector to edit</b><small>Everything below is scoped to this sector.</small></div></div><div class="field" style="margin-top:12px"><label>Sector</label><select id="typeWorkspace" '+(advancedEditing?'disabled':'')+'>'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></section>';
     html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><div class="advancedStepLabel scopedArchitectureLabel"><span>3</span><div><b>'+(advancedEditing?'Edit architecture':'Architecture')+'</b><small>Phases, platforms, training types and qualifications belong to the selected sector.</small></div></div>';
     html+='<div class="advancedScopeColumns"><div class="advancedScopeColumn">';
@@ -7172,7 +7173,8 @@ function bindSettings(){
     if(currentCourseId===key)switchCourseByKey('AEP-26',{screen:'courses',render:false,force:true});toast('Course deleted');render();
   });
   if($('#typeWorkspace'))$('#typeWorkspace').onchange=e=>{state.typeWorkspace=e.target.value;state.packageNameFilters=[];state.packagePhaseFilters=[];state.packagePlatformFilters=[];state.packageCategoryFilters=[];state.packageContextFilters=[];state.packageCreateOpen=null;state.packageFocusId=null;state.packageEditId=null;saveUiState();render()};
-  [['packageNameFilter','packageNameFilters'],['packagePhaseFilter','packagePhaseFilters'],['packagePlatformFilter','packagePlatformFilters'],['packageTrainingFilter','packageCategoryFilters'],['packageContextFilter','packageContextFilters']].forEach(([id,key])=>{const el=$('#'+id);if(el)el.addEventListener('filterapply',e=>{state[key]=e.detail?.values||[];state.packageFocusId=null;state.packageAddFlow=null;saveUiState();render()})});
+  if($('#packageSectorFilter'))$('#packageSectorFilter').onchange=e=>{state.typeWorkspace=e.target.value;state.packageNameFilters=[];state.packagePhaseFilters=[];state.packagePlatformFilters=[];state.packageCategoryFilters=[];state.packageContextFilters=[];state.packageFocusId=null;state.packageAddFlow=null;state.packageEditId=null;state.packageCreateOpen=null;saveUiState();render()};
+  [['packagePhaseFilter','packagePhaseFilters'],['packagePlatformFilter','packagePlatformFilters'],['packageTrainingFilter','packageCategoryFilters'],['packageContextFilter','packageContextFilters']].forEach(([id,key])=>{const el=$('#'+id);if(el)el.addEventListener('filterapply',e=>{state[key]=e.detail?.values||[];state.packageFocusId=null;state.packageAddFlow=null;saveUiState();render()})});
   document.querySelectorAll('[data-package-assign-open]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const type=btn.dataset.packageAssignOpen,panel=document.querySelector('[data-package-assign-panel="'+type+'"]');state.packageCreateOpen=type;if(panel){panel.hidden=false;btn.hidden=true;panel.querySelector('input[name="name"]')?.focus?.()}});
   document.querySelectorAll('[data-package-assign-cancel]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const panel=btn.closest('[data-package-assign-panel]'),type=panel?.dataset.packageAssignPanel,trigger=document.querySelector('[data-package-assign-open="'+type+'"]');if(panel)panel.hidden=true;if(trigger)trigger.hidden=false;if(state.packageCreateOpen===type)state.packageCreateOpen=null});
 
