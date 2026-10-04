@@ -655,15 +655,24 @@ assert(html.includes("pendingSystemThemeSync=true")&&
 assert(html.includes("flympusResumeVisualSync")&&
   html.includes("transition:none!important"),
   "Foreground reconciliation must suppress one-frame CSS transitions and visual cross-fades");
-assert(html.includes("snap.visualVersion===2")&&html.includes("snapFresh=snapAge<=15*60*1000")&&
-  html.includes("snap.resolvedTheme===currentResolvedTheme"),
-  "Reload snapshots must be fresh and visually compatible before they are painted");
-assert(html.includes("visualVersion:2")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
-  html.includes("largerText:!!root?.classList.contains('flympusLargeText')"),
-  "Saved reload snapshots must include the visual preference signature used for first-paint validation");
+assert(html.includes("snap.visualVersion===3")&&html.includes("snapFresh=snapAge<=15*60*1000")&&
+  html.includes("snap.resolvedTheme===currentResolvedTheme")&&html.includes("viewportCompatible"),
+  "Reload snapshots must be fresh, viewport-compatible and visually compatible before they are painted");
+assert(html.includes("visualVersion:3")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
+  html.includes("largerText:!!root?.classList.contains('flympusLargeText')")&&html.includes("localDay,"),
+  "Saved reload snapshots must include the visual preference signature and local-day key used for first-paint validation");
 assert(html.indexOf('<meta name="theme-color" content="#07294c" />')<html.indexOf('Early preference bootstrap: keep first paint identical'),
   "theme-color metadata must exist before the early bootstrap so status-bar color can be corrected before first paint");
 assert(html.includes('<meta name="color-scheme" content="light" />')&&
   html.includes("document.querySelector('meta[name=\"color-scheme\"]')?.setAttribute('content',resolvedTheme)"),
   "Native browser controls and the document color-scheme must stay aligned with the resolved FLYMPUS theme");
+
+assert(html.includes("function flympusContinuitySnapshotHtml(content)")&&
+  html.includes("clone.querySelectorAll?.('.modal.open')")&&
+  html.includes("clone.querySelectorAll?.('.multiFilterMenu,.datePickerPanel')"),
+  "Continuity snapshots must strip transient dialogs, menus and picker overlays that would otherwise flash on resume");
+assert(html.includes("topHidden:scrollY>64&&")&&html.includes("if(snap.topHidden&&y>64)"),
+  "Resume snapshots must not restore hidden top chrome when the saved viewport is effectively at the top");
+assert(html.includes("snap.localDay===localDay"),
+  "A snapshot from a previous local day must never flash before today's plan renders");
 
