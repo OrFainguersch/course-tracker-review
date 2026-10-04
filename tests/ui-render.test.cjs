@@ -613,3 +613,12 @@ assert(html.includes("Early preference bootstrap: prevent RTL/theme/text paint f
 
 assert(html.includes("Dark completeness pass · settings + workflow surfaces")&&html.includes('html[data-flympus-theme="dark"] .myCourseCard')&&html.includes('html[data-flympus-theme="dark"] .wizardCreateBar'),
   "Dark-mode completion pass must cover course cards and sticky workflow surfaces that previously stayed light");
+
+
+/* Final Settings QA coverage */
+assert(html.includes("Final Settings QA pass · haptics, large text and dark accents"),
+  "Final Settings QA layer must remain present");
+assert(html.includes("html.flympusLargeText p{font-size:14px!important")&&html.includes("html.flympusLargeText small{font-size:13px!important"),
+  "Large text must cover ordinary paragraph and helper text across the site");
+assert(html.includes('html[data-flympus-theme="dark"] .pushStatus.off')&&html.includes('html[data-flympus-theme="dark"] .btn.danger'),
+  "Dark mode must include notification states and destructive controls instead of leaving light islands");
