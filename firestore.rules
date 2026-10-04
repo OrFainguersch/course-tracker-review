@@ -36,15 +36,36 @@ service cloud.firestore {
       ]) && validRoleAndStatus(data);
     }
 
+    function validInviteShape(data) {
+      return data.keys().hasOnly([
+        'email', 'displayName', 'role', 'status',
+        'createdAt', 'updatedAt', 'invitedBy'
+      ])
+        && data.email == data.email.lower()
+        && data.role in ['user', 'admin']
+        && data.status == 'active';
+    }
+
+    function invitedUserCreate(data) {
+      let email = request.auth.token.email.lower();
+      return exists(/databases/$(database)/documents/invitations/$(email))
+        && get(/databases/$(database)/documents/invitations/$(email)).data.email == email
+        && get(/databases/$(database)/documents/invitations/$(email)).data.status == 'active'
+        && data.email == email
+        && data.role == get(/databases/$(database)/documents/invitations/$(email)).data.role
+        && data.status == 'active';
+    }
+
     match /users/{uid} {
       /* First sign-in may only create the caller's own pending USER record.
          A browser client can never create itself as ACTIVE or ADMIN. */
       allow create: if ownUser(uid)
         && validUserShape(request.resource.data)
         && request.resource.data.uid == request.auth.uid
-        && request.resource.data.email == request.auth.token.email
-        && request.resource.data.role == 'user'
-        && request.resource.data.status == 'pending';
+        && request.resource.data.email == request.auth.token.email.lower()
+        && ((request.resource.data.role == 'user'
+          && request.resource.data.status == 'pending')
+          || invitedUserCreate(request.resource.data));
 
       allow read: if ownUser(uid) || admin();
 
@@ -63,6 +84,15 @@ service cloud.firestore {
             'displayName', 'photoURL', 'providerIds', 'lastLoginAt', 'updatedAt'
           ])));
 
+      allow delete: if admin();
+    }
+
+    match /invitations/{email} {
+      allow get: if signedIn() && request.auth.token.email.lower() == email;
+      allow list: if admin();
+      allow create, update: if admin()
+        && validInviteShape(request.resource.data)
+        && request.resource.data.email == email;
       allow delete: if admin();
     }
 

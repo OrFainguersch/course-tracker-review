@@ -65,3 +65,8 @@ assert.equal(localStorage.getItem('unrelated-origin-key'),'keep','Unrelated orig
 scope.clearUid();
 assert.equal(localStorage.getItem('ct-review-evals:AEP-26'),null,'Sign-out removes all private runtime visibility');
 console.log('UID-scoped storage tests passed');
+
+const storageSource=fs.readFileSync('storage-scope.js','utf8');
+assert(storageSource.includes('function installResumeThemeHold()'),'Storage bootstrap must install the pre-runtime resume-theme guard');
+assert(storageSource.includes("observer.observe(root,{attributes:true,attributeFilter:['data-flympus-theme']})"),'Resume-theme guard must revert transient theme mutations before paint');
+assert(storageSource.includes('const first=sampleSystem()')&&storageSource.includes('first===second?second:stable'),'System theme must require two matching post-resume samples');

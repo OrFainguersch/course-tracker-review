@@ -2,6 +2,7 @@ const fs=require('fs');
 const assert=require('assert');
 
 const html=fs.readFileSync('index.html','utf8');
+const auth=fs.readFileSync('auth.js','utf8');
 
 assert(html.includes("language:'en'"),'English must remain the default language');
 assert(html.includes("data-app-pref-select=\"language\""),'Settings must expose a language selector');
@@ -40,3 +41,9 @@ assert(html.includes('"Primary mobile navigation": "ניווט ראשי בניי
 assert(html.includes('"Electrical": "חשמל"')&&html.includes('"General / Operational": "כללי / תפעולי"'),'Emergency category labels must translate');
 assert(html.includes('"Course to tailor": "קורס להתאמה"'),'Course tailoring UI must translate');
 assert(html.includes('"Recent Evaluations": "הערכות אחרונות"'),'Trainee profile UI must translate');
+
+/* Dynamic authentication/admin UI follows the same Hebrew contract. */
+assert(auth.includes('const AUTH_HE_UI=Object.freeze'),'Authentication UI must have explicit Hebrew coverage');
+assert(auth.includes("'Continue with Google':'המשך עם Google'"),'Google sign-in must translate to Hebrew');
+assert(auth.includes("'User Management':'ניהול משתמשים'")&&auth.includes("'Add user':'הוסף משתמש'"),'User Management and Add User must translate to Hebrew');
+assert(auth.includes('syncAuthAdjacentChromeLanguage'),'Profile and notification dropdown additions must synchronize with Hebrew');

@@ -125,6 +125,76 @@
     return Object.freeze({enabled:authEnabled,uid,privateLocalKeys:prefix?rawKeys(local).filter(k=>k.startsWith(prefix)).length:0,legacyOwner:rawGet(local,LEGACY_OWNER_KEY)||''})
   }
 
+
+  /* iOS can briefly expose the wrong System appearance while a suspended PWA
+     returns from the app switcher. Hold the last visible resolved theme through
+     that unstable window and accept a System change only after two matches. */
+  function installResumeThemeHold(){
+    const doc=window.document;
+    if(!doc?.documentElement||typeof window.MutationObserver!=='function'||typeof window.setTimeout!=='function')return;
+    const root=doc.documentElement;
+    let token=0,observer=null;
+    const sampleSystem=()=>{
+      try{return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches?'dark':'light'}
+      catch{return String(root.getAttribute('data-flympus-theme')||'light')}
+    };
+    const readPrefs=()=>{try{return JSON.parse(rawGet(local,'flympus-app-preferences')||'{}')||{}}catch{return{}}};
+    const commit=(theme,persist=false)=>{
+      const resolved=theme==='dark'?'dark':'light',dark=resolved==='dark';
+      root.setAttribute('data-flympus-theme',resolved);
+      root.style.colorScheme=resolved;
+      root.style.backgroundColor=dark?'#091522':'#f4f8fc';
+      doc.querySelector?.('meta[name="theme-color"]')?.setAttribute('content',dark?'#07131f':'#07294c');
+      doc.querySelector?.('meta[name="color-scheme"]')?.setAttribute('content',resolved);
+      if(persist){
+        rawSet(local,'flympus-last-resolved-theme',resolved);
+        rawSet(local,'flympus-last-visible-theme-at',Date.now())
+      }
+    };
+    const begin=()=>{
+      if(doc.visibilityState==='hidden')return;
+      const prefs=readPrefs();
+      const mode=['light','dark','system'].includes(prefs.theme)?prefs.theme:'system';
+      const stored=String(rawGet(local,'flympus-last-resolved-theme')||'');
+      const current=String(root.getAttribute('data-flympus-theme')||'');
+      const stable=mode==='dark'?'dark':mode==='light'?'light':(stored==='dark'||stored==='light'?stored:(current==='dark'||current==='light'?current:sampleSystem()));
+      const my=++token;
+      observer?.disconnect?.();
+      root.classList.add('flympusResumeVisualSync');
+      commit(stable,false);
+      observer=new window.MutationObserver(()=>{
+        if(my!==token)return;
+        const now=String(root.getAttribute('data-flympus-theme')||'');
+        if(now!==stable)commit(stable,false)
+      });
+      observer.observe(root,{attributes:true,attributeFilter:['data-flympus-theme']});
+      if(mode!=='system'){
+        window.setTimeout(()=>{
+          if(my!==token)return;
+          observer?.disconnect?.();
+          commit(stable,true);
+          (window.requestAnimationFrame||window.setTimeout)(()=>root.classList.remove('flympusResumeVisualSync'))
+        },0);
+        return
+      }
+      window.setTimeout(()=>{
+        if(my!==token)return;
+        const first=sampleSystem();
+        window.setTimeout(()=>{
+          if(my!==token)return;
+          const second=sampleSystem(),resolved=first===second?second:stable;
+          observer?.disconnect?.();
+          commit(resolved,true);
+          (window.requestAnimationFrame||window.setTimeout)(()=>root.classList.remove('flympusResumeVisualSync'))
+        },180)
+      },650)
+    };
+    doc.addEventListener?.('visibilitychange',()=>{if(doc.visibilityState==='visible')begin()},true);
+    window.addEventListener?.('pageshow',begin,true);
+    window.addEventListener?.('focus',()=>{if(doc.visibilityState!=='hidden')begin()},true)
+  }
+  installResumeThemeHold();
+
   window.FLYMPUS_STORAGE_SCOPE=Object.freeze({
     enabled:authEnabled,
     setUid,

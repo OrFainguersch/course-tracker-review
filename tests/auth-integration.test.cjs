@@ -62,4 +62,17 @@ assert(storage.includes("admin!==true"),'Only an authenticated administrator may
 assert(storage.includes('claimed-by-another-user'),'Legacy local data must never be inherited by a second account');
 assert(storage.includes("'flympus-app-preferences'"),'Device-level appearance/accessibility preferences may remain shared on the device');
 
+
+assert(auth.includes('const AUTH_HE_UI=Object.freeze'),'Auth/User Management must own a bilingual dictionary for dynamic UI');
+assert(auth.includes("'User Management':'ניהול משתמשים'")&&auth.includes("'Add user':'הוסף משתמש'"),'New authentication/admin UI must include Hebrew translations');
+assert(auth.includes('bindAuthLanguageSync()'),'Dynamic auth/admin UI must react when the app language changes');
+assert(auth.includes('bindBottomNavigationOverlayDismissal()')&&auth.includes("'#topNotificationDropdown'")&&auth.includes("'#topPersonalProfileDropdown'"),'Bottom navigation must dismiss open notification/profile menus');
+assert(auth.includes("firestoreSdk.collection(db,'invitations')")&&auth.includes("firestoreSdk.doc(db,'invitations',email)"),'User Management must support pre-authorizing email invitations');
+assert(auth.includes('data-user-invite-form')&&auth.includes('name="email"')&&auth.includes('name="role"'),'User Management must expose Add User email and application-role controls');
+assert(auth.includes("preauthorized?'active':'pending'"),'A pre-authorized email must become active on first sign-in');
+assert(rules.includes('match /invitations/{email}')&&rules.includes('request.auth.token.email.lower() == email'),'Invitation reads must be bound to the signed-in normalized email');
+assert(rules.includes('invitedUserCreate(request.resource.data)'),'First sign-in may inherit only an administrator-created invitation role');
+assert(storage.includes('function installResumeThemeHold()')&&storage.includes("attributeFilter:['data-flympus-theme']"),'Early lifecycle layer must hold the stable theme through iOS resume');
+assert(storage.includes('const first=sampleSystem()')&&storage.includes('first===second?second:stable'),'Resume theme guard must require two matching System samples');
+
 console.log('Authentication foundation checks passed');

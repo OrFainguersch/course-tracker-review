@@ -52,3 +52,9 @@ The client UI may hide/show features based on the application role, but Firestor
 ## Why popup sign-in is used
 
 The site is hosted by GitHub Pages, not Firebase Hosting. Firebase redirect authentication depends on cross-origin auth helpers and can fail in browsers that block third-party storage unless the helpers are proxied/self-hosted. Google therefore uses `signInWithPopup()`. The staged Microsoft provider uses the same flow and stays hidden until it is configured. We can revisit a self-hosted redirect helper if iOS PWA testing shows that it is needed.
+
+## Pre-authorized users
+
+User Management can add an email before first sign-in and choose USER or ADMIN. This creates an `invitations/{normalizedEmail}` record; it does not send email. On first Firebase sign-in, Security Rules permit ACTIVE access only with the exact role stored in that administrator-created invitation. Uninvited accounts continue to enter as PENDING.
+
+The invitation rules in `firestore.rules` must be deployed to Firebase when this feature is released.
