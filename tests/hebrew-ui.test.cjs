@@ -35,3 +35,9 @@ console.log('Hebrew UI/RTL integration checks passed');
 assert(html.includes("trim.match(/^·\\s*(.+)$/)"),'Punctuation-prefixed helper copy must still translate');
 assert(html.includes("body.drawerPushOpen .backdrop{\n  background:transparent!important;"),'Push drawer must leave the displaced page visible');
 assert(html.includes("html[data-flympus-language=\"he\"] .personCard.traineeRosterCard .rosterTraineeHead{\n  width:100%!important;"),'Hebrew trainee identity must occupy the mirrored content edge');
+
+
+/* Split-node and empty-state Hebrew coverage */
+assert(html.includes('"Syllabi / practical tasks (": "סילבוסים / משימות מעשיות ("'),'Split syllabus heading fragment must translate');
+assert(html.includes('"minimum flights": "טיסות מינימום"'),'Split minimum-flights label must translate');
+assert(html.includes("No (assessment criteria|emergency requirements|experience requirements|exams|progression gates|items) configured"),'Dynamic empty package states must translate');
