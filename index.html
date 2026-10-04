@@ -4394,6 +4394,20 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
     const target=String(btn.dataset?.mobileNav||'');if(!target)return;
     window.__FLYMPUS_EARLY_NAV_TARGET__=target;
 
+    /* Audio must be the first side effect of the physical press. On a fresh
+       page/reload, forced layout and halo measurements are comparatively
+       expensive on every platform and used to push the click noticeably
+       behind the finger/mouse press. */
+    const now=performance.now?.()||Date.now();
+    if(now-Number(window.__FLYMPUS_EARLY_NAV_SOUND_AT__||0)>=72){
+      window.__FLYMPUS_EARLY_NAV_SOUND_AT__=now;
+      const a=ensureEarlyNavAudio();
+      if(a){
+        try{a.pause?.()}catch{}try{a.currentTime=0}catch{}
+        try{const p=a.play?.();if(p?.catch)p.catch(()=>{})}catch{}
+      }
+    }
+
     const pressedItem=btn.closest?.('.mobileBottomItem');
     const repeatActive=!!pressedItem?.classList.contains('active');
     bottomNav.classList.remove('dockPressZoom','dockPressRepeat');
@@ -4423,18 +4437,9 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
       bottomNav.style.setProperty('--dock-halo-height',height.toFixed(2)+'px');
       bottomNav.classList.add('dockHaloMeasured','dockHaloReady');
     }
-
-    const now=performance.now?.()||Date.now();
-    if(now-Number(window.__FLYMPUS_EARLY_NAV_SOUND_AT__||0)>=72){
-      window.__FLYMPUS_EARLY_NAV_SOUND_AT__=now;
-      const a=ensureEarlyNavAudio();
-      if(a){
-        try{a.pause?.()}catch{}try{a.currentTime=0}catch{}
-        try{const p=a.play?.();if(p?.catch)p.catch(()=>{})}catch{}
-      }
-    }
   };
   bottomNav?.addEventListener?.('touchstart',handleEarlyBottomNavPress,{passive:true,capture:true});
+  if(window.PointerEvent)bottomNav?.addEventListener?.('pointerdown',e=>{if(e?.pointerType!=='touch')handleEarlyBottomNavPress(e)},{passive:true,capture:true});
 
   if(snapMatches&&content){
     ensureEarlyNavAudio();
@@ -6267,55 +6272,51 @@ function playFlympusNavFastSound(){
     const wake=flympusNavAudioNeedsWake||idle;
     flympusNavLastAudioUseAt=now;
 
-    const ctx=getFlympusNavFastContext();
+    const ctx=getFlympusNavFastContext(),buffer=flympusNavFastBuffer;
     if(!ctx)return false;
 
-    /* The first bottom-nav press after a cold start, reload, foreground return
-       or long idle must make sound on THAT physical gesture. On iOS a newly
-       resumed AudioContext can report "running" before the real output route is
-       audible, so never spend the first press only on resume/warm-up. Use the
-       already-preloaded, physically attenuated media WAV synchronously from the
-       gesture, and wake/prime WebAudio in parallel for subsequent presses. */
-    if(wake||ctx.state!=='running'){
-      const fallbackStarted=playFlympusNavFileFallback();
-      let resumePromise=null;
-      try{if(ctx.state!=='running')resumePromise=ctx.resume?.()}catch{}
+    /* Cross-platform first-press path: when the selected WAV is already
+       decoded, queue it NOW on the physical gesture even if AudioContext is
+       suspended. currentTime is frozen while suspended, so the source fires
+       at the first runnable audio quantum as resume opens the route. Do not
+       wait for resume().then() and do not route a ready buffer through
+       HTMLMediaElement; both add a one-time perceptible lag after load/reload. */
+    if(buffer){
+      const queued=scheduleFlympusNavFastBuffer(ctx,buffer,{wake:false});
+      if(!queued)return false;
 
-      const settleAfterWake=()=>{
-        if(ctx!==flympusNavFastCtx)return;
-        if(ctx.state!=='running'){
+      if(ctx.state!=='running'){
+        let resumePromise=null;
+        try{resumePromise=ctx.resume?.()}catch{
           markFlympusNavAudioNeedsWake();
-          return;
+          return false;
         }
-        flympusNavAudioNeedsWake=false;
-        try{
-          const p=primeFlympusNavFastAudio();
-          if(p?.catch)p.catch(()=>{});
-        }catch{}
-      };
-      if(resumePromise?.then){
-        Promise.resolve(resumePromise).then(settleAfterWake).catch(()=>markFlympusNavAudioNeedsWake());
-      }else settleAfterWake();
-
-      return fallbackStarted||!!resumePromise||ctx.state==='running';
-    }
-
-    if(!flympusNavFastBuffer){
-      primeFlympusNavFastAudio().then(buffer=>{
-        if(ctx!==flympusNavFastCtx||ctx.state!=='running'){
-          markFlympusNavAudioNeedsWake();
-          return;
+        if(resumePromise?.catch){
+          resumePromise.catch(()=>{
+            markFlympusNavAudioNeedsWake();
+            if(ctx===flympusNavFastCtx&&ctx.state!=='running')discardFlympusNavFastContext();
+          });
         }
-        if(!buffer||!scheduleFlympusNavFastBuffer(ctx,buffer,{wake:false})){
-          markFlympusNavAudioNeedsWake();
-        }
-      }).catch(()=>markFlympusNavAudioNeedsWake());
+      }
+      flympusNavAudioNeedsWake=false;
       return true;
     }
 
-    const ok=scheduleFlympusNavFastBuffer(ctx,flympusNavFastBuffer,{wake:false});
-    if(!ok)markFlympusNavAudioNeedsWake();
-    return ok;
+    /* Very-fast taps can beat preload/decode. Resume immediately on the same
+       gesture, start decoding for the next press, and let the already-preloaded
+       media WAV be the synchronous safety net for this one exceptional tap. */
+    if(ctx.state!=='running'){
+      try{
+        const p=ctx.resume?.();
+        if(p?.catch)p.catch(()=>markFlympusNavAudioNeedsWake());
+      }catch{}
+    }
+    try{
+      const p=primeFlympusNavFastAudio();
+      if(p?.catch)p.catch(()=>{});
+    }catch{}
+    if(wake)flympusNavAudioNeedsWake=true;
+    return false;
   }catch{
     return false;
   }
@@ -6465,9 +6466,12 @@ function bindFlympusNavPressSound(el,onImmediatePress=null){
   if(!el)return()=>{};
   const press=e=>{
     if(e?.pointerType==='mouse'&&e?.button!==0)return;
-    playFlympusDockPressZoom(el);
-    triggerFlympusPortableHaptic(7);
+    /* Ask the audio engine first. playFlympusDockPressZoom() intentionally
+       forces layout to restart the punch animation, which can be expensive on
+       the first interaction after a load/reload. */
     playFlympusBottomNavSound();
+    triggerFlympusPortableHaptic(7);
+    playFlympusDockPressZoom(el);
     if(typeof onImmediatePress==='function')onImmediatePress(e);
   };
   /* Mobile bottom-nav actions can run on the physical press itself instead of
