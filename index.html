@@ -5615,7 +5615,7 @@ function draftAttentionCount(name){
 }
 function formatCompactBadgeCount(value){
  const n=Math.max(0,Math.floor(Number(value)||0));
- return n>10?'9+':String(n)
+ return n>9?'9+':String(n)
 }
 function formatAttentionCount(value){return formatCompactBadgeCount(value)}
 function courseAttentionCounts(){
