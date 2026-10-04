@@ -1,0 +1,56 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function currentUserRecord() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function activeUser() {
+      return signedIn()
+        && currentUserRecord().data.status == 'active';
+    }
+
+    function admin() {
+      return activeUser()
+        && currentUserRecord().data.role == 'admin';
+    }
+
+    match /users/{uid} {
+      /* First sign-in may only create the caller's own pending USER record.
+         A browser client can never create itself as ACTIVE or ADMIN. */
+      allow create: if ownUser(uid)
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.role == 'user'
+        && request.resource.data.status == 'pending';
+
+      allow read: if ownUser(uid) || admin();
+
+      /* Users may refresh only non-authority profile fields. role/status/uid/email
+         are immutable unless an already-active administrator performs the write. */
+      allow update: if admin()
+        || (ownUser(uid)
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.email == resource.data.email
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.status == resource.data.status);
+
+      allow delete: if admin();
+    }
+
+    /* Training/course collections stay fail-closed until they are migrated from
+       local device storage and receive UID/course-membership rules. */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

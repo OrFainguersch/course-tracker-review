@@ -29,6 +29,8 @@ jobs:
         run: node tests/ios-audio-lifecycle.test.cjs
       - name: Web Push integration tests
         run: node tests/push-notifications.test.cjs
+      - name: Authentication foundation tests
+        run: node tests/auth-integration.test.cjs
       - name: Hebrew UI and RTL tests
         run: node tests/hebrew-ui.test.cjs
       - name: Hebrew i18n integration tests

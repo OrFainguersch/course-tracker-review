@@ -1,0 +1,224 @@
+/* FLYMPUS authentication shell · Google + Microsoft · Firebase Spark */
+html.flympusAuthBooting body,
+html.flympusAuthLocked body,
+html.flympusAuthPreview body{overflow:hidden!important}
+
+html.flympusAuthBooting .app,
+html.flympusAuthLocked .app,
+html.flympusAuthPreview .app{
+  visibility:hidden!important;
+  pointer-events:none!important;
+  user-select:none!important
+}
+
+#flympusAuthRoot[hidden]{display:none!important}
+#flympusAuthRoot{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  display:grid;
+  place-items:center;
+  min-height:100dvh;
+  padding:calc(22px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) calc(22px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));
+  overflow:auto;
+  background:
+    radial-gradient(circle at 14% 8%,rgba(19,168,238,.22),transparent 34%),
+    radial-gradient(circle at 88% 88%,rgba(223,184,92,.14),transparent 31%),
+    linear-gradient(155deg,#061b31 0%,#082f57 54%,#06192d 100%);
+  color:#eaf6ff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif
+}
+.flympusAuthShell{width:min(440px,100%);margin:auto}
+.flympusAuthBrand{display:flex;justify-content:center;margin:0 0 18px}
+.flympusAuthBrand img{
+  display:block;
+  width:min(250px,72vw);
+  max-height:74px;
+  object-fit:contain;
+  filter:drop-shadow(0 8px 24px rgba(0,0,0,.18))
+}
+.flympusAuthCard{
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:25px;
+  background:rgba(255,255,255,.97);
+  color:#10263b;
+  box-shadow:0 26px 80px rgba(0,0,0,.30);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px)
+}
+.flympusAuthCardBody{padding:26px}
+.flympusAuthEyebrow{
+  margin:0 0 7px;
+  color:#1687e8;
+  font-size:10px;
+  line-height:1.2;
+  font-weight:900;
+  letter-spacing:.14em;
+  text-transform:uppercase
+}
+.flympusAuthTitle{
+  margin:0;
+  color:#0a315c;
+  font-size:27px;
+  line-height:1.08;
+  font-weight:950;
+  letter-spacing:-.025em
+}
+.flympusAuthCopy{
+  margin:9px 0 0;
+  color:#687d91;
+  font-size:12px;
+  line-height:1.52
+}
+.flympusAuthProviders{display:grid;gap:10px;margin-top:21px}
+.flympusAuthProvider{
+  width:100%;
+  min-height:50px;
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr) 20px;
+  align-items:center;
+  gap:10px;
+  padding:0 14px;
+  border:1px solid #d8e3ed;
+  border-radius:14px;
+  background:#fff;
+  color:#173d61;
+  font-size:13px;
+  font-weight:850;
+  text-align:left;
+  cursor:pointer;
+  box-shadow:0 3px 10px rgba(22,61,97,.05);
+  transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease,background .14s ease
+}
+.flympusAuthProvider:hover,
+.flympusAuthProvider:focus-visible{
+  outline:none;
+  transform:translateY(-1px);
+  border-color:#9fc9e8;
+  box-shadow:0 8px 22px rgba(22,61,97,.10)
+}
+.flympusAuthProvider:active{transform:translateY(0) scale(.992)}
+.flympusAuthProvider:disabled{cursor:not-allowed;opacity:.5;transform:none;box-shadow:none}
+.flympusAuthProviderMark{
+  width:28px;height:28px;
+  display:grid;place-items:center;
+  border-radius:8px;
+  background:#f5f8fb;
+  border:1px solid #e1e8ef;
+  font-size:15px;
+  font-weight:950
+}
+.flympusAuthProviderArrow{color:#8aa0b4;font-size:19px;text-align:right}
+.flympusMicrosoftMark{grid-template-columns:repeat(2,7px);grid-template-rows:repeat(2,7px);gap:2px}
+.flympusMicrosoftMark i{display:block;width:7px;height:7px;background:#477da9;border-radius:1px}
+.flympusAuthFine{
+  margin:17px 0 0;
+  padding-top:14px;
+  border-top:1px solid #edf2f6;
+  color:#8091a1;
+  font-size:9.5px;
+  line-height:1.45;
+  text-align:center
+}
+.flympusAuthStatus{
+  display:flex;
+  gap:11px;
+  align-items:flex-start;
+  margin-top:19px;
+  padding:13px 14px;
+  border:1px solid #dce8f2;
+  border-radius:14px;
+  background:#f7fbfe
+}
+.flympusAuthStatusIcon{
+  flex:0 0 30px;
+  width:30px;height:30px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:#e5f3fd;
+  color:#1676b9;
+  font-weight:950
+}
+.flympusAuthStatus b{display:block;color:#214b70;font-size:11px}
+.flympusAuthStatus span{display:block;margin-top:3px;color:#73879a;font-size:9.5px;line-height:1.45}
+.flympusAuthStatus.error{border-color:#f1cfd3;background:#fff7f8}
+.flympusAuthStatus.error .flympusAuthStatusIcon{background:#fde7ea;color:#be123c}
+.flympusAuthStatus.pending{border-color:#f0dfb6;background:#fffbef}
+.flympusAuthStatus.pending .flympusAuthStatusIcon{background:#fdf0c8;color:#99620a}
+.flympusAuthAccount{
+  margin-top:16px;
+  padding:13px 14px;
+  border-radius:14px;
+  border:1px solid #e0e9f1;
+  background:#f8fbfd
+}
+.flympusAuthAccount b{display:block;color:#173d61;font-size:11px}
+.flympusAuthAccount span{display:block;margin-top:4px;color:#71869a;font-size:9.5px;overflow-wrap:anywhere}
+.flympusAuthActions{display:flex;gap:8px;margin-top:16px}
+.flympusAuthAction{
+  flex:1;
+  min-height:42px;
+  border:1px solid #cbdbe8;
+  border-radius:12px;
+  background:#fff;
+  color:#24577f;
+  font-size:11px;
+  font-weight:850;
+  cursor:pointer
+}
+.flympusAuthSpinner{
+  width:28px;height:28px;
+  margin:4px auto 15px;
+  border:3px solid rgba(22,135,232,.18);
+  border-top-color:#1687e8;
+  border-radius:50%;
+  animation:flympusAuthSpin .75s linear infinite
+}
+@keyframes flympusAuthSpin{to{transform:rotate(360deg)}}
+
+/* Signed-in account summary injected into the existing personal profile menu. */
+.flympusSignedInAccount{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid #edf2f7
+}
+.flympusSignedInAccountHead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.flympusSignedInAccountHead b{font-size:10px!important;color:#2a4968!important}
+.flympusSignedInRole{
+  display:inline-flex;
+  align-items:center;
+  min-height:20px;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#e7f3fc;
+  color:#176da9;
+  font-size:8px;
+  font-weight:900;
+  text-transform:uppercase
+}
+.flympusSignedInAccount small{display:block;margin-top:4px!important;overflow-wrap:anywhere}
+.flympusSignedInSignOut{
+  margin-top:9px;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:#2774ad;
+  font-size:9.5px;
+  font-weight:850;
+  cursor:pointer
+}
+
+html[data-flympus-theme="dark"] .flympusSignedInAccount{border-color:#294158}
+html[data-flympus-theme="dark"] .flympusSignedInAccountHead b{color:#dcecf8!important}
+html[data-flympus-theme="dark"] .flympusSignedInRole{background:#17324a;color:#86c8f3}
+html[data-flympus-theme="dark"] .flympusSignedInSignOut{color:#7ec2ef}
+
+@media(max-width:520px){
+  #flympusAuthRoot{place-items:end center;padding-left:12px;padding-right:12px}
+  .flympusAuthShell{width:100%}
+  .flympusAuthBrand{margin-bottom:12px}
+  .flympusAuthCard{border-radius:22px}
+  .flympusAuthCardBody{padding:22px 18px}
+  .flympusAuthTitle{font-size:24px}
+}
