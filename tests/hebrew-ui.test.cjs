@@ -44,7 +44,7 @@ assert(html.includes("No (assessment criteria|emergency requirements|experience 
 
 
 /* Early locale bootstrap + mirrored drawer gesture */
-const earlyLocaleIndex=html.indexOf('/* Early locale bootstrap: prevent RTL/LTR paint flash on reload. */');
+const earlyLocaleIndex=html.indexOf('/* Early preference bootstrap: prevent RTL/theme/text paint flashes on reload. */');
 const firstStyleIndex=html.indexOf('<style>');
 assert(earlyLocaleIndex>=0 && firstStyleIndex>=0 && earlyLocaleIndex<firstStyleIndex,'Saved Hebrew dir/lang must be applied before CSS can paint');
 assert(html.includes("const drawerCloseSwipeIsRight=()=>getFlympusAppPreferences().language==='he'"),'Drawer gesture must mirror with Hebrew');
@@ -69,3 +69,18 @@ assert(html.includes("tracking=rtlBack()?startX>=Math.max(0,w-56):startX<=56"),
   "Hebrew back gesture must start from the right edge");
 assert(html.includes("farEnough=rtlBack()?dx<=-72:dx>=72"),
   "Hebrew back gesture must swipe left, mirroring English");
+
+
+/* Hebrew home mixed-direction composition coverage */
+assert(html.includes("'Israel':'ישראל'")&&html.includes("'Cyprus':'קפריסין'"),
+  "Known country labels must translate in Hebrew while custom configured values stay protected");
+assert(html.includes("const homeWelcome=homeHebrew?'ברוך שובך,\\u00a0אור':'Welcome back,\\u00a0Or'"),
+  "Home greeting must keep a non-breaking visual gap after the comma in both languages");
+assert(html.includes("const homeForwardArrow=homeHebrew?'←':'→'"),
+  "Home all-courses arrow must be chosen explicitly by language instead of double-mirroring the glyph");
+assert(html.includes('class="homeHeroMetaLine"')&&html.includes('class="homeHeroStartDate"'),
+  "Home course metadata must isolate RTL labels from LTR dates");
+assert(html.includes("if(!known)return true;"),
+  "Protected configured values may translate only when they have an explicit UI translation");
+assert(html.includes("Hebrew composition QA · home and mixed-direction values"),
+  "Final RTL composition layer must cover mixed-direction home content");
