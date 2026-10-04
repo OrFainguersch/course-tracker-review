@@ -259,3 +259,12 @@ vm.runInContext(source,context,{filename:'index.html#audio'});
   console.error(err);
   process.exitCode=1;
 });
+
+
+/* Haptics preference must suppress both portable vibration and the native iOS switch overlay. */
+assert(html.includes("if(getFlympusAppPreferences().haptics===false)return false"),
+  'Portable vibration path must honor the haptics preference');
+assert(html.includes("root?.classList.toggle('flympusHapticsOff',prefs.haptics===false)"),
+  'Applying preferences must expose a live haptics-off state');
+assert(html.includes("html.flympusHapticsOff .mobileBottomHapticSwitch{display:none!important;pointer-events:none!important}"),
+  'Turning haptics off must remove the native iOS haptic switch from hit testing immediately');
