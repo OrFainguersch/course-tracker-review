@@ -4273,6 +4273,36 @@ html[data-flympus-language="he"] .packageSyllabusCell.minimumCell input{
   html[data-flympus-language="he"] .homeCourseContextItem:last-child{padding-right:4px!important;padding-left:0!important}
 }
 </style>
+<style>
+/* ===== Hebrew composition QA · home and mixed-direction values ===== */
+.homeHeroMetaLine{display:inline-flex;align-items:center;gap:4px;min-width:0;white-space:nowrap}
+.homeHeroStartDate{direction:ltr!important;unicode-bidi:isolate;font-style:normal}
+.homeHeroMetaSep{opacity:.8}
+html[data-flympus-language="he"] .homeHeroMetaLine{direction:rtl;text-align:right!important}
+html[data-flympus-language="he"] .homeHeroCountry,
+html[data-flympus-language="he"] .homeHeroStartLabel{text-align:right!important}
+html[data-flympus-language="he"] .homeAllCoursesLink i{
+  transform:none!important;
+  margin-left:0!important;
+  margin-right:3px!important
+}
+html[data-flympus-language="he"] .homeBlockTitle,
+html[data-flympus-language="he"] .homeSectionTitle{
+  direction:rtl!important;text-align:right!important
+}
+html[data-flympus-language="he"] .homePlanMain{text-align:right!important;direction:rtl!important}
+html[data-flympus-language="he"] .mobileActivity{direction:rtl!important;text-align:right!important}
+html[data-flympus-language="he"] .mobileActivity small{padding-right:0!important;padding-left:16px!important}
+html[data-flympus-language="he"] .mobileActivity .tileArrow{
+  right:auto!important;left:12px!important;transform:scaleX(-1)
+}
+html[data-flympus-language="he"] .mobileActivity .activityCount{right:auto!important;left:10px!important}
+html[data-flympus-language="he"] .homeQuickBtn{justify-content:flex-start}
+html[data-flympus-language="he"] .homeWelcomeName{margin-inline-start:.22em}
+@media(max-width:520px){
+  .homeHeroMetaLine{white-space:normal;flex-wrap:wrap;row-gap:2px}
+}
+</style>
 </head>
 <body>
 <div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0726 · rank badge +2px</div><div class="toast" id="toast"></div></div>
@@ -5125,6 +5155,18 @@ Object.assign(FLYMPUS_HE_UI,{
   "Restore this device's app preferences without changing course or training data.":"שחזר את העדפות האפליקציה במכשיר זה מבלי לשנות נתוני קורס או הכשרה."
 });
 
+Object.assign(FLYMPUS_HE_UI,{
+  'Israel':'ישראל',
+  'Cyprus':'קפריסין',
+  'New Training':'הכשרה חדשה',
+  'Conversion':'הסבה',
+  'Flight Instructor Training':'הכשרת מדריך טיסה',
+  'Screening':'מיון',
+  'Refreshment':'רענון',
+  'Return to Currency':'חזרה לכשירות',
+  'Customer-specific Qualification':'הסמכה ייעודית ללקוח'
+});
+
 const flympusI18nTextOriginal=new WeakMap(),flympusI18nAttrOriginal=new WeakMap();
 const FLYMPUS_HE_UI_CASEFOLD=(()=>{const map=new Map();Object.entries(FLYMPUS_HE_UI).forEach(([key,value])=>{const folded=String(key).trim().toLocaleLowerCase('en');if(folded&&!map.has(folded))map.set(folded,value)});return map})();
 function flympusTranslateUiString(value){
@@ -5259,7 +5301,10 @@ function applyFlympusLanguage(root=document.body){
     const parent=node?.parentElement;if(!parent)return false;
     if(parent.closest?.('script,style,noscript,textarea,[data-i18n-skip]'))return true;
     const value=String(node.nodeValue||'').trim();
-    if(value&&protectedValues.has(value))return true;
+    if(value&&protectedValues.has(value)){
+      const known=FLYMPUS_HE_UI[value]||FLYMPUS_HE_UI_CASEFOLD.get(value.toLocaleLowerCase('en'));
+      if(!known)return true;
+    }
     if(parent.closest?.('[data-current-user-avatar],.personPhoto,.currentUserAvatarPhoto'))return true;
     return false
   };
@@ -6829,6 +6874,9 @@ function getExamRecords(){return readCourseArray('ct-review-exams')}
 function saveExamRecords(v){writeCourseArray('ct-review-exams',v)}
 function currentActivityCounts(){return {evaluation:getEvaluations().length,safety:courseMockSafetyEvents().length+getSafetyRecords().length,exams:courseMockExamAttempts().length+getExamRecords().length,planned:getDailyReports().length,roster:courseTrainees().length+courseInstructors().length}}
 function home(){
+ const homeHebrew=getFlympusAppPreferences().language==='he';
+ const homeWelcome=homeHebrew?'ברוך שובך,\u00a0אור':'Welcome back,\u00a0Or';
+ const homeForwardArrow=homeHebrew?'←':'→';
  const activeT=courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active');
  const evals=allEvaluationsForAnalytics().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  const avgProgress=Math.round(mean(activeT.map(t=>Number(t.progress)||0))||0);
@@ -6884,9 +6932,9 @@ function home(){
    '<section class="mobileHero">'+
      '<span class="courseStateBadge homeCourseStatusBadge '+homeCourseLifecycle.className+'">'+esc(homeCourseLifecycle.label)+'</span>'+
      '<div class="eyebrow" style="color:#8bc8ff">'+esc(String(currentCourseMeta.courseName||course.name).toUpperCase())+'</div>'+
-     '<div class="welcome">Welcome back, Or</div>'+
+     '<div class="welcome" data-i18n-skip>'+esc(homeWelcome)+'</div>'+
      homeContextHtml+
-     '<div class="heroMeta homeHeroFooter"><span>'+esc(currentCourseMeta.country||'—')+(currentCourseMeta.startsOn?' · Start date '+esc(formatCourseDate(currentCourseMeta.startsOn)):'')+'</span><button class="homeAllCoursesLink" type="button" data-go="courses">View all courses <i aria-hidden="true">→</i></button></div>'+
+     '<div class="heroMeta homeHeroFooter"><span class="homeHeroMetaLine"><span class="homeHeroCountry">'+esc(currentCourseMeta.country||'—')+'</span>'+(currentCourseMeta.startsOn?'<span class="homeHeroMetaSep" aria-hidden="true">·</span><span class="homeHeroStartLabel">Start date</span><bdi class="homeHeroStartDate">'+esc(formatCourseDate(currentCourseMeta.startsOn))+'</bdi>':'')+'</span><button class="homeAllCoursesLink" type="button" data-go="courses">View all courses <i aria-hidden="true" data-i18n-skip>'+homeForwardArrow+'</i></button></div>'+
    '</section>'+
    '<section class="homePrimaryGrid">'+
      '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Today\'s Plan</h2><p>Scheduled flights and activities for today</p></div></div><span class="homeDateChip">▣ '+esc(todayLabel)+'</span></div></div>'+
