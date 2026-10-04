@@ -3349,6 +3349,10 @@ body.flympusPersonModalOpen{touch-action:none}
 .appSettingRow:last-child{border-bottom:0}
 .appSettingCopy{min-width:0}.appSettingCopy b{display:block;color:#294963;font-size:11.5px}.appSettingCopy small{display:block;margin-top:3px;color:#8192a3;font-size:9.3px;line-height:1.4;max-width:520px}
 .appSettingsSwitch{width:40px;height:24px}.appSettingsSwitch i{width:40px;height:24px}.appSettingsSwitch i:after{width:18px;height:18px}.appSettingsSwitch input:checked+i:after{transform:translateX(16px)}
+/* Async push verification must never look like a user toggle. The master
+   switch becomes animated only after its first verified state is painted. */
+.pushMasterSwitch:not(.pushSwitchInteractive) i,
+.pushMasterSwitch:not(.pushSwitchInteractive) i:after{transition:none!important}
 .appSettingSelect{width:auto;min-width:148px;max-width:210px;height:40px;padding:0 34px 0 11px;border-radius:11px;font-size:10.5px;font-weight:800;color:#244663;background:#fff}
 .appSettingsDataCard,.appSettingsAboutCard{grid-column:1/-1}
 .appSettingsActions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:15px 17px 7px}.appSettingsActions .btn{min-height:40px}
@@ -7418,6 +7422,20 @@ function flympusIsStandalone(){
 function flympusPushSupported(){
   return !!(window.isSecureContext&&'serviceWorker'in navigator&&'Notification'in window&&'PushManager'in window)
 }
+function getFlympusPushImmediateStatus(){
+  const supported=flympusPushSupported(),permission=('Notification'in window)?Notification.permission:'unsupported',ios=flympusIsIos(),standalone=flympusIsStandalone(),userEnabled=getFlympusPushUserEnabled();
+  let state='unsupported',label='Not supported',detail='This browser does not expose the Web Push APIs.';
+  if(supported){
+    if(ios&&!standalone){state='install';label='Install required';detail='On iPhone/iPad, add FLYMPUS to the Home Screen and open it there to receive system notifications.'}
+    else if(permission==='denied'){state='blocked';label='Blocked';detail='Notifications are blocked in the browser or device settings.'}
+    else if(permission!=='granted'){state='off';label='Not enabled';detail='Enable notifications once on this device to allow system alerts.'}
+    else if(!userEnabled){state='disabled';label='Disabled in FLYMPUS';detail='The operating-system permission is still allowed, but FLYMPUS will not subscribe or send notifications on this device until you enable them again.'}
+    else{state='local';label='Device enabled';detail='System notifications work on this device. Checking background push connection…'}
+  }
+  const checked=!!(supported&&userEnabled&&permission==='granted'&&state!=='install');
+  const disabled=!supported||state==='install'||state==='blocked'||state==='unsupported';
+  return {supported,permission,ios,standalone,userEnabled,state,label,detail,checked,disabled}
+}
 function flympusBase64UrlToBytes(value){
   const padding='='.repeat((4-value.length%4)%4),base64=(value+padding).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(base64);
   return Uint8Array.from([...raw].map(ch=>ch.charCodeAt(0)))
@@ -7539,28 +7557,28 @@ async function sendFlympusDeviceTestNotification(){
   }catch(err){toast(err?.message||'Could not send the test notification','error')}
 }
 async function getFlympusPushStatus(){
-  const supported=flympusPushSupported(),permission=('Notification'in window)?Notification.permission:'unsupported',ios=flympusIsIos(),standalone=flympusIsStandalone(),cfg=await getFlympusPushConfig(),userEnabled=getFlympusPushUserEnabled(),sub=supported&&permission==='granted'?await getFlympusPushSubscription():null;
-  let state='unsupported',label='Not supported',detail='This browser does not expose the Web Push APIs.';
-  if(supported){
-    if(ios&&!standalone){state='install';label='Install required';detail='On iPhone/iPad, add FLYMPUS to the Home Screen and open it there to receive system notifications.'}
-    else if(permission==='denied'){state='blocked';label='Blocked';detail='Notifications are blocked in the browser or device settings.'}
-    else if(permission!=='granted'){state='off';label='Not enabled';detail='Enable notifications once on this device to allow system alerts.'}
-    else if(!userEnabled){state='disabled';label='Disabled in FLYMPUS';detail='The operating-system permission is still allowed, but FLYMPUS will not subscribe or send notifications on this device until you enable them again.'}
-    else if(sub&&cfg.enabled&&cfg.apiBaseUrl&&cfg.vapidPublicKey){state='ready';label='Push ready';detail='This device is subscribed for background push delivery.'}
+  const immediate=getFlympusPushImmediateStatus(),{supported,permission,ios,standalone,userEnabled}=immediate,cfg=await getFlympusPushConfig(),sub=supported&&permission==='granted'?await getFlympusPushSubscription():null;
+  let {state,label,detail}=immediate;
+  if(supported&&permission==='granted'&&userEnabled&&state!=='install'){
+    if(sub&&cfg.enabled&&cfg.apiBaseUrl&&cfg.vapidPublicKey){state='ready';label='Push ready';detail='This device is subscribed for background push delivery.'}
     else{state='local';label='Device enabled';detail='System notifications work on this device. The remote push delivery server is not connected yet.'}
   }
-  return {supported,permission,ios,standalone,userEnabled,subscription:sub,backendReady:!!(cfg.enabled&&cfg.apiBaseUrl&&cfg.vapidPublicKey),state,label,detail}
+  return {...immediate,subscription:sub,backendReady:!!(cfg.enabled&&cfg.apiBaseUrl&&cfg.vapidPublicKey),state,label,detail}
 }
+let flympusPushSettingsUiToken=0;
 async function refreshFlympusPushSettingsUi(){
-  const status=await getFlympusPushStatus(),root=$('[data-push-settings]');if(!root)return status;
-  const badge=root.querySelector('[data-push-status]'),detail=root.querySelector('[data-push-detail]'),toggle=root.querySelector('#systemNotificationsToggle');
+  const token=++flympusPushSettingsUiToken,status=await getFlympusPushStatus(),root=$('[data-push-settings]');if(!root||token!==flympusPushSettingsUiToken)return status;
+  const badge=root.querySelector('[data-push-status]'),detail=root.querySelector('[data-push-detail]'),toggle=root.querySelector('#systemNotificationsToggle'),switchLabel=toggle?.closest?.('.pushMasterSwitch');
+  switchLabel?.classList.remove('pushSwitchInteractive');
   if(badge){badge.textContent=status.label;badge.className='pushStatus '+status.state}
   if(detail)detail.textContent=status.detail;
   if(toggle){
-    toggle.checked=!!(status.userEnabled&&status.permission==='granted'&&status.state!=='install');
-    toggle.disabled=!status.supported||status.state==='install'||status.state==='blocked'||status.state==='unsupported';
+    toggle.checked=!!status.checked;
+    toggle.disabled=!!status.disabled;
     toggle.setAttribute('aria-checked',toggle.checked?'true':'false');
   }
+  const arm=()=>{if(token===flympusPushSettingsUiToken&&document.contains?.(switchLabel))switchLabel?.classList.add('pushSwitchInteractive')};
+  if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>requestAnimationFrame(arm));else setTimeout(arm,32);
   return status
 }
 function initFlympusPushClient(){
@@ -8742,6 +8760,7 @@ function appSettingsSectionIcon(kind){
 }
 function appPreferencesScreen(){
   const p=getFlympusAppPreferences(),theme=['system','light','dark'].includes(p.theme)?p.theme:'system',language=p.language==='he'?'he':'en',startScreen=['home','courses','roster','planned','record','reports'].includes(p.startScreen)?p.startScreen:'home';
+  const pushInitial=getFlympusPushImmediateStatus();
   const build=(document.querySelector('.reviewBanner')?.textContent||'FLYMPUS Review').trim();
   const mode=(window.navigator?.standalone===true||window.matchMedia?.('(display-mode: standalone)')?.matches)?'Installed web app':'Browser';
   const hapticsRelevant=isFlympusIOSHapticTarget()||(Number(navigator.maxTouchPoints||0)>0&&!!window.matchMedia?.('(hover:none) and (pointer:coarse)')?.matches);
@@ -8754,8 +8773,8 @@ function appPreferencesScreen(){
       '<div class="appSettingRow"><div class="appSettingCopy"><b>Language</b><small>'+(language==='he'?'Use Hebrew throughout the interface, including right-to-left layout.':'Use English throughout the interface.')+'</small></div><select class="appSettingSelect" data-app-pref-select="language"><option value="en" '+(language==='en'?'selected':'')+'>English</option><option value="he" '+(language==='he'?'selected':'')+'>עברית</option></select></div>'+
       appPreferenceSwitch('showHints','Interface guidance','Show helper text, hints and explanatory notes throughout the app.',p.showHints!==false)+
     '</section>'+
-    '<section class="card appSettingsCard" data-push-settings><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('notifications')+'</span><div><h3>System notifications</h3><p>Receive FLYMPUS alerts through the phone or computer notification system, including when the PWA is not open.</p></div><span class="pushStatus" data-push-status>Checking…</span></div>'+
-      '<div class="appSettingRow pushDeliveryRow"><div class="appSettingCopy"><b>Push delivery on this device</b><small data-push-detail>Checking browser and device support…</small></div><label class="prefSwitch appSettingsSwitch pushMasterSwitch"><input type="checkbox" id="systemNotificationsToggle" aria-label="Push delivery on this device"><i></i></label></div>'+
+    '<section class="card appSettingsCard" data-push-settings><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('notifications')+'</span><div><h3>System notifications</h3><p>Receive FLYMPUS alerts through the phone or computer notification system, including when the PWA is not open.</p></div><span class="pushStatus '+esc(pushInitial.state)+'" data-push-status>'+esc(pushInitial.label)+'</span></div>'+
+      '<div class="appSettingRow pushDeliveryRow"><div class="appSettingCopy"><b>Push delivery on this device</b><small data-push-detail>'+esc(pushInitial.detail)+'</small></div><label class="prefSwitch appSettingsSwitch pushMasterSwitch"><input type="checkbox" id="systemNotificationsToggle" aria-label="Push delivery on this device" aria-checked="'+(pushInitial.checked?'true':'false')+'" '+(pushInitial.checked?'checked ':'')+(pushInitial.disabled?'disabled ':'')+'><i></i></label></div>'+
       '<div class="pushBackendNote"><b>Cross-platform Web Push</b><span>Android, desktop browsers and installed iPhone/iPad PWAs use the same subscription path. Notification categories are still controlled from the bell menu.</span></div>'+
     '</section>'+
     '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('sound')+'</span><div><h3>'+feedbackTitle+'</h3><p>'+feedbackCopy+'</p></div></div>'+

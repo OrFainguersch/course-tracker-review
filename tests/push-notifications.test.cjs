@@ -32,3 +32,21 @@ assert(html.includes('id="systemNotificationsToggle"'),'Settings must expose sys
 assert(!html.includes('id="testSystemNotification"'),'Settings must not expose a redundant test-notification button');
 assert(!html.includes('id="enableSystemNotifications"')&&!html.includes('id="disableSystemNotifications"'),'Settings must not expose separate enable/disable push buttons');
 assert(html.includes("pushToggle.onchange=async()=>"),'Master push toggle must drive the existing enable/disable lifecycle');
+
+
+/* Push master switch must be visually correct on the first Settings paint. */
+assert(html.includes('function getFlympusPushImmediateStatus()'),
+  'Settings must derive a synchronous push state before async service-worker checks');
+assert(html.includes("const pushInitial=getFlympusPushImmediateStatus();"),
+  'Settings render must consume the synchronous push state');
+assert(html.includes("(pushInitial.checked?'checked ':'')"),
+  'Push master toggle must render checked immediately when this device is already enabled');
+assert(html.includes("(pushInitial.disabled?'disabled ':'')"),
+  'Push master toggle must render its immediately-known disabled state without a later jump');
+assert(html.includes('.pushMasterSwitch:not(.pushSwitchInteractive) i:after{transition:none!important}'),
+  'Initial async push verification must not animate the switch thumb');
+assert(html.includes("switchLabel?.classList.remove('pushSwitchInteractive')")&&
+  html.includes("requestAnimationFrame(()=>requestAnimationFrame(arm))"),
+  'Push switch animation must only be armed after verified state is painted');
+assert(html.includes("let flympusPushSettingsUiToken=0"),
+  'Stale async push status checks must not repaint a newer Settings screen');
