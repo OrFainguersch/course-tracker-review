@@ -11,6 +11,9 @@ assert(html.includes("Notification.requestPermission"),'Permission must be reque
 assert(html.includes("sendFlympusPushSubscriptionToBackend"),'Subscriptions must sync to the delivery server');
 assert(html.includes("flympusIsIos()&&!flympusIsStandalone()"),'iOS must require installed standalone PWA mode');
 assert(html.includes("data-push-settings"),'Settings must expose push status and controls');
+assert(html.includes("FLYMPUS_PUSH_USER_ENABLED_KEY"),'Push must keep an explicit per-device enable/disable preference');
+assert(html.includes("setFlympusPushUserEnabled(false)"),'Push must be disableable even when no remote subscription exists');
+assert(html.includes("Disabled in FLYMPUS"),'Push status must distinguish app-level disable from OS permission');
 
 assert(sw.includes("addEventListener('push'"),'Service worker must handle push');
 assert(sw.includes("showNotification"),'Service worker must display OS notifications');
