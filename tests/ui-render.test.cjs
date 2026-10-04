@@ -622,3 +622,10 @@ assert(html.includes("html.flympusLargeText p{font-size:14px!important")&&html.i
   "Large text must cover ordinary paragraph and helper text across the site");
 assert(html.includes('html[data-flympus-theme="dark"] .pushStatus.off')&&html.includes('html[data-flympus-theme="dark"] .btn.danger'),
   "Dark mode must include notification states and destructive controls instead of leaving light islands");
+
+
+/* Settings reset actions must stay unambiguous. */
+assert(!html.includes('id="clearRememberedUi"'),
+  "Remembered interface state reset must not be exposed in Settings");
+assert(html.includes('id="resetAppPreferences">Reset settings to defaults</button>'),
+  "Preferences reset must clearly say that it restores defaults");
