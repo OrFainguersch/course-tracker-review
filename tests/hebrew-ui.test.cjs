@@ -74,9 +74,11 @@ assert(html.includes("farEnough=rtlBack()?dx<=-72:dx>=72"),
 /* Hebrew home mixed-direction composition coverage */
 assert(html.includes("'Israel':'ישראל'")&&html.includes("'Cyprus':'קפריסין'"),
   "Known country labels must translate in Hebrew while custom configured values stay protected");
+assert(html.includes("'Sounds & Haptics':'צלילים ומשוב הפטי'")&&html.includes("'Sounds':'צלילים'"),
+  "Settings sound section must translate correctly whether haptics are shown or hidden on this device");
 assert(html.includes("const homeWelcomeLead=homeHebrew?'ברוך שובך,':'Welcome back,'")&&
   html.includes("const homeWelcomeName=homeHebrew?'אור':'Or'")&&
-  html.includes(".homeWelcomeLine{display:flex!important;align-items:baseline;gap:10px"),
+  html.includes(".homeWelcomeLine{display:flex!important;align-items:baseline;gap:5px"),
   "Home greeting must use structural spacing after the comma in both languages, not whitespace or font kerning");
 assert(html.includes("const homeForwardArrow=homeHebrew?'←':'→'")&&
   html.includes('class="homeAllCoursesArrow" aria-hidden="true" data-i18n-skip>'+homeForwardArrow+'</i>'),
