@@ -3069,6 +3069,7 @@ body.flympusReordering .syllabusDragHandle{cursor:grabbing!important}
   box-shadow:inset 0 0 0 2px rgba(36,112,171,.18)!important;
   transition:opacity 100ms ease,background-color 100ms ease,box-shadow 100ms ease!important
 }
+.flympusReorderGhostHost{display:contents!important}
 .flympusReorderGhost{
   position:fixed!important;
   z-index:520!important;
@@ -6973,6 +6974,13 @@ function bindSettings(){
         let lastY=e.clientY,changed=false,ended=false,moveRaf=null,scrollRaf=null,scrollVelocity=0;
 
         const ghost=dragging.cloneNode(true),computed=getComputedStyle(dragging);
+        const ghostHost=document.createElement('div');
+        ghostHost.className=(table.className?String(table.className)+' ':'')+'flympusReorderGhostHost';
+        /* Keep inline CSS variables such as --rule-cols and the same table
+           ancestor classes. Mobile/desktop row styles rely on those selectors,
+           so the floating clone must retain that context while living in body. */
+        if(table.getAttribute('style'))ghostHost.setAttribute('style',table.getAttribute('style'));
+        ghostHost.style.setProperty('display','contents','important');
         syncReorderGhostControls(dragging,ghost);
         ghost.classList.remove('flympusReorderSource','dropBefore','dropAfter','dragSettling');
         ghost.classList.add('flympusReorderGhost','dragging');
@@ -6986,7 +6994,8 @@ function bindSettings(){
         });
         if(computed.gridTemplateColumns&&computed.gridTemplateColumns!=='none')ghost.style.gridTemplateColumns=computed.gridTemplateColumns;
         if(computed.gridTemplateRows&&computed.gridTemplateRows!=='none')ghost.style.gridTemplateRows=computed.gridTemplateRows;
-        document.body.appendChild(ghost);
+        ghostHost.appendChild(ghost);
+        document.body.appendChild(ghostHost);
         dragging.classList.add('flympusReorderSource');
         handle.setAttribute('aria-grabbed','true');
         document.body.classList.add('flympusReordering');
@@ -7058,7 +7067,7 @@ function bindSettings(){
           ghost.classList.add('flympusReorderGhostSettling');
           Object.assign(ghost.style,{left:finalRect.left+'px',top:finalRect.top+'px',width:finalRect.width+'px',height:finalRect.height+'px',minWidth:finalRect.width+'px',maxWidth:finalRect.width+'px'});
           const reveal=()=>{
-            ghost.remove();
+            ghostHost.remove();
             dragging.classList.remove('flympusReorderSource');
             dragging.classList.add('dragSettling');
             setTimeout(()=>dragging.classList.remove('dragSettling'),190);
