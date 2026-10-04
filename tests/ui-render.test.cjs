@@ -651,12 +651,18 @@ assert(html.includes("FLYMPUS_RESOLVED_THEME_KEY='flympus-last-resolved-theme'")
   "System theme must freeze to the last visible resolved theme while the app is hidden");
 assert(html.includes("flympus-last-visible-theme-at")&&html.includes("Date.now()-lastVisibleAt<=6*60*60*1000"),
   "First paint may reuse the last visible System theme only for a recent app session, not indefinitely");
-assert(html.includes("pendingSystemThemeSync=true")&&
-  html.includes("window.addEventListener('pageshow',scheduleForegroundThemeSync"),
-  "System theme changes that occur in the background must be deferred until a visible foreground frame");
-assert(html.includes("flympusResumeVisualSync")&&
-  html.includes("transition:none!important"),
+assert(html.includes("applyFlympusAppPreferences(undefined,{allowSystemProbe:false});"),
+  "Runtime boot must preserve the early resolved theme instead of immediately probing a transient system value");
+assert(html.includes("FLYMPUS_SYSTEM_THEME_SETTLE_MS=650")&&html.includes("FLYMPUS_SYSTEM_THEME_CONFIRM_MS=180")&&html.includes("if(first===second)"),
+  "Foreground System theme reconciliation must require two stable samples after a settle window");
+assert(html.includes("resumeThemeGuardUntil")&&html.includes("if(now<resumeThemeGuardUntil)"),
+  "Transient foreground media-query changes must be absorbed by the resume guard");
+assert(html.includes("root?.classList.add('flympusResumeVisualSync')")&&html.includes("applyFlympusAppPreferences(undefined,{allowSystemProbe:false});"),
+  "Foreground resume must re-assert the last visible theme before probing the OS");
+assert(html.includes("flympusResumeVisualSync")&&html.includes("transition:none!important"),
   "Foreground reconciliation must suppress one-frame CSS transitions and visual cross-fades");
+assert(html.includes("root.style.backgroundColor=dark?'#091522':'#f4f8fc'"),
+  "The resolved document background must be set before first paint");
 assert(html.includes("snap.visualVersion===3")&&html.includes("snapFresh=snapAge<=15*60*1000")&&
   html.includes("snap.resolvedTheme===currentResolvedTheme")&&html.includes("viewportCompatible"),
   "Reload snapshots must be fresh, viewport-compatible and visually compatible before they are painted");
@@ -678,3 +684,12 @@ assert(html.includes("topHidden:scrollY>64&&")&&html.includes("if(snap.topHidden
 assert(html.includes("snap.localDay===localDay"),
   "A snapshot from a previous local day must never flash before today's plan renders");
 
+
+
+/* Navigation audio must never escape its initiating physical gesture. */
+assert(html.includes("window.__FLYMPUS_CLAIM_NAV_SOUND_GESTURE__")&&html.includes("if(!e||e.isTrusted===false)return false"),
+  "Navigation sound must require a trusted physical event");
+assert(html.includes("if(!ctx||!buffer||ctx.state!=='running')return false")&&html.includes("cancelFlympusPendingNavSources()"),
+  "Navigation WebAudio must never queue while suspended and must be cancellable at lifecycle boundaries");
+assert(html.includes("playFlympusBottomNavSound(e);"),
+  "Bottom-nav binding must pass the originating event into the audible path");

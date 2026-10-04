@@ -26,6 +26,7 @@
   root.setAttribute('data-flympus-theme',resolvedTheme);
   root.setAttribute('data-flympus-theme-mode',themeMode);
   root.style.colorScheme=resolvedTheme;
+  root.style.backgroundColor=dark?'#091522':'#f4f8fc';
   root.classList.toggle('flympusLargeText',saved.largerText===true);
   root.classList.toggle('flympusHapticsOff',saved.haptics===false);
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#07131f':'#07294c');
@@ -4365,6 +4366,25 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
     desktopBreakpointPx:900
   });
 
+  /* One physical event may produce at most one navigation sound, across both
+     the parser/hydration handler and the full runtime. Synthetic events,
+     background events and replayed lifecycle work are never allowed to sound. */
+  if(!window.__FLYMPUS_CLAIM_NAV_SOUND_GESTURE__){
+    const seenNavSoundEvents=typeof WeakSet==='function'?new WeakSet():null;
+    window.__FLYMPUS_CLAIM_NAV_SOUND_GESTURE__=e=>{
+      if(!e||e.isTrusted===false)return false;
+      if(document.visibilityState&&document.visibilityState!=='visible')return false;
+      const type=String(e.type||'');
+      if(!['touchstart','pointerdown','click','keydown'].includes(type))return false;
+      if(type==='pointerdown'&&e.pointerType==='mouse'&&Number(e.button||0)!==0)return false;
+      try{
+        if(seenNavSoundEvents?.has(e))return false;
+        seenNavSoundEvents?.add(e);
+      }catch{}
+      return true;
+    };
+  }
+
   /* Reload reference behavior: the restored dock may become visible before the
      full runtime has parsed. Capture a physical dock press in that hydration
      window so the first tap is never dead. The real navigation is replayed as
@@ -4399,7 +4419,7 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
        expensive on every platform and used to push the click noticeably
        behind the finger/mouse press. */
     const now=performance.now?.()||Date.now();
-    if(now-Number(window.__FLYMPUS_EARLY_NAV_SOUND_AT__||0)>=72){
+    if(window.__FLYMPUS_CLAIM_NAV_SOUND_GESTURE__?.(e)&&now-Number(window.__FLYMPUS_EARLY_NAV_SOUND_AT__||0)>=72){
       window.__FLYMPUS_EARLY_NAV_SOUND_AT__=now;
       const a=ensureEarlyNavAudio();
       if(a){
@@ -4619,7 +4639,7 @@ function applyFlympusAppPreferences(input,{allowSystemProbe=true}={}){
   if(schemeMeta)schemeMeta.setAttribute('content',resolvedTheme);
   if(themeMode!=='system'||document.visibilityState!=='hidden')setFlympusStableResolvedTheme(resolvedTheme);
 }
-applyFlympusAppPreferences();
+applyFlympusAppPreferences(undefined,{allowSystemProbe:false});
 
 const FLYMPUS_HE_UI={
   'COURSE':'קורס','APP':'אפליקציה','My Courses':'הקורסים שלי','Course Management':'ניהול קורס','Settings':'הגדרות',
@@ -5414,7 +5434,23 @@ if(!window.__flympusI18nObserverBound&&window.MutationObserver){
 
 if(!window.__flympusThemePreferenceBound){
   window.__flympusThemePreferenceBound=true;
-  let pendingSystemThemeSync=false,resumeThemeToken=0;
+  let pendingSystemThemeSync=false,resumeThemeToken=0,resumeThemeTimer=null,resumeThemeConfirmTimer=null,resumeThemeGuardUntil=0;
+  const FLYMPUS_SYSTEM_THEME_SETTLE_MS=650;
+  const FLYMPUS_SYSTEM_THEME_CONFIRM_MS=180;
+  const visibleSystemTheme=()=>{
+    try{return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches?'dark':'light'}
+    catch{return getFlympusStableResolvedTheme()||'light'}
+  };
+  const clearForegroundThemeTimers=()=>{
+    clearTimeout(resumeThemeTimer);
+    clearTimeout(resumeThemeConfirmTimer);
+    resumeThemeTimer=null;
+    resumeThemeConfirmTimer=null;
+  };
+  const finishForegroundThemeGuard=(token,root)=>{
+    if(token!==resumeThemeToken)return;
+    requestAnimationFrame?.(()=>root?.classList.remove('flympusResumeVisualSync'));
+  };
   const syncVisibleSystemTheme=()=>{
     if(getFlympusAppPreferences().theme!=='system'){pendingSystemThemeSync=false;return}
     if(document.visibilityState!=='visible'){pendingSystemThemeSync=true;return}
@@ -5425,32 +5461,60 @@ if(!window.__flympusThemePreferenceBound){
     if(getFlympusAppPreferences().theme!=='system')return;
     if(document.visibilityState!=='visible'){pendingSystemThemeSync=true;return}
     const token=++resumeThemeToken,root=document.documentElement;
+    clearForegroundThemeTimers();
+    pendingSystemThemeSync=false;
+    resumeThemeGuardUntil=(performance.now?.()||Date.now())+FLYMPUS_SYSTEM_THEME_SETTLE_MS+FLYMPUS_SYSTEM_THEME_CONFIRM_MS+250;
     root?.classList.add('flympusResumeVisualSync');
-    const finish=()=>{
-      if(token!==resumeThemeToken)return;
-      syncVisibleSystemTheme();
-      requestAnimationFrame?.(()=>root?.classList.remove('flympusResumeVisualSync'));
-    };
-    if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>requestAnimationFrame(finish));
-    else setTimeout(finish,32);
+
+    /* Re-assert the last actually visible theme immediately. Never probe the
+       OS during the fragile first foreground frames: WebKit can briefly report
+       the wrong color scheme while restoring an app-switcher snapshot. */
+    applyFlympusAppPreferences(undefined,{allowSystemProbe:false});
+
+    resumeThemeTimer=setTimeout(()=>{
+      if(token!==resumeThemeToken||document.visibilityState!=='visible')return;
+      const first=visibleSystemTheme();
+      resumeThemeConfirmTimer=setTimeout(()=>{
+        if(token!==resumeThemeToken||document.visibilityState!=='visible')return;
+        const second=visibleSystemTheme();
+        if(first===second){
+          const current=document.documentElement?.getAttribute('data-flympus-theme');
+          if(second!==current){
+            /* Two stable samples after the settle window are treated as a real
+               system appearance change, not a resume transient. */
+            applyFlympusAppPreferences(undefined,{allowSystemProbe:true});
+          }else{
+            const stable=current==='dark'||current==='light'?current:second;
+            setFlympusStableResolvedTheme(stable);
+          }
+        }
+        finishForegroundThemeGuard(token,root);
+      },FLYMPUS_SYSTEM_THEME_CONFIRM_MS);
+    },FLYMPUS_SYSTEM_THEME_SETTLE_MS);
   };
   try{
     const mq=window.matchMedia?.('(prefers-color-scheme: dark)');
     mq?.addEventListener?.('change',()=>{
       if(getFlympusAppPreferences().theme!=='system')return;
       if(document.visibilityState!=='visible'){pendingSystemThemeSync=true;return}
+      const now=performance.now?.()||Date.now();
+      if(now<resumeThemeGuardUntil){
+        pendingSystemThemeSync=true;
+        scheduleForegroundThemeSync();
+        return;
+      }
       syncVisibleSystemTheme();
     });
   }catch{}
   document.addEventListener('visibilitychange',()=>{
     if(document.visibilityState==='hidden'){
-      /* Freeze the last visible theme. Never let an iOS background-only
-         color-scheme event rewrite the DOM or the next app-switcher snapshot. */
+      clearForegroundThemeTimers();
+      ++resumeThemeToken;
       const current=document.documentElement?.getAttribute('data-flympus-theme');
       if(current==='dark'||current==='light')setFlympusStableResolvedTheme(current);
       return;
     }
-    if(pendingSystemThemeSync||getFlympusAppPreferences().theme==='system')scheduleForegroundThemeSync();
+    scheduleForegroundThemeSync();
   },{passive:true});
   window.addEventListener('pageshow',scheduleForegroundThemeSync,{passive:true});
 }
@@ -6058,6 +6122,7 @@ let flympusNavAudioPools={mobile:null,desktop:null},flympusNavAudioIndex=0;
 let flympusRefreshAudioPool=null,flympusRefreshAudioIndex=0;
 let flympusLastNavSoundAt=0;
 let flympusNavFastCtx=null,flympusNavFastBuffer=null,flympusNavFastBytes=null,flympusNavFastDecodePromise=null;
+const flympusNavScheduledSources=new Set();
 let flympusNavLastAudioUseAt=0,flympusNavAudioNeedsWake=true;
 const FLYMPUS_NAV_IDLE_WAKE_MS=10000;
 
@@ -6223,24 +6288,18 @@ function markFlympusNavAudioNeedsWake(){
   flympusLastNavSoundAt=0;
 }
 
-function scheduleFlympusNavFastBuffer(ctx,buffer,{wake=false}={}){
-  if(!ctx||!buffer)return false;
+function cancelFlympusPendingNavSources(){
+  for(const source of [...flympusNavScheduledSources]){
+    try{source.stop?.(0)}catch{}
+  }
+  flympusNavScheduledSources.clear();
+}
+function scheduleFlympusNavFastBuffer(ctx,buffer){
+  if(!ctx||!buffer||ctx.state!=='running')return false;
+  let source=null;
   try{
     const now=Number(ctx.currentTime||0);
-    if(wake&&ctx.createOscillator&&ctx.createGain){
-      /* Some browsers power the actual audio device down after inactivity even
-         while AudioContext.state still says "running". Keep the first press
-         audible by opening the output path with a short inaudible pre-roll,
-         then play the real click after the device has had time to wake. */
-      const osc=ctx.createOscillator(),wakeGain=ctx.createGain();
-      wakeGain.gain.value=.000001;
-      osc.frequency.value=120;
-      osc.connect(wakeGain);
-      wakeGain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now+.065);
-    }
-    const source=ctx.createBufferSource();
+    source=ctx.createBufferSource();
     const gain=ctx.createGain?.();
     source.buffer=buffer;
     if(gain){
@@ -6248,9 +6307,14 @@ function scheduleFlympusNavFastBuffer(ctx,buffer,{wake=false}={}){
       source.connect(gain);
       gain.connect(ctx.destination);
     }else source.connect(ctx.destination);
-    source.start(now+(wake ? .080 : .001));
+    flympusNavScheduledSources.add(source);
+    source.onended=()=>flympusNavScheduledSources.delete(source);
+    source.start(now+.001);
     return true;
-  }catch{return false}
+  }catch{
+    if(source)flympusNavScheduledSources.delete(source);
+    return false
+  }
 }
 
 function playFlympusNavFileFallback(){
@@ -6268,58 +6332,41 @@ function playFlympusNavFileFallback(){
 function playFlympusNavFastSound(){
   try{
     setFlympusAmbientAudioSession();
-    const now=performance.now?.()||Date.now(),idle=flympusNavLastAudioUseAt>0&&(now-flympusNavLastAudioUseAt)>=FLYMPUS_NAV_IDLE_WAKE_MS;
-    const wake=flympusNavAudioNeedsWake||idle;
-    flympusNavLastAudioUseAt=now;
-
-    const ctx=getFlympusNavFastContext(),buffer=flympusNavFastBuffer;
+    flympusNavLastAudioUseAt=performance.now?.()||Date.now();
+    const ctx=getFlympusNavFastContext();
     if(!ctx)return false;
 
-    /* Cross-platform first-press path: when the selected WAV is already
-       decoded, queue it NOW on the physical gesture even if AudioContext is
-       suspended. currentTime is frozen while suspended, so the source fires
-       at the first runnable audio quantum as resume opens the route. Do not
-       wait for resume().then() and do not route a ready buffer through
-       HTMLMediaElement; both add a one-time perceptible lag after load/reload. */
-    if(buffer){
-      const queued=scheduleFlympusNavFastBuffer(ctx,buffer,{wake:false});
-      if(!queued)return false;
-
-      if(ctx.state!=='running'){
-        let resumePromise=null;
-        try{resumePromise=ctx.resume?.()}catch{
-          markFlympusNavAudioNeedsWake();
-          return false;
-        }
-        if(resumePromise?.catch){
-          resumePromise.catch(()=>{
-            markFlympusNavAudioNeedsWake();
-            if(ctx===flympusNavFastCtx&&ctx.state!=='running')discardFlympusNavFastContext();
-          });
-        }
-      }
-      flympusNavAudioNeedsWake=false;
-      return true;
-    }
-
-    /* Very-fast taps can beat preload/decode. Resume immediately on the same
-       gesture, start decoding for the next press, and let the already-preloaded
-       media WAV be the synchronous safety net for this one exceptional tap. */
+    /* Never queue an audible source while AudioContext is suspended. A queued
+       BufferSource can survive the initiating tap and later fire when WebKit
+       resumes the context, producing a ghost click with no new user action. */
     if(ctx.state!=='running'){
       try{
         const p=ctx.resume?.();
         if(p?.catch)p.catch(()=>markFlympusNavAudioNeedsWake());
-      }catch{}
+      }catch{markFlympusNavAudioNeedsWake()}
+      if(ctx.state!=='running'){
+        try{
+          const p=primeFlympusNavFastAudio();
+          if(p?.catch)p.catch(()=>{});
+        }catch{}
+        return false;
+      }
     }
-    try{
-      const p=primeFlympusNavFastAudio();
-      if(p?.catch)p.catch(()=>{});
-    }catch{}
-    if(wake)flympusNavAudioNeedsWake=true;
-    return false;
-  }catch{
-    return false;
-  }
+
+    const buffer=flympusNavFastBuffer;
+    if(!buffer){
+      try{
+        const p=primeFlympusNavFastAudio();
+        if(p?.catch)p.catch(()=>{});
+      }catch{}
+      return false;
+    }
+
+    const ok=scheduleFlympusNavFastBuffer(ctx,buffer);
+    if(ok)flympusNavAudioNeedsWake=false;
+    else markFlympusNavAudioNeedsWake();
+    return ok;
+  }catch{return false}
 }
 
 function makeFlympusFileAudio(src,volume=1){
@@ -6379,6 +6426,7 @@ function rewindFlympusFileAudio(a,volume=1){
 
 function resetFlympusAudioSession(){
   setFlympusAmbientAudioSession();
+  cancelFlympusPendingNavSources();
   markFlympusNavAudioNeedsWake();
   flympusNavLastAudioUseAt=0;
   if(flympusNavFastCtx&&flympusNavFastCtx.state==='closed'){
@@ -6397,28 +6445,22 @@ function resetFlympusAudioSession(){
   }
 }
 
-function playFlympusBottomNavSound(){
+function playFlympusBottomNavSound(e){
   try{
-    if(getFlympusAppPreferences().navigationSounds===false)return;
+    if(getFlympusAppPreferences().navigationSounds===false)return false;
+    if(!window.__FLYMPUS_CLAIM_NAV_SOUND_GESTURE__?.(e))return false;
     setFlympusAmbientAudioSession();
 
-    /* The selected signature is ~86 ms. Prevent acoustic overlap, but never
-       delay navigation itself. */
     const now=performance.now?.()||Date.now();
-    if(now-flympusLastNavSoundAt<72)return;
+    if(now-flympusLastNavSoundAt<72)return false;
     flympusLastNavSoundAt=now;
 
-    /* Web Audio is the primary path for the short UI click because Safari's
-       HTMLMediaElement can start hundreds of ms after play(). The exact same
-       selected WAV is already decoded in memory; source.start() is scheduled
-       one millisecond ahead on the interactive context. */
-    if(playFlympusNavFastSound())return;
-
-    /* Decoder/context not ready yet: use the viewport-specific baked fallback WAV (10% mobile / 65% desktop).
-       iOS may ignore HTMLMediaElement.volume, so attenuation is baked into the
-       PCM samples and the first taps cannot sound louder than WebAudio. */
-    playFlympusNavFileFallback();
-  }catch{}
+    /* Running WebAudio is the zero-lag path. If resume is still asynchronous,
+       use the already-preloaded baked WAV on this same trusted gesture. No
+       audible WebAudio node is left waiting for a future lifecycle resume. */
+    if(playFlympusNavFastSound())return true;
+    return playFlympusNavFileFallback();
+  }catch{return false}
 }
 
 function isFlympusIOSHapticTarget(){
@@ -6469,7 +6511,7 @@ function bindFlympusNavPressSound(el,onImmediatePress=null){
     /* Ask the audio engine first. playFlympusDockPressZoom() intentionally
        forces layout to restart the punch animation, which can be expensive on
        the first interaction after a load/reload. */
-    playFlympusBottomNavSound();
+    playFlympusBottomNavSound(e);
     triggerFlympusPortableHaptic(7);
     playFlympusDockPressZoom(el);
     if(typeof onImmediatePress==='function')onImmediatePress(e);
@@ -6539,6 +6581,25 @@ setFlympusAmbientAudioSession();
 getFlympusNavAudioPool();
 getFlympusRefreshAudioPool();
 primeFlympusNavFastAudio();
+if(!window.__flympusNavGestureWakeBound){
+  window.__flympusNavGestureWakeBound=true;
+  const wakeNavAudio=e=>{
+    if(!e||e.isTrusted===false)return;
+    if(document.visibilityState&&document.visibilityState!=='visible')return;
+    try{
+      const ctx=getFlympusNavFastContext();
+      if(!ctx)return;
+      primeFlympusNavFastAudio();
+      if(ctx.state!=='running'){
+        const p=ctx.resume?.();
+        if(p?.catch)p.catch(()=>markFlympusNavAudioNeedsWake());
+      }
+    }catch{}
+  };
+  const dock=document.querySelector?.('#mobileBottomNav');
+  dock?.addEventListener?.('touchstart',wakeNavAudio,{passive:true,capture:true});
+  if(window.PointerEvent)dock?.addEventListener?.('pointerdown',e=>{if(e?.pointerType!=='touch')wakeNavAudio(e)},{passive:true,capture:true});
+}
 if(!window.__flympusActionAudioPrimeBound){
   window.__flympusActionAudioPrimeBound=true;
   const primeActionAudio=()=>primeFlympusActionAudio();
@@ -6558,14 +6619,13 @@ if(!window.__flympusNavAudioLifecycleBound){
   window.__flympusNavAudioLifecycleBound=true;
   window.addEventListener('blur',markFlympusNavAudioNeedsWake,{passive:true});
   window.addEventListener('focus',markFlympusNavAudioNeedsWake,{passive:true});
-  window.addEventListener('pagehide',markFlympusNavAudioNeedsWake,{passive:true});
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible')markFlympusNavAudioNeedsWake()},{passive:true});
+  window.addEventListener('pagehide',()=>{cancelFlympusPendingNavSources();markFlympusNavAudioNeedsWake()},{passive:true});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible'){cancelFlympusPendingNavSources();markFlympusNavAudioNeedsWake()}},{passive:true});
 }
 
-/* Navigation audio is intentionally NOT unlocked by arbitrary screen gestures.
-   Only a bottom-nav press may touch its AudioContext; pull-to-refresh owns its
-   separate muted media element. Scrolls, back-swipes and random taps are never
-   navigation-audio triggers. */
+/* Bottom-nav capture may silently resume its AudioContext on the same trusted
+   gesture. Audible navigation output is still created only from the claimed
+   physical event; lifecycle, scroll and resume events can never create it. */
 
 if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   window.__flympusPullRefreshSoundBound=true;
