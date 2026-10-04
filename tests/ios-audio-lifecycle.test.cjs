@@ -103,5 +103,8 @@ const ev=(type='touchstart',extra={})=>({type,isTrusted:true,timeStamp:now,...ex
   assert(html.includes("playFlympusBottomNavSound(e);\n    triggerFlympusPortableHaptic(7);"));
   assert(html.includes("window.__FLYMPUS_CLAIM_NAV_SOUND_GESTURE__?.(e)"));
   assert(html.includes("cancelFlympusPendingNavSources();markFlympusNavAudioNeedsWake()"));
+  assert(html.includes("if((ctx.state!=='running'||!flympusNavFastBuffer)&&getFlympusAppPreferences().navigationSounds!==false)")&&
+    html.includes("playFlympusNavFileFallback();"),
+    'First unavailable WebAudio path must play fallback in bottom-nav capture phase');
   console.log('Cross-platform trusted-gesture navigation audio lifecycle tests passed');
 })().catch(err=>{console.error(err);process.exitCode=1});

@@ -4611,10 +4611,11 @@ function resolveFlympusTheme(prefs,allowSystemProbe=true){
   if(!allowSystemProbe||document.visibilityState==='hidden')return current||stable||'light';
   try{return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches?'dark':'light'}catch{return current||stable||'light'}
 }
-function applyFlympusAppPreferences(input,{allowSystemProbe=true}={}){
+function applyFlympusAppPreferences(input,{allowSystemProbe=true,resolvedSystemTheme=''}={}){
   const prefs=input||getFlympusAppPreferences(),root=document.documentElement,body=document.body;
   const themeMode=['light','dark','system'].includes(prefs.theme)?prefs.theme:'system';
-  const resolvedTheme=resolveFlympusTheme(prefs,allowSystemProbe),dark=resolvedTheme==='dark';
+  const sampledSystemTheme=resolvedSystemTheme==='dark'||resolvedSystemTheme==='light'?resolvedSystemTheme:'';
+  const resolvedTheme=themeMode==='system'&&sampledSystemTheme?sampledSystemTheme:resolveFlympusTheme(prefs,allowSystemProbe),dark=resolvedTheme==='dark';
   const language=prefs.language==='he'?'he':'en';
   root?.setAttribute('data-flympus-theme',resolvedTheme);
   root?.setAttribute('data-flympus-theme-mode',themeMode);
@@ -5449,7 +5450,8 @@ if(!window.__flympusThemePreferenceBound){
   };
   const finishForegroundThemeGuard=(token,root)=>{
     if(token!==resumeThemeToken)return;
-    requestAnimationFrame?.(()=>root?.classList.remove('flympusResumeVisualSync'));
+    if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>root?.classList.remove('flympusResumeVisualSync'));
+    else root?.classList.remove('flympusResumeVisualSync');
   };
   const syncVisibleSystemTheme=()=>{
     if(getFlympusAppPreferences().theme!=='system'){pendingSystemThemeSync=false;return}
@@ -5482,7 +5484,7 @@ if(!window.__flympusThemePreferenceBound){
           if(second!==current){
             /* Two stable samples after the settle window are treated as a real
                system appearance change, not a resume transient. */
-            applyFlympusAppPreferences(undefined,{allowSystemProbe:true});
+            applyFlympusAppPreferences(undefined,{allowSystemProbe:false,resolvedSystemTheme:second});
           }else{
             const stable=current==='dark'||current==='light'?current:second;
             setFlympusStableResolvedTheme(stable);
@@ -6593,6 +6595,18 @@ if(!window.__flympusNavGestureWakeBound){
       if(ctx.state!=='running'){
         const p=ctx.resume?.();
         if(p?.catch)p.catch(()=>markFlympusNavAudioNeedsWake());
+      }
+
+      /* If WebAudio cannot be ready synchronously, play the preloaded fallback
+         here in capture phase — before haptics, forced layout, halo work or
+         navigation render. Claiming this exact event guarantees target phase
+         cannot emit a duplicate. */
+      if((ctx.state!=='running'||!flympusNavFastBuffer)&&getFlympusAppPreferences().navigationSounds!==false){
+        const now=performance.now?.()||Date.now();
+        if(now-flympusLastNavSoundAt>=72&&window.__FLYMPUS_CLAIM_NAV_SOUND_GESTURE__?.(e)){
+          flympusLastNavSoundAt=now;
+          playFlympusNavFileFallback();
+        }
       }
     }catch{}
   };

@@ -655,6 +655,8 @@ assert(html.includes("applyFlympusAppPreferences(undefined,{allowSystemProbe:fal
   "Runtime boot must preserve the early resolved theme instead of immediately probing a transient system value");
 assert(html.includes("FLYMPUS_SYSTEM_THEME_SETTLE_MS=650")&&html.includes("FLYMPUS_SYSTEM_THEME_CONFIRM_MS=180")&&html.includes("if(first===second)"),
   "Foreground System theme reconciliation must require two stable samples after a settle window");
+assert(html.includes("resolvedSystemTheme:second")&&html.includes("themeMode==='system'&&sampledSystemTheme"),
+  "Stable resume samples must be committed directly without a third matchMedia probe");
 assert(html.includes("resumeThemeGuardUntil")&&html.includes("if(now<resumeThemeGuardUntil)"),
   "Transient foreground media-query changes must be absorbed by the resume guard");
 assert(html.includes("root?.classList.add('flympusResumeVisualSync')")&&html.includes("applyFlympusAppPreferences(undefined,{allowSystemProbe:false});"),
