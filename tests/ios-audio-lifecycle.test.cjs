@@ -268,3 +268,10 @@ assert(html.includes("root?.classList.toggle('flympusHapticsOff',prefs.haptics==
   'Applying preferences must expose a live haptics-off state');
 assert(html.includes("html.flympusHapticsOff .mobileBottomHapticSwitch{display:none!important;pointer-events:none!important}"),
   'Turning haptics off must remove the native iOS haptic switch from hit testing immediately');
+
+
+/* Haptics hard-stop: native iOS switch must also be disabled, not only hidden. */
+assert(html.includes("el.disabled=prefs.haptics===false"),
+  'Applying haptics-off must disable any already-rendered native iOS haptic overlays');
+assert(html.includes("const disabled=getFlympusAppPreferences().haptics===false?' disabled':''"),
+  'Newly rendered iOS haptic overlays must start disabled when haptics are off');
