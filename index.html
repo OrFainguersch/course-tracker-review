@@ -6,13 +6,19 @@
 <meta http-equiv="Expires" content="0">
 <meta charset="utf-8" />
 <script>
-/* Early locale bootstrap: prevent RTL/LTR paint flash on reload. */
+/* Early preference bootstrap: prevent RTL/theme/text paint flashes on reload. */
 (()=>{try{
   const saved=JSON.parse(localStorage.getItem('flympus-app-preferences')||'{}')||{};
-  const language=saved.language==='he'?'he':'en',root=document.documentElement;
+  const language=saved.language==='he'?'he':'en',themeMode=['light','dark','system'].includes(saved.theme)?saved.theme:'system';
+  const dark=themeMode==='dark'||(themeMode==='system'&&window.matchMedia?.('(prefers-color-scheme: dark)')?.matches);
+  const root=document.documentElement;
   root.setAttribute('data-flympus-language',language);
   root.setAttribute('lang',language);
   root.setAttribute('dir',language==='he'?'rtl':'ltr');
+  root.setAttribute('data-flympus-theme',dark?'dark':'light');
+  root.setAttribute('data-flympus-theme-mode',themeMode);
+  root.classList.toggle('flympusLargeText',saved.largerText===true);
+  root.classList.toggle('flympusHapticsOff',saved.haptics===false);
 }catch{}})();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -3785,6 +3791,252 @@ html[data-flympus-language="he"] .personCard.traineeRosterCard .rosterTraineeHea
   text-align:right!important;
 }
 </style>
+<style>
+/* ===== Settings behavior + complete theme/text audit · 2026-10-04 ===== */
+.settingsSectionGlyph{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pushMasterSwitch input:disabled+i{opacity:.48;cursor:not-allowed}
+html.flympusHapticsOff .mobileBottomHapticSwitch{display:none!important;pointer-events:none!important}
+
+/* Large text must affect body copy, controls, tables, cards and navigation — not only headings. */
+html.flympusLargeText body{font-size:17px!important}
+html.flympusLargeText .pageTitle{font-size:36px!important;line-height:1.08!important}
+html.flympusLargeText .sectionHead h2,
+html.flympusLargeText .formTitle h2,
+html.flympusLargeText .homeBlockTitle h2,
+html.flympusLargeText .pvePanelHead h2,
+html.flympusLargeText .recordChildHead h1{font-size:23px!important}
+html.flympusLargeText .appSettingsCardHead h3,
+html.flympusLargeText .card h3,
+html.flympusLargeText .sideCard h3,
+html.flympusLargeText .homePanel h3{font-size:18px!important}
+html.flympusLargeText .btn,
+html.flympusLargeText .navBtn,
+html.flympusLargeText .seg,
+html.flympusLargeText .input,
+html.flympusLargeText input,
+html.flympusLargeText select,
+html.flympusLargeText textarea,
+html.flympusLargeText .multiFilterTrigger,
+html.flympusLargeText .topCourseSwitch{font-size:15px!important}
+html.flympusLargeText .field label,
+html.flympusLargeText .appSettingCopy b,
+html.flympusLargeText .notificationPrefCopy b,
+html.flympusLargeText .personInfo b,
+html.flympusLargeText .homePlanMain b,
+html.flympusLargeText .myCourseMeta b,
+html.flympusLargeText .dataTable th,
+html.flympusLargeText .dataTable td,
+html.flympusLargeText .packageSyllabusCell,
+html.flympusLargeText .pveMetric span,
+html.flympusLargeText .pveCountField span{font-size:14px!important}
+html.flympusLargeText .sub,
+html.flympusLargeText .detail,
+html.flympusLargeText .sectionHead p,
+html.flympusLargeText .appSettingsCardHead p,
+html.flympusLargeText .appSettingCopy small,
+html.flympusLargeText .notificationPrefCopy small,
+html.flympusLargeText .fieldHelp,
+html.flympusLargeText .mutedHint,
+html.flympusLargeText .wizardHint,
+html.flympusLargeText .homeBlockTitle p,
+html.flympusLargeText .homePulseNote,
+html.flympusLargeText .personInfo small,
+html.flympusLargeText .trainingTile small,
+html.flympusLargeText .recordHubCard p,
+html.flympusLargeText .safetyHistoryItem p,
+html.flympusLargeText .pushBackendNote,
+html.flympusLargeText .appSettingsFootnote{font-size:13px!important;line-height:1.5!important}
+html.flympusLargeText .pill,
+html.flympusLargeText .badge,
+html.flympusLargeText .pushStatus,
+html.flympusLargeText .eyebrow,
+html.flympusLargeText .navLabel{font-size:11.5px!important}
+html.flympusLargeText .mobileBottomLabel{font-size:11.5px!important}
+html.flympusLargeText .homePulseValue{font-size:28px!important}
+
+/* Complete dark theme audit. The final layer comes after desktop/mobile component CSS
+   so hard-coded light surfaces cannot leak through. */
+html[data-flympus-theme="dark"]{
+  color-scheme:dark;
+  --bg:#07131f;--card:#102235;--line:#294158;--muted:#9fb0bf;--text:#eef5fb;
+  --navy:#0a2947;--navy2:#eaf4fc;--shadow:0 10px 30px rgba(0,0,0,.28)
+}
+html[data-flympus-theme="dark"],
+html[data-flympus-theme="dark"] body,
+html[data-flympus-theme="dark"] .app,
+html[data-flympus-theme="dark"] main,
+html[data-flympus-theme="dark"] #content,
+html[data-flympus-theme="dark"] body.flympusPullActive #content{background:#07131f!important;color:#eef5fb!important}
+html[data-flympus-theme="dark"] .card,
+html[data-flympus-theme="dark"] .formCard,
+html[data-flympus-theme="dark"] .settingBox,
+html[data-flympus-theme="dark"] .sideCard,
+html[data-flympus-theme="dark"] .action,
+html[data-flympus-theme="dark"] .metric,
+html[data-flympus-theme="dark"] .mini,
+html[data-flympus-theme="dark"] .infoBox,
+html[data-flympus-theme="dark"] .reportKpis>div,
+html[data-flympus-theme="dark"] .requirementCard,
+html[data-flympus-theme="dark"] .workflowStep,
+html[data-flympus-theme="dark"] .executionItem,
+html[data-flympus-theme="dark"] .eventMetric,
+html[data-flympus-theme="dark"] .soloRow,
+html[data-flympus-theme="dark"] .trackingRow,
+html[data-flympus-theme="dark"] .mobileActivity,
+html[data-flympus-theme="dark"] .courseQuick,
+html[data-flympus-theme="dark"] .homePanel,
+html[data-flympus-theme="dark"] .homePulseCard,
+html[data-flympus-theme="dark"] .personCard,
+html[data-flympus-theme="dark"] .profileCard,
+html[data-flympus-theme="dark"] .trainingTile,
+html[data-flympus-theme="dark"] .emergencyGroup,
+html[data-flympus-theme="dark"] .emergencySummaryMetric,
+html[data-flympus-theme="dark"] .emergencyProfileGroup,
+html[data-flympus-theme="dark"] .plannedActualControl button,
+html[data-flympus-theme="dark"] .soloRowMini,
+html[data-flympus-theme="dark"] .focusRow,
+html[data-flympus-theme="dark"] .recentEvalCard,
+html[data-flympus-theme="dark"] .trainingStatusCard,
+html[data-flympus-theme="dark"] .epProgramCard,
+html[data-flympus-theme="dark"] .epPlatformCard,
+html[data-flympus-theme="dark"] .epLessonDetails details,
+html[data-flympus-theme="dark"] .epProgressRow,
+html[data-flympus-theme="dark"] .wizardChoice,
+html[data-flympus-theme="dark"] .tailorItem,
+html[data-flympus-theme="dark"] .cfgSyllabusRow,
+html[data-flympus-theme="dark"] .myCoursesFilters,
+html[data-flympus-theme="dark"] .packageEditorItem,
+html[data-flympus-theme="dark"] .packageRules,
+html[data-flympus-theme="dark"] .packageSyllabusRow,
+html[data-flympus-theme="dark"] .ruleEditorTable,
+html[data-flympus-theme="dark"] .packageSyllabusTable,
+html[data-flympus-theme="dark"] .recordHubCard,
+html[data-flympus-theme="dark"] .safetyHistoryItem,
+html[data-flympus-theme="dark"] .multiFilterMenu,
+html[data-flympus-theme="dark"] .filterPanelCard,
+html[data-flympus-theme="dark"] .datePickerPanel,
+html[data-flympus-theme="dark"] .pveExecutionOverview>div,
+html[data-flympus-theme="dark"] .profileRecordDock,
+html[data-flympus-theme="dark"] .flympusBootCard,
+html[data-flympus-theme="dark"] .topCourseDropdown,
+html[data-flympus-theme="dark"] .topNotificationDropdown,
+html[data-flympus-theme="dark"] .topPersonalProfileDropdown,
+html[data-flympus-theme="dark"] .modalCard,
+html[data-flympus-theme="dark"] .siteDialogCard,
+html[data-flympus-theme="dark"] .personalCropCard{background:#102235!important;border-color:#294158!important;color:#eaf4fc!important}
+html[data-flympus-theme="dark"] .scrollTabs,
+html[data-flympus-theme="dark"] .workflowStepHead,
+html[data-flympus-theme="dark"] .homeDateChip,
+html[data-flympus-theme="dark"] .homeAttentionTable th,
+html[data-flympus-theme="dark"] .homeCalendar,
+html[data-flympus-theme="dark"] .emergencyGroup summary,
+html[data-flympus-theme="dark"] .emergencyPlanCard,
+html[data-flympus-theme="dark"] .plannedEvalBox,
+html[data-flympus-theme="dark"] .epActiveSuit,
+html[data-flympus-theme="dark"] .epSyllabusBrief,
+html[data-flympus-theme="dark"] .epSourceNote,
+html[data-flympus-theme="dark"] .wizardEmpty,
+html[data-flympus-theme="dark"] .tailorSection,
+html[data-flympus-theme="dark"] .evaluationExperienceBlock,
+html[data-flympus-theme="dark"] .notificationPreferences,
+html[data-flympus-theme="dark"] .myCoursesFilterSummary,
+html[data-flympus-theme="dark"] .myCoursesFilterBar,
+html[data-flympus-theme="dark"] .contextReference,
+html[data-flympus-theme="dark"] .packageRules>summary,
+html[data-flympus-theme="dark"] .packageRuleEmpty,
+html[data-flympus-theme="dark"] .packagePathBox,
+html[data-flympus-theme="dark"] .courseOnlyItem,
+html[data-flympus-theme="dark"] .courseOnlyAddBox,
+html[data-flympus-theme="dark"] .packageAddBox,
+html[data-flympus-theme="dark"] .assignedPackageRow,
+html[data-flympus-theme="dark"] .packageAssignDetails>summary,
+html[data-flympus-theme="dark"] .packageEditorShell[open]>.packageShellSummary,
+html[data-flympus-theme="dark"] .excludedSyllabiBox,
+html[data-flympus-theme="dark"] .excludedSyllabusList .packageSyllabusRow,
+html[data-flympus-theme="dark"] .packageAddPanel,
+html[data-flympus-theme="dark"] .packageAssignPanel,
+html[data-flympus-theme="dark"] .packageGradingSettings,
+html[data-flympus-theme="dark"] .tailorCoursePicker,
+html[data-flympus-theme="dark"] .datePickerNav,
+html[data-flympus-theme="dark"] .pveMetric,
+html[data-flympus-theme="dark"] .pvePanelHead,
+html[data-flympus-theme="dark"] .pveCountField,
+html[data-flympus-theme="dark"] .pveSoloBlock,
+html[data-flympus-theme="dark"] .pveSoloLocked,
+html[data-flympus-theme="dark"] .pveCancellationRow,
+html[data-flympus-theme="dark"] .pveClearState,
+html[data-flympus-theme="dark"] .safetyHistoryFilters,
+html[data-flympus-theme="dark"] .multiFilterMenuHead,
+html[data-flympus-theme="dark"] .multiFilterAll,
+html[data-flympus-theme="dark"] .unifiedFilterGrid,
+html[data-flympus-theme="dark"] .reportFilters,
+html[data-flympus-theme="dark"] .unifiedFilterSelections,
+html[data-flympus-theme="dark"] .pushBackendNote{background:#0d1e2f!important;border-color:#294158!important;color:#c9d7e3!important}
+html[data-flympus-theme="dark"] .input,
+html[data-flympus-theme="dark"] input,
+html[data-flympus-theme="dark"] select,
+html[data-flympus-theme="dark"] textarea,
+html[data-flympus-theme="dark"] .appSettingSelect,
+html[data-flympus-theme="dark"] .multiFilterTrigger,
+html[data-flympus-theme="dark"] .multiFilterOption,
+html[data-flympus-theme="dark"] .multiFilterClose,
+html[data-flympus-theme="dark"] .multiFilterCheck,
+html[data-flympus-theme="dark"] .btn.secondary,
+html[data-flympus-theme="dark"] .homeInlineLink,
+html[data-flympus-theme="dark"] .myCourseOpen.selectAction,
+html[data-flympus-theme="dark"] .syllabusDragHandle{background:#0a1b2a!important;border-color:#36516a!important;color:#e6f0f8!important}
+html[data-flympus-theme="dark"] input::placeholder,
+html[data-flympus-theme="dark"] textarea::placeholder{color:#70869a!important}
+html[data-flympus-theme="dark"] .dataTable{background:#102235!important}
+html[data-flympus-theme="dark"] .dataTable th{background:#0d1e2f!important;color:#b8c8d6!important}
+html[data-flympus-theme="dark"] .dataTable td{color:#dbe7f1!important;border-color:#24394d!important}
+html[data-flympus-theme="dark"] .pageTitle,
+html[data-flympus-theme="dark"] h1,
+html[data-flympus-theme="dark"] h2,
+html[data-flympus-theme="dark"] h3,
+html[data-flympus-theme="dark"] h4,
+html[data-flympus-theme="dark"] b,
+html[data-flympus-theme="dark"] label,
+html[data-flympus-theme="dark"] strong,
+html[data-flympus-theme="dark"] .myCourseTitle,
+html[data-flympus-theme="dark"] .action b{color:#eaf4fc!important}
+html[data-flympus-theme="dark"] p,
+html[data-flympus-theme="dark"] .sub,
+html[data-flympus-theme="dark"] small,
+html[data-flympus-theme="dark"] .detail,
+html[data-flympus-theme="dark"] .mutedHint,
+html[data-flympus-theme="dark"] .fieldHelp,
+html[data-flympus-theme="dark"] .appSettingsFootnote{color:#9fb0bf!important}
+html[data-flympus-theme="dark"] .appSettingsCardHead{background:#0b1b2a!important;border-color:#294158!important}
+html[data-flympus-theme="dark"] .appSettingsIcon{background:#17324a!important;color:#7ec2ef!important}
+html[data-flympus-theme="dark"] .appSettingRow,
+html[data-flympus-theme="dark"] .appAboutRows>div,
+html[data-flympus-theme="dark"] .notificationPrefRow{border-color:#294158!important}
+html[data-flympus-theme="dark"] .prefSwitch i{background:#435568!important}
+html[data-flympus-theme="dark"] .prefSwitch input:checked+i{background:#1687e8!important}
+html[data-flympus-theme="dark"] .prefSwitch i:after{background:#f4f8fb!important}
+html[data-flympus-theme="dark"] .pveMetric.short,
+html[data-flympus-theme="dark"] .recordAttentionSummary,
+html[data-flympus-theme="dark"] .emphasisRemove,
+html[data-flympus-theme="dark"] .evalMissingPanel,
+html[data-flympus-theme="dark"] .pveReasonConfigWarning{background:#382129!important;border-color:#6f3b45!important}
+html[data-flympus-theme="dark"] .pveMetric.match,
+html[data-flympus-theme="dark"] .requirementCard.complete,
+html[data-flympus-theme="dark"] .pveClearState.ok{background:#102d28!important;border-color:#23584b!important}
+html[data-flympus-theme="dark"] .syllabusDecisionCard,
+html[data-flympus-theme="dark"] .formCompletionPanel{background:#172637!important;border-color:#3a5368!important}
+html[data-flympus-theme="dark"] .syllabusDecisionOption,
+html[data-flympus-theme="dark"] .syllabusDecisionMeta span,
+html[data-flympus-theme="dark"] .formCompletionPanel .evalMissingChips button{background:#0a1b2a!important;border-color:#36516a!important;color:#e6f0f8!important}
+html[data-flympus-theme="dark"] .packageSyllabusRow:nth-child(odd),
+html[data-flympus-theme="dark"] .ruleEditorTable .packageSyllabusRow:nth-child(odd){background:#0d1e2f!important}
+html[data-flympus-theme="dark"] .topCourseOption:hover,
+html[data-flympus-theme="dark"] .topCourseOption:focus-visible,
+html[data-flympus-theme="dark"] .topCourseViewAll:hover,
+html[data-flympus-theme="dark"] .topCourseViewAll:focus-visible,
+html[data-flympus-theme="dark"] .personCard.personCardOpen:hover,
+html[data-flympus-theme="dark"] .multiFilterOption:hover{background:#142b40!important}
+</style>
 </head>
 <body>
 <div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0726 · rank badge +2px</div><div class="toast" id="toast"></div></div>
@@ -4024,12 +4276,15 @@ function applyFlympusAppPreferences(input){
   root?.setAttribute('data-flympus-language',language);
   root?.setAttribute('lang',language);
   root?.setAttribute('dir',language==='he'?'rtl':'ltr');
-  root?.classList.toggle('flympusCompact',prefs.density==='compact');
+  /* Density + accessibility controls were removed from Settings; do not leave
+     previously-saved hidden modes active. */
+  root?.classList.remove('flympusCompact','flympusReducedMotion','flympusHighContrast');
+  body?.classList.remove('flympusCompact');
   root?.classList.toggle('flympusHintsOff',prefs.showHints===false);
-  root?.classList.toggle('flympusReducedMotion',prefs.reducedMotion===true);
-  root?.classList.toggle('flympusHighContrast',prefs.highContrast===true);
   root?.classList.toggle('flympusLargeText',prefs.largerText===true);
-  body?.classList.toggle('flympusCompact',prefs.density==='compact');
+  root?.classList.toggle('flympusHapticsOff',prefs.haptics===false);
+  const themeMeta=document.querySelector?.('meta[name="theme-color"]');
+  if(themeMeta)themeMeta.setAttribute('content',dark?'#07131f':'#07294c');
 }
 applyFlympusAppPreferences();
 
@@ -6699,12 +6954,14 @@ async function getFlympusPushStatus(){
 }
 async function refreshFlympusPushSettingsUi(){
   const status=await getFlympusPushStatus(),root=$('[data-push-settings]');if(!root)return status;
-  const badge=root.querySelector('[data-push-status]'),detail=root.querySelector('[data-push-detail]'),enable=root.querySelector('#enableSystemNotifications'),disable=root.querySelector('#disableSystemNotifications'),test=root.querySelector('#testSystemNotification');
+  const badge=root.querySelector('[data-push-status]'),detail=root.querySelector('[data-push-detail]'),toggle=root.querySelector('#systemNotificationsToggle');
   if(badge){badge.textContent=status.label;badge.className='pushStatus '+status.state}
   if(detail)detail.textContent=status.detail;
-  if(enable)enable.hidden=status.userEnabled&&status.permission==='granted'&&status.state!=='install';
-  if(disable)disable.hidden=!(status.permission==='granted'&&status.userEnabled&&status.state!=='install');
-  if(test)test.disabled=!(status.supported&&status.userEnabled&&(!status.ios||status.standalone));
+  if(toggle){
+    toggle.checked=!!(status.userEnabled&&status.permission==='granted'&&status.state!=='install');
+    toggle.disabled=!status.supported||status.state==='install'||status.state==='blocked'||status.state==='unsupported';
+    toggle.setAttribute('aria-checked',toggle.checked?'true':'false');
+  }
   return status
 }
 function initFlympusPushClient(){
@@ -7868,40 +8125,46 @@ function cfgProfileEditor(p,c){
 function appPreferenceSwitch(key,title,copy,checked){
   return '<div class="appSettingRow"><div class="appSettingCopy"><b>'+esc(title)+'</b><small>'+esc(copy)+'</small></div><label class="prefSwitch appSettingsSwitch"><input type="checkbox" data-app-pref="'+esc(key)+'" '+(checked?'checked':'')+'><i></i></label></div>'
 }
+function appSettingsSectionIcon(kind){
+  const paths={
+    general:'<path d="M4 7h10M18 7h2M4 12h3M11 12h9M4 17h8M16 17h4"></path><circle cx="16" cy="7" r="2"></circle><circle cx="9" cy="12" r="2"></circle><circle cx="14" cy="17" r="2"></circle>',
+    notifications:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path>',
+    sound:'<path d="M5 10h4l4-3.5v11L9 14H5z"></path><path d="M16 9.2c1.8 1.5 1.8 4.1 0 5.6"></path><path d="M18.8 6.8c3.2 2.8 3.2 7.6 0 10.4"></path>',
+    appearance:'<circle cx="12" cy="12" r="3.5"></circle><path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5 7 7M17 17l1.5 1.5M18.5 5.5 17 7M7 17l-1.5 1.5"></path>',
+    data:'<ellipse cx="12" cy="5.5" rx="7.5" ry="3"></ellipse><path d="M4.5 5.5v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6"></path><path d="M4.5 11.5v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6"></path>',
+    about:'<circle cx="12" cy="12" r="9"></circle><path d="M12 10.5v6"></path><path d="M12 7.2h.01"></path>'
+  };
+  return '<svg class="settingsSectionGlyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">'+(paths[kind]||paths.general)+'</svg>'
+}
 function appPreferencesScreen(){
-  const p=getFlympusAppPreferences(),theme=['system','light','dark'].includes(p.theme)?p.theme:'system',density=p.density==='compact'?'compact':'comfortable',language=p.language==='he'?'he':'en',startScreen=['home','courses','roster','planned','record','reports'].includes(p.startScreen)?p.startScreen:'home';
+  const p=getFlympusAppPreferences(),theme=['system','light','dark'].includes(p.theme)?p.theme:'system',language=p.language==='he'?'he':'en',startScreen=['home','courses','roster','planned','record','reports'].includes(p.startScreen)?p.startScreen:'home';
   const build=(document.querySelector('.reviewBanner')?.textContent||'FLYMPUS Review').trim();
   const mode=(window.navigator?.standalone===true||window.matchMedia?.('(display-mode: standalone)')?.matches)?'Installed web app':'Browser';
   return '<div class="appSettingsHead"><div><div class="eyebrow">APP SETTINGS</div><h1 class="pageTitle">Settings</h1><p class="sub">Personal device and interface preferences. Course configuration stays in Course Management; profile and notification preferences stay in their existing menus.</p></div></div>'+
   '<div class="appSettingsGrid">'+
-    '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('home')+'</span><div><h3>General</h3><p>Choose how FLYMPUS opens and how much guidance the interface shows.</p></div></div>'+
+    '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('general')+'</span><div><h3>General</h3><p>Choose how FLYMPUS opens and how much guidance the interface shows.</p></div></div>'+
       '<div class="appSettingRow"><div class="appSettingCopy"><b>Default landing page</b><small>Used when FLYMPUS opens in a new browser/app session. Refresh still stays on the current screen.</small></div><select class="appSettingSelect" data-app-pref-select="startScreen"><option value="home" '+(startScreen==='home'?'selected':'')+'>Home</option><option value="courses" '+(startScreen==='courses'?'selected':'')+'>My Courses</option><option value="roster" '+(startScreen==='roster'?'selected':'')+'>Roster</option><option value="planned" '+(startScreen==='planned'?'selected':'')+'>Plan</option><option value="record" '+(startScreen==='record'?'selected':'')+'>Forms</option><option value="reports" '+(startScreen==='reports'?'selected':'')+'>Reports</option></select></div>'+
-      '<div class="appSettingRow"><div class="appSettingCopy"><b>Language</b><small>'+(language==='he'?'Use Hebrew throughout the interface, including right-to-left layout.':'Use English throughout the interface.')+'</small></div><select class="appSettingSelect" data-app-pref-select="language"><option value="en" '+(language==='en'?'selected':'')+'>English</option><option value="he" '+(language==='he'?'selected':'')+'>Hebrew</option></select></div>'+
+      '<div class="appSettingRow"><div class="appSettingCopy"><b>Language</b><small>'+(language==='he'?'Use Hebrew throughout the interface, including right-to-left layout.':'Use English throughout the interface.')+'</small></div><select class="appSettingSelect" data-app-pref-select="language"><option value="en" '+(language==='en'?'selected':'')+'>English</option><option value="he" '+(language==='he'?'selected':'')+'>עברית</option></select></div>'+
       appPreferenceSwitch('showHints','Interface guidance','Show helper text, hints and explanatory notes throughout the app.',p.showHints!==false)+
     '</section>'+
-    '<section class="card appSettingsCard" data-push-settings><div class="appSettingsCardHead"><span class="appSettingsIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></span><div><h3>System notifications</h3><p>Receive FLYMPUS alerts through the phone or computer notification system, including when the PWA is not open.</p></div><span class="pushStatus" data-push-status>Checking…</span></div>'+
-      '<div class="appSettingRow pushDeliveryRow"><div class="appSettingCopy"><b>Push delivery on this device</b><small data-push-detail>Checking browser and device support…</small></div><div class="pushSettingActions"><button class="btn sky small" type="button" id="enableSystemNotifications">Enable</button><button class="btn secondary small" type="button" id="testSystemNotification">Send test</button><button class="btn secondary small" type="button" id="disableSystemNotifications" hidden>Disable on this device</button></div></div>'+
+    '<section class="card appSettingsCard" data-push-settings><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('notifications')+'</span><div><h3>System notifications</h3><p>Receive FLYMPUS alerts through the phone or computer notification system, including when the PWA is not open.</p></div><span class="pushStatus" data-push-status>Checking…</span></div>'+
+      '<div class="appSettingRow pushDeliveryRow"><div class="appSettingCopy"><b>Push delivery on this device</b><small data-push-detail>Checking browser and device support…</small></div><label class="prefSwitch appSettingsSwitch pushMasterSwitch"><input type="checkbox" id="systemNotificationsToggle" aria-label="Push delivery on this device"><i></i></label></div>'+
       '<div class="pushBackendNote"><b>Cross-platform Web Push</b><span>Android, desktop browsers and installed iPhone/iPad PWAs use the same subscription path. Notification categories are still controlled from the bell menu.</span></div>'+
     '</section>'+
-    '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('record')+'</span><div><h3>Sounds & Haptics</h3><p>Control the interaction feedback generated by this device.</p></div></div>'+
+    '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('sound')+'</span><div><h3>Sounds & Haptics</h3><p>Control the interaction feedback generated by this device.</p></div></div>'+
       appPreferenceSwitch('navigationSounds','Navigation sounds','Play the short FLYMPUS sound when using the primary navigation.',p.navigationSounds!==false)+
       appPreferenceSwitch('refreshSound','Pull-to-refresh sound','Play the refresh sound when the pull threshold is reached.',p.refreshSound!==false)+
       appPreferenceSwitch('haptics','Haptic feedback','Use vibration/haptic feedback where the browser or device supports it.',p.haptics!==false)+
     '</section>'+
-    '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('preferences')+'</span><div><h3>Appearance</h3><p>Keep the same FLYMPUS design language while adapting it to your device.</p></div></div>'+
+    '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('appearance')+'</span><div><h3>Appearance</h3><p>Keep the same FLYMPUS design language while adapting it to your device.</p></div></div>'+
       '<div class="appSettingRow"><div class="appSettingCopy"><b>Theme</b><small>Follow the device, or choose a fixed light or dark appearance.</small></div><select class="appSettingSelect" data-app-pref-select="theme"><option value="system" '+(theme==='system'?'selected':'')+'>System</option><option value="light" '+(theme==='light'?'selected':'')+'>Light</option><option value="dark" '+(theme==='dark'?'selected':'')+'>Dark</option></select></div>'+
-      '<div class="appSettingRow"><div class="appSettingCopy"><b>Interface density</b><small>Compact reduces spacing in cards, tables and controls without changing content.</small></div><select class="appSettingSelect" data-app-pref-select="density"><option value="comfortable" '+(density==='comfortable'?'selected':'')+'>Comfortable</option><option value="compact" '+(density==='compact'?'selected':'')+'>Compact</option></select></div>'+
       appPreferenceSwitch('largerText','Larger interface text','Increase base interface text size while preserving responsive layouts.',p.largerText===true)+
     '</section>'+
-    '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('safety')+'</span><div><h3>Accessibility</h3><p>Reduce visual motion or strengthen contrast where helpful.</p></div></div>'+
-      appPreferenceSwitch('reducedMotion','Reduce motion','Minimize non-essential transitions and animations.',p.reducedMotion===true)+
-      appPreferenceSwitch('highContrast','Higher contrast','Strengthen borders and text contrast across the interface.',p.highContrast===true)+
-    '</section>'+
-    '<section class="card appSettingsCard appSettingsDataCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('settings')+'</span><div><h3>Data & Device</h3><p>These actions affect only data stored in this browser or installed web app.</p></div></div>'+
+    '<section class="card appSettingsCard appSettingsDataCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('data')+'</span><div><h3>Data & Device</h3><p>These actions affect only data stored in this browser or installed web app.</p></div></div>'+
       '<div class="appSettingsActions"><button class="btn secondary" type="button" id="clearRememberedUi">Clear remembered interface state</button><button class="btn secondary" type="button" id="resetAppPreferences">Reset app settings</button><button class="btn danger" type="button" id="resetLocalReviewDataFromSettings">Reset local review data</button></div>'+
       '<p class="appSettingsFootnote">Reset local review data removes browser-local review records and course review state. It does not change the source code or reusable GitHub build.</p>'+
     '</section>'+
-    '<section class="card appSettingsCard appSettingsAboutCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('courses')+'</span><div><h3>About FLYMPUS</h3><p>Build and device context for troubleshooting.</p></div></div>'+
+    '<section class="card appSettingsCard appSettingsAboutCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('about')+'</span><div><h3>About FLYMPUS</h3><p>Build and device context for troubleshooting.</p></div></div>'+
       '<div class="appAboutRows"><div><span>Build</span><b>'+esc(build)+'</b></div><div><span>Running as</span><b>'+esc(mode)+'</b></div><div><span>Storage</span><b>Local review data on this device</b></div></div>'+
     '</section>'+
   '</div>';
@@ -8517,9 +8780,17 @@ if($('#resetBrokenReviewState'))$('#resetBrokenReviewState').onclick=async()=>{i
 
 function bindAppPreferences(){
   refreshFlympusPushSettingsUi();
-  if($('#enableSystemNotifications'))$('#enableSystemNotifications').onclick=enableFlympusSystemNotifications;
-  if($('#testSystemNotification'))$('#testSystemNotification').onclick=sendFlympusDeviceTestNotification;
-  if($('#disableSystemNotifications'))$('#disableSystemNotifications').onclick=disableFlympusSystemNotifications;
+  const pushToggle=$('#systemNotificationsToggle');
+  if(pushToggle)pushToggle.onchange=async()=>{
+    const wantsEnabled=!!pushToggle.checked;
+    pushToggle.disabled=true;
+    try{
+      if(wantsEnabled)await enableFlympusSystemNotifications();
+      else await disableFlympusSystemNotifications();
+    }finally{
+      await refreshFlympusPushSettingsUi();
+    }
+  };
   document.querySelectorAll('[data-app-pref]').forEach(el=>el.onchange=()=>{
     const prefs=getFlympusAppPreferences();prefs[el.dataset.appPref]=!!el.checked;saveFlympusAppPreferences(prefs);toast('Setting saved')
   });
