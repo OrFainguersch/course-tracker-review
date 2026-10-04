@@ -9,9 +9,9 @@ function wavPcm16Data(buf){
   assert.equal(buf.toString('ascii',8,12),'WAVE');
   let p=12;
   while(p+8<=buf.length){
-    const id=buf.toString('ascii',p,p+4),len=buf.readUInt32LE(p+4),start=p+8;
-    if(id==='data')return buf.subarray(start,start+len);
-    p=start+len+(len&1);
+    const id=buf.toString('ascii',p,p+4),len=buf.readUInt32LE(p+4),dataStart=p+8;
+    if(id==='data')return buf.subarray(dataStart,dataStart+len);
+    p=dataStart+len+(len&1);
   }
   throw new Error('WAV data chunk missing');
 }
@@ -23,11 +23,14 @@ function assertPcmScaled(originalPath,scaledPath,gain){
     assert.equal(b.readInt16LE(i),expected,scaledPath+' must bake the requested amplitude into every PCM sample');
   }
 }
-assertPcmScaled('assets/flympus-nav-signature.wav','assets/flympus-nav-signature-25.wav',.25);
-assertPcmScaled('assets/flympus-refresh-sync.wav','assets/flympus-refresh-sync-22.wav',.22);
+
+assertPcmScaled('assets/flympus-nav-signature.wav','assets/flympus-nav-signature-10.wav',.10);
+assertPcmScaled('assets/flympus-nav-signature.wav','assets/flympus-nav-signature-65.wav',.65);
+assertPcmScaled('assets/flympus-refresh-sync.wav','assets/flympus-refresh-sync-13.wav',.13);
+
 const start=html.indexOf("const FLYMPUS_NAV_SOUND_SRC=");
-const end=html.indexOf('if(document.addEventListener&&!window.__flympusPullRefreshSoundBound)',start);
-assert(start>=0&&end>start,'audio block must remain extractable');
+const end=html.indexOf('function isFlympusIOSHapticTarget',start);
+assert(start>=0&&end>start,'navigation audio block must remain extractable');
 const source=html.slice(start,end);
 
 const mediaPlays=[];
@@ -36,6 +39,8 @@ const fastStarts=[];
 const fastGains=[];
 let now=1000;
 let category='auto';
+let desktop=false;
+let prefs={navigationSounds:true};
 
 const audioSession={};
 Object.defineProperty(audioSession,'type',{get:()=>category,set:v=>{category=v}});
@@ -51,7 +56,7 @@ class AudioStub{
   pause(){this.paused=true}
   play(){
     this.paused=false;
-    mediaPlays.push({audio:this,src:this.src,currentTime:this.currentTime,volume:this.volume,muted:this.muted,category});
+    mediaPlays.push({src:this.src,currentTime:this.currentTime,volume:this.volume,muted:this.muted,category});
     return Promise.resolve();
   }
 }
@@ -67,211 +72,131 @@ class AudioContextStub{
   close(){this.state='closed';return Promise.resolve()}
   decodeAudioData(bytes){assert(bytes.byteLength>1000);return Promise.resolve({decoded:true})}
   createBufferSource(){
-    const rec={buffer:null,connected:false,startTime:null};
+    const rec={buffer:null,startTime:null};
     fastStarts.push(rec);
     return{
       set buffer(v){rec.buffer=v},
       get buffer(){return rec.buffer},
-      connect(dest){assert(dest);rec.connected=true},
+      connect(dest){assert(dest);return this},
       start(t){rec.startTime=t}
     };
   }
   createGain(){
-    const rec={gain:{value:1},connected:false};
+    const rec={gain:{value:1}};
     fastGains.push(rec);
+    return{gain:rec.gain,connect(dest){assert(dest);return this}};
+  }
+  createOscillator(){
     return{
-      gain:rec.gain,
-      connect(dest){assert(dest);rec.connected=true}
+      frequency:{value:0},
+      connect(dest){assert(dest);return this},
+      start(){},
+      stop(){}
     };
   }
 }
 
 const documentStub={
   body:{appendChild(){}},
-  createElement(tag){assert.equal(tag,'audio');return new AudioStub()},
-  addEventListener(){}
+  createElement(tag){assert.equal(tag,'audio');return new AudioStub()}
 };
-
 const context={
-  window:{PointerEvent:function(){},AudioContext:AudioContextStub},
+  window:{
+    AudioContext:AudioContextStub,
+    matchMedia:query=>({matches:desktop&&String(query).includes('min-width')})
+  },
   navigator:{audioSession},
   document:documentStub,
   performance:{now:()=>now},
-  Date,Math,Promise,Array,ArrayBuffer,Uint8Array,
+  getFlympusAppPreferences:()=>prefs,
+  Date,Math,Promise,Array,ArrayBuffer,Uint8Array,Object,
   atob:s=>Buffer.from(s,'base64').toString('binary'),
-  setTimeout:()=>1,
-  clearTimeout(){},
   console
 };
 context.window.window=context.window;
 vm.createContext(context);
-vm.runInContext(source,context,{filename:'index.html#audio'});
+vm.runInContext(source,context,{filename:'index.html#nav-audio'});
 
 (async()=>{
+  vm.runInContext('getFlympusNavAudioPool();primeFlympusNavFastAudio()',context);
   await Promise.resolve();
   await Promise.resolve();
 
-  const embeddedMatch=source.match(/const FLYMPUS_NAV_SOUND_SRC='data:audio\/wav;base64,([^']+)'/);
-  assert(embeddedMatch,'Embedded navigation WAV must remain extractable');
-  assert(Buffer.from(embeddedMatch[1],'base64').equals(fs.readFileSync('assets/flympus-nav-signature.wav')),
-    'Fast navigation sound must use the exact selected C FLYMPUS Signature WAV bytes');
-  assert(source.includes("./assets/flympus-refresh-sync-22.wav"),
-    'Refresh must keep the selected FLYMPUS Sync waveform with 27 percent baked amplitude');
+  assert.equal(mediaCreated.length,2,'Mobile navigation fallback pool must preload two media elements');
+  assert.equal(mediaPlays.length,0,'Preloading must remain silent');
+  assert.equal(category,'ambient','Navigation audio session must stay ambient');
 
-  assert(source.includes("latencyHint:'interactive'"),
-    'Navigation AudioContext must request interactive low latency');
-  assert(source.includes('decodeAudioData(copy)'),
-    'Selected navigation WAV must be decoded ahead of time');
-  assert(source.includes('createBufferSource()'),
-    'Navigation click must use an AudioBufferSourceNode');
-  assert(source.includes('source.start(ctx.currentTime+.001)'),
-    'Navigation click must schedule essentially immediately');
-  assert(source.includes('const FLYMPUS_NAV_SOUND_VOLUME=.25')&&source.includes('const FLYMPUS_REFRESH_SOUND_VOLUME=.22'),
-    'Bottom-nav and refresh target levels must remain 25 and 22 percent');
-  assert(source.includes("FLYMPUS_NAV_FALLBACK_SOUND_SRC='./assets/flympus-nav-signature-25.wav")&&source.includes("FLYMPUS_REFRESH_SOUND_SRC='./assets/flympus-refresh-sync-22.wav"),
-    'HTMLAudio paths must use physically attenuated WAV files so iOS cannot bypass the requested levels');
+  /* This reproduces the recording: runtime is ready, WebAudio was created by
+     preload but remains suspended, and the first visible bottom-bar touch is
+     the user gesture that must both sound and unlock the fast path. */
+  vm.runInContext("playFlympusBottomNavSound()",context);
+  assert.equal(mediaPlays.length,1,'Cold/reload first press must synchronously play the media fallback');
+  assert(mediaPlays[0].src.includes('flympus-nav-signature-10.wav'),'Mobile first-press fallback must use the baked 10 percent WAV');
+  assert.equal(mediaPlays[0].volume,1,'Baked fallback must stay at unity element volume on iOS');
+  assert.equal(fastStarts.length,0,'Cold first press must not depend on an asynchronously resumed WebAudio click');
 
-  assert.equal(mediaCreated.length,4,
-    'Only two HTMLAudio nav fallbacks and two refresh players should be preloaded');
-  assert.equal(mediaPlays.length,0,'Preload must not audibly play HTML media');
-
-  vm.runInContext('unlockFlympusNavFastAudio()',context);
   await Promise.resolve();
-  vm.runInContext('playFlympusBottomNavSound()',context);
-  assert.equal(fastStarts.length,1,'First ready nav press must use the low-latency buffer path');
-  assert.equal(mediaPlays.length,0,'Ready fast nav press must not also trigger delayed HTMLAudio');
-  assert.equal(fastStarts[0].buffer?.decoded,true,'Fast path must use the decoded selected WAV');
-  assert.equal(fastGains[0]?.gain?.value,.25,'WebAudio navigation click must use the 25 percent gain');
-  assert(Math.abs(fastStarts[0].startTime-10.001)<.0001,'Fast path must start 1ms ahead');
-  assert.equal(category,'ambient','Fast nav sound must remain ambient');
-
-  /* Reproduce the real iOS first-tap state: resume() has been requested by the
-     gesture handler, but WebAudio has not reached "running" yet. */
+  await Promise.resolve();
   now+=100;
-  const beforeFirstTapFallbackMedia=mediaPlays.length;
-  const beforeFirstTapFallbackFast=fastStarts.length;
-  vm.runInContext("flympusNavFastCtx.state='suspended';flympusNavFastCtx.resume=()=>Promise.resolve()",context);
-  vm.runInContext('playFlympusBottomNavSound()',context);
-  assert.equal(fastStarts.length,beforeFirstTapFallbackFast,
-    'Suspended first tap must not be falsely consumed before AudioContext resume completes');
-  assert.equal(mediaPlays.length,beforeFirstTapFallbackMedia+1,
-    'Suspended first tap must use the preloaded media fallback on that same gesture');
-  assert.equal(mediaPlays.at(-1).volume,1,
-    'Physically attenuated HTMLAudio navigation fallback must play at unity element volume');
-  assert(mediaPlays.at(-1).src.includes('flympus-nav-signature-25.wav'),
-    'First-tap fallback must use the physically attenuated 25 percent WAV');
-  vm.runInContext("flympusNavFastCtx.state='running'",context);
+  vm.runInContext("playFlympusBottomNavSound()",context);
+  assert.equal(mediaPlays.length,1,'Second press must not replay the fallback once WebAudio is awake');
+  assert.equal(fastStarts.length,1,'Second press must use the decoded low-latency WebAudio path');
+  assert.equal(fastStarts[0].buffer?.decoded,true,'Fast path must use the decoded selected signature WAV');
+  assert.equal(fastGains.at(-1)?.gain?.value,.10,'Mobile fast navigation gain must remain 10 percent');
+  assert(Math.abs(fastStarts[0].startTime-10.001)<.0001,'Warm WebAudio navigation click must start essentially immediately');
 
-  for(let i=0;i<12;i++){
-    now+=100;
-    vm.runInContext('playFlympusBottomNavSound()',context);
-  }
-  assert.equal(fastStarts.length,13,'Repeated nav presses must remain on the low-latency buffer path');
-  assert.equal(mediaPlays.length,1,'Only the simulated suspended first tap should use HTMLAudio');
-
-  const beforeRefreshMedia=mediaPlays.length;
-  vm.runInContext('globalThis.__g=armFlympusRefreshSound()',context);
+  /* Simulate the post-refresh / foreground lifecycle state. The first press
+     after mark-needs-wake must again be audible synchronously, even if the
+     context is suspended, and must not create a duplicate WebAudio click. */
+  now+=100;
+  const mediaBeforeResume=mediaPlays.length,fastBeforeResume=fastStarts.length;
+  vm.runInContext("markFlympusNavAudioNeedsWake();flympusNavFastCtx.state='suspended';playFlympusBottomNavSound()",context);
+  assert.equal(mediaPlays.length,mediaBeforeResume+1,'First press after reload/foreground must sound on the same gesture');
+  assert.equal(fastStarts.length,fastBeforeResume,'Wake press must not double-play through WebAudio');
   await Promise.resolve();
-  assert.equal(mediaPlays.length,beforeRefreshMedia+1,'Refresh touchstart must still arm HTMLAudio');
-  const primer=mediaPlays.at(-1);
-  assert(primer.src.includes('flympus-refresh-sync-22.wav'),'Refresh primer must use the physically attenuated 22 percent WAV');
-  assert.equal(primer.muted,true,'Refresh primer must be fully muted before a real pull reaches 44px');
-  assert.equal(primer.volume,1,'Physically attenuated refresh media must remain at unity element volume');
-
-  vm.runInContext('fireFlympusRefreshSound(globalThis.__g)',context);
   await Promise.resolve();
-  const refresh=mediaPlays.at(-1);
-  assert(refresh.src.includes('flympus-refresh-sync-22.wav'),'Refresh fire must use the physically attenuated 22 percent WAV');
-  assert.equal(refresh.currentTime,0,'Refresh fire must restart from sample zero');
-  assert.equal(refresh.volume,1,'Physically attenuated refresh media must remain at unity element volume');
-  assert.equal(refresh.muted,false,'Refresh fire must unmute only at the actual pull threshold');
 
-  assert(html.includes('if(!pullRefreshSoundPlayed&&pullDy>=44)'),
-    'Refresh sound threshold must stay 44px');
-  assert(html.includes('const pullThreshold=96;'),
-    'Actual refresh threshold must stay 96px');
-  assert(html.includes("if(e.target?.closest?.('#mobileBottomNav'))return"),
-    'Pull gesture must still ignore the bottom nav');
-  assert(!html.includes("document.addEventListener('touchstart',unlock"),
-    'Arbitrary screen touchstart must never unlock or trigger navigation audio');
-  assert(html.includes('Only a bottom-nav press may touch its AudioContext'),
-    'Code must document the strict audio boundary: bottom-nav only for nav audio');
+  now+=100;
+  vm.runInContext("playFlympusBottomNavSound()",context);
+  assert.equal(fastStarts.length,fastBeforeResume+1,'WebAudio must be ready again on the following press');
 
-  assert(html.includes('REFERENCE BASELINE · 2026-10-02 · commit 0666b046'),
-    'Approved slot-centered halo state must remain pinned to concrete reference commit 0666b046');
-  assert(html.includes('Previous audio/post-refresh reference: commit 64960d03'),
-    'Earlier audio/post-refresh reference must remain documented');
-  assert(html.includes('CROSS-PLATFORM BASELINE: halo geometry, press zoom, navigation timing and'),
-    'Reference behavior must explicitly remain cross-platform rather than iPhone-only');
-  assert(html.includes("el.ontouchstart=press")&&html.includes("el.onpointerdown=e=>{if(e?.pointerType!=='touch')press(e)}"),
-    'Bottom-nav press behavior must support touch devices and non-touch pointer browsers');
-  assert(html.includes('--dock-halo-y-nudge:-1px'),
-    'Approved halo vertical centering must remain unchanged');
-  assert(html.includes('class="mobileBottomHalo"')&&html.includes('function ensureBottomDockHalo()'),
-    'Bottom dock must use one persistent traveling halo element');
-  assert(html.includes('transition:transform .22s cubic-bezier(.22,.78,.20,1);'),
-    'Persistent halo must visibly travel between destinations');
-  assert(html.includes('function bottomDockLayoutBox(el,dock)')&&html.includes('width=buttonBox.width')&&html.includes('height=buttonBox.height'),
-    'Traveling halo must derive size from untransformed layout metrics');
-  assert(html.includes('x=itemBox.x+(itemBox.width-width)/2'),
-    'Traveling halo must be centered horizontally on the actual navigation slot');
-  assert(html.includes('class="mobileBottomHapticSwitch"')&&html.includes('flympusDirectHapticOverlayHtml()'),
-    'iOS bottom-nav taps must use a real transparent WebKit switch target for direct native haptics');
-  assert(html.includes("s.ontouchstart=e=>b.ontouchstart?.(e)"),
-    'The iOS haptic overlay must forward touchstart to the existing immediate sound/navigation path');
-  assert(html.includes("closest?.('.mobileBottomIconButton,.mobileBottomHapticSwitch')"),
-    'Bottom-nav touchend protection must not cancel the native iOS haptic switch default action');
-  assert(html.includes('triggerFlympusPortableHaptic(9)'),
-    'Pull threshold must request haptic feedback where the Vibration API exists');
-  assert(html.includes("render({fastNavigation:!!options.fastNavigation})"),
-    'Bottom navigation must keep the fast render path');
-  assert(html.includes("const flympusBottomScreenTemplates=new Map()"),
-    'Bottom-bar root screens must have an in-memory pre-render cache');
-  assert(html.includes("requestIdleCallback")&&html.includes("prewarmFlympusBottomScreens()"),
-    'Bottom-bar screens must pre-render during idle time');
-  assert(html.includes("mountFlympusFastScreen(state.screen)"),
-    'Fast bottom navigation must mount the prepared screen instead of rebuilding it when available');
-  assert(html.includes("function scheduleFlympusBottomNavigation(target)")&&html.includes("requestAnimationFrame(afterPaint)")&&html.includes("setTimeout(commit,0)"),
-    'Physical bottom-nav presses must yield one paint before screen DOM work so audio and halo motion are not blocked');
-  assert(html.includes("scheduleFlympusBottomNavigation(target);"),
-    'Bottom-nav activation must use the post-paint navigation scheduler');
-  assert(html.includes('handleEarlyBottomNavPress')&&html.includes('__FLYMPUS_EARLY_NAV_TARGET__'),
-    'Reload hydration must capture the first physical bottom-nav press instead of dropping it');
-  assert(html.includes("['roster','planned','home','record','reports'].includes(earlyNavTarget)"),
-    'Queued hydration tap must be consumed as soon as the real runtime becomes ready');
-  assert(html.includes('function playFlympusDockPressZoom(el)')&&html.includes("playFlympusDockPressZoom(el);"),
-    'Physical bottom-nav taps must trigger the Facebook-reference press zoom without delaying navigation');
-  assert(html.includes('34%{transform:scale(1.018)}')&&html.includes('32%{scale:1.115}'),
-    'Normal press punch must be clearly visible while remaining below the repeat-active emphasis');
-  assert(html.includes('scale:1.036!important')&&html.includes('32%{scale:1.016}'),
-    'Normal pressed item zoom must remain geometry-safe and visibly stronger than the previous reference');
-  assert(html.includes('32%{transform:scale(1.024)}')&&html.includes('30%{scale:1.145}'),
-    'Already-active destination must receive the stronger Facebook-like repeat pulse');
-  assert(html.includes("const repeatActive=item.classList.contains('active')")&&html.includes("dock.classList.add('dockPressRepeat')"),
-    'Runtime must distinguish a repeat tap on the already-active bottom destination');
-  assert(html.includes('VISUAL ONLY: do not change layout, hit targets, halo measurements'),
-    'Press zoom must remain explicitly visual-only so approved halo geometry stays untouched');
-  assert(html.includes('offset* values are layout geometry')&&html.includes('clientTop'),
-    'Halo geometry must remain immune to press transforms while preserving the approved vertical baseline');
+  /* A long-idle route wake uses the same safe rule: one synchronous fallback,
+     then the fast path resumes. */
+  now+=11000;
+  const mediaBeforeIdle=mediaPlays.length,fastBeforeIdle=fastStarts.length;
+  vm.runInContext("playFlympusBottomNavSound()",context);
+  assert.equal(mediaPlays.length,mediaBeforeIdle+1,'First press after long idle must remain audible');
+  assert.equal(fastStarts.length,fastBeforeIdle,'Idle wake must not double-play');
+  await Promise.resolve();
+  now+=100;
+  vm.runInContext("playFlympusBottomNavSound()",context);
+  assert.equal(fastStarts.length,fastBeforeIdle+1,'Fast path must resume after the idle wake press');
 
-  console.log('Low-latency nav audio, refresh audio, and traveling halo tests passed');
+  prefs={navigationSounds:false};
+  now+=100;
+  const silentMedia=mediaPlays.length,silentFast=fastStarts.length;
+  vm.runInContext("playFlympusBottomNavSound()",context);
+  assert.equal(mediaPlays.length,silentMedia,'Navigation sound preference must suppress fallback audio');
+  assert.equal(fastStarts.length,silentFast,'Navigation sound preference must suppress WebAudio');
+
+  assert(source.includes("const FLYMPUS_NAV_MOBILE_FALLBACK_SOUND_SRC='./assets/flympus-nav-signature-10.wav"),
+    'Mobile fallback must stay physically attenuated to 10 percent');
+  assert(source.includes("const FLYMPUS_NAV_DESKTOP_FALLBACK_SOUND_SRC='./assets/flympus-nav-signature-65.wav"),
+    'Desktop fallback must stay physically attenuated to 65 percent');
+  assert(source.includes("const FLYMPUS_REFRESH_SOUND_SRC='./assets/flympus-refresh-sync-13.wav"),
+    'Refresh fallback must keep the selected 13 percent WAV');
+  assert(source.includes('const fallbackStarted=playFlympusNavFileFallback();')&&
+         source.includes("if(wake||ctx.state!=='running')"),
+    'Cold/reload wake path must synchronously use media fallback before WebAudio handoff');
+  assert(html.includes('handleEarlyBottomNavPress')&&html.includes('ensureEarlyNavAudio()'),
+    'Hydration-window bottom-nav presses must keep their own first-touch audio path');
+  assert(html.includes("el.ontouchstart=press")&&html.includes("playFlympusBottomNavSound();"),
+    'Runtime bottom-nav audio must stay attached directly to physical touchstart');
+  assert(html.includes("if(!pullRefreshSoundPlayed&&pullDy>=44)")&&html.includes('const pullThreshold=96;'),
+    'Pull-to-refresh sound and refresh thresholds must remain unchanged');
+
+  console.log('iOS first-touch navigation audio lifecycle tests passed');
 })().catch(err=>{
   console.error(err);
   process.exitCode=1;
 });
-
-
-/* Haptics preference must suppress both portable vibration and the native iOS switch overlay. */
-assert(html.includes("if(getFlympusAppPreferences().haptics===false)return false"),
-  'Portable vibration path must honor the haptics preference');
-assert(html.includes("root?.classList.toggle('flympusHapticsOff',prefs.haptics===false)"),
-  'Applying preferences must expose a live haptics-off state');
-assert(html.includes("html.flympusHapticsOff .mobileBottomHapticSwitch{display:none!important;pointer-events:none!important}"),
-  'Turning haptics off must remove the native iOS haptic switch from hit testing immediately');
-
-
-/* Haptics hard-stop: native iOS switch must also be disabled, not only hidden. */
-assert(html.includes("el.disabled=prefs.haptics===false"),
-  'Applying haptics-off must disable any already-rendered native iOS haptic overlays');
-assert(html.includes("const disabled=getFlympusAppPreferences().haptics===false?' disabled':''"),
-  'Newly rendered iOS haptic overlays must start disabled when haptics are off');

@@ -6270,44 +6270,51 @@ function playFlympusNavFastSound(){
     const ctx=getFlympusNavFastContext();
     if(!ctx)return false;
 
-    /* resume() itself is requested synchronously from the physical press so
-       autoplay policy still treats this as user-initiated. Only after resume
-       resolves do we schedule the warm-up + click. This avoids the old case
-       where the first press merely woke the context and the sound was lost. */
-    if(ctx.state!=='running'){
+    /* The first bottom-nav press after a cold start, reload, foreground return
+       or long idle must make sound on THAT physical gesture. On iOS a newly
+       resumed AudioContext can report "running" before the real output route is
+       audible, so never spend the first press only on resume/warm-up. Use the
+       already-preloaded, physically attenuated media WAV synchronously from the
+       gesture, and wake/prime WebAudio in parallel for subsequent presses. */
+    if(wake||ctx.state!=='running'){
+      const fallbackStarted=playFlympusNavFileFallback();
       let resumePromise=null;
-      try{resumePromise=ctx.resume?.()}catch{}
-      Promise.resolve(resumePromise).then(()=>primeFlympusNavFastAudio()).then(buffer=>{
+      try{if(ctx.state!=='running')resumePromise=ctx.resume?.()}catch{}
+
+      const settleAfterWake=()=>{
         if(ctx!==flympusNavFastCtx)return;
-        if(!buffer||ctx.state!=='running'){
+        if(ctx.state!=='running'){
           markFlympusNavAudioNeedsWake();
-          playFlympusNavFileFallback();
           return;
         }
-        if(!scheduleFlympusNavFastBuffer(ctx,buffer,{wake:true})){
-          markFlympusNavAudioNeedsWake();
-          playFlympusNavFileFallback();
-        }
-      }).catch(()=>{
-        markFlympusNavAudioNeedsWake();
-        playFlympusNavFileFallback();
-      });
-      flympusNavAudioNeedsWake=false;
-      return true;
+        flympusNavAudioNeedsWake=false;
+        try{
+          const p=primeFlympusNavFastAudio();
+          if(p?.catch)p.catch(()=>{});
+        }catch{}
+      };
+      if(resumePromise?.then){
+        Promise.resolve(resumePromise).then(settleAfterWake).catch(()=>markFlympusNavAudioNeedsWake());
+      }else settleAfterWake();
+
+      return fallbackStarted||!!resumePromise||ctx.state==='running';
     }
 
     if(!flympusNavFastBuffer){
       primeFlympusNavFastAudio().then(buffer=>{
-        if(!buffer)return playFlympusNavFileFallback();
-        if(ctx!==flympusNavFastCtx)return;
-        if(!scheduleFlympusNavFastBuffer(ctx,buffer,{wake:true}))playFlympusNavFileFallback();
-      }).catch(()=>playFlympusNavFileFallback());
-      flympusNavAudioNeedsWake=false;
+        if(ctx!==flympusNavFastCtx||ctx.state!=='running'){
+          markFlympusNavAudioNeedsWake();
+          return;
+        }
+        if(!buffer||!scheduleFlympusNavFastBuffer(ctx,buffer,{wake:false})){
+          markFlympusNavAudioNeedsWake();
+        }
+      }).catch(()=>markFlympusNavAudioNeedsWake());
       return true;
     }
 
-    const ok=scheduleFlympusNavFastBuffer(ctx,flympusNavFastBuffer,{wake});
-    if(ok)flympusNavAudioNeedsWake=false;
+    const ok=scheduleFlympusNavFastBuffer(ctx,flympusNavFastBuffer,{wake:false});
+    if(!ok)markFlympusNavAudioNeedsWake();
     return ok;
   }catch{
     return false;
