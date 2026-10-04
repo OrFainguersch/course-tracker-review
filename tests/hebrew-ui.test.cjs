@@ -50,3 +50,22 @@ assert(earlyLocaleIndex>=0 && firstStyleIndex>=0 && earlyLocaleIndex<firstStyleI
 assert(html.includes("const drawerCloseSwipeIsRight=()=>getFlympusAppPreferences().language==='he'"),'Drawer gesture must mirror with Hebrew');
 assert(html.includes("drawerCloseSwipeIsRight()?dx>12:dx<-12"),'Hebrew drawer close swipe must claim rightward movement');
 assert(html.includes("drawerCloseSwipeIsRight()?dx>=58:dx<=-58"),'Hebrew drawer close swipe must complete to the right');
+
+
+/* Hebrew adaptive mirror audit */
+assert(html.includes("Hebrew adaptive mirror audit · 2026-10-04"),
+  "Hebrew must use a deliberate mirrored layout layer, not only text-align:right");
+assert(html.includes('html[data-flympus-language="he"] .mobileHero .homeCourseStatusBadge')&&html.includes('right:auto!important;left:18px!important'),
+  "Home status badge must mirror to the left in Hebrew");
+assert(html.includes('html[data-flympus-language="he"] .homePlanTags{justify-content:flex-start!important}'),
+  "Hebrew plan tags must align with the right-aligned activity text instead of drifting left");
+assert(html.includes('html[data-flympus-language="he"] .formCompletionPanel')&&html.includes('border-right:4px solid var(--brand-gold)!important'),
+  "Hebrew warning/completion accents must move to the right edge");
+assert(html.includes('html[data-flympus-language="he"] .packageSyllabusTable:not(.ruleEditorTable) .useCell')&&html.includes('left:auto!important;right:0!important'),
+  "Sticky Package table controls must mirror to the right in Hebrew");
+assert(html.includes("const rtlBack=()=>getFlympusAppPreferences().language==='he'"),
+  "Back navigation must know the current language");
+assert(html.includes("tracking=rtlBack()?startX>=Math.max(0,w-56):startX<=56"),
+  "Hebrew back gesture must start from the right edge");
+assert(html.includes("farEnough=rtlBack()?dx<=-72:dx>=72"),
+  "Hebrew back gesture must swipe left, mirroring English");
