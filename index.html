@@ -6004,8 +6004,8 @@ function advancedPackagesHtml(type){
       '<details class="packageRules"><summary><b>Progression gates ('+gateActive.length+')</b><span>'+(allGates.length-gateActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('progression',['Use','Order / Move','Progression requirement','Status'],gates,'48px 92px minmax(320px,1.8fr) minmax(140px,.7fr)')+gateAdd+'</details>'+
       '</div></fieldset></details></form>';
   }).join('');
-  const countLabel=!selectedCategories.length?allPackages.length+' packages':packages.length+' of '+allPackages.length+' packages';
-  return '<div class="sectionHead advancedPackageTitle"><div><h2>Training Packages</h2></div><span class="pill blue">'+countLabel+'</span></div>'+filterHtml+'<div class="globalPackageList">'+(cards||'<div class="wizardEmpty compact">No Packages match this category.</div>')+'</div>';
+  const countLabel=!activeFilters?allPackages.length+' packages':packages.length+' of '+allPackages.length+' packages';
+  return '<div class="sectionHead advancedPackageTitle"><div><h2>Training Packages</h2></div><span class="pill blue">'+countLabel+'</span></div>'+filterHtml+'<div class="globalPackageList">'+(cards||'<div class="wizardEmpty compact">No Packages match the selected filters.</div>')+'</div>';
 }
 function courseTailorModel(){
   const core=window.FLYMPUS_TRAINING,active=epCurrentProgram();if(!core||!active)return null;
