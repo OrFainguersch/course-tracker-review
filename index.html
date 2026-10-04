@@ -3111,6 +3111,61 @@ body.flympusReordering .packageSyllabusRow.dropAfter{
   .packageSyllabusRow.flympusReorderSource,.flympusReorderGhost,.flympusReorderGhost.flympusReorderGhostSettling{transition:none!important}
 }
 </style>
+<style>
+/* ===== Stable person editor modal + profile record dock · 2026-10-04 ===== */
+html.flympusPersonModalOpen,
+body.flympusPersonModalOpen{overscroll-behavior:none!important}
+body.flympusPersonModalOpen{touch-action:none}
+#editPersonModal{
+  position:fixed!important;
+  inset:0!important;
+  z-index:320!important;
+  overscroll-behavior:contain;
+  touch-action:none;
+  opacity:1;
+  animation:flympusPersonModalBackdropIn 140ms ease-out both
+}
+#editPersonModal .modalCard{
+  touch-action:pan-y;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  transform-origin:50% 100%;
+  animation:flympusPersonModalCardIn 180ms cubic-bezier(.22,.78,.24,1) both;
+  will-change:transform,opacity;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden
+}
+@keyframes flympusPersonModalBackdropIn{from{background:rgba(2,8,23,0)}to{background:rgba(2,8,23,.42)}}
+@keyframes flympusPersonModalCardIn{from{opacity:.96;transform:translate3d(0,14px,0) scale(.996)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+
+/* The sticky trainee form dock must stay on one compositor layer.
+   Avoid backdrop-filter here: WebKit can repaint sticky blurred layers while
+   scrolling, which appears as a small vertical flicker. */
+.profileRecordDockWrap{
+  isolation:isolate;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  contain:paint
+}
+.profileRecordDock{
+  background:#fff!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  transform:translateZ(0);
+  -webkit-transform:translateZ(0)
+}
+@media(max-width:759px){
+  .profileRecordDockWrap{top:78px!important}
+}
+@media(min-width:760px){
+  .profileRecordDockWrap{top:70px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #editPersonModal,#editPersonModal .modalCard{animation:none!important}
+}
+</style>
 </head>
 <body>
 <div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p><div class="deviceDataBox"><div class="deviceDataHead"><b>Device data</b><span class="deviceDataMode" id="deviceDataMode">Local</span></div><p id="deviceDataCopy">Courses, photos, evaluations and settings are stored locally on this device.</p><div class="deviceDataActions"><button class="btn secondary small" type="button" id="exportFlympusBackup">Export backup</button><label class="btn secondary small" for="flympusBackupInput" style="cursor:pointer">Import backup</label></div><p class="deviceDataHint" id="deviceDataHint">Use a backup to move the complete FLYMPUS setup between Safari and the Home Screen app.</p></div></div></div></div></header><input id="flympusBackupInput" type="file" accept=".json,application/json" hidden><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0726 · rank badge +2px</div><div class="toast" id="toast"></div></div>
@@ -6438,7 +6493,46 @@ function mountFlympusFastScreen(screen){
   return true;
 }
 
+let flympusPersonModalScrollY=0;
+let flympusPersonModalLocked=false;
+function unlockFlympusPersonModalScroll(){
+  if(!flympusPersonModalLocked)return;
+  const y=flympusPersonModalScrollY;
+  flympusPersonModalLocked=false;
+  document.documentElement?.classList.remove('flympusPersonModalOpen');
+  document.body?.classList.remove('flympusPersonModalOpen');
+  if(document.body){
+    document.body.style.position='';
+    document.body.style.top='';
+    document.body.style.left='';
+    document.body.style.right='';
+    document.body.style.width='';
+    document.body.style.overflow='';
+  }
+  try{window.scrollTo(0,y)}catch{}
+}
+function cleanupMountedPersonEditModal(){
+  const modal=document.body?.querySelector(':scope > #editPersonModal');
+  if(modal)modal.remove();
+  unlockFlympusPersonModalScroll();
+}
+function mountPersonEditModal(){
+  const modal=$('#editPersonModal');
+  if(!modal||modal.parentElement===document.body)return;
+  flympusPersonModalScrollY=Number(window.scrollY||document.documentElement?.scrollTop||0);
+  document.body.appendChild(modal);
+  flympusPersonModalLocked=true;
+  document.documentElement?.classList.add('flympusPersonModalOpen');
+  document.body?.classList.add('flympusPersonModalOpen');
+  document.body.style.position='fixed';
+  document.body.style.top='-'+flympusPersonModalScrollY+'px';
+  document.body.style.left='0';
+  document.body.style.right='0';
+  document.body.style.width='100%';
+  document.body.style.overflow='hidden';
+}
 function render(options={}){
+  cleanupMountedPersonEditModal();
   const fast=!!options.fastNavigation;
   if(fast)syncNavigationActiveState();
   else{
@@ -6508,7 +6602,7 @@ function bindGlobalFormUx(){
     form.addEventListener('submit',e=>{if(showFormInvalid(form)){e.preventDefault();e.stopImmediatePropagation()}},true)
   });
 }
-function bind(){bindGlobalFormUx();bindDmyDateInputs();bindMultiFilters();renderPersonalIdentity();syncAttentionBadges();bindGlobalBackGesture();if($('#appBackBtn'))$('#appBackBtn').onclick=()=>goBack();if($('#exportFlympusBackup'))$('#exportFlympusBackup').onclick=async()=>{const ok=await exportFlympusBackup();if(ok)toast('FLYMPUS backup ready','success')};if($('#standaloneImportBackup'))$('#standaloneImportBackup').onclick=()=>$('#flympusBackupInput')?.click();if($('#standaloneMigrationDismiss'))$('#standaloneMigrationDismiss').onclick=()=>{localStorage.setItem('ct-review-standalone-migration-dismissed','1');render()};if($('#flympusBackupInput'))$('#flympusBackupInput').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const payload=JSON.parse(await file.text());const entries=validateFlympusBackup(payload);if(!(await siteConfirm('Replace this device\'s current FLYMPUS data with the selected backup? This imports courses, photos, records and settings.',{title:'Import FLYMPUS backup?',confirmLabel:'Import backup',tone:'primary'})))return;restoreFlympusBackup(payload);toast('Backup imported · reloading','success');setTimeout(()=>location.reload(),350)}catch(err){toast(err?.message||'Could not import this backup.','error')}finally{e.target.value=''}};const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop'),drawerPanel=drawer?.querySelector?.('.panel');if(menuBtn&&drawer)menuBtn.onclick=e=>{e?.preventDefault?.();e?.stopPropagation?.();closeAllMultiFilters(false);setDrawerOpen(!drawer.classList.contains('open'))};if(backdrop&&drawer)backdrop.onclick=()=>setDrawerOpen(false);if(drawer){let drawerSwipeStartX=0,drawerSwipeStartY=0,drawerSwipeTracking=false,drawerSwipeClaimed=false;drawer.ontouchstart=e=>{if(!drawer.classList.contains('open'))return;const t=e.touches?.[0];if(!t)return;drawerSwipeStartX=t.clientX;drawerSwipeStartY=t.clientY;drawerSwipeTracking=true;drawerSwipeClaimed=false};drawer.ontouchmove=e=>{if(!drawerSwipeTracking)return;const t=e.touches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY;if(dx<-12&&Math.abs(dx)>Math.abs(dy)*1.2){drawerSwipeClaimed=true;e.preventDefault?.()}};drawer.ontouchend=e=>{if(!drawerSwipeTracking)return;drawerSwipeTracking=false;const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY;if(drawerSwipeClaimed&&dx<=-58&&Math.abs(dy)<=70)setDrawerOpen(false);drawerSwipeClaimed=false};drawer.ontouchcancel=()=>{drawerSwipeTracking=false;drawerSwipeClaimed=false}};const mobileBottom=$('#mobileBottomNav');if(mobileBottom){mobileBottom.ontouchend=e=>{if(!e.target?.closest?.('.mobileBottomIconButton,.mobileBottomHapticSwitch'))e.preventDefault?.()};mobileBottom.ongesturestart=e=>e.preventDefault?.();mobileBottom.ongesturechange=e=>e.preventDefault?.();mobileBottom.ongestureend=e=>e.preventDefault?.()}document.querySelectorAll('[data-mobile-nav]').forEach(b=>{const activate=e=>{const now=performance.now?.()||Date.now();b.__flympusImmediateNavAt=now;const target=b.dataset.mobileNav,currentRoot=bottomNavRootForScreen(state.screen);if(state.screen===target){scrollActiveBottomNavTop(target);return}if(state.screen===currentRoot)rememberBottomNavScroll();bottomDockNavigationTransition=true;
+function bind(){bindGlobalFormUx();bindDmyDateInputs();bindMultiFilters();renderPersonalIdentity();syncAttentionBadges();bindGlobalBackGesture();mountPersonEditModal();if($('#appBackBtn'))$('#appBackBtn').onclick=()=>goBack();if($('#exportFlympusBackup'))$('#exportFlympusBackup').onclick=async()=>{const ok=await exportFlympusBackup();if(ok)toast('FLYMPUS backup ready','success')};if($('#standaloneImportBackup'))$('#standaloneImportBackup').onclick=()=>$('#flympusBackupInput')?.click();if($('#standaloneMigrationDismiss'))$('#standaloneMigrationDismiss').onclick=()=>{localStorage.setItem('ct-review-standalone-migration-dismissed','1');render()};if($('#flympusBackupInput'))$('#flympusBackupInput').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const payload=JSON.parse(await file.text());const entries=validateFlympusBackup(payload);if(!(await siteConfirm('Replace this device\'s current FLYMPUS data with the selected backup? This imports courses, photos, records and settings.',{title:'Import FLYMPUS backup?',confirmLabel:'Import backup',tone:'primary'})))return;restoreFlympusBackup(payload);toast('Backup imported · reloading','success');setTimeout(()=>location.reload(),350)}catch(err){toast(err?.message||'Could not import this backup.','error')}finally{e.target.value=''}};const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop'),drawerPanel=drawer?.querySelector?.('.panel');if(menuBtn&&drawer)menuBtn.onclick=e=>{e?.preventDefault?.();e?.stopPropagation?.();closeAllMultiFilters(false);setDrawerOpen(!drawer.classList.contains('open'))};if(backdrop&&drawer)backdrop.onclick=()=>setDrawerOpen(false);if(drawer){let drawerSwipeStartX=0,drawerSwipeStartY=0,drawerSwipeTracking=false,drawerSwipeClaimed=false;drawer.ontouchstart=e=>{if(!drawer.classList.contains('open'))return;const t=e.touches?.[0];if(!t)return;drawerSwipeStartX=t.clientX;drawerSwipeStartY=t.clientY;drawerSwipeTracking=true;drawerSwipeClaimed=false};drawer.ontouchmove=e=>{if(!drawerSwipeTracking)return;const t=e.touches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY;if(dx<-12&&Math.abs(dx)>Math.abs(dy)*1.2){drawerSwipeClaimed=true;e.preventDefault?.()}};drawer.ontouchend=e=>{if(!drawerSwipeTracking)return;drawerSwipeTracking=false;const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY;if(drawerSwipeClaimed&&dx<=-58&&Math.abs(dy)<=70)setDrawerOpen(false);drawerSwipeClaimed=false};drawer.ontouchcancel=()=>{drawerSwipeTracking=false;drawerSwipeClaimed=false}};const mobileBottom=$('#mobileBottomNav');if(mobileBottom){mobileBottom.ontouchend=e=>{if(!e.target?.closest?.('.mobileBottomIconButton,.mobileBottomHapticSwitch'))e.preventDefault?.()};mobileBottom.ongesturestart=e=>e.preventDefault?.();mobileBottom.ongesturechange=e=>e.preventDefault?.();mobileBottom.ongestureend=e=>e.preventDefault?.()}document.querySelectorAll('[data-mobile-nav]').forEach(b=>{const activate=e=>{const now=performance.now?.()||Date.now();b.__flympusImmediateNavAt=now;const target=b.dataset.mobileNav,currentRoot=bottomNavRootForScreen(state.screen);if(state.screen===target){scrollActiveBottomNavTop(target);return}if(state.screen===currentRoot)rememberBottomNavScroll();bottomDockNavigationTransition=true;
   /* Visual response is immediate. Do not wait for the full page render before
      moving the gold state/halo to the pressed destination. */
   $('#mobileBottomNav')?.querySelectorAll?.('[data-mobile-nav]')?.forEach?.(btn=>{
@@ -6559,7 +6653,10 @@ const toggleRosterManageMode=()=>renderPreservingManagementView(()=>{state.roste
 document.querySelectorAll('[data-person-edit]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();renderPreservingManagementView(()=>{state.personEditKey=btn.dataset.personEdit;state.personPhotoDraft=undefined})});
 if($('#closeEditPerson'))$('#closeEditPerson').onclick=()=>{state.personEditKey=null;state.personPhotoDraft=undefined;render()};
 if($('#cancelEditPerson'))$('#cancelEditPerson').onclick=()=>{state.personEditKey=null;state.personPhotoDraft=undefined;render()};
-if($('#editPersonModal'))$('#editPersonModal').onclick=e=>{if(e.target.id==='editPersonModal'){state.personEditKey=null;state.personPhotoDraft=undefined;render()}};
+if($('#editPersonModal')){
+  $('#editPersonModal').onclick=e=>{if(e.target.id==='editPersonModal'){state.personEditKey=null;state.personPhotoDraft=undefined;render()}};
+  $('#editPersonModal').ontouchmove=e=>{if(!e.target.closest?.('.modalCard'))e.preventDefault?.()};
+}
 if($('#personPhotoInput'))$('#personPhotoInput').onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{await openPersonalPhotoCrop(file,'roster')}catch(err){toast('Could not process this photo')}};
 if($('#editPersonPhoto'))$('#editPersonPhoto').onclick=async()=>{const key=state.personEditKey||'',type=key.split(':')[0],id=key.split(':').slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id),data=state.personPhotoDraft!==undefined?state.personPhotoDraft:p?.photoData;if(!data)return;try{await openPersonalPhotoCropDataUrl(data,'roster')}catch(err){toast('Could not open photo editor')}};
 if($('#removePersonPhoto'))$('#removePersonPhoto').onclick=()=>{state.personPhotoDraft=null;const key=state.personEditKey||'',type=key.split(':')[0],id=key.split(':').slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id),preview=$('#personPhotoPreview'),choose=$('#choosePersonPhotoAction'),edit=$('#editPersonPhoto'),remove=$('#removePersonPhoto');if(preview)preview.innerHTML=esc(personInitials(p||{name:'?'}));if(choose)choose.hidden=false;if(edit)edit.hidden=true;if(remove)remove.hidden=true};
