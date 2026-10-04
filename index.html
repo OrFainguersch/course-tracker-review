@@ -3296,6 +3296,103 @@ body.flympusPersonModalOpen{touch-action:none}
   .packageFilterBar.packagePathFilters{grid-template-columns:1fr}
 }
 </style>
+<style>
+/* ===== App Settings · personal device preferences ===== */
+.appSettingsHead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.appSettingsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.appSettingsCard{padding:0!important;overflow:hidden}
+.appSettingsCardHead{display:flex;align-items:center;gap:12px;padding:16px 17px;background:#f7fafc;border-bottom:1px solid #e3ebf2}
+.appSettingsCardHead h3{margin:0;color:#173b5e;font-size:15px}
+.appSettingsCardHead p{margin:3px 0 0;color:#73879b;font-size:10px;line-height:1.4}
+.appSettingsIcon{width:38px;height:38px;flex:0 0 38px;border-radius:11px;display:grid;place-items:center;background:#eaf4fc;color:#176da9}
+.appSettingsIcon .navIcon,.appSettingsIcon svg{width:20px;height:20px}
+.appSettingRow{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 17px;border-bottom:1px solid #edf2f6}
+.appSettingRow:last-child{border-bottom:0}
+.appSettingCopy{min-width:0}.appSettingCopy b{display:block;color:#294963;font-size:11.5px}.appSettingCopy small{display:block;margin-top:3px;color:#8192a3;font-size:9.3px;line-height:1.4;max-width:520px}
+.appSettingsSwitch{width:40px;height:24px}.appSettingsSwitch i{width:40px;height:24px}.appSettingsSwitch i:after{width:18px;height:18px}.appSettingsSwitch input:checked+i:after{transform:translateX(16px)}
+.appSettingSelect{width:auto;min-width:148px;max-width:210px;height:40px;padding:0 34px 0 11px;border-radius:11px;font-size:10.5px;font-weight:800;color:#244663;background:#fff}
+.appSettingsDataCard,.appSettingsAboutCard{grid-column:1/-1}
+.appSettingsActions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:15px 17px 7px}.appSettingsActions .btn{min-height:40px}
+.appSettingsFootnote{margin:3px 17px 16px;color:#8494a4;font-size:9px;line-height:1.45}
+.appAboutRows{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}.appAboutRows>div{padding:15px 17px;border-right:1px solid #edf2f6}.appAboutRows>div:last-child{border-right:0}.appAboutRows span{display:block;color:#8293a4;font-size:8px;text-transform:uppercase;letter-spacing:.07em;font-weight:850}.appAboutRows b{display:block;margin-top:5px;color:#294963;font-size:10.5px;line-height:1.35}
+@media(max-width:820px){.appSettingsGrid{grid-template-columns:1fr}.appSettingsDataCard,.appSettingsAboutCard{grid-column:auto}.appAboutRows{grid-template-columns:1fr}.appAboutRows>div{border-right:0;border-bottom:1px solid #edf2f6}.appAboutRows>div:last-child{border-bottom:0}}
+@media(max-width:520px){.appSettingsCardHead{padding:14px}.appSettingRow{padding:12px 14px;gap:10px}.appSettingSelect{min-width:116px;max-width:138px}.appSettingsActions{display:grid;grid-template-columns:1fr;padding:13px 14px 6px}.appSettingsActions .btn{width:100%}.appSettingsFootnote{margin:4px 14px 14px}}
+
+/* User-selected interface density and guidance. */
+html.flympusHintsOff .wizardHint,
+html.flympusHintsOff .fieldHelp,
+html.flympusHintsOff .mutedHint,
+html.flympusHintsOff .packageFilterHint,
+html.flympusHintsOff .notificationPrefsHint{display:none!important}
+html.flympusCompact main{--compact-gap:8px}
+html.flympusCompact .card,
+html.flympusCompact .formCard,
+html.flympusCompact .settingBox,
+html.flympusCompact .sideCard{border-radius:15px}
+html.flympusCompact .appSettingRow{min-height:54px;padding-top:8px;padding-bottom:8px}
+html.flympusCompact .fields,
+html.flympusCompact .grid,
+html.flympusCompact .reportsGrid,
+html.flympusCompact .people{gap:8px!important}
+html.flympusCompact .dataTable th,
+html.flympusCompact .dataTable td{padding-top:8px!important;padding-bottom:8px!important}
+html.flympusLargeText{font-size:108%}
+html.flympusHighContrast{--line:#aebfce}
+html.flympusHighContrast .card,
+html.flympusHighContrast .input,
+html.flympusHighContrast select,
+html.flympusHighContrast textarea,
+html.flympusHighContrast .multiFilterTrigger{border-color:#9eb2c3!important}
+html.flympusReducedMotion *,
+html.flympusReducedMotion *:before,
+html.flympusReducedMotion *:after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+
+/* Dark theme keeps the existing FLYMPUS hierarchy and colors, only changing surfaces. */
+html[data-flympus-theme="dark"]{color-scheme:dark;--bg:#091522;--card:#102235;--line:#294158;--muted:#9fb0bf;--text:#eef5fb;--shadow:0 10px 30px rgba(0,0,0,.24)}
+html[data-flympus-theme="dark"] body{background:#091522;color:#eef5fb}
+html[data-flympus-theme="dark"] .top{background:#0d1e2f!important;border-color:#294158!important;box-shadow:0 1px 0 #294158!important}
+html[data-flympus-theme="dark"] .topTitle b,
+html[data-flympus-theme="dark"] .pageTitle,
+html[data-flympus-theme="dark"] .sectionHead h2,
+html[data-flympus-theme="dark"] .formTitle h2,
+html[data-flympus-theme="dark"] .settingBox h3,
+html[data-flympus-theme="dark"] .sideCard h3{color:#eaf4fc!important}
+html[data-flympus-theme="dark"] .card,
+html[data-flympus-theme="dark"] .formCard,
+html[data-flympus-theme="dark"] .settingBox,
+html[data-flympus-theme="dark"] .sideCard,
+html[data-flympus-theme="dark"] .workflowStep,
+html[data-flympus-theme="dark"] .saved,
+html[data-flympus-theme="dark"] .infoBox,
+html[data-flympus-theme="dark"] .unifiedFilterGrid,
+html[data-flympus-theme="dark"] .reportFilters,
+html[data-flympus-theme="dark"] .myCoursesFilterBar,
+html[data-flympus-theme="dark"] .multiFilterMenu,
+html[data-flympus-theme="dark"] .topNotificationDropdown,
+html[data-flympus-theme="dark"] .topPersonalProfileDropdown{background:#102235!important;border-color:#294158!important;color:#eaf4fc!important}
+html[data-flympus-theme="dark"] .input,
+html[data-flympus-theme="dark"] select,
+html[data-flympus-theme="dark"] textarea,
+html[data-flympus-theme="dark"] .multiFilterTrigger,
+html[data-flympus-theme="dark"] .btn.secondary{background:#0c1c2c!important;border-color:#36516a!important;color:#dfeaf4!important}
+html[data-flympus-theme="dark"] .appSettingsCardHead,
+html[data-flympus-theme="dark"] .multiFilterMenuHead,
+html[data-flympus-theme="dark"] .notificationPreferences{background:#0d1e2f!important;border-color:#294158!important}
+html[data-flympus-theme="dark"] .appSettingsCardHead h3,
+html[data-flympus-theme="dark"] .appSettingCopy b,
+html[data-flympus-theme="dark"] .appAboutRows b{color:#dcecf8!important}
+html[data-flympus-theme="dark"] .appSettingsCardHead p,
+html[data-flympus-theme="dark"] .appSettingCopy small,
+html[data-flympus-theme="dark"] .appAboutRows span,
+html[data-flympus-theme="dark"] .sub{color:#9fb0bf!important}
+html[data-flympus-theme="dark"] .appSettingRow,
+html[data-flympus-theme="dark"] .appAboutRows>div{border-color:#294158!important}
+html[data-flympus-theme="dark"] .appSettingsIcon{background:#17324a;color:#73b7e8}
+html[data-flympus-theme="dark"] .myCourseCard{background:#102235!important;border-color:#294158!important}
+html[data-flympus-theme="dark"] .myCourseTitle{color:#eaf4fc!important}
+html[data-flympus-theme="dark"] .myCourseMeta .courseMetaTile{background:#0d1e2f!important;border-color:#294158!important}
+html[data-flympus-theme="dark"] .myCourseMeta b{color:#dcecf8!important}
+</style>
 </head>
 <body>
 <div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0726 · rank badge +2px</div><div class="toast" id="toast"></div></div>
@@ -3502,7 +3599,51 @@ const countries=['Israel','Cyprus'];
 let activeCoursePreview={};try{activeCoursePreview=JSON.parse(localStorage.getItem('ct-review-active-course')||'{}')||{}}catch{}
 const currentCourseMeta={type:'EP',phase:'RC Model',platformId:'rc_model',trainingKind:'New Training',dayNight:'Day',country:'Israel',programId:'ep_rc_new',courseName:'Aerostar EP Course',courseCode:'AEP-26',startsOn:'2026-09-01',...activeCoursePreview};
 const syllProgress=[['Basic Handling',100,'Complete'],['Figure 8',100,'Complete'],['Circuits',100,'Complete'],['Emergencies',80,'Current'],['Final Preparation',0,'Next']];
+const flympusAppPreferenceDefaults={
+  navigationSounds:true,
+  refreshSound:true,
+  haptics:true,
+  theme:'system',
+  density:'comfortable',
+  showHints:true,
+  reducedMotion:false,
+  highContrast:false,
+  largerText:false,
+  startScreen:'home'
+};
+function getFlympusAppPreferences(){
+  try{return {...flympusAppPreferenceDefaults,...(JSON.parse(localStorage.getItem('flympus-app-preferences')||'{}')||{})}}
+  catch{return {...flympusAppPreferenceDefaults}}
+}
+function saveFlympusAppPreferences(next){
+  const prefs={...flympusAppPreferenceDefaults,...(next||{})};
+  try{localStorage.setItem('flympus-app-preferences',JSON.stringify(prefs))}catch{}
+  applyFlympusAppPreferences(prefs);
+  return prefs
+}
+function applyFlympusAppPreferences(input){
+  const prefs=input||getFlympusAppPreferences(),root=document.documentElement,body=document.body;
+  const themeMode=['light','dark','system'].includes(prefs.theme)?prefs.theme:'system';
+  const dark=themeMode==='dark'||(themeMode==='system'&&window.matchMedia?.('(prefers-color-scheme: dark)')?.matches);
+  root?.setAttribute('data-flympus-theme',dark?'dark':'light');
+  root?.setAttribute('data-flympus-theme-mode',themeMode);
+  root?.classList.toggle('flympusCompact',prefs.density==='compact');
+  root?.classList.toggle('flympusHintsOff',prefs.showHints===false);
+  root?.classList.toggle('flympusReducedMotion',prefs.reducedMotion===true);
+  root?.classList.toggle('flympusHighContrast',prefs.highContrast===true);
+  root?.classList.toggle('flympusLargeText',prefs.largerText===true);
+  body?.classList.toggle('flympusCompact',prefs.density==='compact');
+}
+applyFlympusAppPreferences();
+if(!window.__flympusThemePreferenceBound){
+  window.__flympusThemePreferenceBound=true;
+  try{window.matchMedia?.('(prefers-color-scheme: dark)')?.addEventListener?.('change',()=>{if(getFlympusAppPreferences().theme==='system')applyFlympusAppPreferences()})}catch{}
+}
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
+if(!sessionStorage.getItem('ct-review-ui')){
+  const landing=getFlympusAppPreferences().startScreen;
+  if(landing==='courses')initialUiState.screen='courses'
+}
 const state={screen:'home',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',rosterStatuses:[],rosterRoles:[],rosterDateFrom:'',rosterDateTo:'',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',reportTrainees:[],reportInstructors:[],reportSyllabi:[],reportDateFrom:'',reportDateTo:'',myCoursesStatuses:[],myCoursesSectors:[],myCoursesPhases:[],myCoursesPlatforms:[],myCoursesTrainings:[],myCoursesCountries:[],myCoursesRoles:[],myCoursesDateFrom:'',myCoursesDateTo:'',packageNameFilters:[],packagePhaseFilters:[],packagePlatformFilters:[],packageCategoryFilters:[],packageContextFilters:[],safetyView:'new',evaluationView:'new',examsView:'new',...initialUiState};
 let courseTailorEditSnapshot=null;
 let advancedArchitectureEditSnapshot=null;
@@ -3561,8 +3702,8 @@ function captureAdvancedArchitectureSnapshot(){
 function beginAdvancedArchitectureEditSession(){advancedArchitectureEditSnapshot=captureAdvancedArchitectureSnapshot()}
 function discardAdvancedArchitectureSession(){restoreLocalStorageScope(advancedArchitectureEditSnapshot);advancedArchitectureEditSnapshot=null;state.packageAddFlow=null;state.packageCreateOpen=null}
 
-const appScreenIds=new Set(['home','courses','record','evaluation','roster','profile','instructor','settings','reports','safety','exams','planned']);
-const appRootScreens=new Set(['courses','roster','planned','record','reports','settings']);
+const appScreenIds=new Set(['home','courses','record','evaluation','roster','profile','instructor','settings','preferences','reports','safety','exams','planned']);
+const appRootScreens=new Set(['courses','roster','planned','record','reports','settings','preferences']);
 let appNavHistory=[];try{const stored=JSON.parse(sessionStorage.getItem('ct-review-nav-history')||'[]');if(Array.isArray(stored))appNavHistory=stored.filter(x=>appScreenIds.has(x))}catch{}
 if(state.screen==='home')appNavHistory=[];else if(appRootScreens.has(state.screen))appNavHistory=['home'];else if(!appNavHistory.length||appNavHistory[0]!=='home')appNavHistory=['home',...appNavHistory.filter(x=>x!=='home')];
 function saveAppNavHistory(){try{sessionStorage.setItem('ct-review-nav-history',JSON.stringify(appNavHistory))}catch{}}
@@ -3876,7 +4017,7 @@ function siteEditDecision(message,{title='Unsaved changes'}={}){
 }
 
 function getEvaluations(){return readCourseArray('ct-review-evals')}function setEvaluations(x){writeCourseArray('ct-review-evals',x)}
-const nav=[['__label','','COURSE'],['courses','courses','My Courses'],['settings','settings','Course Management']];
+const nav=[['__label','','COURSE'],['courses','courses','My Courses'],['settings','settings','Course Management'],['__label','','APP'],['preferences','preferences','Settings']];
 function navIconSvg(name){
   const paths={
     courses:'<rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"></rect><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="1"></rect><rect x="14" y="14" width="6.5" height="6.5" rx="1"></rect>',
@@ -3889,6 +4030,7 @@ function navIconSvg(name){
     record:'<rect x="5" y="4.5" width="14" height="16" rx="2"></rect><path d="M9 3h6v3H9z"></path><path d="M12 9v7M8.5 12.5h7"></path>',
     reports:'<path d="M4 20.5h16"></path><rect x="5" y="12" width="3" height="6.5" rx=".7"></rect><rect x="10.5" y="8" width="3" height="10.5" rx=".7"></rect><rect x="16" y="4" width="3" height="14.5" rx=".7"></rect>',
     settings:'<path d="M4 7h10M18 7h2M4 12h3M11 12h9M4 17h8M16 17h4"></path><circle cx="16" cy="7" r="2"></circle><circle cx="9" cy="12" r="2"></circle><circle cx="14" cy="17" r="2"></circle>',
+    preferences:'<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 .6 1 1.7 1.7 0 0 0 1.1.4h.1v4h-.1a1.7 1.7 0 0 0-1.7.6Z"></path>',
     more:'<circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle>'
   };
   return '<span class="navIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none">'+(paths[name]||'')+'</svg></span>';
@@ -4340,6 +4482,7 @@ function resetFlympusAudioSession(){
 
 function playFlympusBottomNavSound(){
   try{
+    if(getFlympusAppPreferences().navigationSounds===false)return;
     setFlympusAmbientAudioSession();
 
     /* The selected signature is ~86 ms. Prevent acoustic overlap, but never
@@ -4373,6 +4516,7 @@ function flympusDirectHapticOverlayHtml(){
 }
 function triggerFlympusPortableHaptic(duration=8){
   try{
+    if(getFlympusAppPreferences().haptics===false)return false;
     if(typeof navigator.vibrate==='function'){
       return !!navigator.vibrate(Math.max(1,Math.min(20,Number(duration)||8)));
     }
@@ -4419,6 +4563,7 @@ function bindFlympusNavPressSound(el,onImmediatePress=null){
 
 function armFlympusRefreshSound(){
   try{
+    if(getFlympusAppPreferences().refreshSound===false)return null;
     setFlympusAmbientAudioSession();
     const pool=getFlympusRefreshAudioPool();if(!pool.length)return null;
     const a=pool[flympusRefreshAudioIndex++%pool.length];
@@ -6376,6 +6521,42 @@ function cfgProfileEditor(p,c){
     '<div class="sectionHead"><h2>Assigned emergencies</h2><p>Emergency categories are defined in Course type setup and used in the Evaluation picker.</p></div><div id="cfgProfileEmergencies">'+checks('emergencyIds',scopedEmer,v.emergencyIds,x=>' · '+resolveEmergencyCategory(x.category||defaultEmergencyCategory(x.name)))+'</div>'+
     '<div class="toolbar"><button class="btn sky" type="submit">'+(p?'Save profile':'Create profile')+'</button>'+(p?'<button class="btn secondary" type="button" id="cfgProfileCancel">Cancel</button>':'')+'</div></form>';
 }
+function appPreferenceSwitch(key,title,copy,checked){
+  return '<div class="appSettingRow"><div class="appSettingCopy"><b>'+esc(title)+'</b><small>'+esc(copy)+'</small></div><label class="prefSwitch appSettingsSwitch"><input type="checkbox" data-app-pref="'+esc(key)+'" '+(checked?'checked':'')+'><i></i></label></div>'
+}
+function appPreferencesScreen(){
+  const p=getFlympusAppPreferences(),theme=['system','light','dark'].includes(p.theme)?p.theme:'system',density=p.density==='compact'?'compact':'comfortable';
+  const build=(document.querySelector('.reviewBanner')?.textContent||'FLYMPUS Review').trim();
+  const mode=(window.navigator?.standalone===true||window.matchMedia?.('(display-mode: standalone)')?.matches)?'Installed web app':'Browser';
+  return '<div class="appSettingsHead"><div><div class="eyebrow">APP SETTINGS</div><h1 class="pageTitle">Settings</h1><p class="sub">Personal device and interface preferences. Course configuration stays in Course Management; profile and notification preferences stay in their existing menus.</p></div></div>'+
+  '<div class="appSettingsGrid">'+
+    '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('home')+'</span><div><h3>General</h3><p>Choose how FLYMPUS opens and how much guidance the interface shows.</p></div></div>'+
+      '<div class="appSettingRow"><div class="appSettingCopy"><b>Default landing page</b><small>Used when FLYMPUS opens in a new browser/app session. Refresh still stays on the current screen.</small></div><select class="appSettingSelect" data-app-pref-select="startScreen"><option value="home" '+(p.startScreen!=='courses'?'selected':'')+'>Home</option><option value="courses" '+(p.startScreen==='courses'?'selected':'')+'>My Courses</option></select></div>'+
+      appPreferenceSwitch('showHints','Interface guidance','Show helper text, hints and explanatory notes throughout the app.',p.showHints!==false)+
+    '</section>'+
+    '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('record')+'</span><div><h3>Sounds & Haptics</h3><p>Control the interaction feedback generated by this device.</p></div></div>'+
+      appPreferenceSwitch('navigationSounds','Navigation sounds','Play the short FLYMPUS sound when using the primary navigation.',p.navigationSounds!==false)+
+      appPreferenceSwitch('refreshSound','Pull-to-refresh sound','Play the refresh sound when the pull threshold is reached.',p.refreshSound!==false)+
+      appPreferenceSwitch('haptics','Haptic feedback','Use vibration/haptic feedback where the browser or device supports it.',p.haptics!==false)+
+    '</section>'+
+    '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('preferences')+'</span><div><h3>Appearance</h3><p>Keep the same FLYMPUS design language while adapting it to your device.</p></div></div>'+
+      '<div class="appSettingRow"><div class="appSettingCopy"><b>Theme</b><small>Follow the device, or choose a fixed light or dark appearance.</small></div><select class="appSettingSelect" data-app-pref-select="theme"><option value="system" '+(theme==='system'?'selected':'')+'>System</option><option value="light" '+(theme==='light'?'selected':'')+'>Light</option><option value="dark" '+(theme==='dark'?'selected':'')+'>Dark</option></select></div>'+
+      '<div class="appSettingRow"><div class="appSettingCopy"><b>Interface density</b><small>Compact reduces spacing in cards, tables and controls without changing content.</small></div><select class="appSettingSelect" data-app-pref-select="density"><option value="comfortable" '+(density==='comfortable'?'selected':'')+'>Comfortable</option><option value="compact" '+(density==='compact'?'selected':'')+'>Compact</option></select></div>'+
+      appPreferenceSwitch('largerText','Larger interface text','Increase base interface text size while preserving responsive layouts.',p.largerText===true)+
+    '</section>'+
+    '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('safety')+'</span><div><h3>Accessibility</h3><p>Reduce visual motion or strengthen contrast where helpful.</p></div></div>'+
+      appPreferenceSwitch('reducedMotion','Reduce motion','Minimize non-essential transitions and animations.',p.reducedMotion===true)+
+      appPreferenceSwitch('highContrast','Higher contrast','Strengthen borders and text contrast across the interface.',p.highContrast===true)+
+    '</section>'+
+    '<section class="card appSettingsCard appSettingsDataCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('settings')+'</span><div><h3>Data & Device</h3><p>These actions affect only data stored in this browser or installed web app.</p></div></div>'+
+      '<div class="appSettingsActions"><button class="btn secondary" type="button" id="clearRememberedUi">Clear remembered interface state</button><button class="btn secondary" type="button" id="resetAppPreferences">Reset app settings</button><button class="btn danger" type="button" id="resetLocalReviewDataFromSettings">Reset local review data</button></div>'+
+      '<p class="appSettingsFootnote">Reset local review data removes browser-local review records and course review state. It does not change the source code or reusable GitHub build.</p>'+
+    '</section>'+
+    '<section class="card appSettingsCard appSettingsAboutCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+navIconSvg('courses')+'</span><div><h3>About FLYMPUS</h3><p>Build and device context for troubleshooting.</p></div></div>'+
+      '<div class="appAboutRows"><div><span>Build</span><b>'+esc(build)+'</b></div><div><span>Running as</span><b>'+esc(mode)+'</b></div><div><span>Storage</span><b>Local review data on this device</b></div></div>'+
+    '</section>'+
+  '</div>';
+}
 function settings(){
   const c=cfgGet(),tab=state.settingsTab==='profiles'?'builder':state.settingsTab==='packages'?'catalog':(state.settingsTab||'builder');
   const type=state.builderType||'',phases=type?c.phases.filter(x=>x.type===type):[],phase=state.builderPhase&&phases.some(x=>x.id===state.builderPhase)?state.builderPhase:'';
@@ -6724,6 +6905,7 @@ function buildFlympusScreenHtml(screen){
     case'profile':html=traineeProfile();break;
     case'instructor':html=instructorProfile();break;
     case'settings':html=settings();break;
+    case'preferences':html=appPreferencesScreen();break;
     case'reports':html=reports();break;
     case'safety':html=safetyScreen();break;
     case'exams':html=examsScreen();break;
@@ -6967,6 +7149,7 @@ if($('#removePersonFromCourse'))$('#removePersonFromCourse').onclick=async()=>{c
 if($('#editPersonForm'))$('#editPersonForm').onsubmit=async e=>{e.preventDefault();const key=state.personEditKey||'',type=key.split(':')[0],id=key.split(':').slice(1).join(':'),fd=new FormData(e.currentTarget),list=type==='INSTRUCTOR'?allInstructors():allTrainees(),p=list.find(x=>x.id===id);if(!p)return;const name=String(fd.get('name')||'').trim(),email=String(fd.get('email')||'').trim(),membership=String(fd.get('membership')||''),patch={name,email};if(state.personPhotoDraft!==undefined)patch.photoData=state.personPhotoDraft;if(type==='TRAINEE'){const current=courseMembershipFor(id,'TRAINEE',{status:p.status||'Active'}).status;if(current!==membership&&membership==='Inactive'&&!(await siteConfirm('Set '+name+' inactive for '+currentCourseId+'?',{title:'Set trainee inactive?',confirmLabel:'Set inactive',tone:'warning'})))return;personOverride(id,patch);updateCourseMembership(id,'TRAINEE',{status:membership,removed:false})}else{const current=courseMembershipFor(id,'INSTRUCTOR',{role:p.role||'INSTRUCTOR'}).role;if(current!==membership&&membership==='COURSE_MANAGER'&&!(await siteConfirm('Make '+name+' Course Manager for '+currentCourseId+'? The current Course Manager will become Instructor.',{title:'Change Course Manager?',confirmLabel:'Confirm change',tone:'primary'})))return;personOverride(id,patch);if(membership==='COURSE_MANAGER'){courseInstructors().forEach(i=>updateCourseMembership(i.id,'INSTRUCTOR',{role:i.id===id?'COURSE_MANAGER':'INSTRUCTOR',removed:false}))}else updateCourseMembership(id,'INSTRUCTOR',{role:'INSTRUCTOR',removed:false})}state.personEditKey=null;state.personPhotoDraft=undefined;toast('Person details saved');render()};
 if(state.screen==='evaluation')bindEval();
 if(state.screen==='settings')bindSettings();
+if(state.screen==='preferences')bindAppPreferences();
 if(state.screen==='reports')bindReports();
 if(state.screen==='planned')bindPlanned();
 if(state.screen==='safety')bindSafety();
@@ -6982,6 +7165,31 @@ if(state.screen==='profile'){bindActivity();
 if($('#resetBrokenReviewState'))$('#resetBrokenReviewState').onclick=async()=>{if(await siteConfirm('Reset browser-local review data? This removes the local review data stored in this browser.',{title:'Reset local review data?',confirmLabel:'Reset',tone:'danger'})){Object.keys(localStorage).filter(k=>k.startsWith('ct-review-')).forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('ct-review-ui');location.reload()}};document.querySelectorAll('[data-edit-eval]').forEach(b=>b.onclick=()=>{state.editingEval=b.dataset.editEval;state.evaluationView='new';render();forcePageTop()});}
 
 
+function bindAppPreferences(){
+  document.querySelectorAll('[data-app-pref]').forEach(el=>el.onchange=()=>{
+    const prefs=getFlympusAppPreferences();prefs[el.dataset.appPref]=!!el.checked;saveFlympusAppPreferences(prefs);toast('Setting saved')
+  });
+  document.querySelectorAll('[data-app-pref-select]').forEach(el=>el.onchange=()=>{
+    const prefs=getFlympusAppPreferences(),key=el.dataset.appPrefSelect;prefs[key]=el.value;saveFlympusAppPreferences(prefs);
+    if(key==='theme'||key==='density')render();else toast('Setting saved')
+  });
+  if($('#clearRememberedUi'))$('#clearRememberedUi').onclick=async()=>{
+    if(!(await siteConfirm('Clear remembered screen, navigation and scroll state for this browser? Course data will not be removed.',{title:'Clear interface state?',confirmLabel:'Clear state',tone:'warning'})))return;
+    Object.keys(sessionStorage).filter(k=>k.startsWith('ct-review-')).forEach(k=>sessionStorage.removeItem(k));
+    location.reload()
+  };
+  if($('#resetAppPreferences'))$('#resetAppPreferences').onclick=async()=>{
+    if(!(await siteConfirm('Restore all app settings on this device to their defaults?',{title:'Reset app settings?',confirmLabel:'Reset settings',tone:'warning'})))return;
+    try{localStorage.removeItem('flympus-app-preferences')}catch{}
+    applyFlympusAppPreferences(flympusAppPreferenceDefaults);toast('App settings restored');render()
+  };
+  if($('#resetLocalReviewDataFromSettings'))$('#resetLocalReviewDataFromSettings').onclick=async()=>{
+    if(!(await siteConfirm('Reset browser-local review data? This removes the local review data stored in this browser.',{title:'Reset local review data?',confirmLabel:'Reset',tone:'danger'})))return;
+    Object.keys(localStorage).filter(k=>k.startsWith('ct-review-')).forEach(k=>localStorage.removeItem(k));
+    Object.keys(sessionStorage).filter(k=>k.startsWith('ct-review-')).forEach(k=>sessionStorage.removeItem(k));
+    location.reload()
+  };
+}
 function bindActivity(){
   const form=$('#activityForm');
   if(form)form.onsubmit=e=>{
