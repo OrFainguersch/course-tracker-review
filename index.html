@@ -4152,7 +4152,9 @@ function flympusI18nProtectedValues(){
   return values
 }
 function applyFlympusLanguage(root=document.body){
-  const lang=getFlympusAppPreferences().language==='he'?'he':'en',scope=root||document.body;if(!scope)return,protectedValues=flympusI18nProtectedValues();
+  const lang=getFlympusAppPreferences().language==='he'?'he':'en',scope=root||document.body;
+  if(!scope)return;
+  const protectedValues=flympusI18nProtectedValues();
   const skip=node=>{
     const parent=node?.parentElement;if(!parent)return false;
     if(parent.closest?.('script,style,noscript,textarea,[data-i18n-skip]'))return true;
