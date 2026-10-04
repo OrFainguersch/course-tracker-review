@@ -3719,6 +3719,41 @@ html[data-flympus-language="he"] .modalCard .toolbar{direction:rtl}
   html[data-flympus-language="he"] .rankCorner{padding:8px 10px 9px 8px!important;border-bottom-right-radius:18px!important}
 }
 </style>
+<style>
+/* ===== Hebrew mirror fixes · drawer + roster cards ===== */
+@media(max-width:759px){
+  html[data-flympus-language="he"] body.drawerPushOpen .top,
+  html[data-flympus-language="he"] body.drawerPushOpen main,
+  html[data-flympus-language="he"] body.drawerPushOpen .mobileBottomNav,
+  html[data-flympus-language="he"] body.drawerPushOpen .reviewBanner,
+  html[data-flympus-language="he"] body.drawerPushOpen .toast{
+    translate:calc(-1 * var(--drawer-push-width)) 0!important;
+  }
+}
+html[data-flympus-language="he"] .personCard.traineeRosterCard,
+html[data-flympus-language="he"] .personCard.instructorRosterCard{
+  direction:rtl!important;
+  grid-template-columns:auto minmax(0,1fr) auto!important;
+}
+html[data-flympus-language="he"] .personCard.traineeRosterCard .personInfo,
+html[data-flympus-language="he"] .personCard.instructorRosterCard .personInfo{
+  text-align:right!important;
+  direction:rtl!important;
+}
+html[data-flympus-language="he"] .rosterTraineeHead{
+  justify-items:start!important;
+  text-align:right!important;
+}
+html[data-flympus-language="he"] .rosterTraineeHead>b,
+html[data-flympus-language="he"] .rosterTraineeHead .rosterStatus{
+  justify-self:start!important;
+  text-align:right!important;
+}
+html[data-flympus-language="he"] .rosterMetricRow{direction:rtl!important}
+html[data-flympus-language="he"] .rosterMetric,
+html[data-flympus-language="he"] .rosterMetricCopy{text-align:right!important;align-items:flex-start!important}
+html[data-flympus-language="he"] .personCard .rosterChevron{transform:scaleX(-1)}
+</style>
 </head>
 <body>
 <div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0726 · rank badge +2px</div><div class="toast" id="toast"></div></div>
@@ -4229,6 +4264,63 @@ Object.assign(FLYMPUS_HE_UI,{
   'Course Share':'נתח מהקורס','Instructed Flights':'טיסות עם מדריך','Active trainees':'חניכים פעילים'
 });
 
+Object.assign(FLYMPUS_HE_UI,{
+  'Trainees and instructors assigned to this course.':'חניכים ומדריכים המשויכים לקורס זה.',
+  'Manage mode':'מצב ניהול','Edit identity, photo and course membership safely.':'ערוך זהות, תמונה ושיוך לקורס באופן בטוח.',
+  'Add person':'הוסף אדם','Done editing':'סיום עריכה','All':'הכול','From date':'מתאריך','To date':'עד תאריך',
+  'DAILY OPERATIONS':'פעילות יומית','Planned vs Executed':'מתוכנן מול מבוצע',
+  'Set the daily plan, record actual solo execution, and classify every cancellation for later tracking.':'הגדר את התכנון היומי, תעד ביצועי סולו בפועל וסווג כל ביטול לצורך מעקב.',
+  'Day overview':'סקירת היום','Instructed flights are counted automatically from submitted Evaluations. Solo flights are recorded below.':'טיסות מודרכות נספרות אוטומטית מהערכות שנשלחו. טיסות סולו מתועדות להלן.',
+  'Planned':'מתוכנן','Executed':'בוצע','Cancelled':'בוטל','No cancellations':'אין ביטולים','None':'אין',
+  'Enter the number of instructed and solo flights intended for this date.':'הזן את מספר הטיסות המודרכות וטיסות הסולו המתוכננות לתאריך זה.',
+  'Execution':'ביצוע','Instructed is automatic. Solo entry opens only when at least one solo flight is planned.':'הטיסות המודרכות מתעדכנות אוטומטית. הזנת סולו נפתחת רק כאשר מתוכננת לפחות טיסת סולו אחת.',
+  'Recorded for this date':'תועד לתאריך זה','Add executed solo flight':'הוסף טיסת סולו שבוצעה',
+  'Assign the completed flight to the trainee and solo syllabus actually flown.':'שייך את הטיסה שבוצעה לחניך ולסילבוס הסולו שבוצע בפועל.',
+  'Add solo flight':'הוסף טיסת סולו','SOLO ENTRY LOCKED':'הזנת סולו נעולה','No solo flight is planned for this date.':'לא מתוכננת טיסת סולו לתאריך זה.',
+  'Set Planned Solo to 1 or more in the Plan section before recording a new solo execution.':'הגדר סולו מתוכנן ל־1 או יותר באזור התכנון לפני תיעוד ביצוע סולו חדש.',
+  'Recorded solo flights':'טיסות סולו שתועדו','Cancellation reasons':'סיבות ביטול',
+  'Each row represents one planned flight that was not executed and is stored separately for reporting.':'כל שורה מייצגת טיסה מתוכננת שלא בוצעה ונשמרת בנפרד לצורכי דיווח.',
+  'Select cancellation reason':'בחר סיבת ביטול','Previous reason':'סיבה קודמת','No reason':'ללא סיבה',
+  'Record, review and revise flight evaluations with weighted criteria and emergency practice.':'תעד, סקור ועדכן הערכות טיסה עם קריטריונים משוקללים ותרגול מצבי חירום.',
+  'Edit evaluation':'ערוך הערכה','Required before submission':'נדרש לפני שליחה',
+  'Complete the required fields below before submitting this evaluation.':'יש להשלים את השדות הנדרשים להלן לפני שליחת ההערכה.',
+  'Duration':'משך','Assessment criteria':'קריטריוני הערכה','Weighted score exactly like the Phase 2 workflow.':'ציון משוקלל בהתאם לשיטת העבודה של Phase 2.',
+  'Suggested grade':'ציון מוצע','Grade source':'מקור הציון','Use suggested grade':'השתמש בציון המוצע','Instructor override':'ציון מדריך ידני','Instructor grade':'ציון מדריך',
+  'Comments':'הערות','Observed performance…':'ביצועים שנצפו…','Next-flight emphases':'דגשים לטיסה הבאה',
+  'Add one clear emphasis per item. These will appear numbered in the trainee profile.':'הוסף דגש ברור אחד בכל שורה. הדגשים יוצגו ממוספרים בפרופיל החניך.',
+  'Next-flight emphasis':'דגש לטיסה הבאה','Add emphasis':'הוסף דגש','Change reason':'סיבת שינוי','Correction':'תיקון','Cancel edit':'בטל עריכה',
+  'Emergency practice':'תרגול מצבי חירום','Planned emergencies are highlighted here. Enter only what was actually performed on this flight.':'מצבי חירום מתוכננים מודגשים כאן. הזן רק מה שבוצע בפועל בטיסה זו.',
+  'Search emergency…':'חפש מצב חירום…','Used now':'בוצע כעת',
+  'Record and review theoretical exam results for this course.':'תעד וסקור תוצאות מבחנים עיוניים עבור קורס זה.',
+  'New result':'תוצאה חדשה','Exam result':'תוצאת מבחן','Select exam':'בחר מבחן','Passing grade':'ציון מעבר','Grade':'ציון','Submit exam result':'שלח תוצאת מבחן',
+  'Result':'תוצאה','Below pass':'מתחת לציון המעבר','Not recorded':'לא תועד',
+  'SUGGESTED GRADE':'ציון מוצע','SUGGESTED':'מוצע','Benchmark':'מדד ייחוס','Scale':'סולם ציונים',
+  'Instructor Emphases':'דגשי מדריך','Objectives / benchmark':'יעדים / מדד ייחוס',
+  'No matching people.':'לא נמצאו אנשים התואמים למסננים.','Add to course roster':'הוסף לסגל הקורס',
+  'Assign an existing person or create a new one for this course.':'שייך אדם קיים או צור אדם חדש עבור קורס זה.',
+  'Existing person':'אדם קיים','Select person':'בחר אדם','Add existing person':'הוסף אדם קיים','or create new':'או צור חדש',
+  'Email (optional)':'דוא״ל (אופציונלי)','Set inactive':'הפוך ללא פעיל','Set trainee inactive?':'להפוך את החניך ללא פעיל?',
+  'Person details saved':'פרטי האדם נשמרו','Activity record removed':'רשומת הפעילות הוסרה',
+  'Review needed':'נדרשת בדיקה','Minimum met':'המינימום הושג','Program complete':'התכנית הושלמה','Ready to start':'מוכן להתחלה',
+  'Ready for next solo':'מוכן לסולו הבא','All experience requirements complete':'כל דרישות הניסיון הושלמו',
+  'Add external / historical experience':'הוסף ניסיון חיצוני / היסטורי','Record practical task':'תעד משימה מעשית',
+  'Practical repetitions required by this training suit.':'חזרות מעשיות הנדרשות לפי חליפת הכשרה זו.',
+  'Required practical repetitions for this active training suit.':'חזרות מעשיות הנדרשות לפי חליפת ההכשרה הפעילה.',
+  'Takeoffs, landings and other counters required by this training suit.':'המראות, נחיתות ומונים נוספים הנדרשים לפי חליפת הכשרה זו.',
+  'Required instructed flights':'טיסות מודרכות נדרשות','Required syllabus gates':'שערי סילבוס נדרשים','Emergency types practiced':'סוגי מצבי חירום שתורגלו',
+  'Choose Edit to create, change or delete Packages.':'בחר עריכה כדי ליצור, לשנות או למחוק חבילות.',
+  'Create a new Package here or edit an existing one below.':'צור כאן חבילה חדשה או ערוך חבילה קיימת להלן.',
+  'Choose the EP phase.':'בחר את שלב ה־EP.','Choose the platform.':'בחר את הפלטפורמה.','Choose the training purpose.':'בחר את מטרת ההכשרה.',
+  'Choose Day, Night or Day + Night.':'בחר יום, לילה או יום + לילה.','Complete the next selection to resolve the training suit.':'השלם את הבחירה הבאה כדי לקבוע את חליפת ההכשרה.',
+  'Select a syllabus to resolve Day / Night':'בחר סילבוס כדי לקבוע יום / לילה','currently defined for the selected sector.':'מוגדרים כעת עבור הסקטור שנבחר.',
+  'Add assessment criterion':'הוסף קריטריון הערכה','Criterion name':'שם הקריטריון','Add emergency requirement':'הוסף דרישת חירום',
+  'Add exam':'הוסף מבחן','Exam name':'שם המבחן','Add experience requirement':'הוסף דרישת ניסיון','Requirement name':'שם הדרישה','Add progression gate':'הוסף שער התקדמות',
+  'Defined progression gate':'שער התקדמות מוגדר','Optional reference or explanation':'הפניה או הסבר אופציונליים',
+  'Course Tracker screen render failed':'טעינת מסך FLYMPUS נכשלה','Could not enable system notifications':'לא ניתן היה להפעיל התראות מערכת',
+  'Could not send the test notification':'לא ניתן היה לשלוח התראת בדיקה','Notification permission is required for the test.':'נדרשת הרשאת התראות לצורך הבדיקה.',
+  'Notification preferences saved':'העדפות ההתראות נשמרו','System notifications require HTTPS.':'התראות מערכת דורשות HTTPS.'
+});
+
 const flympusI18nTextOriginal=new WeakMap(),flympusI18nAttrOriginal=new WeakMap();
 const FLYMPUS_HE_UI_CASEFOLD=(()=>{const map=new Map();Object.entries(FLYMPUS_HE_UI).forEach(([key,value])=>{const folded=String(key).trim().toLocaleLowerCase('en');if(folded&&!map.has(folded))map.set(folded,value)});return map})();
 function flympusTranslateUiString(value){
@@ -4298,6 +4390,24 @@ function flympusTranslateUiString(value){
     else if((m=trim.match(/^(\d+) takeoffs · (\d+) landings · (\d+) min$/)))translated=m[1]+' המראות · '+m[2]+' נחיתות · '+m[3]+' דקות';
     else if((m=trim.match(/^(.+) · Passing grade (\d+)%$/)))translated=m[1]+' · ציון מעבר '+m[2]+'%';
     else if((m=trim.match(/^(.+) · choose the course you want to work in\.$/)))translated=m[1]+' · בחר את הקורס שבו ברצונך לעבוד.';
+    else if((m=trim.match(/^Search (trainees|instructors)\.\.\.$/)))translated='חפש '+(m[1]==='trainees'?'חניכים':'מדריכים')+'…';
+    else if((m=trim.match(/^From submitted Evaluations on (.+)\.$/)))translated='מהערכות שנשלחו בתאריך '+m[1]+'.';
+    else if((m=trim.match(/^(\d+) recorded$/)))translated=m[1]+' תועדו';
+    else if((m=trim.match(/^(\d+) total$/)))translated='סה״כ '+m[1];
+    else if((m=trim.match(/^(\d+) cancelled$/)))translated=m[1]+' בוטלו';
+    else if((m=trim.match(/^Benchmark ([0-9.]+) · Scale ([0-9.]+)[–-]([0-9.]+)$/)))translated='מדד ייחוס '+m[1]+' · סולם '+m[2]+'–'+m[3];
+    else if((m=trim.match(/^(\d+) recorded now$/)))translated=m[1]+' תועדו כעת';
+    else if((m=trim.match(/^Planned \((\d+)\)$/)))translated='מתוכנן ('+m[1]+')';
+    else if((m=trim.match(/^past (\d+)$/i)))translated='בעבר '+m[1];
+    else if((m=trim.match(/^now (\d+)$/i)))translated='כעת '+m[1];
+    else if((m=trim.match(/^(\d+) of (\d+) practiced previously · (\d+) total occurrences$/)))translated=m[1]+' מתוך '+m[2]+' תורגלו בעבר · '+m[3]+' מופעים בסך הכול';
+    else if((m=trim.match(/^(\d+) total occurrences$/)))translated=m[1]+' מופעים בסך הכול';
+    else if((m=trim.match(/^(\d+) total occurrence$/)))translated=m[1]+' מופע בסך הכול';
+    else if((m=trim.match(/^(\d+) min$/)))translated=m[1]+' דקות';
+    else if((m=trim.match(/^Edit evaluation · revision (\d+)$/)))translated='עריכת הערכה · גרסה '+m[1];
+    else if((m=trim.match(/^History (\d+)$/)))translated='היסטוריה '+m[1];
+    else if((m=trim.match(/^([*])(.+)$/))){const inner=FLYMPUS_HE_UI[m[2]]||FLYMPUS_HE_UI_CASEFOLD.get(m[2].toLocaleLowerCase('en'));if(inner)translated=m[1]+inner}
+    else if((m=trim.match(/^(.+)([*])$/))){const inner=FLYMPUS_HE_UI[m[1]]||FLYMPUS_HE_UI_CASEFOLD.get(m[1].toLocaleLowerCase('en'));if(inner)translated=inner+m[2]}
   }
   if(!translated)return raw;
   const lead=raw.match(/^\s*/)?.[0]||'',tail=raw.match(/\s*$/)?.[0]||'';
