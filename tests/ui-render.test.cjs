@@ -610,3 +610,6 @@ assert(html.includes("Complete dark theme audit")&&html.includes("html[data-flym
   "Dark mode must cover reusable workflow surfaces across Course Management and daily operations");
 assert(html.includes("Early preference bootstrap: prevent RTL/theme/text paint flashes on reload."),
   "Theme and text preferences must be applied before first paint");
+
+assert(html.includes("Dark completeness pass · settings + workflow surfaces")&&html.includes('html[data-flympus-theme="dark"] .myCourseCard')&&html.includes('html[data-flympus-theme="dark"] .wizardCreateBar'),
+  "Dark-mode completion pass must cover course cards and sticky workflow surfaces that previously stayed light");
