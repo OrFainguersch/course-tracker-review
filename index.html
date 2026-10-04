@@ -4471,7 +4471,14 @@ function applyFlympusLanguage(root=document.body){
 }
 if(!window.__flympusI18nObserverBound&&window.MutationObserver){
   window.__flympusI18nObserverBound=true;
-  const start=()=>{if(!document.body)return;const observer=new MutationObserver(muts=>{if(getFlympusAppPreferences().language!=='he')return;muts.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType===1)applyFlympusLanguage(n);else if(n.nodeType===3&&n.parentElement)applyFlympusLanguage(n.parentElement)}))});observer.observe(document.body,{childList:true,subtree:true})};
+  const start=()=>{if(!document.body)return;const observer=new MutationObserver(muts=>{
+    if(getFlympusAppPreferences().language!=='he')return;
+    muts.forEach(m=>{
+      if(m.type==='childList')m.addedNodes.forEach(n=>{if(n.nodeType===1)applyFlympusLanguage(n);else if(n.nodeType===3&&n.parentElement)applyFlympusLanguage(n.parentElement)});
+      else if(m.type==='characterData'&&m.target?.parentElement)applyFlympusLanguage(m.target.parentElement);
+      else if(m.type==='attributes'&&m.target?.nodeType===1)applyFlympusLanguage(m.target)
+    })
+  });observer.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label']})};
   if(document.body)start();else document.addEventListener('DOMContentLoaded',start,{once:true})
 }
 
