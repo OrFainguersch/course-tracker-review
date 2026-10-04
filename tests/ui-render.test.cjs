@@ -608,8 +608,8 @@ assert(html.includes("html.flympusLargeText body{font-size:17px!important}")&&ht
   "Large text must scale body copy, controls and table content rather than only titles");
 assert(html.includes("Complete dark theme audit")&&html.includes("html[data-flympus-theme=\"dark\"] .packageSyllabusTable")&&html.includes("html[data-flympus-theme=\"dark\"] .pveExecutionOverview>div"),
   "Dark mode must cover reusable workflow surfaces across Course Management and daily operations");
-assert(html.includes("Early preference bootstrap: prevent RTL/theme/text paint flashes on reload."),
-  "Theme and text preferences must be applied before first paint");
+assert(html.includes("Early preference bootstrap: keep first paint identical to the last visible"),
+  "Theme and text preferences must be stabilized before first paint");
 
 assert(html.includes("Dark completeness pass · settings + workflow surfaces")&&html.includes('html[data-flympus-theme="dark"] .myCourseCard')&&html.includes('html[data-flympus-theme="dark"] .wizardCreateBar'),
   "Dark-mode completion pass must cover course cards and sticky workflow surfaces that previously stayed light");
@@ -644,4 +644,26 @@ assert(html.includes("(hapticsRelevant?appPreferenceSwitch('haptics','Haptic fee
   "Desktop Settings must omit the Haptic feedback row while retaining it on relevant mobile devices");
 assert(html.includes("const feedbackTitle=hapticsRelevant?'Sounds & Haptics':'Sounds'"),
   "Desktop Settings must label the section Sounds when haptics are not relevant");
+
+/* iOS/PWA foreground visual lifecycle */
+assert(html.includes("FLYMPUS_RESOLVED_THEME_KEY='flympus-last-resolved-theme'")&&
+  html.includes("if(!allowSystemProbe||document.visibilityState==='hidden')return current||stable||'light'"),
+  "System theme must freeze to the last visible resolved theme while the app is hidden");
+assert(html.includes("pendingSystemThemeSync=true")&&
+  html.includes("window.addEventListener('pageshow',scheduleForegroundThemeSync"),
+  "System theme changes that occur in the background must be deferred until a visible foreground frame");
+assert(html.includes("flympusResumeVisualSync")&&
+  html.includes("transition:none!important"),
+  "Foreground reconciliation must suppress one-frame CSS transitions and visual cross-fades");
+assert(html.includes("snap.visualVersion===2")&&html.includes("snapFresh=snapAge<=15*60*1000")&&
+  html.includes("snap.resolvedTheme===currentResolvedTheme"),
+  "Reload snapshots must be fresh and visually compatible before they are painted");
+assert(html.includes("visualVersion:2")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
+  html.includes("largerText:!!root?.classList.contains('flympusLargeText')"),
+  "Saved reload snapshots must include the visual preference signature used for first-paint validation");
+assert(html.indexOf('<meta name="theme-color" content="#07294c" />')<html.indexOf('Early preference bootstrap: keep first paint identical'),
+  "theme-color metadata must exist before the early bootstrap so status-bar color can be corrected before first paint");
+assert(html.includes('<meta name="color-scheme" content="light" />')&&
+  html.includes("document.querySelector('meta[name=\"color-scheme\"]')?.setAttribute('content',resolvedTheme)"),
+  "Native browser controls and the document color-scheme must stay aligned with the resolved FLYMPUS theme");
 
