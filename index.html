@@ -4995,6 +4995,10 @@ Object.assign(FLYMPUS_HE_UI,{
   'Restore all app settings on this device to their default values?':'להחזיר את כל הגדרות האפליקציה במכשיר זה לערכי ברירת המחדל?'
 });
 
+Object.assign(FLYMPUS_HE_UI,{
+  "Restore this device's app preferences without changing course or training data.":"שחזר את העדפות האפליקציה במכשיר זה מבלי לשנות נתוני קורס או הכשרה."
+});
+
 const flympusI18nTextOriginal=new WeakMap(),flympusI18nAttrOriginal=new WeakMap();
 const FLYMPUS_HE_UI_CASEFOLD=(()=>{const map=new Map();Object.entries(FLYMPUS_HE_UI).forEach(([key,value])=>{const folded=String(key).trim().toLocaleLowerCase('en');if(folded&&!map.has(folded))map.set(folded,value)});return map})();
 function flympusTranslateUiString(value){
@@ -8282,9 +8286,8 @@ function appPreferencesScreen(){
       '<div class="appSettingRow"><div class="appSettingCopy"><b>Theme</b><small>Follow the device, or choose a fixed light or dark appearance.</small></div><select class="appSettingSelect" data-app-pref-select="theme"><option value="system" '+(theme==='system'?'selected':'')+'>System</option><option value="light" '+(theme==='light'?'selected':'')+'>Light</option><option value="dark" '+(theme==='dark'?'selected':'')+'>Dark</option></select></div>'+
       appPreferenceSwitch('largerText','Larger interface text','Increase base interface text size while preserving responsive layouts.',p.largerText===true)+
     '</section>'+
-    '<section class="card appSettingsCard appSettingsDataCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('data')+'</span><div><h3>Data & Device</h3><p>These actions affect only data stored in this browser or installed web app.</p></div></div>'+
-      '<div class="appSettingsActions"><button class="btn secondary" type="button" id="resetAppPreferences">Reset settings to defaults</button><button class="btn danger" type="button" id="resetLocalReviewDataFromSettings">Reset local review data</button></div>'+
-      '<p class="appSettingsFootnote">Reset local review data removes browser-local review records and course review state. It does not change the source code or reusable GitHub build.</p>'+
+    '<section class="card appSettingsCard appSettingsDataCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('data')+'</span><div><h3>Data & Device</h3><p>Restore this device\'s app preferences without changing course or training data.</p></div></div>'+
+      '<div class="appSettingsActions"><button class="btn secondary" type="button" id="resetAppPreferences">Reset settings to defaults</button></div>'+
     '</section>'+
     '<section class="card appSettingsCard appSettingsAboutCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('about')+'</span><div><h3>About FLYMPUS</h3><p>Build and device context for troubleshooting.</p></div></div>'+
       '<div class="appAboutRows"><div><span>Build</span><b>'+esc(build)+'</b></div><div><span>Running as</span><b>'+esc(mode)+'</b></div><div><span>Storage</span><b>Local review data on this device</b></div></div>'+
@@ -8924,12 +8927,6 @@ function bindAppPreferences(){
     if(!(await siteConfirm('Restore all app settings on this device to their default values?',{title:'Reset settings to defaults?',confirmLabel:'Reset to defaults',tone:'warning'})))return;
     try{localStorage.removeItem('flympus-app-preferences')}catch{}
     applyFlympusAppPreferences(flympusAppPreferenceDefaults);toast('App settings restored');render()
-  };
-  if($('#resetLocalReviewDataFromSettings'))$('#resetLocalReviewDataFromSettings').onclick=async()=>{
-    if(!(await siteConfirm('Reset browser-local review data? This removes the local review data stored in this browser.',{title:'Reset local review data?',confirmLabel:'Reset',tone:'danger'})))return;
-    Object.keys(localStorage).filter(k=>k.startsWith('ct-review-')).forEach(k=>localStorage.removeItem(k));
-    Object.keys(sessionStorage).filter(k=>k.startsWith('ct-review-')).forEach(k=>sessionStorage.removeItem(k));
-    location.reload()
   };
 }
 function bindActivity(){
