@@ -1,7 +1,7 @@
 /* FLYMPUS Web Push service worker
    Scope: GitHub Pages PWA. No fetch caching is installed here on purpose;
    this worker is dedicated to push delivery and notification navigation. */
-const FLYMPUS_SW_VERSION='2026-10-04-push-1';
+const FLYMPUS_SW_VERSION='2026-10-04-push-2';
 const DEFAULT_ICON='./assets/flympus-app-icon.webp';
 
 function normalizePayload(event){
@@ -22,24 +22,34 @@ self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
 
 self.addEventListener('push',event=>{
-  const payload=normalizePayload(event),data=payload.data&&typeof payload.data==='object'?{...payload.data}:payload;
-  const title=String(payload.title||data.title||'FLYMPUS');
-  const body=String(payload.body||data.body||'');
-  const options={
-    body,
-    icon:String(payload.icon||DEFAULT_ICON),
-    badge:String(payload.badge||DEFAULT_ICON),
-    tag:String(payload.tag||data.tag||'flympus'),
-    renotify:payload.renotify===true,
-    requireInteraction:payload.requireInteraction===true,
-    silent:payload.silent===true,
-    data:{
-      ...data,
-      url:targetUrl(data)
+  event.waitUntil((async()=>{
+    const payload=normalizePayload(event),data=payload.data&&typeof payload.data==='object'?{...payload.data}:payload;
+    const title=String(payload.title||data.title||'FLYMPUS');
+    const body=String(payload.body||data.body||'');
+    const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    const foreground=windows.find(client=>client.focused===true)||windows.find(client=>client.visibilityState==='visible')||null;
+    const customForegroundSound=!!foreground&&payload.silent!==true;
+    const options={
+      body,
+      icon:String(payload.icon||DEFAULT_ICON),
+      badge:String(payload.badge||DEFAULT_ICON),
+      tag:String(payload.tag||data.tag||'flympus'),
+      renotify:payload.renotify===true,
+      requireInteraction:payload.requireInteraction===true,
+      /* Avoid a double ding while FLYMPUS is visible: the page plays the
+         selected Avionics Pulse tail. Background delivery keeps OS sound. */
+      silent:payload.silent===true||customForegroundSound,
+      data:{
+        ...data,
+        url:targetUrl(data)
+      }
+    };
+    if(Array.isArray(payload.actions))options.actions=payload.actions.slice(0,2);
+    if(customForegroundSound){
+      try{foreground.postMessage({type:'FLYMPUS_PUSH_RECEIVED',silent:false,data:{...data,title,body}})}catch{}
     }
-  };
-  if(Array.isArray(payload.actions))options.actions=payload.actions.slice(0,2);
-  event.waitUntil(self.registration.showNotification(title,options))
+    await self.registration.showNotification(title,options)
+  })())
 });
 
 self.addEventListener('notificationclick',event=>{

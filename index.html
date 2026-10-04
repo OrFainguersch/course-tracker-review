@@ -5948,6 +5948,8 @@ const FLYMPUS_REFRESH_POOL_SIZE=2;
 const FLYMPUS_NAV_MOBILE_SOUND_VOLUME=FLYMPUS_AUDIO_REFERENCE.mobileBottomNav;
 const FLYMPUS_NAV_DESKTOP_SOUND_VOLUME=FLYMPUS_AUDIO_REFERENCE.desktopBottomNav;
 const FLYMPUS_REFRESH_SOUND_VOLUME=FLYMPUS_AUDIO_REFERENCE.pullToRefresh;
+/* Form submit is intentionally 3 percentage points above the current pull-to-refresh reference. */
+const FLYMPUS_FORM_SUBMIT_SOUND_VOLUME=Math.min(1,FLYMPUS_REFRESH_SOUND_VOLUME+.03);
 
 let flympusNavAudioPools={mobile:null,desktop:null},flympusNavAudioIndex=0;
 let flympusRefreshAudioPool=null,flympusRefreshAudioIndex=0;
@@ -5960,6 +5962,96 @@ function setFlympusAmbientAudioSession(){
   /* Keep UI sounds in the ambient category when the browser exposes the
      Audio Session API. No category bouncing. */
   try{if(navigator.audioSession)navigator.audioSession.type='ambient'}catch{}
+}
+
+/* FLYMPUS action audio uses its own low-latency context so the approved
+   bottom-navigation and pull-to-refresh lifecycles remain isolated.
+   Submit waveform: selected 04 · HUD / Mission Confirm.
+   Notification waveform: selected short tail of A · Avionics Pulse. */
+let flympusActionAudioCtx=null,flympusActionAudioLastUseAt=0,flympusActionAudioNeedsWake=true;
+const FLYMPUS_ACTION_IDLE_WAKE_MS=10000;
+
+function getFlympusActionAudioContext(){
+  try{
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    if(!AudioCtx)return null;
+    if(flympusActionAudioCtx?.state==='closed')flympusActionAudioCtx=null;
+    if(!flympusActionAudioCtx){
+      try{flympusActionAudioCtx=new AudioCtx({latencyHint:'interactive'})}
+      catch{flympusActionAudioCtx=new AudioCtx()}
+    }
+    return flympusActionAudioCtx
+  }catch{return null}
+}
+function primeFlympusActionAudio(){
+  const ctx=getFlympusActionAudioContext();if(!ctx)return false;
+  try{
+    if(ctx.state!=='running'){
+      const p=ctx.resume?.();if(p?.catch)p.catch(()=>{})
+    }
+    return true
+  }catch{return false}
+}
+function flympusActionStartTime(ctx){
+  const nowMs=performance.now?.()||Date.now();
+  const wake=flympusActionAudioNeedsWake||!flympusActionAudioLastUseAt||(nowMs-flympusActionAudioLastUseAt)>=FLYMPUS_ACTION_IDLE_WAKE_MS;
+  flympusActionAudioLastUseAt=nowMs;
+  if(wake&&ctx.createOscillator&&ctx.createGain){
+    try{
+      const now=Number(ctx.currentTime||0),osc=ctx.createOscillator(),gain=ctx.createGain();
+      gain.gain.value=.000001;osc.frequency.value=120;
+      osc.connect(gain);gain.connect(ctx.destination);osc.start(now);osc.stop(now+.065)
+    }catch{}
+  }
+  flympusActionAudioNeedsWake=false;
+  return Number(ctx.currentTime||0)+(wake?.080:.004)
+}
+function scheduleFlympusHannTone(ctx,start,duration,frequency,peak){
+  const osc=ctx.createOscillator(),gain=ctx.createGain(),curve=new Float32Array(64);
+  for(let i=0;i<curve.length;i++)curve[i]=peak*(.5-.5*Math.cos((Math.PI*2*i)/(curve.length-1)));
+  osc.type='sine';osc.frequency.setValueAtTime(frequency,start);
+  gain.gain.setValueAtTime(0,start);
+  gain.gain.setValueCurveAtTime(curve,start,duration);
+  osc.connect(gain);gain.connect(ctx.destination);
+  osc.start(start);osc.stop(start+duration+.004)
+}
+function withFlympusActionAudio(schedule){
+  try{
+    setFlympusAmbientAudioSession();
+    const ctx=getFlympusActionAudioContext();if(!ctx)return false;
+    const run=()=>{if(ctx.state==='running')schedule(ctx,flympusActionStartTime(ctx))};
+    if(ctx.state==='running'){run();return true}
+    const p=ctx.resume?.();
+    Promise.resolve(p).then(run).catch(()=>{});
+    return true
+  }catch{return false}
+}
+function playFlympusFormSubmitSound(){
+  return withFlympusActionAudio((ctx,t0)=>{
+    /* Rebuild the chosen HUD / Mission Confirm waveform at the requested
+       16% reference amplitude (13% refresh + 3 percentage points). */
+    const peak=.92*FLYMPUS_FORM_SUBMIT_SOUND_VOLUME,sustain=peak*.65;
+    const start=t0+.020,duration=.220,attack=duration*.02,decay=duration*.08,release=duration*.18;
+    const osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.type='sine';
+    osc.frequency.setValueAtTime(650,start);
+    osc.frequency.linearRampToValueAtTime(1450,start+duration);
+    gain.gain.setValueAtTime(0,start);
+    gain.gain.linearRampToValueAtTime(peak,start+attack);
+    gain.gain.linearRampToValueAtTime(sustain,start+attack+decay);
+    gain.gain.setValueAtTime(sustain,start+duration-release);
+    gain.gain.linearRampToValueAtTime(0,start+duration);
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.start(start);osc.stop(start+duration+.004);
+    scheduleFlympusHannTone(ctx,t0+.290,.080,1120,peak*(.33/.34))
+  })
+}
+function playFlympusNotificationSound(){
+  return withFlympusActionAudio((ctx,t0)=>{
+    /* Only the selected compact ending of A · Avionics Pulse. */
+    scheduleFlympusHannTone(ctx,t0+.015,.055,720,.649);
+    scheduleFlympusHannTone(ctx,t0+.080,.060,520,.649*(.22/.24))
+  })
 }
 
 function flympusNavSoundBytes(){
@@ -6334,6 +6426,21 @@ setFlympusAmbientAudioSession();
 getFlympusNavAudioPool();
 getFlympusRefreshAudioPool();
 primeFlympusNavFastAudio();
+if(!window.__flympusActionAudioPrimeBound){
+  window.__flympusActionAudioPrimeBound=true;
+  const primeActionAudio=()=>primeFlympusActionAudio();
+  window.addEventListener('pointerdown',primeActionAudio,{passive:true,capture:true});
+  window.addEventListener('touchstart',primeActionAudio,{passive:true,capture:true});
+  window.addEventListener('keydown',primeActionAudio,{capture:true});
+}
+if(!window.__flympusActionAudioLifecycleBound){
+  window.__flympusActionAudioLifecycleBound=true;
+  const markActionAudioNeedsWake=()=>{flympusActionAudioNeedsWake=true};
+  window.addEventListener('blur',markActionAudioNeedsWake,{passive:true});
+  window.addEventListener('focus',markActionAudioNeedsWake,{passive:true});
+  window.addEventListener('pagehide',markActionAudioNeedsWake,{passive:true});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible')markActionAudioNeedsWake()},{passive:true});
+}
 if(!window.__flympusNavAudioLifecycleBound){
   window.__flympusNavAudioLifecycleBound=true;
   window.addEventListener('blur',markFlympusNavAudioNeedsWake,{passive:true});
@@ -7238,7 +7345,8 @@ async function sendFlympusDeviceTestNotification(){
     const registration=await registerFlympusPushServiceWorker();
     let permission=Notification.permission;if(permission!=='granted')permission=await Notification.requestPermission();
     if(permission!=='granted'){toast('Notification permission is required for the test.','error');return}
-    await registration.showNotification('FLYMPUS',{body:'Notifications are working on this device.',icon:'./assets/flympus-app-icon.webp',badge:'./assets/flympus-app-icon.webp',tag:'flympus-device-test',data:{screen:'home',url:'./'}});
+    await registration.showNotification('FLYMPUS',{body:'Notifications are working on this device.',icon:'./assets/flympus-app-icon.webp',badge:'./assets/flympus-app-icon.webp',tag:'flympus-device-test',silent:true,data:{screen:'home',url:'./'}});
+    playFlympusNotificationSound();
     toast('Test notification sent to this device');
     await refreshFlympusPushSettingsUi()
   }catch(err){toast(err?.message||'Could not send the test notification','error')}
@@ -7274,7 +7382,12 @@ function initFlympusPushClient(){
   if(!window.__flympusPushMessageBound){
     window.__flympusPushMessageBound=true;
     navigator.serviceWorker.addEventListener('message',event=>{
-      const msg=event.data||{};if(msg.type!=='FLYMPUS_PUSH_NAVIGATE')return;
+      const msg=event.data||{};
+      if(msg.type==='FLYMPUS_PUSH_RECEIVED'){
+        if(document.visibilityState==='visible'&&msg.silent!==true)playFlympusNotificationSound();
+        return
+      }
+      if(msg.type!=='FLYMPUS_PUSH_NAVIGATE')return;
       const screen=String(msg.screen||'home'),courseCode=String(msg.courseCode||'');
       if(courseCode&&courseByKey?.(courseCode))switchCourseByKey(courseCode,{screen,force:true});
       else if(appScreenIds.has(screen))go(screen)
@@ -9198,7 +9311,7 @@ function bindSafety(){
  applyHistoryFilters();
  const form=$('#safetyForm');if(!form)return;const draft=getActivityDraft('safety');if(draft?.data){restoreFormDraft(form,draft.data);form.dataset.requiredStarted='true'}bindRequiredCompletionPanel(form,'safety');bindAutoDraft(form,'safety',()=>{if($('#safetyDraftBadge'))$('#safetyDraftBadge').textContent=draftSavedLabel('safety')});
  if($('#discardSafetyDraft'))$('#discardSafetyDraft').onclick=async()=>{if(await siteConfirm('Discard this auto-saved safety draft?',{title:'Discard safety draft?',confirmLabel:'Discard',tone:'danger'})){discardActivityDraft('safety');toast('Safety draft discarded');render()}};
- form.onsubmit=e=>{e.preventDefault();const fd=new FormData(form),arr=getSafetyRecords(),traineeId=String(fd.get('trainee')||''),instructorId=String(fd.get('instructor')||''),allT=allTrainees(),allI=allInstructors();arr.unshift({id:'s_'+Date.now(),date:normalizeDateValue(fd.get('date')),traineeId,instructorId,title:String(fd.get('title')),severity:String(fd.get('severity')),classification:String(fd.get('classification')),details:String(fd.get('details')),traineeName:allT.find(t=>t.id===traineeId)?.name||'',instructorName:allI.find(i=>i.id===instructorId)?.name||'',createdAt:new Date().toISOString()});saveSafetyRecords(arr);discardActivityDraft('safety');state.safetyView='history';toast('Safety event submitted','success');render();forcePageTop()};
+ form.onsubmit=e=>{e.preventDefault();const fd=new FormData(form),arr=getSafetyRecords(),traineeId=String(fd.get('trainee')||''),instructorId=String(fd.get('instructor')||''),allT=allTrainees(),allI=allInstructors();arr.unshift({id:'s_'+Date.now(),date:normalizeDateValue(fd.get('date')),traineeId,instructorId,title:String(fd.get('title')),severity:String(fd.get('severity')),classification:String(fd.get('classification')),details:String(fd.get('details')),traineeName:allT.find(t=>t.id===traineeId)?.name||'',instructorName:allI.find(i=>i.id===instructorId)?.name||'',createdAt:new Date().toISOString()});saveSafetyRecords(arr);playFlympusFormSubmitSound();discardActivityDraft('safety');state.safetyView='history';toast('Safety event submitted','success');render();forcePageTop()};
 }
 function bindExams(){
  document.querySelectorAll('[data-exams-view]').forEach(btn=>btn.onclick=()=>{state.examsView=btn.dataset.examsView||'new';render();forcePageTop()});
@@ -9218,7 +9331,7 @@ function bindExams(){
  if($('#examTypeSelect'))$('#examTypeSelect').onchange=e=>{const opt=e.target.selectedOptions?.[0],v=opt?.dataset?.pass;if(v!==undefined&&v!=='')$('#examPassInput').value=v};
  bindAutoDraft(form,'exams',()=>{if($('#examDraftBadge'))$('#examDraftBadge').textContent=draftSavedLabel('exams')});
  if($('#discardExamDraft'))$('#discardExamDraft').onclick=async()=>{if(await siteConfirm('Discard this auto-saved exam draft?',{title:'Discard exam draft?',confirmLabel:'Discard',tone:'danger'})){discardActivityDraft('exams');toast('Exam draft discarded');render()}};
- form.onsubmit=e=>{e.preventDefault();const fd=new FormData(form),arr=getExamRecords(),traineeId=String(fd.get('trainee')),grade=Number(fd.get('grade')),pass=Number(fd.get('pass')),allT=allTrainees();arr.unshift({id:'x_'+Date.now(),date:normalizeDateValue(fd.get('date')),traineeId,traineeName:allT.find(t=>t.id===traineeId)?.name||'',exam:String(fd.get('exam')),grade,pass});saveExamRecords(arr);discardActivityDraft('exams');state.examsView='history';toast('Exam result submitted','success');render();forcePageTop()};
+ form.onsubmit=e=>{e.preventDefault();const fd=new FormData(form),arr=getExamRecords(),traineeId=String(fd.get('trainee')),grade=Number(fd.get('grade')),pass=Number(fd.get('pass')),allT=allTrainees();arr.unshift({id:'x_'+Date.now(),date:normalizeDateValue(fd.get('date')),traineeId,traineeName:allT.find(t=>t.id===traineeId)?.name||'',exam:String(fd.get('exam')),grade,pass});saveExamRecords(arr);playFlympusFormSubmitSound();discardActivityDraft('exams');state.examsView='history';toast('Exam result submitted','success');render();forcePageTop()};
 }
 function bindEval(){document.querySelectorAll('[data-evaluation-view]').forEach(btn=>btn.onclick=()=>{state.evaluationView=btn.dataset.evaluationView||'new';if(state.evaluationView==='history')state.editingEval=null;render();forcePageTop()});const historyItems=[...document.querySelectorAll('[data-evaluation-history-item]')],historySearch=$('#evaluationHistorySearch');const applyHistoryFilters=()=>{const q=String(historySearch?.value||'').trim().toLowerCase(),trainee=multiFilterValues('evaluationHistoryTrainee'),instructor=multiFilterValues('evaluationHistoryInstructor'),syllabus=multiFilterValues('evaluationHistorySyllabus'),from=$('#evaluationHistoryDateFrom')?.value||'',to=$('#evaluationHistoryDateTo')?.value||'';let shown=0;historyItems.forEach(row=>{const show=(!q||String(row.dataset.search||'').includes(q))&&multiFilterMatches(row.dataset.trainee,trainee)&&multiFilterMatches(row.dataset.instructor,instructor)&&multiFilterMatches(row.dataset.syllabus,syllabus)&&filterDateMatches(row.dataset.date,from,to);row.hidden=!show;if(show)shown++});{const active=(q?1:0)+(trainee.length?1:0)+(instructor.length?1:0)+(syllabus.length?1:0)+((normalizeDateValue(from)||normalizeDateValue(to))?1:0);if($('#evaluationHistoryFilterSummary'))$('#evaluationHistoryFilterSummary').textContent=filterSummaryText(active,shown,historyItems.length,'All evaluations');updateFilterSelections('evaluationHistorySelections',[
  q?{label:'Search',value:q}:null,
@@ -9251,7 +9364,7 @@ if($('#emergencyExpandUsed'))$('#emergencyExpandUsed').onclick=()=>{emergencyMod
 updateEmergencyUi();applyEmergencyFilter();recalc();syncProgressionReview();updateMissingPanel();
 const syncOverrideRequired=()=>{const on=f.querySelector('input[name="gradeMode"]:checked')?.value==='INSTRUCTOR',wrap=$('#overrideWrap'),sel=$('#instructorGradeSelect');if(wrap)wrap.style.display=on?'block':'none';if(sel)sel.required=on;updateMissingPanel()};f.querySelectorAll('input[name="gradeMode"]').forEach(x=>x.onchange=syncOverrideRequired);syncOverrideRequired();
 if($('#discardDraftBtn'))$('#discardDraftBtn').onclick=async()=>{if(await siteConfirm('Discard this auto-saved Evaluation draft?',{title:'Discard evaluation draft?',confirmLabel:'Discard',tone:'danger'})){discardActivityDraft('evaluation');toast('Evaluation draft discarded');render()}};if($('#cancelEdit'))$('#cancelEdit').onclick=()=>{state.editingEval=null;render()};
-f.onsubmit=e=>{e.preventDefault();const fd=new FormData(f),list=getEvaluations(),old=state.editingEval?list.find(x=>x.id===state.editingEval):null,traineeId=old?.traineeId||fd.get('trainee'),instId=fd.get('instructor');const scores={};evalCriteria.forEach(c=>scores[c.id]=Number(fd.get('score_'+c.id))||0);let suggested=0,complete=true;evalCriteria.forEach(c=>{if(!scores[c.id])complete=false;suggested+=scores[c.id]*c.weight});suggested=complete?Math.round(suggested*10)/10:0;const gradeMode=fd.get('gradeMode')||'SUGGESTED';const grade=gradeMode==='INSTRUCTOR'?Number(fd.get('instructorGrade')||0):suggested;const takeoffs=Math.max(0,Math.floor(Number(fd.get('takeoffs'))||0)),landings=Math.max(0,Math.floor(Number(fd.get('landings'))||0)),allT=allTrainees(),allI=allInstructors();const obj={id:old?.id||'ev_'+Date.now(),revision:old?(old.revision||1)+1:1,revisionCount:old?(old.revisionCount||1)+1:1,traineeId,instructorId:instId,traineeName:allT.find(t=>t.id===traineeId)?.name||'Trainee',instructorName:allI.find(i=>i.id===instId)?.name||'Instructor',syllabus:old?.syllabus||fd.get('syllabus'),duration:Number(fd.get('duration')),flightDate:normalizeDateValue(fd.get('date')),takeoffs,landings,scores,suggestedGrade:suggested,gradeMode,grade,comments:fd.get('comments'),emphases:fd.getAll('emphasisItem').map(String).map(x=>x.trim()).filter(Boolean),plannedEmergencyIds:evaluationPlanIds(String(traineeId),old),emergencyCounts:Object.fromEntries(evaluationEmergencyDefs().map(x=>[x.id,Number(fd.get('emid_'+x.id))||0])),emergencies:evaluationEmergencyDefs().map(x=>Number(fd.get('emid_'+x.id))||0),progressionDecision:String(fd.get('progressionDecision')||''),changeReason:fd.get('changeReason')||''};const next=old?list.map(x=>x.id===old.id?obj:x):[obj,...list];setEvaluations(next);let activity=getActivityEvents().filter(x=>x.sourceId!==obj.id);const takeoffCounter=experienceCounterFor('TAKEOFF',String(obj.syllabus)),landingCounter=experienceCounterFor('LANDING',String(obj.syllabus)),experienceTrack=experienceTrackForSyllabus(String(obj.syllabus));if(takeoffs>0&&takeoffCounter)activity.unshift({id:'evt_'+Date.now()+'_eto',traineeId:String(traineeId),date:String(obj.flightDate),type:takeoffCounter.type,quantity:takeoffs,track:experienceTrack,source:'Evaluation',sourceId:obj.id,note:String(obj.syllabus),createdAt:new Date().toISOString()});if(landings>0&&landingCounter)activity.unshift({id:'evt_'+Date.now()+'_eld',traineeId:String(traineeId),date:String(obj.flightDate),type:landingCounter.type,quantity:landings,track:experienceTrack,source:'Evaluation',sourceId:obj.id,note:String(obj.syllabus),createdAt:new Date().toISOString()});saveActivityEvents(activity);discardActivityDraft('evaluation');if(!old)clearTraineeEmergencyPlan(String(traineeId));state.evaluationTraineeId=null;state.editingEval=null;state.evaluationView='history';toast(old?'Revision '+obj.revision+' submitted; activity counters updated':'Evaluation submitted; emergency plan cleared for next sortie');render();forcePageTop()}}
+f.onsubmit=e=>{e.preventDefault();const fd=new FormData(f),list=getEvaluations(),old=state.editingEval?list.find(x=>x.id===state.editingEval):null,traineeId=old?.traineeId||fd.get('trainee'),instId=fd.get('instructor');const scores={};evalCriteria.forEach(c=>scores[c.id]=Number(fd.get('score_'+c.id))||0);let suggested=0,complete=true;evalCriteria.forEach(c=>{if(!scores[c.id])complete=false;suggested+=scores[c.id]*c.weight});suggested=complete?Math.round(suggested*10)/10:0;const gradeMode=fd.get('gradeMode')||'SUGGESTED';const grade=gradeMode==='INSTRUCTOR'?Number(fd.get('instructorGrade')||0):suggested;const takeoffs=Math.max(0,Math.floor(Number(fd.get('takeoffs'))||0)),landings=Math.max(0,Math.floor(Number(fd.get('landings'))||0)),allT=allTrainees(),allI=allInstructors();const obj={id:old?.id||'ev_'+Date.now(),revision:old?(old.revision||1)+1:1,revisionCount:old?(old.revisionCount||1)+1:1,traineeId,instructorId:instId,traineeName:allT.find(t=>t.id===traineeId)?.name||'Trainee',instructorName:allI.find(i=>i.id===instId)?.name||'Instructor',syllabus:old?.syllabus||fd.get('syllabus'),duration:Number(fd.get('duration')),flightDate:normalizeDateValue(fd.get('date')),takeoffs,landings,scores,suggestedGrade:suggested,gradeMode,grade,comments:fd.get('comments'),emphases:fd.getAll('emphasisItem').map(String).map(x=>x.trim()).filter(Boolean),plannedEmergencyIds:evaluationPlanIds(String(traineeId),old),emergencyCounts:Object.fromEntries(evaluationEmergencyDefs().map(x=>[x.id,Number(fd.get('emid_'+x.id))||0])),emergencies:evaluationEmergencyDefs().map(x=>Number(fd.get('emid_'+x.id))||0),progressionDecision:String(fd.get('progressionDecision')||''),changeReason:fd.get('changeReason')||''};const next=old?list.map(x=>x.id===old.id?obj:x):[obj,...list];setEvaluations(next);let activity=getActivityEvents().filter(x=>x.sourceId!==obj.id);const takeoffCounter=experienceCounterFor('TAKEOFF',String(obj.syllabus)),landingCounter=experienceCounterFor('LANDING',String(obj.syllabus)),experienceTrack=experienceTrackForSyllabus(String(obj.syllabus));if(takeoffs>0&&takeoffCounter)activity.unshift({id:'evt_'+Date.now()+'_eto',traineeId:String(traineeId),date:String(obj.flightDate),type:takeoffCounter.type,quantity:takeoffs,track:experienceTrack,source:'Evaluation',sourceId:obj.id,note:String(obj.syllabus),createdAt:new Date().toISOString()});if(landings>0&&landingCounter)activity.unshift({id:'evt_'+Date.now()+'_eld',traineeId:String(traineeId),date:String(obj.flightDate),type:landingCounter.type,quantity:landings,track:experienceTrack,source:'Evaluation',sourceId:obj.id,note:String(obj.syllabus),createdAt:new Date().toISOString()});saveActivityEvents(activity);playFlympusFormSubmitSound();discardActivityDraft('evaluation');if(!old)clearTraineeEmergencyPlan(String(traineeId));state.evaluationTraineeId=null;state.editingEval=null;state.evaluationView='history';toast(old?'Revision '+obj.revision+' submitted; activity counters updated':'Evaluation submitted; emergency plan cleared for next sortie');render();forcePageTop()}}
 
 function bindSettings(){
   const c=cfgGet();
