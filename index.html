@@ -512,9 +512,11 @@ select option[value=""]{color:#8a9bad}
 .packagePathBox{margin-top:12px;padding:12px;border:1px solid #dfe8f1;border-radius:12px;background:#f8fbfe}.packagePathEditor{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:9px}.packageChoiceGrid .wizardChoice{text-align:left;align-items:flex-start}.packageChoiceGrid .wizardChoice small{white-space:normal;line-height:1.35}
 @media(max-width:760px){.packagePathEditor{grid-template-columns:1fr 1fr}}@media(max-width:430px){.packagePathEditor{grid-template-columns:1fr}}
 </style><style>
-.advancedSequence{display:grid;gap:10px}.advancedSequence>.settingBox{margin:0}.advancedStepLabel{display:flex;align-items:center;gap:10px;margin:4px 0 8px}.advancedStepLabel>span{display:grid;place-items:center;width:28px;height:28px;border-radius:999px;background:#e8f3ff;color:#176bb3;font-weight:900;font-size:12px}.advancedStepLabel b{display:block;color:#173b60;font-size:13px}.advancedStepLabel small{display:block;color:#7c8fa3;font-size:10px;margin-top:2px}.advancedSectorPicker{margin-top:14px}.scopedArchitectureLabel{margin-top:18px}.advancedScopeGrid{align-items:start}.advancedScopeGrid>.settingBox{align-self:start}.advancedScopeGrid .editableRow{min-height:0}
-.advancedEditFieldset{border:0;padding:0;margin:0;min-width:0}.advancedEditFieldset:disabled input,.advancedEditFieldset:disabled select{opacity:1;background:#f7f9fb;color:#566d82;border-color:#e5ebf1}.advancedEditFieldset:disabled .cfgCompactAdd,.advancedEditFieldset:disabled #cfgAddPhase,.advancedEditFieldset:disabled #cfgAddPlatform,.advancedEditFieldset:disabled [data-cfg-remove],.advancedEditFieldset:disabled [data-phase-remove],.advancedEditFieldset:disabled [data-platform-remove]{display:none!important}.advancedArchitectureActions{margin-top:12px}
-@media(max-width:760px){.advancedStepLabel{align-items:flex-start}.advancedSectorPicker #typeWorkspace{width:100%}.advancedArchitectureActions .btn{width:100%}}
+.advancedSequence{display:grid;gap:10px}.advancedSequence>.settingBox{margin:0}.advancedStepLabel{display:flex;align-items:center;gap:10px;margin:4px 0 8px}.advancedStepLabel>span{display:grid;place-items:center;width:28px;height:28px;border-radius:999px;background:#e8f3ff;color:#176bb3;font-weight:900;font-size:12px}.advancedStepLabel b{display:block;color:#173b60;font-size:13px}.advancedStepLabel small{display:block;color:#7c8fa3;font-size:10px;margin-top:2px}.advancedSectorPicker{margin-top:14px}.scopedArchitectureLabel{margin-top:18px}
+.advancedScopeColumns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start;margin-top:10px}.advancedScopeColumn{display:grid;gap:12px;align-content:start;min-width:0}.advancedScopeColumn>.settingBox{margin:0;min-width:0}.advancedScopeColumn .editableRow{min-height:0}
+.emergencyCategoriesCard .sub{margin-bottom:12px}.emergencyCategoryConfigRow .cfgEmergencyCategoryName{flex:1;min-width:0}
+.advancedEditFieldset{border:0;padding:0;margin:0;min-width:0}.advancedEditFieldset:disabled input,.advancedEditFieldset:disabled select{opacity:1;background:#f7f9fb;color:#566d82;border-color:#e5ebf1}.advancedEditFieldset:disabled .cfgCompactAdd,.advancedEditFieldset:disabled #cfgAddPhase,.advancedEditFieldset:disabled #cfgAddPlatform,.advancedEditFieldset:disabled #cfgAddEmergencyCategory,.advancedEditFieldset:disabled [data-cfg-remove],.advancedEditFieldset:disabled [data-phase-remove],.advancedEditFieldset:disabled [data-platform-remove],.advancedEditFieldset:disabled [data-emergency-category-remove]{display:none!important}.advancedArchitectureActions{margin-top:12px}
+@media(max-width:760px){.advancedScopeColumns{grid-template-columns:1fr}.advancedStepLabel{align-items:flex-start}.advancedSectorPicker #typeWorkspace{width:100%}.advancedArchitectureActions .btn{width:100%}}
 </style><style>
 #courseBuilderSubmit[aria-disabled="true"]{opacity:.58;cursor:pointer;filter:saturate(.55)}
 </style><style>
@@ -5304,7 +5306,7 @@ function experienceLogHtml(t,tracking){
   return '<details class="card settingBox experienceEntry"><summary><b>＋ '+title+'</b><span class="pill '+(technician?'violet':'blue')+'">'+(technician?'Technician':'EP / IP')+'</span></summary><p class="sub">'+hint+'</p><form id="activityForm"><div class="fields"><div class="field"><label>Date</label><input class="input dateDmy" name="date" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" required value="'+esc(dateInputValue(todayIsoDate()))+'" placeholder="DD/MM/YYYY"></div><div class="field"><label>'+(technician?'Practical task':'Experience counter')+'</label><select name="type" required><option value="" selected disabled>Select '+(technician?'task':'counter')+'</option>'+options+'</select></div><div class="field"><label>Completed quantity</label><input class="input" name="quantity" type="number" min="'+(technician?'1':'0.1')+'" step="'+(technician?'1':'0.1')+'" value="1" required></div><div class="field"><label>'+(technician?'Supervision':'Record source')+'</label><select name="source" required><option value="" selected disabled>Select '+(technician?'supervision':'source')+'</option>'+(technician?'<option>Supervised practical task</option><option>Independent practical task</option><option>Imported record</option>':'<option>External flight record</option><option>Imported historical record</option><option>Authorized correction</option>')+'</select></div></div><div class="field" style="margin-top:10px"><label>Evidence / note</label><input class="input" name="note" placeholder="'+(technician?'Work order, component or supervisor note':'Optional reference or explanation')+'"></div><button class="btn sky" type="submit">Save '+(technician?'task execution':'experience')+'</button></form></details>';
 }
 
-const emergencyCategories=['Electrical','Propulsion / Engine','Flight Controls','Communications / Avionics','General / Operational'];
+const emergencyCategoryDefaults=['Electrical','Propulsion / Engine','Flight Controls','Communications / Avionics','General / Operational'];
 function defaultEmergencyCategory(name){
   const n=String(name||'').toLowerCase();
   if(/gen|bat|electr|power/.test(n))return 'Electrical';
@@ -5312,6 +5314,21 @@ function defaultEmergencyCategory(name){
   if(/flap|aileron|rudder|elevator|control/.test(n))return 'Flight Controls';
   if(/rpt|radio|comm|ias|flight-box|avion/.test(n))return 'Communications / Avionics';
   return 'General / Operational';
+}
+function emergencyCategoryNames(config){
+  const c=config||cfgGet(),list=Array.isArray(c?.emergencyCategories)&&c.emergencyCategories.length?c.emergencyCategories:emergencyCategoryDefaults.map((name,i)=>({id:'emcat_'+(i+1),name}));
+  return list.map(x=>String(typeof x==='string'?x:x?.name||'').trim()).filter(Boolean);
+}
+function resolveEmergencyCategory(value,config){
+  const c=config||cfgGet(),names=emergencyCategoryNames(c),aliases=c?.emergencyCategoryAliases||{};
+  let current=String(value||'').trim()||'General / Operational',guard=0,seen=new Set();
+  while(aliases[current]&&guard++<20&&!seen.has(current)){seen.add(current);current=String(aliases[current]||'').trim()||current}
+  if(names.includes(current))return current;
+  return names.includes('General / Operational')?'General / Operational':(names[0]||'General / Operational');
+}
+function emergencyCategoryOptions(value,config){
+  const names=emergencyCategoryNames(config),current=resolveEmergencyCategory(value,config);
+  return [...names,...(!names.includes(current)&&current?[current]:[])];
 }
 function currentConfigSelection(){
   const c=cfgGet(),type=c.courseTypes.find(x=>x.id===currentCourseMeta.type)?.id||currentCourseMeta.type;
@@ -5325,10 +5342,10 @@ function evaluationEmergencyDefs(){
   const sel=currentConfigSelection();
   if(window.FLYMPUS_TRAINING){
     const suit=epCurrentProgram(),em=window.FLYMPUS_TRAINING.requiredEmergencies(suit);
-    if(em.length)return em.map(x=>({...x,courseType:sel.courseType,category:x.category||defaultEmergencyCategory(x.name)}));
+    if(em.length)return em.map(x=>({...x,courseType:sel.courseType,category:resolveEmergencyCategory(x.category||defaultEmergencyCategory(x.name))}));
   }
   const c=cfgGet(),p=cfgResolve(sel),allowed=p?.emergencyIds?.length?new Set(p.emergencyIds):null;
-  return c.emergencies.filter(x=>x.courseType===sel.courseType&&(!allowed||allowed.has(x.id))).map(x=>({...x,category:x.category||defaultEmergencyCategory(x.name)}));
+  return c.emergencies.filter(x=>x.courseType===sel.courseType&&(!allowed||allowed.has(x.id))).map(x=>({...x,category:resolveEmergencyCategory(x.category||defaultEmergencyCategory(x.name))}));
 }
 
 
@@ -5548,7 +5565,7 @@ function traineeEmergencyHistory(traineeId,excludeEvalId){
 function renderTraineeEmergencyProfile(traineeId){
   const defs=evaluationEmergencyDefs(),history=traineeEmergencyHistory(traineeId,null),plan=getTraineeEmergencyPlan(traineeId),planned=new Set(plan.emergencyIds||[]),filter=state.emergencyProfileFilter||'ALL',groups={};
   defs.forEach(x=>{const cat=x.category||'General / Operational';(groups[cat]||(groups[cat]=[])).push({...x,count:Number(history[x.id]||0),planned:planned.has(x.id)})});
-  const ordered=[...emergencyCategories,...Object.keys(groups).filter(x=>!emergencyCategories.includes(x))].filter(x=>groups[x]?.length);
+  const categoryOrder=emergencyCategoryNames(),ordered=[...categoryOrder,...Object.keys(groups).filter(x=>!categoryOrder.includes(x))].filter(x=>groups[x]?.length);
   const practiced=defs.filter(x=>Number(history[x.id]||0)>0).length,totalOccurrences=defs.reduce((a,x)=>a+Number(history[x.id]||0),0),missing=Math.max(0,defs.length-practiced),filterTabs='<div class="profileFilterTabs"><button class="'+(filter==='ALL'?'active':'')+'" data-emergency-profile-filter="ALL">All ('+defs.length+')</button><button class="'+(filter==='MISSING'?'active':'')+'" data-emergency-profile-filter="MISSING">Not practiced ('+missing+')</button></div>';
   return '<div class="emergencyPlanCard"><div class="inlineHead"><div><h4>Plan next sortie</h4><p>Select the emergencies you intend to practice. This does not count as completed training; it only preloads the Evaluation form.</p></div><span class="emergencyPlanCount" id="emergencyPlanCount">'+planned.size+' selected</span></div><div class="emergencyPlanToolbar"><span class="mutedHint">'+(plan.updatedAt?'Plan saved · '+formatDateDMY(plan.updatedAt):'No saved plan yet')+'</span><div class="toolbar" style="margin:0"><button class="btn secondary small" type="button" id="clearEmergencyPlan">Clear</button><button class="btn sky small" type="button" id="saveEmergencyPlan">Save plan</button></div></div>'+(planned.size?'<div class="planReady"><span class="pill green">✓ Ready in Evaluation</span><span class="mutedHint">'+planned.size+' planned</span><button class="btn secondary small" type="button" data-start-eval="'+traineeId+'">Open Evaluation</button></div>':'')+'</div>'+
     '<div class="emergencyProfileSummary"><div class="emergencySummaryMetric"><strong>'+practiced+'/'+defs.length+'</strong><span>Practiced</span></div><div class="emergencySummaryMetric"><strong>'+totalOccurrences+'</strong><span>Total occurrences</span></div><div class="emergencySummaryMetric"><strong>'+missing+'</strong><span>Not practiced</span></div></div>'+filterTabs+
@@ -5561,7 +5578,7 @@ function renderEmergencyPractice(edit,traineeId){
   const defs=evaluationEmergencyDefs(),legacy=edit?.emergencies||[],counts=edit?.emergencyCounts||{},history=traineeEmergencyHistory(traineeId,edit?.id),planIds=evaluationPlanIds(traineeId,edit),planned=new Set(planIds);
   const groups={};
   defs.forEach((x,i)=>{const cat=x.category||'General / Operational';(groups[cat]||(groups[cat]=[])).push({...x,legacyIndex:i,value:Number(counts[x.id]??legacy[i]??0),history:Number(history[x.id]||0),planned:planned.has(x.id)})});
-  const ordered=[...emergencyCategories,...Object.keys(groups).filter(x=>!emergencyCategories.includes(x))].filter(x=>groups[x]?.length);
+  const categoryOrder=emergencyCategoryNames(),ordered=[...categoryOrder,...Object.keys(groups).filter(x=>!categoryOrder.includes(x))].filter(x=>groups[x]?.length);
   const total=defs.reduce((sum,x,i)=>sum+Number(counts[x.id]??legacy[i]??0),0);
   return '<div class="sectionHead"><div class="inlineHead"><div><h2>Emergency practice</h2><p>Planned emergencies are highlighted here. Enter only what was actually performed on this flight.</p></div><span class="pill blue" id="emergencySelectedBadge">'+total+' recorded now</span></div></div>'+
     '<div class="emergencyToolbar"><input class="input" id="emergencySearch" type="search" placeholder="Search emergency…"><button class="btn secondary small emergencySelected" type="button" id="emergencyPlannedOnly">Planned ('+planIds.length+')</button><button class="btn secondary small emergencySelected" type="button" id="emergencyExpandUsed">Used now</button></div>'+
@@ -5926,8 +5943,8 @@ function advancedPackagesHtml(type){
     const gateAdd=addBox('progression','Add progression gate',field('Requirement','<input class="input" data-add-field="text" placeholder="Example: Course Manager approval required">',true));
 
     const platformIds=base.platformId?[base.platformId]:(base.platformIds||[]),allEmergency=mergeEditor([...platformIds.flatMap(id=>core.emergencyCatalog(id)),...(base.courseEmergencies||[])],editorOverrides.custom?.emergencies,editorOverrides.emergencies),required=new Set(core.requiredEmergencies(current).map(x=>x.id));
-    const emergencyRows=allEmergency.map((x,i)=>'<div class="packageSyllabusRow ruleEditorRow '+(x.packageCustom?'packageCustomItem ':'')+(!required.has(x.id)?'ruleDisabledRow':'')+'" data-rule-row="emergencies|'+esc(x.id)+'">'+cell('Use','<input type="checkbox" name="g_required_emergency" value="'+esc(x.id)+'" '+(required.has(x.id)?'checked':'')+'>','useCell')+cell('Order / Move','<button class="syllabusDragHandle ruleDragHandle" type="button" title="Drag to reorder">☰</button><span class="ruleOrderNumber">'+(i+1)+'</span><input type="hidden" name="g_emergency_order_'+esc(x.id)+'" value="'+(i+1)+'">','ruleOrderCell')+cell('Emergency','<input class="input" name="g_emergency_name_'+esc(x.id)+'" value="'+esc(x.name)+'">')+cell('Category','<select name="g_emergency_category_'+esc(x.id)+'">'+emergencyCategories.map(c=>'<option value="'+esc(c)+'" '+((x.category||defaultEmergencyCategory(x.name))===c?'selected':'')+'>'+esc(c)+'</option>').join('')+'</select>')+cell('Status',customBadge(x,'emergencies'),'statusCell')+'</div>').join('');
-    const emergencyAdd=addBox('emergencies','Add emergency requirement',field('Emergency name','<input class="input" data-add-field="name" placeholder="New emergency">',true)+field('Category','<select data-add-field="category">'+emergencyCategories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('')+'</select>'));
+    const emergencyRows=allEmergency.map((x,i)=>'<div class="packageSyllabusRow ruleEditorRow '+(x.packageCustom?'packageCustomItem ':'')+(!required.has(x.id)?'ruleDisabledRow':'')+'" data-rule-row="emergencies|'+esc(x.id)+'">'+cell('Use','<input type="checkbox" name="g_required_emergency" value="'+esc(x.id)+'" '+(required.has(x.id)?'checked':'')+'>','useCell')+cell('Order / Move','<button class="syllabusDragHandle ruleDragHandle" type="button" title="Drag to reorder">☰</button><span class="ruleOrderNumber">'+(i+1)+'</span><input type="hidden" name="g_emergency_order_'+esc(x.id)+'" value="'+(i+1)+'">','ruleOrderCell')+cell('Emergency','<input class="input" name="g_emergency_name_'+esc(x.id)+'" value="'+esc(x.name)+'">')+cell('Category','<select name="g_emergency_category_'+esc(x.id)+'">'+emergencyCategoryNames().map(c=>'<option value="'+esc(c)+'" '+(resolveEmergencyCategory(x.category||defaultEmergencyCategory(x.name))===c?'selected':'')+'>'+esc(c)+'</option>').join('')+'</select>')+cell('Status',customBadge(x,'emergencies'),'statusCell')+'</div>').join('');
+    const emergencyAdd=addBox('emergencies','Add emergency requirement',field('Emergency name','<input class="input" data-add-field="name" placeholder="New emergency">',true)+field('Category','<select data-add-field="category">'+emergencyCategoryNames().map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('')+'</select>'));
 
     const editing=!!state.advancedArchitectureEditing,focused=state.packageFocusId===p.id;
     return '<form class="card globalPackageCard globalPackageForm '+(focused?'packageFocused ':'')+(editing?'packageEditing':'')+'" data-global-package-id="'+esc(p.id)+'" data-global-package-type="'+esc(type)+'"><details class="packageEditorShell" '+(focused?'open':'')+'><summary class="packageShellSummary"><div class="globalPackageHead"><div><div class="eyebrow">REUSABLE PACKAGE</div><h3>'+esc(current.name)+'</h3><p>'+esc(packagePathLabel(type,current))+'</p></div><div class="packageHeaderActions">'+(editing?'<div class="packageActionButtons"><button class="btn danger small" type="button" data-delete-package="'+esc(p.id)+'" data-package-sector="'+esc(type)+'">Delete Package</button></div>':'')+'</div></div><div class="packageSummaryStats"><span><b>'+orderedSyllabi.length+'</b> Syllabi</span><span><b>'+criteriaActive.length+'</b> Criteria</span><span><b>'+required.size+'</b> Emergencies</span><span><b>'+counterActive.length+'</b> Experience</span><span><b>'+examActive.length+'</b> Exams</span></div></summary><fieldset class="packageEditFieldset" '+(editing?'':'disabled')+'><div class="packageEditorBody">'+
@@ -5998,8 +6015,8 @@ function courseOverridesHtml(){
   const gateItems=orderedGates.map((x,i)=>{const k=progressionEditableKey(x);return '<div class="packageSyllabusRow ruleEditorRow '+(x.courseOnly?'packageCustomItem ':'')+(x.applicable===false?'ruleDisabledRow':'')+'" data-rule-row="progression|'+esc(x.id)+'">'+cell('Use','<input type="checkbox" name="gate_'+esc(x.id)+'" '+(x.applicable===false?'':'checked')+'>','useCell')+cell('Order / Move','<button class="syllabusDragHandle ruleDragHandle" type="button" title="Drag to reorder">☰</button><span class="ruleOrderNumber">'+(i+1)+'</span><input type="hidden" name="gate_order_'+esc(x.id)+'" value="'+(i+1)+'">','ruleOrderCell')+cell('Progression requirement',k?'<input class="input" name="gate_text_'+esc(x.id)+'" value="'+esc(progressionDisplay(x))+'">':'<input class="input" value="'+esc(progressionDisplay(x))+'" readonly>')+cell('Status',origin(x,'progression'),'statusCell')+'</div>'}).join('');
   const gateAdd=addBox('progression','Add progression gate',field('Requirement','<input class="input" data-add-field="text" placeholder="Example: Course Manager approval required">',true));
 
-  const orderedEmergencies=orderItems(emergencies),emergencyItems=orderedEmergencies.map((x,i)=>'<div class="packageSyllabusRow ruleEditorRow '+(x.courseOnly?'packageCustomItem ':'')+(!required.has(x.id)?'ruleDisabledRow':'')+'" data-rule-row="emergencies|'+esc(x.id)+'">'+cell('Use','<input type="checkbox" name="requiredEmergency" value="'+esc(x.id)+'" '+(required.has(x.id)?'checked':'')+'>','useCell')+cell('Order / Move','<button class="syllabusDragHandle ruleDragHandle" type="button" title="Drag to reorder">☰</button><span class="ruleOrderNumber">'+(i+1)+'</span><input type="hidden" name="course_emergency_order_'+esc(x.id)+'" value="'+(i+1)+'">','ruleOrderCell')+cell('Emergency','<input class="input" name="course_emergency_name_'+esc(x.id)+'" value="'+esc(x.name)+'">')+cell('Category','<select name="course_emergency_category_'+esc(x.id)+'">'+emergencyCategories.map(c=>'<option value="'+esc(c)+'" '+((x.category||defaultEmergencyCategory(x.name))===c?'selected':'')+'>'+esc(c)+'</option>').join('')+'</select>')+cell('Status',origin(x,'emergencies'),'statusCell')+'</div>').join('');
-  const emergencyAdd=addBox('emergencies','Add emergency requirement',field('Emergency name','<input class="input" data-add-field="name" placeholder="New emergency">',true)+field('Category','<select data-add-field="category">'+emergencyCategories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('')+'</select>'));
+  const orderedEmergencies=orderItems(emergencies),emergencyItems=orderedEmergencies.map((x,i)=>'<div class="packageSyllabusRow ruleEditorRow '+(x.courseOnly?'packageCustomItem ':'')+(!required.has(x.id)?'ruleDisabledRow':'')+'" data-rule-row="emergencies|'+esc(x.id)+'">'+cell('Use','<input type="checkbox" name="requiredEmergency" value="'+esc(x.id)+'" '+(required.has(x.id)?'checked':'')+'>','useCell')+cell('Order / Move','<button class="syllabusDragHandle ruleDragHandle" type="button" title="Drag to reorder">☰</button><span class="ruleOrderNumber">'+(i+1)+'</span><input type="hidden" name="course_emergency_order_'+esc(x.id)+'" value="'+(i+1)+'">','ruleOrderCell')+cell('Emergency','<input class="input" name="course_emergency_name_'+esc(x.id)+'" value="'+esc(x.name)+'">')+cell('Category','<select name="course_emergency_category_'+esc(x.id)+'">'+emergencyCategoryNames().map(c=>'<option value="'+esc(c)+'" '+(resolveEmergencyCategory(x.category||defaultEmergencyCategory(x.name))===c?'selected':'')+'>'+esc(c)+'</option>').join('')+'</select>')+cell('Status',origin(x,'emergencies'),'statusCell')+'</div>').join('');
+  const emergencyAdd=addBox('emergencies','Add emergency requirement',field('Emergency name','<input class="input" data-add-field="name" placeholder="New emergency">',true)+field('Category','<select data-add-field="category">'+emergencyCategoryNames().map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('')+'</select>'));
 
   const customCount=Object.values(o.custom||{}).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0),editing=state.courseTailorEditing===true;
   const modeAction='<div class="courseTailorModeActions">'+(editing?'<button class="btn secondary courseTailorTopDone" type="button" id="courseTailorDoneTop">Done editing</button>':'<button class="btn sky" type="button" id="courseTailorEdit">Edit course</button>')+'</div>';
@@ -6096,6 +6113,8 @@ function cfgDefaults(){
     dayNight: dayNight.map((name,n)=>({id:['day','night'][n]||('time_'+n),name})),
     countries: countries.map((name,n)=>({id:['israel','cyprus'][n]||('country_'+n),name})),
     cancellationReasons:[{id:'weather',name:'Weather'},{id:'technical',name:'Technical'},{id:'trainee',name:'Trainee'},{id:'instructor',name:'Instructor'},{id:'operational',name:'Operational'}],
+    emergencyCategories:emergencyCategoryDefaults.map((name,n)=>({id:'emcat_'+(n+1),name})),
+    emergencyCategoryAliases:{},
     syllabi: syllabi.map((name,n)=>({id:'syll_'+(n+1),courseType:ep,name,minimum:null,instructorPresence:'WITH INSTRUCTOR'})),
     criteria: criteria.map(c=>({id:c.id,courseType:ep,name:c.name,weight:Math.round(c.weight*100)})),
     emergencies: emergencies.map((name,n)=>({id:'em_'+(n+1),courseType:ep,name,category:defaultEmergencyCategory(name)}))
@@ -6108,10 +6127,14 @@ function cfgGet(){
     const defaults=cfgDefaults(),c={...defaults,...raw};
     const mergeStable=(base,saved)=>[...base.map(x=>saved?.find(y=>y.id===x.id)?{...x,...saved.find(y=>y.id===x.id)}:x),...(saved||[]).filter(x=>!base.some(y=>y.id===x.id))];
     c.courseTypes=mergeStable(defaults.courseTypes,raw.courseTypes);c.phases=mergeStable(defaults.phases,raw.phases);c.trainingKinds=mergeStable(defaults.trainingKinds,raw.trainingKinds);c.qualifications=mergeStable(defaults.qualifications,raw.qualifications);c.platformLabels={...(defaults.platformLabels||{}),...legacyPlatformLabels,...(raw.platformLabels||{})};c.dayNight=mergeStable(defaults.dayNight,raw.dayNight).filter(x=>x.id!=='mixed');c.dayNight=c.dayNight.map(x=>({...x,name:c.qualifications.find(q=>q.id===x.id)?.name||x.name}));c.countries=mergeStable(defaults.countries,raw.countries);c.cancellationReasons=mergeStable(defaults.cancellationReasons,raw.cancellationReasons);
+    const rawEmergencyCategories=Array.isArray(raw.emergencyCategories)?raw.emergencyCategories:null;
+    c.emergencyCategories=(rawEmergencyCategories||defaults.emergencyCategories).map((x,i)=>typeof x==='string'?{id:'emcat_'+(String(x).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||('legacy_'+i)),name:x}:{id:x.id||('emcat_'+(i+1)),name:String(x.name||'').trim()}).filter(x=>x.name);
+    if(!c.emergencyCategories.length)c.emergencyCategories=defaults.emergencyCategories.map(x=>({...x}));
+    c.emergencyCategoryAliases={...(raw.emergencyCategoryAliases||{})};
     c.phases=(c.phases||[]).map(x=>({...x,tracking:normalizePhaseTracking(x)}));
     c.syllabi=(c.syllabi||[]).map(x=>({...x,courseType:x.courseType||'EP',minimum:x.minimum===undefined?null:x.minimum,instructorPresence:x.instructorPresence||'WITH INSTRUCTOR'}));
     c.criteria=(c.criteria||[]).map(x=>({...x,courseType:x.courseType||'EP'}));
-    c.emergencies=(c.emergencies||[]).map(x=>({...x,courseType:x.courseType||'EP',category:x.category||defaultEmergencyCategory(x.name)}));
+    c.emergencies=(c.emergencies||[]).map(x=>({...x,courseType:x.courseType||'EP',category:resolveEmergencyCategory(x.category||defaultEmergencyCategory(x.name),c)}));
     return c;
   }catch{return cfgDefaults()}
 }
@@ -6156,9 +6179,35 @@ function cfgCatalogCard(title,key,list,help=''){
     '</div><div class="cfgCompactAdd" data-cfg-add-box="'+key+'"><button class="btn secondary" type="button" data-cfg-add-open="'+key+'">＋ Add</button><form class="toolbar cfgAddForm cfgAddPanel" data-kind="'+key+'" hidden><input class="input" name="name" placeholder="Add '+esc(title.toLowerCase())+'" required><button class="btn sky" type="submit">Add</button><button class="btn secondary" type="button" data-cfg-add-cancel="'+key+'">Cancel</button></form></div></section>';
 }
 
+function cfgEmergencyCategoriesCard(c){
+  const list=c.emergencyCategories||[];
+  return '<section class="card settingBox emergencyCategoriesCard"><h3>Emergency categories</h3><p class="sub">Controls the Category dropdown and grouping used in Packages, Tailor course, trainee emergency views and Evaluation.</p><div class="editableList emergencyCategoryConfigList">'+
+    list.map(x=>'<div class="editableRow emergencyCategoryConfigRow"><input class="input cfgEmergencyCategoryName" data-id="'+esc(x.id)+'" data-original-name="'+esc(x.name)+'" value="'+esc(x.name)+'"><button class="btn danger small" type="button" data-emergency-category-remove="'+esc(x.id)+'">Remove</button></div>').join('')+
+    '</div><form class="toolbar" id="cfgAddEmergencyCategory"><input class="input" name="name" placeholder="Add emergency category" required><button class="btn secondary" type="submit">＋ Add category</button></form></section>';
+}
+function applyEmergencyCategoryEditorToConfig(c){
+  const inputs=[...document.querySelectorAll('.cfgEmergencyCategoryName')];
+  if(!inputs.length)return {ok:true};
+  const names=inputs.map(el=>String(el.value||'').trim()),normalized=names.map(x=>x.toLowerCase());
+  if(names.some(x=>!x))return {ok:false,message:'Emergency category names cannot be empty.'};
+  if(new Set(normalized).size!==normalized.length)return {ok:false,message:'Emergency category names must be unique.'};
+  const aliases={...(c.emergencyCategoryAliases||{})};
+  inputs.forEach((el,i)=>{
+    const item=(c.emergencyCategories||[]).find(x=>x.id===el.dataset.id),old=String(el.dataset.originalName||item?.name||'').trim(),next=names[i];
+    if(!item)return;
+    if(old&&old!==next){
+      Object.keys(aliases).forEach(key=>{if(aliases[key]===old)aliases[key]=next});
+      aliases[old]=next;
+      (c.emergencies||[]).forEach(em=>{if(String(em.category||'')===old)em.category=next});
+    }
+    item.name=next;
+  });
+  c.emergencyCategoryAliases=aliases;
+  return {ok:true};
+}
 function cfgTypeScopedCard(title,key,list,type,kind){
   const scoped=list.filter(x=>x.courseType===type),isCriteria=kind==='criteria',isSyllabus=kind==='syllabi',isEmergency=kind==='emergencies';
-  const categoryOptions=value=>[...emergencyCategories,...(!emergencyCategories.includes(value)&&value?[value]:[])].map(cat=>'<option value="'+esc(cat)+'" '+(cat===value?'selected':'')+'>'+esc(cat)+'</option>').join('');
+  const categoryOptions=value=>emergencyCategoryOptions(value).map(cat=>'<option value="'+esc(cat)+'" '+(cat===resolveEmergencyCategory(value)?'selected':'')+'>'+esc(cat)+'</option>').join('');
   const rows=scoped.map(x=>{
     if(isSyllabus)return '<div class="cfgSyllabusRow"><label class="field cfgSyllabusName"><span class="fieldLabel">Syllabus name</span><input class="input cfgScopedName" data-kind="'+key+'" data-id="'+x.id+'" value="'+esc(x.name)+'"></label><label class="field"><span class="fieldLabel">Minimum</span><input class="input cfgSyllabusMinimum" data-id="'+x.id+'" type="number" min="0" max="999" placeholder="Min" value="'+(x.minimum==null?'':x.minimum)+'"></label><label class="field"><span class="fieldLabel">Supervision</span><select class="cfgSyllabusPresence" data-id="'+x.id+'"><option value="WITH INSTRUCTOR" '+(x.instructorPresence==='WITH INSTRUCTOR'?'selected':'')+'>With Instructor</option><option value="WITHOUT INSTRUCTOR" '+(x.instructorPresence==='WITHOUT INSTRUCTOR'?'selected':'')+'>Without Instructor</option></select></label><button class="btn danger small" data-scoped-remove="'+key+'|'+x.id+'">Remove</button></div>';
     if(isEmergency)return '<div class="cfgEmergencyRow"><input class="input cfgScopedName" data-kind="'+key+'" data-id="'+x.id+'" value="'+esc(x.name)+'"><select class="cfgEmergencyCategory" data-id="'+x.id+'">'+categoryOptions(x.category||defaultEmergencyCategory(x.name))+'</select><button class="btn danger small" data-scoped-remove="'+key+'|'+x.id+'">Remove</button></div>';
@@ -6201,7 +6250,7 @@ function cfgProfileEditor(p,c){
     '<div class="infoBox" style="margin-top:12px"><b>Scoped to '+esc(cfgItem(c.courseTypes,v.courseType)?.name||v.courseType)+'</b><p>You are not choosing from a global bank. Only items owned by this course type appear below.</p></div>'+
     '<div class="sectionHead"><h2>Assigned syllabi</h2><p>Minimum and instructor-presence settings come from the '+esc(cfgItem(c.courseTypes,v.courseType)?.name||v.courseType)+' syllabus definition.</p></div><div id="cfgProfileSyllabi">'+checks('syllabusIds',scopedSyll,v.syllabusIds,x=>' · '+(x.instructorPresence==='WITHOUT INSTRUCTOR'?'Without Instructor':'With Instructor')+' · Min '+(x.minimum==null?'—':x.minimum))+'</div>'+
     '<div class="sectionHead"><h2>Assigned criteria</h2></div><div id="cfgProfileCriteria">'+checks('criteriaIds',scopedCrit,v.criteriaIds,x=>' · '+x.weight+'%')+'</div>'+
-    '<div class="sectionHead"><h2>Assigned emergencies</h2><p>Emergency categories are defined in Course type setup and used in the Evaluation picker.</p></div><div id="cfgProfileEmergencies">'+checks('emergencyIds',scopedEmer,v.emergencyIds,x=>' · '+(x.category||defaultEmergencyCategory(x.name)))+'</div>'+
+    '<div class="sectionHead"><h2>Assigned emergencies</h2><p>Emergency categories are defined in Course type setup and used in the Evaluation picker.</p></div><div id="cfgProfileEmergencies">'+checks('emergencyIds',scopedEmer,v.emergencyIds,x=>' · '+resolveEmergencyCategory(x.category||defaultEmergencyCategory(x.name)))+'</div>'+
     '<div class="toolbar"><button class="btn sky" type="submit">'+(p?'Save profile':'Create profile')+'</button>'+(p?'<button class="btn secondary" type="button" id="cfgProfileCancel">Cancel</button>':'')+'</div></form>';
 }
 function settings(){
@@ -6235,14 +6284,16 @@ function settings(){
     html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><section class="advancedSequence" style="margin-top:14px"><div class="advancedStepLabel"><span>1</span><div><b>Define sectors</b><small>Add, rename or remove sectors first.</small></div></div>'+cfgCatalogCard('Course types','courseTypes',c.courseTypes)+'</section></fieldset>';
     html+='<section class="card settingBox advancedSectorPicker"><div class="advancedStepLabel"><span>2</span><div><b>Select sector to edit</b><small>Everything below is scoped to this sector.</small></div></div><div class="field" style="margin-top:12px"><label>Sector</label><select id="typeWorkspace" '+(advancedEditing?'disabled':'')+'>'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></section>';
     html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><div class="advancedStepLabel scopedArchitectureLabel"><span>3</span><div><b>'+(advancedEditing?'Edit architecture':'Architecture')+'</b><small>Phases, platforms, training types and qualifications belong to the selected sector.</small></div></div>';
-    html+='<div class="settingsGrid advancedScopeGrid" style="margin-top:10px">';
+    html+='<div class="advancedScopeColumns"><div class="advancedScopeColumn">';
     html+=cfgPhaseCard(c,scope);
-    html+=advancedPlatformsCard(scope);
     html+=cfgCatalogCard('Training types','trainingKinds',c.trainingKinds);
+    html+=cfgCatalogCard('Cancellation reasons','cancellationReasons',c.cancellationReasons,'Global list used by Planned vs Executed. One reason is stored for every cancelled flight.');
+    html+='</div><div class="advancedScopeColumn">';
+    html+=advancedPlatformsCard(scope);
     html+=advancedContextCard(scope,c);
     html+=cfgCatalogCard('Countries / customer contexts','countries',c.countries);
-    html+=cfgCatalogCard('Cancellation reasons','cancellationReasons',c.cancellationReasons,'Global list used by Planned vs Executed. One reason is stored for every cancelled flight.');
-    html+='</div></fieldset>';
+    html+=cfgEmergencyCategoriesCard(c);
+    html+='</div></div></fieldset>';
     html+='<section class="advancedPackagesFinal"><div class="advancedStepLabel"><span>4</span><div><b>Packages</b><small>Final step · create and manage reusable Packages.</small></div></div>'+sectorPackageAssignmentCard(scope)+advancedPackagesHtml(scope)+'</section>';
     html+='<div class="toolbar packageSaveBar advancedArchitectureActions '+(advancedEditing?'editDecisionBar':'')+'">'+(advancedEditing?'<button class="btn secondary discardChanges editDecisionBtn" type="button" id="cfgDiscardCatalogs">Discard changes</button>':'')+'<button class="btn sky '+(advancedEditing?'editDecisionBtn':'')+'" type="button" id="'+(advancedEditing?'cfgSaveCatalogs':'advancedArchitectureEdit')+'">'+(advancedEditing?'Save changes':'Edit')+'</button></div>';
   }
@@ -7355,9 +7406,28 @@ function bindSettings(){
     all[type]=arr.filter(x=>x.id!==id);saveCustomPlatforms(all);const labels=getPlatformLabels();delete labels[id];savePlatformLabels(labels);toast('Platform removed');render();
   });
 
+  if($('#cfgAddEmergencyCategory'))$('#cfgAddEmergencyCategory').onsubmit=e=>{
+    e.preventDefault();const cc=cfgGet(),applied=applyEmergencyCategoryEditorToConfig(cc);if(!applied.ok){toast(applied.message,'error');return}
+    const name=String(new FormData(e.currentTarget).get('name')||'').trim();if(!name){toast('Enter a category name before adding it.','error');return}
+    if(emergencyCategoryNames(cc).some(x=>x.toLowerCase()===name.toLowerCase())){toast('That emergency category already exists.','error');return}
+    cc.emergencyCategories.push({id:cfgId('emcat'),name});cfgSave(cc);toast(name+' added');renderPreservingManagementView();
+  };
+  document.querySelectorAll('[data-emergency-category-remove]').forEach(btn=>btn.onclick=async()=>{
+    const cc=cfgGet(),applied=applyEmergencyCategoryEditorToConfig(cc);if(!applied.ok){toast(applied.message,'error');return}
+    const id=btn.dataset.emergencyCategoryRemove,item=(cc.emergencyCategories||[]).find(x=>x.id===id);if(!item)return;
+    if((cc.emergencyCategories||[]).length<=1){toast('At least one emergency category is required.','error');return}
+    const fallback=(cc.emergencyCategories||[]).find(x=>x.id!==id&&x.name==='General / Operational')||(cc.emergencyCategories||[]).find(x=>x.id!==id);
+    if(!fallback)return;
+    if(!(await siteConfirm('Remove “'+item.name+'”? Existing emergencies assigned to it will move to “'+fallback.name+'”.',{title:'Remove emergency category?',confirmLabel:'Remove category',tone:'danger'})))return;
+    const aliases={...(cc.emergencyCategoryAliases||{})};Object.keys(aliases).forEach(key=>{if(aliases[key]===item.name)aliases[key]=fallback.name});aliases[item.name]=fallback.name;cc.emergencyCategoryAliases=aliases;
+    (cc.emergencies||[]).forEach(em=>{if(resolveEmergencyCategory(em.category||defaultEmergencyCategory(em.name),cc)===item.name||String(em.category||'')===item.name)em.category=fallback.name});
+    cc.emergencyCategories=cc.emergencyCategories.filter(x=>x.id!==id);cfgSave(cc);toast(item.name+' removed · existing items moved to '+fallback.name);renderPreservingManagementView();
+  });
+
   if($('#cfgSaveCatalogs'))$('#cfgSaveCatalogs').onclick=()=>{
+    const cc=cfgGet(),categoryEdit=applyEmergencyCategoryEditorToConfig(cc);if(!categoryEdit.ok){toast(categoryEdit.message,'error');return}
     for(const form of document.querySelectorAll('.globalPackageForm[data-dirty="1"]'))if(!saveGlobalPackageForm(form,{renderAfter:false,quiet:true}))return;
-    const cc=cfgGet(),platformLabels=getPlatformLabels();
+    const platformLabels=getPlatformLabels();
     document.querySelectorAll('.cfgName').forEach(el=>{const x=cc[el.dataset.kind]?.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});
     document.querySelectorAll('.cfgPhaseName').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x&&el.value.trim())x.name=el.value.trim()});document.querySelectorAll('.phaseTrackingEnabled').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x){x.tracking=normalizePhaseTracking(x);x.tracking.enabled=el.checked}});document.querySelectorAll('.phaseCounterEnabled').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x){x.tracking=normalizePhaseTracking(x);x.tracking.counters[el.dataset.counter].enabled=el.checked}});document.querySelectorAll('.phaseCounterMinimum').forEach(el=>{const x=cc.phases.find(v=>v.id===el.dataset.id);if(x){x.tracking=normalizePhaseTracking(x);x.tracking.counters[el.dataset.counter].minimum=el.value===''?null:Number(el.value)}});
     document.querySelectorAll('.cfgPlatformName').forEach(el=>{if(el.value.trim())platformLabels[el.dataset.id]=el.value.trim()});savePlatformLabels(platformLabels);
@@ -7370,7 +7440,7 @@ function bindSettings(){
   document.querySelectorAll('[data-cfg-add-cancel]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-cfg-add-box]'),form=box?.querySelector('.cfgAddForm'),trigger=box?.querySelector('[data-cfg-add-open]');if(form){form.reset?.();form.hidden=true}if(trigger)trigger.hidden=false});
   document.querySelectorAll('.cfgAddForm').forEach(form=>form.onsubmit=e=>{
     e.preventDefault();const cc=cfgGet(),kind=form.dataset.kind,name=String(new FormData(form).get('name')||'').trim();if(!name){toast('Enter a name before adding this item.','error');return}
-    const prefix={courseTypes:'type',trainingKinds:'training',qualifications:'qualification',dayNight:'time',countries:'country',cancellationReasons:'cancel'}[kind]||'item';
+    const prefix={courseTypes:'type',trainingKinds:'training',qualifications:'qualification',dayNight:'time',countries:'country',cancellationReasons:'cancel',emergencyCategories:'emcat'}[kind]||'item';
     cc[kind].push({id:cfgId(prefix),name});cfgSave(cc);toast(name+' added');render();
   });
 
