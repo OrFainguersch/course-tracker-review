@@ -4988,6 +4988,13 @@ Object.assign(FLYMPUS_HE_UI,{
   "Optional / non-blocking": "אופציונלי / אינו חוסם"
 });
 
+Object.assign(FLYMPUS_HE_UI,{
+  'Reset settings to defaults':'איפוס הגדרות לברירת המחדל',
+  'Reset settings to defaults?':'לאפס את ההגדרות לברירת המחדל?',
+  'Reset to defaults':'איפוס לברירת המחדל',
+  'Restore all app settings on this device to their default values?':'להחזיר את כל הגדרות האפליקציה במכשיר זה לערכי ברירת המחדל?'
+});
+
 const flympusI18nTextOriginal=new WeakMap(),flympusI18nAttrOriginal=new WeakMap();
 const FLYMPUS_HE_UI_CASEFOLD=(()=>{const map=new Map();Object.entries(FLYMPUS_HE_UI).forEach(([key,value])=>{const folded=String(key).trim().toLocaleLowerCase('en');if(folded&&!map.has(folded))map.set(folded,value)});return map})();
 function flympusTranslateUiString(value){
@@ -8276,7 +8283,7 @@ function appPreferencesScreen(){
       appPreferenceSwitch('largerText','Larger interface text','Increase base interface text size while preserving responsive layouts.',p.largerText===true)+
     '</section>'+
     '<section class="card appSettingsCard appSettingsDataCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('data')+'</span><div><h3>Data & Device</h3><p>These actions affect only data stored in this browser or installed web app.</p></div></div>'+
-      '<div class="appSettingsActions"><button class="btn secondary" type="button" id="clearRememberedUi">Clear remembered interface state</button><button class="btn secondary" type="button" id="resetAppPreferences">Reset app settings</button><button class="btn danger" type="button" id="resetLocalReviewDataFromSettings">Reset local review data</button></div>'+
+      '<div class="appSettingsActions"><button class="btn secondary" type="button" id="resetAppPreferences">Reset settings to defaults</button><button class="btn danger" type="button" id="resetLocalReviewDataFromSettings">Reset local review data</button></div>'+
       '<p class="appSettingsFootnote">Reset local review data removes browser-local review records and course review state. It does not change the source code or reusable GitHub build.</p>'+
     '</section>'+
     '<section class="card appSettingsCard appSettingsAboutCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('about')+'</span><div><h3>About FLYMPUS</h3><p>Build and device context for troubleshooting.</p></div></div>'+
@@ -8913,13 +8920,8 @@ function bindAppPreferences(){
     const prefs=getFlympusAppPreferences(),key=el.dataset.appPrefSelect;prefs[key]=el.value;saveFlympusAppPreferences(prefs);
     if(key==='theme'||key==='density'||key==='language')render();else toast('Setting saved')
   });
-  if($('#clearRememberedUi'))$('#clearRememberedUi').onclick=async()=>{
-    if(!(await siteConfirm('Clear remembered screen, navigation and scroll state for this browser? Course data will not be removed.',{title:'Clear interface state?',confirmLabel:'Clear state',tone:'warning'})))return;
-    Object.keys(sessionStorage).filter(k=>k.startsWith('ct-review-')).forEach(k=>sessionStorage.removeItem(k));
-    location.reload()
-  };
   if($('#resetAppPreferences'))$('#resetAppPreferences').onclick=async()=>{
-    if(!(await siteConfirm('Restore all app settings on this device to their defaults?',{title:'Reset app settings?',confirmLabel:'Reset settings',tone:'warning'})))return;
+    if(!(await siteConfirm('Restore all app settings on this device to their default values?',{title:'Reset settings to defaults?',confirmLabel:'Reset to defaults',tone:'warning'})))return;
     try{localStorage.removeItem('flympus-app-preferences')}catch{}
     applyFlympusAppPreferences(flympusAppPreferenceDefaults);toast('App settings restored');render()
   };
