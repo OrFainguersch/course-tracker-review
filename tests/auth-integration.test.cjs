@@ -11,7 +11,7 @@ const storage=fs.readFileSync('storage-scope.js','utf8');
 assert(html.includes('./firebase-config.js?v=20261004-auth2'),'Firebase config must load from the static app');
 assert(html.includes('./storage-scope.js?v=20261005-auth6'),'UID storage scope must load from the static app');
 assert(html.includes('./auth.css?v=20261005-auth4'),'Authentication UI CSS must be loaded');
-assert(html.includes('type="module" src="./auth.js?v=20261005-auth5"'),'Authentication runtime must load as a module');
+assert(html.includes('type="module" src="./auth.js?v=20261005-auth6"'),'Authentication runtime must load as a module');
 assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"'),'Firebase Authentication must preload before the post-login reload');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('</head>'),'Firebase config must load before first body paint');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('Early preference bootstrap'),'Firebase config must load before any local preference access');
@@ -28,7 +28,9 @@ assert(auth.includes("const SDK_VERSION='12.19.0'"),'Use the currently documente
 assert(auth.includes("new authSdk.GoogleAuthProvider()"),'Google sign-in provider must exist');
 assert(auth.includes("new authSdk.OAuthProvider('microsoft.com')"),'Microsoft sign-in provider must exist');
 assert(auth.includes('cfg.microsoftEnabled===true'),'Microsoft sign-in UI must be guarded by its feature flag');
-assert(auth.includes('signInWithPopup(auth,provider)'),'GitHub Pages authentication must use popup flow by default');
+assert(auth.includes('signInWithPopup(auth,provider,authSdk.browserPopupRedirectResolver)'),'Ordinary browsers must keep popup authentication');
+assert(auth.includes("kind==='google'&&isAppleStandaloneWebApp()")&&auth.includes('signInWithRedirect(auth,provider,authSdk.browserPopupRedirectResolver)'),'iOS Home Screen Google authentication must avoid the popup storage context');
+assert(auth.includes("const REDIRECT_PENDING_KEY='firebase:flympus:redirect-pending'")&&auth.includes('getRedirectResult(auth,authModule.browserPopupRedirectResolver)'),'Redirect completion must survive the iOS PWA navigation round trip');
 assert(!auth.includes("addScope('mail.read')")&&!auth.includes("addScope('calendars.read')"),
   'FLYMPUS authentication must not request mailbox or calendar scopes');
 assert(auth.includes("role:preauthorized&&invitation?.role==='admin'?'admin':'user'")&&auth.includes("status:preauthorized?'active':'pending'"),
@@ -41,7 +43,8 @@ assert(auth.includes("action==='make-admin'")&&auth.includes("action==='make-use
 assert(auth.includes('FLYMPUS_STORAGE_SCOPE?.setUid')&&auth.includes('FLYMPUS_STORAGE_SCOPE?.clearUid'),'Authentication lifecycle must bind and clear UID-scoped browser state');
 assert(auth.includes('if(scopeChanged||migratedLegacyCount>0){location.reload();return}'),'UID selection and legacy migration must use one consolidated reload');
 assert(auth.includes("params.get('authPreview')==='1'"),'Login UI must have a safe preview mode before Firebase activation');
-assert(auth.includes("auth=authModule.getAuth(firebaseApp)"),'Firebase Auth must use its durable browser persistence stack');
+assert(auth.includes("auth=authModule.initializeAuth(firebaseApp,{"),'Firebase Auth must be initialized with explicit platform dependencies');
+assert(auth.includes("persistence:[authModule.browserLocalPersistence,authModule.indexedDBLocalPersistence]"),'iOS PWA auth must prefer durable localStorage before IndexedDB fallback');
 assert(auth.includes("if(typeof auth.authStateReady==='function')await auth.authStateReady();"),'Returning sessions must wait for Firebase persistence restoration before signed-out handling');
 assert(!auth.includes("setPersistence(auth,authModule.browserLocalPersistence)"),'Auth persistence must not be reconfigured on every refresh');
 
