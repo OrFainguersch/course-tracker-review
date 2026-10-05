@@ -74,11 +74,12 @@ assert.equal(localStorage.getItem('ct-review-evals:AEP-26'),null,'Sign-out remov
 console.log('UID-scoped storage tests passed');
 
 const storageSource=fs.readFileSync('storage-scope.js','utf8');
-assert(storageSource.includes('function installResumeThemeHold()'),'Storage bootstrap must install the pre-runtime resume-theme guard');
-assert(storageSource.includes("observer.observe(root,{attributes:true,attributeFilter:['data-flympus-theme']})"),'Resume-theme guard must revert transient theme mutations before paint');
-assert(storageSource.includes('const first=sampleSystem()')&&storageSource.includes('const third=sampleSystem()')&&storageSource.includes('first===second&&second===third?third:stable'),'System theme must require three matching post-resume samples');
+const themeSource=fs.readFileSync('theme-controller.js','utf8');
+assert(themeSource.includes('authoritative first-paint and iOS lifecycle theme controller'),'A dedicated pre-paint theme controller must own lifecycle changes');
+assert(themeSource.includes('function reassertStableTheme()')&&themeSource.includes("window.addEventListener('pageshow'"),'Resume must reassert the committed theme');
+assert(!storageSource.includes('installResumeThemeHold')&&!themeSource.includes('setTimeout('),'Storage scoping must not compete with the theme controller or use resume timers');
 
 assert(storageSource.includes("const UID_PERSISTED_KEY='flympus-auth-scope-last-uid'"),'Cold PWA relaunch must have a durable UID namespace hint');
 assert(storageSource.includes("rawGet(session,UID_SESSION_KEY)||rawGet(local,UID_PERSISTED_KEY)"),'Session UID must fall back to the durable namespace hint');
 
-assert(storageSource.includes('RESUME_THEME_SETTLE_MS=1800')&&storageSource.includes('RESUME_THEME_CONFIRM_MS=350'),'Early resume guard must hold the last visible theme through a multi-second iOS restore transient');
+assert(themeSource.includes("if(now-visibleSince<1500){reassertStableTheme();return}"),'Transient iOS media-query changes during resume must be ignored');

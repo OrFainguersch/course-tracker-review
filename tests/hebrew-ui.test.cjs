@@ -44,7 +44,7 @@ assert(html.includes("No (assessment criteria|emergency requirements|experience 
 
 
 /* Early locale bootstrap + mirrored drawer gesture */
-const earlyLocaleIndex=html.indexOf('/* Early preference bootstrap: prevent RTL/theme/text paint flashes on reload. */');
+const earlyLocaleIndex=html.indexOf('./theme-controller.js?v=20261005-theme1');
 const firstStyleIndex=html.indexOf('<style>');
 assert(earlyLocaleIndex>=0 && firstStyleIndex>=0 && earlyLocaleIndex<firstStyleIndex,'Saved Hebrew dir/lang must be applied before CSS can paint');
 assert(html.includes("const drawerCloseSwipeIsRight=()=>getFlympusAppPreferences().language==='he'"),'Drawer gesture must mirror with Hebrew');
@@ -81,7 +81,7 @@ assert(html.includes("const homeWelcomeLead=homeHebrew?'ברוך שובך,':'Wel
   html.includes(".homeWelcomeLine{display:flex!important;align-items:baseline;gap:5px"),
   "Home greeting must use structural spacing after the comma in both languages, not whitespace or font kerning");
 assert(html.includes("const homeForwardArrow=homeHebrew?'←':'→'")&&
-  html.includes('class="homeAllCoursesArrow" aria-hidden="true" data-i18n-skip>'+homeForwardArrow+'</i>'),
+  html.includes("class=\"homeAllCoursesArrow\" aria-hidden=\"true\" data-i18n-skip>'+homeForwardArrow+'</i>"),
   "Home all-courses arrow must be rendered as an explicit glyph per writing direction, not CSS-mirrored");
 assert(html.includes('class="homeHeroMetaLine"')&&html.includes('class="homeHeroStartDate"'),
   "Home course metadata must isolate RTL labels from LTR dates");

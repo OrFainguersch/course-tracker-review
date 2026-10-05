@@ -28,6 +28,7 @@ let returningScopedSession=!!window.FLYMPUS_STORAGE_SCOPE?.currentUid?.();
 let silentAuthLoadingTimer=null;
 let silentAuthLoadingCopy='Starting secure authentication…';
 let signInPromise=null;
+let authStateVersion=0;
 
 const api=window.FLYMPUS_AUTH={
   status:enabled?'booting':'disabled',
@@ -91,7 +92,7 @@ function syncAuthAdjacentChromeLanguage(){
   document.getElementById('topNotificationBtn')?.setAttribute('aria-label',tr('Notifications'));document.getElementById('topPersonalProfileBtn')?.setAttribute('aria-label',tr('Personal profile'))
 }
 function root(){let el=document.getElementById('flympusAuthRoot');if(el)return el;el=document.createElement('div');el.id='flympusAuthRoot';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','FLYMPUS sign in');el.hidden=true;document.body.appendChild(el);return el}
-function shell(body){const el=root();el.dir=authLanguage()==='he'?'rtl':'ltr';el.innerHTML='<div class="flympusAuthShell"><div class="flympusAuthBrand"><img src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><section class="flympusAuthCard"><div class="flympusAuthCardBody">'+body+'</div></section></div>';el.hidden=false;return el}
+function shell(body){const el=root();el.classList.remove('flympusAuthInitial');el.dir=authLanguage()==='he'?'rtl':'ltr';el.innerHTML='<div class="flympusAuthShell"><div class="flympusAuthBrand"><img src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><section class="flympusAuthCard"><div class="flympusAuthCardBody">'+body+'</div></section></div>';el.hidden=false;return el}
 function cancelSilentAuthLoading(){
   if(silentAuthLoadingTimer!==null){clearTimeout(silentAuthLoadingTimer);silentAuthLoadingTimer=null}
 }
@@ -288,11 +289,15 @@ async function updateManagedInvitation(email,action,button){if(!api.isAdmin()||!
 async function confirmManagedUserAction(action){const copy={approve:['Approve this user?','This account will be able to access FLYMPUS.'],block:['Block this user?','This account will immediately lose application access.'],reactivate:['Reactivate this user?','This account will regain application access.'],'make-admin':['Make this user an administrator?','Administrators can approve users and change application access.'],'make-user':['Remove administrator access?','The account remains active but loses User Management permissions.']}[action]||['Update this user?','The account permissions will be changed.'];if(typeof window.siteConfirm==='function')return window.siteConfirm(tr(copy[1]),{title:tr(copy[0]),confirmLabel:tr('Confirm'),tone:action==='block'?'danger':'primary'});return false}
 async function updateManagedUser(uid,action,button){if(!api.isAdmin()||!uid||uid===currentUser?.uid)return;if(!(await confirmManagedUserAction(action)))return;const changes={updatedAt:firestoreSdk.serverTimestamp(),updatedBy:currentUser.uid};if(action==='approve'||action==='reactivate')changes.status='active';if(action==='block')changes.status='blocked';if(action==='make-admin')changes.role='admin';if(action==='make-user')changes.role='user';button.disabled=true;try{await firestoreSdk.updateDoc(firestoreSdk.doc(db,'users',uid),changes);renderUserManagement(await loadManagedDirectory())}catch(err){console.error('FLYMPUS user-management update failed',err);button.disabled=false;renderUserManagement(lastManagedDirectory,String(err?.message||tr('Update failed')))}}
 function bindAuthLanguageSync(){if(window.__FLYMPUS_AUTH_LANGUAGE_BOUND__)return;window.__FLYMPUS_AUTH_LANGUAGE_BOUND__=true;syncAuthAdjacentChromeLanguage();if(typeof MutationObserver!=='function')return;const observer=new MutationObserver(records=>{if(!records.some(x=>x.attributeName==='data-flympus-language'))return;syncAuthAdjacentChromeLanguage();if(currentUser&&currentProfile)syncAuthenticatedChrome(currentUser,currentProfile);const manager=document.getElementById('flympusUserManagementRoot');if(manager&&!manager.hidden)renderUserManagement(lastManagedDirectory,lastManagedError)});observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-flympus-language']})}
-async function handleSignedIn(user){
+async function handleSignedIn(user,version=authStateVersion){
   if(returningScopedSession)scheduleSilentAuthLoading('Verifying FLYMPUS access…');
   else showLoading('Verifying FLYMPUS access…');
   try{
     const profile=normalizeProfile(await ensureUserProfile(user));
+    /* Token refreshes and rapid iOS lifecycle changes can deliver a newer auth
+       callback while Firestore is still resolving this one. Only the newest
+       verified state may mutate the UID scope or unlock the application. */
+    if(version!==authStateVersion||auth?.currentUser?.uid!==user.uid)return;
     const scopeChanged=window.FLYMPUS_STORAGE_SCOPE?.setUid?.(user.uid)===true;
     if(profile.status!=='active'){showPending(user,profile);return}
     let migratedLegacyCount=0;
@@ -306,6 +311,7 @@ async function handleSignedIn(user){
     applyRoleContext(user,profile);
     unlockApp()
   }catch(err){
+    if(version!==authStateVersion||auth?.currentUser?.uid!==user.uid)return;
     console.error('FLYMPUS profile verification failed',err);
     showFatal('Account verification failed',String(err?.message||'Firestore user access is not configured yet.'))
   }
@@ -356,7 +362,8 @@ async function boot(){
        fail-closed handler would incorrectly clear the verified UID scope. */
     if(typeof auth.authStateReady==='function')await auth.authStateReady();
     authUnsubscribe=authModule.onAuthStateChanged(auth,user=>{
-      if(user)handleSignedIn(user);
+      const version=++authStateVersion;
+      if(user)handleSignedIn(user,version);
       else{
         cancelSilentAuthLoading();returningScopedSession=false;
         currentUser=null;currentProfile=null;api.currentUser=null;api.profile=null;

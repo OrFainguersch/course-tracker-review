@@ -7,15 +7,16 @@ const css=fs.readFileSync('auth.css','utf8');
 const config=fs.readFileSync('firebase-config.js','utf8');
 const rules=fs.readFileSync('firestore.rules','utf8');
 const storage=fs.readFileSync('storage-scope.js','utf8');
+const theme=fs.readFileSync('theme-controller.js','utf8');
 
 assert(html.includes('./firebase-config.js?v=20261004-auth2'),'Firebase config must load from the static app');
-assert(html.includes('./storage-scope.js?v=20261005-auth6'),'UID storage scope must load from the static app');
-assert(html.includes('./auth.css?v=20261005-auth4'),'Authentication UI CSS must be loaded');
-assert(html.includes('type="module" src="./auth.js?v=20261005-auth12"'),'Authentication runtime must load as a module');
+assert(html.includes('./storage-scope.js?v=20261005-auth7'),'UID storage scope must load from the static app');
+assert(html.includes('./auth.css?v=20261005-auth5'),'Authentication UI CSS must be loaded');
+assert(html.includes('type="module" src="./auth.js?v=20261005-auth13"'),'Authentication runtime must load as a module');
 assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"'),'Firebase Authentication must preload before the post-login reload');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('</head>'),'Firebase config must load before first body paint');
-assert(html.indexOf('./firebase-config.js')<html.indexOf('Early preference bootstrap'),'Firebase config must load before any local preference access');
-assert(html.indexOf('./storage-scope.js')<html.indexOf('Early preference bootstrap'),'UID storage scope must install before application storage reads');
+assert(html.indexOf('./theme-controller.js')<html.indexOf('./firebase-config.js'),'First-paint theme must resolve before network-dependent Firebase startup scripts');
+assert(html.indexOf('./theme-controller.js')<html.indexOf('./storage-scope.js'),'Device-level appearance preferences must resolve before private application storage is installed');
 assert(html.includes("document.documentElement.classList.add(returning?'flympusAuthReturning':'flympusAuthBooting')"),
   'Returning sessions must avoid the hidden boot shell while new sessions remain fail-closed');
 
@@ -54,6 +55,8 @@ assert(!auth.includes("setPersistence(auth,authModule.browserLocalPersistence)")
 
 assert(css.includes('html.flympusAuthBooting .app')&&css.includes('visibility:hidden!important'),
   'Auth gate must hide the underlying app while enforced authentication is unresolved');
+assert(html.includes('id="flympusAuthRoot" class="flympusAuthInitial"')&&css.includes('#flympusAuthRoot.flympusAuthInitial'),
+  'A branded authentication shell must be present in static HTML before the deferred Firebase runtime loads');
 assert(css.includes('html.flympusUserManagementOpen body{position:fixed!important'),'User Management must freeze the page behind its modal');
 assert(css.includes('overscroll-behavior:contain')&&css.includes('touch-action:pan-y'),'User Management must contain iOS scrolling inside its own body');
 assert(html.includes("classList.contains('flympusUserManagementOpen')"),'Pull-to-refresh must ignore User Management gestures');
@@ -81,8 +84,9 @@ assert(auth.includes('data-user-invite-form')&&auth.includes('name="email"')&&au
 assert(auth.includes("preauthorized?'active':'pending'"),'A pre-authorized email must become active on first sign-in');
 assert(rules.includes('match /invitations/{email}')&&rules.includes('request.auth.token.email.lower() == email'),'Invitation reads must be bound to the signed-in normalized email');
 assert(rules.includes('invitedUserCreate(request.resource.data)'),'First sign-in may inherit only an administrator-created invitation role');
-assert(storage.includes('function installResumeThemeHold()')&&storage.includes("attributeFilter:['data-flympus-theme']"),'Early lifecycle layer must hold the stable theme through iOS resume');
-assert(storage.includes('const first=sampleSystem()')&&storage.includes('const third=sampleSystem()')&&storage.includes('first===second&&second===third?third:stable'),'Resume theme guard must require three matching System samples');
+assert(theme.includes('authoritative first-paint and iOS lifecycle theme controller'),'Theme lifecycle must have one authoritative writer');
+assert(theme.includes("window.addEventListener('pageshow'")&&theme.includes('reassertStableTheme()'),'iOS resume must reassert the committed theme without probing transient state');
+assert(!storage.includes('installResumeThemeHold')&&!theme.includes('setTimeout('),'Theme lifecycle must not retain competing timeout-based resume writers');
 
 
 assert(auth.includes("returningScopedSession=!!window.FLYMPUS_STORAGE_SCOPE?.currentUid?.()"),'Refresh auth should recognize an already UID-scoped returning session');
@@ -104,8 +108,6 @@ assert(storage.includes("rawGet(session,UID_SESSION_KEY)||rawGet(local,UID_PERSI
 assert(storage.includes('rawRemove(local,UID_PERSISTED_KEY)'),'Sign-out must clear the durable UID hint');
 
 
-assert(html.includes('FLYMPUS_SYSTEM_THEME_SETTLE_MS=1800')&&html.includes('FLYMPUS_SYSTEM_THEME_CONFIRM_MS=350'),'Runtime resume theme reconciliation must outlast the observed iOS transient window');
-assert(html.includes('const third=visibleSystemTheme()')&&html.includes('first===second&&second===third'),'Runtime System theme changes must require three stable foreground samples');
-assert(storage.includes('RESUME_THEME_SETTLE_MS=1800')&&storage.includes('RESUME_THEME_CONFIRM_MS=350'),'Early theme hold must match the hardened runtime settle window');
+assert(auth.includes('let authStateVersion=0')&&auth.includes('version!==authStateVersion'),'Stale asynchronous auth callbacks must never unlock or rescope the app');
 
 console.log('Authentication foundation checks passed');

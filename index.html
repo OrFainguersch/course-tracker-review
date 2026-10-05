@@ -7,42 +7,16 @@
 <meta charset="utf-8" />
 <meta name="theme-color" content="#07294c" />
 <meta name="color-scheme" content="light" />
+<script src="./theme-controller.js?v=20261005-theme1"></script>
 <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
 <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin />
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js" crossorigin />
-<link rel="modulepreload" href="./auth.js?v=20261005-auth12" />
+<link rel="modulepreload" href="./auth.js?v=20261005-auth13" />
 <script src="./firebase-config.js?v=20261004-auth2"></script>
-<script src="./storage-scope.js?v=20261005-auth6"></script>
-<script>
-/* Early preference bootstrap: keep first paint identical to the last visible
-   FLYMPUS frame. iOS can report a transient system color scheme while a PWA is
-   backgrounded/reopened, so System theme starts from the last resolved visible
-   theme and is reconciled only after the page is actually foregrounded. */
-(()=>{try{
-  const saved=JSON.parse(localStorage.getItem('flympus-app-preferences')||'{}')||{};
-  const language=saved.language==='he'?'he':'en',themeMode=['light','dark','system'].includes(saved.theme)?saved.theme:'system';
-  const stableRaw=String(localStorage.getItem('flympus-last-resolved-theme')||''),stable=stableRaw==='dark'||stableRaw==='light'?stableRaw:'';
-  const lastVisibleAt=Math.max(0,Number(localStorage.getItem('flympus-last-visible-theme-at')||0)),recentVisibleTheme=!!stable&&Date.now()-lastVisibleAt<=6*60*60*1000;
-  const mediaDark=!!window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
-  const resolvedTheme=themeMode==='dark'?'dark':themeMode==='light'?'light':(recentVisibleTheme?stable:(mediaDark?'dark':'light'));
-  const dark=resolvedTheme==='dark',root=document.documentElement;
-  root.setAttribute('data-flympus-language',language);
-  root.setAttribute('lang',language);
-  root.setAttribute('dir',language==='he'?'rtl':'ltr');
-  root.setAttribute('data-flympus-theme',resolvedTheme);
-  root.setAttribute('data-flympus-theme-mode',themeMode);
-  root.style.colorScheme=resolvedTheme;
-  root.style.backgroundColor=dark?'#091522':'#f4f8fc';
-  root.classList.toggle('flympusLargeText',saved.largerText===true);
-  root.classList.toggle('flympusHapticsOff',saved.haptics===false);
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#07131f':'#07294c');
-  document.querySelector('meta[name="color-scheme"]')?.setAttribute('content',resolvedTheme);
-  if(themeMode!=='system')localStorage.setItem('flympus-last-resolved-theme',resolvedTheme);
-}catch{}})();
-</script>
+<script src="./storage-scope.js?v=20261005-auth7"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -54,7 +28,7 @@
    still owns notification permission/subscription later; this early call only
    makes the next cold launch independent of mobile network latency. */
 try{
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{})
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(()=>{})
 }catch{}
 </script>
 <title>FLYMPUS — Train. Track. Progress.</title>
@@ -4350,7 +4324,15 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
   .homeHeroMetaLine{white-space:normal;flex-wrap:wrap;row-gap:2px}
 }
 </style>
-<link rel="stylesheet" href="./auth.css?v=20261005-auth4" />
+<style>
+/* Header overlays stay inside the iPhone safe-area viewport. */
+@media(max-width:760px){
+  .topCourseSwitcherWrap{flex:1 1 auto;min-width:0;max-width:none;margin:0}
+  .topCourseSwitch{height:42px;padding:5px 9px}
+  .topCourseDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right));width:auto;max-width:none}
+}
+</style>
+<link rel="stylesheet" href="./auth.css?v=20261005-auth5" />
 <script>
 /* Authentication is fail-closed only after it is explicitly enabled.
    Until the Firebase project and UID-scoped data migration are ready,
@@ -4365,9 +4347,17 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
 </script>
 </head>
 <body>
+<div id="flympusAuthRoot" class="flympusAuthInitial" role="dialog" aria-modal="true" aria-label="FLYMPUS sign in"><div class="flympusAuthShell"><div class="flympusAuthBrand"><img src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><section class="flympusAuthCard"><div class="flympusAuthCardBody"><div class="flympusAuthSpinner" aria-hidden="true"></div><p class="flympusAuthEyebrow">SECURE SIGN IN</p><h1 class="flympusAuthTitle">Opening FLYMPUS</h1><p class="flympusAuthCopy">Starting secure authentication…</p></div></section></div></div>
+<script>if(document.documentElement.getAttribute('data-flympus-language')==='he'){const r=document.getElementById('flympusAuthRoot');r.dir='rtl';r.querySelector('.flympusAuthEyebrow').textContent='כניסה מאובטחת';r.querySelector('.flympusAuthTitle').textContent='פותח את FLYMPUS';r.querySelector('.flympusAuthCopy').textContent='מפעיל אימות מאובטח…'}</script>
 <div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><details class="notificationPreferences" id="notificationPreferences"><summary>Notification preferences</summary><div class="notificationPrefsBody"><p class="notificationPrefsHint">Choose which personal notifications you want to receive across all courses.</p><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Assignments & role changes</b><small>When you are assigned to a course or your course role changes.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="assignments"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Course updates</b><small>Important changes to courses you are assigned to.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="courseUpdates"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Evaluations & drafts</b><small>Items that require completion, revision or follow-up.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="evaluations"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Checks, tests & certifications</b><small>Qualification events and certification-related updates.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="checks"><i></i></span></label><label class="notificationPrefRow"><span class="notificationPrefCopy"><b>Required actions & deadlines</b><small>Time-sensitive items that need your attention.</small></span><span class="prefSwitch"><input type="checkbox" data-notification-pref="requiredActions"><i></i></span></label></div></details></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0726 · rank badge +2px</div><div class="toast" id="toast"></div></div>
 <script>
 (()=>{try{
+  /* The selected-course control is injected before application hydration so
+     it is present for the first interactive frame on every responsive size. */
+  if(!document.getElementById('topCourseSwitch')){
+    const spacer=document.querySelector('.topHeaderSpacer');
+    spacer?.insertAdjacentHTML('afterend','<div class="topCourseSwitcherWrap"><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="topCourseDropdown"><span>Selected course</span><b id="topCourseName" aria-live="polite">&nbsp;</b><i aria-hidden="true">⌄</i></button><div class="topCourseDropdown" id="topCourseDropdown" role="menu" hidden></div></div>')
+  }
   /* Reload continuity: Safari may paint the document while parser-blocking
      catalog scripts are still loading. Restore the exact previous #content
      snapshot before that can happen, then the real render replaces it with
@@ -4622,43 +4612,20 @@ function getFlympusAppPreferences(){
   catch{return {...flympusAppPreferenceDefaults}}
 }
 function saveFlympusAppPreferences(next){
+  const previous=getFlympusAppPreferences();
   const prefs={...flympusAppPreferenceDefaults,...(next||{})};
   try{localStorage.setItem('flympus-app-preferences',JSON.stringify(prefs))}catch{}
-  applyFlympusAppPreferences(prefs);
+  applyFlympusAppPreferences(prefs,{themeSelectionChanged:previous.theme!==prefs.theme});
   return prefs
 }
-const FLYMPUS_RESOLVED_THEME_KEY='flympus-last-resolved-theme';
-function getFlympusStableResolvedTheme(){
-  try{const v=String(localStorage.getItem(FLYMPUS_RESOLVED_THEME_KEY)||'');return v==='dark'||v==='light'?v:''}catch{return ''}
-}
-function setFlympusStableResolvedTheme(theme){
-  if(theme!=='dark'&&theme!=='light')return;
-  try{
-    localStorage.setItem(FLYMPUS_RESOLVED_THEME_KEY,theme);
-    localStorage.setItem('flympus-last-visible-theme-at',String(Date.now()));
-  }catch{}
-}
-function resolveFlympusTheme(prefs,allowSystemProbe=true){
-  const themeMode=['light','dark','system'].includes(prefs?.theme)?prefs.theme:'system';
-  if(themeMode==='dark'||themeMode==='light')return themeMode;
-  const rootTheme=document.documentElement?.getAttribute('data-flympus-theme');
-  const current=rootTheme==='dark'||rootTheme==='light'?rootTheme:'';
-  const stable=getFlympusStableResolvedTheme();
-  if(!allowSystemProbe||document.visibilityState==='hidden')return current||stable||'light';
-  try{return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches?'dark':'light'}catch{return current||stable||'light'}
-}
-function applyFlympusAppPreferences(input,{allowSystemProbe=true,resolvedSystemTheme=''}={}){
+function applyFlympusAppPreferences(input,{themeSelectionChanged=false}={}){
   const prefs=input||getFlympusAppPreferences(),root=document.documentElement,body=document.body;
-  const themeMode=['light','dark','system'].includes(prefs.theme)?prefs.theme:'system';
-  const sampledSystemTheme=resolvedSystemTheme==='dark'||resolvedSystemTheme==='light'?resolvedSystemTheme:'';
-  const resolvedTheme=themeMode==='system'&&sampledSystemTheme?sampledSystemTheme:resolveFlympusTheme(prefs,allowSystemProbe),dark=resolvedTheme==='dark';
   const language=prefs.language==='he'?'he':'en';
-  root?.setAttribute('data-flympus-theme',resolvedTheme);
-  root?.setAttribute('data-flympus-theme-mode',themeMode);
+  window.FLYMPUS_THEME?.applyPreferences?.(prefs,{sampleSystemNow:themeSelectionChanged&&prefs.theme==='system'});
+  window.FLYMPUS_THEME?.applyLocaleAndAccessibility?.(prefs);
   root?.setAttribute('data-flympus-language',language);
   root?.setAttribute('lang',language);
   root?.setAttribute('dir',language==='he'?'rtl':'ltr');
-  if(root?.style)root.style.colorScheme=resolvedTheme;
   /* Density + accessibility controls were removed from Settings; do not leave
      previously-saved hidden modes active. */
   root?.classList.remove('flympusCompact','flympusReducedMotion','flympusHighContrast');
@@ -4670,13 +4637,8 @@ function applyFlympusAppPreferences(input,{allowSystemProbe=true,resolvedSystemT
      hit-testing, and disabled is a second hard stop so WebKit cannot emit a
      native switch haptic after the preference is turned off. */
   document.querySelectorAll?.('.mobileBottomHapticSwitch')?.forEach?.(el=>{el.disabled=prefs.haptics===false});
-  const themeMeta=document.querySelector?.('meta[name="theme-color"]');
-  if(themeMeta)themeMeta.setAttribute('content',dark?'#07131f':'#07294c');
-  const schemeMeta=document.querySelector?.('meta[name="color-scheme"]');
-  if(schemeMeta)schemeMeta.setAttribute('content',resolvedTheme);
-  if(themeMode!=='system'||document.visibilityState!=='hidden')setFlympusStableResolvedTheme(resolvedTheme);
 }
-applyFlympusAppPreferences(undefined,{allowSystemProbe:false});
+applyFlympusAppPreferences();
 
 const FLYMPUS_HE_UI={
   'COURSE':'קורס','APP':'אפליקציה','My Courses':'הקורסים שלי','Course Management':'ניהול קורס','Settings':'הגדרות',
@@ -5469,100 +5431,6 @@ if(!window.__flympusI18nObserverBound&&window.MutationObserver){
   if(document.body)start();else document.addEventListener('DOMContentLoaded',start,{once:true})
 }
 
-if(!window.__flympusThemePreferenceBound){
-  window.__flympusThemePreferenceBound=true;
-  let pendingSystemThemeSync=false,resumeThemeToken=0,resumeThemeTimer=null,resumeThemeConfirmTimer=null,resumeThemeFinalTimer=null,resumeThemeGuardUntil=0;
-  const FLYMPUS_SYSTEM_THEME_SETTLE_MS=1800;
-  const FLYMPUS_SYSTEM_THEME_CONFIRM_MS=350;
-  const visibleSystemTheme=()=>{
-    try{return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches?'dark':'light'}
-    catch{return getFlympusStableResolvedTheme()||'light'}
-  };
-  const clearForegroundThemeTimers=()=>{
-    clearTimeout(resumeThemeTimer);
-    clearTimeout(resumeThemeConfirmTimer);
-    clearTimeout(resumeThemeFinalTimer);
-    resumeThemeTimer=null;
-    resumeThemeConfirmTimer=null;
-    resumeThemeFinalTimer=null;
-  };
-  const finishForegroundThemeGuard=(token,root)=>{
-    if(token!==resumeThemeToken)return;
-    if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>root?.classList.remove('flympusResumeVisualSync'));
-    else root?.classList.remove('flympusResumeVisualSync');
-  };
-  const syncVisibleSystemTheme=()=>{
-    if(getFlympusAppPreferences().theme!=='system'){pendingSystemThemeSync=false;return}
-    if(document.visibilityState!=='visible'){pendingSystemThemeSync=true;return}
-    pendingSystemThemeSync=false;
-    applyFlympusAppPreferences(undefined,{allowSystemProbe:true});
-  };
-  const scheduleForegroundThemeSync=()=>{
-    if(getFlympusAppPreferences().theme!=='system')return;
-    if(document.visibilityState!=='visible'){pendingSystemThemeSync=true;return}
-    const token=++resumeThemeToken,root=document.documentElement;
-    clearForegroundThemeTimers();
-    pendingSystemThemeSync=false;
-    resumeThemeGuardUntil=(performance.now?.()||Date.now())+FLYMPUS_SYSTEM_THEME_SETTLE_MS+(FLYMPUS_SYSTEM_THEME_CONFIRM_MS*2)+300;
-    root?.classList.add('flympusResumeVisualSync');
-
-    /* Re-assert the last actually visible theme immediately. Never probe the
-       OS during the fragile first foreground frames: WebKit can briefly report
-       the wrong color scheme while restoring an app-switcher snapshot. */
-    applyFlympusAppPreferences(undefined,{allowSystemProbe:false});
-
-    resumeThemeTimer=setTimeout(()=>{
-      if(token!==resumeThemeToken||document.visibilityState!=='visible')return;
-      const first=visibleSystemTheme();
-      resumeThemeConfirmTimer=setTimeout(()=>{
-        if(token!==resumeThemeToken||document.visibilityState!=='visible')return;
-        const second=visibleSystemTheme();
-        resumeThemeFinalTimer=setTimeout(()=>{
-          if(token!==resumeThemeToken||document.visibilityState!=='visible')return;
-          const third=visibleSystemTheme();
-          if(first===second&&second===third){
-            const current=document.documentElement?.getAttribute('data-flympus-theme');
-            if(third!==current){
-              /* iOS can keep a stale app-switcher color scheme for more than
-                 a second. Require three stable samples before accepting a
-                 real System appearance change after foregrounding. */
-              applyFlympusAppPreferences(undefined,{allowSystemProbe:false,resolvedSystemTheme:third});
-            }else{
-              const stable=current==='dark'||current==='light'?current:third;
-              setFlympusStableResolvedTheme(stable);
-            }
-          }
-          finishForegroundThemeGuard(token,root);
-        },FLYMPUS_SYSTEM_THEME_CONFIRM_MS);
-      },FLYMPUS_SYSTEM_THEME_CONFIRM_MS);
-    },FLYMPUS_SYSTEM_THEME_SETTLE_MS);
-  };
-  try{
-    const mq=window.matchMedia?.('(prefers-color-scheme: dark)');
-    mq?.addEventListener?.('change',()=>{
-      if(getFlympusAppPreferences().theme!=='system')return;
-      if(document.visibilityState!=='visible'){pendingSystemThemeSync=true;return}
-      const now=performance.now?.()||Date.now();
-      if(now<resumeThemeGuardUntil){
-        pendingSystemThemeSync=true;
-        scheduleForegroundThemeSync();
-        return;
-      }
-      syncVisibleSystemTheme();
-    });
-  }catch{}
-  document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='hidden'){
-      clearForegroundThemeTimers();
-      ++resumeThemeToken;
-      const current=document.documentElement?.getAttribute('data-flympus-theme');
-      if(current==='dark'||current==='light')setFlympusStableResolvedTheme(current);
-      return;
-    }
-    scheduleForegroundThemeSync();
-  },{passive:true});
-  window.addEventListener('pageshow',scheduleForegroundThemeSync,{passive:true});
-}
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
 const flympusPushBootParams=(()=>{try{return new URLSearchParams(location.search)}catch{return new URLSearchParams()}})();
 const flympusPushBootScreen=String(flympusPushBootParams.get('pushScreen')||''),flympusPushBootCourse=String(flympusPushBootParams.get('pushCourse')||'');
@@ -7154,16 +7022,6 @@ function goBack(){
   if(target==='home')appNavHistory=[];
   Object.assign(state,{screen:target});saveAppNavHistory();setDrawerOpen(false);render();forcePageTop();return true
 }
-function goBack(){
-  if(state.screen==='home')return false;
-  let target='home';
-  while(appNavHistory.length){
-    const candidate=appNavHistory.pop();
-    if(candidate&&candidate!==state.screen&&appScreenIds.has(candidate)){target=candidate;break}
-  }
-  if(target==='home')appNavHistory=[];
-  Object.assign(state,{screen:target});saveAppNavHistory();setDrawerOpen(false);render();forcePageTop();return true
-}
 function metric(label,value,detail){return `<div class="card metric"><div class="label">${label}</div><div class="value">${value}</div><div class="detail">${detail||''}</div></div>`}
 
 const mockEvalHistory=[
@@ -7510,7 +7368,7 @@ async function getFlympusPushConfig({force=false}={}){
 }
 async function registerFlympusPushServiceWorker(){
   if(!('serviceWorker'in navigator))throw new Error('Service workers are not supported on this device.');
-  const registration=await navigator.serviceWorker.register(FLYMPUS_PUSH_SW,{scope:'./'});
+  const registration=await navigator.serviceWorker.register(FLYMPUS_PUSH_SW,{scope:'./',updateViaCache:'none'});
   await navigator.serviceWorker.ready;
   return registration
 }
@@ -10210,6 +10068,6 @@ if(['roster','planned','home','record','reports'].includes(earlyNavTarget)){
   }
 })();
 </script>
-<script type="module" src="./auth.js?v=20261005-auth12"></script>
+<script type="module" src="./auth.js?v=20261005-auth13"></script>
 </body>
 </html>

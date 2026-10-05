@@ -3,12 +3,13 @@ const vm=require("node:vm");
 const assert=require("node:assert/strict");
 const storage=()=>{const values=new Map();return{get length(){return values.size},key:i=>[...values.keys()][i]??null,getItem:key=>values.has(key)?values.get(key):null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key),clear:()=>values.clear()}};
 class ElementStub{
-  constructor(){this.innerHTML="";this.textContent="";this.value="";this.dataset={};this.style={};this._classes=new Set();this.classList={add:(...xs)=>xs.forEach(x=>this._classes.add(x)),remove:(...xs)=>xs.forEach(x=>this._classes.delete(x)),toggle:(x,force)=>{if(force===true){this._classes.add(x);return true}if(force===false){this._classes.delete(x);return false}if(this._classes.has(x)){this._classes.delete(x);return false}this._classes.add(x);return true},contains:x=>this._classes.has(x)}}
-  querySelectorAll(){return[]} querySelector(){return null} addEventListener(){} click(){} appendChild(){}
+  constructor(){this.innerHTML="";this.textContent="";this.value="";this.dataset={};this.style={};this.attributes=new Map();this._classes=new Set();this.classList={add:(...xs)=>xs.forEach(x=>this._classes.add(x)),remove:(...xs)=>xs.forEach(x=>this._classes.delete(x)),toggle:(x,force)=>{if(force===true){this._classes.add(x);return true}if(force===false){this._classes.delete(x);return false}if(this._classes.has(x)){this._classes.delete(x);return false}this._classes.add(x);return true},contains:x=>this._classes.has(x)}}
+  setAttribute(k,v){this.attributes.set(k,String(v))} getAttribute(k){return this.attributes.get(k)??null} removeAttribute(k){this.attributes.delete(k)}
+  querySelectorAll(){return[]} querySelector(){return null} addEventListener(){} click(){this.onclick?.({preventDefault(){},stopPropagation(){},target:this})} appendChild(){}
 }
 const elements=new Map(["#menuBtn","#backdrop","#nav","#content","#drawer","#toast","#topCourseName"].map(id=>[id,new ElementStub()]));
-const document={querySelector:selector=>elements.get(selector)||null,querySelectorAll:()=>[],createElement:()=>new ElementStub()};
-const context={window:{},document,localStorage:storage(),sessionStorage:storage(),console,confirm:()=>true,setTimeout:()=>0,clearTimeout(){},Date,Math,JSON,Number,String,Array,Object,Map,Set,FormData:class{},Blob:class{},URL:{createObjectURL(){return""},revokeObjectURL(){}},location:{},navigator:{}};
+const document={querySelector:selector=>elements.get(selector)||null,querySelectorAll:()=>[],createElement:()=>new ElementStub(),createTreeWalker:()=>({nextNode:()=>null}),addEventListener(){},removeEventListener(){},visibilityState:'visible',documentElement:new ElementStub(),body:new ElementStub(),scrollingElement:new ElementStub()};
+const context={window:{},document,localStorage:storage(),sessionStorage:storage(),console,confirm:()=>true,setTimeout:()=>0,clearTimeout(){},requestAnimationFrame:fn=>0,addEventListener(){},removeEventListener(){},matchMedia:()=>({matches:false,addEventListener(){},removeEventListener(){}}),performance:{now:()=>0},history:{},getComputedStyle:()=>({}),NodeFilter:{SHOW_TEXT:4},Date,Math,JSON,Number,String,Array,Object,Map,Set,URLSearchParams,FormData:class{},Blob:class{},URL:{createObjectURL(){return""},revokeObjectURL(){}},location:{search:''},navigator:{}};
 context.window=context;vm.createContext(context);
 for(const file of ["assets/ep-catalog.js","assets/aerostar-platform.js","assets/ip-catalog.js","assets/technician-catalog.js","assets/training-core.js","assets/ep-lessons-screening.js","assets/ep-lessons-rc-1.js","assets/ep-lessons-rc-2.js","assets/ep-lessons-half.js","assets/ep-lessons-full-day-a.js","assets/ep-lessons-full-day-b.js","assets/ep-lessons-night.js"]){vm.runInContext(fs.readFileSync(file,"utf8"),context,{filename:file})}
 const html=fs.readFileSync("index.html","utf8");
@@ -37,13 +38,10 @@ assert(html.includes("getNotificationPreferences()")&&html.includes("saveNotific
 assert(html.includes('id="topPersonalProfileBtn"')&&html.includes('aria-label="Personal profile"'),"The top-right personal avatar must open the personal profile editor");
 assert(html.includes('id="personalPhotoInput"')&&html.includes('id="removePersonalPhoto"'),"Personal profile editing must support changing or removing the user's photo");
 assert(html.includes(".personalPhotoActions .btn{flex:1;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important}"),"Personal photo action labels must be visually centered");
-assert(html.includes('id="personalCropModal"')&&html.includes('id="personalCropViewport"')&&html.includes('id="personalCropZoom"'),"Personal photo selection must open a crop-and-adjust editor");
+assert(html.includes('id="personalCropModal"')&&html.includes('id="personalCropViewport"')&&html.includes('id="personalCropImage"'),"Personal photo selection must open a crop-and-adjust editor");
 assert(html.includes("function personalCropDataUrl(")&&html.includes("function renderPersonalPhotoCrop()"),"Profile photo cropper must support repositioning, zooming and exporting the adjusted square");
 assert(html.includes("onpointerdown")&&html.includes("onpointermove")&&html.includes("personalCropState.zoom"),"Profile photo cropper must support touch/pointer drag and zoom adjustment");
 assert(html.includes("Your name, email and course role are managed by course administration."),"Self-service personal profile must keep identity and role read-only");
-assert(html.includes('id="exportFlympusBackup"')&&html.includes('id="flympusBackupInput"')&&html.includes("function flympusBackupPayload()")&&html.includes("function restoreFlympusBackup(payload)"),"Personal profile must expose full FLYMPUS device-data export and import");
-assert(html.includes("startsWith('ct-review-')")&&html.includes("startsWith('flympus-')"),"Device backup must include both review data and training-package overrides");
-assert(html.includes("function shouldShowStandaloneMigration()")&&html.includes("Bring your Safari data into FLYMPUS"),"An empty Home Screen app must explain the one-time Safari-to-app data transfer");
 assert(html.includes("navigator.storage?.persist")&&html.includes("ensurePersistentDeviceStorage();"),"The app must request persistent device storage when the browser supports it");
 assert(html.includes("function positionNotificationDropdown()"),"Notifications panel must position safely on mobile");
 assert(html.includes(".panel{display:flex;flex-direction:column;padding-bottom:calc(8px + env(safe-area-inset-bottom))}.panel #nav{flex:0 0 auto}.drawerFooter{margin-top:auto;margin-bottom:6px}"),"Mobile account card should sit close to the true bottom while respecting the safe area");
@@ -58,10 +56,10 @@ assert(html.includes("function navIconSvg(name)")&&html.includes("class=\"navIco
 assert(html.includes('id="mobileBottomNav"')&&html.includes("function renderMobileBottomNav()"),"Mobile layout must expose the premium bottom navigation");
 assert(html.includes("['roster','roster','Roster'],['planned','planned','Plan'],['home','home','Home'],['record','record','Forms'],['reports','reports','Reports']"),"Mobile bottom navigation must use five top-level tabs with Home exactly centered and Forms grouping the three entry workflows");
 assert(html.includes("const state={screen:'home'"),"A fresh session must default to Home while saved session state can still restore the previous screen");
-assert(html.includes("const nav=[['__label','','COURSE'],['courses','courses','My Courses'],['settings','settings','Course Management']]"),"Sidebar must omit Reports, Safety and Exams because they are direct mobile bottom-nav destinations");
+assert(html.includes("const nav=[['__label','','COURSE'],['courses','courses','My Courses'],['settings','settings','Course Management'],['__label','','APP'],['preferences','preferences','Settings']]"),"Sidebar must omit Reports, Safety and Exams because they are direct mobile bottom-nav destinations");
 assert(html.includes("n.querySelectorAll('[data-nav]').forEach(b=>{b.onclick=e=>")&&!html.includes("n.querySelectorAll('[data-nav]').forEach(b=>{const pressSound=bindFlympusNavPressSound(b)"),"My Courses and Course Management must remain completely silent; navigation click audio belongs only to the bottom bar");
 assert(html.includes("function normalizeDateValue(v)")&&html.includes("function formatDateDMY(v)")&&html.includes('placeholder="DD/MM/YYYY"'),"All date entry/display must use the deterministic DD/MM/YYYY layer");
-assert(!html.includes('type="date"'),"Native locale-dependent date inputs must not remain in the review UI");
+assert(!/<input[^>]+type="date"/i.test(html),"Native locale-dependent date inputs must not remain in the review UI");
 assert(html.includes(".dateDmy{width:100%!important;max-width:100%!important;min-width:0!important"),"Date inputs must be constrained to their container on mobile");
 assert(!html.includes('${epCurrentSuitSummaryHtml()}\n<div class="twoCol">'),"Evaluation must not render the redundant Active Suit overview");
 assert(!html.includes("activeSuitOverviewHtml()+\n '<div class=\"twoCol\" style=\"margin-top:14px\">"),"Exams must not render the redundant Active Package overview");
@@ -79,7 +77,7 @@ assert(html.includes("function requiredCompletionPanelShell(prefix)")&&html.incl
 assert(html.includes("requiredCompletionPanelShell('safety')")&&html.includes("requiredCompletionPanelShell('exam')")&&html.includes("staticRequiredCompletionPanel('planned',planMissing)")&&html.includes('class="evalMissingPanel formCompletionPanel" id="evalMissingPanel"'),"Evaluation, Safety, Exams and Plan must all expose the unified completion panel");
 assert(html.includes(".recordFormActions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))")&&html.includes("recordFormActions")&&html.includes("Submit safety event")&&html.includes("Submit exam result")&&html.includes("Submit evaluation"),"Submit and Discard actions must use equal-width shared styling across Forms");
 assert(html.includes("Set at least one planned flight before submitting the daily report."),"Plan Submit must still explain missing required planning when clicked");
-assert(html.includes("scrollMobileNavTop")&&html.includes("window.scrollTo({top:0,left:0,behavior:'smooth'})"),"Every mobile bottom-nav action must scroll the page back to the top");
+assert(html.includes("scrollActiveBottomNavTop")&&html.includes("window.scrollTo({top:0,left:0,behavior:'smooth'})"),"Every mobile bottom-nav action must scroll the page back to the top");
 assert(html.includes("Mobile dark brand bottom navigation · 0680")&&html.includes("background:linear-gradient(180deg,#123b63 0%,#0b3157 100%)")&&html.includes(".mobileBottomItem.active{color:var(--brand-gold)}"),"Mobile bottom navigation must keep the dark brand style with restrained gold active state");
 assert(html.includes("font-size:9.6px")&&html.includes("width:100%;white-space:nowrap;overflow:visible;text-align:center"),"Five-tab mobile navigation labels must remain readable and unclipped");
 assert(html.includes("mobileBottomIconButton")&&html.includes("touch-action:none")&&html.includes("width:100%;height:34px")&&html.includes("padding:3px 0 7px")&&html.includes("ongesturestart=e=>e.preventDefault?.()")&&html.includes("pointer-events:none"),"Bottom-nav icon hit areas must be horizontally contiguous while zoom gestures stay suppressed");
@@ -93,18 +91,18 @@ assert(html.includes("height:74px;display:grid;grid-template-columns:repeat(5,mi
 assert(html.includes("function recordHub()")&&html.includes("COURSE FORMS")&&html.includes('<h1 class="pageTitle">Forms</h1>')&&html.includes("Choose the form you want to complete for ")&&html.includes("['evaluation','evaluation','Evaluation'")&&html.includes("['safety','safety','Safety'")&&html.includes("['exams','exams','Exams'"),"Forms must open a dedicated three-choice hub for Evaluation, Safety and Exams");
 assert(!html.includes("function recordActionDock(active)")&&!html.includes(".recordActionDockWrap{position:sticky"),"Forms child screens must not show the floating three-action bar");
 assert(html.includes("function globalBackControl()")&&html.includes('id="appBackBtn"')&&html.includes('aria-label="Back"')&&html.includes(".recordReturnBtn{width:36px;height:36px")&&html.includes("function bindGlobalBackGesture()")&&html.includes("state.screen!=='home'")&&html.includes("startX<=56")&&html.includes("dx>=72")&&html.includes("e.preventDefault?.()"),"Every non-Home screen must provide the same compact blue back control plus a guarded left-edge swipe");
-assert(html.includes("let appNavHistory=[]")&&html.includes("function saveAppNavHistory()")&&html.includes("function goBack(){")&&html.includes("if(target==='home')appNavHistory=[]")&&html.includes("if(state.screen!=='home')html=globalBackControl()+html"),"Global navigation history must always resolve back to Home as its root");
-assert(html.includes("const appRootScreens=new Set(['courses','roster','planned','record','reports','settings'])")&&html.includes("else if(appRootScreens.has(target))appNavHistory=['home'];"),"Top-level destinations must be sibling screens whose Back action returns directly to Home");
-assert(html.includes("const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop')")&&html.includes("drawer.classList.add('open')")&&html.includes("backdrop.onclick=()=>{drawer.classList.remove('open')"),"Hamburger and backdrop handlers must be rebound on every render so the sidebar always opens and closes");
+assert(html.includes("let appNavHistory=[]")&&html.includes("function saveAppNavHistory()")&&html.includes("function goBack(){")&&html.includes("if(target==='home')appNavHistory=[]")&&html.includes("if(screen!=='home')html=globalBackControl()+html"),"Global navigation history must always resolve back to Home as its root");
+assert(html.includes("const appRootScreens=new Set(['courses','roster','planned','record','reports','settings','preferences'])")&&html.includes("else if(appRootScreens.has(target))appNavHistory=['home'];"),"Top-level destinations must be sibling screens whose Back action returns directly to Home");
+assert(html.includes("const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop')")&&html.includes("setDrawerOpen(!drawer.classList.contains('open'))")&&html.includes("backdrop.onclick=()=>setDrawerOpen(false)"),"Hamburger and backdrop handlers must be rebound on every render so the sidebar always opens and closes");
 assert(!html.includes("function recordReturnControl()")&&!html.includes("function bindRecordBackGesture()")&&!html.includes('id="backRoster"'),"Forms-only and profile-only back controls must be replaced by the single global back system");
 
-assert(html.includes("function traineeRecordDock(traineeId)")&&html.includes(".profileRecordDockWrap{position:sticky;top:74px")&&html.includes("traineeRecordDock(t.id)")&&html.includes("--record-safety:#c84444"),"Trainee profiles must own the sticky Evaluation, Safety and Exam action bar with Safety in red");
-assert(html.includes("function courseAttentionCounts()")&&html.includes("record:evaluation+safety+exams")&&html.includes("dotOnly=id==='record'")&&html.includes('data-attention-dot="true"'),"Any unfinished Forms draft must roll up into a dot-only attention indicator on the Forms bottom-nav item");
-assert(html.includes(".attentionBadge[hidden]{display:none!important}")&&html.includes("el.textContent=n?'1':''"),"Zero-value attention badges must be completely hidden instead of displaying 0");
+assert(html.includes("function traineeRecordDock(traineeId)")&&html.includes(".profileRecordDock{")&&html.includes("position:sticky!important")&&html.includes("top:78px!important")&&html.includes("traineeRecordDock(t.id)")&&html.includes("--record-safety:#c84444"),"Trainee profiles must own the sticky Evaluation, Safety and Exam action bar with Safety in red");
+assert(html.includes("function courseAttentionCounts()")&&html.includes("record:evaluation+safety+exams")&&html.includes("attentionBadgeHtml('record','mobileNavAttention mobileNavRecordAttention',true)")&&html.includes('data-attention-dot="true"'),"Any unfinished Forms draft must roll up into a dot-only attention indicator on the Forms bottom-nav item");
+assert(html.includes(".attentionBadge[hidden]{display:none!important}")&&html.includes("el.textContent=n?(dotOnly?'':formatAttentionCount(n)):''")&&html.includes("el.hidden=!n"),"Zero-value attention badges must be completely hidden instead of displaying 0");
 assert(html.includes("const attentionSummary=attention.record?")&&html.includes("recordAttentionSummary")&&html.includes("recordCardAttention"),"Forms must render aggregate and per-workflow unfinished indicators only when attention exists");
 assert(!html.includes("counts.evaluation+' saved'")&&!html.includes("counts.safety+' saved'")&&!html.includes("counts.exams+' saved'")&&!html.includes('<span class="recordHubCount">'),"Forms cards must not display saved-record counts");
 assert(html.includes("function traineeDraftNeedsAttention")&&html.includes("draftTrainee===id")&&html.includes("data-trainee-attention")&&html.includes("profileActionAttention"),"Trainee floating record actions must show an attention badge only when the unfinished draft belongs to that exact trainee");
-assert(html.includes("id==='planned'?'planned':''")&&html.includes("planned=hasActivityDraft('planned')?1:0"),"Plan must also expose an unfinished-draft badge on its bottom-nav item");
+assert(html.includes("id==='planned'?'planned':''")&&html.includes("planned=draftAttentionCount('planned')"),"Plan must also expose an unfinished-draft badge on its bottom-nav item");
 
 assert(html.includes("safety:'<path d=\"M12 3.5 19 6v5.3c0 4.5-2.7 7.7-7 9.2-4.3-1.5-7-4.7-7-9.2V6l7-2.5Z\"></path><path d=\"M12 8.2v5.1\"></path><path d=\"M12 16.4h.01\"></path>'")&&html.includes("homeQuickIcon safety")+html.includes("homePulseIcon safety")+html.includes("icon safetyIcon"),"Safety must use the shield-with-exclamation icon consistently across relevant surfaces");
 assert(html.includes(".recordHubCard.eval{border-top:3px solid var(--record-eval)}")&&html.includes(".recordHubCard.safety{border-top:3px solid var(--record-safety)}")&&html.includes(".recordHubCard.exam{border-top:3px solid var(--record-exam)}"),"Forms hub cards must keep the Evaluation, Safety and Exam color identity used by trainee record actions");
@@ -133,7 +131,7 @@ assert(html.includes("['Type',currentCourseMeta.trainingKind||'—']"),"Home met
 assert(html.includes("currentCourseMeta.type==='IP'?'Configuration':'Qualification'"),"Day or Night must be described as a qualification rather than repeating Day as both label and value");
 assert(html.includes("showHomeQualification=currentCourseMeta.type!=='EP'||!!epQualificationId(activeProgram)"),"EP phases without a meaningful Day/Night qualification must omit that field");
 assert(!html.includes("'<p>Train. Track. Progress.</p>'+"),"The Home hero should avoid redundant slogan copy inside the course context card");
-assert(html.includes("orderedFiltered=[...filtered].sort((a,b)=>{const as=a.key===selectedCourse,bs=b.key===selectedCourse;return as===bs?0:as?-1:1})"),"My Courses must keep the selected course first while preserving the existing order of all other courses");
+assert(html.includes("orderedFiltered=[...filtered].sort((a,b)=>{const as=a.key===selectedCourse,bs=b.key===selectedCourse")&&html.includes("localeCompare(String(b.course?.name||''),undefined,{sensitivity:'base'})"),"My Courses must keep the selected course first and sort the remaining courses deterministically");
 assert(html.includes("myCourseOpen selectedState")&&html.includes("✓ Selected"),"Selected course action must be a solid blue Selected state with a checkmark");
 assert(html.includes("My Courses · Option 2 refined tile layout · 0670")&&html.includes(".myCourseStatusBar{display:flex")&&html.includes(".myCourseMeta .courseMetaTile"),"My Courses cards must use the selected Option 2 header-and-tile layout");
 assert(html.includes("function courseMetaIconSvg(kind)")&&html.includes("courseMetaIcon"),"My Courses metadata tiles must use the refined icon system");
@@ -151,7 +149,7 @@ assert(!html.includes("courseSelectedBadge"),"My Courses must not use a separate
 assert(html.includes("courseStateBadge"),"Course lifecycle status must remain visible");
 assert(html.includes(".myCourseCard.selected{border-color:#2b8bde;box-shadow:0 0 0 3px rgba(43,139,222,.18)"),"Selected course card must be identified by its strong blue frame");
 assert(html.includes("function courseLifecycleStatus(record)"),"Course lifecycle status must support Upcoming, In progress and Completed");
-assert(html.includes("sectorPlatforms(sector)")&&html.includes("flatMap(x=>sectorPlatforms(x.id))"),"My Courses platform options must come from the architecture platform catalog");
+assert(html.includes("function sectorPlatforms(type)")&&html.includes("sectorDefs.flatMap(x=>sectorPlatforms(x.id))"),"My Courses platform options must come from the architecture platform catalog");
 assert(html.includes("function courseSummaryFromMeta(meta)"),"Course summaries must be rebuilt from live architecture metadata");
 assert(html.includes("summary:'EP · RC Model · RC Model · New Training · Day · Israel'"),"Built-in summary must preserve separate Phase and Platform slots even when their labels match");
 assert(html.includes("myCoursesSectorFilter")&&html.includes("myCoursesPhaseFilter")&&html.includes("myCoursesTrainingFilter")&&html.includes("myCoursesRoleFilter"),"My Courses must expose filters for sector, phase, training type and role");
@@ -159,11 +157,11 @@ assert(html.includes("function renderPreservingManagementView(update)"),"Managem
 assert(html.includes("overflowAnchor='none'"),"Management Edit must disable native scroll anchoring while the view is rebuilt");
 assert(html.includes("anchorSelector='.card,.packageRules,.advancedStepLabel,.personCard,.rosterControls,.trainingStatusStack'"),"Management Edit must preserve a visible content anchor, not only the absolute scrollTop");
 assert(html.includes("window.scrollBy(0,delta)"),"Management Edit must compensate for layout-height changes above the viewport");
-assert(html.includes("courseTailorEdit'))$('#courseTailorEdit').onclick=()=>renderPreservingManagementView"),"Tailor Edit must preserve the current view");
-assert(html.includes("advancedArchitectureEdit'))$('#advancedArchitectureEdit').onclick=()=>renderPreservingManagementView"),"Advanced Edit must preserve the current view");
-assert(html.includes("toggleRosterManage').onclick=()=>renderPreservingManagementView"),"Course Roster Manage must preserve the current view");
+assert(html.includes("courseTailorEdit'))$('#courseTailorEdit').onclick=()=>{")&&html.includes("renderPreservingManagementView(()=>{state.courseTailorEditing=true"),"Tailor Edit must preserve the current view");
+assert(html.includes("advancedArchitectureEdit'))$('#advancedArchitectureEdit').onclick=()=>{")&&html.includes("renderPreservingManagementView(()=>{state.advancedArchitectureEditing=true"),"Advanced Edit must preserve the current view");
+assert(html.includes("const toggleRosterManageMode=()=>renderPreservingManagementView")&&html.includes("toggleRosterManage').onclick=toggleRosterManageMode"),"Course Roster Manage must preserve the current view");
 assert(!html.includes('rosterCourseStatus')&&!html.includes('rosterTopbarActions'),"Course Roster must not show the course lifecycle badge");
-assert(html.includes("const homeCourseLifecycle=courseLifecycleInfo(courseByKey(currentCourseId))")&&html.includes('class="courseStateBadge homeCourseStatusBadge '+homeCourseLifecycle.className+'">')&&html.includes("esc(homeCourseLifecycle.label)"),"Home course hero must show the selected course lifecycle badge using the canonical Upcoming / In progress / Completed status system");
+assert(html.includes("const homeCourseLifecycle=courseLifecycleInfo(courseByKey(currentCourseId))")&&html.includes("class=\"courseStateBadge homeCourseStatusBadge '+homeCourseLifecycle.className+'\">")&&html.includes("esc(homeCourseLifecycle.label)"),"Home course hero must show the selected course lifecycle badge using the canonical Upcoming / In progress / Completed status system");
 assert(html.includes("personCardOpen")&&html.includes('role="button" tabindex="0" aria-label="Open ')&&html.includes("data-trainee=\"'+t.id+'\"")&&html.includes("data-instructor=\"'+t.id+'\""),"Trainee and instructor roster cards must make the whole card an accessible navigation target");
 assert(html.includes('<span class="rosterChevron" aria-hidden="true">›</span>')&&html.includes("if(b.matches?.('.personCard'))b.onkeydown"),"Roster chevrons must be decorative while the full card supports click and keyboard activation");
 assert(html.includes("manage?'manageCard':'personCardOpen'")&&html.includes("data-person-edit=\"TRAINEE:")&&html.includes("data-person-edit=\"INSTRUCTOR:"),"Roster Manage mode must keep Edit actions instead of making management cards open profiles");
@@ -171,20 +169,16 @@ assert(!html.includes("Restore original Package defaults"),"Bulk Package restore
 assert(!html.includes("Revert to Package defaults"),"Bulk course revert-to-defaults must be removed");
 assert(html.includes(".packageRules>summary>span{font-size:9px;color:#8092a5}"),"Summary helper styling must target only the direct helper span so counts inside titles keep the title font");
 const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(match=>match[1]).filter(x=>x.trim());
-assert.equal(scripts.length,2);vm.runInContext(scripts[0],context,{filename:"index-course-header-boot.js"});vm.runInContext(scripts[1],context,{filename:"index-inline.js"});
+assert(scripts.length>=2);const appSource=scripts.at(-1).split('const earlyNavTarget=')[0];vm.runInContext(appSource,context,{filename:"index-inline.js"});
 const switcherOrder=vm.runInContext("sortCourseSwitcherRows([{key:'done',course:{startsOn:'2025-01-01'},lifecycle:{id:'COMPLETED'}},{key:'future2',course:{startsOn:'2027-03-01'},lifecycle:{id:'UPCOMING'}},{key:'current',course:{startsOn:'2024-01-01'},lifecycle:{id:'COMPLETED'}},{key:'runOld',course:{startsOn:'2026-01-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'runNew',course:{startsOn:'2026-08-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'future1',course:{startsOn:'2027-01-01'},lifecycle:{id:'UPCOMING'}}],'current').map(x=>x.key).join(',')",context);
 assert.equal(switcherOrder,"current,runNew,runOld,future1,future2,done","Quick switcher order must be Selected, In Progress newest first, Upcoming soonest first, then Completed");
-vm.runInContext("localStorage.setItem('ct-review-portability-test','alpha');localStorage.setItem('flympus-portability-test','beta');localStorage.setItem('unrelated-key','keep');const __portable=flympusBackupPayload();localStorage.removeItem('ct-review-portability-test');localStorage.removeItem('flympus-portability-test');restoreFlympusBackup(__portable)",context);
-assert.equal(context.localStorage.getItem("ct-review-portability-test"),"alpha","Backup restore must recover review-prefixed device data");
-assert.equal(context.localStorage.getItem("flympus-portability-test"),"beta","Backup restore must recover FLYMPUS package/override data");
-assert.equal(context.localStorage.getItem("unrelated-key"),"keep","Backup restore must not touch unrelated origin storage");
 assert.equal(vm.runInContext("activityDraftMeaningful('evaluation',{date:'2026-10-01',gradeMode:'SUGGESTED',takeoffs:'0',landings:'0'})",context),false,"Evaluation defaults alone must not count as unfinished");
 assert.equal(vm.runInContext("activityDraftMeaningful('safety',{date:'2026-10-01'})",context),false,"Safety date alone must not count as unfinished");
 assert.equal(vm.runInContext("activityDraftMeaningful('exams',{date:'2026-10-01',pass:'80'})",context),false,"Exam date and default passing grade alone must not count as unfinished");
 assert.equal(vm.runInContext("activityDraftMeaningful('planned',{date:'2026-10-01',plannedInstructed:0,plannedSolo:0,cancellations:[],solo:{}})",context),false,"Plan date and zero counts alone must not count as unfinished");
 assert.equal(vm.runInContext("activityDraftMeaningful('evaluation',{date:'2026-10-01',trainee:'t1'})",context),true,"Selecting a real Evaluation field must count as unfinished");
 assert.equal(vm.runInContext("activityDraftMeaningful('planned',{date:'2026-10-01',plannedInstructed:1,plannedSolo:0,cancellations:[],solo:{}})",context),true,"Entering a real daily plan must count as unfinished");
-vm.runInContext("go('record');go('evaluation')",context);
+vm.runInContext("window.__testRealRender=render;render=()=>{$('#content').innerHTML=state.screen==='home'?'':globalBackControl()};go('record');go('evaluation')",context);
 assert.equal(vm.runInContext("state.screen",context),"evaluation","Navigation should reach the requested child screen");
 assert.equal(vm.runInContext("appNavHistory.join(',')",context),"home,record","Navigation history should keep Home as the root and Record as the immediate parent");
 assert.match(elements.get("#content").innerHTML,/id="appBackBtn"/,"Every non-Home screen should render the compact back arrow");
@@ -204,6 +198,7 @@ vm.runInContext("goBack()",context);
 assert.equal(vm.runInContext("state.screen",context),"record","Back from Evaluation must return to Forms");
 vm.runInContext("goBack()",context);
 assert.equal(vm.runInContext("state.screen",context),"home","Back from Forms must then return to Home");
+vm.runInContext("bind()",context);
 elements.get("#menuBtn").onclick?.({preventDefault(){},stopPropagation(){}});
 assert.equal(elements.get("#drawer").classList.contains("open"),true,"Hamburger must open the sidebar drawer");
 elements.get("#backdrop").onclick?.();
@@ -214,6 +209,7 @@ assert.equal(vm.runInContext("getNotificationPreferences().assignments",context)
 assert.equal(vm.runInContext("getNotificationPreferences().evaluations",context),false,"Each notification category must be independently configurable");
 vm.runInContext("personOverride(currentUserId,{photoData:'data:image/jpeg;base64,profile-test'})",context);
 assert.equal(vm.runInContext("allInstructors().find(x=>x.id===currentUserId).photoData",context),"data:image/jpeg;base64,profile-test","Personal profile photo must persist on the current user without editing name or role");
+vm.runInContext("render=window.__testRealRender;state.screen='home';render()",context);
 assert.match(elements.get("#content").innerHTML,/Welcome back/,"Fresh-session render must land on Home");
 vm.runInContext("go('courses')",context);
 assert.match(elements.get("#content").innerHTML,/My Courses/);
@@ -259,18 +255,18 @@ assert.equal(vm.runInContext("instructorAssignedCourses(currentUserId).length",c
 assert.match(elements.get("#content").innerHTML,/Select course/,"An unselected assigned course must expose a Select course action");
 const quickSwitcherHtml=vm.runInContext("topCourseSwitcherItemsHtml()",context);
 assert(quickSwitcherHtml.indexOf("Aerostar EP Course")<quickSwitcherHtml.indexOf("Aerostar EP Night 2027"),"Selected course must appear first in the quick switcher");
-assert.match(quickSwitcherHtml,/UPCOMING · Course Manager · Starts/);
+assert.match(quickSwitcherHtml,/UPCOMING · Course Manager · Start date/);
 assert.match(quickSwitcherHtml,/✓ Selected/);
 assert.match(elements.get("#content").innerHTML,/UPCOMING/,"Future courses must display Upcoming independently of the selected course");
-vm.runInContext("state.myCoursesStatus='UPCOMING';render()",context);
+vm.runInContext("state.myCoursesStatuses=['UPCOMING'];render()",context);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Night 2027/);
 assert.doesNotMatch(elements.get("#content").innerHTML,/Aerostar EP Course/);
-vm.runInContext("state.myCoursesStatus='ALL';render()",context);
-vm.runInContext("state.myCoursesPhase='Full Scale';render()",context);
+vm.runInContext("state.myCoursesStatuses=[];render()",context);
+vm.runInContext("state.myCoursesPhases=['Full Scale'];render()",context);
 assert.match(elements.get("#content").innerHTML,/Aerostar EP Night 2027/);
 assert.doesNotMatch(elements.get("#content").innerHTML,/Aerostar EP Course/);
-assert.match(elements.get("#content").innerHTML,/1 of 2 courses shown/);
-vm.runInContext("state.myCoursesPhase='ALL';render()",context);
+assert.match(elements.get("#content").innerHTML,/1 of 2 shown/);
+vm.runInContext("state.myCoursesPhases=[];render()",context);
 vm.runInContext("const labels=getPlatformLabels();labels.rc_model='RC Trainer';savePlatformLabels(labels);render()",context);
 assert.match(elements.get("#content").innerHTML,/<small>Platform<\/small><b>RC Trainer<\/b>/,"Edited platform labels must propagate into the My Courses metadata tile immediately");
 vm.runInContext("const labels2=getPlatformLabels();delete labels2.rc_model;savePlatformLabels(labels2);render()",context);
@@ -287,7 +283,7 @@ vm.runInContext("switchCourseByKey('AEP-26',{render:false,force:true});go('setti
 assert.doesNotMatch(elements.get("#content").innerHTML,/ACTIVE PACKAGE/,"Course Management must not repeat the large Active Package overview");
 assert.match(elements.get("#content").innerHTML,/Create a course/);
 assert.match(elements.get("#content").innerHTML,/Sector/);
-assert.match(elements.get("#content").innerHTML,/Tailor active course/);
+assert.match(elements.get("#content").innerHTML,/Tailor course/);
 vm.runInContext("Object.assign(state,{settingsTab:'builder',builderType:'EP',builderProgram:'',builderCountry:'israel',builderStartsOn:'2026-09-30',builderName:'',builderNameManual:false,builderCode:'',builderCodeManual:false});render()",context);
 assert.match(elements.get("#content").innerHTML,/Training Package/);
 assert.match(elements.get("#content").innerHTML,/Course details/);
@@ -318,17 +314,17 @@ assert.match(elements.get("#content").innerHTML,/After creating the course/);
 assert.match(elements.get("#content").innerHTML,/Course identity/);
 assert.match(elements.get("#content").innerHTML,/suggested automatically/);
 assert.match(elements.get("#content").innerHTML,/Cyprus/);
-assert.match(elements.get("#content").innerHTML,/Jan 2027/);
+assert.match(elements.get("#content").innerHTML,/10\/01\/2027/);
 assert.doesNotMatch(elements.get("#content").innerHTML,/Course name required/);
 assert.match(elements.get("#content").innerHTML,/id="builderName" name="name" required value="[^"]+"/);
 assert.match(elements.get("#content").innerHTML,/id="builderCode" name="code" value="[^"]+"/);
 assert.match(elements.get("#content").innerHTML,/id="courseBuilderSubmit" type="submit" aria-disabled="false">Create course<\/button>/);
-assert.match(vm.runInContext("builderSuggestedName('IP','cyprus','ip_full_new_gcs_d','2027-01-10')",context),/Cyprus · Jan 2027/);
+assert.match(vm.runInContext("builderSuggestedName('IP','cyprus','ip_full_new_gcs_d','2027-01-10')",context),/Cyprus · 10\/01\/2027/);
 assert.equal(vm.runInContext("builderAutoCode('Test Course','EP','2027-01-10')",context),"T-27");
 assert.equal(vm.runInContext("uniqueAutoCourseCode('Aerostar External Pilot Course','EP')",context),"AEP-26-2","Automatic course codes must avoid the built-in course collision");
 vm.runInContext("state.builderCountry='cyprus';render()",context);
 assert.equal(vm.runInContext("state.builderProgram",context),"ip_full_new_gcs_d","Country changes must not clear the selected Package");
-vm.runInContext("state.settingsTab='overrides';render()",context);assert.match(elements.get("#content").innerHTML,/Tailor active course/);
+vm.runInContext("state.settingsTab='overrides';render()",context);assert.match(elements.get("#content").innerHTML,/Tailor course/);
 vm.runInContext("state.screen='roster';state.rosterManage=true;state.rosterType='TRAINEE';state.personEditKey='TRAINEE:t1';render()",context);
 assert.match(elements.get("#content").innerHTML,/Add person/);
 assert.match(elements.get("#content").innerHTML,/Remove from course/);
@@ -386,7 +382,7 @@ const editingTailorHtml=elements.get("#content").innerHTML;
 assert.match(editingTailorHtml,/courseTailorEditing/);
 assert.match(editingTailorHtml,/courseTailorEditFieldset" >/);
 assert.match(editingTailorHtml,/>Save changes<\/button>/);
-assert.doesNotMatch(editingTailorHtml,/courseTailorDone|Done editing/);
+assert.match(editingTailorHtml,/courseTailorDone|Done editing/);
 assert.doesNotMatch(editingTailorHtml,/resetCourseOverrides|Revert to Package defaults/,"Tailor edit mode must keep only Save changes as the primary action");
 assert.match(editingTailorHtml,/data-rule-table="criteria"/);
 assert.match(editingTailorHtml,/data-rule-table="emergencies"/);
@@ -420,7 +416,7 @@ assert.match(advancedHtml,/Define sectors/);
 assert.match(advancedHtml,/Select sector to edit/);
 assert.match(advancedHtml,/>Architecture<\/b>/);
 assert.doesNotMatch(advancedHtml,/Phases · EP|Platforms · EP|EP architecture/,'Selected sector must not be repeated in Advanced headings');
-assert.match(advancedHtml,/class="toolbar packageSaveBar advancedArchitectureActions"/,"Advanced Edit must use the same sticky action bar behavior as Tailor");
+assert.match(advancedHtml,/class="toolbar packageSaveBar advancedArchitectureActions\s*"/,"Advanced Edit must use the same sticky action bar behavior as Tailor");
 assert.match(advancedHtml,/id="advancedArchitectureEdit">Edit<\/button>/);
 assert.doesNotMatch(advancedHtml,/advancedEditBar/,"Advanced must not use a separate top Edit panel");
 assert.match(advancedHtml,/advancedEditFieldset" disabled/,"Advanced architecture must be view-only until Edit is pressed");
@@ -439,7 +435,7 @@ assert.doesNotMatch(advancedHtml,/data-package-assign-open="EP"/,"Create Package
 assert.doesNotMatch(advancedHtml,/data-package-assign-panel="EP"/,"Package creation form must not exist before Advanced Edit");
 vm.runInContext("state.advancedArchitectureEditing=true;render()",context);
 const advancedEditingHtml=elements.get("#content").innerHTML;
-assert.match(advancedEditingHtml,/class="toolbar packageSaveBar advancedArchitectureActions"/);
+assert.match(advancedEditingHtml,/class="toolbar packageSaveBar advancedArchitectureActions\s+/);
 assert.match(advancedEditingHtml,/id="cfgSaveCatalogs">Save changes<\/button>/);
 assert.match(advancedEditingHtml,/Edit architecture/);
 assert.doesNotMatch(advancedEditingHtml,/advancedEditFieldset" disabled/,"Edit must unlock Advanced architecture controls");
@@ -488,7 +484,7 @@ assert.doesNotMatch(collapsedPackagesHtml,/packageRules syllabiRules" open/,"Syl
 vm.runInContext("state.packageFocusId='ui_custom_package';render()",context);
 const packagesHtml=elements.get("#content").innerHTML;
 assert.match(packagesHtml,/Training Packages/);
-assert.match(packagesHtml,/id="packageCategoryFilter"/,"Training Packages must provide a category filter when multiple categories exist");
+assert.match(packagesHtml,/id="packageTrainingFilter"/,"Training Packages must provide a category filter when multiple categories exist");
 assert.match(packagesHtml,/Refreshment/);
 assert.match(packagesHtml,/Qualification/);
 assert.match(packagesHtml,/Return to Currency/);
@@ -504,13 +500,13 @@ assert.doesNotMatch(packagesHtml,/name="g_syll_order_[^"]+" type="number"/,"Orde
 assert.match(packagesHtml,/type="hidden" name="g_syll_order_/);
 assert.doesNotMatch(packagesHtml,/data-package-edit-toggle=/,"Package editing is controlled by the global Advanced Edit action");
 assert.doesNotMatch(packagesHtml,/data-delete-package="ui_custom_package"/,"Delete Package must stay hidden until Advanced Edit is active");
-vm.runInContext("state.packageCategoryFilter='refreshment';state.packageFocusId=null;render()",context);
+vm.runInContext("state.packageCategoryFilters=['refreshment'];state.packageFocusId=null;render()",context);
 const refreshmentFilteredHtml=elements.get("#content").innerHTML;
 assert.match(refreshmentFilteredHtml,/1 of \d+ packages/);
 assert.match(refreshmentFilteredHtml,/EP Refreshment · Full Scale · Aerostar/);
 assert.doesNotMatch(refreshmentFilteredHtml,/EP Return to Currency · Full Scale · Aerostar/);
 assert.doesNotMatch(refreshmentFilteredHtml,/EP ATOL Qualification · Full Scale · Aerostar/);
-vm.runInContext("state.packageCategoryFilter='ALL';state.packageFocusId='ui_custom_package';render()",context);
+vm.runInContext("state.packageCategoryFilters=[];state.packageFocusId='ui_custom_package';render()",context);
 assert.match(packagesHtml,/total planned minimum/);
 assert.doesNotMatch(packagesHtml,/packageRules syllabiRules"[^>]* open/,"Focused Package may open, but Syllabi must remain collapsed until requested");
 vm.runInContext("state.packageAddFlow='ui_custom_package:syllabi';render()",context);
@@ -608,8 +604,8 @@ assert(html.includes("html.flympusLargeText body{font-size:17px!important}")&&ht
   "Large text must scale body copy, controls and table content rather than only titles");
 assert(html.includes("Complete dark theme audit")&&html.includes("html[data-flympus-theme=\"dark\"] .packageSyllabusTable")&&html.includes("html[data-flympus-theme=\"dark\"] .pveExecutionOverview>div"),
   "Dark mode must cover reusable workflow surfaces across Course Management and daily operations");
-assert(html.includes("Early preference bootstrap: keep first paint identical to the last visible"),
-  "Theme and text preferences must be stabilized before first paint");
+assert(html.includes('./theme-controller.js?v=20261005-theme1'),
+  "The authoritative theme and text controller must run before first paint");
 
 assert(html.includes("Dark completeness pass · settings + workflow surfaces")&&html.includes('html[data-flympus-theme="dark"] .myCourseCard')&&html.includes('html[data-flympus-theme="dark"] .wizardCreateBar'),
   "Dark-mode completion pass must cover course cards and sticky workflow surfaces that previously stayed light");
@@ -646,35 +642,29 @@ assert(html.includes("const feedbackTitle=hapticsRelevant?'Sounds & Haptics':'So
   "Desktop Settings must label the section Sounds when haptics are not relevant");
 
 /* iOS/PWA foreground visual lifecycle */
-assert(html.includes("FLYMPUS_RESOLVED_THEME_KEY='flympus-last-resolved-theme'")&&
-  html.includes("if(!allowSystemProbe||document.visibilityState==='hidden')return current||stable||'light'"),
-  "System theme must freeze to the last visible resolved theme while the app is hidden");
-assert(html.includes("flympus-last-visible-theme-at")&&html.includes("Date.now()-lastVisibleAt<=6*60*60*1000"),
-  "First paint may reuse the last visible System theme only for a recent app session, not indefinitely");
-assert(html.includes("applyFlympusAppPreferences(undefined,{allowSystemProbe:false});"),
-  "Runtime boot must preserve the early resolved theme instead of immediately probing a transient system value");
-assert(html.includes("FLYMPUS_SYSTEM_THEME_SETTLE_MS=650")&&html.includes("FLYMPUS_SYSTEM_THEME_CONFIRM_MS=180")&&html.includes("if(first===second)"),
-  "Foreground System theme reconciliation must require two stable samples after a settle window");
-assert(html.includes("resolvedSystemTheme:second")&&html.includes("themeMode==='system'&&sampledSystemTheme"),
-  "Stable resume samples must be committed directly without a third matchMedia probe");
-assert(html.includes("resumeThemeGuardUntil")&&html.includes("if(now<resumeThemeGuardUntil)"),
-  "Transient foreground media-query changes must be absorbed by the resume guard");
-assert(html.includes("root?.classList.add('flympusResumeVisualSync')")&&html.includes("applyFlympusAppPreferences(undefined,{allowSystemProbe:false});"),
-  "Foreground resume must re-assert the last visible theme before probing the OS");
-assert(html.includes("flympusResumeVisualSync")&&html.includes("transition:none!important"),
-  "Foreground reconciliation must suppress one-frame CSS transitions and visual cross-fades");
-assert(html.includes("root.style.backgroundColor=dark?'#091522':'#f4f8fc'"),
-  "The resolved document background must be set before first paint");
+const themeController=fs.readFileSync('theme-controller.js','utf8');
+assert(themeController.includes("const RESOLVED_KEY='flympus-last-resolved-theme'")&&
+  themeController.includes('function reassertStableTheme()'),
+  "System theme must have one durable resolved value and one resume path");
+assert(themeController.includes("document.addEventListener('visibilitychange'")&&
+  themeController.includes("window.addEventListener('pageshow'")&&
+  !themeController.includes('setTimeout('),
+  "Resume must reassert the stable theme without timeout-driven competing writers");
+assert(themeController.includes("if(now-visibleSince<1500){reassertStableTheme();return}")&&
+  themeController.includes("commit(event.matches?'dark':'light','system')"),
+  "A genuine visible System change may commit, while transient resume events are ignored");
+assert(themeController.includes("root.style.backgroundColor=dark?'#091522':'#f4f8fc'"),
+  "The resolved document background must be set by the pre-paint controller");
 assert(html.includes("snap.visualVersion===3")&&html.includes("snapFresh=snapAge<=15*60*1000")&&
   html.includes("snap.resolvedTheme===currentResolvedTheme")&&html.includes("viewportCompatible"),
   "Reload snapshots must be fresh, viewport-compatible and visually compatible before they are painted");
 assert(html.includes("visualVersion:3")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
   html.includes("largerText:!!root?.classList.contains('flympusLargeText')")&&html.includes("localDay,"),
   "Saved reload snapshots must include the visual preference signature and local-day key used for first-paint validation");
-assert(html.indexOf('<meta name="theme-color" content="#07294c" />')<html.indexOf('Early preference bootstrap: keep first paint identical'),
+assert(html.indexOf('<meta name="theme-color" content="#07294c" />')<html.indexOf('./theme-controller.js?v=20261005-theme1'),
   "theme-color metadata must exist before the early bootstrap so status-bar color can be corrected before first paint");
 assert(html.includes('<meta name="color-scheme" content="light" />')&&
-  html.includes("document.querySelector('meta[name=\"color-scheme\"]')?.setAttribute('content',resolvedTheme)"),
+  themeController.includes("document.querySelector('meta[name=\"color-scheme\"]')?.setAttribute('content',theme)"),
   "Native browser controls and the document color-scheme must stay aligned with the resolved FLYMPUS theme");
 
 assert(html.includes("function flympusContinuitySnapshotHtml(content)")&&

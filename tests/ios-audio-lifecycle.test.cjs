@@ -10,7 +10,7 @@ function wavPcm16Data(buf){
 }
 function assertPcmScaled(aPath,bPath,gain){
   const a=wavPcm16Data(fs.readFileSync(aPath)),b=wavPcm16Data(fs.readFileSync(bPath));assert.equal(a.length,b.length);
-  for(let i=0;i+1<a.length;i+=2){const ex=Math.max(-32768,Math.min(32767,Math.round(a.readInt16LE(i)*gain)));assert.equal(b.readInt16LE(i),ex,bPath+' PCM amplitude mismatch')}
+  for(let i=0;i+1<a.length;i+=2){const scaled=Math.round(a.readInt16LE(i)*gain),ex=scaled===0?0:Math.max(-32768,Math.min(32767,scaled));assert.equal(b.readInt16LE(i),ex,bPath+' PCM amplitude mismatch')}
 }
 assertPcmScaled('assets/flympus-nav-signature.wav','assets/flympus-nav-signature-10.wav',.10);
 assertPcmScaled('assets/flympus-nav-signature.wav','assets/flympus-nav-signature-65.wav',.65);
