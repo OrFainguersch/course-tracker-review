@@ -32,6 +32,7 @@ assert.equal(localStorage.getItem('ct-review-evals:AEP-26'),null,'Private legacy
 assert.equal(localStorage.getItem('flympus-app-preferences'),'{"theme":"dark"}','Device appearance preferences remain device-scoped');
 
 assert.equal(scope.setUid('uid-admin'),true);
+assert.equal(localStorage.getItem('flympus-auth-scope-last-uid'),'uid-admin','Authenticated UID scope must persist across an iOS PWA cold relaunch');
 assert.equal(localStorage.getItem('ct-review-evals:AEP-26'),null,'Legacy data is not inherited merely by setting a UID');
 assert.equal(scope.claimLegacy('uid-admin',{admin:false}).claimed,false,'A regular user can never claim legacy device data');
 const migrated=scope.claimLegacy('uid-admin',{admin:true});
@@ -55,6 +56,11 @@ scope.setUid('uid-user');
 assert.equal(localStorage.getItem('ct-review-evals:AEP-26'),'[{"id":"user-new"}]');
 assert.equal(sessionStorage.getItem('ct-review-ui'),'{"screen":"home"}');
 
+/* Simulate iOS discarding sessionStorage while preserving localStorage between PWA launches. */
+sessionStorage.removeItem('flympus-auth-scope-uid');
+assert.equal(scope.currentUid(),'uid-user','Cold relaunch must recover the last authenticated UID namespace from localStorage');
+assert.equal(localStorage.getItem('ct-review-evals:AEP-26'),'[{"id":"user-new"}]','Cold relaunch must immediately select only the last authenticated user namespace');
+
 const visible=[];
 for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key!==null)visible.push(key)}
 assert(visible.includes('ct-review-evals:AEP-26'),'Current user sees logical private keys');
@@ -63,6 +69,7 @@ assert(!visible.includes('ct-review-person-overrides'),'Unmigrated legacy keys m
 assert.equal(localStorage.getItem('unrelated-origin-key'),'keep','Unrelated origin storage remains untouched');
 
 scope.clearUid();
+assert.equal(localStorage.getItem('flympus-auth-scope-last-uid'),null,'Sign-out must remove the persisted UID scope hint');
 assert.equal(localStorage.getItem('ct-review-evals:AEP-26'),null,'Sign-out removes all private runtime visibility');
 console.log('UID-scoped storage tests passed');
 
@@ -70,3 +77,6 @@ const storageSource=fs.readFileSync('storage-scope.js','utf8');
 assert(storageSource.includes('function installResumeThemeHold()'),'Storage bootstrap must install the pre-runtime resume-theme guard');
 assert(storageSource.includes("observer.observe(root,{attributes:true,attributeFilter:['data-flympus-theme']})"),'Resume-theme guard must revert transient theme mutations before paint');
 assert(storageSource.includes('const first=sampleSystem()')&&storageSource.includes('first===second?second:stable'),'System theme must require two matching post-resume samples');
+
+assert(storageSource.includes("const UID_PERSISTED_KEY='flympus-auth-scope-last-uid'"),'Cold PWA relaunch must have a durable UID namespace hint');
+assert(storageSource.includes("rawGet(session,UID_SESSION_KEY)||rawGet(local,UID_PERSISTED_KEY)"),'Session UID must fall back to the durable namespace hint');

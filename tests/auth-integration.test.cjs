@@ -9,7 +9,7 @@ const rules=fs.readFileSync('firestore.rules','utf8');
 const storage=fs.readFileSync('storage-scope.js','utf8');
 
 assert(html.includes('./firebase-config.js?v=20261004-auth2'),'Firebase config must load from the static app');
-assert(html.includes('./storage-scope.js?v=20261004-auth2'),'UID storage scope must load from the static app');
+assert(html.includes('./storage-scope.js?v=20261005-auth5'),'UID storage scope must load from the static app');
 assert(html.includes('./auth.css?v=20261005-auth4'),'Authentication UI CSS must be loaded');
 assert(html.includes('type="module" src="./auth.js?v=20261005-auth4"'),'Authentication runtime must load as a module');
 assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"'),'Firebase Authentication must preload before the post-login reload');
@@ -88,5 +88,10 @@ assert(!css.slice(css.indexOf('html.flympusAuthReturning .app'),css.indexOf('htm
 assert(auth.includes('if(enforce&&!returningScopedSession)lockApp();'),'Returning sessions must skip the opaque auth lock during normal refresh');
 assert(auth.includes('lockApp();\n    showLoading(silentAuthLoadingCopy)'),'A slow returning auth check may still fail closed after the grace period');
 assert(auth.includes("classList.remove('flympusAuthBooting','flympusAuthReturning','flympusAuthLocked'"),'Successful auth must clear the returning-session guard');
+
+
+assert(storage.includes("const UID_PERSISTED_KEY='flympus-auth-scope-last-uid'"),'Returning PWA launches must retain a durable UID namespace hint');
+assert(storage.includes("rawGet(session,UID_SESSION_KEY)||rawGet(local,UID_PERSISTED_KEY)"),'Cold relaunch must reuse the last verified UID scope before Firebase finishes booting');
+assert(storage.includes('rawRemove(local,UID_PERSISTED_KEY)'),'Sign-out must clear the durable UID hint');
 
 console.log('Authentication foundation checks passed');

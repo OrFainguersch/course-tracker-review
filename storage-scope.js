@@ -20,6 +20,7 @@
   if(!native.length)return;
 
   const UID_SESSION_KEY='flympus-auth-scope-uid';
+  const UID_PERSISTED_KEY='flympus-auth-scope-last-uid';
   const LEGACY_OWNER_KEY='flympus-auth-legacy-owner-uid';
   const MIGRATED_PREFIX='flympus-auth-legacy-migrated:';
   const USER_PREFIX='flympus:user:';
@@ -40,9 +41,11 @@
     return out
   };
   const owned=key=>typeof key==='string'&&(key.startsWith('ct-review-')||key.startsWith('flympus-'));
-  const internal=key=>typeof key==='string'&&(key===UID_SESSION_KEY||key===LEGACY_OWNER_KEY||key.startsWith(MIGRATED_PREFIX)||key.startsWith(USER_PREFIX));
+  const internal=key=>typeof key==='string'&&(key===UID_SESSION_KEY||key===UID_PERSISTED_KEY||key===LEGACY_OWNER_KEY||key.startsWith(MIGRATED_PREFIX)||key.startsWith(USER_PREFIX));
   const deviceKey=key=>DEVICE_KEYS.has(String(key));
-  const currentUid=()=>String(rawGet(session,UID_SESSION_KEY)||'').trim();
+  /* The persisted UID is only a local namespace hint for cold PWA relaunches.
+     It never grants server access; Firebase still verifies the real session. */
+  const currentUid=()=>String(rawGet(session,UID_SESSION_KEY)||rawGet(local,UID_PERSISTED_KEY)||'').trim();
   const prefixFor=uid=>USER_PREFIX+encodeURIComponent(uid)+':';
   const physicalKey=key=>prefixFor(currentUid())+String(key);
   const shouldScope=(store,key)=>authEnabled&&owned(String(key))&&!internal(String(key))&&!(store===local&&deviceKey(key));
@@ -96,7 +99,13 @@
 
   function setUid(uid){
     const next=String(uid||'').trim(),previous=currentUid();
-    if(next)rawSet(session,UID_SESSION_KEY,next);else rawRemove(session,UID_SESSION_KEY);
+    if(next){
+      rawSet(session,UID_SESSION_KEY,next);
+      rawSet(local,UID_PERSISTED_KEY,next)
+    }else{
+      rawRemove(session,UID_SESSION_KEY);
+      rawRemove(local,UID_PERSISTED_KEY)
+    }
     return previous!==next
   }
   function clearUid(){return setUid('')}
