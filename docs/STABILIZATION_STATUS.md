@@ -69,13 +69,21 @@ earlier Work run completed deployment.
 - The bundle records the exact Git commit and public-file SHA-256 hashes.
 - `firebase-hosting.yml` runs all tests, authenticates, deploys Hosting only and
   verifies the live commit, every public asset and Firebase auth helper routes.
-- Prefer GitHub Workload Identity Federation with the public variables
-  `FIREBASE_WIF_PROVIDER` and `FIREBASE_DEPLOY_SERVICE_ACCOUNT`. The alternative
-  is a deployment account stored in `FIREBASE_SERVICE_ACCOUNT_FLYMPUS`.
+- The owner now requires keyless WIF only. All JSON-key fallback steps have
+  been removed. Use only `FIREBASE_WIF_PROVIDER` and
+  `FIREBASE_DEPLOY_SERVICE_ACCOUNT`; do not create/download keys or use tokens.
+- Firebase CLI 15.32.1 passed its real ADC/WIF code path with synthetic STS and
+  impersonation endpoints. CI repeats that test and verifies real Hosting access
+  before deploying. No real WIF exchange or production deploy is verified yet.
+- `docs/KEYLESS_HOSTING.md` records exact repo/owner IDs, main/workflow restrictions,
+  dedicated account roles, and the bootstrap script. Cloud resources and repository
+  variables are not provisioned. The Google Cloud console still returns Site
+  Unavailable after one reload; no interactive authentication prompt is present.
 - The workflow is manual until the first release succeeds. Enable automatic
   main deployments only after authorization and production validation succeed.
-- No deployment credential has been created and no production release has been
-  made. The next blocking step is connecting authorized Google deployment access.
+- No usable deployment credential and no production release are available. A
+  possible unused key from the earlier attempt needs metadata review/cleanup,
+  not recovery. The next blocking step is provisioning WIF with administrator access.
 
 ## Still required before completion
 

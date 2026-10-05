@@ -31,30 +31,26 @@ jobs:
         env:
           WIF_PROVIDER: ${{ vars.FIREBASE_WIF_PROVIDER }}
           SERVICE_ACCOUNT: ${{ vars.FIREBASE_DEPLOY_SERVICE_ACCOUNT }}
-          HAS_DEPLOY_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FLYMPUS != '' }}
         run: |
-          if [ -n "$WIF_PROVIDER" ] && [ -n "$SERVICE_ACCOUNT" ]; then
-            echo 'Keyless deployment authorization is configured.'
-          elif [ "$HAS_DEPLOY_KEY" = 'true' ]; then
-            echo 'Firebase deployment authorization is configured.'
-          else
-            echo '::error::Connect Firebase deployment authorization before running this workflow.'
+          if [ -z "$WIF_PROVIDER" ] || [ -z "$SERVICE_ACCOUNT" ]; then
+            echo '::error::Configure the verified WIF provider and dedicated Hosting service account repository variables.'
             exit 1
           fi
+      - name: Install pinned Firebase CLI
+        run: npm install --prefix "$RUNNER_TEMP/firebase-cli" --no-audit --no-fund firebase-tools@15.32.1
+      - name: Verify pinned CLI ADC and WIF compatibility
+        run: node scripts/test-firebase-wif.cjs "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools"
       - name: Authenticate with short-lived GitHub identity
-        if: vars.FIREBASE_WIF_PROVIDER != '' && vars.FIREBASE_DEPLOY_SERVICE_ACCOUNT != ''
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ vars.FIREBASE_WIF_PROVIDER }}
           service_account: ${{ vars.FIREBASE_DEPLOY_SERVICE_ACCOUNT }}
           project_id: flympus
-      - name: Authenticate with Firebase deployment account
-        if: vars.FIREBASE_WIF_PROVIDER == '' || vars.FIREBASE_DEPLOY_SERVICE_ACCOUNT == ''
-        uses: google-github-actions/auth@v3
-        with:
-          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FLYMPUS }}
-          project_id: flympus
+          create_credentials_file: true
+          export_environment_variables: true
+      - name: Verify real ADC access to the Hosting site
+        run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" hosting:sites:get flympus --project flympus --non-interactive
       - name: Deploy reviewed public bundle to Firebase Hosting
-        run: npx --yes firebase-tools@15.32.1 deploy --only hosting --project flympus --non-interactive
+        run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" deploy --only hosting --project flympus --non-interactive
       - name: Verify production commit, assets and reserved auth helpers
         run: node scripts/verify-hosting.cjs
