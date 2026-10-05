@@ -31,8 +31,8 @@ assert(auth.includes('cfg.microsoftEnabled===true'),'Microsoft sign-in UI must b
 assert(auth.includes('signInWithPopup(auth,provider)'),'GitHub Pages authentication must use popup flow by default');
 assert(!auth.includes("addScope('mail.read')")&&!auth.includes("addScope('calendars.read')"),
   'FLYMPUS authentication must not request mailbox or calendar scopes');
-assert(auth.includes("role:'user'")&&auth.includes("status:'pending'"),
-  'A first-time authenticated user must start as pending USER');
+assert(auth.includes("role:preauthorized&&invitation?.role==='admin'?'admin':'user'")&&auth.includes("status:preauthorized?'active':'pending'"),
+  'An uninvited first-time account must start as pending USER while an admin invitation may pre-authorize it');
 assert(auth.includes("profile.status!=='active'"),'Only active profiles may unlock authenticated access');
 assert(auth.includes("profile.role==='admin'"),'Client role context must distinguish administrators');
 assert(auth.includes('openUserManagement')&&auth.includes("getDocs(firestoreSdk.collection(db,'users'))"),'Active administrators must have a Firestore-backed User Management screen');
