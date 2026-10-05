@@ -11,7 +11,7 @@ const storage=fs.readFileSync('storage-scope.js','utf8');
 assert(html.includes('./firebase-config.js?v=20261004-auth2'),'Firebase config must load from the static app');
 assert(html.includes('./storage-scope.js?v=20261005-auth6'),'UID storage scope must load from the static app');
 assert(html.includes('./auth.css?v=20261005-auth4'),'Authentication UI CSS must be loaded');
-assert(html.includes('type="module" src="./auth.js?v=20261005-auth4"'),'Authentication runtime must load as a module');
+assert(html.includes('type="module" src="./auth.js?v=20261005-auth5"'),'Authentication runtime must load as a module');
 assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"'),'Firebase Authentication must preload before the post-login reload');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('</head>'),'Firebase config must load before first body paint');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('Early preference bootstrap'),'Firebase config must load before any local preference access');
@@ -41,7 +41,9 @@ assert(auth.includes("action==='make-admin'")&&auth.includes("action==='make-use
 assert(auth.includes('FLYMPUS_STORAGE_SCOPE?.setUid')&&auth.includes('FLYMPUS_STORAGE_SCOPE?.clearUid'),'Authentication lifecycle must bind and clear UID-scoped browser state');
 assert(auth.includes('if(scopeChanged||migratedLegacyCount>0){location.reload();return}'),'UID selection and legacy migration must use one consolidated reload');
 assert(auth.includes("params.get('authPreview')==='1'"),'Login UI must have a safe preview mode before Firebase activation');
-assert(auth.includes("browserLocalPersistence"),'Signed-in sessions should persist on the device');
+assert(auth.includes("auth=authModule.getAuth(firebaseApp)"),'Firebase Auth must use its durable browser persistence stack');
+assert(auth.includes("if(typeof auth.authStateReady==='function')await auth.authStateReady();"),'Returning sessions must wait for Firebase persistence restoration before signed-out handling');
+assert(!auth.includes("setPersistence(auth,authModule.browserLocalPersistence)"),'Auth persistence must not be reconfigured on every refresh');
 
 assert(css.includes('html.flympusAuthBooting .app')&&css.includes('visibility:hidden!important'),
   'Auth gate must hide the underlying app while enforced authentication is unresolved');
