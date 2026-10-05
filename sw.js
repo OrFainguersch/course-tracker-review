@@ -2,7 +2,7 @@
    - Instant PWA cold-start from a versioned same-origin app-shell cache
    - Background revalidation so deployments replace the cached shell safely
    - Web Push delivery and notification navigation */
-const FLYMPUS_SW_VERSION='2026-10-05-startup-4';
+const FLYMPUS_SW_VERSION='2026-10-05-startup-5';
 const SHELL_CACHE='flympus-shell-'+FLYMPUS_SW_VERSION;
 const DEFAULT_ICON='./assets/flympus-app-icon.webp';
 const SHELL_URLS=[
@@ -80,6 +80,10 @@ self.addEventListener('fetch',event=>{
   const request=event.request;
   if(request.method!=='GET')return;
   const url=new URL(request.url);
+  /* Firebase Hosting reserves /__ for Authentication and other helpers.
+     Never intercept or cache these requests; the Firebase auth handler must
+     execute from Hosting exactly as served by Firebase. */
+  if(url.origin===self.location.origin&&url.pathname.startsWith('/__/'))return;
   if(request.mode==='navigate'){
     event.respondWith((async()=>{
       const cache=await caches.open(SHELL_CACHE);
