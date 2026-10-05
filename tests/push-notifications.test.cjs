@@ -19,6 +19,10 @@ assert(sw.includes("addEventListener('push'"),'Service worker must handle push')
 assert(sw.includes("showNotification"),'Service worker must display OS notifications');
 assert(sw.includes("addEventListener('notificationclick'"),'Notification clicks must be handled');
 assert(sw.includes("FLYMPUS_PUSH_NAVIGATE"),'Clicks must navigate an existing PWA client');
+assert(sw.includes("const SHELL_CACHE='flympus-shell-'"),'Installed PWA must maintain a versioned static app-shell cache');
+assert(sw.includes("request.mode==='navigate'")&&sw.includes("cache.match('./')"),'Cold PWA navigation must render the cached shell without waiting for the network');
+assert(sw.includes("updateNavigationCache(request)"),'Cached startup shell must revalidate in the background');
+assert(sw.includes("No user/course data is cached here"),'Startup caching must stay limited to static application resources');
 
 assert.strictEqual(typeof config.enabled,'boolean');
 assert.strictEqual(typeof config.apiBaseUrl,'string');
