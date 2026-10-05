@@ -336,8 +336,14 @@ async function boot(){
        to in-memory state when IndexedDB is unavailable during an iOS lifecycle
        transition; that is safe but would look like a logout after a cold PWA
        relaunch. localStorage is already required and verified by FLYMPUS. */
+    /* Use exactly one durable persistence layer. Firebase can migrate a user
+       between entries when a persistence array is supplied; on iOS that makes
+       auth state depend on IndexedDB lifecycle as well as localStorage. FLYMPUS
+       only needs LOCAL persistence, so keep the user in localStorage and let
+       Firebase own the popup resolver on this Auth instance. */
     auth=authModule.initializeAuth(firebaseApp,{
-      persistence:[authModule.browserLocalPersistence,authModule.indexedDBLocalPersistence]
+      persistence:authModule.browserLocalPersistence,
+      popupRedirectResolver:authModule.browserPopupRedirectResolver
     });
     db=firestoreModule.getFirestore(firebaseApp);
     try{
@@ -355,8 +361,11 @@ async function boot(){
         cancelSilentAuthLoading();returningScopedSession=false;
         currentUser=null;currentProfile=null;api.currentUser=null;api.profile=null;
         clearRoleContext();removeAuthenticatedChrome();
-        const scopeChanged=window.FLYMPUS_STORAGE_SCOPE?.clearUid?.()===true;
-        if(scopeChanged){location.reload();return}
+        /* A passive Firebase null is not an explicit FLYMPUS sign-out. Keep the
+           last verified UID namespace intact while the login gate is locked.
+           Only signOutCurrentUser() may clear the durable UID hint. This avoids
+           destroying/reloading the local scope when iOS momentarily loses the
+           Firebase session during a lifecycle transition. */
         if(enforce||setupMode)showLogin();else{api.status='signed-out';unlockApp()}
       }
     },err=>showFatal('Authentication failed',friendlyAuthError(err)))
