@@ -27,6 +27,7 @@ let userManagementPreviousBodyTop='';
 let returningScopedSession=!!window.FLYMPUS_STORAGE_SCOPE?.currentUid?.();
 let silentAuthLoadingTimer=null;
 let silentAuthLoadingCopy='Starting secure authentication…';
+let signInPromise=null;
 
 const api=window.FLYMPUS_AUTH={
   status:enabled?'booting':'disabled',
@@ -110,6 +111,28 @@ function statusBlock(kind,title,copy){const icon=kind==='error'?'!':kind==='pend
 function showLoading(copy='Checking your account…'){api.status='loading';shell('<div class="flympusAuthSpinner" aria-hidden="true"></div><p class="flympusAuthEyebrow">'+esc(tr('SECURE SIGN IN'))+'</p><h1 class="flympusAuthTitle">'+esc(tr('Opening FLYMPUS'))+'</h1><p class="flympusAuthCopy">'+esc(tr(copy))+'</p>')}
 function providerButtons(disabled=false){const microsoftButton=cfg.microsoftEnabled===true?'<button class="flympusAuthProvider" type="button" data-auth-provider="microsoft" '+(disabled?'disabled':'')+'><span class="flympusAuthProviderMark flympusMicrosoftMark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>'+esc(tr('Continue with Microsoft'))+'</span><span class="flympusAuthProviderArrow" aria-hidden="true">›</span></button>':'';return '<div class="flympusAuthProviders"><button class="flympusAuthProvider" type="button" data-auth-provider="google" '+(disabled?'disabled':'')+'><span class="flympusAuthProviderMark" aria-hidden="true">G</span><span>'+esc(tr('Continue with Google'))+'</span><span class="flympusAuthProviderArrow" aria-hidden="true">›</span></button>'+microsoftButton+'</div>'}
 function bindProviderButtons(){document.querySelectorAll('[data-auth-provider]').forEach(btn=>btn.onclick=()=>signInProvider(btn.dataset.authProvider))}
+function setProviderBusy(busy){
+  document.querySelectorAll('[data-auth-provider]').forEach(btn=>{
+    btn.disabled=!!busy;
+    btn.setAttribute('aria-busy',busy?'true':'false')
+  })
+}
+async function waitForSignedInUser(timeoutMs=4500){
+  if(auth?.currentUser)return true;
+  if(!auth||!authSdk?.onAuthStateChanged)return false;
+  return new Promise(resolve=>{
+    let done=false,timer=null,unsubscribe=null;
+    const finish=value=>{
+      if(done)return;
+      done=true;
+      if(timer!==null)clearTimeout(timer);
+      try{unsubscribe?.()}catch{}
+      resolve(!!value)
+    };
+    unsubscribe=authSdk.onAuthStateChanged(auth,user=>{if(user)finish(true)});
+    timer=setTimeout(()=>finish(!!auth.currentUser),Math.max(250,Number(timeoutMs)||4500))
+  })
+}
 function showLogin({setupPreview=false,error=''}={}){cancelSilentAuthLoading();api.status=setupPreview?'preview':'signed-out';lockApp();const setup=setupPreview?statusBlock('pending',tr('Authentication preview'),tr('The Google sign-in experience is ready.')):'';const err=error?statusBlock('error',tr('Sign-in failed'),error):'';shell('<p class="flympusAuthEyebrow">'+esc(tr('FLYMPUS ACCOUNT'))+'</p><h1 class="flympusAuthTitle">'+esc(tr('Sign in to continue'))+'</h1><p class="flympusAuthCopy">'+esc(tr('Use the work or personal account assigned to you. FLYMPUS requests identity only — not access to your Gmail or Outlook mailbox.'))+'</p>'+providerButtons(setupPreview)+setup+err+'<p class="flympusAuthFine">'+esc(tr('Your account email identifies you in FLYMPUS. Application and course permissions are managed separately.'))+'</p>');if(!setupPreview)bindProviderButtons()}
 function showPending(user,profile){cancelSilentAuthLoading();api.status=profile?.status==='blocked'?'blocked':'pending';lockApp();const blocked=profile?.status==='blocked';shell('<p class="flympusAuthEyebrow">'+esc(tr('ACCOUNT ACCESS'))+'</p><h1 class="flympusAuthTitle">'+esc(tr(blocked?'Access unavailable':'Approval required'))+'</h1><p class="flympusAuthCopy">'+esc(tr(blocked?'This FLYMPUS account is currently blocked.':'Your identity is verified. An administrator still needs to approve access to FLYMPUS.'))+'</p>'+statusBlock(blocked?'error':'pending',tr(blocked?'Account blocked':'Pending administrator approval'),tr(blocked?'Contact a FLYMPUS administrator if you believe this is incorrect.':'You do not have access to course data until approval is granted.'))+'<div class="flympusAuthAccount"><b>'+esc(user.displayName||tr('Signed-in user'))+'</b><span>'+esc(user.email||'')+'</span></div><div class="flympusAuthActions"><button class="flympusAuthAction" type="button" data-auth-signout>'+esc(tr('Sign out'))+'</button></div>');document.querySelector('[data-auth-signout]')?.addEventListener('click',signOutCurrentUser)}
 function showFatal(title,copy){cancelSilentAuthLoading();api.status='error';lockApp();shell('<p class="flympusAuthEyebrow">'+esc(tr('AUTHENTICATION'))+'</p><h1 class="flympusAuthTitle">'+esc(tr(title))+'</h1>'+statusBlock('error','FLYMPUS could not complete sign-in',copy)+'<div class="flympusAuthActions"><button class="flympusAuthAction" type="button" data-auth-retry>'+esc(tr('Try again'))+'</button></div>');document.querySelector('[data-auth-retry]')?.addEventListener('click',()=>location.reload())}
@@ -130,28 +153,47 @@ function friendlyAuthError(err){
 }
 async function signInProvider(kind){
   if(!enabled||!auth||!authSdk){showLogin({setupPreview:!enabled});return}
+  if(signInPromise)return signInPromise;
   if(kind==='microsoft'&&cfg.microsoftEnabled!==true){
     showLogin({error:'Microsoft sign-in is temporarily unavailable. Continue with Google.'});
     return
   }
-  try{
-    api.status='signing-in';
-    let provider;
-    if(kind==='microsoft'){
-      provider=new authSdk.OAuthProvider('microsoft.com');
-      const tenant=String(cfg.microsoftTenant||'common').trim();
-      if(tenant)provider.setCustomParameters({tenant})
-    }else{
-      provider=new authSdk.GoogleAuthProvider()
+  const attempt=(async()=>{
+    setProviderBusy(true);
+    try{
+      api.status='signing-in';
+      let provider;
+      if(kind==='microsoft'){
+        provider=new authSdk.OAuthProvider('microsoft.com');
+        const tenant=String(cfg.microsoftTenant||'common').trim();
+        if(tenant)provider.setCustomParameters({tenant})
+      }else{
+        provider=new authSdk.GoogleAuthProvider()
+      }
+      /* Keep provider authorization on Firebase's supported popup path.
+         Session durability is handled separately by explicit local persistence,
+         so OAuth redirect URIs remain the Firebase-managed values. */
+      await authSdk.signInWithPopup(auth,provider,authSdk.browserPopupRedirectResolver)
+    }catch(err){
+      const code=String(err?.code||'');
+      /* iOS can report cancelled-popup-request while the already-open Firebase
+         web-auth sheet is still completing successfully. Treat that as a
+         transient concurrency signal, not as a failed sign-in banner. */
+      if(code==='auth/cancelled-popup-request'){
+        console.warn('FLYMPUS duplicate popup request suppressed');
+        if(await waitForSignedInUser())return;
+        showLogin();
+        return
+      }
+      console.error('FLYMPUS sign-in failed',err);
+      showLogin({error:friendlyAuthError(err)})
+    }finally{
+      setProviderBusy(false)
     }
-    /* Keep provider authorization on Firebase's supported popup path.
-       Session durability is handled separately by explicit local persistence,
-       so OAuth redirect URIs remain the Firebase-managed values. */
-    await authSdk.signInWithPopup(auth,provider,authSdk.browserPopupRedirectResolver)
-  }catch(err){
-    console.error('FLYMPUS sign-in failed',err);
-    showLogin({error:friendlyAuthError(err)})
-  }
+  })();
+  signInPromise=attempt;
+  try{return await attempt}
+  finally{if(signInPromise===attempt)signInPromise=null}
 }
 async function signOutCurrentUser(){
   try{
