@@ -11,7 +11,7 @@ const storage=fs.readFileSync('storage-scope.js','utf8');
 assert(html.includes('./firebase-config.js?v=20261004-auth2'),'Firebase config must load from the static app');
 assert(html.includes('./storage-scope.js?v=20261005-auth6'),'UID storage scope must load from the static app');
 assert(html.includes('./auth.css?v=20261005-auth4'),'Authentication UI CSS must be loaded');
-assert(html.includes('type="module" src="./auth.js?v=20261005-auth10"'),'Authentication runtime must load as a module');
+assert(html.includes('type="module" src="./auth.js?v=20261005-auth11"'),'Authentication runtime must load as a module');
 assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"'),'Firebase Authentication must preload before the post-login reload');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('</head>'),'Firebase config must load before first body paint');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('Early preference bootstrap'),'Firebase config must load before any local preference access');
@@ -49,6 +49,10 @@ assert(auth.includes("auth=authModule.initializeAuth(firebaseApp,{"),'Firebase A
 assert(auth.includes("persistence:authModule.browserLocalPersistence"),'iOS PWA auth must use one durable localStorage persistence layer');
 assert(auth.includes("popupRedirectResolver:authModule.browserPopupRedirectResolver"),'Firebase Auth must own the browser popup resolver on the initialized instance');
 assert(!auth.includes("persistence:[authModule.browserLocalPersistence"),'Auth must not bounce the user between localStorage and IndexedDB persistence layers');
+assert(auth.includes("firebase:authUser:")&&auth.includes("firebase:flympus-auth-backup:"),'FLYMPUS must maintain a same-origin backup of Firebase user persistence for iOS memory fallback');
+assert(auth.includes("JSON.stringify(user.toJSON())")&&auth.includes("stsTokenManager?.refreshToken"),'The auth backup must mirror Firebase\'s own persisted User JSON, including its refresh token');
+assert(auth.includes("restoreFirebaseUserBackup();")&&auth.includes("persistFirebaseUserBackup(user);"),'Auth backup must restore before Firebase initialization and refresh after successful sign-in');
+assert(auth.includes("clearFirebaseUserBackup();"),'Explicit sign-out must clear the Firebase persistence backup');
 assert(auth.includes("if(typeof auth.authStateReady==='function')await auth.authStateReady();"),'Returning sessions must wait for Firebase persistence restoration before signed-out handling');
 assert(!auth.includes("setPersistence(auth,authModule.browserLocalPersistence)"),'Auth persistence must not be reconfigured on every refresh');
 
