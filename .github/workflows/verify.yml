@@ -31,6 +31,10 @@ jobs:
         run: node tests/push-notifications.test.cjs
       - name: Authentication foundation tests
         run: node tests/auth-integration.test.cjs
+      - name: Authentication lifecycle regression tests
+        run: node --test tests/auth-lifecycle.test.cjs
+      - name: First paint and resume theme tests
+        run: node --test tests/theme-controller.test.cjs
       - name: UID-scoped storage tests
         run: node tests/storage-scope.test.cjs
       - name: Hebrew UI and RTL tests
