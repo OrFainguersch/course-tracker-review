@@ -11,6 +11,7 @@ const setupMode=params.get('authSetup')==='1';
 const enabled=cfg.enabled===true;
 const enforce=enabled&&cfg.enforceAuth===true;
 const SDK_VERSION='12.19.0';
+const REDIRECT_PENDING_KEY='firebase:flympus:redirect-pending';
 
 let firebaseApp=null;
 let auth=null;
@@ -117,6 +118,18 @@ function firebaseConfigReady(){
   const f=cfg.firebase||{};
   return ['apiKey','authDomain','projectId','appId'].every(k=>typeof f[k]==='string'&&f[k].trim())
 }
+function isAppleStandaloneWebApp(){
+  const nav=window.navigator||{};
+  const apple=/iPad|iPhone|iPod/.test(String(nav.userAgent||''))||(nav.platform==='MacIntel'&&Number(nav.maxTouchPoints||0)>1);
+  const standalone=nav.standalone===true||window.matchMedia?.('(display-mode: standalone)')?.matches===true;
+  return apple&&standalone
+}
+function redirectPending(){
+  try{return window.localStorage?.getItem(REDIRECT_PENDING_KEY)==='1'}catch{return false}
+}
+function setRedirectPending(value){
+  try{if(value)window.localStorage?.setItem(REDIRECT_PENDING_KEY,'1');else window.localStorage?.removeItem(REDIRECT_PENDING_KEY)}catch{}
+}
 function friendlyAuthError(err){
   const code=String(err?.code||'');
   if(code==='auth/popup-closed-by-user')return 'The sign-in window was closed before authentication finished.';
@@ -125,6 +138,7 @@ function friendlyAuthError(err){
   if(code==='auth/account-exists-with-different-credential')return 'This email already belongs to a FLYMPUS account using a different sign-in provider.';
   if(code==='auth/unauthorized-domain')return 'This FLYMPUS address has not yet been added to Firebase Authorized domains.';
   if(code==='auth/operation-not-allowed')return 'This sign-in provider has not yet been enabled in Firebase.';
+  if(code==='auth/web-storage-unsupported')return 'This device could not access persistent sign-in storage. Close FLYMPUS completely and try again.';
   return String(err?.message||'Authentication could not be completed.')
 }
 async function signInProvider(kind){
@@ -143,9 +157,20 @@ async function signInProvider(kind){
     }else{
       provider=new authSdk.GoogleAuthProvider()
     }
-    /* GitHub Pages cannot proxy Firebase redirect helpers. Popup auth avoids
-       Safari/Firefox third-party-storage redirect failures documented by Firebase. */
-    await authSdk.signInWithPopup(auth,provider)
+    /* iOS Home Screen apps can place Firebase's popup helper in a separate
+       WebKit storage context where its sessionStorage is unavailable. Use the
+       same-window redirect flow there; ordinary browsers keep the popup UX. */
+    if(kind==='google'&&isAppleStandaloneWebApp()){
+      setRedirectPending(true);
+      try{
+        await authSdk.signInWithRedirect(auth,provider,authSdk.browserPopupRedirectResolver)
+      }catch(err){
+        setRedirectPending(false);
+        throw err
+      }
+      return
+    }
+    await authSdk.signInWithPopup(auth,provider,authSdk.browserPopupRedirectResolver)
   }catch(err){
     console.error('FLYMPUS sign-in failed',err);
     showLogin({error:friendlyAuthError(err)})
@@ -288,8 +313,25 @@ async function boot(){
     ]);
     authSdk=authModule;firestoreSdk=firestoreModule;
     firebaseApp=appModule.initializeApp(cfg.firebase);
-    auth=authModule.getAuth(firebaseApp);
+    /* Prefer localStorage persistence explicitly. Firebase 12.19 may fall back
+       to in-memory state when IndexedDB is unavailable during an iOS lifecycle
+       transition; that is safe but would look like a logout after a cold PWA
+       relaunch. localStorage is already required and verified by FLYMPUS. */
+    auth=authModule.initializeAuth(firebaseApp,{
+      persistence:[authModule.browserLocalPersistence,authModule.indexedDBLocalPersistence]
+    });
     db=firestoreModule.getFirestore(firebaseApp);
+    let redirectError='';
+    if(redirectPending()){
+      try{
+        await authModule.getRedirectResult(auth,authModule.browserPopupRedirectResolver)
+      }catch(err){
+        console.error('FLYMPUS redirect sign-in failed',err);
+        redirectError=friendlyAuthError(err)
+      }finally{
+        setRedirectPending(false)
+      }
+    }
     /* Firebase restores persisted browser auth asynchronously. Do not attach the
        signed-out branch until that initial restoration is complete: on iOS,
        rapid refreshes can otherwise expose a transient null user and our
@@ -303,7 +345,7 @@ async function boot(){
         clearRoleContext();removeAuthenticatedChrome();
         const scopeChanged=window.FLYMPUS_STORAGE_SCOPE?.clearUid?.()===true;
         if(scopeChanged){location.reload();return}
-        if(enforce||setupMode)showLogin();else{api.status='signed-out';unlockApp()}
+        if(enforce||setupMode)showLogin({error:redirectError});else{api.status='signed-out';unlockApp()}
       }
     },err=>showFatal('Authentication failed',friendlyAuthError(err)))
   }catch(err){
