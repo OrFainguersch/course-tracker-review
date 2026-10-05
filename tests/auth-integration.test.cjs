@@ -11,7 +11,7 @@ const storage=fs.readFileSync('storage-scope.js','utf8');
 assert(html.includes('./firebase-config.js?v=20261004-auth2'),'Firebase config must load from the static app');
 assert(html.includes('./storage-scope.js?v=20261005-auth6'),'UID storage scope must load from the static app');
 assert(html.includes('./auth.css?v=20261005-auth4'),'Authentication UI CSS must be loaded');
-assert(html.includes('type="module" src="./auth.js?v=20261005-auth8"'),'Authentication runtime must load as a module');
+assert(html.includes('type="module" src="./auth.js?v=20261005-auth9"'),'Authentication runtime must load as a module');
 assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"'),'Firebase Authentication must preload before the post-login reload');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('</head>'),'Firebase config must load before first body paint');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('Early preference bootstrap'),'Firebase config must load before any local preference access');
@@ -29,6 +29,8 @@ assert(auth.includes("new authSdk.GoogleAuthProvider()"),'Google sign-in provide
 assert(auth.includes("new authSdk.OAuthProvider('microsoft.com')"),'Microsoft sign-in provider must exist');
 assert(auth.includes('cfg.microsoftEnabled===true'),'Microsoft sign-in UI must be guarded by its feature flag');
 assert(auth.includes('signInWithPopup(auth,provider,authSdk.browserPopupRedirectResolver)'),'Google authentication must use Firebase-managed popup OAuth so redirect URIs stay valid');
+assert(auth.includes('if(signInPromise)return signInPromise'),'Repeated taps must reuse the active sign-in attempt instead of opening a second Firebase popup');
+assert(auth.includes("code==='auth/cancelled-popup-request'")&&auth.includes('waitForSignedInUser()'),'A transient iOS cancelled-popup-request must wait for the already-open sign-in instead of flashing a false failure');
 assert(!auth.includes("identityToolkitRequest(")&&!auth.includes("startStandaloneGoogleSignIn(")&&!auth.includes("signInWithRedirect("),'Authentication must not use the temporary direct OAuth redirect experiment');
 assert(!auth.includes("addScope('mail.read')")&&!auth.includes("addScope('calendars.read')"),
   'FLYMPUS authentication must not request mailbox or calendar scopes');
