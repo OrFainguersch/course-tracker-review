@@ -40,9 +40,17 @@ earlier Work run completed deployment.
   that it requires authentication. The production verifier rejects this state.
 - Cloud Shell (embedded and direct) and the Google Cloud IAM console were
   unavailable in this browser. Firebase Console and GitHub remained accessible.
-- Live User Management opened but its directory load failed with
-  `Missing or insufficient permissions`. Do not report this feature as verified:
-  inspect the actually deployed Firestore rules and reconcile them with main.
+- After explicit owner approval, published the main Firestore rules in Firebase
+  Console. The latest published rules entry is 2026-10-05 at 7:55 PM.
+- Live User Management then loaded successfully: one active administrator,
+  no permission error. Its content fits the Cloud Chrome viewport; this does
+  not verify overflowing touch scrolling on iPhone.
+- Plan remained selected after refresh. Bottom navigation also dismissed the
+  notification dropdown. These observations were on the existing Pages origin.
+- The Firebase Admin SDK key-generation confirmation is prepared, but no key
+  was generated. A new persistent credential grants the existing account
+  access to Firebase services, beyond Hosting, and needs specific approval.
+  Prefer restricted WIF when the Google Cloud IAM console becomes accessible.
 
 ## Deployment prepared in this change
 
@@ -63,7 +71,8 @@ earlier Work run completed deployment.
 
 1. Connect deployment authorization without exposing credential values.
 2. Run the Hosting workflow on main and verify its production checks and live UI.
-3. Inspect the live Firestore rules, authorized domains and Google provider setup.
+3. Verify authorized domains and Google provider setup. Firestore rules publication
+   and the live directory load are already verified; do not repeat publication.
 4. Validate the iPhone PWA auth return path on the Firebase origin; make changes
    only when the current architecture's behavior is established.
 5. Complete lifecycle/theme/UI validation and report remaining physical-device
