@@ -29,6 +29,8 @@ jobs:
         run: node tests/ios-audio-lifecycle.test.cjs
       - name: Web Push integration tests
         run: node tests/push-notifications.test.cjs
+      - name: Firebase reserved route runtime tests
+        run: node --test tests/sw-routing.test.cjs
       - name: Authentication foundation tests
         run: node tests/auth-integration.test.cjs
       - name: Authentication lifecycle regression tests

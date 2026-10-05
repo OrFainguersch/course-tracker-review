@@ -1,6 +1,7 @@
 {
   "hosting": {
-    "public": ".",
+    "public": "dist",
+    "predeploy": ["node scripts/prepare-hosting.cjs"],
     "ignore": [
       "firebase.json",
       ".firebaserc",

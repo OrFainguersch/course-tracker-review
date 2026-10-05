@@ -1,0 +1,4 @@
+dist/
+.firebase/
+firebase-debug.log
+gha-creds-*.json
