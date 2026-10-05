@@ -11,7 +11,7 @@ const storage=fs.readFileSync('storage-scope.js','utf8');
 assert(html.includes('./firebase-config.js?v=20261004-auth2'),'Firebase config must load from the static app');
 assert(html.includes('./storage-scope.js?v=20261005-auth6'),'UID storage scope must load from the static app');
 assert(html.includes('./auth.css?v=20261005-auth4'),'Authentication UI CSS must be loaded');
-assert(html.includes('type="module" src="./auth.js?v=20261005-auth7"'),'Authentication runtime must load as a module');
+assert(html.includes('type="module" src="./auth.js?v=20261005-auth8"'),'Authentication runtime must load as a module');
 assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"'),'Firebase Authentication must preload before the post-login reload');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('</head>'),'Firebase config must load before first body paint');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('Early preference bootstrap'),'Firebase config must load before any local preference access');
@@ -28,11 +28,8 @@ assert(auth.includes("const SDK_VERSION='12.19.0'"),'Use the currently documente
 assert(auth.includes("new authSdk.GoogleAuthProvider()"),'Google sign-in provider must exist');
 assert(auth.includes("new authSdk.OAuthProvider('microsoft.com')"),'Microsoft sign-in provider must exist');
 assert(auth.includes('cfg.microsoftEnabled===true'),'Microsoft sign-in UI must be guarded by its feature flag');
-assert(auth.includes('signInWithPopup(auth,provider,authSdk.browserPopupRedirectResolver)'),'Ordinary browsers must keep popup authentication');
-assert(auth.includes("kind==='google'&&isAppleStandaloneWebApp()")&&auth.includes("identityToolkitRequest('createAuthUri'"),'iOS Home Screen Google authentication must avoid the Firebase popup/redirect helper storage context');
-assert(auth.includes("identityToolkitRequest('signInWithIdp'")&&auth.includes('sessionId')&&auth.includes("const IDP_SESSION_KEY='firebase:flympus:idp-session'"),'Standalone OAuth completion must verify the Identity Toolkit anti-fixation session');
-assert(auth.includes('GoogleAuthProvider.credential(oauthIdToken||null,oauthAccessToken||null)')&&auth.includes('signInWithCredential(auth,credential)'),'Standalone OAuth must hand a Google credential back to Firebase Auth for durable persistence');
-assert(!auth.includes('signInWithRedirect(')&&!auth.includes('getRedirectResult('),'iOS PWA auth must not rely on Firebase cross-origin redirect helper state');
+assert(auth.includes('signInWithPopup(auth,provider,authSdk.browserPopupRedirectResolver)'),'Google authentication must use Firebase-managed popup OAuth so redirect URIs stay valid');
+assert(!auth.includes("identityToolkitRequest(")&&!auth.includes("startStandaloneGoogleSignIn(")&&!auth.includes("signInWithRedirect("),'Authentication must not use the temporary direct OAuth redirect experiment');
 assert(!auth.includes("addScope('mail.read')")&&!auth.includes("addScope('calendars.read')"),
   'FLYMPUS authentication must not request mailbox or calendar scopes');
 assert(auth.includes("role:preauthorized&&invitation?.role==='admin'?'admin':'user'")&&auth.includes("status:preauthorized?'active':'pending'"),
