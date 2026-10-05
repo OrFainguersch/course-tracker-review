@@ -47,10 +47,20 @@ earlier Work run completed deployment.
   not verify overflowing touch scrolling on iPhone.
 - Plan remained selected after refresh. Bottom navigation also dismissed the
   notification dropdown. These observations were on the existing Pages origin.
-- The Firebase Admin SDK key-generation confirmation is prepared, but no key
-  was generated. A new persistent credential grants the existing account
-  access to Firebase services, beyond Hosting, and needs specific approval.
-  Prefer restricted WIF when the Google Cloud IAM console becomes accessible.
+- The owner explicitly approved creating the Firebase Admin SDK credential and
+  using it for Hosting deployment. Generate key was clicked once. The dialog
+  closed, but the documented download event timed out and no credential file
+  appeared in the shared download directory. Creation success is unknown; a
+  key may exist. Do not generate another key blindly or claim no key exists.
+- Browser security policy rejected opening the browser download manager and
+  forbids circumventing that restriction. No credential contents were read,
+  exposed, committed or saved to Library. Deployment remains unauthorized.
+- Live Firebase Authentication has Google enabled. Authorized domains include
+  flympus.firebaseapp.com, flympus.web.app and orfainguersch.github.io.
+- Prefer restricted WIF when the Google Cloud IAM console becomes accessible.
+  Credential delivery, possible unused-key cleanup and GitHub deployment
+  authorization remain unresolved. Additional consent cannot fix an unsupported
+  download mechanism; do not repeatedly ask for the same approval.
 
 ## Deployment prepared in this change
 
@@ -71,8 +81,8 @@ earlier Work run completed deployment.
 
 1. Connect deployment authorization without exposing credential values.
 2. Run the Hosting workflow on main and verify its production checks and live UI.
-3. Verify authorized domains and Google provider setup. Firestore rules publication
-   and the live directory load are already verified; do not repeat publication.
+3. Google provider, both Hosting domains and the Pages domain are already verified.
+   Firestore publication and live directory load are also verified; do not repeat.
 4. Validate the iPhone PWA auth return path on the Firebase origin; make changes
    only when the current architecture's behavior is established.
 5. Complete lifecycle/theme/UI validation and report remaining physical-device
