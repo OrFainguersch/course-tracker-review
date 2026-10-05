@@ -11,9 +11,6 @@ const setupMode=params.get('authSetup')==='1';
 const enabled=cfg.enabled===true;
 const enforce=enabled&&cfg.enforceAuth===true;
 const SDK_VERSION='12.19.0';
-const FIREBASE_APP_NAME='[DEFAULT]';
-const firebaseAuthStorageKey=()=>`firebase:authUser:${String(cfg.firebase?.apiKey||'')}:${FIREBASE_APP_NAME}`;
-const firebaseAuthBackupKey=()=>`firebase:flympus-auth-backup:${String(cfg.firebase?.apiKey||'')}:${FIREBASE_APP_NAME}`;
 
 let firebaseApp=null;
 let auth=null;
@@ -143,43 +140,6 @@ function firebaseConfigReady(){
   const f=cfg.firebase||{};
   return ['apiKey','authDomain','projectId','appId'].every(k=>typeof f[k]==='string'&&f[k].trim())
 }
-function rawLocalGet(key){try{return window.localStorage?.getItem(String(key))||null}catch{return null}}
-function rawLocalSet(key,value){try{window.localStorage?.setItem(String(key),String(value));return true}catch{return false}}
-function rawLocalRemove(key){try{window.localStorage?.removeItem(String(key));return true}catch{return false}}
-function restoreFirebaseUserBackup(){
-  const officialKey=firebaseAuthStorageKey(),backupKey=firebaseAuthBackupKey();
-  const official=rawLocalGet(officialKey),backup=rawLocalGet(backupKey);
-  if(!official&&backup){
-    try{
-      const parsed=JSON.parse(backup);
-      if(parsed&&typeof parsed==='object'&&parsed.uid&&parsed.stsTokenManager?.refreshToken){
-        rawLocalSet(officialKey,backup);
-        return true
-      }
-    }catch{}
-  }
-  return false
-}
-function persistFirebaseUserBackup(user){
-  if(!user?.uid||typeof user.toJSON!=='function')return false;
-  try{
-    const json=JSON.stringify(user.toJSON());
-    const parsed=JSON.parse(json);
-    if(!parsed?.uid||!parsed?.stsTokenManager?.refreshToken)return false;
-    const officialKey=firebaseAuthStorageKey(),backupKey=firebaseAuthBackupKey();
-    /* PersistenceUserManager writes user.toJSON() under firebase:authUser.
-       Mirror exactly that representation so a transient SDK fallback to
-       in-memory persistence cannot turn a successful login into a cold-start
-       logout on iOS. */
-    rawLocalSet(backupKey,json);
-    rawLocalSet(officialKey,json);
-    return true
-  }catch{return false}
-}
-function clearFirebaseUserBackup(){
-  rawLocalRemove(firebaseAuthBackupKey());
-  rawLocalRemove(firebaseAuthStorageKey())
-}
 function friendlyAuthError(err){
   const code=String(err?.code||'');
   if(code==='auth/popup-closed-by-user')return 'The sign-in window was closed before authentication finished.';
@@ -245,7 +205,6 @@ async function signOutCurrentUser(){
     api.currentUser=null;api.profile=null;
     clearRoleContext();
     removeAuthenticatedChrome();
-    clearFirebaseUserBackup();
     const scopeChanged=window.FLYMPUS_STORAGE_SCOPE?.clearUid?.()===true;
     if(scopeChanged){location.reload();return}
     if(enforce||preview||setupMode)showLogin({setupPreview:preview&&!enabled});else unlockApp()
@@ -330,7 +289,6 @@ async function confirmManagedUserAction(action){const copy={approve:['Approve th
 async function updateManagedUser(uid,action,button){if(!api.isAdmin()||!uid||uid===currentUser?.uid)return;if(!(await confirmManagedUserAction(action)))return;const changes={updatedAt:firestoreSdk.serverTimestamp(),updatedBy:currentUser.uid};if(action==='approve'||action==='reactivate')changes.status='active';if(action==='block')changes.status='blocked';if(action==='make-admin')changes.role='admin';if(action==='make-user')changes.role='user';button.disabled=true;try{await firestoreSdk.updateDoc(firestoreSdk.doc(db,'users',uid),changes);renderUserManagement(await loadManagedDirectory())}catch(err){console.error('FLYMPUS user-management update failed',err);button.disabled=false;renderUserManagement(lastManagedDirectory,String(err?.message||tr('Update failed')))}}
 function bindAuthLanguageSync(){if(window.__FLYMPUS_AUTH_LANGUAGE_BOUND__)return;window.__FLYMPUS_AUTH_LANGUAGE_BOUND__=true;syncAuthAdjacentChromeLanguage();if(typeof MutationObserver!=='function')return;const observer=new MutationObserver(records=>{if(!records.some(x=>x.attributeName==='data-flympus-language'))return;syncAuthAdjacentChromeLanguage();if(currentUser&&currentProfile)syncAuthenticatedChrome(currentUser,currentProfile);const manager=document.getElementById('flympusUserManagementRoot');if(manager&&!manager.hidden)renderUserManagement(lastManagedDirectory,lastManagedError)});observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-flympus-language']})}
 async function handleSignedIn(user){
-  persistFirebaseUserBackup(user);
   if(returningScopedSession)scheduleSilentAuthLoading('Verifying FLYMPUS access…');
   else showLoading('Verifying FLYMPUS access…');
   try{
@@ -374,7 +332,6 @@ async function boot(){
     ]);
     authSdk=authModule;firestoreSdk=firestoreModule;
     firebaseApp=appModule.initializeApp(cfg.firebase);
-    restoreFirebaseUserBackup();
     /* Prefer localStorage persistence explicitly. Firebase 12.19 may fall back
        to in-memory state when IndexedDB is unavailable during an iOS lifecycle
        transition; that is safe but would look like a logout after a cold PWA
@@ -398,7 +355,6 @@ async function boot(){
        rapid refreshes can otherwise expose a transient null user and our
        fail-closed handler would incorrectly clear the verified UID scope. */
     if(typeof auth.authStateReady==='function')await auth.authStateReady();
-    if(auth.currentUser)persistFirebaseUserBackup(auth.currentUser);
     authUnsubscribe=authModule.onAuthStateChanged(auth,user=>{
       if(user)handleSignedIn(user);
       else{
