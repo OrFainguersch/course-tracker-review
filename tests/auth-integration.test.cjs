@@ -75,4 +75,11 @@ assert(rules.includes('invitedUserCreate(request.resource.data)'),'First sign-in
 assert(storage.includes('function installResumeThemeHold()')&&storage.includes("attributeFilter:['data-flympus-theme']"),'Early lifecycle layer must hold the stable theme through iOS resume');
 assert(storage.includes('const first=sampleSystem()')&&storage.includes('first===second?second:stable'),'Resume theme guard must require two matching System samples');
 
+
+assert(auth.includes("returningScopedSession=!!window.FLYMPUS_STORAGE_SCOPE?.currentUid?.()"),'Refresh auth should recognize an already UID-scoped returning session');
+assert(auth.includes('function scheduleSilentAuthLoading')&&auth.includes('},2200)'),'Returning sessions should delay the visible auth splash instead of showing it on every refresh');
+assert(auth.includes("if(returningScopedSession)scheduleSilentAuthLoading('Starting secure authentication…')"),'Auth boot must stay silent for a returning session');
+assert(auth.includes("if(returningScopedSession)scheduleSilentAuthLoading('Verifying FLYMPUS access…')"),'Profile verification must also remain silent for a returning session');
+assert(auth.includes('function cancelSilentAuthLoading()')&&auth.includes('function unlockApp(){cancelSilentAuthLoading();'),'Successful auth must cancel the delayed splash before it can paint');
+
 console.log('Authentication foundation checks passed');
