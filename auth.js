@@ -11,7 +11,8 @@ const setupMode=params.get('authSetup')==='1';
 const enabled=cfg.enabled===true;
 const enforce=enabled&&cfg.enforceAuth===true;
 const SDK_VERSION='12.19.0';
-const REDIRECT_PENDING_KEY='firebase:flympus:redirect-pending';
+const IDP_SESSION_KEY='firebase:flympus:idp-session';
+const IDP_RETURN_KEY='firebase:flympus:idp-return';
 
 let firebaseApp=null;
 let auth=null;
@@ -124,11 +125,87 @@ function isAppleStandaloneWebApp(){
   const standalone=nav.standalone===true||window.matchMedia?.('(display-mode: standalone)')?.matches===true;
   return apple&&standalone
 }
-function redirectPending(){
-  try{return window.localStorage?.getItem(REDIRECT_PENDING_KEY)==='1'}catch{return false}
+function authLocalGet(key){
+  try{return String(window.localStorage?.getItem(key)||'')}catch{return ''}
 }
-function setRedirectPending(value){
-  try{if(value)window.localStorage?.setItem(REDIRECT_PENDING_KEY,'1');else window.localStorage?.removeItem(REDIRECT_PENDING_KEY)}catch{}
+function authLocalSet(key,value){
+  try{window.localStorage?.setItem(key,String(value||''))}catch{}
+}
+function authLocalRemove(key){
+  try{window.localStorage?.removeItem(key)}catch{}
+}
+function cleanStandaloneAuthUrl(value=location.href){
+  const url=new URL(value,location.href);
+  ['code','state','scope','authuser','prompt','hd','error','error_description'].forEach(key=>url.searchParams.delete(key));
+  url.hash='';
+  return url.href
+}
+function hasStandaloneIdpCallback(){
+  try{
+    const url=new URL(location.href);
+    return !!url.searchParams.get('state')&&(!!url.searchParams.get('code')||!!url.searchParams.get('error'))
+  }catch{return false}
+}
+async function identityToolkitRequest(method,payload){
+  const apiKey=String(cfg.firebase?.apiKey||'').trim();
+  if(!apiKey)throw new Error('Firebase API key is unavailable.');
+  const response=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:'+method+'?key='+encodeURIComponent(apiKey),{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload||{})
+  });
+  let data={};
+  try{data=await response.json()}catch{}
+  if(!response.ok){
+    const detail=String(data?.error?.message||data?.error?.status||'Google authentication could not be completed.');
+    const error=new Error(detail);
+    error.code='auth/identity-toolkit-'+String(method||'request');
+    throw error
+  }
+  return data
+}
+async function startStandaloneGoogleSignIn(){
+  const returnUrl=cleanStandaloneAuthUrl();
+  const result=await identityToolkitRequest('createAuthUri',{
+    providerId:'google.com',
+    continueUri:returnUrl,
+    authFlowType:'CODE_FLOW',
+    oauthScope:'openid email profile'
+  });
+  const sessionId=String(result?.sessionId||''),authUri=String(result?.authUri||'');
+  if(!sessionId||!authUri)throw new Error('Google authentication did not return a valid authorization session.');
+  authLocalSet(IDP_SESSION_KEY,sessionId);
+  authLocalSet(IDP_RETURN_KEY,returnUrl);
+  location.assign(authUri)
+}
+async function finishStandaloneGoogleSignIn(){
+  if(!isAppleStandaloneWebApp()||!hasStandaloneIdpCallback())return false;
+  const callback=new URL(location.href),sessionId=authLocalGet(IDP_SESSION_KEY);
+  const returnUrl=authLocalGet(IDP_RETURN_KEY)||cleanStandaloneAuthUrl();
+  try{
+    const providerError=callback.searchParams.get('error');
+    if(providerError){
+      const description=callback.searchParams.get('error_description');
+      throw new Error(description||providerError)
+    }
+    if(!sessionId)throw new Error('The Google sign-in session expired. Please try again.');
+    const result=await identityToolkitRequest('signInWithIdp',{
+      requestUri:location.href,
+      sessionId,
+      returnSecureToken:true,
+      returnIdpCredential:true
+    });
+    const oauthIdToken=String(result?.oauthIdToken||'');
+    const oauthAccessToken=String(result?.oauthAccessToken||'');
+    if(!oauthIdToken&&!oauthAccessToken)throw new Error('Google did not return a reusable sign-in credential.');
+    const credential=authSdk.GoogleAuthProvider.credential(oauthIdToken||null,oauthAccessToken||null);
+    await authSdk.signInWithCredential(auth,credential);
+    try{history.replaceState(null,'',returnUrl)}catch{}
+    return true
+  }finally{
+    authLocalRemove(IDP_SESSION_KEY);
+    authLocalRemove(IDP_RETURN_KEY)
+  }
 }
 function friendlyAuthError(err){
   const code=String(err?.code||'');
@@ -157,17 +234,13 @@ async function signInProvider(kind){
     }else{
       provider=new authSdk.GoogleAuthProvider()
     }
-    /* iOS Home Screen apps can place Firebase's popup helper in a separate
-       WebKit storage context where its sessionStorage is unavailable. Use the
-       same-window redirect flow there; ordinary browsers keep the popup UX. */
+    /* iOS Home Screen apps can isolate Firebase's cross-origin auth helper
+       from the PWA storage context. Avoid that helper entirely: request the
+       Google authorization URI directly from Identity Toolkit, keep only the
+       anti-fixation session ID in this app's localStorage, then finish with a
+       normal Firebase credential after Google returns to this same PWA URL. */
     if(kind==='google'&&isAppleStandaloneWebApp()){
-      setRedirectPending(true);
-      try{
-        await authSdk.signInWithRedirect(auth,provider,authSdk.browserPopupRedirectResolver)
-      }catch(err){
-        setRedirectPending(false);
-        throw err
-      }
+      await startStandaloneGoogleSignIn();
       return
     }
     await authSdk.signInWithPopup(auth,provider,authSdk.browserPopupRedirectResolver)
@@ -321,15 +394,14 @@ async function boot(){
       persistence:[authModule.browserLocalPersistence,authModule.indexedDBLocalPersistence]
     });
     db=firestoreModule.getFirestore(firebaseApp);
-    let redirectError='';
-    if(redirectPending()){
+    let standaloneIdpError='';
+    if(hasStandaloneIdpCallback()){
       try{
-        await authModule.getRedirectResult(auth,authModule.browserPopupRedirectResolver)
+        await finishStandaloneGoogleSignIn()
       }catch(err){
-        console.error('FLYMPUS redirect sign-in failed',err);
-        redirectError=friendlyAuthError(err)
-      }finally{
-        setRedirectPending(false)
+        console.error('FLYMPUS standalone Google sign-in failed',err);
+        standaloneIdpError=friendlyAuthError(err);
+        try{history.replaceState(null,'',authLocalGet(IDP_RETURN_KEY)||cleanStandaloneAuthUrl())}catch{}
       }
     }
     /* Firebase restores persisted browser auth asynchronously. Do not attach the
@@ -345,7 +417,7 @@ async function boot(){
         clearRoleContext();removeAuthenticatedChrome();
         const scopeChanged=window.FLYMPUS_STORAGE_SCOPE?.clearUid?.()===true;
         if(scopeChanged){location.reload();return}
-        if(enforce||setupMode)showLogin({error:redirectError});else{api.status='signed-out';unlockApp()}
+        if(enforce||setupMode)showLogin({error:standaloneIdpError});else{api.status='signed-out';unlockApp()}
       }
     },err=>showFatal('Authentication failed',friendlyAuthError(err)))
   }catch(err){
