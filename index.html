@@ -15,7 +15,7 @@
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js" crossorigin />
 <link rel="modulepreload" href="./auth.js?v=20261004-auth3" />
 <script src="./firebase-config.js?v=20261004-auth2"></script>
-<script src="./storage-scope.js?v=20261005-auth5"></script>
+<script src="./storage-scope.js?v=20261005-auth6"></script>
 <script>
 /* Early preference bootstrap: keep first paint identical to the last visible
    FLYMPUS frame. iOS can report a transient system color scheme while a PWA is
@@ -5463,9 +5463,9 @@ if(!window.__flympusI18nObserverBound&&window.MutationObserver){
 
 if(!window.__flympusThemePreferenceBound){
   window.__flympusThemePreferenceBound=true;
-  let pendingSystemThemeSync=false,resumeThemeToken=0,resumeThemeTimer=null,resumeThemeConfirmTimer=null,resumeThemeGuardUntil=0;
-  const FLYMPUS_SYSTEM_THEME_SETTLE_MS=650;
-  const FLYMPUS_SYSTEM_THEME_CONFIRM_MS=180;
+  let pendingSystemThemeSync=false,resumeThemeToken=0,resumeThemeTimer=null,resumeThemeConfirmTimer=null,resumeThemeFinalTimer=null,resumeThemeGuardUntil=0;
+  const FLYMPUS_SYSTEM_THEME_SETTLE_MS=1800;
+  const FLYMPUS_SYSTEM_THEME_CONFIRM_MS=350;
   const visibleSystemTheme=()=>{
     try{return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches?'dark':'light'}
     catch{return getFlympusStableResolvedTheme()||'light'}
@@ -5473,8 +5473,10 @@ if(!window.__flympusThemePreferenceBound){
   const clearForegroundThemeTimers=()=>{
     clearTimeout(resumeThemeTimer);
     clearTimeout(resumeThemeConfirmTimer);
+    clearTimeout(resumeThemeFinalTimer);
     resumeThemeTimer=null;
     resumeThemeConfirmTimer=null;
+    resumeThemeFinalTimer=null;
   };
   const finishForegroundThemeGuard=(token,root)=>{
     if(token!==resumeThemeToken)return;
@@ -5493,7 +5495,7 @@ if(!window.__flympusThemePreferenceBound){
     const token=++resumeThemeToken,root=document.documentElement;
     clearForegroundThemeTimers();
     pendingSystemThemeSync=false;
-    resumeThemeGuardUntil=(performance.now?.()||Date.now())+FLYMPUS_SYSTEM_THEME_SETTLE_MS+FLYMPUS_SYSTEM_THEME_CONFIRM_MS+250;
+    resumeThemeGuardUntil=(performance.now?.()||Date.now())+FLYMPUS_SYSTEM_THEME_SETTLE_MS+(FLYMPUS_SYSTEM_THEME_CONFIRM_MS*2)+300;
     root?.classList.add('flympusResumeVisualSync');
 
     /* Re-assert the last actually visible theme immediately. Never probe the
@@ -5507,18 +5509,23 @@ if(!window.__flympusThemePreferenceBound){
       resumeThemeConfirmTimer=setTimeout(()=>{
         if(token!==resumeThemeToken||document.visibilityState!=='visible')return;
         const second=visibleSystemTheme();
-        if(first===second){
-          const current=document.documentElement?.getAttribute('data-flympus-theme');
-          if(second!==current){
-            /* Two stable samples after the settle window are treated as a real
-               system appearance change, not a resume transient. */
-            applyFlympusAppPreferences(undefined,{allowSystemProbe:false,resolvedSystemTheme:second});
-          }else{
-            const stable=current==='dark'||current==='light'?current:second;
-            setFlympusStableResolvedTheme(stable);
+        resumeThemeFinalTimer=setTimeout(()=>{
+          if(token!==resumeThemeToken||document.visibilityState!=='visible')return;
+          const third=visibleSystemTheme();
+          if(first===second&&second===third){
+            const current=document.documentElement?.getAttribute('data-flympus-theme');
+            if(third!==current){
+              /* iOS can keep a stale app-switcher color scheme for more than
+                 a second. Require three stable samples before accepting a
+                 real System appearance change after foregrounding. */
+              applyFlympusAppPreferences(undefined,{allowSystemProbe:false,resolvedSystemTheme:third});
+            }else{
+              const stable=current==='dark'||current==='light'?current:third;
+              setFlympusStableResolvedTheme(stable);
+            }
           }
-        }
-        finishForegroundThemeGuard(token,root);
+          finishForegroundThemeGuard(token,root);
+        },FLYMPUS_SYSTEM_THEME_CONFIRM_MS);
       },FLYMPUS_SYSTEM_THEME_CONFIRM_MS);
     },FLYMPUS_SYSTEM_THEME_SETTLE_MS);
   };

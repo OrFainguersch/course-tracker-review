@@ -76,7 +76,9 @@ console.log('UID-scoped storage tests passed');
 const storageSource=fs.readFileSync('storage-scope.js','utf8');
 assert(storageSource.includes('function installResumeThemeHold()'),'Storage bootstrap must install the pre-runtime resume-theme guard');
 assert(storageSource.includes("observer.observe(root,{attributes:true,attributeFilter:['data-flympus-theme']})"),'Resume-theme guard must revert transient theme mutations before paint');
-assert(storageSource.includes('const first=sampleSystem()')&&storageSource.includes('first===second?second:stable'),'System theme must require two matching post-resume samples');
+assert(storageSource.includes('const first=sampleSystem()')&&storageSource.includes('const third=sampleSystem()')&&storageSource.includes('first===second&&second===third?third:stable'),'System theme must require three matching post-resume samples');
 
 assert(storageSource.includes("const UID_PERSISTED_KEY='flympus-auth-scope-last-uid'"),'Cold PWA relaunch must have a durable UID namespace hint');
 assert(storageSource.includes("rawGet(session,UID_SESSION_KEY)||rawGet(local,UID_PERSISTED_KEY)"),'Session UID must fall back to the durable namespace hint');
+
+assert(storageSource.includes('RESUME_THEME_SETTLE_MS=1800')&&storageSource.includes('RESUME_THEME_CONFIRM_MS=350'),'Early resume guard must hold the last visible theme through a multi-second iOS restore transient');

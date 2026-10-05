@@ -9,7 +9,7 @@ const rules=fs.readFileSync('firestore.rules','utf8');
 const storage=fs.readFileSync('storage-scope.js','utf8');
 
 assert(html.includes('./firebase-config.js?v=20261004-auth2'),'Firebase config must load from the static app');
-assert(html.includes('./storage-scope.js?v=20261005-auth5'),'UID storage scope must load from the static app');
+assert(html.includes('./storage-scope.js?v=20261005-auth6'),'UID storage scope must load from the static app');
 assert(html.includes('./auth.css?v=20261005-auth4'),'Authentication UI CSS must be loaded');
 assert(html.includes('type="module" src="./auth.js?v=20261005-auth4"'),'Authentication runtime must load as a module');
 assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"'),'Firebase Authentication must preload before the post-login reload');
@@ -73,7 +73,7 @@ assert(auth.includes("preauthorized?'active':'pending'"),'A pre-authorized email
 assert(rules.includes('match /invitations/{email}')&&rules.includes('request.auth.token.email.lower() == email'),'Invitation reads must be bound to the signed-in normalized email');
 assert(rules.includes('invitedUserCreate(request.resource.data)'),'First sign-in may inherit only an administrator-created invitation role');
 assert(storage.includes('function installResumeThemeHold()')&&storage.includes("attributeFilter:['data-flympus-theme']"),'Early lifecycle layer must hold the stable theme through iOS resume');
-assert(storage.includes('const first=sampleSystem()')&&storage.includes('first===second?second:stable'),'Resume theme guard must require two matching System samples');
+assert(storage.includes('const first=sampleSystem()')&&storage.includes('const third=sampleSystem()')&&storage.includes('first===second&&second===third?third:stable'),'Resume theme guard must require three matching System samples');
 
 
 assert(auth.includes("returningScopedSession=!!window.FLYMPUS_STORAGE_SCOPE?.currentUid?.()"),'Refresh auth should recognize an already UID-scoped returning session');
@@ -93,5 +93,10 @@ assert(auth.includes("classList.remove('flympusAuthBooting','flympusAuthReturnin
 assert(storage.includes("const UID_PERSISTED_KEY='flympus-auth-scope-last-uid'"),'Returning PWA launches must retain a durable UID namespace hint');
 assert(storage.includes("rawGet(session,UID_SESSION_KEY)||rawGet(local,UID_PERSISTED_KEY)"),'Cold relaunch must reuse the last verified UID scope before Firebase finishes booting');
 assert(storage.includes('rawRemove(local,UID_PERSISTED_KEY)'),'Sign-out must clear the durable UID hint');
+
+
+assert(html.includes('FLYMPUS_SYSTEM_THEME_SETTLE_MS=1800')&&html.includes('FLYMPUS_SYSTEM_THEME_CONFIRM_MS=350'),'Runtime resume theme reconciliation must outlast the observed iOS transient window');
+assert(html.includes('const third=visibleSystemTheme()')&&html.includes('first===second&&second===third'),'Runtime System theme changes must require three stable foreground samples');
+assert(storage.includes('RESUME_THEME_SETTLE_MS=1800')&&storage.includes('RESUME_THEME_CONFIRM_MS=350'),'Early theme hold must match the hardened runtime settle window');
 
 console.log('Authentication foundation checks passed');
