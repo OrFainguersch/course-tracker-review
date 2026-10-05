@@ -49,6 +49,14 @@
 <meta name="apple-mobile-web-app-title" content="FLYMPUS" />
 <link rel="manifest" href="./manifest.webmanifest" />
 <link rel="apple-touch-icon" href="./assets/flympus-app-icon.webp" />
+<script>
+/* Register the PWA shell worker as soon as the document is parsed. Push setup
+   still owns notification permission/subscription later; this early call only
+   makes the next cold launch independent of mobile network latency. */
+try{
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{})
+}catch{}
+</script>
 <title>FLYMPUS — Train. Track. Progress.</title>
 <style>
 :root{--navy:#07294c;--navy2:#0a315c;--sky:#13a8ee;--bg:#f4f8fc;--card:#fff;--line:#dbe5ef;--muted:#64748b;--text:#0f172a;--green:#047857;--amber:#b45309;--rose:#be123c;--violet:#7c3aed;--shadow:0 10px 30px rgba(31,71,112,.08)}
