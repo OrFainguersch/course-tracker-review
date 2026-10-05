@@ -290,7 +290,11 @@ async function boot(){
     firebaseApp=appModule.initializeApp(cfg.firebase);
     auth=authModule.getAuth(firebaseApp);
     db=firestoreModule.getFirestore(firebaseApp);
-    try{await authModule.setPersistence(auth,authModule.browserLocalPersistence)}catch{}
+    /* Firebase restores persisted browser auth asynchronously. Do not attach the
+       signed-out branch until that initial restoration is complete: on iOS,
+       rapid refreshes can otherwise expose a transient null user and our
+       fail-closed handler would incorrectly clear the verified UID scope. */
+    if(typeof auth.authStateReady==='function')await auth.authStateReady();
     authUnsubscribe=authModule.onAuthStateChanged(auth,user=>{
       if(user)handleSignedIn(user);
       else{
