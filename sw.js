@@ -1,8 +1,48 @@
-/* FLYMPUS Web Push service worker
-   Scope: GitHub Pages PWA. No fetch caching is installed here on purpose;
-   this worker is dedicated to push delivery and notification navigation. */
-const FLYMPUS_SW_VERSION='2026-10-04-push-2';
+/* FLYMPUS service worker
+   - Instant PWA cold-start from a versioned same-origin app-shell cache
+   - Background revalidation so deployments replace the cached shell safely
+   - Web Push delivery and notification navigation */
+const FLYMPUS_SW_VERSION='2026-10-05-startup-1';
+const SHELL_CACHE='flympus-shell-'+FLYMPUS_SW_VERSION;
 const DEFAULT_ICON='./assets/flympus-app-icon.webp';
+const SHELL_URLS=[
+  './',
+  './index.html',
+  './auth.css?v=20261005-auth4',
+  './auth.js?v=20261005-auth9',
+  './firebase-config.js?v=20261004-auth2',
+  './storage-scope.js?v=20261005-auth6',
+  './manifest.webmanifest',
+  './assets/flympus-app-icon.webp',
+  './assets/flympus-sidebar-final.webp'
+];
+
+async function cacheShell(){
+  const cache=await caches.open(SHELL_CACHE);
+  await Promise.allSettled(SHELL_URLS.map(async url=>{
+    try{
+      const response=await fetch(url,{cache:'reload'});
+      if(response?.ok)await cache.put(url,response)
+    }catch{}
+  }))
+}
+async function updateNavigationCache(request){
+  try{
+    const response=await fetch(request,{cache:'no-store'});
+    if(response?.ok){
+      const cache=await caches.open(SHELL_CACHE);
+      await cache.put('./',response.clone());
+      await cache.put('./index.html',response.clone())
+    }
+    return response
+  }catch{return null}
+}
+function offlineShell(){
+  return new Response('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07294c"><style>html,body{margin:0;min-height:100%;background:#07294c;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{display:grid;place-items:center;min-height:100vh}.b{font-weight:900;font-size:28px;letter-spacing:.02em}.s{margin-top:8px;opacity:.72;font-size:13px;text-align:center}</style><main><div class="b">FLYMPUS</div><div class="s">Opening your saved app…</div></main>',{
+    status:200,
+    headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}
+  })
+}
 
 function normalizePayload(event){
   if(!event?.data)return {};
@@ -18,8 +58,59 @@ function targetUrl(data={}){
     return url.href
   }catch{return self.registration.scope}
 }
-self.addEventListener('install',()=>self.skipWaiting());
-self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
+
+self.addEventListener('install',event=>{
+  event.waitUntil((async()=>{
+    await cacheShell();
+    await self.skipWaiting()
+  })())
+});
+self.addEventListener('activate',event=>{
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(key=>key.startsWith('flympus-shell-')&&key!==SHELL_CACHE).map(key=>caches.delete(key)));
+    await self.clients.claim()
+  })())
+});
+
+/* The installed PWA must never wait on 4G before it can paint its own HTML.
+   Navigation therefore uses the last verified static shell immediately and
+   refreshes it in the background. No user/course data is cached here. */
+self.addEventListener('fetch',event=>{
+  const request=event.request;
+  if(request.method!=='GET')return;
+  const url=new URL(request.url);
+  if(request.mode==='navigate'){
+    event.respondWith((async()=>{
+      const cache=await caches.open(SHELL_CACHE);
+      const cached=await cache.match('./')||await cache.match('./index.html');
+      const networkPromise=updateNavigationCache(request);
+      if(cached){
+        event.waitUntil(networkPromise.then(()=>{}).catch(()=>{}));
+        return cached
+      }
+      const network=await networkPromise;
+      return network||offlineShell()
+    })());
+    return
+  }
+  if(url.origin!==self.location.origin)return;
+  const shellPath=new URL(url.pathname+url.search,self.registration.scope).href;
+  const isShell=SHELL_URLS.some(entry=>new URL(entry,self.registration.scope).href===shellPath);
+  if(!isShell)return;
+  event.respondWith((async()=>{
+    const cache=await caches.open(SHELL_CACHE);
+    const cached=await cache.match(request)||await cache.match(url.pathname+url.search);
+    if(cached)return cached;
+    try{
+      const response=await fetch(request);
+      if(response?.ok)await cache.put(request,response.clone());
+      return response
+    }catch{
+      return new Response('',{status:503,statusText:'Offline'})
+    }
+  })())
+});
 
 self.addEventListener('push',event=>{
   event.waitUntil((async()=>{
@@ -36,13 +127,8 @@ self.addEventListener('push',event=>{
       tag:String(payload.tag||data.tag||'flympus'),
       renotify:payload.renotify===true,
       requireInteraction:payload.requireInteraction===true,
-      /* Avoid a double ding while FLYMPUS is visible: the page plays the
-         selected Avionics Pulse tail. Background delivery keeps OS sound. */
       silent:payload.silent===true||customForegroundSound,
-      data:{
-        ...data,
-        url:targetUrl(data)
-      }
+      data:{...data,url:targetUrl(data)}
     };
     if(Array.isArray(payload.actions))options.actions=payload.actions.slice(0,2);
     if(customForegroundSound){
