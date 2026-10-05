@@ -21,6 +21,7 @@ assert(sw.includes("addEventListener('notificationclick'"),'Notification clicks 
 assert(sw.includes("FLYMPUS_PUSH_NAVIGATE"),'Clicks must navigate an existing PWA client');
 assert(sw.includes("const SHELL_CACHE='flympus-shell-'"),'Installed PWA must maintain a versioned static app-shell cache');
 assert(sw.includes("request.mode==='navigate'")&&sw.includes("cache.match('./')"),'Cold PWA navigation must render the cached shell without waiting for the network');
+assert(sw.includes("url.pathname.startsWith('/__/')"),'Service worker must never intercept Firebase reserved /__ authentication routes');
 assert(sw.includes("updateNavigationCache(request)"),'Cached startup shell must revalidate in the background');
 assert(sw.includes("No user/course data is cached here"),'Startup caching must stay limited to static application resources');
 
