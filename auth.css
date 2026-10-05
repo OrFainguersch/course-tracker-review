@@ -3,6 +3,14 @@ html.flympusAuthBooting body,
 html.flympusAuthLocked body,
 html.flympusAuthPreview body{overflow:hidden!important}
 
+/* Returning authenticated refreshes keep the last rendered app visible while
+   Firebase silently revalidates the persisted session. Interaction remains
+   blocked until verification completes. */
+html.flympusAuthReturning .app{
+  pointer-events:none!important;
+  user-select:none!important
+}
+
 html.flympusAuthBooting .app,
 html.flympusAuthLocked .app,
 html.flympusAuthPreview .app{

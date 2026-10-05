@@ -100,11 +100,12 @@ function scheduleSilentAuthLoading(copy='Starting secure authentication…'){
   silentAuthLoadingTimer=setTimeout(()=>{
     silentAuthLoadingTimer=null;
     if(api.status==='active'||api.status==='signed-out'||api.status==='pending'||api.status==='blocked'||api.status==='error')return;
+    lockApp();
     showLoading(silentAuthLoadingCopy)
   },2200)
 }
-function lockApp(){document.documentElement.classList.add(preview&&!enabled?'flympusAuthPreview':'flympusAuthLocked');document.documentElement.classList.remove('flympusAuthBooting')}
-function unlockApp(){cancelSilentAuthLoading();document.documentElement.classList.remove('flympusAuthBooting','flympusAuthLocked','flympusAuthPreview');const el=document.getElementById('flympusAuthRoot');if(el)el.hidden=true}
+function lockApp(){document.documentElement.classList.add(preview&&!enabled?'flympusAuthPreview':'flympusAuthLocked');document.documentElement.classList.remove('flympusAuthBooting','flympusAuthReturning')}
+function unlockApp(){cancelSilentAuthLoading();document.documentElement.classList.remove('flympusAuthBooting','flympusAuthReturning','flympusAuthLocked','flympusAuthPreview');const el=document.getElementById('flympusAuthRoot');if(el)el.hidden=true}
 function statusBlock(kind,title,copy){const icon=kind==='error'?'!':kind==='pending'?'…':'✓';return '<div class="flympusAuthStatus '+esc(kind)+'"><span class="flympusAuthStatusIcon">'+icon+'</span><div><b>'+esc(title)+'</b><span>'+esc(copy)+'</span></div></div>'}
 function showLoading(copy='Checking your account…'){api.status='loading';shell('<div class="flympusAuthSpinner" aria-hidden="true"></div><p class="flympusAuthEyebrow">'+esc(tr('SECURE SIGN IN'))+'</p><h1 class="flympusAuthTitle">'+esc(tr('Opening FLYMPUS'))+'</h1><p class="flympusAuthCopy">'+esc(tr(copy))+'</p>')}
 function providerButtons(disabled=false){const microsoftButton=cfg.microsoftEnabled===true?'<button class="flympusAuthProvider" type="button" data-auth-provider="microsoft" '+(disabled?'disabled':'')+'><span class="flympusAuthProviderMark flympusMicrosoftMark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>'+esc(tr('Continue with Microsoft'))+'</span><span class="flympusAuthProviderArrow" aria-hidden="true">›</span></button>':'';return '<div class="flympusAuthProviders"><button class="flympusAuthProvider" type="button" data-auth-provider="google" '+(disabled?'disabled':'')+'><span class="flympusAuthProviderMark" aria-hidden="true">G</span><span>'+esc(tr('Continue with Google'))+'</span><span class="flympusAuthProviderArrow" aria-hidden="true">›</span></button>'+microsoftButton+'</div>'}
@@ -269,14 +270,14 @@ async function boot(){
   if(!enabled){
     api.status='disabled';
     if(preview){showLogin({setupPreview:true})}
-    else document.documentElement.classList.remove('flympusAuthBooting','flympusAuthLocked','flympusAuthPreview');
+    else document.documentElement.classList.remove('flympusAuthBooting','flympusAuthReturning','flympusAuthLocked','flympusAuthPreview');
     return
   }
   if(!firebaseConfigReady()){
     showFatal('Firebase setup required','The FLYMPUS Firebase web configuration is incomplete.');
     return
   }
-  if(enforce)lockApp();
+  if(enforce&&!returningScopedSession)lockApp();
   if(returningScopedSession)scheduleSilentAuthLoading('Starting secure authentication…');
   else showLoading('Starting secure authentication…');
   try{

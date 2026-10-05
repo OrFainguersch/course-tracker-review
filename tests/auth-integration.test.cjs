@@ -10,14 +10,14 @@ const storage=fs.readFileSync('storage-scope.js','utf8');
 
 assert(html.includes('./firebase-config.js?v=20261004-auth2'),'Firebase config must load from the static app');
 assert(html.includes('./storage-scope.js?v=20261004-auth2'),'UID storage scope must load from the static app');
-assert(html.includes('./auth.css?v=20261004-auth2'),'Authentication UI CSS must be loaded');
-assert(html.includes('type="module" src="./auth.js?v=20261004-auth3"'),'Authentication runtime must load as a module');
+assert(html.includes('./auth.css?v=20261005-auth4'),'Authentication UI CSS must be loaded');
+assert(html.includes('type="module" src="./auth.js?v=20261005-auth4"'),'Authentication runtime must load as a module');
 assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"'),'Firebase Authentication must preload before the post-login reload');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('</head>'),'Firebase config must load before first body paint');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('Early preference bootstrap'),'Firebase config must load before any local preference access');
 assert(html.indexOf('./storage-scope.js')<html.indexOf('Early preference bootstrap'),'UID storage scope must install before application storage reads');
-assert(html.includes("if(cfg.enabled===true&&cfg.enforceAuth===true)document.documentElement.classList.add('flympusAuthBooting')"),
-  'Enforced auth must hide the app before first paint');
+assert(html.includes("document.documentElement.classList.add(returning?'flympusAuthReturning':'flympusAuthBooting')"),
+  'Returning sessions must avoid the hidden boot shell while new sessions remain fail-closed');
 
 assert(config.includes('enabled:true'),'Firebase authentication must be connected');
 assert(config.includes('enforceAuth:true'),'Authentication must be enforced after UID-scoped migration');
@@ -81,5 +81,12 @@ assert(auth.includes('function scheduleSilentAuthLoading')&&auth.includes('},220
 assert(auth.includes("if(returningScopedSession)scheduleSilentAuthLoading('Starting secure authentication…')"),'Auth boot must stay silent for a returning session');
 assert(auth.includes("if(returningScopedSession)scheduleSilentAuthLoading('Verifying FLYMPUS access…')"),'Profile verification must also remain silent for a returning session');
 assert(auth.includes('function cancelSilentAuthLoading()')&&auth.includes('function unlockApp(){cancelSilentAuthLoading();'),'Successful auth must cancel the delayed splash before it can paint');
+
+
+assert(css.includes('html.flympusAuthReturning .app')&&css.includes('pointer-events:none!important'),'Returning auth refresh must preserve visual continuity while blocking interaction');
+assert(!css.slice(css.indexOf('html.flympusAuthReturning .app'),css.indexOf('html.flympusAuthBooting .app')).includes('visibility:hidden'),'Returning auth refresh must not hide the app');
+assert(auth.includes('if(enforce&&!returningScopedSession)lockApp();'),'Returning sessions must skip the opaque auth lock during normal refresh');
+assert(auth.includes('lockApp();\n    showLoading(silentAuthLoadingCopy)'),'A slow returning auth check may still fail closed after the grace period');
+assert(auth.includes("classList.remove('flympusAuthBooting','flympusAuthReturning','flympusAuthLocked'"),'Successful auth must clear the returning-session guard');
 
 console.log('Authentication foundation checks passed');
