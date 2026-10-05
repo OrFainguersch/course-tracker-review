@@ -11,7 +11,7 @@ const storage=fs.readFileSync('storage-scope.js','utf8');
 assert(html.includes('./firebase-config.js?v=20261004-auth2'),'Firebase config must load from the static app');
 assert(html.includes('./storage-scope.js?v=20261005-auth6'),'UID storage scope must load from the static app');
 assert(html.includes('./auth.css?v=20261005-auth4'),'Authentication UI CSS must be loaded');
-assert(html.includes('type="module" src="./auth.js?v=20261005-auth9"'),'Authentication runtime must load as a module');
+assert(html.includes('type="module" src="./auth.js?v=20261005-auth10"'),'Authentication runtime must load as a module');
 assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"'),'Firebase Authentication must preload before the post-login reload');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('</head>'),'Firebase config must load before first body paint');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('Early preference bootstrap'),'Firebase config must load before any local preference access');
@@ -42,10 +42,13 @@ assert(auth.includes('openUserManagement')&&auth.includes("getDocs(firestoreSdk.
 assert(auth.includes("action==='approve'")&&auth.includes("action==='block'")&&auth.includes("action==='reactivate'"),'User Management must support approval, blocking and reactivation');
 assert(auth.includes("action==='make-admin'")&&auth.includes("action==='make-user'"),'User Management must support USER and ADMIN role changes');
 assert(auth.includes('FLYMPUS_STORAGE_SCOPE?.setUid')&&auth.includes('FLYMPUS_STORAGE_SCOPE?.clearUid'),'Authentication lifecycle must bind and clear UID-scoped browser state');
+assert((auth.match(/FLYMPUS_STORAGE_SCOPE\?\.clearUid\?\.\(\)/g)||[]).length===1,'Only explicit sign-out may clear the durable UID namespace hint');
 assert(auth.includes('if(scopeChanged||migratedLegacyCount>0){location.reload();return}'),'UID selection and legacy migration must use one consolidated reload');
 assert(auth.includes("params.get('authPreview')==='1'"),'Login UI must have a safe preview mode before Firebase activation');
 assert(auth.includes("auth=authModule.initializeAuth(firebaseApp,{"),'Firebase Auth must be initialized with explicit platform dependencies');
-assert(auth.includes("persistence:[authModule.browserLocalPersistence,authModule.indexedDBLocalPersistence]"),'iOS PWA auth must prefer durable localStorage before IndexedDB fallback');
+assert(auth.includes("persistence:authModule.browserLocalPersistence"),'iOS PWA auth must use one durable localStorage persistence layer');
+assert(auth.includes("popupRedirectResolver:authModule.browserPopupRedirectResolver"),'Firebase Auth must own the browser popup resolver on the initialized instance');
+assert(!auth.includes("persistence:[authModule.browserLocalPersistence"),'Auth must not bounce the user between localStorage and IndexedDB persistence layers');
 assert(auth.includes("if(typeof auth.authStateReady==='function')await auth.authStateReady();"),'Returning sessions must wait for Firebase persistence restoration before signed-out handling');
 assert(!auth.includes("setPersistence(auth,authModule.browserLocalPersistence)"),'Auth persistence must not be reconfigured on every refresh');
 
