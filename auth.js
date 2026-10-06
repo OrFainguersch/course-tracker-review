@@ -479,7 +479,7 @@ async function mountUserManagementPage(host){
 async function addManagedUser(form){
   if(!canManageUsers()||!db||!firestoreSdk)return;
   const valid=validateManagedInviteForm(form);if(!valid)return;
-  const fd=new FormData(form),email=valid.email,displayName=valid.displayName,role=['admin','training_manager','user'].includes(String(fd.get('role')))?String(fd.get('role')):'user';
+  const fd=new FormData(form),email=valid.email,displayName=valid.displayName,requestedRole=normalizeAppRole(String(fd.get('role'))),role=canAssignAppRole(requestedRole)?requestedRole:'user';
   const button=form.querySelector('button[type="submit"]');if(button)button.disabled=true;
   try{
     const directory=await prefetchManagedDirectory(true),existing=directory.users.find(x=>canonicalEmail(x.email)===email);
