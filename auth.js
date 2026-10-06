@@ -2,7 +2,7 @@
    - Google sign-in through Firebase Authentication
    - Microsoft sign-in remains staged behind an explicit feature flag
    - Firestore user profiles: pending/active/blocked + user/admin
-   - No mail/calendar scopes are requested.
+   - No mail/calendar scopes are requested; invitation email delivery, when configured, uses a dedicated authenticated backend endpoint.
    - Production access is enforced after UID-scoped data migration. */
 const cfg=window.FLYMPUS_FIREBASE_CONFIG||{};
 const params=new URLSearchParams(location.search);
@@ -24,6 +24,9 @@ let userManagementScrollY=0;
 let lastManagedDirectory={users:[],invitations:[]};
 let lastManagedError='';
 let userManagementPreviousBodyTop='';
+let managedDirectoryCache=null;
+let managedDirectoryPromise=null;
+let userManagementCloseTimer=null;
 let returningScopedSession=!!window.FLYMPUS_STORAGE_SCOPE?.currentUid?.();
 let silentAuthLoadingTimer=null;
 let silentAuthLoadingCopy='Starting secure authentication…';
@@ -57,12 +60,14 @@ const AUTH_HE_UI=Object.freeze({
   'Signed in':'מחובר','Administrator':'מנהל','User':'משתמש','User Management':'ניהול משתמשים','Sign out of FLYMPUS':'התנתקות מ־FLYMPUS',
   'ADMINISTRATION':'ניהול מערכת','Application access is separate from course membership and course roles.':'הרשאת הגישה לאפליקציה נפרדת מהשיוך לקורס ומהתפקיד בקורס.','Close User Management':'סגור ניהול משתמשים',
   'Add user':'הוסף משתמש','Pre-authorize an email before the person signs in for the first time.':'אשר מראש כתובת מייל לפני שהמשתמש מתחבר בפעם הראשונה.',
-  'Name (optional)':'שם (אופציונלי)','Email address':'כתובת מייל','App role':'הרשאת אפליקציה','Regular user':'משתמש רגיל',
-  'No email is sent. The email is simply authorized to sign in to FLYMPUS.':'לא נשלח מייל. הכתובת פשוט מאושרת מראש להתחברות ל־FLYMPUS.',
+  'Name':'שם','Email address':'כתובת מייל','App role':'הרשאת אפליקציה','Regular user':'משתמש רגיל','Send invitation':'שלח הזמנה',
+  'Name is required.':'יש להזין שם.','Email is required.':'יש להזין כתובת מייל.','Enter a valid email address.':'הזן כתובת מייל תקינה.',
+  'Creates a FLYMPUS invitation and pre-authorizes this email for first sign-in.':'יוצר הזמנה ל־FLYMPUS ומאשר מראש את כתובת המייל להתחברות הראשונה.',
+  'Invitation created':'ההזמנה נוצרה','Invitation sent':'ההזמנה נשלחה','Invitation email delivery is not configured yet.':'שליחת הזמנות במייל עדיין אינה מוגדרת.',
   'Invited':'הוזמן','Pending':'ממתין','Active':'פעיל','Blocked':'חסום','Invited users':'משתמשים שהוזמנו','Pending users':'משתמשים ממתינים','Active users':'משתמשים פעילים','Blocked users':'משתמשים חסומים',
   'Current account':'החשבון הנוכחי','Approve':'אשר','Block':'חסום','Reactivate':'הפעל מחדש','Make User':'הפוך למשתמש רגיל','Make Admin':'הפוך למנהל','Remove invite':'בטל הזמנה','Not signed in yet':'טרם התחבר',
   'Unnamed user':'משתמש ללא שם','No email':'ללא מייל','Unknown':'לא ידוע','Loading users…':'טוען משתמשים…','Could not load users':'לא ניתן לטעון משתמשים','Administrator access is required.':'נדרשת הרשאת מנהל.',
-  'Enter a valid email address.':'הזן כתובת מייל תקינה.','This is your current account.':'זה החשבון הנוכחי שלך.','Could not add user':'לא ניתן להוסיף משתמש',
+  'This is your current account.':'זה החשבון הנוכחי שלך.','Could not add user':'לא ניתן להוסיף משתמש',
   'Remove this invitation?':'לבטל את ההזמנה הזאת?','The email will no longer be pre-authorized for FLYMPUS.':'כתובת המייל לא תהיה עוד מאושרת מראש ל־FLYMPUS.','Remove':'בטל',
   'Approve this user?':'לאשר את המשתמש הזה?','This account will be able to access FLYMPUS.':'החשבון יוכל לגשת ל־FLYMPUS.','Block this user?':'לחסום את המשתמש הזה?','This account will immediately lose application access.':'החשבון יאבד מיד את הגישה לאפליקציה.',
   'Reactivate this user?':'להפעיל מחדש את המשתמש הזה?','This account will regain application access.':'החשבון יקבל מחדש גישה לאפליקציה.','Make this user an administrator?':'להפוך את המשתמש הזה למנהל?','Administrators can approve users and change application access.':'מנהלים יכולים לאשר משתמשים ולשנות הרשאות גישה לאפליקציה.',
@@ -231,6 +236,7 @@ function applyRoleContext(user,profile){
   api.currentUser=user;api.profile=profile;api.status='active';
   document.documentElement.setAttribute('data-flympus-app-role',profile.role);
   syncAuthenticatedChrome(user,profile);
+  if(profile.role==='admin')setTimeout(()=>prefetchManagedDirectory().catch(()=>{}),0);
   try{
     document.dispatchEvent(new CustomEvent('flympus:auth-ready',{detail:{
       uid:user.uid,
@@ -251,7 +257,7 @@ function syncAuthenticatedChrome(user,profile){
   box.querySelector('[data-auth-profile-signout]')?.addEventListener('click',signOutCurrentUser);box.querySelector('[data-auth-user-management]')?.addEventListener('click',openUserManagement);syncAuthAdjacentChromeLanguage()
 }
 function removeAuthenticatedChrome(){document.getElementById('flympusSignedInAccount')?.remove()}
-function closeTransientHeaderMenus(){[['#topCourseDropdown','#topCourseSwitch'],['#topNotificationDropdown','#topNotificationBtn'],['#topPersonalProfileDropdown','#topPersonalProfileBtn']].forEach(([menuSel,buttonSel])=>{const menu=document.querySelector(menuSel),button=document.querySelector(buttonSel);if(menu&&!menu.hidden)menu.hidden=true;button?.setAttribute?.('aria-expanded','false')})}
+function closeTransientHeaderMenus({animated=false}={}){[['#topCourseDropdown','#topCourseSwitch'],['#topNotificationDropdown','#topNotificationBtn'],['#topPersonalProfileDropdown','#topPersonalProfileBtn']].forEach(([menuSel,buttonSel])=>{const menu=document.querySelector(menuSel),button=document.querySelector(buttonSel);if(!menu||menu.hidden){button?.setAttribute?.('aria-expanded','false');return}const canAnimate=animated&&(menuSel==='#topNotificationDropdown'||menuSel==='#topPersonalProfileDropdown')&&button?.getAttribute?.('aria-expanded')==='true';if(canAnimate){button.click?.();return}menu.hidden=true;button?.setAttribute?.('aria-expanded','false')})}
 function bindBottomNavigationOverlayDismissal(){if(window.__FLYMPUS_BOTTOM_DISMISS_BOUND__)return;window.__FLYMPUS_BOTTOM_DISMISS_BOUND__=true;const dismiss=event=>{if(event.target?.closest?.('#mobileBottomNav,[data-mobile-nav],.mobileBottomHapticSwitch'))closeTransientHeaderMenus()};document.addEventListener('touchstart',dismiss,true);document.addEventListener('pointerdown',dismiss,true);document.addEventListener('click',dismiss,true)}
 function userManagementRoot(){
   let el=document.getElementById('flympusUserManagementRoot');if(el)return el;el=document.createElement('div');el.id='flympusUserManagementRoot';el.hidden=true;
@@ -259,7 +265,17 @@ function userManagementRoot(){
   el.querySelectorAll('[data-user-management-close]').forEach(btn=>btn.addEventListener('click',closeUserManagement));let lastTouchY=0;el.addEventListener('touchstart',event=>{lastTouchY=Number(event.touches?.[0]?.clientY||0)},{passive:true});el.addEventListener('touchmove',event=>{const touch=event.touches?.[0];if(!touch)return;const scroller=event.target?.closest?.('.flympusUserManagementBody');if(!scroller){if(event.cancelable)event.preventDefault();return}const nextY=Number(touch.clientY||0),dy=nextY-lastTouchY;lastTouchY=nextY;const max=Math.max(0,scroller.scrollHeight-scroller.clientHeight);if((dy>0&&scroller.scrollTop<=0)||(dy<0&&scroller.scrollTop>=max)){if(event.cancelable)event.preventDefault()}},{passive:false});syncUserManagementStaticLanguage(el);return el
 }
 function syncUserManagementStaticLanguage(el=document.getElementById('flympusUserManagementRoot')){if(!el)return;el.dir=authLanguage()==='he'?'rtl':'ltr';const eyebrow=el.querySelector('[data-user-management-eyebrow]'),title=el.querySelector('#flympusUserManagementTitle'),subtitle=el.querySelector('[data-user-management-subtitle]'),close=el.querySelector('.flympusUserManagementClose');if(eyebrow)eyebrow.textContent=tr('ADMINISTRATION');if(title)title.textContent=tr('User Management');if(subtitle)subtitle.textContent=tr('Application access is separate from course membership and course roles.');close?.setAttribute('aria-label',tr('Close User Management'))}
-function closeUserManagement(){const el=document.getElementById('flympusUserManagementRoot');if(el)el.hidden=true;document.documentElement.classList.remove('flympusUserManagementOpen');if(document.body)document.body.style.top=userManagementPreviousBodyTop;window.scrollTo(0,userManagementScrollY)}
+function closeUserManagement(){
+  const el=document.getElementById('flympusUserManagementRoot');if(!el||el.hidden)return;
+  clearTimeout(userManagementCloseTimer);
+  el.classList.remove('flympusUserManagementVisible');
+  userManagementCloseTimer=setTimeout(()=>{
+    el.hidden=true;
+    document.documentElement.classList.remove('flympusUserManagementOpen');
+    if(document.body)document.body.style.top=userManagementPreviousBodyTop;
+    window.scrollTo(0,userManagementScrollY)
+  },190)
+}
 function userProviderLabel(profile){const providers=Array.isArray(profile?.providerIds)?profile.providerIds:[];if(providers.includes('microsoft.com'))return 'Microsoft';if(providers.includes('google.com'))return 'Google';return providers.length?providers.join(', '):tr('Unknown')}
 function managementStatusLabel(status){if(status==='invited')return tr('Invited');return status==='active'?tr('Active'):status==='blocked'?tr('Blocked'):tr('Pending')}
 function managementGroupLabel(status){return tr(status==='invited'?'Invited users':status==='active'?'Active users':status==='blocked'?'Blocked users':'Pending users')}
@@ -267,27 +283,118 @@ function managementRoleLabel(role){return role==='admin'?tr('Administrator'):tr(
 function managementActionButton(action,uid,label,tone=''){return '<button type="button" class="flympusUserAction '+esc(tone)+'" data-user-action="'+esc(action)+'" data-user-uid="'+esc(uid)+'">'+esc(tr(label))+'</button>'}
 function managementInviteActionButton(action,email,label,tone=''){return '<button type="button" class="flympusUserAction '+esc(tone)+'" data-invite-action="'+esc(action)+'" data-invite-email="'+esc(email)+'">'+esc(tr(label))+'</button>'}
 function managementEmptyLabel(status){return authLanguage()==='he'?(status==='invited'?'אין משתמשים שהוזמנו.':status==='active'?'אין משתמשים פעילים.':status==='blocked'?'אין משתמשים חסומים.':'אין משתמשים ממתינים.'):'No '+status+' users.'}
+function clearManagedFieldError(input){
+  if(!input)return;
+  input.classList.remove('fieldInvalidControl');
+  input.removeAttribute('aria-invalid');
+  const label=input.closest('label');
+  label?.querySelector('.flympusUserFieldError')?.remove()
+}
+function setManagedFieldError(input,message){
+  if(!input)return;
+  clearManagedFieldError(input);
+  input.classList.add('fieldInvalidControl');
+  input.setAttribute('aria-invalid','true');
+  const label=input.closest('label');
+  if(label){const error=document.createElement('small');error.className='flympusUserFieldError';error.textContent=tr(message);label.appendChild(error)}
+}
+function validateManagedInviteForm(form){
+  const name=form?.elements?.displayName,emailInput=form?.elements?.email;
+  const displayName=String(name?.value||'').trim(),email=canonicalEmail(emailInput?.value);
+  clearManagedFieldError(name);clearManagedFieldError(emailInput);
+  let first=null;
+  if(!displayName){setManagedFieldError(name,'Name is required.');first=first||name}
+  if(!email){setManagedFieldError(emailInput,'Email is required.');first=first||emailInput}
+  else if(!validManagedEmail(email)){setManagedFieldError(emailInput,'Enter a valid email address.');first=first||emailInput}
+  first?.focus?.({preventScroll:false});
+  return first?null:{displayName,email}
+}
+async function sendManagedInvitationEmail(invitation){
+  const endpoint=String(cfg.invitationEmailApiUrl||'').trim();
+  if(!endpoint)return {sent:false,configured:false};
+  if(!currentUser?.getIdToken)throw new Error('Authenticated invitation delivery is unavailable.');
+  const token=await currentUser.getIdToken();
+  const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({
+    email:invitation.email,displayName:invitation.displayName,role:invitation.role,
+    appUrl:new URL('./',location.href).href
+  })});
+  let result={};try{result=await response.json()}catch{}
+  if(!response.ok)throw new Error(String(result?.error||'Invitation email could not be sent.'));
+  return {sent:true,configured:true}
+}
 function invitationCard(invite){const name=String(invite.displayName||'').trim(),email=canonicalEmail(invite.email),role=invite.role==='admin'?'admin':'user',actions=managementInviteActionButton(role==='admin'?'invite-user':'invite-admin',email,role==='admin'?'Make User':'Make Admin')+managementInviteActionButton('remove-invite',email,'Remove invite','danger');return '<article class="flympusUserCard invited"><div class="flympusUserAvatar">'+esc(String(name||email||'?').slice(0,1).toUpperCase())+'</div><div class="flympusUserIdentity"><b>'+esc(name||email)+'</b><span>'+esc(email)+'</span><div class="flympusUserMeta"><i>'+esc(tr('Not signed in yet'))+'</i><i class="status invited">'+esc(managementStatusLabel('invited'))+'</i><i class="role">'+esc(managementRoleLabel(role))+'</i></div></div><div class="flympusUserActions">'+actions+'</div></article>'}
 function renderUserManagement(directory,error=''){
   const el=userManagementRoot(),body=el.querySelector('[data-user-management-body]');syncUserManagementStaticLanguage(el);const users=Array.isArray(directory)?directory:(directory?.users||[]),invitations=Array.isArray(directory?.invitations)?directory.invitations:[];lastManagedDirectory={users:[...users],invitations:[...invitations]};lastManagedError=error;
   const normalized=users.map(x=>normalizeProfile(x)),counts={invited:invitations.length,pending:0,active:0,blocked:0};normalized.forEach(x=>counts[x.status]++);const tabs=['invited','pending','active','blocked'];
-  const addForm='<section class="flympusUserInviteBox"><div class="flympusUserInviteHead"><h2>'+esc(tr('Add user'))+'</h2><p>'+esc(tr('Pre-authorize an email before the person signs in for the first time.'))+'</p></div><form class="flympusUserInviteForm" data-user-invite-form><label><span>'+esc(tr('Name (optional)'))+'</span><input name="displayName" autocomplete="name"></label><label class="email"><span>'+esc(tr('Email address'))+'</span><input name="email" type="email" inputmode="email" autocomplete="email" required></label><label><span>'+esc(tr('App role'))+'</span><select name="role"><option value="user">'+esc(tr('Regular user'))+'</option><option value="admin">'+esc(tr('Administrator'))+'</option></select></label><button class="flympusUserAddButton" type="submit">'+esc(tr('Add user'))+'</button><small>'+esc(tr('No email is sent. The email is simply authorized to sign in to FLYMPUS.'))+'</small></form></section>';
+  const addForm='<section class="flympusUserInviteBox"><div class="flympusUserInviteHead"><h2>'+esc(tr('Add user'))+'</h2><p>'+esc(tr('Pre-authorize an email before the person signs in for the first time.'))+'</p></div><form class="flympusUserInviteForm" data-user-invite-form novalidate><label><span>'+esc(tr('Name'))+' <i class="flympusRequiredMark" aria-hidden="true">*</i></span><input name="displayName" autocomplete="name" required aria-required="true"></label><label class="email"><span>'+esc(tr('Email address'))+' <i class="flympusRequiredMark" aria-hidden="true">*</i></span><input name="email" type="email" inputmode="email" autocomplete="email" required aria-required="true"></label><label><span>'+esc(tr('App role'))+'</span><select name="role"><option value="user">'+esc(tr('Regular user'))+'</option><option value="admin">'+esc(tr('Administrator'))+'</option></select></label><button class="flympusUserAddButton" type="submit">'+esc(tr('Send invitation'))+'</button><small>'+esc(tr('Creates a FLYMPUS invitation and pre-authorizes this email for first sign-in.'))+'</small></form></section>';
   const groupHtml=status=>{if(status==='invited'){const rows=invitations.slice().sort((a,b)=>String(a.displayName||a.email||'').localeCompare(String(b.displayName||b.email||'')));return '<section class="flympusUserGroup"><div class="flympusUserGroupHead"><h2>'+esc(managementGroupLabel(status))+'</h2><span>'+rows.length+'</span></div><div class="flympusUserList">'+(rows.length?rows.map(invitationCard).join(''):'<div class="flympusUserEmpty">'+esc(managementEmptyLabel(status))+'</div>')+'</div></section>'}
     const rows=normalized.filter(user=>user.status===status).sort((a,b)=>String(a.displayName||a.email||'').localeCompare(String(b.displayName||b.email||'')));return '<section class="flympusUserGroup"><div class="flympusUserGroupHead"><h2>'+esc(managementGroupLabel(status))+'</h2><span>'+rows.length+'</span></div><div class="flympusUserList">'+(rows.length?rows.map(user=>{const self=user.uid===currentUser?.uid;let actions='';if(self)actions='<span class="flympusCurrentAdmin">'+esc(tr('Current account'))+'</span>';else if(status==='pending')actions=managementActionButton('approve',user.uid,'Approve','primary')+managementActionButton('block',user.uid,'Block','danger');else if(status==='active')actions=managementActionButton(user.role==='admin'?'make-user':'make-admin',user.uid,user.role==='admin'?'Make User':'Make Admin')+managementActionButton('block',user.uid,'Block','danger');else actions=managementActionButton('reactivate',user.uid,'Reactivate','primary')+managementActionButton(user.role==='admin'?'make-user':'make-admin',user.uid,user.role==='admin'?'Make User':'Make Admin');return '<article class="flympusUserCard"><div class="flympusUserAvatar">'+esc(String(user.displayName||user.email||'?').trim().slice(0,1).toUpperCase())+'</div><div class="flympusUserIdentity"><b>'+esc(user.displayName||tr('Unnamed user'))+'</b><span>'+esc(user.email||tr('No email'))+'</span><div class="flympusUserMeta"><i>'+esc(userProviderLabel(user))+'</i><i class="status '+esc(user.status)+'">'+esc(managementStatusLabel(user.status))+'</i><i class="role">'+esc(managementRoleLabel(user.role))+'</i></div></div><div class="flympusUserActions">'+actions+'</div></article>'}).join(''):'<div class="flympusUserEmpty">'+esc(managementEmptyLabel(status))+'</div>')+'</div></section>'};
   body.innerHTML=(error?statusBlock('error',tr('Could not load users'),error):'')+addForm+'<div class="flympusUserSummary">'+tabs.map(status=>'<div><strong>'+counts[status]+'</strong><span>'+esc(managementStatusLabel(status))+'</span></div>').join('')+'</div>'+tabs.map(groupHtml).join('');
-  body.querySelector('[data-user-invite-form]')?.addEventListener('submit',event=>{event.preventDefault();addManagedUser(event.currentTarget)});body.querySelectorAll('[data-user-action]').forEach(btn=>btn.addEventListener('click',()=>updateManagedUser(btn.dataset.userUid,btn.dataset.userAction,btn)));body.querySelectorAll('[data-invite-action]').forEach(btn=>btn.addEventListener('click',()=>updateManagedInvitation(btn.dataset.inviteEmail,btn.dataset.inviteAction,btn)))
+  const inviteForm=body.querySelector('[data-user-invite-form]');inviteForm?.addEventListener('submit',event=>{event.preventDefault();addManagedUser(event.currentTarget)});inviteForm?.querySelectorAll('input').forEach(input=>input.addEventListener('input',()=>clearManagedFieldError(input)));body.querySelectorAll('[data-user-action]').forEach(btn=>btn.addEventListener('click',()=>updateManagedUser(btn.dataset.userUid,btn.dataset.userAction,btn)));body.querySelectorAll('[data-invite-action]').forEach(btn=>btn.addEventListener('click',()=>updateManagedInvitation(btn.dataset.inviteEmail,btn.dataset.inviteAction,btn)))
 }
 async function loadManagedUsers(){if(!api.isAdmin()||!db||!firestoreSdk)throw new Error(tr('Administrator access is required.'));const snapshot=await firestoreSdk.getDocs(firestoreSdk.collection(db,'users'));return snapshot.docs.map(doc=>({id:doc.id,...doc.data()}))}
 async function loadManagedInvitations(){if(!api.isAdmin()||!db||!firestoreSdk)throw new Error(tr('Administrator access is required.'));const snapshot=await firestoreSdk.getDocs(firestoreSdk.collection(db,'invitations'));return snapshot.docs.map(doc=>({id:doc.id,...doc.data()})).filter(x=>x.status==='active')}
 async function loadManagedDirectory(){const [users,invitations]=await Promise.all([loadManagedUsers(),loadManagedInvitations()]);const existingEmails=new Set(users.map(x=>canonicalEmail(x.email)).filter(Boolean));return{users,invitations:invitations.filter(x=>!existingEmails.has(canonicalEmail(x.email)))}}
-async function openUserManagement(){if(!api.isAdmin())return;closeTransientHeaderMenus();const el=userManagementRoot(),body=el.querySelector('[data-user-management-body]');userManagementScrollY=Math.max(0,Number(window.scrollY||document.scrollingElement?.scrollTop||0));userManagementPreviousBodyTop=document.body?.style?.top||'';if(document.body)document.body.style.top='-'+userManagementScrollY+'px';el.hidden=false;document.documentElement.classList.add('flympusUserManagementOpen');body.innerHTML='<div class="flympusUserManagementLoading"><div class="flympusAuthSpinner"></div><span>'+esc(tr('Loading users…'))+'</span></div>';try{renderUserManagement(await loadManagedDirectory())}catch(err){renderUserManagement({users:[],invitations:[]},String(err?.message||'Firestore rejected this request.'))}}
-async function addManagedUser(form){
-  if(!api.isAdmin()||!db||!firestoreSdk)return;const fd=new FormData(form),email=canonicalEmail(fd.get('email')),displayName=String(fd.get('displayName')||'').trim(),role=String(fd.get('role'))==='admin'?'admin':'user';if(!validManagedEmail(email)){renderUserManagement(lastManagedDirectory,tr('Enter a valid email address.'));return}const button=form.querySelector('button[type="submit"]');if(button)button.disabled=true;
-  try{const directory=await loadManagedDirectory(),existing=directory.users.find(x=>canonicalEmail(x.email)===email);if(existing?.uid===currentUser?.uid){renderUserManagement(directory,tr('This is your current account.'));return}if(existing){await firestoreSdk.updateDoc(firestoreSdk.doc(db,'users',existing.uid),{role,status:'active',updatedAt:firestoreSdk.serverTimestamp(),updatedBy:currentUser.uid});renderUserManagement(await loadManagedDirectory());return}const ref=firestoreSdk.doc(db,'invitations',email),old=await firestoreSdk.getDoc(ref),payload={email,displayName,role,status:'active',updatedAt:firestoreSdk.serverTimestamp(),invitedBy:currentUser.uid};if(!old.exists())payload.createdAt=firestoreSdk.serverTimestamp();await firestoreSdk.setDoc(ref,payload,{merge:true});form.reset();renderUserManagement(await loadManagedDirectory())}catch(err){console.error('FLYMPUS add-user failed',err);if(button)button.disabled=false;renderUserManagement(lastManagedDirectory,String(err?.message||tr('Could not add user')))}
+async function prefetchManagedDirectory(force=false){
+  if(!api.isAdmin())throw new Error(tr('Administrator access is required.'));
+  if(managedDirectoryCache&&!force)return managedDirectoryCache;
+  if(managedDirectoryPromise)return managedDirectoryPromise;
+  managedDirectoryPromise=loadManagedDirectory().then(directory=>{managedDirectoryCache=directory;return directory}).finally(()=>{managedDirectoryPromise=null});
+  return managedDirectoryPromise
 }
-async function updateManagedInvitation(email,action,button){if(!api.isAdmin()||!validManagedEmail(email))return;const ref=firestoreSdk.doc(db,'invitations',canonicalEmail(email));button.disabled=true;try{if(action==='remove-invite'){const ok=typeof window.siteConfirm==='function'?await window.siteConfirm(tr('The email will no longer be pre-authorized for FLYMPUS.'),{title:tr('Remove this invitation?'),confirmLabel:tr('Remove'),tone:'danger'}):false;if(!ok){button.disabled=false;return}await firestoreSdk.deleteDoc(ref)}else{const role=action==='invite-admin'?'admin':'user';await firestoreSdk.setDoc(ref,{role,updatedAt:firestoreSdk.serverTimestamp(),invitedBy:currentUser.uid},{merge:true})}renderUserManagement(await loadManagedDirectory())}catch(err){console.error('FLYMPUS invitation update failed',err);button.disabled=false;renderUserManagement(lastManagedDirectory,String(err?.message||tr('Update failed')))}}
+function showUserManagement(directory,error=''){
+  const el=userManagementRoot();
+  clearTimeout(userManagementCloseTimer);
+  renderUserManagement(directory,error);
+  userManagementScrollY=Math.max(0,Number(window.scrollY||document.scrollingElement?.scrollTop||0));
+  userManagementPreviousBodyTop=document.body?.style?.top||'';
+  if(document.body)document.body.style.top='-'+userManagementScrollY+'px';
+  el.hidden=false;
+  document.documentElement.classList.add('flympusUserManagementOpen');
+  void el.offsetWidth;
+  requestAnimationFrame(()=>el.classList.add('flympusUserManagementVisible'))
+}
+async function openUserManagement(){
+  if(!api.isAdmin())return;
+  let directory=managedDirectoryCache,error='';
+  if(!directory){try{directory=await prefetchManagedDirectory()}catch(err){directory={users:[],invitations:[]};error=String(err?.message||'Firestore rejected this request.')}}
+  const hadAnimatedHeader=!!document.querySelector('#topPersonalProfileDropdown:not([hidden]),#topNotificationDropdown:not([hidden])');
+  closeTransientHeaderMenus({animated:true});
+  const reveal=()=>showUserManagement(directory,error);
+  if(hadAnimatedHeader)setTimeout(reveal,145);else reveal();
+  prefetchManagedDirectory(true).then(fresh=>{const el=document.getElementById('flympusUserManagementRoot');if(el&&!el.hidden&&el.classList.contains('flympusUserManagementVisible'))renderUserManagement(fresh)}).catch(()=>{})
+}
+async function addManagedUser(form){
+  if(!api.isAdmin()||!db||!firestoreSdk)return;
+  const valid=validateManagedInviteForm(form);if(!valid)return;
+  const fd=new FormData(form),email=valid.email,displayName=valid.displayName,role=String(fd.get('role'))==='admin'?'admin':'user';
+  const button=form.querySelector('button[type="submit"]');if(button)button.disabled=true;
+  try{
+    const directory=await prefetchManagedDirectory(true),existing=directory.users.find(x=>canonicalEmail(x.email)===email);
+    if(existing?.uid===currentUser?.uid){renderUserManagement(directory,tr('This is your current account.'));return}
+    if(existing){
+      await firestoreSdk.updateDoc(firestoreSdk.doc(db,'users',existing.uid),{displayName,role,status:'active',updatedAt:firestoreSdk.serverTimestamp(),updatedBy:currentUser.uid});
+      managedDirectoryCache=await loadManagedDirectory();renderUserManagement(managedDirectoryCache);return
+    }
+    const ref=firestoreSdk.doc(db,'invitations',email),old=await firestoreSdk.getDoc(ref),payload={email,displayName,role,status:'active',updatedAt:firestoreSdk.serverTimestamp(),invitedBy:currentUser.uid};
+    if(!old.exists())payload.createdAt=firestoreSdk.serverTimestamp();
+    await firestoreSdk.setDoc(ref,payload,{merge:true});
+    let delivery={sent:false,configured:false};
+    try{delivery=await sendManagedInvitationEmail({email,displayName,role})}catch(err){console.error('FLYMPUS invitation email failed',err)}
+    form.reset();
+    managedDirectoryCache=await loadManagedDirectory();
+    renderUserManagement(managedDirectoryCache);
+    const notify=window.toast;
+    if(typeof notify==='function')notify(tr(delivery.sent?'Invitation sent':'Invitation created'),delivery.sent?'success':'')
+  }catch(err){
+    console.error('FLYMPUS add-user failed',err);
+    if(button)button.disabled=false;
+    renderUserManagement(lastManagedDirectory,String(err?.message||tr('Could not add user')))
+  }
+}
+async function updateManagedInvitation(email,action,button){if(!api.isAdmin()||!validManagedEmail(email))return;const ref=firestoreSdk.doc(db,'invitations',canonicalEmail(email));button.disabled=true;try{if(action==='remove-invite'){const ok=typeof window.siteConfirm==='function'?await window.siteConfirm(tr('The email will no longer be pre-authorized for FLYMPUS.'),{title:tr('Remove this invitation?'),confirmLabel:tr('Remove'),tone:'danger'}):false;if(!ok){button.disabled=false;return}await firestoreSdk.deleteDoc(ref)}else{const role=action==='invite-admin'?'admin':'user';await firestoreSdk.setDoc(ref,{role,updatedAt:firestoreSdk.serverTimestamp(),invitedBy:currentUser.uid},{merge:true})}managedDirectoryCache=await loadManagedDirectory();renderUserManagement(managedDirectoryCache)}catch(err){console.error('FLYMPUS invitation update failed',err);button.disabled=false;renderUserManagement(lastManagedDirectory,String(err?.message||tr('Update failed')))}}
 async function confirmManagedUserAction(action){const copy={approve:['Approve this user?','This account will be able to access FLYMPUS.'],block:['Block this user?','This account will immediately lose application access.'],reactivate:['Reactivate this user?','This account will regain application access.'],'make-admin':['Make this user an administrator?','Administrators can approve users and change application access.'],'make-user':['Remove administrator access?','The account remains active but loses User Management permissions.']}[action]||['Update this user?','The account permissions will be changed.'];if(typeof window.siteConfirm==='function')return window.siteConfirm(tr(copy[1]),{title:tr(copy[0]),confirmLabel:tr('Confirm'),tone:action==='block'?'danger':'primary'});return false}
-async function updateManagedUser(uid,action,button){if(!api.isAdmin()||!uid||uid===currentUser?.uid)return;if(!(await confirmManagedUserAction(action)))return;const changes={updatedAt:firestoreSdk.serverTimestamp(),updatedBy:currentUser.uid};if(action==='approve'||action==='reactivate')changes.status='active';if(action==='block')changes.status='blocked';if(action==='make-admin')changes.role='admin';if(action==='make-user')changes.role='user';button.disabled=true;try{await firestoreSdk.updateDoc(firestoreSdk.doc(db,'users',uid),changes);renderUserManagement(await loadManagedDirectory())}catch(err){console.error('FLYMPUS user-management update failed',err);button.disabled=false;renderUserManagement(lastManagedDirectory,String(err?.message||tr('Update failed')))}}
+async function updateManagedUser(uid,action,button){if(!api.isAdmin()||!uid||uid===currentUser?.uid)return;if(!(await confirmManagedUserAction(action)))return;const changes={updatedAt:firestoreSdk.serverTimestamp(),updatedBy:currentUser.uid};if(action==='approve'||action==='reactivate')changes.status='active';if(action==='block')changes.status='blocked';if(action==='make-admin')changes.role='admin';if(action==='make-user')changes.role='user';button.disabled=true;try{await firestoreSdk.updateDoc(firestoreSdk.doc(db,'users',uid),changes);managedDirectoryCache=await loadManagedDirectory();renderUserManagement(managedDirectoryCache)}catch(err){console.error('FLYMPUS user-management update failed',err);button.disabled=false;renderUserManagement(lastManagedDirectory,String(err?.message||tr('Update failed')))}}
 function bindAuthLanguageSync(){if(window.__FLYMPUS_AUTH_LANGUAGE_BOUND__)return;window.__FLYMPUS_AUTH_LANGUAGE_BOUND__=true;syncAuthAdjacentChromeLanguage();if(typeof MutationObserver!=='function')return;const observer=new MutationObserver(records=>{if(!records.some(x=>x.attributeName==='data-flympus-language'))return;syncAuthAdjacentChromeLanguage();if(currentUser&&currentProfile)syncAuthenticatedChrome(currentUser,currentProfile);const manager=document.getElementById('flympusUserManagementRoot');if(manager&&!manager.hidden)renderUserManagement(lastManagedDirectory,lastManagedError)});observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-flympus-language']})}
 async function handleSignedIn(user,version=authStateVersion){
   if(returningScopedSession)scheduleSilentAuthLoading('Verifying FLYMPUS access…');
