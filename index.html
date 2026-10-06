@@ -2594,10 +2594,10 @@ body::before{
   position:fixed;
   left:0;
   right:0;
-  top:-140px;
-  height:180px;
+  top:-1px;
+  height:calc(env(safe-area-inset-top) + 2px);
   background:#0d3156;
-  z-index:29;
+  z-index:32;
   pointer-events:none;
   transform:translateZ(0);
   backface-visibility:hidden;
@@ -2783,13 +2783,7 @@ body::-webkit-scrollbar{
     transform:translate3d(0,calc(0px - var(--flympus-top-chrome-height,78px)),0)!important;
     transition-duration:.64s!important;
   }
-  body::before{
-    transition:transform .58s cubic-bezier(.32,.72,0,1)!important;
-  }
-  body.topChromeHidden::before{
-    transform:translate3d(0,calc(0px - var(--flympus-top-chrome-height,78px)),0)!important;
-    transition-duration:.64s!important;
-  }
+  /* The status-bar canvas stays fixed while page chrome moves beneath it. */
 
   /* A transformed content root would otherwise become the containing block
      for fixed dialogs. When one is open, keep the overlay viewport-bound. */
@@ -3014,6 +3008,11 @@ body.flympusPullActive #content{
   background:#f5f7fa;
   will-change:transform;
 }
+/* A claimed pull owns these transforms until its return finishes. Chrome's
+   scroll transitions must never animate the same nodes concurrently. */
+body.flympusPullActive .top,
+body.flympusPullActive #content{transition:none!important}
+html[data-flympus-theme="dark"] body::before{background:#0d1e2f}
 html.flympusPullRoot{
   background:#0d3156!important;
   overscroll-behavior-y:none!important;
@@ -6635,7 +6634,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
 
   let pullStartY=0,pullStartX=0,pullOriginY=null,pullTracking=false;
   let pullRefreshSoundPlayed=false,pullRefreshGraph=null,pullStandaloneGesture=false;
-  let pullOffset=0,pullArmed=false,pullReturning=false,pullAnimations=[],pullFallbackRaf=null,pullFallbackTimer=null;
+  let pullOffset=0,pullArmed=false,pullReturning=false,pullAnimations=[],pullFallbackRaf=null,pullFallbackTimer=null,pullReturnEpoch=0;
 
   const pullThreshold=96;
   const pullMaxVisual=108;
@@ -6650,11 +6649,13 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   };
 
   const setPullRootActive=active=>{
+    window.__FLYMPUS_PULL_ACTIVE__=!!active;
     document.body?.classList.toggle('flympusPullActive',!!active);
     document.documentElement?.classList.toggle('flympusPullRoot',!!active);
   };
 
   const cancelPullReturn=()=>{
+    pullReturnEpoch++;
     clearTimeout(pullFallbackTimer);
     if(pullFallbackRaf!=null){try{cancelAnimationFrame(pullFallbackRaf)}catch{}}
     pullFallbackRaf=null;
@@ -6716,7 +6717,9 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
 
   const finishPullReturn=refresh=>{
     pullOffset=0;
+    const finishedAnimations=pullAnimations;
     pullAnimations=[];
+    clearTimeout(pullFallbackTimer);
     pullReturning=false;
 
     pullNodes().forEach(el=>{
@@ -6730,16 +6733,15 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
       indicator.style.opacity='0';
       indicator.style.transform='translate3d(-50%,-52px,0) scale(.82)';
     }
-
-    const complete=()=>{
-      pullNodes().forEach(el=>el.style.removeProperty('transform'));
-      indicator?.classList.remove('refreshing');
-      setPullRootActive(false);
-      if(refresh)location.reload();
-    };
-
-    if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>requestAnimationFrame(complete));
-    else setTimeout(complete,34);
+    /* fill:forwards survives finished promises. Release those effects before
+       returning ownership to CSS; otherwise later pulls/scrolls can jump. */
+    finishedAnimations.forEach(a=>{try{a.cancel()}catch{}});
+    pullNodes().forEach(el=>el.style.removeProperty('transform'));
+    indicator?.classList.remove('refreshing');
+    // Commit the resting geometry while chrome transitions are still disabled.
+    $('.top')?.getBoundingClientRect();
+    setPullRootActive(false);
+    if(refresh)location.reload();
   };
 
   /* Facebook-like release cadence from the side-by-side reference:
@@ -6787,6 +6789,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   const returnPull=refresh=>{
     if(pullReturning)return;
     pullReturning=true;
+    const epoch=++pullReturnEpoch;
 
     const from=Math.max(0,pullOffset);
     const indicator=pullIndicator();
@@ -6824,8 +6827,8 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     if(animated.length){
       pullAnimations=animated;
       let done=false;
-      const finish=()=>{if(done)return;done=true;finishPullReturn(refresh)};
-      animated[0].finished.then(finish).catch(finish);
+      const finish=()=>{if(done||epoch!==pullReturnEpoch)return;done=true;finishPullReturn(refresh)};
+      Promise.all(animated.map(a=>a.finished)).then(finish).catch(finish);
       pullFallbackTimer=setTimeout(finish,springDuration+110);
       return;
     }
@@ -6867,10 +6870,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     pullTracking=true;
     pullStandaloneGesture=standalone;
 
-    if(standalone){
-      ensurePullChromeVisible();
-      if(top<=2)setPullRootActive(true);
-    }
+    // Touch-down alone is ordinary scrolling, not a pull. Do not move chrome.
     pullRefreshGraph=armFlympusRefreshSound();
   },{passive:true,capture:true});
 
@@ -6892,6 +6892,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
            native rubber-band frame to open the white seam on a fast pull. */
         pullOriginY=t.clientY;
         setPullRootActive(true);
+        ensurePullChromeVisible();
         if(e.cancelable)e.preventDefault();
         renderPull(0,0);
         return;
@@ -6900,6 +6901,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
       pullDy=t.clientY-pullOriginY;
       if(pullDy<=0)return;
       setPullRootActive(true);
+      ensurePullChromeVisible();
       if(e.cancelable)e.preventDefault();
 
       renderPull(rubberBandOffset(pullDy),pullDy);
@@ -6944,7 +6946,11 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   });
 
   document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState!=='visible')return;
+    if(document.visibilityState!=='visible'){
+      resetPullTracking();
+      resetPullStyles();
+      return;
+    }
     resetFlympusAudioSession();
   });
 }
@@ -6991,6 +6997,15 @@ function updateBottomDockFromScroll(){
   /* Clamp Safari rubber-band overscroll at both edges. Elastic movement must
      never masquerade as the opposite scroll direction. */
   const y=Math.max(0,Math.min(maxY,rawY));
+
+  if(window.__FLYMPUS_PULL_ACTIVE__){
+    bottomDockLastScrollY=y;
+    bottomDockLastScrollTime=now;
+    bottomDockVelocity=0;
+    bottomDockDirection=0;
+    bottomDockDirectionTravel=0;
+    return;
+  }
 
   if(now<bottomDockProgrammaticRestoreUntil){
     bottomDockLastScrollY=y;

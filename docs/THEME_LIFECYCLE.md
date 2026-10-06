@@ -80,3 +80,11 @@ controls the first document paint, not iOS's pre-document imagery; no physical
 zero-incorrect-frame claim is justified until the new build is recorded on the
 actual device. Native splash remains branded by the existing manifest, which
 cannot read persisted web preferences. Auth/PWA configuration is preserved.
+
+## Follow-up: pull/scroll compositing (6 October 2026)
+
+The owner's second recording (`ScreenRecording_10-06-2026 04-23-32_1.mp4`, 34.47 seconds) shows a normal skeleton at approximately 0.6–0.7 seconds, then loaded content around 0.8 seconds. It also shows pull returns and scroll chrome movement sharing the same transformed nodes, with a light seam near the status/header boundary (for example 21.7 seconds). Exact WebKit event ordering cannot be inferred from video alone.
+
+The pull now claims transform ownership only after a downward gesture reaches the top. Ordinary touch-down no longer opens hidden chrome. Scroll chrome updates are suspended during the claimed pull and its return; CSS transitions are disabled for those nodes while owned. All return animations are awaited together and cancelled after installing resting geometry, releasing their `fill:forwards` effects. Background cancellation invalidates pending callbacks so they cannot reload a resumed page. The status-bar canvas is fixed, opaque, overlaps its boundary, and follows the selected header palette; it no longer translates with hidden chrome. The existing return curve, sound thresholds, session continuity, auth, theme decisions, and legitimate cold-start skeleton remain intact.
+
+Regression tests replay ordinary scrolling, repeated pulls, and backgrounding an armed return. Physical validation: in both Light and Dark, scroll the roster down and quickly back to the top; perform repeated short pulls (no reload) and full pulls (reload); switch away during a pull return and reopen. Check for a boundary seam, jumping header/content, duplicate reloads, or an incorrect palette. Production browser checks cannot establish zero transient frames in physical iOS compositing.
