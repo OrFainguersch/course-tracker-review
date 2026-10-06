@@ -94,10 +94,26 @@ service cloud.firestore {
     }
 
     function administratorManagesOther(uid) {
+      let actorRole = currentUserRecord().data.role;
+      let currentRole = resource.data.role;
+      let nextRole = request.resource.data.role;
       return administrator()
         && uid != request.auth.uid
-        && resource.data.role != 'owner'
-        && request.resource.data.role != 'owner';
+        && currentRole != 'owner'
+        && nextRole != 'owner'
+        && (actorRole == 'owner'
+          || (actorRole == 'admin'
+            && currentRole != 'admin'
+            && nextRole != 'admin'));
+    }
+
+    function administratorMayDelete(uid) {
+      let actorRole = currentUserRecord().data.role;
+      let targetRole = resource.data.role;
+      return administrator()
+        && uid != request.auth.uid
+        && targetRole != 'owner'
+        && (actorRole == 'owner' || targetRole != 'admin');
     }
 
     match /users/{uid} {
@@ -125,18 +141,23 @@ service cloud.firestore {
           || ownerBootstrap(uid)
           || selfProfileOnly(uid));
 
-      allow delete: if administrator()
-        && uid != request.auth.uid
-        && resource.data.role != 'owner';
+      allow delete: if administratorMayDelete(uid);
     }
 
     match /invitations/{email} {
       allow get: if signedIn() && request.auth.token.email.lower() == email;
       allow list: if administrator();
-      allow create, update: if administrator()
+      allow create: if administrator()
         && validInviteShape(request.resource.data)
-        && request.resource.data.email == email;
-      allow delete: if administrator();
+        && request.resource.data.email == email
+        && (request.resource.data.role != 'admin' || owner());
+      allow update: if administrator()
+        && validInviteShape(request.resource.data)
+        && request.resource.data.email == email
+        && (resource.data.role != 'admin' || owner())
+        && (request.resource.data.role != 'admin' || owner());
+      allow delete: if administrator()
+        && (resource.data.role != 'admin' || owner());
     }
 
     match /system/access {
