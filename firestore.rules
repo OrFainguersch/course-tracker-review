@@ -19,13 +19,26 @@ service cloud.firestore {
         && currentUserRecord().data.status == 'active';
     }
 
-    function admin() {
+    function owner() {
       return activeUser()
-        && currentUserRecord().data.role == 'admin';
+        && currentUserRecord().data.role == 'owner';
+    }
+
+    function administrator() {
+      return activeUser()
+        && currentUserRecord().data.role in ['owner', 'admin'];
+    }
+
+    function systemAccessExists() {
+      return exists(/databases/$(database)/documents/system/access);
+    }
+
+    function systemOwnerUid() {
+      return get(/databases/$(database)/documents/system/access).data.ownerUid;
     }
 
     function validRoleAndStatus(data) {
-      return data.role in ['user', 'admin']
+      return data.role in ['user', 'training_manager', 'admin', 'owner']
         && data.status in ['pending', 'active', 'blocked'];
     }
 
@@ -42,7 +55,7 @@ service cloud.firestore {
         'createdAt', 'updatedAt', 'invitedBy'
       ])
         && data.email == data.email.lower()
-        && data.role in ['user', 'admin']
+        && data.role in ['user', 'training_manager', 'admin']
         && data.status == 'active';
     }
 
@@ -56,9 +69,41 @@ service cloud.firestore {
         && data.status == 'active';
     }
 
+    function selfProfileOnly(uid) {
+      return ownUser(uid)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'displayName', 'photoURL', 'providerIds', 'lastLoginAt', 'updatedAt'
+        ]);
+    }
+
+    function ownerBootstrap(uid) {
+      return ownUser(uid)
+        && resource.data.role == 'admin'
+        && resource.data.status == 'active'
+        && request.resource.data.role == 'owner'
+        && request.resource.data.status == 'active'
+        && systemAccessExists()
+        && systemOwnerUid() == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'role', 'updatedAt', 'updatedBy'
+        ]);
+    }
+
+    function administratorManagesOther(uid) {
+      return administrator()
+        && uid != request.auth.uid
+        && resource.data.role != 'owner'
+        && request.resource.data.role != 'owner';
+    }
+
     match /users/{uid} {
       /* First sign-in may only create the caller's own pending USER record.
-         A browser client can never create itself as ACTIVE or ADMIN. */
+         An invitation may pre-authorize USER, TRAINING_MANAGER or ADMIN.
+         OWNER is established separately through the one-time bootstrap below. */
       allow create: if ownUser(uid)
         && validUserShape(request.resource.data)
         && request.resource.data.uid == request.auth.uid
@@ -67,33 +112,47 @@ service cloud.firestore {
           && request.resource.data.status == 'pending')
           || invitedUserCreate(request.resource.data));
 
-      allow read: if ownUser(uid) || admin();
+      allow read: if ownUser(uid) || administrator();
 
-      /* Users may refresh only non-authority profile fields. role/status/uid/email
-         are immutable unless an already-active administrator performs the write. */
+      /* Owner/Admin may manage other accounts, but nobody can create a second
+         Owner through User Management. The original Owner account is protected.
+         A legacy active Admin may promote only itself after winning the
+         one-time /system/access ownership claim. */
       allow update: if validUserShape(request.resource.data)
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.email == resource.data.email
-        && (admin()
-        || (ownUser(uid)
-          && request.resource.data.uid == resource.data.uid
-          && request.resource.data.email == resource.data.email
-          && request.resource.data.role == resource.data.role
-          && request.resource.data.status == resource.data.status
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'displayName', 'photoURL', 'providerIds', 'lastLoginAt', 'updatedAt'
-          ])));
+        && (administratorManagesOther(uid)
+          || ownerBootstrap(uid)
+          || selfProfileOnly(uid));
 
-      allow delete: if admin();
+      allow delete: if administrator()
+        && uid != request.auth.uid
+        && resource.data.role != 'owner';
     }
 
     match /invitations/{email} {
       allow get: if signedIn() && request.auth.token.email.lower() == email;
-      allow list: if admin();
-      allow create, update: if admin()
+      allow list: if administrator();
+      allow create, update: if administrator()
         && validInviteShape(request.resource.data)
         && request.resource.data.email == email;
-      allow delete: if admin();
+      allow delete: if administrator();
+    }
+
+    match /system/access {
+      allow read: if administrator();
+
+      /* Existing legacy Admins race only for this first immutable claim. Once
+         created, no additional Admin can become Owner from the client. */
+      allow create: if administrator()
+        && !systemAccessExists()
+        && request.resource.data.keys().hasOnly([
+          'ownerUid', 'createdAt', 'createdBy'
+        ])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.createdBy == request.auth.uid;
+
+      allow update, delete: if false;
     }
 
     /* Training/course collections stay fail-closed until they are migrated from
