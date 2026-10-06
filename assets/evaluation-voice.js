@@ -9,8 +9,8 @@
   const NUMBER_WORDS=Object.freeze({
     zero:'0',oh:'0',אפס:'0',
     one:'1',first:'1',אחד:'1',אחת:'1',
-    two:'2',second:'2',twice:'2',שניים:'2',שתיים:'2',שני:'2',שתי:'2',פעמיים:'2',
-    three:'3',third:'3',thrice:'3',שלוש:'3',שלושה:'3',
+    two:'2',second:'2',שניים:'2',שתיים:'2',שני:'2',שתי:'2',
+    three:'3',third:'3',שלוש:'3',שלושה:'3',
     four:'4',fourth:'4',ארבע:'4',ארבעה:'4',
     five:'5',fifth:'5',חמש:'5',חמישה:'5',
     six:'6',שש:'6',שישה:'6',
@@ -129,9 +129,13 @@
   function countNearAlias(text,alias,index){
     const after=text.slice(index+alias.length).trimStart();
     const before=text.slice(0,index).trimEnd();
-    let m=after.match(/^([0-9]+)\s*(?:times|time|פעמים|פעם|x)?\b/i);
+    if(/^(?:twice|פעמיים)\b/i.test(after))return 2;
+    if(/^(?:thrice)\b/i.test(after))return 3;
+    let m=after.match(/^([0-9]+)\s*(?:times|time|פעמים|פעם|x)\b/i);
     if(m)return Math.max(1,Math.min(99,Number(m[1])||1));
-    m=before.match(/([0-9]+)\s*(?:times|time|פעמים|פעם|x)?\s*$/i);
+    if(/(?:twice|פעמיים)\s*$/i.test(before))return 2;
+    if(/(?:thrice)\s*$/i.test(before))return 3;
+    m=before.match(/([0-9]+)\s*(?:times|time|פעמים|פעם|x)\s*$/i);
     if(m)return Math.max(1,Math.min(99,Number(m[1])||1));
     return 1;
   }
