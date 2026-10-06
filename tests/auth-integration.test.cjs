@@ -110,6 +110,8 @@ assert(auth.includes('roleGuideHtml()')&&auth.includes('FLYMPUS role and course 
   'User Management must explain role meaning and explicitly separate FLYMPUS roles from course roles');
 assert(auth.includes('May appoint another Owner or an Administrator')&&auth.includes('May appoint a Training Manager')&&auth.includes('May invite and approve Users')&&auth.includes('Cannot appoint the same role or a higher role'),
   'Role guide must clearly explain the role-assignment pyramid and Owner exception');
+assert(auth.includes('Role assignment follows the pyramid: Owner → Administrator → Training Manager → User. Owner may also appoint another Owner.')&&auth.includes('Managed at a higher level'),
+  'User Management must state the hierarchy explicitly and use a generic higher-level management label');
 assert(auth.includes('data-managed-user-form')&&auth.includes('updateManagedUserDetails')&&auth.includes('name="role"')&&auth.includes('Email is tied to the sign-in account and cannot be changed here.'),
   'Edit must manage Name and Role together while keeping the sign-in email read-only');
 assert(auth.includes("tr('Role')")&&!auth.includes("<span>'+esc(tr('App role'))+'</span><select name=\"role\">"),
