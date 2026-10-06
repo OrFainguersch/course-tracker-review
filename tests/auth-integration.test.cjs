@@ -35,8 +35,8 @@ assert(auth.includes("code==='auth/cancelled-popup-request'")&&auth.includes('wa
 assert(!auth.includes("identityToolkitRequest(")&&!auth.includes("startStandaloneGoogleSignIn(")&&!auth.includes("signInWithRedirect("),'Authentication must not use the temporary direct OAuth redirect experiment');
 assert(!auth.includes("addScope('mail.read')")&&!auth.includes("addScope('calendars.read')"),
   'FLYMPUS authentication must not request mailbox or calendar scopes');
-assert(auth.includes("['admin','training_manager'].includes(invitation?.role)")&&auth.includes("status:preauthorized?'active':'pending'"),
-  'An uninvited first-time account must start as pending USER while an invitation may pre-authorize USER, TRAINING_MANAGER or ADMIN access');
+assert(auth.includes("['owner','admin','training_manager','user'].includes(invitation?.role)")&&auth.includes("status:preauthorized?'active':'pending'"),
+  'An uninvited first-time account must start as pending USER while a valid invitation may pre-authorize the exact hierarchy-granted role');
 assert(auth.includes("profile.status!=='active'"),'Only active profiles may unlock authenticated access');
 assert(auth.includes("APP_ROLE_ORDER=Object.freeze(['user','training_manager','admin','owner'])")&&auth.includes("function hasCapability("),
   'Client role context must use explicit tiered application roles and capabilities');
