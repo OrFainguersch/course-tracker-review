@@ -8,6 +8,7 @@ This repository treats production deployment stability as a hard project rule.
 4. The Firebase production workflow must ignore obsolete revisions and must not fail merely because an intermediate/application verification revision is invalid; it should leave production unchanged and exit successfully.
 5. Real production infrastructure failures (authentication, Firestore Rules deployment, Hosting deployment, or final production verification) must stop that deployment and be surfaced as workflow warnings/summary, but the workflow must not conclude as failed or generate repeated GitHub failure emails.
 6. Do not report a deployment as successful until the exact `main` SHA reaches the final production verification step and that step succeeds.
+7. Pull-request/review verification must also be email-quiet: failed checks stay visible as step warnings and summary output, but the workflow must not conclude as failed or generate GitHub failure-email spam.
 
 These rules exist specifically to prevent repeated GitHub Actions failure emails from transient edits.
 
