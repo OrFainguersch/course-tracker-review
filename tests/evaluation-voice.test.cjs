@@ -62,7 +62,7 @@ assert.equal(ambiguous.emergencies.length,0,"Ambiguous shorthand must not guess 
 assert(ambiguous.warnings.some(x=>x.includes("matches more than one configured emergency")),"Ambiguous emergency shorthand must ask for the full name");
 
 const specific=voice.parse("engine cut high altitude",{criteria:[],emergencies:ambiguousDefs,grading:{min:1,max:5}});
-assert.deepEqual(specific.emergencies.map(x=>x.id),["engine_cut_high"],"Full emergency names must resolve uniquely");
+assert.equal(specific.emergencies.map(x=>x.id).join(","),"engine_cut_high","Full emergency names must resolve uniquely");
 assert.equal(specific.warnings.length,0,"A full unique emergency name must not retain the generic ambiguity warning");
 
 const badGrade=voice.parse("All criteria 8",{criteria,emergencies:[],grading:{min:1,max:5}});
