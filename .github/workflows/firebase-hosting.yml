@@ -44,7 +44,9 @@ jobs:
           fi
       - name: Verification blocked deployment
         if: steps.app_verify.outputs.deploy_ready != 'true'
-        run: echo "Firebase Hosting was not changed because application verification did not pass."
+        run: |
+          echo "::error::FLYMPUS verification failed. Production was not changed."
+          exit 1
       - name: Confirm deployment authorization is configured
         if: steps.app_verify.outputs.deploy_ready == 'true'
         env:
