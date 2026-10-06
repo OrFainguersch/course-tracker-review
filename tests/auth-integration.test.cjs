@@ -44,6 +44,8 @@ assert(auth.includes('openUserManagement')&&auth.includes("getDocs(firestoreSdk.
 assert(auth.includes("action==='approve'")&&auth.includes("action==='block'")&&auth.includes("action==='reactivate'"),'User Management must support approval, blocking and reactivation');
 assert(auth.includes('updateManagedUserRole')&&auth.includes('updateManagedInvitationRole')&&auth.includes("role==='owner'"),
   'User Management must support tiered role changes while protecting OWNER');
+assert(auth.includes("if(actor==='owner')return ['admin','owner']")&&auth.includes("if(actor==='admin')return ['training_manager']")&&auth.includes("if(actor==='training_manager')return ['user']"),
+  'Client role selectors must expose only the next role down, with Owner additionally able to appoint Owner');
 assert(auth.includes('FLYMPUS_STORAGE_SCOPE?.setUid')&&auth.includes('FLYMPUS_STORAGE_SCOPE?.clearUid'),'Authentication lifecycle must bind and clear UID-scoped browser state');
 assert((auth.match(/FLYMPUS_STORAGE_SCOPE\?\.clearUid\?\.\(\)/g)||[]).length===1,'Only explicit sign-out may clear the durable UID namespace hint');
 assert(auth.includes('if(scopeChanged||migratedLegacyCount>0){location.reload();return}'),'UID selection and legacy migration must use one consolidated reload');
@@ -119,8 +121,8 @@ assert(auth.includes("firestoreSdk.collection(db,'invitations')")&&auth.includes
 assert(auth.includes('data-user-invite-form')&&auth.includes('name="email"')&&auth.includes('name="role"'),'User Management must expose Add User email and application-role controls');
 assert(auth.includes("preauthorized?'active':'pending'"),'A pre-authorized email must become active on first sign-in');
 assert(rules.includes('match /invitations/{email}')&&rules.includes('request.auth.token.email.lower() == email'),'Invitation reads must be bound to the signed-in normalized email');
-assert(rules.includes('invitedUserCreate(request.resource.data)')&&rules.includes("data.role in ['user', 'training_manager', 'admin']"),
-  'First sign-in may inherit only a non-Owner administrator-created invitation role');
+assert(rules.includes('invitedUserCreate(request.resource.data)')&&rules.includes("data.role in ['user', 'training_manager', 'admin', 'owner']")&&rules.includes('mayGrantInvitationRole(request.resource.data.role)'),
+  'First sign-in may inherit only a role that was validly granted through the hierarchy');
 assert(theme.includes('Single theme authority'),'Theme lifecycle must have one authoritative writer');
 assert(theme.includes("window.addEventListener('pageshow'")&&theme.includes('reassertStableTheme()'),'iOS resume must reassert the committed theme without probing transient state');
 assert(!storage.includes('installResumeThemeHold')&&!theme.includes('setTimeout('),'Theme lifecycle must not retain competing timeout-based resume writers');
