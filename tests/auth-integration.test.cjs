@@ -106,12 +106,12 @@ assert(auth.includes('const AUTH_HE_UI=Object.freeze'),'Auth/User Management mus
 assert(auth.includes("'User Management':'ניהול משתמשים'")&&auth.includes("'Owner':'בעלים'")&&auth.includes("'Training Manager':'מנהל הדרכה'"),
   'Authentication and role-management UI must include Hebrew translations for the full role hierarchy');
 assert(auth.includes('bindAuthLanguageSync()'),'Dynamic auth/admin UI must react when the app language changes');
-assert(auth.includes('roleGuideHtml()')&&auth.includes('FLYMPUS role and course role are separate.'),
-  'User Management must explain role meaning and explicitly separate FLYMPUS roles from course roles');
+assert(auth.includes('roleGuideHtml()')&&!auth.includes('flympusRoleSeparationNote'),
+  'User Management role guide must stay concise and must not render a separate explanatory note box');
 assert(auth.includes('May appoint: Owner, Administrator, Training Manager or User')&&auth.includes('May appoint: Training Manager or User')&&auth.includes('May appoint: User')&&auth.includes('Cannot appoint application roles'),
   'Role guide must enumerate every direct appointment option for every application role');
-assert(auth.includes('Direct appointment follows the hierarchy: Owner may appoint any role; Administrator may appoint Training Manager or User; Training Manager may appoint User. The Primary Owner remains protected.')&&auth.includes('Managed at a higher level'),
-  'User Management must state direct appointment rights explicitly and use a generic higher-level management label');
+assert(auth.includes('Managed at a higher level')&&!auth.includes('Direct appointment follows the hierarchy:'),
+  'User Management must keep appointment rights inside the role cards without a duplicated hierarchy note');
 assert(auth.includes('data-managed-user-form')&&auth.includes('updateManagedUserDetails')&&auth.includes('name="role"')&&auth.includes('Email is tied to the sign-in account and cannot be changed here.'),
   'Edit must manage Name and Role together while keeping the sign-in email read-only');
 assert(auth.includes("tr('Role')")&&!auth.includes("<span>'+esc(tr('App role'))+'</span><select name=\"role\">"),
