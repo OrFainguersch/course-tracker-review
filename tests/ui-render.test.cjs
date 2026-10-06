@@ -35,7 +35,9 @@ assert.equal(manifest.display,"standalone","Home Screen installation must use st
 assert.equal(manifest.start_url,"./","Home Screen app must start inside the same GitHub Pages scope");
 assert(html.includes('rel="manifest" href="./manifest.webmanifest"')&&html.includes('apple-mobile-web-app-title" content="FLYMPUS"'),"Index must advertise the FLYMPUS manifest and iOS app title");
 assert(html.includes('maximum-scale=1, user-scalable=no')&&html.includes('id="flympus-mobile-zoom-guard"'),"Mobile application pages must suppress accidental browser zoom");
-assert(html.includes('./assets/evaluation-voice.js?v=0741')&&html.includes('id="evaluationVoiceBlock"')&&html.includes('bindEvaluationVoiceInput(f'),"Evaluation must load and bind the zero-cost voice-input beta only inside the Evaluation workflow");
+assert(html.includes('./assets/evaluation-voice.js?v=0741'),"Evaluation must load the local zero-cost voice helper");
+assert(html.includes('id="evaluationVoiceBlock"'),"Evaluation must render the voice-input beta block");
+assert(html.includes('bindEvaluationVoiceInput(f'),"Evaluation must bind voice input only through the Evaluation form workflow");
 assert(html.includes('Apply detected values')&&html.includes('Transcription is provided by your browser or device. FLYMPUS does not use a paid AI/API and does not store the audio.'),"Voice Evaluation must require review/apply and clearly state its zero-paid-AI behavior");
 assert(html.includes("event.touches?.length>1&&!insideCrop(event.target)")&&html.includes("closest('.personalCropViewport')"),"Global mobile zoom suppression must preserve the intentional profile-photo crop pinch gesture");
 assert(html.includes('<main id="content"><div class="flympusBootShell" aria-hidden="true">'),"The initial HTML must contain the first-paint shell so standalone iOS never waits for hydration JS before showing app-owned content");
