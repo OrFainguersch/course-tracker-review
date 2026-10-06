@@ -153,6 +153,13 @@ assert(html.includes(".safetySeverity-minor{--severity:#2ca66f")&&html.includes(
 assert(html.includes('html[data-flympus-language="he"] .safetySeverityGuide')&&html.includes('html[data-flympus-theme="dark"] .safetySeverityGuide')&&html.includes('html.flympusLargeText .safetySeverityGuideHead h3'),"Safety severity guide must support Hebrew RTL, dark mode and Larger Text");
 assert(html.includes("const severityOptionDots={Minor:'🟢',Moderate:'🟡',Major:'🟠',Critical:'🔴'}")&&html.includes("SAFETY_SEVERITY_DEFS.map(x=>'<option value=\"'+esc(x.value)+'\">'+esc((severityOptionDots[x.value]||'●')+' '+x.value)+'</option>')")&&!html.includes('<option>Low</option><option>Medium</option><option>High</option>'),"Safety form must keep canonical severity values while showing the reference color dots in the dropdown");
 assert(html.includes("safetyRows.map(x=>normalizeSafetySeverity(x.severity)).filter(Boolean)"),"Safety analytics must group legacy and current records using normalized severity values");
+assert(html.includes('class="safetyEventDetailsSection"')&&html.includes('id="safetyEventDetailsTitle"')&&html.includes('class="safetyEventDetailsCard"'),"Safety must render Event Details as one fixed-label grouped card matching the reference structure");
+assert(html.includes('name="briefDescription" required')&&html.includes('name="findings"')&&html.includes('name="lessonsLearned"'),"Safety Event Details must include brief description, findings and lessons learned/conclusions fields");
+assert(html.includes('placeholder="Type here..."')&&html.includes('.safetyEventDetailBlock label{display:block')&&html.includes('.safetyEventDetailBlock textarea{display:block;width:100%;min-height:72px'),"Safety Event Details must keep fixed blue headings with editable text areas beneath and Type here placeholders");
+assert(html.includes("details:briefDescription,briefDescription,findings,lessonsLearned"),"Safety submissions must persist structured Event Details while preserving the legacy details alias");
+assert(html.includes("briefDescription:String(draft.data.briefDescription||draft.data.details||'')"),"Legacy Safety drafts must restore their old Details content into Brief event description");
+assert(html.includes("['trainee','instructor','severity','classification','title','briefDescription','findings','lessonsLearned','details']"),"Safety draft attention must recognize all structured Event Details fields");
+assert(html.includes('html[data-flympus-language="he"] .safetyEventDetailsSection')&&html.includes('html[data-flympus-theme="dark"] .safetyEventDetailsCard')&&html.includes('html.flympusLargeText .safetyEventDetailBlock label'),"Safety Event Details must support Hebrew RTL, dark mode and Larger Text");
 assert(html.includes('data-evaluation-view="new"')&&html.includes('data-evaluation-view="history"')&&html.includes("Evaluation history")&&html.includes("evaluationHistorySearch")&&html.includes("evaluationHistoryTrainee")&&html.includes("evaluationHistoryInstructor")&&html.includes("evaluationHistorySyllabus"),"Evaluation must use the same New/History pattern with course-specific searchable history");
 assert(html.includes("if(state.screen==='evaluation')bindEval();")&&!html.includes("if($('#evalForm'))bindEval();"),"Evaluation tab handlers must bind on the History view even when the evaluation form is not rendered");
 assert(html.includes('data-exams-view="new"')&&html.includes('data-exams-view="history"')&&html.includes("Exam history")&&html.includes("examHistorySearch")&&html.includes("examHistoryExam")&&html.includes("examHistoryResult")&&html.includes("examHistoryTrainee"),"Exams must use the same New/History pattern with course-specific searchable history");
@@ -701,10 +708,10 @@ assert(!themeController.includes("addEventListener('change'")&&themeController.i
   "System has a persisted resolution and must not accept delayed media-query transitions");
 assert(themeController.includes("background=dark?'#07131f':'#f4f8fc'"),
   "The pre-paint canvas must match the final CSS canvas");
-assert(html.includes("snap.visualVersion===10")&&html.includes("snapFresh=snapAge<=15*60*1000")&&
+assert(html.includes("snap.visualVersion===11")&&html.includes("snapFresh=snapAge<=15*60*1000")&&
   html.includes("snap.resolvedTheme===currentResolvedTheme")&&html.includes("viewportCompatible"),
   "Reload snapshots must be fresh, viewport-compatible and visually compatible before they are painted");
-assert(html.includes("visualVersion:10")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
+assert(html.includes("visualVersion:11")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
   html.includes("largerText:!!root?.classList.contains('flympusLargeText')")&&html.includes("localDay,"),
   "Saved reload snapshots must include the visual preference signature and local-day key used for first-paint validation");
 assert(html.indexOf('<meta name="theme-color" content="#f4f8fc" />')<html.indexOf('id="flympus-theme-bootstrap"'),
