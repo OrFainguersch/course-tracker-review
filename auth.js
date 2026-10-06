@@ -389,7 +389,7 @@ async function sendManagedInvitationEmail(invitation){
   return {sent:true,configured:true}
 }
 function managementRoleOptions(selected,{includeOwner=false}={}){
-  const roles=(includeOwner?['owner','admin','training_manager','user']:['admin','training_manager','user']);
+  const roles=(includeOwner?['user','training_manager','admin','owner']:['user','training_manager','admin']);
   return roles.map(role=>'<option value="'+esc(role)+'" '+(normalizeAppRole(selected)===role?'selected':'')+'>'+esc(managementRoleLabel(role))+'</option>').join('')
 }
 function roleGuideHtml(){
@@ -454,7 +454,7 @@ async function openUserManagement(){
 async function mountUserManagementPage(host){
   if(!host||!canManageUsers())return;
   host.dir=authLanguage()==='he'?'rtl':'ltr';
-  host.innerHTML='<div class="flympusUserManagementPageHead"><div class="eyebrow">'+esc(tr('ADMINISTRATION'))+'</div><h1>'+esc(tr('User Management'))+'</h1><p>'+esc(tr('Application access is separate from course membership and course roles.'))+'</p></div><div class="flympusUserManagementBody" data-user-management-body><div class="flympusUserManagementLoading"><div class="flympusAuthSpinner"></div><span>'+esc(tr('Loading users…'))+'</span></div></div>';
+  host.innerHTML='<div class="flympusUserManagementPageHead"><div class="eyebrow" data-user-management-eyebrow>'+esc(tr('ADMINISTRATION'))+'</div><h1 id="flympusUserManagementTitle">'+esc(tr('User Management'))+'</h1><p data-user-management-subtitle>'+esc(tr('Application access is separate from course membership and course roles.'))+'</p></div><div class="flympusUserManagementBody" data-user-management-body><div class="flympusUserManagementLoading"><div class="flympusAuthSpinner"></div><span>'+esc(tr('Loading users…'))+'</span></div></div>';
   let directory=managedDirectoryCache,error='';
   try{directory=directory||await prefetchManagedDirectory()}catch(err){directory={users:[],invitations:[]};error=String(err?.message||'Firestore rejected this request.')}
   if(!document.contains(host))return;
