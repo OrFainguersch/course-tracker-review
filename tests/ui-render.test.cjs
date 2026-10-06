@@ -12,6 +12,22 @@ const document={querySelector:selector=>elements.get(selector)||null,querySelect
 const context={window:{},document,localStorage:storage(),sessionStorage:storage(),console,confirm:()=>true,setTimeout:()=>0,clearTimeout(){},requestAnimationFrame:fn=>0,addEventListener(){},removeEventListener(){},matchMedia:()=>({matches:false,addEventListener(){},removeEventListener(){}}),performance:{now:()=>0},history:{},getComputedStyle:()=>({}),NodeFilter:{SHOW_TEXT:4},Date,Math,JSON,Number,String,Array,Object,Map,Set,URLSearchParams,FormData:class{},Blob:class{},URL:{createObjectURL(){return""},revokeObjectURL(){}},location:{search:''},navigator:{},FLYMPUS_AUTH:{can:()=>true,role:()=>'owner',isAdmin:()=>true,profile:{email:'or@example.test'},currentUser:{email:'or@example.test'},mountUserManagementPage(){}}};
 context.window=context;vm.createContext(context);
 for(const file of ["assets/ep-catalog.js","assets/aerostar-platform.js","assets/ip-catalog.js","assets/technician-catalog.js","assets/training-core.js","assets/ep-lessons-screening.js","assets/ep-lessons-rc-1.js","assets/ep-lessons-rc-2.js","assets/ep-lessons-half.js","assets/ep-lessons-full-day-a.js","assets/ep-lessons-full-day-b.js","assets/ep-lessons-night.js"]){vm.runInContext(fs.readFileSync(file,"utf8"),context,{filename:file})}
+vm.runInContext(fs.readFileSync("assets/evaluation-voice.js","utf8"),context,{filename:"assets/evaluation-voice.js"});
+const voiceParse=context.FLYMPUS_EVALUATION_VOICE?.parse;
+assert.equal(typeof voiceParse,"function","Evaluation voice helper must expose a deterministic parser without a paid AI dependency");
+const voiceSample=voiceParse("כל הקריטריונים ארבע חוץ מ Altitude Control שלוש. ביצענו Vertigo ו SBX. שתי המראות ושלוש נחיתות.",{
+  criteria:[{id:"alt",name:"Altitude Control"},{id:"air",name:"Airmanship"},{id:"work",name:"Work Method"}],
+  emergencies:[{id:"vertigo",name:"Vertigo"},{id:"flightbox",name:"Flight Box Malfunction"}],
+  grading:{min:1,max:5}
+});
+assert.equal(voiceSample.criteria.find(x=>x.id==="alt")?.score,3,"Explicit spoken criterion grade must override the all-criteria grade");
+assert.equal(voiceSample.criteria.find(x=>x.id==="air")?.score,4,"All-criteria voice command must populate remaining configured criteria");
+assert.equal(voiceSample.emergencies.find(x=>x.id==="vertigo")?.count,1,"Spoken emergency name must be detected");
+assert.equal(voiceSample.emergencies.find(x=>x.id==="flightbox")?.count,1,"Configured emergency aliases such as SBX must resolve deterministically");
+assert.equal(voiceSample.counters.takeoffs,2,"Hebrew spoken takeoff count must be parsed");
+assert.equal(voiceSample.counters.landings,3,"Hebrew spoken landing count must be parsed");
+const negatedEmergency=voiceParse("לא ביצענו Vertigo",{criteria:[],emergencies:[{id:"vertigo",name:"Vertigo"}],grading:{min:1,max:5}});
+assert.equal(negatedEmergency.emergencies.length,0,"Negated emergency phrases must never be applied");
 const html=fs.readFileSync("index.html","utf8");
 const manifest=JSON.parse(fs.readFileSync("manifest.webmanifest","utf8"));
 assert.equal(manifest.short_name,"FLYMPUS","Web app manifest must identify FLYMPUS consistently");
@@ -19,6 +35,10 @@ assert.equal(manifest.display,"standalone","Home Screen installation must use st
 assert.equal(manifest.start_url,"./","Home Screen app must start inside the same GitHub Pages scope");
 assert(html.includes('rel="manifest" href="./manifest.webmanifest"')&&html.includes('apple-mobile-web-app-title" content="FLYMPUS"'),"Index must advertise the FLYMPUS manifest and iOS app title");
 assert(html.includes('maximum-scale=1, user-scalable=no')&&html.includes('id="flympus-mobile-zoom-guard"'),"Mobile application pages must suppress accidental browser zoom");
+assert(html.includes('./assets/evaluation-voice.js?v=0741'),"Evaluation must load the local zero-cost voice helper");
+assert(html.includes('id="evaluationVoiceBlock"'),"Evaluation must render the voice-input beta block");
+assert(html.includes('bindEvaluationVoiceInput(f'),"Evaluation must bind voice input only through the Evaluation form workflow");
+assert(html.includes('Apply detected values')&&html.includes('Transcription is provided by your browser or device. FLYMPUS does not use a paid AI/API and does not store the audio.'),"Voice Evaluation must require review/apply and clearly state its zero-paid-AI behavior");
 assert(html.includes("event.touches?.length>1&&!insideCrop(event.target)")&&html.includes("closest('.personalCropViewport')"),"Global mobile zoom suppression must preserve the intentional profile-photo crop pinch gesture");
 assert(html.includes('<main id="content"><div class="flympusBootShell" aria-hidden="true">'),"The initial HTML must contain the first-paint shell so standalone iOS never waits for hydration JS before showing app-owned content");
 assert(html.includes("tile('platform','Platform',platformValue)")&&html.includes("tile('training','Training type',meta.trainingKind)")&&html.includes("countryTile=tile('country','Country',meta.country,showContext?'':'countryWide')"),"My Courses must render course details as visible metadata tiles");
