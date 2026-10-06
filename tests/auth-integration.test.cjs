@@ -67,8 +67,10 @@ assert(!auth.includes('flympusRoleGlyph')&&auth.includes('flympusUserRoleBadge')
   'Role guide cards must not render decorative role icons and user cards must use aligned role badges');
 assert(auth.includes("'Edit':'עריכה'")&&css.includes('#flympusUserManagementPageRoot[dir="rtl"] .flympusUserCard{direction:rtl}'),
   'User Management Edit controls and card geometry must support mirrored Hebrew RTL layout');
-assert(css.includes('.flympusRoleGuideCard.training_manager{border-color:#9fcfeb')&&!css.includes('.flympusRoleGuideCard.training_manager{border-color:#cbe7dc'),
-  'Training Manager role styling must use the application-role blue palette rather than Active-status green');
+assert(css.includes('.flympusRoleGuideCard.training_manager{border-color:#b8c8f3')&&!css.includes('.flympusRoleGuideCard.training_manager{border-color:#cbe7dc'),
+  'Training Manager role styling must use the application-role cobalt palette rather than Active-status green');
+assert(css.includes('.flympusRoleGuideCard.user{border-color:#b7dff1')&&css.includes('.flympusUserRoleBadge.user{background:#e2f5ff'),
+  'USER must use a visibly active sky-blue palette instead of disabled-looking gray');
 assert(auth.includes("window.FLYMPUS_NAVIGATE('user-management')"),
   'Profile shortcut must navigate to the same User Management screen');
 
@@ -98,8 +100,16 @@ assert(auth.includes('const AUTH_HE_UI=Object.freeze'),'Auth/User Management mus
 assert(auth.includes("'User Management':'ניהול משתמשים'")&&auth.includes("'Owner':'בעלים'")&&auth.includes("'Training Manager':'מנהל הדרכה'"),
   'Authentication and role-management UI must include Hebrew translations for the full role hierarchy');
 assert(auth.includes('bindAuthLanguageSync()'),'Dynamic auth/admin UI must react when the app language changes');
-assert(auth.includes('roleGuideHtml()')&&auth.includes('App role and course role are separate.'),
-  'User Management must explain role meaning and explicitly separate app roles from course roles');
+assert(auth.includes('roleGuideHtml()')&&auth.includes('FLYMPUS role and course role are separate.'),
+  'User Management must explain role meaning and explicitly separate FLYMPUS roles from course roles');
+assert(auth.includes('Invite and approve Administrators, Training Managers and Users')&&auth.includes('Invite and approve Training Managers and Users')&&auth.includes('No user invitations or approvals'),
+  'Role guide must make the Owner/Admin invitation and approval split explicit');
+assert(auth.includes('data-managed-user-form')&&auth.includes('updateManagedUserDetails')&&auth.includes('name="role"')&&auth.includes('Email is tied to the sign-in account and cannot be changed here.'),
+  'Edit must manage Name and Role together while keeping the sign-in email read-only');
+assert(auth.includes("tr('Role')")&&!auth.includes("<span>'+esc(tr('App role'))+'</span><select name=\"role\">"),
+  'User Management controls must label the application-level field simply as Role');
+assert(auth.includes("tr('Pending approval')")&&auth.includes("'Approval requests'")&&auth.includes('Signed in without an invitation and waiting for approval.'),
+  'Pending must be presented as an approval request distinct from pre-authorized invitations');
 assert(html.includes("flympusCan('roster.manage')")&&html.includes("flympusCan('courses.create')")&&html.includes("flympusCan('packages.manageGlobal')"),
   'Structural roster, course and global Package editing must be capability-gated');
 assert(auth.includes('bindBottomNavigationOverlayDismissal()')&&auth.includes("'#topNotificationDropdown'")&&auth.includes("'#topPersonalProfileDropdown'"),'Bottom navigation must dismiss open notification/profile menus');
