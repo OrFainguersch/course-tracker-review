@@ -79,6 +79,8 @@ assert(rules.includes("actorRole == 'admin'")&&rules.includes("currentRole != 'a
 assert(rules.includes('allow read, write: if false;'),'Unmigrated training collections must remain fail-closed');
 assert(rules.includes("data.keys().hasOnly"),'User documents must reject unexpected authority-like fields');
 assert(rules.includes("affectedKeys().hasOnly"),'Self-service profile writes must be field-limited');
+assert(rules.includes("preferredName"),'User profiles must support a preferred name field');
+assert(auth.includes('updateOwnPreferredName')&&auth.includes('updateOwnOfficialName'),'Auth runtime must separate preferred-name self service from official-name editing');
 
 assert(storage.includes("const USER_PREFIX='flympus:user:'"),'Private browser data must use explicit UID namespaces');
 assert(storage.includes("admin!==true"),'Only an authenticated administrator may claim legacy device data');
