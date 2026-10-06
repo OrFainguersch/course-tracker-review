@@ -71,6 +71,10 @@ assert(!auth.includes('flympusRoleGlyph')&&auth.includes('flympusUserRoleBadge')
   'Role guide cards must not render decorative role icons and user cards must use aligned role badges');
 assert(auth.includes("'Edit':'עריכה'")&&css.includes('#flympusUserManagementPageRoot[dir="rtl"] .flympusUserCard{direction:rtl}'),
   'User Management Edit controls and card geometry must support mirrored Hebrew RTL layout');
+assert(auth.includes("function managementInitials(value)")&&auth.includes("managementInitials(officialName||user.email||'?')")&&auth.includes("tr('Nickname'))+' · '"),
+  'Administration identity cards must keep official-name initials primary and format Nickname like Roster');
+assert(css.includes('User Management roster-parity cards · 0743')&&css.includes('grid-template-columns:72px minmax(0,1fr) auto')&&css.includes('.flympusUserRoleBadge:before'),
+  'Administration identity cards must follow Roster avatar, spacing and role-pill rules without adding training statistics');
 assert(css.includes('.flympusRoleGuideCard.training_manager{border-color:#b8c8f3')&&!css.includes('.flympusRoleGuideCard.training_manager{border-color:#cbe7dc'),
   'Training Manager role styling must use the application-role cobalt palette rather than Active-status green');
 assert(css.includes('.flympusRoleGuideCard.user{border-color:#b7dff1')&&css.includes('.flympusUserRoleBadge.user{background:#e2f5ff'),
