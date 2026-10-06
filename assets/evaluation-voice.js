@@ -128,14 +128,9 @@
 
   function countNearAlias(text,alias,index){
     const after=text.slice(index+alias.length).trimStart();
-    const before=text.slice(0,index).trimEnd();
     if(/^(?:twice|פעמיים)\b/i.test(after))return 2;
     if(/^(?:thrice)\b/i.test(after))return 3;
-    let m=after.match(/^([0-9]+)\s*(?:times|time|פעמים|פעם|x)\b/i);
-    if(m)return Math.max(1,Math.min(99,Number(m[1])||1));
-    if(/(?:twice|פעמיים)\s*$/i.test(before))return 2;
-    if(/(?:thrice)\s*$/i.test(before))return 3;
-    m=before.match(/([0-9]+)\s*(?:times|time|פעמים|פעם|x)\s*$/i);
+    const m=after.match(/^([0-9]+)\s*(?:times|time|פעמים|פעם|x)\b/i);
     if(m)return Math.max(1,Math.min(99,Number(m[1])||1));
     return 1;
   }
