@@ -1,4 +1,4 @@
-# Hosting deployment through GitHub OIDC
+# FLYMPUS deployment through GitHub OIDC
 
 This configuration is prepared but **not provisioned or deployed**. Google Cloud
 Console currently returns `Site Unavailable` in the Work browser, even after one
@@ -17,10 +17,13 @@ Never create/download another service-account key or fall back to FIREBASE_TOKEN
 - Service-account impersonation is granted to the repository ID principal set,
   not every identity in the pool.
 - Dedicated account: `flympus-hosting-deployer@flympus.iam.gserviceaccount.com`.
-- Project roles: `roles/firebasehosting.admin` and
-  `roles/serviceusage.apiKeysViewer`. Firebase documents the second role as
-  necessary for CLI deployment. No Owner, Editor, Auth/Firestore admin, or
-  service-account-key permissions are added.
+- Project roles are intentionally narrow:
+  - `roles/firebasehosting.admin` — deploy the reviewed Hosting bundle.
+  - `roles/serviceusage.apiKeysViewer` — Firebase CLI API-key lookup.
+  - `roles/serviceusage.serviceUsageViewer` — inspect whether required APIs are enabled; this includes `serviceusage.services.get/list` but cannot enable/disable services.
+  - `roles/firebaserules.admin` — publish Firebase Security Rules only.
+- No Owner, Editor, Firebase Admin, Cloud Firestore database admin, Auth admin,
+  or service-account-key permissions are added.
 
 `scripts/configure-hosting-wif.sh` is the administrator bootstrap implementation.
 It validates the project number, aborts if the dedicated account already has
@@ -49,13 +52,14 @@ It passed for 15.32.1. This proves compatibility of that code path without any
 private key or real credentials; it does not prove the cloud IAM configuration.
 The workflow repeats this test for the CLI installed in CI, then uses auth@v3's
 generated external-account ADC file and verifies real Hosting access before
-deploying `--only hosting`. It never uses a token or a JSON service-account key.
+deploying `--only hosting,firestore:rules`. It never uses a token or a JSON service-account key.
 
 ## Production acceptance
 
 Run the manual workflow from main only after the two verified variables exist.
-The job must pass real ADC preflight, Hosting deploy, and the verifier checking
-the exact commit, every public asset, and reserved auth helper responses.
+The job must pass real ADC preflight, the combined Hosting + Firestore Rules
+deploy, and the verifier checking the exact commit, every public asset, and
+reserved auth helper responses.
 Then test Google login on the Firebase origin in the live browser and iPhone PWA.
 Current production still returns 404; no successful deployment is claimed.
 The existing real-worker test confirms `/__/` bypasses worker handling.
