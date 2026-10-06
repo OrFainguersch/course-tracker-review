@@ -73,9 +73,9 @@ jobs:
       - name: Verify real ADC access to the Hosting site
         if: steps.app_verify.outputs.deploy_ready == 'true'
         run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" hosting:sites:get flympus --project flympus --non-interactive
-      - name: Deploy reviewed public bundle to Firebase Hosting
+      - name: Deploy reviewed Hosting bundle and Firestore rules
         if: steps.app_verify.outputs.deploy_ready == 'true'
-        run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" deploy --only hosting --project flympus --non-interactive
+        run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" deploy --only hosting,firestore:rules --project flympus --non-interactive
       - name: Verify production commit, assets and reserved auth helpers
         if: steps.app_verify.outputs.deploy_ready == 'true'
         run: node scripts/verify-hosting.cjs
