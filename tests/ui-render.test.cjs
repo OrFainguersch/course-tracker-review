@@ -48,7 +48,7 @@ assert(html.includes("@keyframes flympusHeaderPopoverIn")&&
   html.includes("playHeaderPopoverOpen(profileMenu,profileBtn,positionPersonalProfileDropdown)"),
   "Bell and personal-profile popovers must zoom/fade from the actual pressed header controls instead of appearing abruptly");
 assert(html.includes('id="personalPhotoInput"')&&html.includes('id="myProfilePhotoEdit"')&&html.includes('id="myProfileRemovePhoto"'),"My Profile must edit the photo through the avatar pencil and support removal");
-assert(html.includes('id="quickMyProfile"')&&html.includes('id="quickSettings"')&&html.includes('id="quickUserManagement"')&&html.includes('id="quickSignOut"'),"The account popover must remain a compact quick-action menu");
+assert(html.includes('id="quickMyProfile"')&&html.includes('id="quickSettings"')&&html.includes('id="quickSignOut"')&&!html.includes('id="quickUserManagement"'),"The account popover must stay focused on profile, settings and sign-out without duplicating User Management");
 assert(html.includes('id="personalCropModal"')&&html.includes('id="personalCropViewport"')&&html.includes('id="personalCropImage"'),"Personal photo selection must open a crop-and-adjust editor");
 assert(html.includes("function personalCropDataUrl(")&&html.includes("function renderPersonalPhotoCrop()"),"Profile photo cropper must support repositioning, zooming and exporting the adjusted square");
 assert(html.includes("onpointerdown")&&html.includes("onpointermove")&&html.includes("personalCropState.zoom"),"Profile photo cropper must support touch/pointer drag and zoom adjustment");
@@ -58,6 +58,8 @@ assert(html.includes("function positionNotificationDropdown()"),"Notifications p
 assert(html.includes(".panel{display:flex;flex-direction:column;padding-bottom:calc(8px + env(safe-area-inset-bottom))}.panel #nav{flex:0 0 auto}.drawerFooter{margin-top:auto;margin-bottom:6px}"),"Mobile account card should sit close to the true bottom while respecting the safe area");
 assert(html.includes('id="drawerProfileShortcut"')&&html.includes('data-go="my-profile"'),"The sidebar account card must navigate to My Profile");
 assert(html.includes("case'my-profile':html=myProfileScreen()"),"My Profile must participate in normal application navigation");
+assert(!html.includes('class="card myProfileLinks"'),"My Profile must not duplicate Settings or User Management navigation");
+assert(html.includes("const role=instructorCourseRole(currentCourseId,currentUserId)||currentUserCourseRole()"),"Account chrome must derive the selected-course role from the same membership source as Course roles");
 assert(html.includes("html[data-flympus-language=\"he\"] .accountQuickAction>i")&&html.includes("html[data-flympus-language=\"he\"] .drawerProfileArrow"),"Directional account-menu arrows must mirror in Hebrew");
 assert(html.includes(".topNotificationDropdown,.topPersonalProfileDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right))"),"Mobile notification and personal-profile panels must stay within the viewport");
 assert(html.includes(".topCourseDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right));width:auto"),"Mobile quick course dropdown must stay inside the viewport on both sides");
