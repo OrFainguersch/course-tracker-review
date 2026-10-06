@@ -15,7 +15,7 @@ function harness({standalone=true,maxTouchPoints=5}={}){
   const context={document,window,$:s=>({'.top':top,'#content':content,'#mobileBottomNav':dock,'#flympusStandaloneRefreshIndicator':indicator})[s],location:{reload(){reloads++}},performance:{now:()=>0},getComputedStyle:()=>({opacity:'1',transform:'none'}),setTimeout(fn){timers.set(++timerId,fn);return timerId},clearTimeout:id=>timers.delete(id),cancelAnimationFrame(){},requestAnimationFrame(){},armFlympusRefreshSound:()=>null,stopFlympusRefreshSound(){},triggerFlympusPortableHaptic(){},fireFlympusRefreshSound(){},resetFlympusAudioSession(){}};
   vm.runInNewContext(source,context);
   const touch=(type,y)=>{const e={target:{closest:()=>null},touches:[{clientX:100,clientY:y}],cancelable:true,preventDefault(){this.prevented=true}};handlers.get(type)(e);return e};
-  return {touch,handlers,windowHandlers,document,window,top,content,dock,root,body,animations,timers,reloads:()=>reloads};
+  return {context,touch,handlers,windowHandlers,document,window,top,content,dock,root,body,animations,timers,reloads:()=>reloads};
 }
 test('ordinary touch and upward scroll never force hidden chrome open',()=>{
   const h=harness();h.document.scrollingElement.scrollTop=80;h.top.classList.add('topHidden');h.body.classList.add('topChromeHidden');
@@ -47,4 +47,16 @@ test('touch Safari claims pull after a long page reaches the top and blocks nati
   const reachedTop=h.touch('touchmove',240);
   assert(reachedTop.prevented);
   assert(h.window.__FLYMPUS_PULL_ACTIVE__);
+});
+test('touch chrome still hides on down-scroll and returns on up-scroll without moving document content',()=>{
+  const h=harness({standalone:false,maxTouchPoints:5});
+  const setter=html.slice(html.indexOf('function setBottomDockHidden(hidden)'),html.indexOf('function updateBottomDockFromScroll()'));
+  vm.runInNewContext('let bottomDockLastSwitchTime=0,bottomDockTransitionLockUntil=0,bottomDockVelocity=0,bottomDockDirection=0,bottomDockDirectionTravel=0;'+setter,h.context);
+  for(let i=0;i<8;i++){
+    vm.runInNewContext('setBottomDockHidden(true)',h.context);
+    assert(h.top.classList.contains('topHidden'));assert(h.dock.classList.contains('dockHidden'));
+    assert.equal(h.content.style.transform,undefined);
+    vm.runInNewContext('setBottomDockHidden(false)',h.context);
+    assert(!h.top.classList.contains('topHidden'));assert(!h.dock.classList.contains('dockHidden'));
+  }
 });

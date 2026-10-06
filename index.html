@@ -2769,42 +2769,16 @@ body::-webkit-scrollbar{
   pointer-events:none!important;
 }
 
-/* On touch/coarse-pointer devices, never animate layout while the sticky
-   header is moving. Mobile WebKit/Chromium can recalculate scrollY during
-   elastic or compositor scrolling and make the direction detector reverse.
-   Keep document geometry stable and move visible content on the compositor. */
+/* Only the small chrome layers animate on touch devices. The long document
+   stays in WebKit's normal scrolling/rasterization path, with stable geometry. */
 @media(max-width:899px), (hover:none) and (pointer:coarse){
   #content{
-    transform:translate3d(0,0,0);
-    transition:transform .58s cubic-bezier(.32,.72,0,1)!important;
-    will-change:transform;
+    transform:none;
+    transition:none!important;
+    will-change:auto;
   }
-  body.topChromeHidden #content{
-    transform:translate3d(0,calc(0px - var(--flympus-top-chrome-height,78px)),0)!important;
-    transition-duration:.64s!important;
-  }
-  /* The status-bar canvas stays fixed while page chrome moves beneath it. */
-
-  /* A transformed content root would otherwise become the containing block
-     for fixed dialogs. When one is open, keep the overlay viewport-bound. */
-  body.topChromeHidden:has(#content .modal.open) #content{
-    transform:none!important;
-  }
-
-  /* Touch browsers already animate their own URL/status chrome. Keep the app
-     header, page canvas and dock geometrically stable underneath it. */
-  .top.topHidden{
-    transform:none!important;
-    pointer-events:auto!important;
-  }
-  body.topChromeHidden #content{
-    transform:none!important;
-  }
-  .mobileBottomNav.dockHidden{
-    transform:none!important;
-    opacity:1!important;
-    pointer-events:auto!important;
-  }
+  body.topChromeHidden #content{transform:none}
+  html,body{overscroll-behavior-y:none!important}
 }
 
 /* Fine-pointer desktop browsers can safely collapse the normal-flow slot. */
@@ -4454,7 +4428,7 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
   const viewportWidth=Math.round(window.innerWidth||document.documentElement?.clientWidth||0),viewportHeight=Math.round(window.innerHeight||document.documentElement?.clientHeight||0);
   const snapAge=Math.max(0,Date.now()-Number(snap?.savedAt||0)),snapFresh=snapAge<=15*60*1000;
   const viewportCompatible=!snap?.viewportWidth||Math.abs(Number(snap.viewportWidth)-viewportWidth)<=2;
-  const snapMatches=!!(snap&&snap.visualVersion===4&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
+  const snapMatches=!!(snap&&snap.visualVersion===5&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
   const content=document.querySelector('#content');
   const bottomNav=document.querySelector('#mobileBottomNav');
   window.__FLYMPUS_RUNTIME_READY__=false;
@@ -4603,8 +4577,7 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
     }
     window.__FLYMPUS_RELOAD_SNAPSHOT__=snap;
     const y=Math.max(0,Number(snap.scrollY||0));
-    const touchChromeStable=Number(navigator.maxTouchPoints||0)>0||window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches||window.matchMedia?.('(max-width: 899px)')?.matches;
-    if(snap.topHidden&&y>64&&!touchChromeStable){
+    if(snap.topHidden&&y>64){
       document.body.classList.add('topChromeHidden');
       document.querySelector('.top')?.classList.add('topHidden');
       bottomNav?.classList.add('dockHidden');
@@ -6984,11 +6957,7 @@ window.addEventListener('scroll',()=>{
 },{passive:true});
 let bottomDockLastScrollY=Math.max(0,Number(window.scrollY||0)),bottomDockLastScrollTime=performance.now?.()||Date.now(),bottomDockVelocity=0,bottomDockTicking=false,bottomDockLastSwitchTime=0,bottomDockTransitionLockUntil=0,bottomDockDirection=0,bottomDockDirectionTravel=0;
 function setBottomDockHidden(hidden){
-  const dock=$('#mobileBottomNav'),topBar=$('.top'),touchChromeStable=!!(
-    Number(window.navigator?.maxTouchPoints||0)>0||
-    window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches||
-    window.matchMedia?.('(max-width: 899px)')?.matches
-  ),next=touchChromeStable?false:!!hidden,body=document.body;
+  const dock=$('#mobileBottomNav'),topBar=$('.top'),next=!!hidden,body=document.body;
   const dockChanged=!!dock&&dock.classList.contains('dockHidden')!==next;
   const topChanged=!!topBar&&topBar.classList.contains('topHidden')!==next;
   const bodyChanged=!!body&&body.classList.contains('topChromeHidden')!==next;
@@ -7046,7 +7015,9 @@ function updateBottomDockFromScroll(){
   bottomDockLastScrollY=y;
   bottomDockLastScrollTime=now;
 
-  if(y<=18){
+  // Do not hide the sticky header before its normal-flow slot has scrolled away.
+  const headerSlot=Math.max(18,Number($('.top')?.offsetHeight||78));
+  if(y<=headerSlot){
     bottomDockVelocity=0;
     bottomDockDirection=0;
     bottomDockDirectionTravel=0;
@@ -10098,7 +10069,7 @@ function saveFlympusReloadSnapshot(){
     const d=new Date(),pad=n=>String(n).padStart(2,'0'),localDay=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
     const scrollY=Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0));
     const snapshot={
-      visualVersion:4,
+      visualVersion:5,
       screen:String(state.screen||'home'),
       courseId:String(currentCourseId||'AEP-26'),
       resolvedTheme:resolvedTheme==='dark'?'dark':'light',
@@ -10121,7 +10092,7 @@ function saveFlympusReloadSnapshot(){
         };
       })(),
       scrollY,
-      topHidden:scrollY>64&&Number(navigator.maxTouchPoints||0)===0&&!!$('.top')?.classList.contains('topHidden'),
+      topHidden:scrollY>64&&!!$('.top')?.classList.contains('topHidden'),
       savedAt:Date.now()
     };
     sessionStorage.setItem('ct-review-reload-snapshot',JSON.stringify(snapshot));

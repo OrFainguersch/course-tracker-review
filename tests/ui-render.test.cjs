@@ -654,10 +654,10 @@ assert(!themeController.includes("addEventListener('change'")&&themeController.i
   "System has a persisted resolution and must not accept delayed media-query transitions");
 assert(themeController.includes("background=dark?'#07131f':'#f4f8fc'"),
   "The pre-paint canvas must match the final CSS canvas");
-assert(html.includes("snap.visualVersion===4")&&html.includes("snapFresh=snapAge<=15*60*1000")&&
+assert(html.includes("snap.visualVersion===5")&&html.includes("snapFresh=snapAge<=15*60*1000")&&
   html.includes("snap.resolvedTheme===currentResolvedTheme")&&html.includes("viewportCompatible"),
   "Reload snapshots must be fresh, viewport-compatible and visually compatible before they are painted");
-assert(html.includes("visualVersion:4")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
+assert(html.includes("visualVersion:5")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
   html.includes("largerText:!!root?.classList.contains('flympusLargeText')")&&html.includes("localDay,"),
   "Saved reload snapshots must include the visual preference signature and local-day key used for first-paint validation");
 assert(html.indexOf('<meta name="theme-color" content="#f4f8fc" />')<html.indexOf('id="flympus-theme-bootstrap"'),
@@ -670,12 +670,11 @@ assert(html.includes("function flympusContinuitySnapshotHtml(content)")&&
   html.includes("clone.querySelectorAll?.('.modal.open')")&&
   html.includes("clone.querySelectorAll?.('.multiFilterMenu,.datePickerPanel')"),
   "Continuity snapshots must strip transient dialogs, menus and picker overlays that would otherwise flash on resume");
-assert(html.includes("topHidden:scrollY>64&&Number(navigator.maxTouchPoints||0)===0")&&
-  html.includes("if(snap.topHidden&&y>64&&!touchChromeStable)"),
-  "Touch resumes must keep app chrome stable; desktop snapshots must not restore hidden chrome at the top");
-assert(html.includes("touchChromeStable?false:!!hidden")&&
+assert(html.includes("topHidden:scrollY>64&&")&&html.includes("if(snap.topHidden&&y>64)"),
+  "Snapshots retain auto-hide on all devices without hiding chrome at the page top");
+assert(!html.includes("touchChromeStable?false:!!hidden")&&
   html.includes("flympusTouchPullMode")&&html.includes("pullStandaloneGesture=customPull"),
-  "Touch Safari and installed mode must share stable app chrome and one custom pull owner");
+  "Touch auto-hide remains enabled and Safari shares the custom pull owner");
 assert(html.includes("snap.localDay===localDay"),
   "A snapshot from a previous local day must never flash before today's plan renders");
 
