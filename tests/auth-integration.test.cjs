@@ -108,8 +108,11 @@ assert(auth.includes("'User Management':'ניהול משתמשים'")&&auth.incl
 assert(auth.includes('bindAuthLanguageSync()'),'Dynamic auth/admin UI must react when the app language changes');
 assert(auth.includes('roleGuideHtml()')&&!auth.includes('flympusRoleSeparationNote'),
   'User Management role guide must stay concise and must not render a separate explanatory note box');
-assert(auth.includes('May appoint: Owner, Administrator, Training Manager or User')&&auth.includes('May appoint: Training Manager or User')&&auth.includes('May appoint: User')&&auth.includes('Cannot appoint application roles'),
-  'Role guide must enumerate every direct appointment option for every application role');
+assert(auth.includes("['owner','Full system control',['May appoint: Owner, Administrator, Training Manager or User','Manage all courses and global Packages','Primary Owner is protected']]")&&
+  auth.includes("['admin','System administration',['May appoint: Training Manager or User','Manage lower-level accounts and all courses','Manage global Packages']]")&&
+  auth.includes("['training_manager','Training administration',['May appoint: User','Create and manage courses','Manage course rosters','Create course-specific Package overrides']]")&&
+  auth.includes("['user','Operational access',['Work in assigned courses','Submit evaluations and forms','No structural course editing']]"),
+  'Role guide must stay concise, list positive appointment rights once, and avoid redundant appointment-denial bullets');
 assert(auth.includes('Managed at a higher level')&&!auth.includes('Direct appointment follows the hierarchy:'),
   'User Management must keep appointment rights inside the role cards without a duplicated hierarchy note');
 assert(auth.includes('data-managed-user-form')&&auth.includes('updateManagedUserDetails')&&auth.includes('name="role"')&&auth.includes('Email is tied to the sign-in account and cannot be changed here.'),
@@ -157,7 +160,7 @@ assert(auth.includes('let authStateVersion=0')&&auth.includes('version!==authSta
 console.log('Authentication foundation checks passed');
 
 assert(css.includes('User Management typography + accessibility alignment · 2026-10-06')&&
-  css.includes('#flympusUserManagementPageRoot .flympusRoleGuideCard p{font-size:11.5px')&&
+  css.includes('#flympusUserManagementPageRoot .flympusRoleGuideCard ul{font-size:11.5px')&&
   css.includes('html.flympusLargeText #flympusUserManagementPageRoot'),
   'User Management must share the readable site type scale and respond to Larger Text');
 assert(auth.includes("'Account':'חשבון'")&&auth.includes("'Could not update preferred name':'לא ניתן לעדכן את הכינוי'"),

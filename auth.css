@@ -395,7 +395,6 @@ html[data-flympus-theme="dark"] .flympusAuthStatus span{color:#9fb0bf;border-col
 .flympusRoleGuideCard.training_manager .flympusRoleGlyph{background:#e3f3fd;color:#1d699a}
 .flympusRoleGuideTitle b{display:block;color:#153d62;font-size:10.5px}
 .flympusRoleGuideTitle small{display:block;margin-top:2px;color:#7b8fa1;font-size:8px;font-weight:800}
-.flympusRoleGuideCard p{margin:10px 0 8px;color:#6f8497;font-size:8.6px;line-height:1.5}
 .flympusRoleGuideCard ul{margin:0;padding-left:15px;color:#4d657b;font-size:8.2px;line-height:1.55}
 .flympusRoleGuideCard li+li{margin-top:2px}
 .flympusRoleSelectWrap{display:grid;gap:4px;min-width:132px}
@@ -819,7 +818,6 @@ html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusManagedUs
 #flympusUserManagementPageRoot .flympusRoleGuideHead h2{font-size:18px}
 #flympusUserManagementPageRoot .flympusRoleGuideTitle>b{font-size:11px;min-height:26px;padding:6px 10px}
 #flympusUserManagementPageRoot .flympusRoleGuideTitle small{font-size:10.5px;line-height:1.35}
-#flympusUserManagementPageRoot .flympusRoleGuideCard p{font-size:11.5px;line-height:1.55}
 #flympusUserManagementPageRoot .flympusRoleGuideCard ul{font-size:11.5px;line-height:1.55;padding-inline-start:18px}
 #flympusUserManagementPageRoot .flympusUserInviteHead h2,
 #flympusUserManagementPageRoot .flympusUserGroupHead h2{font-size:15px}
@@ -862,7 +860,6 @@ html.flympusLargeText #flympusUserManagementPageRoot .flympusUserInviteHead h2,
 html.flympusLargeText #flympusUserManagementPageRoot .flympusUserGroupHead h2{font-size:20px}
 html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleGuideTitle>b,
 html.flympusLargeText #flympusUserManagementPageRoot .flympusUserNameLine>b{font-size:15px}
-html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleGuideCard p,
 html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleGuideCard ul,
 html.flympusLargeText #flympusUserManagementPageRoot .flympusUserManagementPageHead p,
 html.flympusLargeText #flympusUserManagementPageRoot .flympusUserInviteHead p,

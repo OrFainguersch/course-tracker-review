@@ -87,7 +87,7 @@
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js" crossorigin />
-<link rel="modulepreload" href="./auth.js?v=20261006-auth26" />
+<link rel="modulepreload" href="./auth.js?v=20261006-auth27" />
 <script src="./firebase-config.js?v=20261004-auth2"></script>
 <script src="./storage-scope.js?v=20261006-auth8"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -4638,7 +4638,7 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
   .topCourseContext{display:none!important}
 }
 </style>
-<link rel="stylesheet" href="./auth.css?v=20261006-auth14" />
+<link rel="stylesheet" href="./auth.css?v=20261006-auth15" />
 <script>
 /* Authentication is fail-closed only after it is explicitly enabled.
    Until the Firebase project and UID-scoped data migration are ready,
@@ -4753,7 +4753,7 @@ html.flympusLargeText .evaluationVoiceChip{font-size:14px!important}
   const viewportWidth=Math.round(window.innerWidth||document.documentElement?.clientWidth||0),viewportHeight=Math.round(window.innerHeight||document.documentElement?.clientHeight||0);
   const snapAge=Math.max(0,Date.now()-Number(snap?.savedAt||0)),snapFresh=snapAge<=15*60*1000;
   const viewportCompatible=!snap?.viewportWidth||Math.abs(Number(snap.viewportWidth)-viewportWidth)<=2;
-  const snapMatches=!!(snap&&snap.visualVersion===6&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
+  const snapMatches=!!(snap&&snap.visualVersion===7&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
   const content=document.querySelector('#content');
   const bottomNav=document.querySelector('#mobileBottomNav');
   window.__FLYMPUS_RUNTIME_READY__=false;
@@ -10699,7 +10699,7 @@ function saveFlympusReloadSnapshot(){
     const d=new Date(),pad=n=>String(n).padStart(2,'0'),localDay=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
     const scrollY=Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0));
     const snapshot={
-      visualVersion:6,
+      visualVersion:7,
       screen:String(state.screen||'home'),
       courseId:String(currentCourseId||'AEP-26'),
       resolvedTheme:resolvedTheme==='dark'?'dark':'light',
@@ -10774,6 +10774,6 @@ if(['roster','planned','home','record','reports'].includes(earlyNavTarget)){
   }
 })();
 </script>
-<script type="module" src="./auth.js?v=20261006-auth26"></script>
+<script type="module" src="./auth.js?v=20261006-auth27"></script>
 </body>
 </html>

@@ -440,11 +440,11 @@ function canAssignAppRole(role){
 function roleGuideHtml(){
   const defs=[
     ['owner','Full system control',['May appoint: Owner, Administrator, Training Manager or User','Manage all courses and global Packages','Primary Owner is protected']],
-    ['admin','System administration',['May appoint: Training Manager or User','Manage lower-level accounts and all courses','Cannot appoint Administrator or Owner']],
-    ['training_manager','Training administration',['May appoint: User','Create and manage courses','Manage course rosters','Cannot appoint Training Manager, Administrator or Owner']],
-    ['user','Operational access',['Cannot appoint application roles','Work in assigned courses','Submit evaluations and forms','No structural course editing']]
+    ['admin','System administration',['May appoint: Training Manager or User','Manage lower-level accounts and all courses','Manage global Packages']],
+    ['training_manager','Training administration',['May appoint: User','Create and manage courses','Manage course rosters','Create course-specific Package overrides']],
+    ['user','Operational access',['Work in assigned courses','Submit evaluations and forms','No structural course editing']]
   ];
-  return '<section class="flympusRoleGuide"><div class="flympusRoleGuideHead"><div><span>'+esc(tr('Role guide'))+'</span><h2>'+esc(tr('What each role can do'))+'</h2></div></div><div class="flympusRoleGuideGrid">'+defs.map(([role,title,items])=>'<article class="flympusRoleGuideCard '+esc(role)+'"><div class="flympusRoleGuideTitle"><b>'+esc(managementRoleLabel(role))+'</b><small>'+esc(tr(title))+'</small></div><p>'+esc(tr(roleDefinition(role).description))+'</p><ul>'+items.map(item=>'<li>'+esc(tr(item))+'</li>').join('')+'</ul></article>').join('')+'</div></section>'
+  return '<section class="flympusRoleGuide"><div class="flympusRoleGuideHead"><div><span>'+esc(tr('Role guide'))+'</span><h2>'+esc(tr('What each role can do'))+'</h2></div></div><div class="flympusRoleGuideGrid">'+defs.map(([role,title,items])=>'<article class="flympusRoleGuideCard '+esc(role)+'"><div class="flympusRoleGuideTitle"><b>'+esc(managementRoleLabel(role))+'</b><small>'+esc(tr(title))+'</small></div><ul>'+items.map(item=>'<li>'+esc(tr(item))+'</li>').join('')+'</ul></article>').join('')+'</div></section>'
 }
 function invitationCard(invite){
   const name=String(invite.displayName||'').trim(),email=canonicalEmail(invite.email),role=normalizeAppRole(invite.role),manageable=canManageTargetRole(role);
