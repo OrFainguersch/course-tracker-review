@@ -82,7 +82,7 @@ test('returning top chrome uses the same timing authority as the bottom dock and
 test('touch chrome still hides on down-scroll and returns on up-scroll without moving document content',()=>{
   const h=harness({standalone:false,maxTouchPoints:5});
   const setter=html.slice(html.indexOf('function setBottomDockHidden(hidden)'),html.indexOf('function updateBottomDockFromScroll()'));
-  vm.runInNewContext('let bottomDockLastSwitchTime=0,bottomDockTransitionLockUntil=0,bottomDockVelocity=0,bottomDockDirection=0,bottomDockDirectionTravel=0;'+setter,h.context);
+  vm.runInNewContext('let bottomDockLastSwitchTime=0,bottomDockTransitionLockUntil=0,bottomDockVelocity=0,bottomDockDirection=0,bottomDockDirectionTravel=0,bottomDockRevealGuardTimer=null,bottomDockRevealGuardEpoch=0;'+setter,h.context);
   for(let i=0;i<8;i++){
     vm.runInNewContext('setBottomDockHidden(true)',h.context);
     assert(h.top.classList.contains('topHidden'));assert(h.dock.classList.contains('dockHidden'));
