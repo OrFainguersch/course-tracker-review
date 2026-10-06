@@ -29,6 +29,11 @@ service cloud.firestore {
         && currentUserRecord().data.role in ['owner', 'admin'];
     }
 
+    function userManager() {
+      return activeUser()
+        && currentUserRecord().data.role in ['owner', 'admin', 'training_manager'];
+    }
+
     function systemAccessExists() {
       return exists(/databases/$(database)/documents/system/access);
     }
@@ -55,7 +60,7 @@ service cloud.firestore {
         'createdAt', 'updatedAt', 'invitedBy'
       ])
         && data.email == data.email.lower()
-        && data.role in ['user', 'training_manager', 'admin']
+        && data.role in ['user', 'training_manager', 'admin', 'owner']
         && data.status == 'active';
     }
 
@@ -105,33 +110,63 @@ service cloud.firestore {
         ]);
     }
 
-    function administratorManagesOther(uid) {
+    function roleMayBeGranted(actorRole, nextRole) {
+      return (actorRole == 'owner' && nextRole in ['owner', 'admin'])
+        || (actorRole == 'admin' && nextRole == 'training_manager')
+        || (actorRole == 'training_manager' && nextRole == 'user');
+    }
+
+    function managerMayTarget(actorRole, targetRole, uid) {
+      return uid != request.auth.uid
+        && !(targetRole == 'owner' && systemAccessExists() && uid == systemOwnerUid())
+        && ((actorRole == 'owner')
+          || (actorRole == 'admin' && targetRole in ['training_manager', 'user'])
+          || (actorRole == 'training_manager' && targetRole == 'user'));
+    }
+
+    function managerManagesOther(uid) {
       let actorRole = currentUserRecord().data.role;
       let currentRole = resource.data.role;
       let nextRole = request.resource.data.role;
-      return administrator()
-        && uid != request.auth.uid
-        && currentRole != 'owner'
-        && nextRole != 'owner'
-        && (actorRole == 'owner'
+      return userManager()
+        && managerMayTarget(actorRole, currentRole, uid)
+        && (nextRole == currentRole
+          || roleMayBeGranted(actorRole, nextRole)
+          || (actorRole == 'owner'
+            && ((currentRole == 'owner' && nextRole in ['admin', 'training_manager', 'user'])
+              || (currentRole == 'admin' && nextRole in ['training_manager', 'user'])
+              || (currentRole == 'training_manager' && nextRole == 'user')))
           || (actorRole == 'admin'
-            && currentRole != 'admin'
-            && nextRole != 'admin'));
+            && currentRole == 'training_manager'
+            && nextRole == 'user'));
     }
 
-    function administratorMayDelete(uid) {
+    function managerMayDelete(uid) {
       let actorRole = currentUserRecord().data.role;
       let targetRole = resource.data.role;
-      return administrator()
-        && uid != request.auth.uid
-        && targetRole != 'owner'
-        && (actorRole == 'owner' || targetRole != 'admin');
+      return userManager()
+        && managerMayTarget(actorRole, targetRole, uid);
+    }
+
+    function mayManageInvitationRole(role) {
+      let actorRole = currentUserRecord().data.role;
+      return userManager()
+        && (actorRole == 'owner'
+          || (actorRole == 'admin' && role in ['training_manager', 'user'])
+          || (actorRole == 'training_manager' && role == 'user'));
+    }
+
+    function mayGrantInvitationRole(role) {
+      return userManager()
+        && roleMayBeGranted(currentUserRecord().data.role, role);
     }
 
     match /users/{uid} {
       /* First sign-in may only create the caller's own pending USER record.
-         An invitation may pre-authorize USER, TRAINING_MANAGER or ADMIN.
-         OWNER is established separately through the one-time bootstrap below. */
+         A valid invitation may pre-authorize the exact role granted by the
+         inviter's hierarchy: Owner -> Owner/Admin, Admin -> Training Manager,
+         Training Manager -> User. The immutable /system/access ownerUid still
+         identifies the protected Primary Owner. */
       allow create: if ownUser(uid)
         && validUserShape(request.resource.data)
         && request.resource.data.uid == request.auth.uid
@@ -140,37 +175,38 @@ service cloud.firestore {
           && request.resource.data.status == 'pending')
           || invitedUserCreate(request.resource.data));
 
-      allow read: if ownUser(uid) || administrator();
+      allow read: if ownUser(uid) || userManager();
 
-      /* Owner/Admin may manage other accounts, but nobody can create a second
-         Owner through User Management. The original Owner account is protected.
-         A legacy active Admin may promote only itself after winning the
-         one-time /system/access ownership claim. */
+      /* User Management is hierarchical. Owner may appoint another Owner or an
+         Administrator; Admin may appoint a Training Manager; Training Manager
+         may appoint a User. Managers may approve/block lower roles, while the
+         Primary Owner in /system/access remains protected. */
       allow update: if validUserShape(request.resource.data)
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.email == resource.data.email
-        && (administratorManagesOther(uid)
+        && (managerManagesOther(uid)
           || ownerBootstrap(uid)
           || ownerSelfIdentity(uid)
           || selfProfileOnly(uid));
 
-      allow delete: if administratorMayDelete(uid);
+      allow delete: if managerMayDelete(uid);
     }
 
     match /invitations/{email} {
       allow get: if signedIn() && request.auth.token.email.lower() == email;
-      allow list: if administrator();
-      allow create: if administrator()
+      allow list: if userManager();
+      allow create: if userManager()
         && validInviteShape(request.resource.data)
         && request.resource.data.email == email
-        && (request.resource.data.role != 'admin' || owner());
-      allow update: if administrator()
+        && mayGrantInvitationRole(request.resource.data.role);
+      allow update: if userManager()
         && validInviteShape(request.resource.data)
         && request.resource.data.email == email
-        && (resource.data.role != 'admin' || owner())
-        && (request.resource.data.role != 'admin' || owner());
-      allow delete: if administrator()
-        && (resource.data.role != 'admin' || owner());
+        && mayManageInvitationRole(resource.data.role)
+        && (request.resource.data.role == resource.data.role
+          || mayGrantInvitationRole(request.resource.data.role));
+      allow delete: if userManager()
+        && mayManageInvitationRole(resource.data.role);
     }
 
     match /system/access {

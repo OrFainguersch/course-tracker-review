@@ -35,15 +35,19 @@ assert(auth.includes("code==='auth/cancelled-popup-request'")&&auth.includes('wa
 assert(!auth.includes("identityToolkitRequest(")&&!auth.includes("startStandaloneGoogleSignIn(")&&!auth.includes("signInWithRedirect("),'Authentication must not use the temporary direct OAuth redirect experiment');
 assert(!auth.includes("addScope('mail.read')")&&!auth.includes("addScope('calendars.read')"),
   'FLYMPUS authentication must not request mailbox or calendar scopes');
-assert(auth.includes("['admin','training_manager'].includes(invitation?.role)")&&auth.includes("status:preauthorized?'active':'pending'"),
-  'An uninvited first-time account must start as pending USER while an invitation may pre-authorize USER, TRAINING_MANAGER or ADMIN access');
+assert(auth.includes("['owner','admin','training_manager','user'].includes(invitation?.role)")&&auth.includes("status:preauthorized?'active':'pending'"),
+  'An uninvited first-time account must start as pending USER while a valid invitation may pre-authorize the exact hierarchy-granted role');
 assert(auth.includes("profile.status!=='active'"),'Only active profiles may unlock authenticated access');
 assert(auth.includes("APP_ROLE_ORDER=Object.freeze(['user','training_manager','admin','owner'])")&&auth.includes("function hasCapability("),
   'Client role context must use explicit tiered application roles and capabilities');
-assert(auth.includes('openUserManagement')&&auth.includes("getDocs(firestoreSdk.collection(db,'users'))"),'Active administrators must have a Firestore-backed User Management screen');
+assert(auth.includes('openUserManagement')&&auth.includes("getDocs(firestoreSdk.collection(db,'users'))"),'Active user managers must have a Firestore-backed User Management screen');
 assert(auth.includes("action==='approve'")&&auth.includes("action==='block'")&&auth.includes("action==='reactivate'"),'User Management must support approval, blocking and reactivation');
 assert(auth.includes('updateManagedUserRole')&&auth.includes('updateManagedInvitationRole')&&auth.includes("role==='owner'"),
   'User Management must support tiered role changes while protecting OWNER');
+assert(auth.includes("if(actor==='owner')return ['admin','owner']")&&auth.includes("if(actor==='admin')return ['training_manager']")&&auth.includes("if(actor==='training_manager')return ['user']"),
+  'Client role selectors must expose only the next role down, with Owner additionally able to appoint Owner');
+assert(auth.includes("training_manager:Object.freeze({")&&auth.includes("capabilities:Object.freeze(['users.manage','courses.create','courses.manageAssigned'"),
+  'Training Manager must have User Management capability for lower-tier Users');
 assert(auth.includes('FLYMPUS_STORAGE_SCOPE?.setUid')&&auth.includes('FLYMPUS_STORAGE_SCOPE?.clearUid'),'Authentication lifecycle must bind and clear UID-scoped browser state');
 assert((auth.match(/FLYMPUS_STORAGE_SCOPE\?\.clearUid\?\.\(\)/g)||[]).length===1,'Only explicit sign-out may clear the durable UID namespace hint');
 assert(auth.includes('if(scopeChanged||migratedLegacyCount>0){location.reload();return}'),'UID selection and legacy migration must use one consolidated reload');
@@ -78,12 +82,14 @@ assert(rules.includes("data.role in ['user', 'training_manager', 'admin', 'owner
   'Firestore must recognize the complete application-role hierarchy');
 assert(rules.includes("request.resource.data.role == 'user'")&&rules.includes("request.resource.data.status == 'pending'"),
   'Uninvited first sign-in must remain pending USER');
-assert(rules.includes("currentUserRecord().data.role in ['owner', 'admin']"),
-  'User administration must be limited to active OWNER or ADMIN accounts');
-assert(rules.includes('match /system/access')&&rules.includes('ownerBootstrap(uid)')&&rules.includes("currentRole != 'owner'")&&rules.includes("nextRole != 'owner'"),
-  'Firestore must provide a one-time Owner bootstrap and protect the Owner from administrator mutation');
-assert(rules.includes("actorRole == 'admin'")&&rules.includes("currentRole != 'admin'")&&rules.includes("nextRole != 'admin'"),
-  'Administrators must manage only lower application roles; peer administrators remain Owner-managed');
+assert(rules.includes("currentUserRecord().data.role in ['owner', 'admin', 'training_manager']"),
+  'User Management must be available to active OWNER, ADMIN and TRAINING_MANAGER accounts');
+assert(rules.includes('match /system/access')&&rules.includes('ownerBootstrap(uid)')&&rules.includes("uid == systemOwnerUid()"),
+  'Firestore must preserve the one-time Owner bootstrap and protect the Primary Owner');
+assert(rules.includes("actorRole == 'owner' && nextRole in ['owner', 'admin']")&&rules.includes("actorRole == 'admin' && nextRole == 'training_manager'")&&rules.includes("actorRole == 'training_manager' && nextRole == 'user'"),
+  'Role grants must follow the one-step hierarchy while allowing Owner to appoint another Owner');
+assert(rules.includes("actorRole == 'admin' && targetRole in ['training_manager', 'user']")&&rules.includes("actorRole == 'training_manager' && targetRole == 'user'"),
+  'Administrators and Training Managers may manage only lower account tiers');
 assert(rules.includes('allow read, write: if false;'),'Unmigrated training collections must remain fail-closed');
 assert(rules.includes("data.keys().hasOnly"),'User documents must reject unexpected authority-like fields');
 assert(rules.includes("affectedKeys().hasOnly"),'Self-service profile writes must be field-limited');
@@ -102,8 +108,8 @@ assert(auth.includes("'User Management':'ניהול משתמשים'")&&auth.incl
 assert(auth.includes('bindAuthLanguageSync()'),'Dynamic auth/admin UI must react when the app language changes');
 assert(auth.includes('roleGuideHtml()')&&auth.includes('FLYMPUS role and course role are separate.'),
   'User Management must explain role meaning and explicitly separate FLYMPUS roles from course roles');
-assert(auth.includes('Invite and approve Administrators, Training Managers and Users')&&auth.includes('Invite and approve Training Managers and Users')&&auth.includes('No user invitations or approvals'),
-  'Role guide must make the Owner/Admin invitation and approval split explicit');
+assert(auth.includes('May appoint another Owner or an Administrator')&&auth.includes('May appoint a Training Manager')&&auth.includes('May invite and approve Users')&&auth.includes('Cannot appoint the same role or a higher role'),
+  'Role guide must clearly explain the role-assignment pyramid and Owner exception');
 assert(auth.includes('data-managed-user-form')&&auth.includes('updateManagedUserDetails')&&auth.includes('name="role"')&&auth.includes('Email is tied to the sign-in account and cannot be changed here.'),
   'Edit must manage Name and Role together while keeping the sign-in email read-only');
 assert(auth.includes("tr('Role')")&&!auth.includes("<span>'+esc(tr('App role'))+'</span><select name=\"role\">"),
@@ -117,8 +123,8 @@ assert(auth.includes("firestoreSdk.collection(db,'invitations')")&&auth.includes
 assert(auth.includes('data-user-invite-form')&&auth.includes('name="email"')&&auth.includes('name="role"'),'User Management must expose Add User email and application-role controls');
 assert(auth.includes("preauthorized?'active':'pending'"),'A pre-authorized email must become active on first sign-in');
 assert(rules.includes('match /invitations/{email}')&&rules.includes('request.auth.token.email.lower() == email'),'Invitation reads must be bound to the signed-in normalized email');
-assert(rules.includes('invitedUserCreate(request.resource.data)')&&rules.includes("data.role in ['user', 'training_manager', 'admin']"),
-  'First sign-in may inherit only a non-Owner administrator-created invitation role');
+assert(rules.includes('invitedUserCreate(request.resource.data)')&&rules.includes("data.role in ['user', 'training_manager', 'admin', 'owner']")&&rules.includes('mayGrantInvitationRole(request.resource.data.role)'),
+  'First sign-in may inherit only a role that was validly granted through the hierarchy');
 assert(theme.includes('Single theme authority'),'Theme lifecycle must have one authoritative writer');
 assert(theme.includes("window.addEventListener('pageshow'")&&theme.includes('reassertStableTheme()'),'iOS resume must reassert the committed theme without probing transient state');
 assert(!storage.includes('installResumeThemeHold')&&!theme.includes('setTimeout('),'Theme lifecycle must not retain competing timeout-based resume writers');

@@ -27,6 +27,7 @@ let userManagementPreviousBodyTop='';
 let managedDirectoryCache=null;
 let managedDirectoryPromise=null;
 let managedNameEditUid='';
+let primaryOwnerUid='';
 let userManagementCloseTimer=null;
 let returningScopedSession=!!window.FLYMPUS_STORAGE_SCOPE?.currentUid?.();
 let silentAuthLoadingTimer=null;
@@ -38,18 +39,18 @@ const APP_ROLE_ORDER=Object.freeze(['user','training_manager','admin','owner']);
 const APP_ROLE_DEFINITIONS=Object.freeze({
   owner:Object.freeze({
     label:'Owner',
-    description:'Complete control of FLYMPUS, including users, administrators, all courses, global Packages and protected system ownership.',
+    description:'Complete control of FLYMPUS. An Owner may appoint another Owner or an Administrator and may manage every lower role. The Primary Owner remains protected.',
     capabilities:Object.freeze(['users.manage','courses.create','courses.manageAll','courses.manageAssigned','packages.manageGlobal','packages.overrideCourse','roster.manage','evaluations.write'])
   }),
   admin:Object.freeze({
     label:'Administrator',
-    description:'Manages Training Managers, Users and all training operations, including courses and global Packages, but cannot manage Administrators or change the Owner.',
+    description:'Manages lower-level accounts and all training operations. An Administrator may appoint a Training Manager, but cannot appoint another Administrator or an Owner.',
     capabilities:Object.freeze(['users.manage','courses.create','courses.manageAll','courses.manageAssigned','packages.manageGlobal','packages.overrideCourse','roster.manage','evaluations.write'])
   }),
   training_manager:Object.freeze({
     label:'Training Manager',
-    description:'Creates and manages training, course rosters and course-specific Package changes without access to user administration or global system ownership.',
-    capabilities:Object.freeze(['courses.create','courses.manageAssigned','packages.overrideCourse','roster.manage','evaluations.write'])
+    description:'Creates and manages training, course rosters and course-specific Package changes. A Training Manager may invite, approve and manage Users, but cannot appoint another Training Manager or any higher role.',
+    capabilities:Object.freeze(['users.manage','courses.create','courses.manageAssigned','packages.overrideCourse','roster.manage','evaluations.write'])
   }),
   user:Object.freeze({
     label:'User',
@@ -98,13 +99,13 @@ const AUTH_HE_UI=Object.freeze({
   'Contact a FLYMPUS administrator if you believe this is incorrect.':'אם לדעתך מדובר בטעות, פנה למנהל FLYMPUS.','Signed-in user':'משתמש מחובר','Sign out':'התנתק','Try again':'נסה שוב',
   'Signed in':'מחובר','Owner':'בעלים','Administrator':'מנהל מערכת','Training Manager':'מנהל הדרכה','User':'משתמש','User Management':'ניהול משתמשים','Sign out of FLYMPUS':'התנתקות מ־FLYMPUS',
   'Application roles':'תפקידי מערכת','Application role':'תפקיד מערכת','Role':'תפקיד','Role guide':'מדריך תפקידים','What each role can do':'מה כל תפקיד מאפשר',
-  'Complete control of FLYMPUS, including users, administrators, all courses, global Packages and protected system ownership.':'שליטה מלאה ב־FLYMPUS, כולל משתמשים, מנהלי מערכת, כל הקורסים, חבילות גלובליות ובעלות מוגנת על המערכת.',
-  'Manages Training Managers, Users and all training operations, including courses and global Packages, but cannot manage Administrators or change the Owner.':'מנהל מנהלי הדרכה, משתמשים ואת כלל פעילות ההדרכה, כולל קורסים וחבילות גלובליות, אך אינו יכול לנהל מנהלי מערכת או לשנות את בעל המערכת.',
-  'Creates and manages training, course rosters and course-specific Package changes without access to user administration or global system ownership.':'יוצר ומנהל הדרכות, סגלי קורס והתאמות חבילה ברמת הקורס, ללא גישה לניהול משתמשים או לבעלות על המערכת.',
+  'Complete control of FLYMPUS. An Owner may appoint another Owner or an Administrator and may manage every lower role. The Primary Owner remains protected.':'שליטה מלאה ב־FLYMPUS. בעלים יכול למנות בעלים נוסף או מנהל מערכת ולנהל כל תפקיד נמוך יותר. הבעלים הראשי נשאר מוגן.',
+  'Manages lower-level accounts and all training operations. An Administrator may appoint a Training Manager, but cannot appoint another Administrator or an Owner.':'מנהל חשבונות בדרגות נמוכות יותר ואת כלל פעילות ההדרכה. מנהל מערכת יכול למנות מנהל הדרכה, אך אינו יכול למנות מנהל מערכת נוסף או בעלים.',
+  'Creates and manages training, course rosters and course-specific Package changes. A Training Manager may invite, approve and manage Users, but cannot appoint another Training Manager or any higher role.':'יוצר ומנהל הדרכות, סגלי קורס והתאמות חבילה ברמת הקורס. מנהל הדרכה יכול להזמין, לאשר ולנהל משתמשים, אך אינו יכול למנות מנהל הדרכה נוסף או תפקיד גבוה יותר.',
   'Works inside assigned courses and records operational data such as evaluations and forms, without changing course structure, rosters or Packages.':'עובד בקורסים שאליהם שובץ ומתעד נתונים תפעוליים כגון הערכות וטפסים, ללא שינוי מבנה הקורס, הסגל או החבילות.',
   'Full system control':'שליטה מלאה במערכת','Manage users and administrators':'ניהול משתמשים ומנהלי מערכת','Manage all courses and global Packages':'ניהול כל הקורסים והחבילות הגלובליות','Protected Owner account':'חשבון בעלים מוגן',
   'System administration':'ניהול מערכת','Manage Training Managers and Users':'ניהול מנהלי הדרכה ומשתמשים','Administrators are managed by the Owner':'מנהלי מערכת מנוהלים על ידי הבעלים','Manage all courses':'ניהול כל הקורסים','Manage global Packages':'ניהול חבילות גלובליות','Managed by Owner':'מנוהל על ידי הבעלים',
-  'Training administration':'ניהול הדרכה','Create and manage courses':'יצירה וניהול קורסים','Manage course rosters':'ניהול סגלי קורס','Create course-specific Package overrides':'יצירת התאמות חבילה ברמת הקורס','No user administration':'ללא ניהול משתמשים','No user invitations or approvals':'ללא הזמנת משתמשים או אישורם','Invite and approve Administrators, Training Managers and Users':'הזמנה ואישור של מנהלי מערכת, מנהלי הדרכה ומשתמשים','Invite and approve Training Managers and Users':'הזמנה ואישור של מנהלי הדרכה ומשתמשים',
+  'Training administration':'ניהול הדרכה','Create and manage courses':'יצירה וניהול קורסים','Manage course rosters':'ניהול סגלי קורס','Create course-specific Package overrides':'יצירת התאמות חבילה ברמת הקורס','No user administration':'ללא ניהול משתמשים','No user invitations or approvals':'ללא הזמנת משתמשים או אישורם','May appoint another Owner or an Administrator':'יכול למנות בעלים נוסף או מנהל מערכת','May appoint a Training Manager':'יכול למנות מנהל הדרכה','May invite and approve Users':'יכול להזמין ולאשר משתמשים','Cannot appoint the same role or a higher role':'לא יכול למנות תפקיד זהה לשלו או תפקיד גבוה יותר','Primary Owner is protected':'הבעלים הראשי מוגן','Manage lower-level accounts and all courses':'ניהול חשבונות בדרגות נמוכות יותר וכל הקורסים',
   'Operational access':'גישה תפעולית','Work in assigned courses':'עבודה בקורסים משויכים','Submit evaluations and forms':'הזנת הערכות וטפסים','No structural course editing':'ללא עריכת מבנה הקורס',
   'FLYMPUS role and course role are separate. A person can be a User in FLYMPUS and still be the Course Manager of a specific course.':'תפקיד FLYMPUS ותפקיד הקורס נפרדים. אדם יכול להיות משתמש רגיל ב־FLYMPUS ובמקביל מנהל קורס בקורס מסוים.',
   'Change role':'שנה תפקיד','Select role':'בחר תפקיד','Role updated':'התפקיד עודכן','Only the Owner can perform this action.':'רק בעל המערכת יכול לבצע פעולה זו.',
@@ -117,7 +118,7 @@ const AUTH_HE_UI=Object.freeze({
   'Invited':'הוזמן','Pending':'ממתין','Pending approval':'ממתין לאישור','Active':'פעיל','Blocked':'חסום','Invited users':'משתמשים שהוזמנו','Pending users':'משתמשים ממתינים','Approval requests':'בקשות לאישור','Active users':'משתמשים פעילים','Blocked users':'משתמשים חסומים','Pre-authorized and not signed in yet.':'אושרו מראש ועדיין לא התחברו.','Signed in without an invitation and waiting for approval.':'התחברו ללא הזמנה וממתינים לאישור.',
   'Current account':'החשבון הנוכחי','Approve':'אשר','Block':'חסום','Reactivate':'הפעל מחדש','Remove invite':'בטל הזמנה','Not signed in yet':'טרם התחבר',
   'Full name':'שם מלא','Official full name':'שם מלא רשמי','Nickname':'כינוי','Edit':'עריכה','Edit name':'ערוך שם','Edit official name':'ערוך שם רשמי','Save name':'שמור שם','Save official name':'שמור שם רשמי','Cancel':'ביטול','Enter a display name.':'יש להזין שם תצוגה.','Enter an official name.':'יש להזין שם רשמי.','Name updated':'השם עודכן','Official name updated':'השם הרשמי עודכן','Nickname updated':'הכינוי עודכן','Nickname cleared':'הכינוי הוסר','Could not update name':'לא ניתן לעדכן את השם','Could not update official name':'לא ניתן לעדכן את השם הרשמי','Could not update nickname':'לא ניתן לעדכן את הכינוי','Open My Profile':'פתח את הפרופיל שלי','Nickname label':'כינוי',
-  'Unnamed user':'משתמש ללא שם','No email':'ללא מייל','Unknown':'לא ידוע','Loading users…':'טוען משתמשים…','Could not load users':'לא ניתן לטעון משתמשים','Administrator access is required.':'נדרשת הרשאת מנהל.',
+  'Unnamed user':'משתמש ללא שם','No email':'ללא מייל','Unknown':'לא ידוע','Loading users…':'טוען משתמשים…','Could not load users':'לא ניתן לטעון משתמשים','User Management access is required.':'נדרשת הרשאת מנהל.',
   'This is your current account.':'זה החשבון הנוכחי שלך.','Could not add user':'לא ניתן להוסיף משתמש',
   'Remove this invitation?':'לבטל את ההזמנה הזאת?','The email will no longer be pre-authorized for FLYMPUS.':'כתובת המייל לא תהיה עוד מאושרת מראש ל־FLYMPUS.','Remove':'בטל',
   'Approve this user?':'לאשר את המשתמש הזה?','This account will be able to access FLYMPUS.':'החשבון יוכל לגשת ל־FLYMPUS.','Block this user?':'לחסום את המשתמש הזה?','This account will immediately lose application access.':'החשבון יאבד מיד את הגישה לאפליקציה.',
@@ -278,7 +279,7 @@ async function ensureUserProfile(user){
   const email=canonicalEmail(user.email);let invitation=null;
   try{const snap=await firestoreSdk.getDoc(firestoreSdk.doc(db,'invitations',email));if(snap.exists())invitation=snap.data()}catch(err){console.warn('FLYMPUS invitation lookup failed; continuing as pending',err)}
   const preauthorized=invitation?.status==='active'&&canonicalEmail(invitation?.email)===email;
-  const profile={uid:user.uid,email,displayName:user.displayName||invitation?.displayName||'',preferredName:'',photoURL:user.photoURL||'',providerIds:(user.providerData||[]).map(x=>String(x?.providerId||'')).filter(Boolean),role:preauthorized&&['admin','training_manager'].includes(invitation?.role)?invitation.role:'user',status:preauthorized?'active':'pending',createdAt:firestoreSdk.serverTimestamp()};
+  const profile={uid:user.uid,email,displayName:user.displayName||invitation?.displayName||'',preferredName:'',photoURL:user.photoURL||'',providerIds:(user.providerData||[]).map(x=>String(x?.providerId||'')).filter(Boolean),role:preauthorized&&['owner','admin','training_manager','user'].includes(invitation?.role)?invitation.role:'user',status:preauthorized?'active':'pending',createdAt:firestoreSdk.serverTimestamp()};
   await firestoreSdk.setDoc(ref,profile);return profile
 }
 function normalizeProfile(profile={}){
@@ -410,53 +411,68 @@ async function sendManagedInvitationEmail(invitation){
   if(!response.ok)throw new Error(String(result?.error||'Invitation email could not be sent.'));
   return {sent:true,configured:true}
 }
-function managementRoleOptions(selected,{includeOwner=false}={}){
-  const current=normalizeAppRole(selected),actor=normalizeAppRole(currentProfile?.role);
-  let roles=includeOwner?['owner','admin','training_manager','user']:(actor==='owner'?['admin','training_manager','user']:['training_manager','user']);
-  if(!roles.includes(current)&&current!=='owner')roles=[current,...roles];
+function assignableAppRoles(actorRole=normalizeAppRole(currentProfile?.role)){
+  const actor=normalizeAppRole(actorRole);
+  if(actor==='owner')return ['admin','owner'];
+  if(actor==='admin')return ['training_manager'];
+  if(actor==='training_manager')return ['user'];
+  return []
+}
+function defaultAssignableRole(){return assignableAppRoles()[0]||'user'}
+function managementRoleOptions(selected,{forInvite=false}={}){
+  const current=normalizeAppRole(selected),roles=[...assignableAppRoles()];
+  if(!forInvite&&!roles.includes(current))roles.push(current);
   return [...new Set(roles)].map(role=>'<option value="'+esc(role)+'" '+(current===role?'selected':'')+'>'+esc(managementRoleLabel(role))+'</option>').join('')
 }
-function canManageTargetRole(role){
+function canManageTargetRole(role,uid=''){
   const actor=normalizeAppRole(currentProfile?.role),target=normalizeAppRole(role);
-  if(actor==='owner')return target!=='owner';
-  if(actor==='admin')return !['owner','admin'].includes(target);
+  if(actor==='owner'){
+    if(uid&&String(uid)===String(primaryOwnerUid||''))return false;
+    return true
+  }
+  if(actor==='admin')return ['training_manager','user'].includes(target);
+  if(actor==='training_manager')return target==='user';
   return false
 }
 function canAssignAppRole(role){
-  const actor=normalizeAppRole(currentProfile?.role),target=normalizeAppRole(role);
-  if(target==='owner')return false;
-  if(actor==='owner')return ['admin','training_manager','user'].includes(target);
-  if(actor==='admin')return ['training_manager','user'].includes(target);
-  return false
+  return assignableAppRoles().includes(normalizeAppRole(role))
 }
 function roleGuideHtml(){
   const defs=[
-    ['owner','Full system control',['Invite and approve Administrators, Training Managers and Users','Manage users and administrators','Manage all courses and global Packages','Protected Owner account']],
-    ['admin','System administration',['Invite and approve Training Managers and Users','Manage Training Managers and Users','Manage all courses','Manage global Packages','Administrators are managed by the Owner']],
-    ['training_manager','Training administration',['Create and manage courses','Manage course rosters','Create course-specific Package overrides','No user invitations or approvals']],
+    ['owner','Full system control',['May appoint another Owner or an Administrator','Manage all courses and global Packages','Primary Owner is protected']],
+    ['admin','System administration',['May appoint a Training Manager','Manage lower-level accounts and all courses','Cannot appoint the same role or a higher role']],
+    ['training_manager','Training administration',['May invite and approve Users','Create and manage courses','Manage course rosters','Cannot appoint the same role or a higher role']],
     ['user','Operational access',['Work in assigned courses','Submit evaluations and forms','No structural course editing']]
   ];
   return '<section class="flympusRoleGuide"><div class="flympusRoleGuideHead"><div><span>'+esc(tr('Role guide'))+'</span><h2>'+esc(tr('What each role can do'))+'</h2></div></div><div class="flympusRoleGuideGrid">'+defs.map(([role,title,items])=>'<article class="flympusRoleGuideCard '+esc(role)+'"><div class="flympusRoleGuideTitle"><b>'+esc(managementRoleLabel(role))+'</b><small>'+esc(tr(title))+'</small></div><p>'+esc(tr(roleDefinition(role).description))+'</p><ul>'+items.map(item=>'<li>'+esc(tr(item))+'</li>').join('')+'</ul></article>').join('')+'</div><div class="flympusRoleSeparationNote">'+esc(tr('FLYMPUS role and course role are separate. A person can be a User in FLYMPUS and still be the Course Manager of a specific course.'))+'</div></section>'
 }
 function invitationCard(invite){
-  const name=String(invite.displayName||'').trim(),email=canonicalEmail(invite.email),role=normalizeAppRole(invite.role),protectedAdmin=role==='admin'&&normalizeAppRole(currentProfile?.role)!=='owner';
-  const actions=protectedAdmin?'<span class="flympusOwnerProtected">'+esc(tr('Managed by Owner'))+'</span>':'<label class="flympusRoleSelectWrap"><span>'+esc(tr('Role'))+'</span><select data-invite-role-select data-invite-email="'+esc(email)+'" aria-label="'+esc(tr('Change role'))+'">'+managementRoleOptions(role)+'</select></label>'+managementInviteActionButton('remove-invite',email,'Remove invite','danger');
+  const name=String(invite.displayName||'').trim(),email=canonicalEmail(invite.email),role=normalizeAppRole(invite.role),manageable=canManageTargetRole(role);
+  const options=managementRoleOptions(role),roleControl=options?'<label class="flympusRoleSelectWrap"><span>'+esc(tr('Role'))+'</span><select data-invite-role-select data-invite-email="'+esc(email)+'" aria-label="'+esc(tr('Change role'))+'">'+options+'</select></label>':'';
+  const actions=manageable?roleControl+managementInviteActionButton('remove-invite',email,'Remove invite','danger'):'<span class="flympusOwnerProtected">'+esc(tr('Managed by Owner'))+'</span>';
   return '<article class="flympusUserCard invited"><div class="flympusUserAvatar">'+esc(String(name||email||'?').slice(0,1).toUpperCase())+'</div><div class="flympusUserIdentity"><b>'+esc(name||email)+'</b><span>'+esc(email)+'</span><div class="flympusUserMeta"><i class="role '+esc(role)+'">'+esc(managementRoleLabel(role))+'</i></div></div><div class="flympusUserActions">'+actions+'</div></article>'
 }
 function renderUserManagement(directory,error='',rootOverride=null){
   const el=rootOverride||document.getElementById('flympusUserManagementPageRoot')||userManagementRoot(),body=el.querySelector('[data-user-management-body]');syncUserManagementStaticLanguage(el);const users=Array.isArray(directory)?directory:(directory?.users||[]),invitations=Array.isArray(directory?.invitations)?directory.invitations:[];lastManagedDirectory={users:[...users],invitations:[...invitations]};lastManagedError=error;
   const normalized=users.map(x=>normalizeProfile(x)),counts={invited:invitations.length,pending:0,active:0,blocked:0};normalized.forEach(x=>counts[x.status]++);const tabs=['invited','pending','active','blocked'];
-  const addForm='<section class="flympusUserInviteBox"><div class="flympusUserInviteHead"><h2>'+esc(tr('Add user'))+'</h2><p>'+esc(tr('Pre-authorize an email before the person signs in for the first time.'))+'</p></div><form class="flympusUserInviteForm" data-user-invite-form novalidate><label><span>'+esc(tr('Name'))+' <i class="flympusRequiredMark" aria-hidden="true">*</i></span><input name="displayName" autocomplete="name" required aria-required="true"></label><label class="email"><span>'+esc(tr('Email address'))+' <i class="flympusRequiredMark" aria-hidden="true">*</i></span><input name="email" type="email" inputmode="email" autocomplete="email" required aria-required="true"></label><label><span>'+esc(tr('Role'))+'</span><select name="role">'+managementRoleOptions('user')+'</select></label><button class="flympusUserAddButton" type="submit">'+esc(tr('Invite user'))+'</button><small>'+esc(tr('Creates a FLYMPUS invitation and pre-authorizes this email for first sign-in.'))+'</small></form></section>';
+  const defaultInviteRole=defaultAssignableRole(),addForm='<section class="flympusUserInviteBox"><div class="flympusUserInviteHead"><h2>'+esc(tr('Add user'))+'</h2><p>'+esc(tr('Pre-authorize an email before the person signs in for the first time.'))+'</p></div><form class="flympusUserInviteForm" data-user-invite-form novalidate><label><span>'+esc(tr('Name'))+' <i class="flympusRequiredMark" aria-hidden="true">*</i></span><input name="displayName" autocomplete="name" required aria-required="true"></label><label class="email"><span>'+esc(tr('Email address'))+' <i class="flympusRequiredMark" aria-hidden="true">*</i></span><input name="email" type="email" inputmode="email" autocomplete="email" required aria-required="true"></label><label><span>'+esc(tr('Role'))+'</span><select name="role">'+managementRoleOptions(defaultInviteRole,{forInvite:true})+'</select></label><button class="flympusUserAddButton" type="submit">'+esc(tr('Invite user'))+'</button><small>'+esc(tr('Creates a FLYMPUS invitation and pre-authorizes this email for first sign-in.'))+'</small></form></section>';
   const groupHtml=status=>{if(status==='invited'){const rows=invitations.slice().sort((a,b)=>String(a.displayName||a.email||'').localeCompare(String(b.displayName||b.email||''))),help=managementGroupHelp(status);return '<section class="flympusUserGroup"><div class="flympusUserGroupHead"><div class="flympusUserGroupTitle"><h2>'+esc(managementGroupLabel(status))+'</h2>'+(help?'<small>'+esc(help)+'</small>':'')+'</div><span>'+rows.length+'</span></div><div class="flympusUserList">'+(rows.length?rows.map(invitationCard).join(''):'<div class="flympusUserEmpty">'+esc(managementEmptyLabel(status))+'</div>')+'</div></section>'}
-    const rows=normalized.filter(user=>user.status===status).sort((a,b)=>String(a.displayName||a.email||'').localeCompare(String(b.displayName||b.email||''))),help=managementGroupHelp(status);return '<section class="flympusUserGroup"><div class="flympusUserGroupHead"><div class="flympusUserGroupTitle"><h2>'+esc(managementGroupLabel(status))+'</h2>'+(help?'<small>'+esc(help)+'</small>':'')+'</div><span>'+rows.length+'</span></div><div class="flympusUserList">'+(rows.length?rows.map(user=>{const self=user.uid===currentUser?.uid,protectedOwner=user.role==='owner'&&!self,protectedAdmin=user.role==='admin'&&normalizeAppRole(currentProfile?.role)!=='owner',editableUser=(self&&normalizeAppRole(currentProfile?.role)==='owner')||(!self&&canManageTargetRole(user.role)),editingUser=editableUser&&managedNameEditUid===user.uid,preferredName=String(user.preferredName||'').trim(),officialName=String(user.displayName||'').trim(),roleBadge='<span class="flympusUserRoleBadge '+esc(user.role)+'">'+esc(managementRoleLabel(user.role))+'</span>',currentBadge=self?'<span class="flympusCurrentAdmin">'+esc(tr('Current account'))+'</span>':'';if(editingUser){const roleControl=self?'<label><span>'+esc(tr('Role'))+'</span><input name="roleLabel" value="'+esc(managementRoleLabel(user.role))+'" readonly aria-readonly="true"></label>':'<label><span>'+esc(tr('Role'))+'</span><select name="role">'+managementRoleOptions(user.role)+'</select></label>';return '<article class="flympusUserCard '+esc(user.role)+' editing"><div class="flympusUserAvatar">'+esc(String(preferredName||officialName||user.email||'?').trim().slice(0,1).toUpperCase())+'</div><form class="flympusManagedUserForm" data-managed-user-form data-user-uid="'+esc(user.uid)+'"><div class="flympusManagedUserFields"><label><span>'+esc(tr('Official full name'))+'</span><input name="displayName" autocomplete="name" maxlength="80" required value="'+esc(officialName)+'"></label><label><span>'+esc(tr('Email address'))+'</span><input name="email" type="email" value="'+esc(user.email||'')+'" readonly aria-readonly="true"><small>'+esc(tr('Email is tied to the sign-in account and cannot be changed here.'))+'</small></label>'+roleControl+'</div><div class="flympusManagedUserActions"><button type="button" data-user-name-cancel>'+esc(tr('Cancel'))+'</button><button type="submit">'+esc(tr('Save changes'))+'</button></div></form></article>'}let actions='';if(protectedOwner)actions='<span class="flympusOwnerProtected">'+esc(tr('Protected Owner account'))+'</span>';else if(protectedAdmin)actions='<span class="flympusOwnerProtected">'+esc(tr('Managed by Owner'))+'</span>';else{if(editableUser)actions+='<button type="button" class="flympusUserNameEdit" data-user-name-edit data-user-uid="'+esc(user.uid)+'" aria-label="'+esc(tr('Edit'))+'"><span aria-hidden="true">✎</span><span>'+esc(tr('Edit'))+'</span></button>';if(!self){if(status==='pending')actions+=managementActionButton('approve',user.uid,'Approve','primary')+managementActionButton('block',user.uid,'Block','danger');else if(status==='active')actions+=managementActionButton('block',user.uid,'Block','danger');else actions+=managementActionButton('reactivate',user.uid,'Reactivate','primary')}}const preferredUi=preferredName&&preferredName!==officialName?'<span class="flympusUserPreferred">'+esc(tr('Nickname label'))+': '+esc(preferredName)+'</span>':'',accountMeta=currentBadge?'<div class="flympusUserMeta">'+currentBadge+'</div>':'';return '<article class="flympusUserCard '+esc(user.role)+(self?' currentAccount':'')+'"><div class="flympusUserAvatar">'+esc(String(preferredName||officialName||user.email||'?').trim().slice(0,1).toUpperCase())+'</div><div class="flympusUserIdentity"><div class="flympusUserNameLine"><b>'+esc(officialName||tr('Unnamed user'))+'</b>'+roleBadge+'</div>'+preferredUi+'<span>'+esc(user.email||tr('No email'))+'</span>'+accountMeta+'</div><div class="flympusUserActions">'+actions+'</div></article>'}).join(''):'<div class="flympusUserEmpty">'+esc(managementEmptyLabel(status))+'</div>')+'</div></section>'};
+    const rows=normalized.filter(user=>user.status===status).sort((a,b)=>String(a.displayName||a.email||'').localeCompare(String(b.displayName||b.email||''))),help=managementGroupHelp(status);return '<section class="flympusUserGroup"><div class="flympusUserGroupHead"><div class="flympusUserGroupTitle"><h2>'+esc(managementGroupLabel(status))+'</h2>'+(help?'<small>'+esc(help)+'</small>':'')+'</div><span>'+rows.length+'</span></div><div class="flympusUserList">'+(rows.length?rows.map(user=>{const self=user.uid===currentUser?.uid,protectedOwner=user.role==='owner'&&!self&&(normalizeAppRole(currentProfile?.role)!=='owner'||String(user.uid||'')===String(primaryOwnerUid||'')),protectedAdmin=!self&&!protectedOwner&&!canManageTargetRole(user.role,user.uid),editableUser=(self&&normalizeAppRole(currentProfile?.role)==='owner')||(!self&&canManageTargetRole(user.role,user.uid)),editingUser=editableUser&&managedNameEditUid===user.uid,preferredName=String(user.preferredName||'').trim(),officialName=String(user.displayName||'').trim(),roleBadge='<span class="flympusUserRoleBadge '+esc(user.role)+'">'+esc(managementRoleLabel(user.role))+'</span>',currentBadge=self?'<span class="flympusCurrentAdmin">'+esc(tr('Current account'))+'</span>':'';if(editingUser){const roleControl=self?'<label><span>'+esc(tr('Role'))+'</span><input name="roleLabel" value="'+esc(managementRoleLabel(user.role))+'" readonly aria-readonly="true"></label>':'<label><span>'+esc(tr('Role'))+'</span><select name="role">'+managementRoleOptions(user.role)+'</select></label>';return '<article class="flympusUserCard '+esc(user.role)+' editing"><div class="flympusUserAvatar">'+esc(String(preferredName||officialName||user.email||'?').trim().slice(0,1).toUpperCase())+'</div><form class="flympusManagedUserForm" data-managed-user-form data-user-uid="'+esc(user.uid)+'"><div class="flympusManagedUserFields"><label><span>'+esc(tr('Official full name'))+'</span><input name="displayName" autocomplete="name" maxlength="80" required value="'+esc(officialName)+'"></label><label><span>'+esc(tr('Email address'))+'</span><input name="email" type="email" value="'+esc(user.email||'')+'" readonly aria-readonly="true"><small>'+esc(tr('Email is tied to the sign-in account and cannot be changed here.'))+'</small></label>'+roleControl+'</div><div class="flympusManagedUserActions"><button type="button" data-user-name-cancel>'+esc(tr('Cancel'))+'</button><button type="submit">'+esc(tr('Save changes'))+'</button></div></form></article>'}let actions='';if(protectedOwner)actions='<span class="flympusOwnerProtected">'+esc(tr('Protected Owner account'))+'</span>';else if(protectedAdmin)actions='<span class="flympusOwnerProtected">'+esc(tr('Managed by Owner'))+'</span>';else{if(editableUser)actions+='<button type="button" class="flympusUserNameEdit" data-user-name-edit data-user-uid="'+esc(user.uid)+'" aria-label="'+esc(tr('Edit'))+'"><span aria-hidden="true">✎</span><span>'+esc(tr('Edit'))+'</span></button>';if(!self){if(status==='pending')actions+=managementActionButton('approve',user.uid,'Approve','primary')+managementActionButton('block',user.uid,'Block','danger');else if(status==='active')actions+=managementActionButton('block',user.uid,'Block','danger');else actions+=managementActionButton('reactivate',user.uid,'Reactivate','primary')}}const preferredUi=preferredName&&preferredName!==officialName?'<span class="flympusUserPreferred">'+esc(tr('Nickname label'))+': '+esc(preferredName)+'</span>':'',accountMeta=currentBadge?'<div class="flympusUserMeta">'+currentBadge+'</div>':'';return '<article class="flympusUserCard '+esc(user.role)+(self?' currentAccount':'')+'"><div class="flympusUserAvatar">'+esc(String(preferredName||officialName||user.email||'?').trim().slice(0,1).toUpperCase())+'</div><div class="flympusUserIdentity"><div class="flympusUserNameLine"><b>'+esc(officialName||tr('Unnamed user'))+'</b>'+roleBadge+'</div>'+preferredUi+'<span>'+esc(user.email||tr('No email'))+'</span>'+accountMeta+'</div><div class="flympusUserActions">'+actions+'</div></article>'}).join(''):'<div class="flympusUserEmpty">'+esc(managementEmptyLabel(status))+'</div>')+'</div></section>'};
   body.innerHTML=(error?statusBlock('error',tr('Could not load users'),error):'')+roleGuideHtml()+addForm+'<div class="flympusUserSummary">'+tabs.map(status=>'<div><strong>'+counts[status]+'</strong><span>'+esc(managementStatusLabel(status))+'</span></div>').join('')+'</div>'+tabs.map(groupHtml).join('');
   const inviteForm=body.querySelector('[data-user-invite-form]');inviteForm?.addEventListener('submit',event=>{event.preventDefault();addManagedUser(event.currentTarget)});inviteForm?.querySelectorAll('input').forEach(input=>input.addEventListener('input',()=>clearManagedFieldError(input)));body.querySelectorAll('[data-user-action]').forEach(btn=>btn.addEventListener('click',()=>updateManagedUser(btn.dataset.userUid,btn.dataset.userAction,btn)));body.querySelectorAll('[data-invite-action]').forEach(btn=>btn.addEventListener('click',()=>updateManagedInvitation(btn.dataset.inviteEmail,btn.dataset.inviteAction,btn)));body.querySelectorAll('[data-user-role-select]').forEach(select=>select.addEventListener('change',()=>updateManagedUserRole(select.dataset.userUid,select.value,select)));body.querySelectorAll('[data-invite-role-select]').forEach(select=>select.addEventListener('change',()=>updateManagedInvitationRole(select.dataset.inviteEmail,select.value,select)));body.querySelectorAll('[data-user-name-edit]').forEach(btn=>btn.addEventListener('click',()=>{managedNameEditUid=String(btn.dataset.userUid||'');renderUserManagement(lastManagedDirectory,lastManagedError,el);requestAnimationFrame(()=>body.querySelector('[data-managed-user-form] input[name="displayName"]')?.focus?.())}));body.querySelectorAll('[data-user-name-cancel]').forEach(btn=>btn.addEventListener('click',()=>{managedNameEditUid='';renderUserManagement(lastManagedDirectory,lastManagedError,el)}));body.querySelectorAll('[data-managed-user-form]').forEach(form=>form.addEventListener('submit',event=>{event.preventDefault();updateManagedUserDetails(String(form.dataset.userUid||''),form)}))
 }
-async function loadManagedUsers(){if(!canManageUsers()||!db||!firestoreSdk)throw new Error(tr('Administrator access is required.'));const snapshot=await firestoreSdk.getDocs(firestoreSdk.collection(db,'users'));return snapshot.docs.map(doc=>({id:doc.id,...doc.data()}))}
-async function loadManagedInvitations(){if(!canManageUsers()||!db||!firestoreSdk)throw new Error(tr('Administrator access is required.'));const snapshot=await firestoreSdk.getDocs(firestoreSdk.collection(db,'invitations'));return snapshot.docs.map(doc=>({id:doc.id,...doc.data()})).filter(x=>x.status==='active')}
-async function loadManagedDirectory(){const [users,invitations]=await Promise.all([loadManagedUsers(),loadManagedInvitations()]);const existingEmails=new Set(users.map(x=>canonicalEmail(x.email)).filter(Boolean));return{users,invitations:invitations.filter(x=>!existingEmails.has(canonicalEmail(x.email)))}}
+async function loadManagedUsers(){if(!canManageUsers()||!db||!firestoreSdk)throw new Error(tr('User Management access is required.'));const snapshot=await firestoreSdk.getDocs(firestoreSdk.collection(db,'users'));return snapshot.docs.map(doc=>({id:doc.id,...doc.data()}))}
+async function loadManagedInvitations(){if(!canManageUsers()||!db||!firestoreSdk)throw new Error(tr('User Management access is required.'));const snapshot=await firestoreSdk.getDocs(firestoreSdk.collection(db,'invitations'));return snapshot.docs.map(doc=>({id:doc.id,...doc.data()})).filter(x=>x.status==='active')}
+async function loadManagedDirectory(){
+  const [users,invitations]=await Promise.all([loadManagedUsers(),loadManagedInvitations()]);
+  if(normalizeAppRole(currentProfile?.role)==='owner'){
+    try{const access=await firestoreSdk.getDoc(firestoreSdk.doc(db,'system','access'));primaryOwnerUid=access.exists()?String(access.data()?.ownerUid||''):''}catch{primaryOwnerUid=''}
+  }else primaryOwnerUid='';
+  const existingEmails=new Set(users.map(x=>canonicalEmail(x.email)).filter(Boolean));
+  return{users,invitations:invitations.filter(x=>!existingEmails.has(canonicalEmail(x.email)))}
+}
 async function prefetchManagedDirectory(force=false){
-  if(!canManageUsers())throw new Error(tr('Administrator access is required.'));
+  if(!canManageUsers())throw new Error(tr('User Management access is required.'));
   if(managedDirectoryCache&&!force)return managedDirectoryCache;
   if(managedDirectoryPromise)return managedDirectoryPromise;
   managedDirectoryPromise=loadManagedDirectory().then(directory=>{managedDirectoryCache=directory;return directory}).finally(()=>{managedDirectoryPromise=null});
@@ -504,13 +520,13 @@ async function mountUserManagementPage(host){
 async function addManagedUser(form){
   if(!canManageUsers()||!db||!firestoreSdk)return;
   const valid=validateManagedInviteForm(form);if(!valid)return;
-  const fd=new FormData(form),email=valid.email,displayName=valid.displayName,requestedRole=normalizeAppRole(String(fd.get('role'))),role=canAssignAppRole(requestedRole)?requestedRole:'user';
+  const fd=new FormData(form),email=valid.email,displayName=valid.displayName,requestedRole=normalizeAppRole(String(fd.get('role'))),role=canAssignAppRole(requestedRole)?requestedRole:defaultAssignableRole();
   const button=form.querySelector('button[type="submit"]');if(button)button.disabled=true;
   try{
     const directory=await prefetchManagedDirectory(true),existing=directory.users.find(x=>canonicalEmail(x.email)===email);
     if(existing?.uid===currentUser?.uid){renderUserManagement(directory,tr('This is your current account.'));return}
     if(existing){
-      if(!canManageTargetRole(existing.role)||!canAssignAppRole(role))throw new Error(tr('Only the Owner can perform this action.'));
+      if(!canManageTargetRole(existing.role,existing.uid)||!canAssignAppRole(role))throw new Error(tr('Only the Owner can perform this action.'));
       await firestoreSdk.updateDoc(firestoreSdk.doc(db,'users',existing.uid),{displayName,role,status:'active',updatedAt:firestoreSdk.serverTimestamp(),updatedBy:currentUser.uid});
       managedDirectoryCache=await loadManagedDirectory();renderUserManagement(managedDirectoryCache);return
     }
@@ -557,7 +573,7 @@ async function updateOwnPreferredName(value){
 async function updateManagedUserOfficialName(uid,value,form=null){
   if(!canManageUsers()||!uid||!db||!firestoreSdk)throw new Error(tr('Could not update official name'));
   const target=(lastManagedDirectory.users||[]).find(user=>user.uid===uid);
-  const self=uid===currentUser?.uid,allowed=self?normalizeAppRole(currentProfile?.role)==='owner':!!target&&canManageTargetRole(target.role);
+  const self=uid===currentUser?.uid,allowed=self?normalizeAppRole(currentProfile?.role)==='owner':!!target&&canManageTargetRole(target.role,uid);
   if(!allowed)throw new Error(tr('Only the Owner can perform this action.'));
   const displayName=normalizeDisplayName(value),input=form?.querySelector?.('input[name="displayName"]');
   if(displayName.length<2){if(input)setManagedFieldError(input,'Enter an official name.');return false}
@@ -585,7 +601,7 @@ async function updateManagedUserOfficialName(uid,value,form=null){
 async function updateManagedUserDetails(uid,form=null){
   if(!canManageUsers()||!uid||!db||!firestoreSdk)throw new Error(tr('Update failed'));
   const target=(lastManagedDirectory.users||[]).find(user=>user.uid===uid);
-  const self=uid===currentUser?.uid,allowed=self?normalizeAppRole(currentProfile?.role)==='owner':!!target&&canManageTargetRole(target.role);
+  const self=uid===currentUser?.uid,allowed=self?normalizeAppRole(currentProfile?.role)==='owner':!!target&&canManageTargetRole(target.role,uid);
   if(!target||!allowed)throw new Error(tr('Only the Owner can perform this action.'));
   const displayName=normalizeDisplayName(String(form?.elements?.displayName?.value||'')),nameInput=form?.elements?.displayName;
   if(displayName.length<2){if(nameInput)setManagedFieldError(nameInput,'Enter an official name.');return false}
@@ -620,7 +636,8 @@ async function updateManagedUserDetails(uid,form=null){
 }
 async function updateManagedUserRole(uid,role,select){
   role=normalizeAppRole(role);if(!canManageUsers()||!uid||uid===currentUser?.uid||!canAssignAppRole(role))return;
-  const previous=lastManagedDirectory.users.find(x=>x.uid===uid)?.role||'user';
+  const target=lastManagedDirectory.users.find(x=>x.uid===uid);if(!target||!canManageTargetRole(target.role,uid))return;
+  const previous=target.role||'user';
   if(previous===role)return;
   const ok=typeof window.siteConfirm==='function'?await window.siteConfirm(tr('The account permissions will be changed.'),{title:tr('Change role'),confirmLabel:tr('Confirm'),tone:'primary'}):true;
   if(!ok){select.value=normalizeAppRole(previous);return}
@@ -642,7 +659,7 @@ async function updateManagedInvitationRole(email,role,select){
   }catch(err){console.error('FLYMPUS invitation role update failed',err);select.disabled=false;select.value=normalizeAppRole(previous);renderUserManagement(lastManagedDirectory,String(err?.message||tr('Update failed')))}
 }
 async function confirmManagedUserAction(action){const copy={approve:['Approve this user?','This account will be able to access FLYMPUS.'],block:['Block this user?','This account will immediately lose application access.'],reactivate:['Reactivate this user?','This account will regain application access.'],'make-admin':['Make this user an administrator?','Administrators can approve users and change application access.'],'make-user':['Remove administrator access?','The account remains active but loses User Management permissions.']}[action]||['Update this user?','The account permissions will be changed.'];if(typeof window.siteConfirm==='function')return window.siteConfirm(tr(copy[1]),{title:tr(copy[0]),confirmLabel:tr('Confirm'),tone:action==='block'?'danger':'primary'});return false}
-async function updateManagedUser(uid,action,button){if(!canManageUsers()||!uid||uid===currentUser?.uid)return;const target=lastManagedDirectory.users.find(x=>x.uid===uid);if(!target||!canManageTargetRole(target.role))return;if(!(await confirmManagedUserAction(action)))return;const changes={updatedAt:firestoreSdk.serverTimestamp(),updatedBy:currentUser.uid};if(action==='approve'||action==='reactivate')changes.status='active';if(action==='block')changes.status='blocked';if(action==='make-admin')changes.role='admin';if(action==='make-user')changes.role='user';button.disabled=true;try{await firestoreSdk.updateDoc(firestoreSdk.doc(db,'users',uid),changes);managedDirectoryCache=await loadManagedDirectory();renderUserManagement(managedDirectoryCache)}catch(err){console.error('FLYMPUS user-management update failed',err);button.disabled=false;renderUserManagement(lastManagedDirectory,String(err?.message||tr('Update failed')))}}
+async function updateManagedUser(uid,action,button){if(!canManageUsers()||!uid||uid===currentUser?.uid)return;const target=lastManagedDirectory.users.find(x=>x.uid===uid);if(!target||!canManageTargetRole(target.role,uid))return;if(!(await confirmManagedUserAction(action)))return;const changes={updatedAt:firestoreSdk.serverTimestamp(),updatedBy:currentUser.uid};if(action==='approve'||action==='reactivate')changes.status='active';if(action==='block')changes.status='blocked';if(action==='make-admin')changes.role='admin';if(action==='make-user')changes.role='user';button.disabled=true;try{await firestoreSdk.updateDoc(firestoreSdk.doc(db,'users',uid),changes);managedDirectoryCache=await loadManagedDirectory();renderUserManagement(managedDirectoryCache)}catch(err){console.error('FLYMPUS user-management update failed',err);button.disabled=false;renderUserManagement(lastManagedDirectory,String(err?.message||tr('Update failed')))}}
 function bindAuthLanguageSync(){if(window.__FLYMPUS_AUTH_LANGUAGE_BOUND__)return;window.__FLYMPUS_AUTH_LANGUAGE_BOUND__=true;syncAuthAdjacentChromeLanguage();if(typeof MutationObserver!=='function')return;const observer=new MutationObserver(records=>{if(!records.some(x=>x.attributeName==='data-flympus-language'))return;syncAuthAdjacentChromeLanguage();if(currentUser&&currentProfile)syncAuthenticatedChrome(currentUser,currentProfile);const manager=document.getElementById('flympusUserManagementPageRoot')||document.getElementById('flympusUserManagementRoot');if(manager&&(!manager.hidden||manager.id==='flympusUserManagementPageRoot'))renderUserManagement(lastManagedDirectory,lastManagedError,manager)});observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-flympus-language']})}
 async function handleSignedIn(user,version=authStateVersion){
   /* Keep the compact sign-in surface in place while profile verification runs.
