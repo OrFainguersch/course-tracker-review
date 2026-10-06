@@ -7705,7 +7705,7 @@ function currentAppRoleDisplay(){
   return getFlympusAppPreferences().language==='he'?({Owner:'בעלים',Administrator:'מנהל מערכת','Training Manager':'מנהל הדרכה',User:'משתמש'}[label]||label):label
 }
 function currentCourseRoleDisplay(){
-  const role=currentUserCourseRole(),en=role==='COURSE_MANAGER'?'Course Manager':'Instructor';
+  const role=instructorCourseRole(currentCourseId,currentUserId)||currentUserCourseRole(),en=role==='COURSE_MANAGER'?'Course Manager':'Instructor';
   return getFlympusAppPreferences().language==='he'?(role==='COURSE_MANAGER'?'מנהל קורס':'מדריך'):en
 }
 function renderPersonalIdentity(){
