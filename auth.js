@@ -118,7 +118,7 @@ const AUTH_HE_UI=Object.freeze({
   'Invited':'הוזמן','Pending':'ממתין','Pending approval':'ממתין לאישור','Active':'פעיל','Blocked':'חסום','Invited users':'משתמשים שהוזמנו','Pending users':'משתמשים ממתינים','Approval requests':'בקשות לאישור','Active users':'משתמשים פעילים','Blocked users':'משתמשים חסומים','Pre-authorized and not signed in yet.':'אושרו מראש ועדיין לא התחברו.','Signed in without an invitation and waiting for approval.':'התחברו ללא הזמנה וממתינים לאישור.',
   'Current account':'החשבון הנוכחי','Approve':'אשר','Block':'חסום','Reactivate':'הפעל מחדש','Remove invite':'בטל הזמנה','Not signed in yet':'טרם התחבר',
   'Full name':'שם מלא','Official full name':'שם מלא רשמי','Nickname':'כינוי','Edit':'עריכה','Edit name':'ערוך שם','Edit official name':'ערוך שם רשמי','Save name':'שמור שם','Save official name':'שמור שם רשמי','Cancel':'ביטול','Enter a display name.':'יש להזין שם תצוגה.','Enter an official name.':'יש להזין שם רשמי.','Name updated':'השם עודכן','Official name updated':'השם הרשמי עודכן','Nickname updated':'הכינוי עודכן','Nickname cleared':'הכינוי הוסר','Could not update name':'לא ניתן לעדכן את השם','Could not update official name':'לא ניתן לעדכן את השם הרשמי','Could not update nickname':'לא ניתן לעדכן את הכינוי','Open My Profile':'פתח את הפרופיל שלי','Nickname label':'כינוי',
-  'Unnamed user':'משתמש ללא שם','No email':'ללא מייל','Unknown':'לא ידוע','Loading users…':'טוען משתמשים…','Could not load users':'לא ניתן לטעון משתמשים','Administrator access is required.':'נדרשת הרשאת מנהל.',
+  'Unnamed user':'משתמש ללא שם','No email':'ללא מייל','Unknown':'לא ידוע','Loading users…':'טוען משתמשים…','Could not load users':'לא ניתן לטעון משתמשים','User Management access is required.':'נדרשת הרשאת מנהל.',
   'This is your current account.':'זה החשבון הנוכחי שלך.','Could not add user':'לא ניתן להוסיף משתמש',
   'Remove this invitation?':'לבטל את ההזמנה הזאת?','The email will no longer be pre-authorized for FLYMPUS.':'כתובת המייל לא תהיה עוד מאושרת מראש ל־FLYMPUS.','Remove':'בטל',
   'Approve this user?':'לאשר את המשתמש הזה?','This account will be able to access FLYMPUS.':'החשבון יוכל לגשת ל־FLYMPUS.','Block this user?':'לחסום את המשתמש הזה?','This account will immediately lose application access.':'החשבון יאבד מיד את הגישה לאפליקציה.',
@@ -413,7 +413,7 @@ async function sendManagedInvitationEmail(invitation){
 }
 function assignableAppRoles(actorRole=normalizeAppRole(currentProfile?.role)){
   const actor=normalizeAppRole(actorRole);
-  if(actor==='owner')return ['owner','admin'];
+  if(actor==='owner')return ['admin','owner'];
   if(actor==='admin')return ['training_manager'];
   if(actor==='training_manager')return ['user'];
   return []
@@ -461,8 +461,8 @@ function renderUserManagement(directory,error='',rootOverride=null){
   body.innerHTML=(error?statusBlock('error',tr('Could not load users'),error):'')+roleGuideHtml()+addForm+'<div class="flympusUserSummary">'+tabs.map(status=>'<div><strong>'+counts[status]+'</strong><span>'+esc(managementStatusLabel(status))+'</span></div>').join('')+'</div>'+tabs.map(groupHtml).join('');
   const inviteForm=body.querySelector('[data-user-invite-form]');inviteForm?.addEventListener('submit',event=>{event.preventDefault();addManagedUser(event.currentTarget)});inviteForm?.querySelectorAll('input').forEach(input=>input.addEventListener('input',()=>clearManagedFieldError(input)));body.querySelectorAll('[data-user-action]').forEach(btn=>btn.addEventListener('click',()=>updateManagedUser(btn.dataset.userUid,btn.dataset.userAction,btn)));body.querySelectorAll('[data-invite-action]').forEach(btn=>btn.addEventListener('click',()=>updateManagedInvitation(btn.dataset.inviteEmail,btn.dataset.inviteAction,btn)));body.querySelectorAll('[data-user-role-select]').forEach(select=>select.addEventListener('change',()=>updateManagedUserRole(select.dataset.userUid,select.value,select)));body.querySelectorAll('[data-invite-role-select]').forEach(select=>select.addEventListener('change',()=>updateManagedInvitationRole(select.dataset.inviteEmail,select.value,select)));body.querySelectorAll('[data-user-name-edit]').forEach(btn=>btn.addEventListener('click',()=>{managedNameEditUid=String(btn.dataset.userUid||'');renderUserManagement(lastManagedDirectory,lastManagedError,el);requestAnimationFrame(()=>body.querySelector('[data-managed-user-form] input[name="displayName"]')?.focus?.())}));body.querySelectorAll('[data-user-name-cancel]').forEach(btn=>btn.addEventListener('click',()=>{managedNameEditUid='';renderUserManagement(lastManagedDirectory,lastManagedError,el)}));body.querySelectorAll('[data-managed-user-form]').forEach(form=>form.addEventListener('submit',event=>{event.preventDefault();updateManagedUserDetails(String(form.dataset.userUid||''),form)}))
 }
-async function loadManagedUsers(){if(!canManageUsers()||!db||!firestoreSdk)throw new Error(tr('Administrator access is required.'));const snapshot=await firestoreSdk.getDocs(firestoreSdk.collection(db,'users'));return snapshot.docs.map(doc=>({id:doc.id,...doc.data()}))}
-async function loadManagedInvitations(){if(!canManageUsers()||!db||!firestoreSdk)throw new Error(tr('Administrator access is required.'));const snapshot=await firestoreSdk.getDocs(firestoreSdk.collection(db,'invitations'));return snapshot.docs.map(doc=>({id:doc.id,...doc.data()})).filter(x=>x.status==='active')}
+async function loadManagedUsers(){if(!canManageUsers()||!db||!firestoreSdk)throw new Error(tr('User Management access is required.'));const snapshot=await firestoreSdk.getDocs(firestoreSdk.collection(db,'users'));return snapshot.docs.map(doc=>({id:doc.id,...doc.data()}))}
+async function loadManagedInvitations(){if(!canManageUsers()||!db||!firestoreSdk)throw new Error(tr('User Management access is required.'));const snapshot=await firestoreSdk.getDocs(firestoreSdk.collection(db,'invitations'));return snapshot.docs.map(doc=>({id:doc.id,...doc.data()})).filter(x=>x.status==='active')}
 async function loadManagedDirectory(){
   const [users,invitations]=await Promise.all([loadManagedUsers(),loadManagedInvitations()]);
   if(normalizeAppRole(currentProfile?.role)==='owner'){
@@ -472,7 +472,7 @@ async function loadManagedDirectory(){
   return{users,invitations:invitations.filter(x=>!existingEmails.has(canonicalEmail(x.email)))}
 }
 async function prefetchManagedDirectory(force=false){
-  if(!canManageUsers())throw new Error(tr('Administrator access is required.'));
+  if(!canManageUsers())throw new Error(tr('User Management access is required.'));
   if(managedDirectoryCache&&!force)return managedDirectoryCache;
   if(managedDirectoryPromise)return managedDirectoryPromise;
   managedDirectoryPromise=loadManagedDirectory().then(directory=>{managedDirectoryCache=directory;return directory}).finally(()=>{managedDirectoryPromise=null});
