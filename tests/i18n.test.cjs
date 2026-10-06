@@ -63,5 +63,13 @@ assert(auth.includes("'May appoint: Owner, Administrator, Training Manager or Us
   auth.includes("'May appoint: User':'יכול למנות: משתמש'"),
   'Every User Management appointment option must have a Hebrew translation');
 
+assert(auth.includes("'Full User Management and role control':'ניהול מלא של משתמשים ותפקידי מערכת'")&&
+  auth.includes("'Manage Users and lower-level roles':'ניהול משתמשים ותפקידים בדרגות נמוכות יותר'")&&
+  auth.includes("'Create and manage assigned training courses':'יצירה וניהול של קורסי ההדרכה המשויכים'")&&
+  auth.includes("'Submit and manage training records/evaluations':'הזנה וניהול של רישומי הדרכה והערכות'")&&
+  auth.includes("'No User Management':'ללא ניהול משתמשים'")&&
+  auth.includes("'No course structure, roster or Package editing':'ללא עריכת מבנה הקורס, סגל הקורס או החבילות'"),
+  'Role-guide scope and boundary copy must have explicit Hebrew translations');
+
 assert(!auth.includes('flympusRoleSeparationNote')&&!auth.includes('Direct appointment follows the hierarchy:')&&!auth.includes('FLYMPUS role and course role are separate.'),
   'User Management must not restore the removed hierarchy/course-role explanatory note box');
