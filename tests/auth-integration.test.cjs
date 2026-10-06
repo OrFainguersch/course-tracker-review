@@ -44,8 +44,8 @@ assert(auth.includes('openUserManagement')&&auth.includes("getDocs(firestoreSdk.
 assert(auth.includes("action==='approve'")&&auth.includes("action==='block'")&&auth.includes("action==='reactivate'"),'User Management must support approval, blocking and reactivation');
 assert(auth.includes('updateManagedUserRole')&&auth.includes('updateManagedInvitationRole')&&auth.includes("role==='owner'"),
   'User Management must support tiered role changes while protecting OWNER');
-assert(auth.includes("if(actor==='owner')return ['admin','owner']")&&auth.includes("if(actor==='admin')return ['training_manager']")&&auth.includes("if(actor==='training_manager')return ['user']"),
-  'Client role selectors must expose only the next role down, with Owner additionally able to appoint Owner');
+assert(auth.includes("if(actor==='owner')return ['owner','admin','training_manager','user']")&&auth.includes("if(actor==='admin')return ['training_manager','user']")&&auth.includes("if(actor==='training_manager')return ['user']"),
+  'Client role selectors must expose every role each manager is allowed to appoint directly');
 assert(auth.includes("training_manager:Object.freeze({")&&auth.includes("capabilities:Object.freeze(['users.manage','courses.create','courses.manageAssigned'"),
   'Training Manager must have User Management capability for lower-tier Users');
 assert(auth.includes('FLYMPUS_STORAGE_SCOPE?.setUid')&&auth.includes('FLYMPUS_STORAGE_SCOPE?.clearUid'),'Authentication lifecycle must bind and clear UID-scoped browser state');
@@ -86,8 +86,8 @@ assert(rules.includes("currentUserRecord().data.role in ['owner', 'admin', 'trai
   'User Management must be available to active OWNER, ADMIN and TRAINING_MANAGER accounts');
 assert(rules.includes('match /system/access')&&rules.includes('ownerBootstrap(uid)')&&rules.includes("uid == systemOwnerUid()"),
   'Firestore must preserve the one-time Owner bootstrap and protect the Primary Owner');
-assert(rules.includes("actorRole == 'owner' && nextRole in ['owner', 'admin']")&&rules.includes("actorRole == 'admin' && nextRole == 'training_manager'")&&rules.includes("actorRole == 'training_manager' && nextRole == 'user'"),
-  'Role grants must follow the one-step hierarchy while allowing Owner to appoint another Owner');
+assert(rules.includes("actorRole == 'owner' && nextRole in ['owner', 'admin', 'training_manager', 'user']")&&rules.includes("actorRole == 'admin' && nextRole in ['training_manager', 'user']")&&rules.includes("actorRole == 'training_manager' && nextRole == 'user'"),
+  'Role grants must allow each manager to directly appoint every permitted lower tier');
 assert(rules.includes("actorRole == 'admin' && targetRole in ['training_manager', 'user']")&&rules.includes("actorRole == 'training_manager' && targetRole == 'user'"),
   'Administrators and Training Managers may manage only lower account tiers');
 assert(rules.includes('allow read, write: if false;'),'Unmigrated training collections must remain fail-closed');
@@ -108,10 +108,10 @@ assert(auth.includes("'User Management':'ניהול משתמשים'")&&auth.incl
 assert(auth.includes('bindAuthLanguageSync()'),'Dynamic auth/admin UI must react when the app language changes');
 assert(auth.includes('roleGuideHtml()')&&auth.includes('FLYMPUS role and course role are separate.'),
   'User Management must explain role meaning and explicitly separate FLYMPUS roles from course roles');
-assert(auth.includes('May appoint another Owner or an Administrator')&&auth.includes('May appoint a Training Manager')&&auth.includes('May invite and approve Users')&&auth.includes('Cannot appoint the same role or a higher role'),
-  'Role guide must clearly explain the role-assignment pyramid and Owner exception');
-assert(auth.includes('Role assignment follows the pyramid: Owner → Administrator → Training Manager → User. Owner may also appoint another Owner.')&&auth.includes('Managed at a higher level'),
-  'User Management must state the hierarchy explicitly and use a generic higher-level management label');
+assert(auth.includes('May appoint: Owner, Administrator, Training Manager or User')&&auth.includes('May appoint: Training Manager or User')&&auth.includes('May appoint: User')&&auth.includes('Cannot appoint application roles'),
+  'Role guide must enumerate every direct appointment option for every application role');
+assert(auth.includes('Direct appointment follows the hierarchy: Owner may appoint any role; Administrator may appoint Training Manager or User; Training Manager may appoint User. The Primary Owner remains protected.')&&auth.includes('Managed at a higher level'),
+  'User Management must state direct appointment rights explicitly and use a generic higher-level management label');
 assert(auth.includes('data-managed-user-form')&&auth.includes('updateManagedUserDetails')&&auth.includes('name="role"')&&auth.includes('Email is tied to the sign-in account and cannot be changed here.'),
   'Edit must manage Name and Role together while keeping the sign-in email read-only');
 assert(auth.includes("tr('Role')")&&!auth.includes("<span>'+esc(tr('App role'))+'</span><select name=\"role\">"),
@@ -155,3 +155,10 @@ assert(storage.includes('rawRemove(local,UID_PERSISTED_KEY)'),'Sign-out must cle
 assert(auth.includes('let authStateVersion=0')&&auth.includes('version!==authStateVersion'),'Stale asynchronous auth callbacks must never unlock or rescope the app');
 
 console.log('Authentication foundation checks passed');
+
+assert(css.includes('User Management typography + accessibility alignment · 2026-10-06')&&
+  css.includes('#flympusUserManagementPageRoot .flympusRoleGuideCard p{font-size:11.5px')&&
+  css.includes('html.flympusLargeText #flympusUserManagementPageRoot'),
+  'User Management must share the readable site type scale and respond to Larger Text');
+assert(auth.includes("'Account':'חשבון'")&&auth.includes("'Could not update preferred name':'לא ניתן לעדכן את הכינוי'"),
+  'Dynamic auth/admin translations must cover every currently used direct tr() key');
