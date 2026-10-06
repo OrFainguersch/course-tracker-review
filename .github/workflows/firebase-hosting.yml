@@ -1,4 +1,4 @@
-name: Deploy FLYMPUS to Firebase Hosting
+name: Deploy FLYMPUS to Firebase
 
 # Production Hosting is verified. Every reviewed main commit now runs the
 # complete test suite and deploys through keyless WIF; manual dispatch remains
