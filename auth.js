@@ -27,6 +27,7 @@ let userManagementPreviousBodyTop='';
 let managedDirectoryCache=null;
 let managedDirectoryPromise=null;
 let managedNameEditUid='';
+let primaryOwnerUid='';
 let userManagementCloseTimer=null;
 let returningScopedSession=!!window.FLYMPUS_STORAGE_SCOPE?.currentUid?.();
 let silentAuthLoadingTimer=null;
@@ -38,18 +39,18 @@ const APP_ROLE_ORDER=Object.freeze(['user','training_manager','admin','owner']);
 const APP_ROLE_DEFINITIONS=Object.freeze({
   owner:Object.freeze({
     label:'Owner',
-    description:'Complete control of FLYMPUS, including users, administrators, all courses, global Packages and protected system ownership.',
+    description:'Complete control of FLYMPUS. An Owner may appoint another Owner or an Administrator and may manage every lower role. The Primary Owner remains protected.',
     capabilities:Object.freeze(['users.manage','courses.create','courses.manageAll','courses.manageAssigned','packages.manageGlobal','packages.overrideCourse','roster.manage','evaluations.write'])
   }),
   admin:Object.freeze({
     label:'Administrator',
-    description:'Manages Training Managers, Users and all training operations, including courses and global Packages, but cannot manage Administrators or change the Owner.',
+    description:'Manages lower-level accounts and all training operations. An Administrator may appoint a Training Manager, but cannot appoint another Administrator or an Owner.',
     capabilities:Object.freeze(['users.manage','courses.create','courses.manageAll','courses.manageAssigned','packages.manageGlobal','packages.overrideCourse','roster.manage','evaluations.write'])
   }),
   training_manager:Object.freeze({
     label:'Training Manager',
-    description:'Creates and manages training, course rosters and course-specific Package changes without access to user administration or global system ownership.',
-    capabilities:Object.freeze(['courses.create','courses.manageAssigned','packages.overrideCourse','roster.manage','evaluations.write'])
+    description:'Creates and manages training, course rosters and course-specific Package changes. A Training Manager may invite, approve and manage Users, but cannot appoint another Training Manager or any higher role.',
+    capabilities:Object.freeze(['users.manage','courses.create','courses.manageAssigned','packages.overrideCourse','roster.manage','evaluations.write'])
   }),
   user:Object.freeze({
     label:'User',
@@ -278,7 +279,7 @@ async function ensureUserProfile(user){
   const email=canonicalEmail(user.email);let invitation=null;
   try{const snap=await firestoreSdk.getDoc(firestoreSdk.doc(db,'invitations',email));if(snap.exists())invitation=snap.data()}catch(err){console.warn('FLYMPUS invitation lookup failed; continuing as pending',err)}
   const preauthorized=invitation?.status==='active'&&canonicalEmail(invitation?.email)===email;
-  const profile={uid:user.uid,email,displayName:user.displayName||invitation?.displayName||'',preferredName:'',photoURL:user.photoURL||'',providerIds:(user.providerData||[]).map(x=>String(x?.providerId||'')).filter(Boolean),role:preauthorized&&['admin','training_manager'].includes(invitation?.role)?invitation.role:'user',status:preauthorized?'active':'pending',createdAt:firestoreSdk.serverTimestamp()};
+  const profile={uid:user.uid,email,displayName:user.displayName||invitation?.displayName||'',preferredName:'',photoURL:user.photoURL||'',providerIds:(user.providerData||[]).map(x=>String(x?.providerId||'')).filter(Boolean),role:preauthorized&&['owner','admin','training_manager','user'].includes(invitation?.role)?invitation.role:'user',status:preauthorized?'active':'pending',createdAt:firestoreSdk.serverTimestamp()};
   await firestoreSdk.setDoc(ref,profile);return profile
 }
 function normalizeProfile(profile={}){
