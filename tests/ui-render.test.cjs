@@ -48,7 +48,7 @@ assert(html.includes("@keyframes flympusHeaderPopoverIn")&&
   html.includes("playHeaderPopoverOpen(profileMenu,profileBtn,positionPersonalProfileDropdown)"),
   "Bell and personal-profile popovers must zoom/fade from the actual pressed header controls instead of appearing abruptly");
 assert(html.includes('id="personalPhotoInput"')&&html.includes('id="myProfilePhotoEdit"')&&html.includes('id="myProfileRemovePhoto"'),"My Profile must edit the photo through the avatar pencil and support removal");
-assert(html.includes('id="quickMyProfile"')&&html.includes('id="quickSettings"')&&html.includes('id="quickSignOut"')&&!html.includes('id="quickUserManagement"'),"The account popover must stay focused on profile, settings and sign-out without duplicating User Management");
+assert(html.includes('id="quickMyProfile"')&&html.includes('id="quickSignOut"')&&!html.includes('id="quickSettings"')&&!html.includes('id="quickUserManagement"'),"The account popover must stay personal and avoid duplicating Settings or User Management");
 assert(html.includes('id="personalCropModal"')&&html.includes('id="personalCropViewport"')&&html.includes('id="personalCropImage"'),"Personal photo selection must open a crop-and-adjust editor");
 assert(html.includes("function personalCropDataUrl(")&&html.includes("function renderPersonalPhotoCrop()"),"Profile photo cropper must support repositioning, zooming and exporting the adjusted square");
 assert(html.includes("onpointerdown")&&html.includes("onpointermove")&&html.includes("personalCropState.zoom"),"Profile photo cropper must support touch/pointer drag and zoom adjustment");
