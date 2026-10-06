@@ -60,8 +60,6 @@ const ev=(type='touchstart',extra={})=>({type,isTrusted:true,timeStamp:now,...ex
   await Promise.resolve();await Promise.resolve();await Promise.resolve();
 
   context.e=ev();order.length=0;vm.runInContext('playFlympusBottomNavSound(e)',context);
-  assert.deepEqual(order,['resume'],'Cold first press may resume WebAudio before its same-gesture decoded click is scheduled');
-  await Promise.resolve();await Promise.resolve();await Promise.resolve();
   assert.deepEqual(order.slice(0,2),['resume','buffer-start']);
   assert.equal(mediaPlays.length,0);assert.equal(fastStarts.length,1);
   assert.equal(fastStarts[0].stateAtStart,'running','No BufferSource may start while suspended');
@@ -77,14 +75,13 @@ const ev=(type='touchstart',extra={})=>({type,isTrusted:true,timeStamp:now,...ex
   vm.runInContext("flympusNavFastCtx.state='suspended';markFlympusNavAudioNeedsWake()",context);
   context.e=ev();const f1=fastStarts.length,m1=mediaPlays.length;order.length=0;
   vm.runInContext('playFlympusBottomNavSound(e)',context);
-  assert.equal(fastStarts.length,f1,'Deferred resume must not start while WebAudio is suspended');
-  assert.equal(mediaPlays.length,m1,'Deferred first press must not burn through cold media fallback entries');
-  deferredResolve?.();await Promise.resolve();await Promise.resolve();await Promise.resolve();
-  assert.equal(fastStarts.length,f1+1,'The same initiating press must sound once resume completes');
-  assert.equal(fastStarts.at(-1).stateAtStart,'running','Deferred first-press playback must start only after WebAudio is running');
+  assert.equal(fastStarts.length,f1,'Deferred resume must not queue WebAudio');
+  assert.equal(mediaPlays.length,m1+1,'Deferred resume must use same-gesture media fallback');
+  deferredResolve?.();await Promise.resolve();await Promise.resolve();
+  assert.equal(fastStarts.length,f1,'Later resume completion must not emit a ghost click');
 
   now+=100;resumeMode='immediate';context.e=ev();vm.runInContext('playFlympusBottomNavSound(e)',context);
-  assert.equal(fastStarts.length,f1+2,'Next real press may use already-running WebAudio');
+  assert.equal(fastStarts.length,f1+1,'Next real press may use running WebAudio');
 
   now+=100;const f2=fastStarts.length,m2=mediaPlays.length;
   context.e={type:'touchstart',isTrusted:false,timeStamp:now};vm.runInContext('playFlympusBottomNavSound(e)',context);
@@ -106,9 +103,7 @@ const ev=(type='touchstart',extra={})=>({type,isTrusted:true,timeStamp:now,...ex
   assert(html.includes("playFlympusBottomNavSound(e);\n    triggerFlympusPortableHaptic(7);"));
   assert(html.includes("window.__FLYMPUS_CLAIM_NAV_SOUND_GESTURE__?.(e)"));
   assert(html.includes("cancelFlympusPendingNavSources();markFlympusNavAudioNeedsWake()"));
-  assert(html.includes("Capture phase is deliberately silent")&&!html.includes("Claiming this exact event guarantees target phase"),
-    'Capture-phase warm-up must never consume the first audible navigation gesture');
-  assert(source.includes("Promise.all([resumePromise,decodePromise]).then")&&source.includes("FLYMPUS_NAV_FIRST_PRESS_MAX_DELAY_MS"),
-    'Cold/deferred first presses must stay tied to their initiating trusted gesture within a bounded window');
+  assert(html.includes("Capture phase is deliberately silent")&&html.includes("return playFlympusNavFileFallback();"),
+    'Capture may warm audio, but target-phase navigation owns the same-gesture fallback');
   console.log('Cross-platform trusted-gesture navigation audio lifecycle tests passed');
 })().catch(err=>{console.error(err);process.exitCode=1});
