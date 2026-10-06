@@ -111,8 +111,8 @@ service cloud.firestore {
     }
 
     function roleMayBeGranted(actorRole, nextRole) {
-      return (actorRole == 'owner' && nextRole in ['owner', 'admin'])
-        || (actorRole == 'admin' && nextRole == 'training_manager')
+      return (actorRole == 'owner' && nextRole in ['owner', 'admin', 'training_manager', 'user'])
+        || (actorRole == 'admin' && nextRole in ['training_manager', 'user'])
         || (actorRole == 'training_manager' && nextRole == 'user');
     }
 
