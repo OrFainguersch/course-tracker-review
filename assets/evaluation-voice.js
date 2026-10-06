@@ -31,7 +31,11 @@
   }
 
   function withNumericWords(value){
-    return normalize(value).split(' ').map(token=>NUMBER_WORDS[token]??(token.startsWith('ו')&&NUMBER_WORDS[token.slice(1)]?NUMBER_WORDS[token.slice(1)]:token)).join(' ');
+    return normalize(value).split(' ').map(token=>{
+      const suffix=token.match(/[.]+$/)?.[0]||'',plain=suffix?token.slice(0,-suffix.length):token;
+      const mapped=NUMBER_WORDS[plain]??(plain.startsWith('ו')&&NUMBER_WORDS[plain.slice(1)]?NUMBER_WORDS[plain.slice(1)]:null);
+      return mapped==null?token:String(mapped)+suffix
+    }).join(' ');
   }
 
   function escapeRegExp(value){
