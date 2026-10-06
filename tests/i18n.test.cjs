@@ -51,6 +51,8 @@ assert(auth.includes("'Owner':'בעלים'")&&auth.includes("'Administrator':'מ
   'All application roles must translate to Hebrew');
 assert(auth.includes("'FLYMPUS role and course role are separate. A person can be a User in FLYMPUS and still be the Course Manager of a specific course.'"),
   'The role-separation guidance must be explicitly translatable');
+assert(auth.includes("'Role assignment follows the pyramid: Owner → Administrator → Training Manager → User. Owner may also appoint another Owner.':'הקצאת תפקידים פועלת בפירמידה: בעלים ← מנהל מערכת ← מנהל הדרכה ← משתמש. בעלים יכול גם למנות בעלים נוסף.'"),
+  'The explicit role pyramid must translate to Hebrew');
 assert(html.includes('html[data-flympus-language="he"] #flympusUserManagementPageRoot')&&auth.includes("host.dir=authLanguage()==='he'?'rtl':'ltr'"),
   'User Management must switch to a mirrored RTL page in Hebrew');
 assert(auth.includes('syncAuthAdjacentChromeLanguage'),'Profile and notification dropdown additions must synchronize with Hebrew');
