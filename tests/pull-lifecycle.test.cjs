@@ -70,19 +70,18 @@ test('installed PWA pull-to-refresh must start at the top instead of claiming an
   assert(explicitPull.prevented);
   assert(h.window.__FLYMPUS_PULL_ACTIVE__);
 });
-test('returning top chrome uses the same timing authority as the bottom dock and a transient reveal guard',()=>{
+test('returning top chrome uses the same timing authority as the bottom dock with no independent background reveal',()=>{
   assert.match(html,/--flympus-chrome-show-duration:\.58s/);
   assert.match(html,/--flympus-chrome-hide-duration:\.64s/);
   assert.match(html,/\.mobileBottomNav\{\s*transition:transform var\(--flympus-chrome-show-duration/);
   assert.match(html,/\.top\{[\s\S]*transition:transform var\(--flympus-chrome-show-duration\)/);
-  assert.match(html,/body\.flympusChromeReturning \.flympusPullBackdrop\{/);
-  assert.match(html,/body\?\.classList\.add\('flympusChromeReturning'\)/);
-  assert.match(html,/body\?\.classList\.remove\('flympusChromeReturning'\)/);
+  assert.doesNotMatch(html,/flympusChromeReturning/);
+  assert.doesNotMatch(html,/--flympus-top-reveal-bg/);
 });
 test('touch chrome still hides on down-scroll and returns on up-scroll without moving document content',()=>{
   const h=harness({standalone:false,maxTouchPoints:5});
   const setter=html.slice(html.indexOf('function setBottomDockHidden(hidden)'),html.indexOf('function updateBottomDockFromScroll()'));
-  vm.runInNewContext('let bottomDockLastSwitchTime=0,bottomDockTransitionLockUntil=0,bottomDockVelocity=0,bottomDockDirection=0,bottomDockDirectionTravel=0,bottomDockRevealGuardTimer=null,bottomDockRevealGuardEpoch=0;'+setter,h.context);
+  vm.runInNewContext('let bottomDockLastSwitchTime=0,bottomDockTransitionLockUntil=0,bottomDockVelocity=0,bottomDockDirection=0,bottomDockDirectionTravel=0;'+setter,h.context);
   for(let i=0;i<8;i++){
     vm.runInNewContext('setBottomDockHidden(true)',h.context);
     assert(h.top.classList.contains('topHidden'));assert(h.dock.classList.contains('dockHidden'));
