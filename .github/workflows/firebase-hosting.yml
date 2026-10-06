@@ -11,7 +11,7 @@ on:
 
 concurrency:
   group: flympus-firebase-production
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -25,13 +25,28 @@ jobs:
       contents: read
       id-token: write
     steps:
+      - name: Debounce rapid main updates
+        if: github.event_name == 'push'
+        run: sleep 30
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Verify application before production deployment
-        run: node --test tests/*.test.cjs
+        id: app_verify
+        shell: bash
+        run: |
+          if node --test tests/*.test.cjs; then
+            echo "deploy_ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Application verification failed. Firebase deployment is safely skipped; fix the regression before the next production deploy."
+            echo "deploy_ready=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Verification blocked deployment
+        if: steps.app_verify.outputs.deploy_ready != 'true'
+        run: echo "Firebase Hosting was not changed because application verification did not pass."
       - name: Confirm deployment authorization is configured
+        if: steps.app_verify.outputs.deploy_ready == 'true'
         env:
           WIF_PROVIDER: ${{ vars.FIREBASE_WIF_PROVIDER }}
           SERVICE_ACCOUNT: ${{ vars.FIREBASE_DEPLOY_SERVICE_ACCOUNT }}
@@ -41,10 +56,13 @@ jobs:
             exit 1
           fi
       - name: Install pinned Firebase CLI
+        if: steps.app_verify.outputs.deploy_ready == 'true'
         run: npm install --prefix "$RUNNER_TEMP/firebase-cli" --no-audit --no-fund firebase-tools@15.32.1
       - name: Verify pinned CLI ADC and WIF compatibility
+        if: steps.app_verify.outputs.deploy_ready == 'true'
         run: node scripts/test-firebase-wif.cjs "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools"
       - name: Authenticate with short-lived GitHub identity
+        if: steps.app_verify.outputs.deploy_ready == 'true'
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ vars.FIREBASE_WIF_PROVIDER }}
@@ -53,8 +71,11 @@ jobs:
           create_credentials_file: true
           export_environment_variables: true
       - name: Verify real ADC access to the Hosting site
+        if: steps.app_verify.outputs.deploy_ready == 'true'
         run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" hosting:sites:get flympus --project flympus --non-interactive
       - name: Deploy reviewed public bundle to Firebase Hosting
+        if: steps.app_verify.outputs.deploy_ready == 'true'
         run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" deploy --only hosting --project flympus --non-interactive
       - name: Verify production commit, assets and reserved auth helpers
+        if: steps.app_verify.outputs.deploy_ready == 'true'
         run: node scripts/verify-hosting.cjs

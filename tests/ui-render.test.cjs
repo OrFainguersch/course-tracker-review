@@ -18,6 +18,7 @@ assert.equal(manifest.short_name,"FLYMPUS","Web app manifest must identify FLYMP
 assert.equal(manifest.display,"standalone","Home Screen installation must use standalone display mode");
 assert.equal(manifest.start_url,"./","Home Screen app must start inside the same GitHub Pages scope");
 assert(html.includes('rel="manifest" href="./manifest.webmanifest"')&&html.includes('apple-mobile-web-app-title" content="FLYMPUS"'),"Index must advertise the FLYMPUS manifest and iOS app title");
+assert(html.includes('<main id="content"><div class="flympusBootShell" aria-hidden="true">'),"The initial HTML must contain the first-paint shell so standalone iOS never waits for hydration JS before showing app-owned content");
 assert(html.includes("tile('platform','Platform',platformValue)")&&html.includes("tile('training','Training type',meta.trainingKind)")&&html.includes("countryTile=tile('country','Country',meta.country,showContext?'':'countryWide')"),"My Courses must render course details as visible metadata tiles");
 assert(html.includes("platformLabels:{rc_simulator:'RC Simulator',rc_model:'Shahak'"),"Shahak must be the default display name for rc_model");
 assert(html.includes("catalog.platformLabels=labels"),"Platform renames must persist inside the architecture catalog");
@@ -39,10 +40,13 @@ assert(html.includes("getNotificationPreferences()")&&html.includes("saveNotific
 assert(html.includes("prefs.requiredActions=true")&&html.includes("preferences:getPushNotificationPreferences()"),"Required actions must remain in the in-app center while the Push backend receives only Push category preferences");
 assert(html.includes('id="topPersonalProfileBtn"')&&html.includes('aria-label="Personal profile"'),"The top-right personal avatar must open the personal profile editor");
 assert(html.includes("@keyframes flympusHeaderPopoverIn")&&
-  html.includes(".topNotificationDropdown:not([hidden])")&&
-  html.includes(".topPersonalProfileDropdown:not([hidden])")&&
-  html.includes("transform-origin:top right"),
-  "Bell and personal-profile popovers must zoom/fade from their header controls instead of appearing abruptly");
+  html.includes(".topNotificationDropdown.headerPopoverOpening")&&
+  html.includes(".topPersonalProfileDropdown.headerPopoverOpening")&&
+  html.includes("function playHeaderPopoverOpen(menu,btn,positioner)")&&
+  html.includes("--header-popover-origin-x")&&
+  html.includes("playHeaderPopoverOpen(notificationMenu,notificationBtn,positionNotificationDropdown)")&&
+  html.includes("playHeaderPopoverOpen(profileMenu,profileBtn,positionPersonalProfileDropdown)"),
+  "Bell and personal-profile popovers must zoom/fade from the actual pressed header controls instead of appearing abruptly");
 assert(html.includes('id="personalPhotoInput"')&&html.includes('id="removePersonalPhoto"'),"Personal profile editing must support changing or removing the user's photo");
 assert(html.includes(".personalPhotoActions .btn{flex:1;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important}"),"Personal photo action labels must be visually centered");
 assert(html.includes('id="personalCropModal"')&&html.includes('id="personalCropViewport"')&&html.includes('id="personalCropImage"'),"Personal photo selection must open a crop-and-adjust editor");
