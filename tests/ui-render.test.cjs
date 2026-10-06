@@ -697,12 +697,13 @@ assert(html.includes("playFlympusBottomNavSound(e);"),
   "Bottom-nav binding must pass the originating event into the audible path");
 
 
-/* Visual switches must not animate during programmatic state hydration. */
-assert(html.includes(".notificationPreferences:not(.notificationPrefsInteractive) .prefSwitch i:after{transition:none!important}"),
-  "Notification preference switches must suppress motion until their stored state is synced");
-assert(html.includes("root?.classList.remove('notificationPrefsInteractive')")&&
-  html.includes("root?.classList.add('notificationPrefsInteractive')"),
-  "Notification preference switches must arm motion only after programmatic sync");
+/* Notification category switches are rendered directly from persisted state. */
+assert(html.includes("function notificationSettingsRows(channel,prefs)")&&
+  html.includes("aria-checked=\"'+(checked?'true':'false')+'\"")&&html.includes("(checked?'checked':'')"),
+  "Notification category switches must paint their persisted checked and aria state synchronously");
+assert(html.includes("function syncNotificationPreferenceControls()")&&
+  html.includes("[data-inapp-notification-pref]")&&html.includes("[data-push-notification-pref]"),
+  "Notification Settings must keep both in-app and Push controls synchronized after render");
 assert(html.includes("aria-checked=\"'+(checked?'true':'false')+'\""),
   "App Settings switches must render accessibility state together with their checked state");
 assert(html.includes("el.setAttribute('aria-checked',el.checked?'true':'false')"),
