@@ -135,7 +135,6 @@ function syncAuthAdjacentChromeLanguage(){
   setStaticText('#notificationPreferences>summary','Notification preferences');setStaticText('.notificationPrefsHint','Choose which personal notifications you want to receive across all courses.');
   setStaticText('#quickMyProfile b','My Profile');setStaticText('#quickMyProfile small','View your account details and course roles.');
   setStaticText('#quickSettings b','Settings');setStaticText('#quickSettings small','Language, appearance and personal preferences.');
-  setStaticText('#quickUserManagement b','User Management');setStaticText('#quickUserManagement small','Manage application access and roles.');
   setStaticText('#quickSignOut b','Sign out of FLYMPUS');
   document.getElementById('topPersonalProfileBtn')?.setAttribute('aria-label',tr('Account menu'));
   document.getElementById('topPersonalProfileDropdown')?.setAttribute('aria-label',tr('Account menu'));
@@ -324,19 +323,15 @@ function clearRoleContext(){
   try{document.dispatchEvent(new CustomEvent('flympus:auth-signed-out'))}catch{}
 }
 function syncAuthenticatedChrome(user,profile){
-  const role=document.getElementById('personalProfileRole'),email=document.getElementById('personalProfileEmail'),manage=document.getElementById('quickUserManagement'),signOut=document.getElementById('quickSignOut');
+  const role=document.getElementById('personalProfileRole'),email=document.getElementById('personalProfileEmail'),signOut=document.getElementById('quickSignOut');
   if(role)role.textContent=tr(roleDefinition(profile.role).label);
   if(email)email.textContent=user.email||'';
-  if(manage){
-    manage.hidden=!canManageUsers(profile);
-    manage.onclick=event=>{event?.stopPropagation?.();openUserManagement()}
-  }
   if(signOut)signOut.onclick=event=>{event?.stopPropagation?.();signOutCurrentUser()};
   syncAuthAdjacentChromeLanguage()
 }
 function removeAuthenticatedChrome(){
-  const role=document.getElementById('personalProfileRole'),email=document.getElementById('personalProfileEmail'),manage=document.getElementById('quickUserManagement');
-  if(role)role.textContent=tr('Account');if(email)email.textContent='';if(manage)manage.hidden=true
+  const role=document.getElementById('personalProfileRole'),email=document.getElementById('personalProfileEmail');
+  if(role)role.textContent=tr('Account');if(email)email.textContent=''
 }
 function closeTransientHeaderMenus({animated=false}={}){[['#topCourseDropdown','#topCourseSwitch'],['#topNotificationDropdown','#topNotificationBtn'],['#topPersonalProfileDropdown','#topPersonalProfileBtn']].forEach(([menuSel,buttonSel])=>{const menu=document.querySelector(menuSel),button=document.querySelector(buttonSel);if(!menu||menu.hidden){button?.setAttribute?.('aria-expanded','false');return}const canAnimate=animated&&(menuSel==='#topNotificationDropdown'||menuSel==='#topPersonalProfileDropdown')&&button?.getAttribute?.('aria-expanded')==='true';if(canAnimate){button.click?.();return}menu.hidden=true;button?.setAttribute?.('aria-expanded','false')})}
 function bindBottomNavigationOverlayDismissal(){if(window.__FLYMPUS_BOTTOM_DISMISS_BOUND__)return;window.__FLYMPUS_BOTTOM_DISMISS_BOUND__=true;const dismiss=event=>{if(event.target?.closest?.('#mobileBottomNav,[data-mobile-nav],.mobileBottomHapticSwitch'))closeTransientHeaderMenus()};document.addEventListener('touchstart',dismiss,true);document.addEventListener('pointerdown',dismiss,true);document.addEventListener('click',dismiss,true)}
