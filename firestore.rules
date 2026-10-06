@@ -44,7 +44,7 @@ service cloud.firestore {
 
     function validUserShape(data) {
       return data.keys().hasOnly([
-        'uid', 'email', 'displayName', 'photoURL', 'providerIds',
+        'uid', 'email', 'displayName', 'preferredName', 'photoURL', 'providerIds',
         'role', 'status', 'createdAt', 'lastLoginAt', 'updatedAt', 'updatedBy'
       ]) && validRoleAndStatus(data);
     }
@@ -76,7 +76,19 @@ service cloud.firestore {
         && request.resource.data.role == resource.data.role
         && request.resource.data.status == resource.data.status
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'displayName', 'photoURL', 'providerIds', 'lastLoginAt', 'updatedAt'
+          'preferredName', 'photoURL', 'providerIds', 'lastLoginAt', 'updatedAt'
+        ]);
+    }
+
+    function ownerSelfIdentity(uid) {
+      return owner()
+        && ownUser(uid)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'displayName', 'preferredName', 'photoURL', 'updatedAt', 'updatedBy'
         ]);
     }
 
@@ -139,6 +151,7 @@ service cloud.firestore {
         && request.resource.data.email == resource.data.email
         && (administratorManagesOther(uid)
           || ownerBootstrap(uid)
+          || ownerSelfIdentity(uid)
           || selfProfileOnly(uid));
 
       allow delete: if administratorMayDelete(uid);
