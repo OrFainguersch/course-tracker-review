@@ -30,7 +30,7 @@ assert(html.includes("myCoursesFilters")&&html.includes("myCoursesFilterSummary"
 assert(!html.includes("myCoursesFilterSummaryCount"),"Compact filter header must not show a redundant courses-shown badge");
 assert(html.includes("grid-template-columns:repeat(2,minmax(0,1fr))"),"Mobile My Courses filters must stay compact in two columns where space allows");
 assert(html.includes("Number(window.innerWidth||9999)>760||state.myCoursesFiltersOpen===true"),"My Courses filter disclosure must default open on desktop and remember mobile expansion");
-assert(html.includes('aria-controls="topCourseDropdown"')&&html.includes('id="topCourseDropdown"'),"Header must contain a real course switcher dropdown");
+assert(html.includes('class="topCourseContext"')&&html.includes('id="topCourseName"')&&!html.includes('aria-controls="topCourseDropdown"'),"Desktop header must show non-interactive current-course context instead of a duplicate course switcher");
 assert(html.includes('id="topNotificationBtn"')&&html.includes('aria-label="Notifications"'),"Header must expose an accessible notifications bell");
 assert(html.includes('id="topNotificationDropdown"')&&html.includes("No new notifications"),"Notifications bell must open a notification panel with an empty state");
 assert(html.includes("<span>Personal</span>")&&html.includes("across all courses"),"Notifications must be personal to the user rather than scoped to the selected course");
@@ -48,11 +48,11 @@ assert(html.includes("@keyframes flympusHeaderPopoverIn")&&
   html.includes("playHeaderPopoverOpen(profileMenu,profileBtn,positionPersonalProfileDropdown)"),
   "Bell and personal-profile popovers must zoom/fade from the actual pressed header controls instead of appearing abruptly");
 assert(html.includes('id="personalPhotoInput"')&&html.includes('id="myProfilePhotoEdit"')&&html.includes('id="myProfileRemovePhoto"'),"My Profile must edit the photo through the avatar pencil and support removal");
-assert(html.includes('id="quickMyProfile"')&&html.includes('id="quickSignOut"')&&!html.includes('id="quickSettings"')&&!html.includes('id="quickUserManagement"'),"The account popover must stay personal and avoid duplicating Settings or User Management");
+assert(html.includes('class="personalProfileHead accountProfileShortcut" id="quickMyProfile"')&&html.includes('id="quickSignOut"')&&!html.includes('id="quickSettings"')&&!html.includes('id="quickUserManagement"'),"The identity header itself must open My Profile without a duplicate My Profile row");
 assert(html.includes('id="personalCropModal"')&&html.includes('id="personalCropViewport"')&&html.includes('id="personalCropImage"'),"Personal photo selection must open a crop-and-adjust editor");
 assert(html.includes("function personalCropDataUrl(")&&html.includes("function renderPersonalPhotoCrop()"),"Profile photo cropper must support repositioning, zooming and exporting the adjusted square");
 assert(html.includes("onpointerdown")&&html.includes("onpointermove")&&html.includes("personalCropState.zoom"),"Profile photo cropper must support touch/pointer drag and zoom adjustment");
-assert(html.includes("function myProfileScreen()")&&html.includes("Your account identity is managed centrally."),"My Profile must be a dedicated read-only identity page with separate self-service photo editing");
+assert(html.includes("function myProfileScreen()")&&html.includes("Official full name")&&html.includes("Preferred name")&&html.includes("updatePreferredName"),"My Profile must separate stable official identity from a self-service preferred name");
 assert(html.includes("navigator.storage?.persist")&&html.includes("ensurePersistentDeviceStorage();"),"The app must request persistent device storage when the browser supports it");
 assert(html.includes("function positionNotificationDropdown()"),"Notifications panel must position safely on mobile");
 assert(html.includes(".panel{display:flex;flex-direction:column;padding-bottom:calc(8px + env(safe-area-inset-bottom))}.panel #nav{flex:0 0 auto}.drawerFooter{margin-top:auto;margin-bottom:6px}"),"Mobile account card should sit close to the true bottom while respecting the safe area");
@@ -62,10 +62,8 @@ assert(!html.includes('class="card myProfileLinks"'),"My Profile must not duplic
 assert(html.includes("const role=instructorCourseRole(currentCourseId,currentUserId)||currentUserCourseRole()"),"Account chrome must derive the selected-course role from the same membership source as Course roles");
 assert(html.includes("html[data-flympus-language=\"he\"] .accountQuickAction>i")&&html.includes("html[data-flympus-language=\"he\"] .drawerProfileArrow"),"Directional account-menu arrows must mirror in Hebrew");
 assert(html.includes(".topNotificationDropdown,.topPersonalProfileDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right))"),"Mobile notification and personal-profile panels must stay within the viewport");
-assert(html.includes(".topCourseDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right));width:auto"),"Mobile quick course dropdown must stay inside the viewport on both sides");
-assert(html.includes("function positionTopCourseDropdown()"),"Quick course switcher must position its mobile menu below the real header button");
-assert(html.includes("if(open)positionTopCourseDropdown()"),"Opening the quick course switcher must position the mobile menu before interaction");
-assert(html.includes("<span>Selected course</span>"),"Header switcher must describe the selected course, not an active lifecycle state");
+assert(html.includes("@media(max-width:899px){\n  .topCourseContext{display:none!important}"),"Mobile header must keep current-course context hidden to preserve space");
+assert(html.includes("position:absolute!important;")&&html.includes("left:50%!important;")&&html.includes("transform:translate(-50%,-50%)!important;"),"Desktop current-course context must be visually centered independent of RTL/LTR");
 assert(html.includes('<b id="topCourseName" aria-live="polite">&nbsp;</b>'),"Header must not hard-code Aerostar EP Course before persisted course state is restored");
 assert(html.includes("active.courseName||'Aerostar EP Course'"),"Header must restore the persisted selected course name before loading the large application scripts");
 assert(html.includes("function navIconSvg(name)")&&html.includes("class=\"navIcon\""),"Sidebar navigation must use a consistent SVG icon system instead of decorative glyphs");
