@@ -104,8 +104,8 @@ assert(auth.includes("'User Management':'ניהול משתמשים'")&&auth.incl
 assert(auth.includes('bindAuthLanguageSync()'),'Dynamic auth/admin UI must react when the app language changes');
 assert(auth.includes('roleGuideHtml()')&&auth.includes('FLYMPUS role and course role are separate.'),
   'User Management must explain role meaning and explicitly separate FLYMPUS roles from course roles');
-assert(auth.includes('Invite and approve Administrators, Training Managers and Users')&&auth.includes('Invite and approve Training Managers and Users')&&auth.includes('No user invitations or approvals'),
-  'Role guide must make the Owner/Admin invitation and approval split explicit');
+assert(auth.includes('May appoint another Owner or an Administrator')&&auth.includes('May appoint a Training Manager')&&auth.includes('May invite and approve Users')&&auth.includes('Cannot appoint the same role or a higher role'),
+  'Role guide must clearly explain the role-assignment pyramid and Owner exception');
 assert(auth.includes('data-managed-user-form')&&auth.includes('updateManagedUserDetails')&&auth.includes('name="role"')&&auth.includes('Email is tied to the sign-in account and cannot be changed here.'),
   'Edit must manage Name and Role together while keeping the sign-in email read-only');
 assert(auth.includes("tr('Role')")&&!auth.includes("<span>'+esc(tr('App role'))+'</span><select name=\"role\">"),
