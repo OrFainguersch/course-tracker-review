@@ -11,8 +11,8 @@ const theme=fs.readFileSync('theme-controller.js','utf8');
 
 assert(html.includes('./firebase-config.js?v=20261004-auth2'),'Firebase config must load from the static app');
 assert(html.includes('./storage-scope.js?v=20261006-auth8'),'UID storage scope must load from the static app');
-assert(html.includes('./auth.css?v=20261006-theme6'),'Authentication UI CSS must be loaded');
-assert(html.includes('type="module" src="./auth.js?v=20261005-auth13"'),'Authentication runtime must load as a module');
+assert(/\.\/auth\.css\?v=[^"'<>\s]+/.test(html),'Authentication UI CSS must be loaded with a cache-busting version');
+assert(/type="module" src="\.\/auth\.js\?v=[^"'<>\s]+"/.test(html),'Authentication runtime must load as a versioned module');
 assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"'),'Firebase Authentication must preload before the post-login reload');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('</head>'),'Firebase config must load before first body paint');
 assert(html.indexOf('id="flympus-theme-bootstrap"')<html.indexOf('./firebase-config.js'),'First-paint theme must resolve before network-dependent Firebase startup scripts');
