@@ -8897,7 +8897,8 @@ function appPreferencesScreen(){
 function settings(){
   const canCreate=flympusCan('courses.create'),canManageCourse=flympusCan('courses.manageAssigned'),canGlobalPackages=flympusCan('packages.manageGlobal');
   if(!canCreate&&!canManageCourse&&!canGlobalPackages)return flympusAccessDenied('Course Management');
-  const requestedTab=state.settingsTab==='profiles'?'builder':state.settingsTab==='packages'?'catalog':(state.settingsTab||'builder'),tab=requestedTab==='catalog'&&!canGlobalPackages?(canManageCourse?'overrides':'builder'):requestedTab;
+  const requestedTab=state.settingsTab==='profiles'?'builder':state.settingsTab==='packages'?'catalog':(state.settingsTab||'builder');
+  const tab=requestedTab==='catalog'&&!canGlobalPackages?(canManageCourse?'overrides':'builder'):requestedTab==='builder'&&!canCreate?(canManageCourse?'overrides':'catalog'):requestedTab==='overrides'&&!canManageCourse?(canCreate?'builder':'catalog'):requestedTab;
   const c=cfgGet();
   const type=state.builderType||'',phases=type?c.phases.filter(x=>x.type===type):[],phase=state.builderPhase&&phases.some(x=>x.id===state.builderPhase)?state.builderPhase:'';
   const training=state.builderTraining||'',time=state.builderDay||'',country=state.builderCountry||'',platform=state.builderPlatform||'',programId=state.builderProgram||'';
