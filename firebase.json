@@ -1,7 +1,9 @@
 {
   "hosting": {
     "public": "dist",
-    "predeploy": ["node scripts/prepare-hosting.cjs"],
+    "predeploy": [
+      "node scripts/prepare-hosting.cjs"
+    ],
     "ignore": [
       "firebase.json",
       ".firebaserc",
@@ -79,5 +81,8 @@
         ]
       }
     ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
   }
 }
