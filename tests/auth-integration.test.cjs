@@ -78,12 +78,14 @@ assert(rules.includes("data.role in ['user', 'training_manager', 'admin', 'owner
   'Firestore must recognize the complete application-role hierarchy');
 assert(rules.includes("request.resource.data.role == 'user'")&&rules.includes("request.resource.data.status == 'pending'"),
   'Uninvited first sign-in must remain pending USER');
-assert(rules.includes("currentUserRecord().data.role in ['owner', 'admin']"),
-  'User administration must be limited to active OWNER or ADMIN accounts');
-assert(rules.includes('match /system/access')&&rules.includes('ownerBootstrap(uid)')&&rules.includes("currentRole != 'owner'")&&rules.includes("nextRole != 'owner'"),
-  'Firestore must provide a one-time Owner bootstrap and protect the Owner from administrator mutation');
-assert(rules.includes("actorRole == 'admin'")&&rules.includes("currentRole != 'admin'")&&rules.includes("nextRole != 'admin'"),
-  'Administrators must manage only lower application roles; peer administrators remain Owner-managed');
+assert(rules.includes("currentUserRecord().data.role in ['owner', 'admin', 'training_manager']"),
+  'User Management must be available to active OWNER, ADMIN and TRAINING_MANAGER accounts');
+assert(rules.includes('match /system/access')&&rules.includes('ownerBootstrap(uid)')&&rules.includes("uid == systemOwnerUid()"),
+  'Firestore must preserve the one-time Owner bootstrap and protect the Primary Owner');
+assert(rules.includes("actorRole == 'owner' && nextRole in ['owner', 'admin']")&&rules.includes("actorRole == 'admin' && nextRole == 'training_manager'")&&rules.includes("actorRole == 'training_manager' && nextRole == 'user'"),
+  'Role grants must follow the one-step hierarchy while allowing Owner to appoint another Owner');
+assert(rules.includes("actorRole == 'admin' && targetRole in ['training_manager', 'user']")&&rules.includes("actorRole == 'training_manager' && targetRole == 'user'"),
+  'Administrators and Training Managers may manage only lower account tiers');
 assert(rules.includes('allow read, write: if false;'),'Unmigrated training collections must remain fail-closed');
 assert(rules.includes("data.keys().hasOnly"),'User documents must reject unexpected authority-like fields');
 assert(rules.includes("affectedKeys().hasOnly"),'Self-service profile writes must be field-limited');
