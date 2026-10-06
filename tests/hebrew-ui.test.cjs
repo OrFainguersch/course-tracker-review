@@ -13,7 +13,7 @@ const html=fs.readFileSync('index.html','utf8');
   "'Edit identity, photo and course membership safely.':'ערוך זהות, תמונה ושיוך לקורס באופן בטוח.'"
 ].forEach(x=>assert(html.includes(x), 'Missing Hebrew UI translation: '+x));
 
-assert(html.includes("translate:calc(-1 * var(--drawer-push-width)) 0!important"),'Hebrew drawer must push the app shell left');
+assert(html.includes('html[data-flympus-language="he"] .drawer .panel')&&html.includes('transform:translate3d(102%,0,0)!important'),'Hebrew drawer must slide in from the right without pushing the app shell');
 assert(html.includes('html[data-flympus-language="he"] .rosterTraineeHead{'),'Hebrew roster override must exist');
 assert(html.includes('justify-items:start!important'),'Hebrew trainee name/status must align to the mirrored start edge');
 assert(html.includes("attributeFilter:['placeholder','title','aria-label']"),'Dynamic translated attributes must remain synchronized');
