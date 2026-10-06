@@ -1,8 +1,9 @@
-name: Deploy FLYMPUS to Firebase
+name: Deploy FLYMPUS to Firebase Hosting
 
-# Production Hosting is verified. Every reviewed main commit now runs the
-# complete test suite and deploys through keyless WIF; manual dispatch remains
-# available for an explicit retry.
+# Production Hosting is verified. Every reviewed main commit runs the complete
+# test suite and deploys Hosting through keyless WIF. Firestore Rules deployment
+# is separately gated by FIREBASE_RULES_DEPLOY_ENABLED so missing Rules IAM can
+# never turn ordinary application commits into repeated failure notifications.
 on:
   push:
     branches:
@@ -75,8 +76,11 @@ jobs:
       - name: Verify real ADC access to the Hosting site
         if: steps.app_verify.outputs.deploy_ready == 'true'
         run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" hosting:sites:get flympus --project flympus --non-interactive
+      - name: Firestore Rules deployment status
+        if: steps.app_verify.outputs.deploy_ready == 'true' && vars.FIREBASE_RULES_DEPLOY_ENABLED != 'true'
+        run: echo "::notice::Firestore Rules deployment is intentionally paused until the dedicated deployer IAM role is enabled. Hosting deployment continues normally."
       - name: Deploy reviewed Firestore access rules
-        if: steps.app_verify.outputs.deploy_ready == 'true'
+        if: steps.app_verify.outputs.deploy_ready == 'true' && vars.FIREBASE_RULES_DEPLOY_ENABLED == 'true'
         run: node scripts/deploy-firestore-rules.cjs "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools"
       - name: Deploy reviewed public bundle to Firebase Hosting
         if: steps.app_verify.outputs.deploy_ready == 'true'
