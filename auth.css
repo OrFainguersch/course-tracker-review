@@ -30,33 +30,29 @@ html:not(.flympusAuthBooting) #flympusAuthRoot.flympusAuthInitial{display:none!i
   min-height:100dvh;
   padding:calc(22px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) calc(22px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));
   overflow:auto;
-  background:
-    radial-gradient(circle at 14% 8%,rgba(19,168,238,.22),transparent 34%),
-    radial-gradient(circle at 88% 88%,rgba(223,184,92,.14),transparent 31%),
-    linear-gradient(155deg,#061b31 0%,#082f57 54%,#06192d 100%);
-  color:#eaf6ff;
+  background:#f4f8fc;
+  color:#10263b;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif
 }
-.flympusAuthShell{width:min(440px,100%);margin:auto}
-.flympusAuthBrand{display:flex;justify-content:center;margin:0 0 18px}
-.flympusAuthBrand img{
-  display:block;
-  width:min(250px,72vw);
-  max-height:74px;
-  object-fit:contain;
-  filter:drop-shadow(0 8px 24px rgba(0,0,0,.18))
-}
+.flympusAuthShell{width:min(390px,100%);margin:auto}
 .flympusAuthCard{
   overflow:hidden;
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:25px;
-  background:rgba(255,255,255,.97);
+  border:1px solid #e0e7ee;
+  border-radius:22px;
+  background:rgba(255,255,255,.98);
   color:#10263b;
-  box-shadow:0 26px 80px rgba(0,0,0,.30);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px)
+  box-shadow:0 14px 38px rgba(30,64,92,.10)
 }
-.flympusAuthCardBody{padding:26px}
+.flympusAuthCardBody{padding:24px}
+.flympusAuthMiniBrand{
+  width:54px;
+  height:54px;
+  margin:0 0 16px;
+  border-radius:15px;
+  overflow:hidden;
+  box-shadow:0 6px 18px rgba(15,52,87,.16)
+}
+.flympusAuthMiniBrand img{display:block;width:100%;height:100%;object-fit:cover}
 .flympusAuthEyebrow{
   margin:0 0 7px;
   color:#1687e8;
@@ -69,66 +65,71 @@ html:not(.flympusAuthBooting) #flympusAuthRoot.flympusAuthInitial{display:none!i
 .flympusAuthTitle{
   margin:0;
   color:#0a315c;
-  font-size:27px;
-  line-height:1.08;
-  font-weight:950;
-  letter-spacing:-.025em
+  font-size:23px;
+  line-height:1.12;
+  font-weight:900;
+  letter-spacing:-.02em
 }
 .flympusAuthCopy{
-  margin:9px 0 0;
-  color:#687d91;
+  margin:8px 0 0;
+  color:#728397;
   font-size:12px;
-  line-height:1.52
+  line-height:1.5
 }
-.flympusAuthProviders{display:grid;gap:10px;margin-top:21px}
+.flympusAuthProviders{display:grid;gap:9px;margin-top:19px}
 .flympusAuthProvider{
   width:100%;
-  min-height:50px;
+  min-height:48px;
   display:grid;
-  grid-template-columns:30px minmax(0,1fr) 20px;
+  grid-template-columns:28px minmax(0,1fr);
   align-items:center;
   gap:10px;
   padding:0 14px;
-  border:1px solid #d8e3ed;
-  border-radius:14px;
+  border:1px solid #d8e0e8;
+  border-radius:11px;
   background:#fff;
   color:#173d61;
-  font-size:13px;
-  font-weight:850;
-  text-align:left;
+  font-size:12.5px;
+  font-weight:800;
+  text-align:start;
   cursor:pointer;
-  box-shadow:0 3px 10px rgba(22,61,97,.05);
-  transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease,background .14s ease
+  box-shadow:0 2px 8px rgba(22,61,97,.035);
+  transition:border-color .14s ease,box-shadow .14s ease,background .14s ease,transform .14s ease
 }
 .flympusAuthProvider:hover,
 .flympusAuthProvider:focus-visible{
   outline:none;
-  transform:translateY(-1px);
-  border-color:#9fc9e8;
-  box-shadow:0 8px 22px rgba(22,61,97,.10)
+  border-color:#a9c8df;
+  box-shadow:0 6px 18px rgba(22,61,97,.08)
 }
-.flympusAuthProvider:active{transform:translateY(0) scale(.992)}
-.flympusAuthProvider:disabled{cursor:not-allowed;opacity:.5;transform:none;box-shadow:none}
+.flympusAuthProvider:active{transform:scale(.995)}
+.flympusAuthProvider:disabled{cursor:wait;opacity:.72;transform:none;box-shadow:none}
+.flympusAuthInitial .flympusAuthProvider:disabled{opacity:1;cursor:default}
 .flympusAuthProviderMark{
-  width:28px;height:28px;
+  width:26px;height:26px;
   display:grid;place-items:center;
-  border-radius:8px;
-  background:#f5f8fb;
-  border:1px solid #e1e8ef;
-  font-size:15px;
+  border-radius:7px;
+  background:#f7f9fb;
+  border:1px solid #e4e9ee;
+  font-size:14px;
   font-weight:950
 }
-.flympusAuthProviderArrow{color:#8aa0b4;font-size:19px;text-align:right}
+.flympusAuthProvider[aria-busy="true"] .flympusAuthProviderMark{font-size:0}
+.flympusAuthProvider[aria-busy="true"] .flympusAuthProviderMark:after{
+  content:"";
+  width:12px;height:12px;
+  border:2px solid #d7e3ed;
+  border-top-color:#1687e8;
+  border-radius:50%;
+  animation:flympusAuthSpin .7s linear infinite
+}
 .flympusMicrosoftMark{grid-template-columns:repeat(2,7px);grid-template-rows:repeat(2,7px);gap:2px}
 .flympusMicrosoftMark i{display:block;width:7px;height:7px;background:#477da9;border-radius:1px}
 .flympusAuthFine{
-  margin:17px 0 0;
-  padding-top:14px;
-  border-top:1px solid #edf2f6;
-  color:#8091a1;
+  margin:15px 0 0;
+  color:#8a99a8;
   font-size:9.5px;
-  line-height:1.45;
-  text-align:center
+  line-height:1.45
 }
 .flympusAuthStatus{
   display:flex;
@@ -279,12 +280,12 @@ html[data-flympus-theme="dark"] .flympusSignedInSignOut{color:#7ec2ef}
 html[data-flympus-theme="dark"] .flympusSignedInAdmin{border-color:#31526c;background:#16324a;color:#8fd0f8}
 
 @media(max-width:520px){
-  #flympusAuthRoot{place-items:end center;padding-left:12px;padding-right:12px}
+  #flympusAuthRoot{place-items:center;padding-left:16px;padding-right:16px}
   .flympusAuthShell{width:100%}
-  .flympusAuthBrand{margin-bottom:12px}
-  .flympusAuthCard{border-radius:22px}
-  .flympusAuthCardBody{padding:22px 18px}
-  .flympusAuthTitle{font-size:24px}
+  .flympusAuthCard{border-radius:20px}
+  .flympusAuthCardBody{padding:22px 20px}
+  .flympusAuthMiniBrand{width:50px;height:50px;margin-bottom:14px}
+  .flympusAuthTitle{font-size:22px}
   #flympusUserManagementRoot{place-items:end center;padding:0}
   .flympusUserManagementPanel{width:100%;max-height:94dvh;border-radius:24px 24px 0 0;transform:translate3d(0,22px,0) scale(.996);transform-origin:center bottom}
   #flympusUserManagementRoot.flympusUserManagementVisible .flympusUserManagementPanel{transform:translate3d(0,0,0) scale(1)}
@@ -298,7 +299,6 @@ html[data-flympus-theme="dark"] .flympusSignedInAdmin{border-color:#31526c;backg
 /* Authentication/startup surfaces inherit the same pre-paint device theme.
    A fixed navy canvas or white auth card must not become a theme flash. */
 html[data-flympus-theme] #flympusAuthRoot{background:var(--flympus-canvas);color:var(--flympus-ink)}
-html[data-flympus-theme="light"] .flympusAuthBrand img{background:#07294c;border-radius:14px;padding:10px}
 html[data-flympus-theme="dark"] .flympusAuthCard,
 html[data-flympus-theme="dark"] .flympusAuthProvider,
 html[data-flympus-theme="dark"] .flympusAuthAccount,
