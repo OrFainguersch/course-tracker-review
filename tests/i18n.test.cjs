@@ -53,3 +53,10 @@ assert(auth.includes("'App role and course role are separate. A person can be a 
 assert(html.includes('html[data-flympus-language="he"] #flympusUserManagementPageRoot')&&auth.includes("host.dir=authLanguage()==='he'?'rtl':'ltr'"),
   'User Management must switch to a mirrored RTL page in Hebrew');
 assert(auth.includes('syncAuthAdjacentChromeLanguage'),'Profile and notification dropdown additions must synchronize with Hebrew');
+assert(auth.includes("'Owner':'בעלים'")&&auth.includes("'Administrator':'מנהל מערכת'")&&auth.includes("'Training Manager':'מנהל הדרכה'")&&auth.includes("'User':'משתמש'"),
+  'All application-role names must have explicit Hebrew translations');
+assert(auth.includes("'App role and course role are separate. A person can be a User in FLYMPUS and still be the Course Manager of a specific course.'"),
+  'The role separation explanation must be covered by the bilingual User Management dictionary');
+assert(html.includes('html[data-flympus-language="he"] #flympusUserManagementPageRoot')&&
+  html.includes('html[data-flympus-language="he"] .recordReturnBtn svg{transform:scaleX(-1)'),
+  'Hebrew User Management must use RTL composition and mirrored directional navigation');
