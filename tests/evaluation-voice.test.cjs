@@ -13,6 +13,9 @@ const voice=context.FLYMPUS_EVALUATION_VOICE;
 assert(voice&&typeof voice.parse==="function","Evaluation voice helper must expose the deterministic parser");
 assert.equal(voice.recognitionSupported(),false,"Speech recognition support must be feature-detected instead of assumed");
 assert.equal(voice.createRecognition(),null,"Unsupported browsers must retain a no-crash fallback");
+assert.equal(voice.preferredRecognitionLanguage(["he-IL","en-US"]),"he-IL","Automatic voice language must follow the device/browser language order");
+assert.equal(voice.preferredRecognitionLanguage(["en-US","he-IL"]),"en-US","Automatic voice language must respect English when it is the primary device/browser language");
+assert.equal(voice.preferredRecognitionLanguage(["fr-FR"],"he-IL"),"he-IL","Unsupported device languages must fall back to the FLYMPUS interface language");
 assert(!/openai|anthropic|gemini|fetch\s*\(|XMLHttpRequest|WebSocket/i.test(source),"Voice parser must not call a paid/external AI API");
 
 const criteria=[
@@ -70,13 +73,16 @@ assert.equal(badGrade.criteria.length,0,"Out-of-range spoken grades must never b
 assert(badGrade.warnings.length>0,"Out-of-range grades must be surfaced for review");
 
 const html=fs.readFileSync("index.html","utf8");
-assert(html.includes('<script src="./assets/evaluation-voice.js?v=0741"></script>'),"Evaluation page must load the local zero-cost voice helper");
+assert(html.includes('<script src="./assets/evaluation-voice.js?v=0742"></script>'),"Evaluation page must load the local zero-cost voice helper");
 assert(html.includes("function evaluationVoiceInputHtml()")&&html.includes("${evaluationVoiceInputHtml()}"),"Voice input UI must be mounted in Evaluation");
 assert.equal((html.match(/\$\{evaluationVoiceInputHtml\(\)\}/g)||[]).length,1,"Voice input must be mounted only once, in Evaluation");
 assert(html.includes("Apply detected values")&&html.includes("review before submitting"),"Detected voice values must require instructor review before normal Evaluation submission");
 assert(html.includes("Use device dictation")&&html.includes("keyboard microphone"),"Unsupported direct recognition must retain a zero-cost device-dictation fallback");
 assert(html.includes("does not use a paid AI/API")&&html.includes("does not store the audio"),"Evaluation voice UI must disclose its privacy/cost behavior");
+assert(html.includes('id="evaluationVoiceLanguageTrigger"')&&html.includes('data-evaluation-voice-language="auto"'),"Voice language must use a compact automatic-language control");
+assert(!html.includes('<select id="evaluationVoiceLanguage"'),"The full-width manual recognition-language dropdown must be removed");
+assert(html.includes("flympus-evaluation-voice-language")&&html.includes("preferredRecognitionLanguage"),"Manual Hebrew/English override must persist while Automatic resolves from the device/browser language");
 const sw=fs.readFileSync("sw.js","utf8");
-assert(sw.includes("./assets/evaluation-voice.js?v=0741"),"Installed PWA shell must cache the local Evaluation voice helper");
+assert(sw.includes("./assets/evaluation-voice.js?v=0742"),"Installed PWA shell must cache the local Evaluation voice helper");
 
 console.log("Evaluation voice tests passed");

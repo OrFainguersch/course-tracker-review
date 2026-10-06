@@ -208,6 +208,17 @@
     };
   }
 
+  function preferredRecognitionLanguage(languages=[],fallback='en-US'){
+    const values=(Array.isArray(languages)?languages:[languages])
+      .map(value=>String(value||'').trim().toLowerCase())
+      .filter(Boolean);
+    for(const value of values){
+      if(value==='he'||value.startsWith('he-')||value==='iw'||value.startsWith('iw-'))return 'he-IL';
+      if(value==='en'||value.startsWith('en-'))return 'en-US';
+    }
+    return fallback==='he-IL'?'he-IL':'en-US';
+  }
+
   function recognitionSupported(){
     return !!(global.SpeechRecognition||global.webkitSpeechRecognition)
   }
@@ -247,6 +258,7 @@
     parse,
     normalize,
     withNumericWords,
+    preferredRecognitionLanguage,
     recognitionSupported,
     createRecognition
   });
