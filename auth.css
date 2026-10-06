@@ -814,3 +814,96 @@ html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusManagedUs
   #flympusUserManagementPageRoot .flympusManagedUserActions button{flex:1}
   #flympusUserManagementPageRoot[dir="rtl"] .flympusManagedUserActions{justify-content:stretch}
 }
+
+
+/* ===== User Management typography + accessibility alignment · 2026-10-06 =====
+   Keep the administration screen on the same readable type scale as the rest
+   of FLYMPUS instead of using a miniature, isolated type system. */
+#flympusUserManagementPageRoot{
+  font-family:inherit;
+  font-size:14px;
+  line-height:1.45
+}
+#flympusUserManagementPageRoot .flympusUserManagementPageHead .eyebrow{font-size:10.5px}
+#flympusUserManagementPageRoot .flympusUserManagementPageHead h1{font-size:25px;letter-spacing:-.025em}
+#flympusUserManagementPageRoot .flympusUserManagementPageHead p{font-size:12px;line-height:1.5}
+#flympusUserManagementPageRoot .flympusRoleGuideHead span{font-size:10px}
+#flympusUserManagementPageRoot .flympusRoleGuideHead h2{font-size:18px}
+#flympusUserManagementPageRoot .flympusRoleGuideTitle>b{font-size:11px;min-height:26px;padding:6px 10px}
+#flympusUserManagementPageRoot .flympusRoleGuideTitle small{font-size:10.5px;line-height:1.35}
+#flympusUserManagementPageRoot .flympusRoleGuideCard p{font-size:11.5px;line-height:1.55}
+#flympusUserManagementPageRoot .flympusRoleGuideCard ul{font-size:11.5px;line-height:1.55;padding-inline-start:18px}
+#flympusUserManagementPageRoot .flympusRoleSeparationNote{font-size:11.5px;line-height:1.55}
+#flympusUserManagementPageRoot .flympusUserInviteHead h2,
+#flympusUserManagementPageRoot .flympusUserGroupHead h2{font-size:15px}
+#flympusUserManagementPageRoot .flympusUserInviteHead p,
+#flympusUserManagementPageRoot .flympusUserGroupTitle small,
+#flympusUserManagementPageRoot .flympusUserInviteForm>small{font-size:11px;line-height:1.45}
+#flympusUserManagementPageRoot .flympusUserInviteForm label>span,
+#flympusUserManagementPageRoot .flympusManagedUserFields label>span,
+#flympusUserManagementPageRoot .flympusRoleSelectWrap>span{font-size:11px}
+#flympusUserManagementPageRoot .flympusUserInviteForm input,
+#flympusUserManagementPageRoot .flympusUserInviteForm select,
+#flympusUserManagementPageRoot .flympusManagedUserFields input,
+#flympusUserManagementPageRoot .flympusManagedUserFields select,
+#flympusUserManagementPageRoot .flympusRoleSelectWrap select{font-size:12px}
+#flympusUserManagementPageRoot .flympusUserAddButton,
+#flympusUserManagementPageRoot .flympusUserAction,
+#flympusUserManagementPageRoot .flympusManagedUserActions button,
+#flympusUserManagementPageRoot .flympusUserNameEdit{font-size:11.5px}
+#flympusUserManagementPageRoot .flympusUserNameLine>b{font-size:14px}
+#flympusUserManagementPageRoot .flympusUserIdentity>span{font-size:11.5px;line-height:1.4}
+#flympusUserManagementPageRoot .flympusUserIdentity>.flympusUserPreferred{font-size:11px}
+#flympusUserManagementPageRoot .flympusUserRoleBadge,
+#flympusUserManagementPageRoot .flympusCurrentAdmin,
+#flympusUserManagementPageRoot .flympusOwnerProtected,
+#flympusUserManagementPageRoot .flympusUserMeta i{font-size:10.5px}
+#flympusUserManagementPageRoot .flympusUserSummary span{font-size:11.5px}
+#flympusUserManagementPageRoot .flympusUserGroupHead>span{font-size:10.5px}
+#flympusUserManagementPageRoot .flympusUserEmpty{font-size:12px}
+#flympusUserManagementPageRoot .flympusManagedUserFields label>small,
+#flympusUserManagementPageRoot .flympusUserFieldError{font-size:10.5px;line-height:1.4}
+#flympusUserManagementPageRoot[dir="rtl"] .flympusUserInviteForm,
+#flympusUserManagementPageRoot[dir="rtl"] .flympusManagedUserFields,
+#flympusUserManagementPageRoot[dir="rtl"] .flympusRoleGuideCard,
+#flympusUserManagementPageRoot[dir="rtl"] .flympusRoleSeparationNote{direction:rtl;text-align:right}
+#flympusUserManagementPageRoot[dir="rtl"] input[type="email"]{direction:ltr;text-align:left;unicode-bidi:isolate}
+
+html.flympusLargeText #flympusUserManagementPageRoot{font-size:17px}
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserManagementPageHead h1{font-size:36px}
+html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleGuideHead h2,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserInviteHead h2,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserGroupHead h2{font-size:20px}
+html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleGuideTitle>b,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserNameLine>b{font-size:15px}
+html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleGuideCard p,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleGuideCard ul,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleSeparationNote,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserManagementPageHead p,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserInviteHead p,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserGroupTitle small,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserIdentity>span,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserInviteForm>small{font-size:13.5px}
+html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleGuideTitle small,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserRoleBadge,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusCurrentAdmin,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusOwnerProtected,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserMeta i,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserInviteForm label>span,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusManagedUserFields label>span,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleSelectWrap>span,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusManagedUserFields label>small{font-size:13px}
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserInviteForm input,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserInviteForm select,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusManagedUserFields input,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusManagedUserFields select,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleSelectWrap select,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserAddButton,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserAction,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusManagedUserActions button,
+html.flympusLargeText #flympusUserManagementPageRoot .flympusUserNameEdit{font-size:14px}
+
+@media(max-width:520px){
+  #flympusUserManagementPageRoot .flympusUserManagementPageHead h1{font-size:25px}
+  html.flympusLargeText #flympusUserManagementPageRoot .flympusUserManagementPageHead h1{font-size:31px}
+}
