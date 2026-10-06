@@ -115,7 +115,7 @@ const AUTH_HE_UI=Object.freeze({
   'Approve this user?':'לאשר את המשתמש הזה?','This account will be able to access FLYMPUS.':'החשבון יוכל לגשת ל־FLYMPUS.','Block this user?':'לחסום את המשתמש הזה?','This account will immediately lose application access.':'החשבון יאבד מיד את הגישה לאפליקציה.',
   'Reactivate this user?':'להפעיל מחדש את המשתמש הזה?','This account will regain application access.':'החשבון יקבל מחדש גישה לאפליקציה.','Make this user an administrator?':'להפוך את המשתמש הזה למנהל?','Administrators can approve users and change application access.':'מנהלים יכולים לאשר משתמשים ולשנות הרשאות גישה לאפליקציה.',
   'Remove administrator access?':'להסיר הרשאת מנהל?','The account remains active but loses User Management permissions.':'החשבון יישאר פעיל אך יאבד הרשאות ניהול משתמשים.','Update this user?':'לעדכן את המשתמש הזה?','The account permissions will be changed.':'הרשאות החשבון ישתנו.','Confirm':'אישור','Update failed':'העדכון נכשל',
-  'Personal profile':'פרופיל אישי','You can change your personal photo here. Your name, email and course role are managed by course administration.':'כאן ניתן לשנות את התמונה האישית. השם, המייל והתפקיד בקורס מנוהלים על ידי הנהלת הקורס.',
+  'Personal profile':'פרופיל אישי','Account menu':'תפריט חשבון','My Profile':'הפרופיל שלי','View your account details and course roles.':'הצג את פרטי החשבון ואת התפקידים שלך בקורסים.','Settings':'הגדרות','Language, appearance and personal preferences.':'שפה, תצוגה והעדפות אישיות.','Manage application access and roles.':'נהל גישה לאפליקציה ותפקידי מערכת.','You can change your personal photo here. Your name, email and course role are managed by course administration.':'כאן ניתן לשנות את התמונה האישית. השם, המייל והתפקיד בקורס מנוהלים על ידי הנהלת הקורס.',
   'Choose photo':'בחר תמונה','Edit photo':'ערוך תמונה','Remove photo':'הסר תמונה',"The photo is compressed and stored with this device's FLYMPUS data.":'התמונה נדחסת ונשמרת עם נתוני FLYMPUS במכשיר הזה.',
   'Notifications':'התראות','Personal':'אישי','No new notifications':'אין התראות חדשות','Your personal updates, assignments and items that need your attention will appear here across all courses.':'עדכונים אישיים, שיוכים ופריטים שדורשים את תשומת לבך יופיעו כאן מכל הקורסים.',
   'Notification preferences':'העדפות התראות','Choose which personal notifications you want to receive across all courses.':'בחר אילו התראות אישיות ברצונך לקבל מכל הקורסים.',
@@ -133,6 +133,12 @@ function setLeadingText(el,en){if(!el)return;const node=[...el.childNodes].find(
 function syncAuthAdjacentChromeLanguage(){
   setStaticText('.notificationHead b','Notifications');setStaticText('.notificationHead span','Personal');setStaticText('.notificationEmpty b','No new notifications');setStaticText('.notificationEmpty p','Your personal updates, assignments and items that need your attention will appear here across all courses.');
   setStaticText('#notificationPreferences>summary','Notification preferences');setStaticText('.notificationPrefsHint','Choose which personal notifications you want to receive across all courses.');
+  setStaticText('#quickMyProfile b','My Profile');setStaticText('#quickMyProfile small','View your account details and course roles.');
+  setStaticText('#quickSettings b','Settings');setStaticText('#quickSettings small','Language, appearance and personal preferences.');
+  setStaticText('#quickUserManagement b','User Management');setStaticText('#quickUserManagement small','Manage application access and roles.');
+  setStaticText('#quickSignOut b','Sign out of FLYMPUS');
+  document.getElementById('topPersonalProfileBtn')?.setAttribute('aria-label',tr('Account menu'));
+  document.getElementById('topPersonalProfileDropdown')?.setAttribute('aria-label',tr('Account menu'));
   const copies={assignments:['Assignments & role changes','When you are assigned to a course or your course role changes.'],courseUpdates:['Course updates','Important changes to courses you are assigned to.'],evaluations:['Evaluations & drafts','Items that require completion, revision or follow-up.'],checks:['Checks, tests & certifications','Qualification events and certification-related updates.'],requiredActions:['Required actions & deadlines','Time-sensitive items that need your attention.']};
   Object.entries(copies).forEach(([key,copy])=>{const row=document.querySelector('[data-notification-pref="'+key+'"]')?.closest?.('.notificationPrefRow');const b=row?.querySelector?.('.notificationPrefCopy b'),small=row?.querySelector?.('.notificationPrefCopy small');if(b)b.textContent=tr(copy[0]);if(small)small.textContent=tr(copy[1])});
   setStaticText('.personalProfileIdentity small','Personal profile');const profileCopy=document.querySelector('.personalProfileBody>p:not(.personalPhotoNote)');if(profileCopy)profileCopy.textContent=tr('You can change your personal photo here. Your name, email and course role are managed by course administration.');
@@ -318,11 +324,20 @@ function clearRoleContext(){
   try{document.dispatchEvent(new CustomEvent('flympus:auth-signed-out'))}catch{}
 }
 function syncAuthenticatedChrome(user,profile){
-  const host=document.querySelector('.personalProfileBody');if(!host)return;let box=document.getElementById('flympusSignedInAccount');if(!box){box=document.createElement('div');box.id='flympusSignedInAccount';box.className='flympusSignedInAccount';host.appendChild(box)}
-  box.innerHTML='<div class="flympusSignedInAccountHead"><b>'+esc(tr('Signed in'))+'</b><span class="flympusSignedInRole">'+esc(tr(roleDefinition(profile.role).label))+'</span></div><small>'+esc(user.email||'')+'</small>'+(canManageUsers(profile)?'<button class="flympusSignedInAdmin" type="button" data-auth-user-management>'+esc(tr('User Management'))+'</button>':'')+'<button class="flympusSignedInSignOut" type="button" data-auth-profile-signout>'+esc(tr('Sign out of FLYMPUS'))+'</button>';
-  box.querySelector('[data-auth-profile-signout]')?.addEventListener('click',signOutCurrentUser);box.querySelector('[data-auth-user-management]')?.addEventListener('click',openUserManagement);syncAuthAdjacentChromeLanguage()
+  const role=document.getElementById('personalProfileRole'),email=document.getElementById('personalProfileEmail'),manage=document.getElementById('quickUserManagement'),signOut=document.getElementById('quickSignOut');
+  if(role)role.textContent=tr(roleDefinition(profile.role).label);
+  if(email)email.textContent=user.email||'';
+  if(manage){
+    manage.hidden=!canManageUsers(profile);
+    manage.onclick=event=>{event?.stopPropagation?.();openUserManagement()}
+  }
+  if(signOut)signOut.onclick=event=>{event?.stopPropagation?.();signOutCurrentUser()};
+  syncAuthAdjacentChromeLanguage()
 }
-function removeAuthenticatedChrome(){document.getElementById('flympusSignedInAccount')?.remove()}
+function removeAuthenticatedChrome(){
+  const role=document.getElementById('personalProfileRole'),email=document.getElementById('personalProfileEmail'),manage=document.getElementById('quickUserManagement');
+  if(role)role.textContent=tr('Account');if(email)email.textContent='';if(manage)manage.hidden=true
+}
 function closeTransientHeaderMenus({animated=false}={}){[['#topCourseDropdown','#topCourseSwitch'],['#topNotificationDropdown','#topNotificationBtn'],['#topPersonalProfileDropdown','#topPersonalProfileBtn']].forEach(([menuSel,buttonSel])=>{const menu=document.querySelector(menuSel),button=document.querySelector(buttonSel);if(!menu||menu.hidden){button?.setAttribute?.('aria-expanded','false');return}const canAnimate=animated&&(menuSel==='#topNotificationDropdown'||menuSel==='#topPersonalProfileDropdown')&&button?.getAttribute?.('aria-expanded')==='true';if(canAnimate){button.click?.();return}menu.hidden=true;button?.setAttribute?.('aria-expanded','false')})}
 function bindBottomNavigationOverlayDismissal(){if(window.__FLYMPUS_BOTTOM_DISMISS_BOUND__)return;window.__FLYMPUS_BOTTOM_DISMISS_BOUND__=true;const dismiss=event=>{if(event.target?.closest?.('#mobileBottomNav,[data-mobile-nav],.mobileBottomHapticSwitch'))closeTransientHeaderMenus()};document.addEventListener('touchstart',dismiss,true);document.addEventListener('pointerdown',dismiss,true);document.addEventListener('click',dismiss,true)}
 function userManagementRoot(){
