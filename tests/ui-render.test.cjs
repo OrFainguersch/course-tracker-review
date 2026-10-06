@@ -33,8 +33,10 @@ assert(html.includes('aria-controls="topCourseDropdown"')&&html.includes('id="to
 assert(html.includes('id="topNotificationBtn"')&&html.includes('aria-label="Notifications"'),"Header must expose an accessible notifications bell");
 assert(html.includes('id="topNotificationDropdown"')&&html.includes("No new notifications"),"Notifications bell must open a notification panel with an empty state");
 assert(html.includes("<span>Personal</span>")&&html.includes("across all courses"),"Notifications must be personal to the user rather than scoped to the selected course");
-assert(html.includes("Notification preferences")&&html.includes('data-notification-pref="assignments"')&&html.includes('data-notification-pref="requiredActions"'),"Personal notifications must expose per-category preferences");
-assert(html.includes("getNotificationPreferences()")&&html.includes("saveNotificationPreferences"),"Notification preferences must persist in browser-local personal settings");
+assert(html.includes('id="notificationSettingsLink"')&&html.includes('id="notificationSettingsCard"')&&!html.includes('id="notificationPreferences"'),"The bell must stay a focused notification center and link to the full notification settings screen");
+assert(html.includes('data-inapp-notification-pref="assignments"')&&html.includes('data-push-notification-pref="assignments"')&&html.includes("notificationAlwaysOn"),"Settings must separate in-app categories from Push categories while keeping required in-app actions always visible");
+assert(html.includes("getNotificationPreferences()")&&html.includes("saveNotificationPreferences")&&html.includes("getPushNotificationPreferences()")&&html.includes("savePushNotificationPreferences"),"In-app and Push notification preferences must persist independently");
+assert(html.includes("prefs.requiredActions=true")&&html.includes("preferences:getPushNotificationPreferences()"),"Required actions must remain in the in-app center while the Push backend receives only Push category preferences");
 assert(html.includes('id="topPersonalProfileBtn"')&&html.includes('aria-label="Personal profile"'),"The top-right personal avatar must open the personal profile editor");
 assert(html.includes("@keyframes flympusHeaderPopoverIn")&&
   html.includes(".topNotificationDropdown:not([hidden])")&&
