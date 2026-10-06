@@ -4464,6 +4464,100 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
   .topCourseDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right));width:auto;max-width:none}
 }
 </style>
+<style>
+/* ===== Desktop shell QA · 0733 ===== */
+.topCourseContext{display:none}
+@media(min-width:900px){
+  :root{--drawer-push-width:296px}
+
+  /* The desktop header is global chrome, not a second home screen. */
+  .topBrand{display:none!important}
+  .topHeaderSpacer{flex:1 1 auto!important;min-width:16px!important}
+  .topCourseContext{
+    min-width:0!important;
+    width:min(300px,28vw)!important;
+    max-width:300px!important;
+    height:44px!important;
+    padding:6px 12px!important;
+    margin-right:10px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    border:1px solid rgba(255,255,255,.16)!important;
+    border-radius:11px!important;
+    background:rgba(255,255,255,.045)!important;
+    color:#fff!important;
+    overflow:hidden!important
+  }
+  .topCourseContextLabel{
+    display:block!important;
+    color:#a9bfd2!important;
+    font-size:8px!important;
+    line-height:1.05!important;
+    font-weight:850!important;
+    letter-spacing:.08em!important;
+    text-transform:uppercase!important;
+    white-space:nowrap!important
+  }
+  .topCourseContext b{
+    display:block!important;
+    min-width:0!important;
+    margin-top:3px!important;
+    color:#f5f9fc!important;
+    font-size:12.5px!important;
+    line-height:1.1!important;
+    font-weight:800!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important
+  }
+
+  /* Desktop drawer gets a little more breathing room and can never scroll sideways. */
+  .panel{
+    width:296px!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior-x:none!important
+  }
+  .panel>*{min-width:0!important;max-width:100%!important}
+  .drawerFooter{
+    left:16px!important;
+    right:16px!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:calc(100% - 32px)!important;
+    overflow:hidden!important
+  }
+  .drawerFooter .avatar{flex:0 0 38px!important}
+  .drawerProfileCopy{min-width:0!important;flex:1 1 auto!important;overflow:hidden!important}
+  .drawerProfileCopy b,
+  .drawerProfileCopy small{
+    max-width:100%!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important
+  }
+  .drawerProfileArrow{flex:0 0 auto!important;margin-inline-start:auto!important}
+
+  /* Shared desktop safety rails: layouts may shrink, deliberate table scrollers still scroll. */
+  main,#content,.homeDashboard,.homePrimaryGrid,.homeBottomGrid,.people,.settingsGrid,
+  .reportsGrid,.fields,.twoCol,.catalogGrid,.requirementsGrid,.reportKpis,.eventSummary{
+    min-width:0!important;
+    max-width:100%!important
+  }
+  .card,.homePanel,.formCard,.settingBox,.sideCard,.personCard,.profileHero{
+    min-width:0!important;
+    max-width:100%!important
+  }
+  .topNotificationWrap,.topPersonalProfileWrap{flex:0 0 auto!important}
+}
+@media(min-width:900px) and (max-width:1100px){
+  .topCourseContext{width:min(240px,25vw)!important;max-width:240px!important}
+}
+@media(max-width:899px){
+  .topCourseContext{display:none!important}
+}
+</style>
 <link rel="stylesheet" href="./auth.css?v=20261006-auth8" />
 <script>
 /* Authentication is fail-closed only after it is explicitly enabled.
@@ -4481,14 +4575,14 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
 <body>
 <div id="flympusAuthRoot" class="flympusAuthInitial" role="dialog" aria-modal="true" aria-label="FLYMPUS sign in"><div class="flympusAuthShell"><div class="flympusAuthBrand"><img src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><section class="flympusAuthCard"><div class="flympusAuthCardBody"><div class="flympusAuthSpinner" aria-hidden="true"></div><p class="flympusAuthEyebrow">SECURE SIGN IN</p><h1 class="flympusAuthTitle">Opening FLYMPUS</h1><p class="flympusAuthCopy">Starting secure authentication…</p></div></section></div></div>
 <script>if(document.documentElement.getAttribute('data-flympus-language')==='he'){const r=document.getElementById('flympusAuthRoot');r.dir='rtl';r.querySelector('.flympusAuthEyebrow').textContent='כניסה מאובטחת';r.querySelector('.flympusAuthTitle').textContent='פותח את FLYMPUS';r.querySelector('.flympusAuthCopy').textContent='מפעיל אימות מאובטח…'}</script>
-<div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><div class="notificationCenterFooter"><button class="notificationSettingsLink" id="notificationSettingsLink" type="button">Notification settings</button></div></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Account menu" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown accountQuickMenu" id="topPersonalProfileDropdown" role="dialog" aria-label="Account menu" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small id="personalProfileRole">Account</small></div></div><div class="personalProfileBody accountQuickActions"><button class="accountQuickAction" type="button" id="quickMyProfile"><span class="accountQuickIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20a7.5 7.5 0 0 1 15 0"></path></svg></span><span><b>My Profile</b><small>View your account details and course roles.</small></span><i aria-hidden="true">›</i></button><button class="accountQuickAction accountQuickSignOut" type="button" id="quickSignOut"><span class="accountQuickIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M10 5H5v14h5"></path><path d="M14 8l4 4-4 4M18 12H9"></path></svg></span><span><b>Sign out of FLYMPUS</b><small id="personalProfileEmail"></small></span></button><input id="personalPhotoInput" type="file" accept="image/*" hidden></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><button class="drawerFooter drawerProfileShortcut" id="drawerProfileShortcut" type="button" data-go="my-profile" aria-label="Open My Profile"><div class="avatar"><span data-current-user-avatar>OF</span></div><div class="drawerProfileCopy"><b id="drawerProfileName">Or Fainguersch</b><small id="drawerProfileRole">Account</small></div><span class="drawerProfileArrow" aria-hidden="true">›</span></button></aside></div><main id="content"><div class="flympusBootShell" aria-hidden="true"><div class="flympusBootHero"><i></i><b></b><span></span><span></span><span></span></div><div class="flympusBootCard"><b></b><i></i><i></i><i></i><i></i></div></div></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0732 · account menu cleanup</div><div class="toast" id="toast"></div></div>
+<div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><div class="notificationCenterFooter"><button class="notificationSettingsLink" id="notificationSettingsLink" type="button">Notification settings</button></div></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Account menu" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown accountQuickMenu" id="topPersonalProfileDropdown" role="dialog" aria-label="Account menu" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small id="personalProfileRole">Account</small></div></div><div class="personalProfileBody accountQuickActions"><button class="accountQuickAction" type="button" id="quickMyProfile"><span class="accountQuickIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 20a7.5 7.5 0 0 1 15 0"></path></svg></span><span><b>My Profile</b><small>View your account details and course roles.</small></span><i aria-hidden="true">›</i></button><button class="accountQuickAction accountQuickSignOut" type="button" id="quickSignOut"><span class="accountQuickIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M10 5H5v14h5"></path><path d="M14 8l4 4-4 4M18 12H9"></path></svg></span><span><b>Sign out of FLYMPUS</b><small id="personalProfileEmail"></small></span></button><input id="personalPhotoInput" type="file" accept="image/*" hidden></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><button class="drawerFooter drawerProfileShortcut" id="drawerProfileShortcut" type="button" data-go="my-profile" aria-label="Open My Profile"><div class="avatar"><span data-current-user-avatar>OF</span></div><div class="drawerProfileCopy"><b id="drawerProfileName">Or Fainguersch</b><small id="drawerProfileRole">Account</small></div><span class="drawerProfileArrow" aria-hidden="true">›</span></button></aside></div><main id="content"><div class="flympusBootShell" aria-hidden="true"><div class="flympusBootHero"><i></i><b></b><span></span><span></span><span></span></div><div class="flympusBootCard"><b></b><i></i><i></i><i></i><i></i></div></div></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0733 · desktop shell QA</div><div class="toast" id="toast"></div></div>
 <script>
 (()=>{try{
-  /* The selected-course control is injected before application hydration so
-     it is present for the first interactive frame on every responsive size. */
-  if(!document.getElementById('topCourseSwitch')){
+  /* Keep course context visible without turning the global header into a
+     second course-navigation surface. Course switching stays in My Courses. */
+  if(!document.getElementById('topCourseName')){
     const spacer=document.querySelector('.topHeaderSpacer');
-    spacer?.insertAdjacentHTML('afterend','<div class="topCourseSwitcherWrap"><button class="topCourseSwitch" id="topCourseSwitch" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="topCourseDropdown"><span>Selected course</span><b id="topCourseName" aria-live="polite">&nbsp;</b><i aria-hidden="true">⌄</i></button><div class="topCourseDropdown" id="topCourseDropdown" role="menu" hidden></div></div>')
+    spacer?.insertAdjacentHTML('afterend','<div class="topCourseContext" aria-label="Current course"><span class="topCourseContextLabel">Current course</span><b id="topCourseName" aria-live="polite">&nbsp;</b></div>')
   }
   /* Reload continuity: Safari may paint the document while parser-blocking
      catalog scripts are still loading. Restore the exact previous #content
