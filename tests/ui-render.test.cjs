@@ -38,7 +38,7 @@ assert(html.includes('id="notificationSettingsLink"')&&html.includes('id="notifi
 assert(html.includes("const attr=channel==='push'?'data-push-notification-pref':'data-inapp-notification-pref'")&&html.includes("notificationCategoryDefinitions")&&html.includes("notificationAlwaysOn"),"Settings must separate in-app categories from Push categories while keeping required in-app actions always visible");
 assert(html.includes("getNotificationPreferences()")&&html.includes("saveNotificationPreferences")&&html.includes("getPushNotificationPreferences()")&&html.includes("savePushNotificationPreferences"),"In-app and Push notification preferences must persist independently");
 assert(html.includes("prefs.requiredActions=true")&&html.includes("preferences:getPushNotificationPreferences()"),"Required actions must remain in the in-app center while the Push backend receives only Push category preferences");
-assert(html.includes('id="topPersonalProfileBtn"')&&html.includes('aria-label="Personal profile"'),"The top-right personal avatar must open the personal profile editor");
+assert(html.includes('id="topPersonalProfileBtn"')&&html.includes('aria-label="Account menu"'),"The top-right personal avatar must open a compact account menu");
 assert(html.includes("@keyframes flympusHeaderPopoverIn")&&
   html.includes(".topNotificationDropdown.headerPopoverOpening")&&
   html.includes(".topPersonalProfileDropdown.headerPopoverOpening")&&
@@ -47,15 +47,18 @@ assert(html.includes("@keyframes flympusHeaderPopoverIn")&&
   html.includes("playHeaderPopoverOpen(notificationMenu,notificationBtn,positionNotificationDropdown)")&&
   html.includes("playHeaderPopoverOpen(profileMenu,profileBtn,positionPersonalProfileDropdown)"),
   "Bell and personal-profile popovers must zoom/fade from the actual pressed header controls instead of appearing abruptly");
-assert(html.includes('id="personalPhotoInput"')&&html.includes('id="removePersonalPhoto"'),"Personal profile editing must support changing or removing the user's photo");
-assert(html.includes(".personalPhotoActions .btn{flex:1;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important}"),"Personal photo action labels must be visually centered");
+assert(html.includes('id="personalPhotoInput"')&&html.includes('id="myProfilePhotoEdit"')&&html.includes('id="myProfileRemovePhoto"'),"My Profile must edit the photo through the avatar pencil and support removal");
+assert(html.includes('id="quickMyProfile"')&&html.includes('id="quickSettings"')&&html.includes('id="quickUserManagement"')&&html.includes('id="quickSignOut"'),"The account popover must remain a compact quick-action menu");
 assert(html.includes('id="personalCropModal"')&&html.includes('id="personalCropViewport"')&&html.includes('id="personalCropImage"'),"Personal photo selection must open a crop-and-adjust editor");
 assert(html.includes("function personalCropDataUrl(")&&html.includes("function renderPersonalPhotoCrop()"),"Profile photo cropper must support repositioning, zooming and exporting the adjusted square");
 assert(html.includes("onpointerdown")&&html.includes("onpointermove")&&html.includes("personalCropState.zoom"),"Profile photo cropper must support touch/pointer drag and zoom adjustment");
-assert(html.includes("Your name, email and course role are managed by course administration."),"Self-service personal profile must keep identity and role read-only");
+assert(html.includes("function myProfileScreen()")&&html.includes("Your account identity is managed centrally."),"My Profile must be a dedicated read-only identity page with separate self-service photo editing");
 assert(html.includes("navigator.storage?.persist")&&html.includes("ensurePersistentDeviceStorage();"),"The app must request persistent device storage when the browser supports it");
 assert(html.includes("function positionNotificationDropdown()"),"Notifications panel must position safely on mobile");
 assert(html.includes(".panel{display:flex;flex-direction:column;padding-bottom:calc(8px + env(safe-area-inset-bottom))}.panel #nav{flex:0 0 auto}.drawerFooter{margin-top:auto;margin-bottom:6px}"),"Mobile account card should sit close to the true bottom while respecting the safe area");
+assert(html.includes('id="drawerProfileShortcut"')&&html.includes('data-go="my-profile"'),"The sidebar account card must navigate to My Profile");
+assert(html.includes("case'my-profile':html=myProfileScreen()"),"My Profile must participate in normal application navigation");
+assert(html.includes("html[data-flympus-language=\"he\"] .accountQuickAction>i")&&html.includes("html[data-flympus-language=\"he\"] .drawerProfileArrow"),"Directional account-menu arrows must mirror in Hebrew");
 assert(html.includes(".topNotificationDropdown,.topPersonalProfileDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right))"),"Mobile notification and personal-profile panels must stay within the viewport");
 assert(html.includes(".topCourseDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right));width:auto"),"Mobile quick course dropdown must stay inside the viewport on both sides");
 assert(html.includes("function positionTopCourseDropdown()"),"Quick course switcher must position its mobile menu below the real header button");
