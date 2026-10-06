@@ -125,7 +125,7 @@
    still owns notification permission/subscription later; this early call only
    makes the next cold launch independent of mobile network latency. */
 try{
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261006-safety-severity-guide-4',{scope:'./',updateViaCache:'none'}).catch(()=>{})
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261006-safety-severity-dots-5',{scope:'./',updateViaCache:'none'}).catch(()=>{})
 }catch{}
 </script>
 <title>FLYMPUS — Train. Track. Progress.</title>
@@ -4771,7 +4771,7 @@ html.flympusLargeText .evaluationVoiceChip{font-size:14px!important}
   const viewportWidth=Math.round(window.innerWidth||document.documentElement?.clientWidth||0),viewportHeight=Math.round(window.innerHeight||document.documentElement?.clientHeight||0);
   const snapAge=Math.max(0,Date.now()-Number(snap?.savedAt||0)),snapFresh=snapAge<=15*60*1000;
   const viewportCompatible=!snap?.viewportWidth||Math.abs(Number(snap.viewportWidth)-viewportWidth)<=2;
-  const snapMatches=!!(snap&&snap.visualVersion===9&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
+  const snapMatches=!!(snap&&snap.visualVersion===10&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
   const content=document.querySelector('#content');
   const bottomNav=document.querySelector('#mobileBottomNav');
   window.__FLYMPUS_RUNTIME_READY__=false;
@@ -5117,7 +5117,7 @@ const FLYMPUS_HE_UI={
   'Required':'נדרש','Optional':'אופציונלי','Current':'נוכחי','Next':'הבא','Locked':'נעול','Complete':'הושלם',
   'With Instructor':'עם מדריך','Without Instructor':'ללא מדריך','Day':'יום','Night':'לילה','Qualification':'הסמכה','Configuration':'תצורה',
   'Auto-save ready':'שמירה אוטומטית מוכנה','Draft saved':'הטיוטה נשמרה','Items need attention':'פריטים דורשים טיפול','Item needs attention':'פריט דורש טיפול',
-  'Low':'נמוכה','Medium':'בינונית','High':'גבוהה','Minor':'קלה','Moderate':'בינונית','Major':'חמורה','Critical':'קריטית','Minor impact, with no real danger or significant effect on the mission.':'השפעה קלה, ללא סכנה ממשית או השפעה משמעותית על המשימה.','Significant impact; intervention or corrective action was required, but without serious risk.':'השפעה משמעותית; נדרשה התערבות או פעולה מתקנת, אך ללא סיכון חמור.','Serious event with a significant safety impact or a substantially reduced safety margin.':'אירוע חמור בעל השפעה בטיחותית משמעותית או צמצום מהותי של מרווח הבטיחות.','Immediate or significant danger to the aircraft, personnel, or flight safety.':'סכנה מיידית או משמעותית לכלי הטיס, לאנשי הצוות או לבטיחות הטיסה.','Safety event':'אירוע בטיחות','Real emergency':'חירום אמיתי','Operational observation':'תצפית תפעולית',
+  'Low':'נמוכה','Medium':'בינונית','High':'גבוהה','Minor':'קלה','Moderate':'בינונית','Major':'חמורה','Critical':'קריטית','🟢 Minor':'🟢 קלה','🟡 Moderate':'🟡 בינונית','🟠 Major':'🟠 חמורה','🔴 Critical':'🔴 קריטית','Minor impact, with no real danger or significant effect on the mission.':'השפעה קלה, ללא סכנה ממשית או השפעה משמעותית על המשימה.','Significant impact; intervention or corrective action was required, but without serious risk.':'השפעה משמעותית; נדרשה התערבות או פעולה מתקנת, אך ללא סיכון חמור.','Serious event with a significant safety impact or a substantially reduced safety margin.':'אירוע חמור בעל השפעה בטיחותית משמעותית או צמצום מהותי של מרווח הבטיחות.','Immediate or significant danger to the aircraft, personnel, or flight safety.':'סכנה מיידית או משמעותית לכלי הטיס, לאנשי הצוות או לבטיחות הטיסה.','Safety event':'אירוע בטיחות','Real emergency':'חירום אמיתי','Operational observation':'תצפית תפעולית',
   'PASS':'עבר','FAIL':'נכשל','Required actions':'פעולות נדרשות','Notifications':'התראות','Notification preferences':'העדפות התראות',
   'Assignments':'הקצאות','Course updates':'עדכוני קורס','Evaluations':'הערכות','Checks':'בדיקות',
   'Profile':'פרופיל','Choose photo':'בחר תמונה','Edit photo':'ערוך תמונה','Remove photo':'הסר תמונה','Full name':'שם מלא','Email':'דוא״ל',
@@ -9716,7 +9716,8 @@ function safetyScreen(){
    '<button class="btn secondary small safetyHistoryReset" type="button" id="safetyHistoryReset">Reset filters</button>'+filterSelectionsHtml('safetyHistorySelections',[])+'</div>'+
    '<div class="safetyHistoryList" id="safetyHistoryList">'+(rows||'<div class="empty"><h3>No safety entries yet.</h3><p>New events recorded for this course will appear here.</p></div>')+'</div></section>';
  }
- const severityOptions=SAFETY_SEVERITY_DEFS.map(x=>'<option value="'+esc(x.value)+'">'+esc(x.value)+'</option>').join('');
+ const severityOptionDots={Minor:'🟢',Moderate:'🟡',Major:'🟠',Critical:'🔴'};
+ const severityOptions=SAFETY_SEVERITY_DEFS.map(x=>'<option value="'+esc(x.value)+'">'+esc((severityOptionDots[x.value]||'●')+' '+x.value)+'</option>').join('');
  return head+
  '<section class="card formCard recordSingleForm"><div class="formTitle"><h2>New safety event</h2><span class="autoDraftNote" id="safetyDraftBadge">'+(draft?draftSavedLabel('safety'):'Auto-save ready')+'</span></div><form id="safetyForm">'+requiredCompletionPanelShell('safety')+'<div class="fields"><div class="field"><label>Date</label><input class="input dateDmy" name="date" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" required value="'+esc(dateInputValue(todayIsoDate()))+'" placeholder="DD/MM/YYYY"></div><div class="field"><label>Trainee <span class="requiredStar">*</span></label><select name="trainee" required data-required-label="Trainee"><option value="" selected disabled>Select trainee</option>'+traineesAlpha.map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('')+'</select></div><div class="field"><label>Instructor</label><select name="instructor"><option value="" selected>—</option>'+instructorsAlpha.map(i=>'<option value="'+i.id+'">'+esc(i.name)+'</option>').join('')+'</select></div><div class="field safetySeverityField" data-safety-severity-field><label>Severity / Impact <span class="requiredStar">*</span></label><select name="severity" required data-required-label="Severity / Impact" aria-describedby="safetySeverityGuideIntro"><option value="" selected disabled>Select severity / impact</option>'+severityOptions+'</select></div><div class="field"><label>Classification</label><select name="classification" required><option value="" selected disabled>Select classification</option><option>Safety event</option><option>Real emergency</option><option>Operational observation</option></select></div><div class="field"><label>Event title</label><input class="input" name="title" required></div></div>'+safetySeverityGuideHtml()+'<div class="field" style="margin-top:10px"><label>Details</label><textarea name="details" required></textarea></div><div class="toolbar recordFormActions"><button class="btn sky" type="submit">Submit safety event</button><button class="btn secondary discardDraft" type="button" id="discardSafetyDraft">Discard draft</button></div></form></section>';
 }
@@ -10736,7 +10737,7 @@ function saveFlympusReloadSnapshot(){
     const d=new Date(),pad=n=>String(n).padStart(2,'0'),localDay=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
     const scrollY=Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0));
     const snapshot={
-      visualVersion:9,
+      visualVersion:10,
       screen:String(state.screen||'home'),
       courseId:String(currentCourseId||'AEP-26'),
       resolvedTheme:resolvedTheme==='dark'?'dark':'light',
