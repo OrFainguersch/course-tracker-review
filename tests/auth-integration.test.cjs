@@ -40,12 +40,14 @@ assert(auth.includes("['owner','admin','training_manager','user'].includes(invit
 assert(auth.includes("profile.status!=='active'"),'Only active profiles may unlock authenticated access');
 assert(auth.includes("APP_ROLE_ORDER=Object.freeze(['user','training_manager','admin','owner'])")&&auth.includes("function hasCapability("),
   'Client role context must use explicit tiered application roles and capabilities');
-assert(auth.includes('openUserManagement')&&auth.includes("getDocs(firestoreSdk.collection(db,'users'))"),'Active administrators must have a Firestore-backed User Management screen');
+assert(auth.includes('openUserManagement')&&auth.includes("getDocs(firestoreSdk.collection(db,'users'))"),'Active user managers must have a Firestore-backed User Management screen');
 assert(auth.includes("action==='approve'")&&auth.includes("action==='block'")&&auth.includes("action==='reactivate'"),'User Management must support approval, blocking and reactivation');
 assert(auth.includes('updateManagedUserRole')&&auth.includes('updateManagedInvitationRole')&&auth.includes("role==='owner'"),
   'User Management must support tiered role changes while protecting OWNER');
 assert(auth.includes("if(actor==='owner')return ['admin','owner']")&&auth.includes("if(actor==='admin')return ['training_manager']")&&auth.includes("if(actor==='training_manager')return ['user']"),
   'Client role selectors must expose only the next role down, with Owner additionally able to appoint Owner');
+assert(auth.includes("training_manager:Object.freeze({")&&auth.includes("capabilities:Object.freeze(['users.manage','courses.create','courses.manageAssigned'"),
+  'Training Manager must have User Management capability for lower-tier Users');
 assert(auth.includes('FLYMPUS_STORAGE_SCOPE?.setUid')&&auth.includes('FLYMPUS_STORAGE_SCOPE?.clearUid'),'Authentication lifecycle must bind and clear UID-scoped browser state');
 assert((auth.match(/FLYMPUS_STORAGE_SCOPE\?\.clearUid\?\.\(\)/g)||[]).length===1,'Only explicit sign-out may clear the durable UID namespace hint');
 assert(auth.includes('if(scopeChanged||migratedLegacyCount>0){location.reload();return}'),'UID selection and legacy migration must use one consolidated reload');
