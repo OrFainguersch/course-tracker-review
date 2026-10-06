@@ -547,7 +547,7 @@ select option[value=""]{color:#8a9bad}
 .notificationCenterFooter{padding:10px 14px;border-top:1px solid #e8eef5;background:#fbfdff}
 .notificationSettingsLink{width:100%;min-height:38px;border:0;border-radius:10px;background:transparent;color:#1674bb;font-size:10.5px;font-weight:900;cursor:pointer}
 .notificationSettingsLink:hover,.notificationSettingsLink:focus-visible{background:#edf6fd;outline:none}
-.topPersonalProfileWrap{position:relative;flex:0 0 auto}.personalAvatarButton{padding:0;overflow:hidden;cursor:pointer}.personalAvatarButton img,.currentUserAvatarPhoto{width:100%;height:100%;display:block;object-fit:cover}.topPersonalProfileDropdown{position:absolute;top:calc(100% + 9px);right:0;width:min(310px,calc(100vw - 24px));background:#fff;color:#0b1f3a;border:1px solid #d9e5f0;border-radius:16px;box-shadow:0 18px 46px rgba(6,38,70,.22);z-index:94;overflow:hidden}.topPersonalProfileDropdown[hidden]{display:none}.personalProfileHead{display:flex;align-items:center;gap:11px;padding:14px;border-bottom:1px solid #e8eef5}
+.topPersonalProfileWrap{position:relative;flex:0 0 auto}.personalAvatarButton{padding:0;overflow:hidden;cursor:pointer}.personalAvatarButton img,.currentUserAvatarPhoto{width:100%;height:100%;display:block;object-fit:cover}.topPersonalProfileDropdown{position:absolute;top:calc(100% + 9px);right:0;width:min(310px,calc(100vw - 24px));background:#fff;color:#0b1f3a;border:1px solid #d9e5f0;border-radius:16px;box-shadow:0 18px 46px rgba(6,38,70,.22);z-index:94;overflow:hidden}.topPersonalProfileDropdown[hidden]{display:none}.personalProfileHead{display:flex;align-items:center;gap:11px;padding:14px;border-bottom:1px solid #d9e5ef}
 .accountProfileShortcut{width:100%;appearance:none;-webkit-appearance:none;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
 .accountProfileShortcut:hover,.accountProfileShortcut:focus-visible{background:#f2f7fb;outline:none}
 .accountProfileChevron{margin-inline-start:auto;color:#8ca0b3;font-size:21px;line-height:1;flex:0 0 auto}.personalProfilePreview{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:#eaf4fd;color:#0b5d9c;font-size:15px;font-weight:900;flex:0 0 auto}.personalProfilePreview img{width:100%;height:100%;object-fit:cover}.personalProfileIdentity{min-width:0}.personalProfileIdentity b{display:block;color:#173e63;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.personalProfileIdentity small{display:block;margin-top:3px;color:#8394a6;font-size:9px}.personalProfileBody{padding:13px 14px}.personalProfileBody p{margin:0 0 11px;color:#718398;font-size:9.5px;line-height:1.45}.personalPhotoActions{display:flex;gap:7px;flex-wrap:wrap}.personalPhotoActions .btn{flex:1;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important}.personalPhotoActions [hidden]{display:none!important}.personPhotoActions [hidden]{display:none!important}.personalPhotoNote{margin-top:10px!important;padding-top:10px;border-top:1px solid #edf2f7}
@@ -563,8 +563,11 @@ select option[value=""]{color:#8a9bad}
 .accountQuickAction b{display:block;font-size:10.5px;color:#183f64}
 .accountQuickAction small{display:block;margin-top:2px;color:#7d90a3;font-size:8px;line-height:1.35}
 .accountQuickAction>i{font-style:normal;color:#8ca0b3;font-size:20px}
-.accountQuickSignOut{margin-top:0!important;border-top:0;border-radius:12px;padding-top:10px}
-.accountQuickSignOut .accountQuickIcon{background:#f3f5f7;color:#607487}
+.accountQuickSignOut{margin-top:0!important;border-top:0;border-radius:12px;padding-top:10px;color:#b43242}
+.accountQuickSignOut b{color:#b43242!important}
+.accountQuickSignOut small{color:#8e6a70!important}
+.accountQuickSignOut .accountQuickIcon{background:#fff0f2;color:#b43242}
+.accountQuickSignOut:hover,.accountQuickSignOut:focus-visible{background:#fff6f7!important}
 .drawerProfileShortcut{width:100%;color:#fff;text-align:left;font:inherit;cursor:pointer;appearance:none;-webkit-appearance:none}
 .drawerProfileShortcut:hover,.drawerProfileShortcut:focus-visible{background:rgba(255,255,255,.09);outline:2px solid rgba(143,208,255,.45);outline-offset:2px}
 .drawerProfileCopy{min-width:0;flex:1}.drawerProfileCopy b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.drawerProfileArrow{margin-left:auto;color:#9bc9e7;font-size:23px;line-height:1}
@@ -3691,6 +3694,13 @@ html[data-flympus-theme="dark"] .homePlanRow{background:#0d1e2f!important;border
 html[data-flympus-theme="dark"] .homePlanRow:hover{background:#132a40!important}
 html[data-flympus-theme="dark"] .accountProfileShortcut:hover,
 html[data-flympus-theme="dark"] .accountProfileShortcut:focus-visible{background:#142b40!important}
+html[data-flympus-theme="dark"] .personalProfileHead{border-bottom-color:#294158}
+html[data-flympus-theme="dark"] .accountQuickSignOut{color:#ff8e99}
+html[data-flympus-theme="dark"] .accountQuickSignOut b{color:#ff9ca6!important}
+html[data-flympus-theme="dark"] .accountQuickSignOut small{color:#c59aa0!important}
+html[data-flympus-theme="dark"] .accountQuickSignOut .accountQuickIcon{background:#3b2028;color:#ff9ca6}
+html[data-flympus-theme="dark"] .accountQuickSignOut:hover,
+html[data-flympus-theme="dark"] .accountQuickSignOut:focus-visible{background:#321d24!important}
 html[data-flympus-theme="dark"] .topNotificationDropdown,
 html[data-flympus-theme="dark"] .topPersonalProfileDropdown,
 html[data-flympus-theme="dark"] .siteDialogCard,
@@ -4614,7 +4624,7 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
 <body>
 <div id="flympusAuthRoot" class="flympusAuthInitial" role="dialog" aria-modal="true" aria-label="FLYMPUS sign in"><div class="flympusAuthShell"><div class="flympusAuthBrand"><img src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><section class="flympusAuthCard"><div class="flympusAuthCardBody"><div class="flympusAuthSpinner" aria-hidden="true"></div><p class="flympusAuthEyebrow">SECURE SIGN IN</p><h1 class="flympusAuthTitle">Opening FLYMPUS</h1><p class="flympusAuthCopy">Starting secure authentication…</p></div></section></div></div>
 <script>if(document.documentElement.getAttribute('data-flympus-language')==='he'){const r=document.getElementById('flympusAuthRoot');r.dir='rtl';r.querySelector('.flympusAuthEyebrow').textContent='כניסה מאובטחת';r.querySelector('.flympusAuthTitle').textContent='פותח את FLYMPUS';r.querySelector('.flympusAuthCopy').textContent='מפעיל אימות מאובטח…'}</script>
-<div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><div class="notificationCenterFooter"><button class="notificationSettingsLink" id="notificationSettingsLink" type="button">Notification settings</button></div></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Account menu" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown accountQuickMenu" id="topPersonalProfileDropdown" role="dialog" aria-label="Account menu" hidden><button class="personalProfileHead accountProfileShortcut" id="quickMyProfile" type="button" aria-label="Open My Profile"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small id="personalProfileRole">Account</small></div><span class="accountProfileChevron" aria-hidden="true">›</span></button><div class="personalProfileBody accountQuickActions"><button class="accountQuickAction accountQuickSignOut" type="button" id="quickSignOut"><span class="accountQuickIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M10 5H5v14h5"></path><path d="M14 8l4 4-4 4M18 12H9"></path></svg></span><span><b>Sign out of FLYMPUS</b><small id="personalProfileEmail"></small></span></button><input id="personalPhotoInput" type="file" accept="image/*" hidden></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><button class="drawerFooter drawerProfileShortcut" id="drawerProfileShortcut" type="button" data-go="my-profile" aria-label="Open My Profile"><div class="avatar"><span data-current-user-avatar>OF</span></div><div class="drawerProfileCopy"><b id="drawerProfileName">Or Fainguersch</b><small id="drawerProfileRole">Account</small></div><span class="drawerProfileArrow" aria-hidden="true">›</span></button></aside></div><main id="content"><div class="flympusBootShell" aria-hidden="true"><div class="flympusBootHero"><i></i><b></b><span></span><span></span><span></span></div><div class="flympusBootCard"><b></b><i></i><i></i><i></i><i></i></div></div></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0735 · identity model & header polish</div><div class="toast" id="toast"></div></div>
+<div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><div class="notificationCenterFooter"><button class="notificationSettingsLink" id="notificationSettingsLink" type="button">Notification settings</button></div></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Account menu" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown accountQuickMenu" id="topPersonalProfileDropdown" role="dialog" aria-label="Account menu" hidden><button class="personalProfileHead accountProfileShortcut" id="quickMyProfile" type="button" aria-label="Open My Profile"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small id="personalProfileRole">Account</small></div><span class="accountProfileChevron" aria-hidden="true">›</span></button><div class="personalProfileBody accountQuickActions"><button class="accountQuickAction accountQuickSignOut" type="button" id="quickSignOut"><span class="accountQuickIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M10 5H5v14h5"></path><path d="M14 8l4 4-4 4M18 12H9"></path></svg></span><span><b>Sign out of FLYMPUS</b><small id="personalProfileEmail"></small></span></button><input id="personalPhotoInput" type="file" accept="image/*" hidden></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><button class="drawerFooter drawerProfileShortcut" id="drawerProfileShortcut" type="button" data-go="my-profile" aria-label="Open My Profile"><div class="avatar"><span data-current-user-avatar>OF</span></div><div class="drawerProfileCopy"><b id="drawerProfileName">Or Fainguersch</b><small id="drawerProfileRole">Account</small></div><span class="drawerProfileArrow" aria-hidden="true">›</span></button></aside></div><main id="content"><div class="flympusBootShell" aria-hidden="true"><div class="flympusBootHero"><i></i><b></b><span></span><span></span><span></span></div><div class="flympusBootCard"><b></b><i></i><i></i><i></i><i></i></div></div></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0736 · first-press audio & account menu polish</div><div class="toast" id="toast"></div></div>
 <script>
 (()=>{try{
   /* Keep course context visible without turning the global header into a
@@ -4694,9 +4704,14 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
       a.style.position='fixed';a.style.width='0';a.style.height='0';
       a.style.opacity='0';a.style.pointerEvents='none';
       document.body?.appendChild?.(a);try{a.load?.()}catch{}
-      earlyNavAudio=a;return a;
+      earlyNavAudio=a;
+      window.__FLYMPUS_EARLY_NAV_AUDIO__=a;
+      return a;
     }catch{return null}
   };
+  /* Start loading the baked first-press fallback during HTML parsing, not after
+     the user has already tapped. Runtime WebAudio still owns normal playback. */
+  ensureEarlyNavAudio();
   const handleEarlyBottomNavPress=e=>{
     if(window.__FLYMPUS_RUNTIME_READY__)return;
     const switchTarget=e.target?.closest?.('.mobileBottomHapticSwitch');
@@ -6375,6 +6390,7 @@ let flympusNavFastCtx=null,flympusNavFastBuffer=null,flympusNavFastBytes=null,fl
 const flympusNavScheduledSources=new Set();
 let flympusNavLastAudioUseAt=0,flympusNavAudioNeedsWake=true;
 const FLYMPUS_NAV_IDLE_WAKE_MS=10000;
+const FLYMPUS_NAV_FIRST_PRESS_MAX_DELAY_MS=900;
 
 function setFlympusAmbientAudioSession(){
   /* Keep UI sounds in the ambient category when the browser exposes the
@@ -6582,40 +6598,38 @@ function playFlympusNavFileFallback(){
 function playFlympusNavFastSound(){
   try{
     setFlympusAmbientAudioSession();
-    flympusNavLastAudioUseAt=performance.now?.()||Date.now();
+    const requestedAt=performance.now?.()||Date.now();
+    flympusNavLastAudioUseAt=requestedAt;
     const ctx=getFlympusNavFastContext();
     if(!ctx)return false;
 
-    /* Never queue an audible source while AudioContext is suspended. A queued
-       BufferSource can survive the initiating tap and later fire when WebKit
-       resumes the context, producing a ghost click with no new user action. */
-    if(ctx.state!=='running'){
-      try{
-        const p=ctx.resume?.();
-        if(p?.catch)p.catch(()=>markFlympusNavAudioNeedsWake());
-      }catch{markFlympusNavAudioNeedsWake()}
-      if(ctx.state!=='running'){
-        try{
-          const p=primeFlympusNavFastAudio();
-          if(p?.catch)p.catch(()=>{});
-        }catch{}
-        return false;
-      }
+    if(ctx.state==='running'&&flympusNavFastBuffer){
+      const ok=scheduleFlympusNavFastBuffer(ctx,flympusNavFastBuffer);
+      if(ok)flympusNavAudioNeedsWake=false;
+      else markFlympusNavAudioNeedsWake();
+      return ok;
     }
 
-    const buffer=flympusNavFastBuffer;
-    if(!buffer){
-      try{
-        const p=primeFlympusNavFastAudio();
-        if(p?.catch)p.catch(()=>{});
-      }catch{}
-      return false;
-    }
-
-    const ok=scheduleFlympusNavFastBuffer(ctx,buffer);
-    if(ok)flympusNavAudioNeedsWake=false;
-    else markFlympusNavAudioNeedsWake();
-    return ok;
+    /* First press after cold launch/reload: resume WebAudio and finish decoding
+       from THIS trusted navigation gesture, then emit that press as soon as both
+       are ready. This is intentionally different from lifecycle resume work:
+       no sound is scheduled unless a physical nav press requested it, and stale
+       requests are dropped after a short bounded window or when the page hides. */
+    let resumePromise=Promise.resolve();
+    try{
+      if(ctx.state!=='running')resumePromise=Promise.resolve(ctx.resume?.()).catch(()=>null)
+    }catch{resumePromise=Promise.resolve(null)}
+    const decodePromise=Promise.resolve(primeFlympusNavFastAudio()).catch(()=>null);
+    Promise.all([resumePromise,decodePromise]).then(([,buffer])=>{
+      const now=performance.now?.()||Date.now();
+      if(now-requestedAt>FLYMPUS_NAV_FIRST_PRESS_MAX_DELAY_MS)return;
+      if(document.visibilityState&&document.visibilityState!=='visible')return;
+      if(ctx.state!=='running'||!buffer)return;
+      const ok=scheduleFlympusNavFastBuffer(ctx,buffer);
+      if(ok)flympusNavAudioNeedsWake=false;
+      else markFlympusNavAudioNeedsWake()
+    }).catch(()=>markFlympusNavAudioNeedsWake());
+    return true;
   }catch{return false}
 }
 
@@ -6653,7 +6667,14 @@ function getFlympusNavAudioPool(){
   const desktop=isFlympusDesktopBottomNav(),key=desktop?'desktop':'mobile';
   if(!flympusNavAudioPools[key]){
     const src=desktop?FLYMPUS_NAV_DESKTOP_FALLBACK_SOUND_SRC:FLYMPUS_NAV_MOBILE_FALLBACK_SOUND_SRC;
-    flympusNavAudioPools[key]=Array.from({length:FLYMPUS_NAV_POOL_SIZE},()=>makeFlympusFileAudio(src,1)).filter(Boolean);
+    const early=window.__FLYMPUS_EARLY_NAV_AUDIO__||null;
+    const earlySrc=String(early?.getAttribute?.('src')||early?.src||'');
+    const earlyMatches=!!early&&(desktop?earlySrc.includes('signature-65'):earlySrc.includes('signature-10'));
+    const pool=earlyMatches?[early]:[];
+    while(pool.length<FLYMPUS_NAV_POOL_SIZE){
+      const audio=makeFlympusFileAudio(src,1);if(audio)pool.push(audio);else break
+    }
+    flympusNavAudioPools[key]=pool;
   }
   return flympusNavAudioPools[key];
 }
@@ -6705,9 +6726,9 @@ function playFlympusBottomNavSound(e){
     if(now-flympusLastNavSoundAt<72)return false;
     flympusLastNavSoundAt=now;
 
-    /* Running WebAudio is the zero-lag path. If resume is still asynchronous,
-       use the already-preloaded baked WAV on this same trusted gesture. No
-       audible WebAudio node is left waiting for a future lifecycle resume. */
+    /* WebAudio owns the press even when the first gesture must asynchronously
+       resume/decode it. Media fallback is reserved for browsers without a usable
+       WebAudio path, so cold pool rotation can never consume the first two taps. */
     if(playFlympusNavFastSound())return true;
     return playFlympusNavFileFallback();
   }catch{return false}
@@ -6845,17 +6866,9 @@ if(!window.__flympusNavGestureWakeBound){
         if(p?.catch)p.catch(()=>markFlympusNavAudioNeedsWake());
       }
 
-      /* If WebAudio cannot be ready synchronously, play the preloaded fallback
-         here in capture phase — before haptics, forced layout, halo work or
-         navigation render. Claiming this exact event guarantees target phase
-         cannot emit a duplicate. */
-      if((ctx.state!=='running'||!flympusNavFastBuffer)&&getFlympusAppPreferences().navigationSounds!==false){
-        const now=performance.now?.()||Date.now();
-        if(now-flympusLastNavSoundAt>=72&&window.__FLYMPUS_CLAIM_NAV_SOUND_GESTURE__?.(e)){
-          flympusLastNavSoundAt=now;
-          playFlympusNavFileFallback();
-        }
-      }
+      /* Capture phase is deliberately silent. It may warm/resume the engine, but
+         it must never CLAIM the gesture or rotate a media fallback before the
+         target-phase nav binding gets its one guaranteed first-press sound. */
     }catch{}
   };
   const dock=document.querySelector?.('#mobileBottomNav');

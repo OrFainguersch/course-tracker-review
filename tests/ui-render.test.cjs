@@ -49,6 +49,7 @@ assert(html.includes("@keyframes flympusHeaderPopoverIn")&&
   "Bell and personal-profile popovers must zoom/fade from the actual pressed header controls instead of appearing abruptly");
 assert(html.includes('id="personalPhotoInput"')&&html.includes('id="myProfilePhotoEdit"')&&html.includes('id="myProfileRemovePhoto"'),"My Profile must edit the photo through the avatar pencil and support removal");
 assert(html.includes('class="personalProfileHead accountProfileShortcut" id="quickMyProfile"')&&html.includes('id="quickSignOut"')&&!html.includes('id="quickSettings"')&&!html.includes('id="quickUserManagement"'),"The identity header itself must open My Profile without a duplicate My Profile row");
+assert(html.includes(".personalProfileHead{display:flex;align-items:center;gap:11px;padding:14px;border-bottom:1px solid #d9e5ef}")&&html.includes(".accountQuickSignOut b{color:#b43242!important}")&&html.includes(".accountQuickSignOut .accountQuickIcon{background:#fff0f2;color:#b43242}"),"Account menu must clearly separate profile identity from the restrained red Sign out action");
 assert(html.includes('id="personalCropModal"')&&html.includes('id="personalCropViewport"')&&html.includes('id="personalCropImage"'),"Personal photo selection must open a crop-and-adjust editor");
 assert(html.includes("function personalCropDataUrl(")&&html.includes("function renderPersonalPhotoCrop()"),"Profile photo cropper must support repositioning, zooming and exporting the adjusted square");
 assert(html.includes("onpointerdown")&&html.includes("onpointermove")&&html.includes("personalCropState.zoom"),"Profile photo cropper must support touch/pointer drag and zoom adjustment");
@@ -695,11 +696,18 @@ assert(html.includes("snap.localDay===localDay"),
 
 
 
-/* Navigation audio must never escape its initiating physical gesture. */
+/* Navigation audio must never escape its initiating physical gesture, and the
+   first press after cold launch/reload must not be sacrificed to audio warm-up. */
 assert(html.includes("window.__FLYMPUS_CLAIM_NAV_SOUND_GESTURE__")&&html.includes("if(!e||e.isTrusted===false)return false"),
   "Navigation sound must require a trusted physical event");
-assert(html.includes("if(!ctx||!buffer||ctx.state!=='running')return false")&&html.includes("cancelFlympusPendingNavSources()"),
-  "Navigation WebAudio must never queue while suspended and must be cancellable at lifecycle boundaries");
+assert(html.includes("FLYMPUS_NAV_FIRST_PRESS_MAX_DELAY_MS=900")&&html.includes("Promise.all([resumePromise,decodePromise]).then")&&html.includes("now-requestedAt>FLYMPUS_NAV_FIRST_PRESS_MAX_DELAY_MS"),
+  "The first trusted nav press must survive asynchronous WebAudio resume/decode within a bounded same-gesture window");
+assert(html.includes("Capture phase is deliberately silent")&&!html.includes("Claiming this exact event guarantees target phase"),
+  "Capture-phase audio warm-up must never consume the audible navigation gesture before target phase");
+assert(html.includes("ensureEarlyNavAudio();")&&html.includes("window.__FLYMPUS_EARLY_NAV_AUDIO__=a"),
+  "The baked fallback must begin preloading during parser startup and remain reusable by runtime");
+assert(html.includes("cancelFlympusPendingNavSources()"),
+  "Navigation sources must remain cancellable at lifecycle boundaries");
 assert(html.includes("playFlympusBottomNavSound(e);"),
   "Bottom-nav binding must pass the originating event into the audible path");
 
