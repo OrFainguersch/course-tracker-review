@@ -495,3 +495,192 @@ html[data-flympus-theme="dark"] .flympusUserInviteForm select{background:#0c1c2c
   #flympusUserManagementPageRoot .flympusCurrentAdmin,
   #flympusUserManagementPageRoot .flympusOwnerProtected{grid-column:1/-1;margin:0;justify-self:start}
 }
+
+
+/* ===== User Management alignment · role palette + roster-consistent cards ===== */
+/* Application roles use their own non-status palette. Green remains reserved
+   for lifecycle/status meaning such as Active. */
+#flympusUserManagementPageRoot .flympusRoleGuideCard{
+  position:relative;
+  padding:14px;
+  border-width:1px;
+  border-top-width:3px;
+  background:#f9fbfd
+}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.owner{border-color:#d8ba70;background:#fffaf1}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.admin{border-color:#bdb4ef;background:#faf9ff}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.training_manager{border-color:#9fcfeb;background:#f5fbff}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.user{border-color:#c9d4df;background:#f8fafc}
+#flympusUserManagementPageRoot .flympusRoleGuideTitle{display:block}
+#flympusUserManagementPageRoot .flympusRoleGuideTitle>b{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:5px 9px;
+  border-radius:999px;
+  color:#153d62;
+  font-size:9.5px;
+  line-height:1;
+  font-weight:900;
+  white-space:nowrap
+}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.owner .flympusRoleGuideTitle>b{background:#fff0c8;color:#805f18}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.admin .flympusRoleGuideTitle>b{background:#eeeafd;color:#6550a8}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.training_manager .flympusRoleGuideTitle>b{background:#e3f3fd;color:#1d699a}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.user .flympusRoleGuideTitle>b{background:#edf3f8;color:#526a80}
+#flympusUserManagementPageRoot .flympusRoleGuideTitle small{
+  display:block;
+  margin-top:5px;
+  color:#7b8fa1;
+  font-size:8px;
+  line-height:1.25;
+  font-weight:850;
+  letter-spacing:.035em
+}
+#flympusUserManagementPageRoot .flympusRoleGuideCard p{margin-top:11px}
+
+/* User cards follow the Course Roster rhythm: avatar, identity/badge, action. */
+#flympusUserManagementPageRoot .flympusUserCard{
+  gap:12px;
+  padding:12px 13px;
+  border-radius:18px;
+  align-items:center
+}
+#flympusUserManagementPageRoot .flympusUserAvatar{
+  width:56px;
+  height:56px;
+  border-radius:14px;
+  background:#e7f3fd;
+  color:#176da9;
+  font-size:18px;
+  font-weight:950
+}
+#flympusUserManagementPageRoot .flympusUserNameLine{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  flex-wrap:wrap
+}
+#flympusUserManagementPageRoot .flympusUserNameLine>b{
+  color:#143d62;
+  font-size:13.5px;
+  line-height:1.15;
+  font-weight:900
+}
+#flympusUserManagementPageRoot .flympusUserIdentity>span{
+  margin-top:4px;
+  font-size:10px
+}
+#flympusUserManagementPageRoot .flympusUserRoleBadge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:24px;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:9px;
+  line-height:1;
+  font-weight:900;
+  white-space:nowrap
+}
+#flympusUserManagementPageRoot .flympusUserRoleBadge:before{
+  content:"";
+  width:6px;
+  height:6px;
+  flex:0 0 6px;
+  border-radius:50%;
+  background:currentColor;
+  opacity:.86
+}
+#flympusUserManagementPageRoot .flympusUserRoleBadge.owner{background:#fff1c9;color:#805f18}
+#flympusUserManagementPageRoot .flympusUserRoleBadge.admin{background:#eeeafd;color:#6550a8}
+#flympusUserManagementPageRoot .flympusUserRoleBadge.training_manager{background:#e3f3fd;color:#1d699a}
+#flympusUserManagementPageRoot .flympusUserRoleBadge.user{background:#edf3f8;color:#526a80}
+#flympusUserManagementPageRoot .flympusUserMeta{margin-top:7px}
+#flympusUserManagementPageRoot .flympusUserMeta i.role.training_manager{background:#e3f3fd;color:#1d699a}
+#flympusUserManagementPageRoot .flympusCurrentAdmin{
+  min-height:24px;
+  padding:5px 9px;
+  background:#edf3f8;
+  color:#526a80;
+  font-size:9px;
+  line-height:1;
+  font-weight:850
+}
+#flympusUserManagementPageRoot .flympusUserActions{
+  align-items:center;
+  justify-content:flex-end
+}
+#flympusUserManagementPageRoot .flympusUserNameEdit{
+  min-width:78px;
+  height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  flex:0 0 auto;
+  padding:0 12px;
+  border:1px solid #d5e0e9;
+  border-radius:10px;
+  background:#edf3f8;
+  color:#285d87;
+  font-size:10.5px;
+  line-height:1;
+  font-weight:850;
+  cursor:pointer;
+  white-space:nowrap
+}
+#flympusUserManagementPageRoot .flympusUserNameEdit:hover,
+#flympusUserManagementPageRoot .flympusUserNameEdit:focus-visible{
+  outline:none;
+  background:#e5eef6;
+  border-color:#bfd2e1
+}
+#flympusUserManagementPageRoot .flympusUserCard.currentAccount{
+  grid-template-columns:56px minmax(0,1fr) auto
+}
+
+/* Full RTL mirror: avatar starts on the right, the action column moves left,
+   and labels/badges keep the same baseline and proportions. */
+#flympusUserManagementPageRoot[dir="rtl"] .flympusUserCard{direction:rtl}
+#flympusUserManagementPageRoot[dir="rtl"] .flympusUserNameLine{justify-content:flex-start}
+#flympusUserManagementPageRoot[dir="rtl"] .flympusUserActions{justify-content:flex-start}
+#flympusUserManagementPageRoot[dir="rtl"] .flympusUserNameEdit{direction:rtl}
+
+/* Dark theme keeps the same role distinctions without borrowing Active green. */
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.owner{background:#211c12;border-color:#6b592d}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.admin{background:#1c1930;border-color:#4e477e}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.training_manager{background:#102433;border-color:#31566d}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.user{background:#0d1e2f;border-color:#3a5065}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.owner .flympusRoleGuideTitle>b,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserRoleBadge.owner{background:#3a321d;color:#ebcf82}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.admin .flympusRoleGuideTitle>b,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserRoleBadge.admin{background:#2b2747;color:#c5b8f5}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.training_manager .flympusRoleGuideTitle>b,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserRoleBadge.training_manager,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserMeta i.role.training_manager{background:#173348;color:#8fcaf0}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.user .flympusRoleGuideTitle>b,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserRoleBadge.user{background:#243444;color:#b7c8d8}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserNameEdit{background:#15293b;border-color:#36516a;color:#9fd3f4}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserNameEdit:hover,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserNameEdit:focus-visible{background:#1b354b;border-color:#486985}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusCurrentAdmin{background:#243444;color:#b7c8d8}
+
+@media(max-width:520px){
+  #flympusUserManagementPageRoot .flympusUserAvatar{width:52px;height:52px;border-radius:14px;font-size:17px}
+  #flympusUserManagementPageRoot .flympusUserNameLine>b{font-size:13px}
+  #flympusUserManagementPageRoot .flympusUserNameEdit{min-width:76px;height:40px;font-size:10px}
+  #flympusUserManagementPageRoot .flympusUserCard.currentAccount{
+    grid-template-columns:52px minmax(0,1fr) auto;
+    gap:11px
+  }
+  #flympusUserManagementPageRoot .flympusUserCard.currentAccount .flympusUserActions{
+    grid-column:auto;
+    display:flex;
+    grid-template-columns:none;
+    justify-content:flex-end;
+    align-self:center
+  }
+  #flympusUserManagementPageRoot[dir="rtl"] .flympusUserCard.currentAccount .flympusUserActions{justify-content:flex-start}
+}
