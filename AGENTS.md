@@ -15,6 +15,7 @@ These rules exist specifically to prevent repeated GitHub Actions failure emails
 
 - Bottom-navigation sound must respond to the **first trusted physical press** after cold launch, reload, focus/resume, and ordinary navigation on both mobile and desktop layouts.
 - Capture-phase handlers may preload, decode, or resume audio, but must never claim/consume the audible navigation gesture before the target navigation binding.
+- If WebAudio cannot become running synchronously on that press, target phase must use the already-preloaded media fallback on the same trusted gesture; a later resume must never emit a ghost sound.
 - Do not reintroduce a cold round-robin media fallback where unloaded pool entries can make the first N presses silent.
 - Any change touching navigation audio, hydration, lifecycle, bottom navigation, or sound preferences must preserve and update regression coverage for this first-press guarantee.
 

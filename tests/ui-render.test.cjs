@@ -702,12 +702,12 @@ assert(html.includes("snap.localDay===localDay"),
    first press after cold launch/reload must not be sacrificed to audio warm-up. */
 assert(html.includes("window.__FLYMPUS_CLAIM_NAV_SOUND_GESTURE__")&&html.includes("if(!e||e.isTrusted===false)return false"),
   "Navigation sound must require a trusted physical event");
-assert(html.includes("FLYMPUS_NAV_FIRST_PRESS_MAX_DELAY_MS=900")&&html.includes("Promise.all([resumePromise,decodePromise]).then")&&html.includes("now-requestedAt>FLYMPUS_NAV_FIRST_PRESS_MAX_DELAY_MS"),
-  "The first trusted nav press must survive asynchronous WebAudio resume/decode within a bounded same-gesture window");
+assert(html.includes("if(ctx.state!=='running')return false;")&&html.includes("return playFlympusNavFileFallback();"),
+  "A deferred AudioContext resume must immediately fall back on the same trusted nav press instead of sacrificing early taps");
 assert(html.includes("Capture phase is deliberately silent")&&!html.includes("Claiming this exact event guarantees target phase"),
   "Capture-phase audio warm-up must never consume the audible navigation gesture before target phase");
-assert(html.includes("ensureEarlyNavAudio();")&&html.includes("window.__FLYMPUS_EARLY_NAV_AUDIO__=a"),
-  "The baked fallback must begin preloading during parser startup and remain reusable by runtime");
+assert(html.includes("ensureEarlyNavAudio();")&&html.includes("window.__FLYMPUS_EARLY_NAV_AUDIO__=a")&&html.includes("earlyMatches?[early]:[]"),
+  "The baked fallback must preload during parser startup and be reused by runtime so the first press is not a cold media entry");
 assert(html.includes("cancelFlympusPendingNavSources()"),
   "Navigation sources must remain cancellable at lifecycle boundaries");
 assert(html.includes("playFlympusBottomNavSound(e);"),
