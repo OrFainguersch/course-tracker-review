@@ -411,30 +411,37 @@ async function sendManagedInvitationEmail(invitation){
   if(!response.ok)throw new Error(String(result?.error||'Invitation email could not be sent.'));
   return {sent:true,configured:true}
 }
-function managementRoleOptions(selected,{includeOwner=false}={}){
-  const current=normalizeAppRole(selected),actor=normalizeAppRole(currentProfile?.role);
-  let roles=includeOwner?['owner','admin','training_manager','user']:(actor==='owner'?['admin','training_manager','user']:['training_manager','user']);
-  if(!roles.includes(current)&&current!=='owner')roles=[current,...roles];
+function assignableAppRoles(actorRole=normalizeAppRole(currentProfile?.role)){
+  const actor=normalizeAppRole(actorRole);
+  if(actor==='owner')return ['owner','admin'];
+  if(actor==='admin')return ['training_manager'];
+  if(actor==='training_manager')return ['user'];
+  return []
+}
+function defaultAssignableRole(){return assignableAppRoles()[0]||'user'}
+function managementRoleOptions(selected,{forInvite=false}={}){
+  const current=normalizeAppRole(selected),roles=[...assignableAppRoles()];
+  if(!forInvite&&!roles.includes(current))roles.push(current);
   return [...new Set(roles)].map(role=>'<option value="'+esc(role)+'" '+(current===role?'selected':'')+'>'+esc(managementRoleLabel(role))+'</option>').join('')
 }
-function canManageTargetRole(role){
+function canManageTargetRole(role,uid=''){
   const actor=normalizeAppRole(currentProfile?.role),target=normalizeAppRole(role);
-  if(actor==='owner')return target!=='owner';
-  if(actor==='admin')return !['owner','admin'].includes(target);
+  if(actor==='owner'){
+    if(uid&&String(uid)===String(primaryOwnerUid||''))return false;
+    return true
+  }
+  if(actor==='admin')return ['training_manager','user'].includes(target);
+  if(actor==='training_manager')return target==='user';
   return false
 }
 function canAssignAppRole(role){
-  const actor=normalizeAppRole(currentProfile?.role),target=normalizeAppRole(role);
-  if(target==='owner')return false;
-  if(actor==='owner')return ['admin','training_manager','user'].includes(target);
-  if(actor==='admin')return ['training_manager','user'].includes(target);
-  return false
+  return assignableAppRoles().includes(normalizeAppRole(role))
 }
 function roleGuideHtml(){
   const defs=[
-    ['owner','Full system control',['Invite and approve Administrators, Training Managers and Users','Manage users and administrators','Manage all courses and global Packages','Protected Owner account']],
-    ['admin','System administration',['Invite and approve Training Managers and Users','Manage Training Managers and Users','Manage all courses','Manage global Packages','Administrators are managed by the Owner']],
-    ['training_manager','Training administration',['Create and manage courses','Manage course rosters','Create course-specific Package overrides','No user invitations or approvals']],
+    ['owner','Full system control',['May appoint another Owner or an Administrator','Manage all courses and global Packages','Primary Owner is protected']],
+    ['admin','System administration',['May appoint a Training Manager','Manage lower-level accounts and all courses','Cannot appoint the same role or a higher role']],
+    ['training_manager','Training administration',['May invite and approve Users','Create and manage courses','Manage course rosters','Cannot appoint the same role or a higher role']],
     ['user','Operational access',['Work in assigned courses','Submit evaluations and forms','No structural course editing']]
   ];
   return '<section class="flympusRoleGuide"><div class="flympusRoleGuideHead"><div><span>'+esc(tr('Role guide'))+'</span><h2>'+esc(tr('What each role can do'))+'</h2></div></div><div class="flympusRoleGuideGrid">'+defs.map(([role,title,items])=>'<article class="flympusRoleGuideCard '+esc(role)+'"><div class="flympusRoleGuideTitle"><b>'+esc(managementRoleLabel(role))+'</b><small>'+esc(tr(title))+'</small></div><p>'+esc(tr(roleDefinition(role).description))+'</p><ul>'+items.map(item=>'<li>'+esc(tr(item))+'</li>').join('')+'</ul></article>').join('')+'</div><div class="flympusRoleSeparationNote">'+esc(tr('FLYMPUS role and course role are separate. A person can be a User in FLYMPUS and still be the Course Manager of a specific course.'))+'</div></section>'
