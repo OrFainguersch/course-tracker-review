@@ -87,7 +87,7 @@
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js" crossorigin />
-<link rel="modulepreload" href="./auth.js?v=20261006-auth25" />
+<link rel="modulepreload" href="./auth.js?v=20261006-auth26" />
 <script src="./firebase-config.js?v=20261004-auth2"></script>
 <script src="./storage-scope.js?v=20261006-auth8"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -4638,7 +4638,7 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
   .topCourseContext{display:none!important}
 }
 </style>
-<link rel="stylesheet" href="./auth.css?v=20261006-auth13" />
+<link rel="stylesheet" href="./auth.css?v=20261006-auth14" />
 <script>
 /* Authentication is fail-closed only after it is explicitly enabled.
    Until the Firebase project and UID-scoped data migration are ready,
@@ -4661,6 +4661,67 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
 html[data-flympus-theme="dark"] .evaluationVoiceBlock{background:linear-gradient(180deg,#102538,#0e2031);border-color:#29465f;box-shadow:none}html[data-flympus-theme="dark"] .evaluationVoiceHead h3{color:#e5f1fa}html[data-flympus-theme="dark"] .evaluationVoiceHead p,html[data-flympus-theme="dark"] .evaluationVoiceStatus{color:#9cb0c1}html[data-flympus-theme="dark"] .evaluationVoiceRecord{background:#17364d;border-color:#365a73;color:#94cef4}html[data-flympus-theme="dark"] .evaluationVoiceRecord.listening{background:#3a2028;border-color:#71404a;color:#f2a6b2}html[data-flympus-theme="dark"] .evaluationVoiceMeta select,html[data-flympus-theme="dark"] .evaluationVoiceTranscript,html[data-flympus-theme="dark"] .evaluationVoicePreview{background:#0c1c2c;border-color:#335069;color:#e5eef6}html[data-flympus-theme="dark"] .evaluationVoiceTrust span{background:#173047;color:#a6c5dc}html[data-flympus-theme="dark"] .evaluationVoicePreviewHead b{color:#e5eef6}html[data-flympus-theme="dark"] .evaluationVoiceChip{background:#17364d;color:#94cef4}html[data-flympus-theme="dark"] .evaluationVoiceChip.emergency{background:#3b321e;color:#e5c87c}html[data-flympus-theme="dark"] .evaluationVoiceChip.counter{background:#1a3150;color:#a8c5ee}html[data-flympus-theme="dark"] .evaluationVoiceWarning{background:#3a2d18;color:#e8c782}
 html[data-flympus-language="he"] .evaluationVoiceHead,html[data-flympus-language="he"] .evaluationVoicePreviewHead{direction:rtl}html[data-flympus-language="he"] .evaluationVoiceMeta,html[data-flympus-language="he"] .evaluationVoiceActions,html[data-flympus-language="he"] .evaluationVoiceChips{direction:rtl}html[data-flympus-language="he"] .evaluationVoiceTranscript{text-align:right}
 @media(max-width:620px){.evaluationVoiceHead{flex-direction:column}.evaluationVoiceRecord{width:100%}.evaluationVoiceMeta{align-items:stretch;flex-direction:column}.evaluationVoiceMeta label{width:100%}.evaluationVoiceTrust{margin-inline-start:0}.evaluationVoiceActions{display:grid;grid-template-columns:1fr 1fr}.evaluationVoiceActions .btn:last-child{grid-column:1/-1}}
+</style>
+<style id="flympus-typography-alignment">
+/* ===== Full-site typography alignment · 2026-10-06 =====
+   Final type layer loaded after feature-specific styles. It keeps one font
+   family, a readable helper/caption floor, and makes Larger Text affect late
+   components such as User Management and Evaluation voice as well. */
+html,body,button,input,select,textarea{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif
+}
+body{font-size:14px}
+.pageTitle{font-size:25px}
+.sectionHead h2,.formTitle h2,.homeBlockTitle h2{font-size:18px}
+.sub,.sectionHead p{font-size:12px;line-height:1.5}
+body small{font-size:11px!important;line-height:1.45!important}
+body :where(.fieldHelp,.mutedHint,.wizardHint,.homePulseNote,.notificationPrefsHint,.pushBackendNote,.appSettingsFootnote,.requiredLegend,.autoDraftNote,.plannedEmpty,.emergencyMissingNote){font-size:11px!important;line-height:1.45!important}
+body :where(.pill,.badge,.pushStatus,.homeTag,.homeDue,.rankBadge,.emergencyPlanTag,.epMode,.evaluationVoiceTrust span,.evaluationVoiceChip){font-size:10.5px!important}
+.btn,.input,select,textarea,.seg,.tab{font-size:12px}
+.eyebrow,.navLabel{font-size:10.5px}
+html[data-flympus-language="he"] body,
+html[data-flympus-language="he"] button,
+html[data-flympus-language="he"] input,
+html[data-flympus-language="he"] select,
+html[data-flympus-language="he"] textarea{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+html[data-flympus-language="he"] input[type="email"],
+html[data-flympus-language="he"] input[type="number"],
+html[data-flympus-language="he"] input[type="tel"],
+html[data-flympus-language="he"] .dateDmy,
+html[data-flympus-language="he"] .homePlanTime{unicode-bidi:isolate}
+html.flympusLargeText{-webkit-text-size-adjust:112%;text-size-adjust:112%}
+html.flympusLargeText body{font-size:17px!important}
+html.flympusLargeText .pageTitle{font-size:36px!important}
+html.flympusLargeText .sectionHead h2,
+html.flympusLargeText .formTitle h2,
+html.flympusLargeText .homeBlockTitle h2{font-size:23px!important}
+html.flympusLargeText p{font-size:14px!important;line-height:1.55!important}
+html.flympusLargeText small{font-size:13px!important;line-height:1.5!important}
+html.flympusLargeText label,
+html.flympusLargeText summary,
+html.flympusLargeText li{font-size:14px!important;line-height:1.5!important}
+html.flympusLargeText .btn,
+html.flympusLargeText .input,
+html.flympusLargeText input,
+html.flympusLargeText select,
+html.flympusLargeText textarea,
+html.flympusLargeText .seg,
+html.flympusLargeText .tab{font-size:15px!important}
+html.flympusLargeText .eyebrow,
+html.flympusLargeText .navLabel,
+html.flympusLargeText .pill,
+html.flympusLargeText .badge,
+html.flympusLargeText .pushStatus{font-size:12px!important}
+html.flympusLargeText .evaluationVoiceHead h3{font-size:19px!important}
+html.flympusLargeText .evaluationVoiceHead p,
+html.flympusLargeText .evaluationVoiceStatus,
+html.flympusLargeText .evaluationVoiceDetectedGroup b,
+html.flympusLargeText .evaluationVoiceWarning{font-size:13px!important}
+html.flympusLargeText .evaluationVoiceRecord,
+html.flympusLargeText .evaluationVoiceMeta select,
+html.flympusLargeText .evaluationVoiceTranscript,
+html.flympusLargeText .evaluationVoicePreviewHead b,
+html.flympusLargeText .evaluationVoiceChip{font-size:14px!important}
 </style>
 </head>
 <body>
@@ -4692,7 +4753,7 @@ html[data-flympus-language="he"] .evaluationVoiceHead,html[data-flympus-language
   const viewportWidth=Math.round(window.innerWidth||document.documentElement?.clientWidth||0),viewportHeight=Math.round(window.innerHeight||document.documentElement?.clientHeight||0);
   const snapAge=Math.max(0,Date.now()-Number(snap?.savedAt||0)),snapFresh=snapAge<=15*60*1000;
   const viewportCompatible=!snap?.viewportWidth||Math.abs(Number(snap.viewportWidth)-viewportWidth)<=2;
-  const snapMatches=!!(snap&&snap.visualVersion===5&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
+  const snapMatches=!!(snap&&snap.visualVersion===6&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
   const content=document.querySelector('#content');
   const bottomNav=document.querySelector('#mobileBottomNav');
   window.__FLYMPUS_RUNTIME_READY__=false;
@@ -10638,7 +10699,7 @@ function saveFlympusReloadSnapshot(){
     const d=new Date(),pad=n=>String(n).padStart(2,'0'),localDay=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
     const scrollY=Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0));
     const snapshot={
-      visualVersion:5,
+      visualVersion:6,
       screen:String(state.screen||'home'),
       courseId:String(currentCourseId||'AEP-26'),
       resolvedTheme:resolvedTheme==='dark'?'dark':'light',
@@ -10713,6 +10774,6 @@ if(['roster','planned','home','record','reports'].includes(earlyNavTarget)){
   }
 })();
 </script>
-<script type="module" src="./auth.js?v=20261006-auth25"></script>
+<script type="module" src="./auth.js?v=20261006-auth26"></script>
 </body>
 </html>
