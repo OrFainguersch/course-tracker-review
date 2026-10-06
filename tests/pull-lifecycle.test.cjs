@@ -46,14 +46,38 @@ test('backgrounding cancels an armed return without a stale callback reloading t
   await new Promise(setImmediate);
   assert(h.animations.every(a=>a.cancelled));assert.equal(h.reloads(),0);assert(!h.window.__FLYMPUS_PULL_ACTIVE__);assert.equal(h.content.style.transform,undefined);
 });
-test('touch Safari claims pull after a long page reaches the top and blocks native overscroll',()=>{
+test('browser Safari never converts an ordinary page scroll into FLYMPUS pull-to-refresh',()=>{
   const h=harness({standalone:false,maxTouchPoints:5});
   h.document.scrollingElement.scrollTop=500;
   h.touch('touchstart',100);
   h.document.scrollingElement.scrollTop=0;
   const reachedTop=h.touch('touchmove',240);
-  assert(reachedTop.prevented);
+  assert.equal(reachedTop.prevented,undefined);
+  assert(!h.window.__FLYMPUS_PULL_ACTIVE__);
+  assert(!h.body.classList.contains('flympusPullActive'));
+});
+test('installed PWA pull-to-refresh must start at the top instead of claiming an in-progress scroll',()=>{
+  const h=harness({standalone:true,maxTouchPoints:5});
+  h.document.scrollingElement.scrollTop=300;
+  h.touch('touchstart',100);
+  h.document.scrollingElement.scrollTop=0;
+  const reachedTop=h.touch('touchmove',240);
+  assert.equal(reachedTop.prevented,undefined);
+  assert(!h.window.__FLYMPUS_PULL_ACTIVE__);
+
+  h.touch('touchstart',100);
+  const explicitPull=h.touch('touchmove',150);
+  assert(explicitPull.prevented);
   assert(h.window.__FLYMPUS_PULL_ACTIVE__);
+});
+test('returning top chrome uses the same timing authority as the bottom dock and a transient reveal guard',()=>{
+  assert.match(html,/--flympus-chrome-show-duration:\.58s/);
+  assert.match(html,/--flympus-chrome-hide-duration:\.64s/);
+  assert.match(html,/\.mobileBottomNav\{\s*transition:transform var\(--flympus-chrome-show-duration/);
+  assert.match(html,/\.top\{[\s\S]*transition:transform var\(--flympus-chrome-show-duration\)/);
+  assert.match(html,/body\.flympusChromeReturning \.flympusPullBackdrop\{/);
+  assert.match(html,/body\?\.classList\.add\('flympusChromeReturning'\)/);
+  assert.match(html,/body\?\.classList\.remove\('flympusChromeReturning'\)/);
 });
 test('touch chrome still hides on down-scroll and returns on up-scroll without moving document content',()=>{
   const h=harness({standalone:false,maxTouchPoints:5});
