@@ -31,7 +31,7 @@
   }
 
   function withNumericWords(value){
-    return normalize(value).split(' ').map(token=>NUMBER_WORDS[token]??token).join(' ');
+    return normalize(value).split(' ').map(token=>NUMBER_WORDS[token]??(token.startsWith('ו')&&NUMBER_WORDS[token.slice(1)]?NUMBER_WORDS[token.slice(1)]:token)).join(' ');
   }
 
   function escapeRegExp(value){
