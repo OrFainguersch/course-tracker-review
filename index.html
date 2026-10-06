@@ -87,7 +87,7 @@
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js" crossorigin />
-<link rel="modulepreload" href="./auth.js?v=20261006-auth28" />
+<link rel="modulepreload" href="./auth.js?v=20261006-auth29" />
 <script src="./firebase-config.js?v=20261004-auth2"></script>
 <script src="./storage-scope.js?v=20261006-auth8"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -125,7 +125,7 @@
    still owns notification permission/subscription later; this early call only
    makes the next cold launch independent of mobile network latency. */
 try{
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261006-evaluation-voice-language-1',{scope:'./',updateViaCache:'none'}).catch(()=>{})
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261006-profile-admin-drawer-1',{scope:'./',updateViaCache:'none'}).catch(()=>{})
 }catch{}
 </script>
 <title>FLYMPUS — Train. Track. Progress.</title>
@@ -4662,7 +4662,7 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
   .topCourseContext{display:none!important}
 }
 </style>
-<link rel="stylesheet" href="./auth.css?v=20261006-auth15" />
+<link rel="stylesheet" href="./auth.css?v=20261006-auth16" />
 <script>
 /* Authentication is fail-closed only after it is explicitly enabled.
    Until the Firebase project and UID-scoped data migration are ready,
@@ -4748,11 +4748,258 @@ html.flympusLargeText .evaluationVoiceTranscript,
 html.flympusLargeText .evaluationVoicePreviewHead b,
 html.flympusLargeText .evaluationVoiceChip{font-size:14px!important}
 </style>
+
+<style>
+/* ===== Profile + drawer visual polish · 0743 =====
+   Drawer overlays the app instead of pushing it outside the viewport. This
+   removes the light/empty strip that iOS exposed during the opening transform. */
+body.drawerPushOpen .top,
+body.drawerPushOpen main,
+body.drawerPushOpen .mobileBottomNav,
+body.drawerPushOpen .reviewBanner,
+body.drawerPushOpen .toast{
+  translate:none!important
+}
+body.drawerPushOpen .backdrop,
+.drawer.open .backdrop{
+  background:rgba(4,22,40,.38)!important;
+  opacity:1!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important
+}
+.panel{
+  transform:translate3d(-102%,0,0)!important;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  will-change:transform
+}
+.drawer.open .panel{transform:translate3d(0,0,0)!important}
+html[data-flympus-language="he"] .drawer .panel{
+  transform:translate3d(102%,0,0)!important
+}
+html[data-flympus-language="he"] .drawer.open .panel{
+  transform:translate3d(0,0,0)!important
+}
+
+/* My Profile follows the same spacing, hierarchy and card geometry as Roster. */
+.myProfilePage{max-width:980px}
+.myProfileHeroCard{
+  padding:20px;
+  gap:18px;
+  border-radius:20px;
+  background:linear-gradient(135deg,#fff 0%,#f5faff 100%)
+}
+.myProfileIdentity h2{font-size:23px;line-height:1.15}
+.myProfileHeroNickname{margin-top:5px;font-size:11px;line-height:1.3}
+.myProfileIdentity p{margin-top:5px;font-size:12px}
+.myProfileBadges{margin-top:11px}
+.myProfileBadges span{padding:6px 10px;font-size:10.5px}
+.myProfileGrid{
+  grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);
+  gap:14px;
+  margin-top:14px
+}
+.myProfileSection{
+  min-width:0;
+  padding:18px;
+  border-radius:20px
+}
+.myProfileSectionHead{
+  padding-bottom:14px;
+  border-bottom:1px solid #e3edf5
+}
+.myProfileSectionHead h2{font-size:18px;line-height:1.18}
+.myProfileSectionHead p{
+  margin:5px 0 0;
+  color:#72879b;
+  font-size:11.5px;
+  line-height:1.45
+}
+.myProfileDetailRow{
+  display:grid;
+  grid-template-columns:minmax(120px,.78fr) minmax(0,1.22fr);
+  align-items:center;
+  gap:18px;
+  min-height:60px;
+  padding:12px 0;
+  border-top:0;
+  border-bottom:1px solid #e8eff5
+}
+.myProfileDetailRow>span{
+  color:#71889e;
+  font-size:11.5px;
+  line-height:1.35
+}
+.myProfileDetailRow>b,
+.myProfileNameValue b{
+  color:#173e63;
+  font-size:12.5px;
+  line-height:1.35;
+  font-weight:850;
+  text-align:end
+}
+.myProfileNameValue{
+  width:100%;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap
+}
+.myProfileNameValue .btn{
+  min-height:38px;
+  height:38px;
+  padding:0 13px;
+  border-radius:11px;
+  font-size:11px;
+  white-space:nowrap
+}
+.myProfileNameEditor{
+  margin:10px 0 12px;
+  padding:13px;
+  border-radius:13px
+}
+.myProfileNameEditorNote{font-size:10px}
+.myProfileEmailValue{
+  direction:ltr;
+  unicode-bidi:isolate;
+  text-align:end!important;
+  overflow-wrap:anywhere
+}
+.myProfileRoleValue{font-weight:900!important}
+.myProfilePhotoTools{
+  justify-content:flex-start;
+  gap:12px;
+  margin-top:0;
+  padding:14px 0 0;
+  border-top:0
+}
+.myProfilePhotoTools small{
+  max-width:520px;
+  color:#8194a6;
+  font-size:10.5px;
+  line-height:1.45;
+  text-align:start
+}
+.myProfileCourseList{gap:9px}
+.myProfileCourseRow{
+  min-height:70px;
+  padding:13px 14px;
+  gap:12px;
+  border-color:#dce7f0;
+  border-radius:16px;
+  background:#fbfdff
+}
+.myProfileCourseRow b{
+  color:#173e63;
+  font-size:12.5px;
+  line-height:1.25
+}
+.myProfileCourseRow small{
+  margin-top:4px;
+  color:#7d91a5;
+  font-size:10.5px
+}
+.myProfileCourseRow .courseRoleBadge{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 10px;
+  font-size:10px
+}
+.myProfileCourseRow .courseRoleBadge:before{
+  content:"";
+  width:7px;height:7px;flex:0 0 7px;
+  border-radius:50%;
+  background:#2d73e8
+}
+.myProfileCourseRow .courseRoleBadge.manager:before{background:#b67d00}
+
+/* RTL mirrors structure; account identifiers remain LTR. */
+html[data-flympus-language="he"] .myProfilePage{
+  direction:rtl;
+  text-align:right
+}
+html[data-flympus-language="he"] .myProfileDetailRow>span,
+html[data-flympus-language="he"] .myProfileSectionHead,
+html[data-flympus-language="he"] .myProfileCourseRow>div{text-align:right}
+html[data-flympus-language="he"] .myProfileNameValue{justify-content:flex-start}
+html[data-flympus-language="he"] .myProfilePhotoTools small{text-align:right}
+html[data-flympus-language="he"] .myProfileEmailValue{
+  direction:ltr;
+  text-align:left!important;
+  unicode-bidi:isolate
+}
+
+/* Dark mode keeps all custom Profile surfaces inside the shared theme. */
+html[data-flympus-theme="dark"] .myProfileHeroCard{
+  background:linear-gradient(135deg,#102235 0%,#0d1e2f 100%)!important;
+  border-color:#294158!important
+}
+html[data-flympus-theme="dark"] .myProfileIdentity h2,
+html[data-flympus-theme="dark"] .myProfileSectionHead h2,
+html[data-flympus-theme="dark"] .myProfileDetailRow>b,
+html[data-flympus-theme="dark"] .myProfileNameValue b,
+html[data-flympus-theme="dark"] .myProfileCourseRow b{color:#eaf4fc!important}
+html[data-flympus-theme="dark"] .myProfileHeroNickname,
+html[data-flympus-theme="dark"] .myProfileIdentity p,
+html[data-flympus-theme="dark"] .myProfileSectionHead p,
+html[data-flympus-theme="dark"] .myProfileDetailRow>span,
+html[data-flympus-theme="dark"] .myProfilePhotoTools small,
+html[data-flympus-theme="dark"] .myProfileCourseRow small{color:#9fb0bf!important}
+html[data-flympus-theme="dark"] .myProfileSectionHead,
+html[data-flympus-theme="dark"] .myProfileDetailRow{border-color:#294158!important}
+html[data-flympus-theme="dark"] .myProfileCourseRow{
+  background:#0b1c2c!important;
+  border-color:#36516a!important
+}
+html[data-flympus-theme="dark"] .myProfileCourseRow .courseRoleBadge{
+  background:#17324a;color:#9fd3f4
+}
+html[data-flympus-theme="dark"] .myProfileCourseRow .courseRoleBadge.manager{
+  background:#3a321d;color:#ebcf82
+}
+
+html.flympusLargeText .myProfileSectionHead h2{font-size:21px!important}
+html.flympusLargeText .myProfileSectionHead p,
+html.flympusLargeText .myProfileDetailRow>span,
+html.flympusLargeText .myProfileDetailRow>b,
+html.flympusLargeText .myProfileNameValue b,
+html.flympusLargeText .myProfileCourseRow b{font-size:14px!important}
+
+@media(max-width:760px){
+  .myProfileGrid{grid-template-columns:1fr;gap:13px}
+  .myProfileHeroCard{padding:18px}
+  .myProfileSection{padding:16px}
+  .myProfileDetailRow{
+    grid-template-columns:minmax(96px,.7fr) minmax(0,1.3fr);
+    gap:12px;
+    min-height:58px
+  }
+  .myProfileNameValue{
+    align-items:flex-end;
+    flex-direction:column;
+    flex-wrap:nowrap
+  }
+  html[data-flympus-language="he"] .myProfileNameValue{align-items:flex-start}
+  .myProfilePhotoTools{
+    align-items:flex-start;
+    flex-direction:column
+  }
+}
+@media(max-width:390px){
+  .myProfileHeroCard{gap:14px;padding:16px}
+  .myProfileAvatar{width:72px;height:72px}
+  .myProfileIdentity h2{font-size:20px}
+  .myProfileSection{padding:15px}
+  .myProfileDetailRow{grid-template-columns:88px minmax(0,1fr);gap:10px}
+  .myProfileNameValue .btn{max-width:100%;padding:0 11px;font-size:10.5px}
+  .myProfileCourseRow{padding:12px}
+}
+</style>
 </head>
 <body>
 <div id="flympusAuthRoot" class="flympusAuthInitial" role="dialog" aria-modal="true" aria-label="FLYMPUS sign in"><div class="flympusAuthShell"><section class="flympusAuthCard"><div class="flympusAuthCardBody"><div class="flympusAuthMiniBrand" aria-hidden="true"><img src="./assets/flympus-app-icon.webp" alt=""></div><h1 class="flympusAuthTitle">Sign in to FLYMPUS</h1><p class="flympusAuthCopy">Continue with the Google account assigned to you.</p><div class="flympusAuthProviders"><button class="flympusAuthProvider" type="button" disabled><span class="flympusAuthProviderMark" aria-hidden="true">G</span><span class="flympusAuthProviderLabel">Continue with Google</span></button></div><p class="flympusAuthFine">FLYMPUS uses your account only to verify your identity. It does not read your Gmail or Outlook.</p></div></section></div></div>
 <script>if(document.documentElement.getAttribute('data-flympus-language')==='he'){const r=document.getElementById('flympusAuthRoot');r.dir='rtl';r.querySelector('.flympusAuthTitle').textContent='כניסה ל־FLYMPUS';r.querySelector('.flympusAuthCopy').textContent='התחבר עם חשבון Google שהוקצה לך.';r.querySelector('.flympusAuthProviderLabel').textContent='המשך עם Google';r.querySelector('.flympusAuthFine').textContent='FLYMPUS משתמש בחשבון רק לצורך זיהוי. אין לו גישה ל־Gmail או ל־Outlook שלך.'}</script>
-<div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><div class="notificationCenterFooter"><button class="notificationSettingsLink" id="notificationSettingsLink" type="button">Notification settings</button></div></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Account menu" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown accountQuickMenu" id="topPersonalProfileDropdown" role="dialog" aria-label="Account menu" hidden><button class="personalProfileHead accountProfileShortcut" id="quickMyProfile" type="button" aria-label="Open My Profile"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small id="personalProfileRole">Account</small></div><span class="accountProfileChevron" aria-hidden="true">›</span></button><div class="personalProfileBody accountQuickActions"><button class="accountQuickAction accountQuickSignOut" type="button" id="quickSignOut"><span class="accountQuickIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M10 5H5v14h5"></path><path d="M14 8l4 4-4 4M18 12H9"></path></svg></span><span><b>Sign out of FLYMPUS</b><small id="personalProfileEmail"></small></span></button><input id="personalPhotoInput" type="file" accept="image/*" hidden></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><button class="drawerFooter drawerProfileShortcut" id="drawerProfileShortcut" type="button" data-go="my-profile" aria-label="Open My Profile"><div class="avatar"><span data-current-user-avatar>OF</span></div><div class="drawerProfileCopy"><b id="drawerProfileName">Or Fainguersch</b><small id="drawerProfileRole">Account</small></div><span class="drawerProfileArrow" aria-hidden="true">›</span></button></aside></div><main id="content"><div class="flympusBootShell" aria-hidden="true"><div class="flympusBootHero"><i></i><b></b><span></span><span></span><span></span></div><div class="flympusBootCard"><b></b><i></i><i></i><i></i><i></i></div></div></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0742 · Evaluation voice auto language</div><div class="toast" id="toast"></div></div>
+<div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><div class="notificationCenterFooter"><button class="notificationSettingsLink" id="notificationSettingsLink" type="button">Notification settings</button></div></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Account menu" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown accountQuickMenu" id="topPersonalProfileDropdown" role="dialog" aria-label="Account menu" hidden><button class="personalProfileHead accountProfileShortcut" id="quickMyProfile" type="button" aria-label="Open My Profile"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small id="personalProfileRole">Account</small></div><span class="accountProfileChevron" aria-hidden="true">›</span></button><div class="personalProfileBody accountQuickActions"><button class="accountQuickAction accountQuickSignOut" type="button" id="quickSignOut"><span class="accountQuickIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M10 5H5v14h5"></path><path d="M14 8l4 4-4 4M18 12H9"></path></svg></span><span><b>Sign out of FLYMPUS</b><small id="personalProfileEmail"></small></span></button><input id="personalPhotoInput" type="file" accept="image/*" hidden></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><button class="drawerFooter drawerProfileShortcut" id="drawerProfileShortcut" type="button" data-go="my-profile" aria-label="Open My Profile"><div class="avatar"><span data-current-user-avatar>OF</span></div><div class="drawerProfileCopy"><b id="drawerProfileName">Or Fainguersch</b><small id="drawerProfileRole">Account</small></div><span class="drawerProfileArrow" aria-hidden="true">›</span></button></aside></div><main id="content"><div class="flympusBootShell" aria-hidden="true"><div class="flympusBootHero"><i></i><b></b><span></span><span></span><span></span></div><div class="flympusBootCard"><b></b><i></i><i></i><i></i><i></i></div></div></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0743 · Profile, administration & drawer polish</div><div class="toast" id="toast"></div></div>
 <script>
 (()=>{try{
   /* Keep course context visible without turning the global header into a
@@ -9379,10 +9626,10 @@ function myProfileScreen(){
   const nicknameRow=isInstructor?'<div class="myProfileDetailRow myProfileNameRow"><span>Nickname</span><div class="myProfileNameValue"><b>'+esc(nickname||'Not set')+'</b><button class="btn secondary small" id="myProfileEditNickname" type="button">Edit nickname</button></div></div><form class="myProfileNameEditor" id="myProfileNicknameEditor" hidden><div class="field"><label>Nickname</label><input class="input" id="myProfileNicknameInput" name="nickname" autocomplete="nickname" maxlength="80" value="'+esc(nickname)+'" placeholder="Optional"></div><div class="myProfileNameEditorActions"><button class="btn secondary small" id="myProfileNicknameCancel" type="button">Cancel</button><button class="btn sky small" type="submit">Save nickname</button></div><small class="myProfileNameEditorNote">Your nickname may appear alongside your full name. Your official name and email stay searchable for course assignment.</small></form>':'';
   return '<div class="myProfilePage"><div class="eyebrow">ACCOUNT</div><h1 class="pageTitle">My Profile</h1><p class="sub">Your FLYMPUS account, profile photo and course assignments.</p>'+
     '<section class="card myProfileHeroCard"><div class="myProfileAvatarWrap"><div class="myProfileAvatar" data-current-user-avatar>'+avatar+'</div><button class="myProfileAvatarEdit" id="myProfilePhotoEdit" type="button" aria-label="Edit profile photo">✎</button></div><div class="myProfileIdentity"><h2>'+esc(officialName||'Personal profile')+'</h2>'+(isInstructor&&nickname&&nickname!==officialName?'<small class="myProfileHeroNickname">Nickname · '+esc(nickname)+'</small>':'')+'<p>'+esc(email||'No email')+'</p><div class="myProfileBadges"><span>'+esc(appRole)+'</span></div></div></section>'+
-    '<div class="myProfileGrid"><section class="card myProfileSection"><div class="myProfileSectionHead"><div><h2>Account details</h2><p>'+(isInstructor?'Official identity stays stable. Instructors can add a nickname for operational display.':'Official identity is managed centrally.')+'</p></div></div>'+
+    '<div class="myProfileGrid"><section class="card myProfileSection myProfileAccountSection"><div class="myProfileSectionHead"><div><h2>Account details</h2><p>'+(isInstructor?'Official identity stays stable. Instructors can add a nickname for operational display.':'Official identity is managed centrally.')+'</p></div></div>'+
     '<div class="myProfileDetailRow myProfileNameRow"><span>Official full name</span><div class="myProfileNameValue"><b>'+esc(officialName||'—')+'</b>'+officialEdit+'</div></div>'+officialForm+nicknameRow+
-    '<div class="myProfileDetailRow"><span>Email</span><b>'+esc(email||'—')+'</b></div><div class="myProfileDetailRow"><span>Application role</span><b>'+esc(appRole)+'</b></div><div class="myProfilePhotoTools"><button class="btn secondary small" id="myProfileRemovePhoto" type="button" '+(hasPhoto?'':'hidden')+'>Remove photo</button><small>The photo is stored with this device\'s FLYMPUS data.</small></div></section>'+
-    '<section class="card myProfileSection"><div class="myProfileSectionHead"><div><h2>Course roles</h2><p>Your role can be different in each assigned course.</p></div></div><div class="myProfileCourseList">'+courseRows+'</div></section></div>'+
+    '<div class="myProfileDetailRow"><span>Email</span><b class="myProfileEmailValue">'+esc(email||'—')+'</b></div><div class="myProfileDetailRow"><span>Role</span><b class="myProfileRoleValue">'+esc(appRole)+'</b></div><div class="myProfilePhotoTools"><button class="btn secondary small" id="myProfileRemovePhoto" type="button" '+(hasPhoto?'':'hidden')+'>Remove photo</button><small>The photo is stored with this device\'s FLYMPUS data.</small></div></section>'+
+    '<section class="card myProfileSection myProfileRolesSection"><div class="myProfileSectionHead"><div><h2>Course roles</h2><p>Your role can be different in each assigned course.</p></div></div><div class="myProfileCourseList">'+courseRows+'</div></section></div>'+
     '</div>'
 }
 function userManagementScreen(){
@@ -10868,6 +11115,6 @@ if(['roster','planned','home','record','reports'].includes(earlyNavTarget)){
   }
 })();
 </script>
-<script type="module" src="./auth.js?v=20261006-auth28"></script>
+<script type="module" src="./auth.js?v=20261006-auth29"></script>
 </body>
 </html>
