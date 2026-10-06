@@ -76,5 +76,7 @@ assert.equal((html.match(/\$\{evaluationVoiceInputHtml\(\)\}/g)||[]).length,1,"V
 assert(html.includes("Apply detected values")&&html.includes("review before submitting"),"Detected voice values must require instructor review before normal Evaluation submission");
 assert(html.includes("Use device dictation")&&html.includes("keyboard microphone"),"Unsupported direct recognition must retain a zero-cost device-dictation fallback");
 assert(html.includes("does not use a paid AI/API")&&html.includes("does not store the audio"),"Evaluation voice UI must disclose its privacy/cost behavior");
+const sw=fs.readFileSync("sw.js","utf8");
+assert(sw.includes("./assets/evaluation-voice.js?v=0741"),"Installed PWA shell must cache the local Evaluation voice helper");
 
 console.log("Evaluation voice tests passed");
