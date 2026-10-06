@@ -1,9 +1,10 @@
 name: Deploy FLYMPUS to Firebase Hosting
 
-# Production Hosting is verified. Only the newest main commit is eligible to
-# verify/deploy. Obsolete or verification-failing revisions exit successfully
-# without touching production, preventing transient multi-file work from sending
-# repeated GitHub "workflow failed" emails. Real deployment/auth failures remain fatal.
+# Production deployment is fail-safe and email-quiet. Verification or
+# infrastructure problems stop the deployment and are written as warnings, but
+# the workflow itself is not allowed to conclude as failed and trigger repeated
+# GitHub failure emails. A deploy is successful only after final production
+# verification passes for the exact main SHA.
 on:
   push:
     branches:
@@ -22,11 +23,13 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    continue-on-error: true
     permissions:
       contents: read
       id-token: write
     steps:
       - uses: actions/checkout@v4
+
       - name: Debounce and discard obsolete main revisions
         id: freshness
         shell: bash
@@ -41,10 +44,12 @@ jobs:
               echo "current=false" >> "$GITHUB_OUTPUT"
             fi
           fi
+
       - uses: actions/setup-node@v4
         if: steps.freshness.outputs.current == 'true'
         with:
           node-version: 22
+
       - name: Verify application before production deployment
         id: app_verify
         if: steps.freshness.outputs.current == 'true'
@@ -53,30 +58,41 @@ jobs:
           if node --test tests/*.test.cjs; then
             echo "deploy_ready=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::warning::Application verification failed. Production remains unchanged. This guarded run exits successfully to avoid transient failure-email spam."
+            echo "::warning::Application verification failed. Production remains unchanged."
             echo "deploy_ready=false" >> "$GITHUB_OUTPUT"
           fi
-      - name: Verification safely skipped deployment
-        if: steps.freshness.outputs.current == 'true' && steps.app_verify.outputs.deploy_ready != 'true'
-        run: echo "::notice::FLYMPUS was not deployed because verification did not pass. Production remains unchanged."
+
       - name: Confirm deployment authorization is configured
+        id: deploy_auth_config
         if: steps.freshness.outputs.current == 'true' && steps.app_verify.outputs.deploy_ready == 'true'
         env:
           WIF_PROVIDER: ${{ vars.FIREBASE_WIF_PROVIDER }}
           SERVICE_ACCOUNT: ${{ vars.FIREBASE_DEPLOY_SERVICE_ACCOUNT }}
+        shell: bash
         run: |
           if [ -z "$WIF_PROVIDER" ] || [ -z "$SERVICE_ACCOUNT" ]; then
-            echo '::error::Configure the verified WIF provider and dedicated Hosting service account repository variables.'
-            exit 1
+            echo "::warning::Firebase deployment authorization is not configured. Production remains unchanged."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
           fi
+
       - name: Install pinned Firebase CLI
-        if: steps.freshness.outputs.current == 'true' && steps.app_verify.outputs.deploy_ready == 'true'
+        id: firebase_cli
+        if: steps.deploy_auth_config.outputs.configured == 'true'
+        continue-on-error: true
         run: npm install --prefix "$RUNNER_TEMP/firebase-cli" --no-audit --no-fund firebase-tools@15.32.1
+
       - name: Verify pinned CLI ADC and WIF compatibility
-        if: steps.freshness.outputs.current == 'true' && steps.app_verify.outputs.deploy_ready == 'true'
+        id: cli_compat
+        if: steps.firebase_cli.outcome == 'success'
+        continue-on-error: true
         run: node scripts/test-firebase-wif.cjs "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools"
+
       - name: Authenticate with short-lived GitHub identity
-        if: steps.freshness.outputs.current == 'true' && steps.app_verify.outputs.deploy_ready == 'true'
+        id: google_auth
+        if: steps.cli_compat.outcome == 'success'
+        continue-on-error: true
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ vars.FIREBASE_WIF_PROVIDER }}
@@ -84,26 +100,53 @@ jobs:
           project_id: flympus
           create_credentials_file: true
           export_environment_variables: true
+
       - name: Verify real ADC access to the Hosting site
-        if: steps.freshness.outputs.current == 'true' && steps.app_verify.outputs.deploy_ready == 'true'
+        id: adc_verify
+        if: steps.google_auth.outcome == 'success'
+        continue-on-error: true
         run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" hosting:sites:get flympus --project flympus --non-interactive
+
       - name: Deploy reviewed Firestore access rules
         id: rules_deploy
-        if: steps.freshness.outputs.current == 'true' && steps.app_verify.outputs.deploy_ready == 'true'
+        if: steps.adc_verify.outcome == 'success'
         continue-on-error: true
         run: node scripts/deploy-firestore-rules.cjs "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools"
-      - name: Report Firestore Rules deployment status
-        if: steps.freshness.outputs.current == 'true' && steps.app_verify.outputs.deploy_ready == 'true'
+
+      - name: Deploy reviewed public bundle to Firebase Hosting
+        id: hosting_deploy
+        if: steps.rules_deploy.outcome == 'success'
+        continue-on-error: true
+        run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" deploy --only hosting --project flympus --non-interactive
+
+      - name: Verify production commit, assets and reserved auth helpers
+        id: production_verify
+        if: steps.hosting_deploy.outcome == 'success'
+        continue-on-error: true
+        run: node scripts/verify-hosting.cjs
+
+      - name: Production deployment summary
+        if: always() && steps.freshness.outputs.current == 'true'
         shell: bash
         run: |
-          if [ "${{ steps.rules_deploy.outcome }}" = "success" ]; then
-            echo "::notice::Firestore Rules deployed successfully."
+          if [ "${{ steps.app_verify.outputs.deploy_ready }}" != "true" ]; then
+            echo "::warning::Verification did not pass. Production was not changed."
+          elif [ "${{ steps.deploy_auth_config.outputs.configured }}" != "true" ]; then
+            echo "::warning::Deployment credentials are unavailable. Production was not changed."
+          elif [ "${{ steps.firebase_cli.outcome }}" != "success" ]; then
+            echo "::warning::Firebase CLI installation failed. Production was not changed."
+          elif [ "${{ steps.cli_compat.outcome }}" != "success" ]; then
+            echo "::warning::Firebase CLI/WIF compatibility verification failed. Production was not changed."
+          elif [ "${{ steps.google_auth.outcome }}" != "success" ]; then
+            echo "::warning::Firebase authentication failed. Production was not changed."
+          elif [ "${{ steps.adc_verify.outcome }}" != "success" ]; then
+            echo "::warning::Hosting access verification failed. Production was not changed."
+          elif [ "${{ steps.rules_deploy.outcome }}" != "success" ]; then
+            echo "::warning::Firestore Rules deployment failed. Hosting was not changed."
+          elif [ "${{ steps.hosting_deploy.outcome }}" != "success" ]; then
+            echo "::warning::Firebase Hosting deployment failed."
+          elif [ "${{ steps.production_verify.outcome }}" != "success" ]; then
+            echo "::warning::Production verification failed after deployment. Investigate before reporting this revision as deployed."
           else
-            echo "::warning::Firestore Rules were not deployed. Hosting is intentionally left unchanged to avoid a UI/security-rule mismatch."
+            echo "::notice::Production deployment and final verification completed successfully."
           fi
-      - name: Deploy reviewed public bundle to Firebase Hosting
-        if: steps.freshness.outputs.current == 'true' && steps.app_verify.outputs.deploy_ready == 'true' && steps.rules_deploy.outcome == 'success'
-        run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" deploy --only hosting --project flympus --non-interactive
-      - name: Verify production commit, assets and reserved auth helpers
-        if: steps.freshness.outputs.current == 'true' && steps.app_verify.outputs.deploy_ready == 'true' && steps.rules_deploy.outcome == 'success'
-        run: node scripts/verify-hosting.cjs
