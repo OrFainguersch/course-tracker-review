@@ -1,6 +1,6 @@
 # FLYMPUS authentication setup
 
-The repository contains enforced Google Firebase Authentication, Firestore-backed account approval, an ADMIN-only User Management screen, and UID-scoped browser persistence. Microsoft Authentication remains staged and hidden until its Entra registration is completed.
+The repository contains enforced Google Firebase Authentication, Firestore-backed account approval, tiered application roles, an Owner/Admin User Management screen, and UID-scoped browser persistence. Microsoft Authentication remains staged and hidden until its Entra registration is completed.
 
 ## Cost boundary
 
@@ -11,7 +11,7 @@ Keep the Firebase project on the **Spark** plan. Do not attach a billing account
 - `firebase-config.js` — public Firebase web identifiers and independent enforcement/provider feature flags.
 - `auth.js` — Google/Microsoft Firebase Authentication client and pending/active user gate.
 - `auth.css` — login/pending/error UI.
-- `firestore.rules` — USER/ADMIN bootstrap rules for `users/{uid}`.
+- `firestore.rules` — Owner/Administrator/Training Manager/User account rules for `users/{uid}`, invitations, and protected ownership bootstrap.
 - `storage-scope.js` — UID isolation and one-time first-admin legacy migration.
 - `docs/AUTH_DATA_MIGRATION.md` — persistence classification and migration boundary.
 - `?authPreview=1` — displays the login UI without connecting to Firebase.
@@ -34,8 +34,14 @@ Keep the Firebase project on the **Spark** plan. Do not attach a billing account
 ## Roles
 
 Application role:
-- `user`
-- `admin`
+- `owner` — protected full-system owner; only one client-bootstrapped owner.
+- `admin` — user administration plus all training/course/global Package management, except Owner/peer-Admin management.
+- `training_manager` — create/manage courses, rosters and course-specific Package overrides without user administration or global Package authority.
+- `user` — operational work in assigned courses, including evaluations/forms, without structural editing.
+
+Application roles and course roles are intentionally separate. A `user` can
+still be `COURSE_MANAGER` for a specific assigned course and receive only that
+course's roster/tailoring permissions.
 
 Account status:
 - `pending`
@@ -55,6 +61,6 @@ The site is hosted by GitHub Pages, not Firebase Hosting. Firebase redirect auth
 
 ## Pre-authorized users
 
-User Management can add an email before first sign-in and choose USER or ADMIN. This creates an `invitations/{normalizedEmail}` record; it does not send email. On first Firebase sign-in, Security Rules permit ACTIVE access only with the exact role stored in that administrator-created invitation. Uninvited accounts continue to enter as PENDING.
+User Management can add an email before first sign-in and choose USER, TRAINING_MANAGER or ADMIN. OWNER is never invitation-assignable. This creates an `invitations/{normalizedEmail}` record; it does not send email. On first Firebase sign-in, Security Rules permit ACTIVE access only with the exact role stored in that administrator-created invitation. Uninvited accounts continue to enter as PENDING.
 
 The invitation rules in `firestore.rules` must be deployed to Firebase when this feature is released.
