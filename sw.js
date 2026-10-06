@@ -2,17 +2,16 @@
    - Instant PWA cold-start from a versioned same-origin app-shell cache
    - Background revalidation so deployments replace the cached shell safely
    - Web Push delivery and notification navigation */
-const FLYMPUS_SW_VERSION='2026-10-05-startup-6';
+const FLYMPUS_SW_VERSION='2026-10-06-theme-7';
 const SHELL_CACHE='flympus-shell-'+FLYMPUS_SW_VERSION;
 const DEFAULT_ICON='./assets/flympus-app-icon.webp';
 const SHELL_URLS=[
   './',
   './index.html',
-  './auth.css?v=20261005-auth5',
+  './auth.css?v=20261006-theme6',
   './auth.js?v=20261005-auth13',
   './firebase-config.js?v=20261004-auth2',
-  './storage-scope.js?v=20261005-auth7',
-  './theme-controller.js?v=20261005-theme1',
+  './storage-scope.js?v=20261006-auth8',
   './manifest.webmanifest',
   './assets/flympus-app-icon.webp',
   './assets/flympus-sidebar-final.webp'
@@ -38,8 +37,13 @@ async function updateNavigationCache(request){
     return response
   }catch{return null}
 }
+/* THEME_SOURCE_START */
+const THEME_BOOTSTRAP="/* Single theme authority. This source is embedded in the HTML head and the\n   worker's emergency shell by scripts/sync-theme-bootstrap.cjs. No network\n   request, media-query listener, resume sample or timer decides a paint. */\n(()=>{\n  'use strict';\n  const root=document.documentElement;\n  const PREFS_KEY='flympus-app-preferences';\n  const RESOLVED_KEY='flympus-last-resolved-theme';\n  const SYSTEM_KEY='flympus-system-resolved-theme';\n  const THEMES=new Set(['light','dark','system']);\n  const readPrefs=()=>{try{return JSON.parse(localStorage.getItem(PREFS_KEY)||'{}')||{}}catch{return{}}};\n  const readTheme=key=>{try{const v=localStorage.getItem(key);return v==='light'||v==='dark'?v:''}catch{return''}};\n  const writeTheme=(key,value)=>{try{localStorage.setItem(key,value)}catch{}};\n  const modeFor=prefs=>THEMES.has(prefs?.theme)?prefs.theme:'system';\n  const sampleSystem=()=>{try{return window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}catch{return'light'}};\n  const initial=readPrefs();\n  let mode=modeFor(initial);\n  // Migrate the previous System result without sampling iOS during restoration.\n  // Explicit Light/Dark writes must never overwrite this separate System value.\n  let systemResolved=readTheme(SYSTEM_KEY)||(mode==='system'?readTheme(RESOLVED_KEY):'');\n  let resolved=mode==='system'?(systemResolved||sampleSystem()):mode;\n  if(mode==='system')systemResolved=resolved;\n\n  function commit(){\n    const changing=!!root.getAttribute('data-flympus-theme')&&root.getAttribute('data-flympus-theme')!==resolved;\n    // Flush the old and new styles while transitions are disabled, in this\n    // same task. No timer or animation frame may expose an intermediate palette.\n    if(changing){root.classList.add('flympusThemeCommit');void root.offsetWidth}\n    const dark=resolved==='dark',background=dark?'#07131f':'#f4f8fc';\n    root.setAttribute('data-flympus-theme',resolved);\n    root.setAttribute('data-flympus-theme-mode',mode);\n    root.style.colorScheme=resolved;\n    root.style.backgroundColor=background;\n    root.style.setProperty('--flympus-canvas',background);\n    root.style.setProperty('--flympus-ink',dark?'#eef5fb':'#0f172a');\n    document.querySelector('meta[name=\"theme-color\"]')?.setAttribute('content',background);\n    document.querySelector('meta[name=\"color-scheme\"]')?.setAttribute('content',resolved);\n    writeTheme(RESOLVED_KEY,resolved);\n    if(systemResolved)writeTheme(SYSTEM_KEY,systemResolved);\n    if(changing){void root.offsetWidth;root.classList.remove('flympusThemeCommit')}\n    return resolved\n  }\n  function applyPreferences(prefs=readPrefs(),{selectionChanged=false,sampleSystemNow=false}={}){\n    if(!selectionChanged)return commit();\n    const nextMode=modeFor(prefs);\n    // Only an explicit Settings selection may resolve System again. Routine\n    // render, storage/auth hydration and lifecycle callbacks retain the result.\n    if(nextMode==='system'&&(!systemResolved||sampleSystemNow))systemResolved=sampleSystem();\n    mode=nextMode;\n    resolved=mode==='system'?systemResolved:mode;\n    return commit()\n  }\n  function applyLocaleAndAccessibility(prefs=readPrefs()){\n    const language=prefs.language==='he'?'he':'en';\n    root.setAttribute('data-flympus-language',language);\n    root.setAttribute('lang',language);\n    root.setAttribute('dir',language==='he'?'rtl':'ltr');\n    root.classList.toggle('flympusLargeText',prefs.largerText===true);\n    root.classList.toggle('flympusHapticsOff',prefs.haptics===false)\n  }\n  // Reassert the in-memory decision. A suspended page must not replace it with\n  // defaults if storage is temporarily unavailable, or a transient OS value.\n  function reassertStableTheme(){return commit()}\n  applyLocaleAndAccessibility(initial);\n  commit();\n  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reassertStableTheme()},{passive:true});\n  window.addEventListener('pageshow',reassertStableTheme,{passive:true});\n  window.FLYMPUS_THEME=Object.freeze({applyPreferences,applyLocaleAndAccessibility,reassertStableTheme,getResolved:()=>resolved})\n})();";
+/* THEME_SOURCE_END */
 function offlineShell(){
-  return new Response('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07294c"><style>html,body{margin:0;min-height:100%;background:#07294c;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{display:grid;place-items:center;min-height:100vh}.b{font-weight:900;font-size:28px;letter-spacing:.02em}.s{margin-top:8px;opacity:.72;font-size:13px;text-align:center}</style><main><div class="b">FLYMPUS</div><div class="s">Opening your saved app…</div></main>',{
+  // Even this no-cache emergency document resolves device preferences before
+  // its body exists; a fixed navy fallback would flash for a Light user.
+  return new Response('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f4f8fc"><meta name="color-scheme" content="light"><script>'+THEME_BOOTSTRAP+'</script><style>html,body{margin:0;min-height:100%;background:var(--flympus-canvas);color:var(--flympus-ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{display:grid;place-items:center;min-height:100vh}.b{font-weight:900;font-size:28px;letter-spacing:.02em}.s{margin-top:8px;opacity:.72;font-size:13px;text-align:center}</style><main><div class="b">FLYMPUS</div><div class="s" id="opening">Opening your saved app…</div></main><script>if(document.documentElement.lang==="he")document.getElementById("opening").textContent="פותח את האפליקציה השמורה…"</script>',{
     status:200,
     headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}
   })

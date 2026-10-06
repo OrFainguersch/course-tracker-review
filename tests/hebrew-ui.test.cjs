@@ -44,7 +44,7 @@ assert(html.includes("No (assessment criteria|emergency requirements|experience 
 
 
 /* Early locale bootstrap + mirrored drawer gesture */
-const earlyLocaleIndex=html.indexOf('./theme-controller.js?v=20261005-theme1');
+const earlyLocaleIndex=html.indexOf('id="flympus-theme-bootstrap"');
 const firstStyleIndex=html.indexOf('<style>');
 assert(earlyLocaleIndex>=0 && firstStyleIndex>=0 && earlyLocaleIndex<firstStyleIndex,'Saved Hebrew dir/lang must be applied before CSS can paint');
 assert(html.includes("const drawerCloseSwipeIsRight=()=>getFlympusAppPreferences().language==='he'"),'Drawer gesture must mirror with Hebrew');

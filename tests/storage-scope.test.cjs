@@ -31,6 +31,7 @@ assert.equal(scope.enabled,true);
 assert.equal(localStorage.getItem('ct-review-evals:AEP-26'),null,'Private legacy data must be hidden before authenticated UID resolution');
 assert.equal(localStorage.getItem('flympus-app-preferences'),'{"theme":"dark"}','Device appearance preferences remain device-scoped');
 
+localStorage.setItem('flympus-system-resolved-theme','light');
 assert.equal(scope.setUid('uid-admin'),true);
 assert.equal(localStorage.getItem('flympus-auth-scope-last-uid'),'uid-admin','Authenticated UID scope must persist across an iOS PWA cold relaunch');
 assert.equal(localStorage.getItem('ct-review-evals:AEP-26'),null,'Legacy data is not inherited merely by setting a UID');
@@ -43,6 +44,7 @@ assert.equal(localStorage.getItem('ct-review-evals:AEP-26'),'[{"id":"legacy"}]',
 localStorage.setItem('ct-review-evals:AEP-26','[{"id":"admin-new"}]');
 sessionStorage.setItem('ct-review-ui','{"screen":"reports"}');
 scope.setUid('uid-user');
+assert.equal(localStorage.getItem('flympus-system-resolved-theme'),'light','System resolution remains device-scoped across UID changes');
 assert.equal(localStorage.getItem('ct-review-evals:AEP-26'),null,'Second user must not inherit administrator course data');
 assert.equal(sessionStorage.getItem('ct-review-ui'),null,'Session UI state must also be UID-scoped');
 assert.equal(scope.claimLegacy('uid-user',{admin:true}).reason,'claimed-by-another-user','Legacy data can only have one owner');
@@ -75,11 +77,11 @@ console.log('UID-scoped storage tests passed');
 
 const storageSource=fs.readFileSync('storage-scope.js','utf8');
 const themeSource=fs.readFileSync('theme-controller.js','utf8');
-assert(themeSource.includes('authoritative first-paint and iOS lifecycle theme controller'),'A dedicated pre-paint theme controller must own lifecycle changes');
+assert(themeSource.includes('Single theme authority'),'A dedicated pre-paint theme controller must own lifecycle changes');
 assert(themeSource.includes('function reassertStableTheme()')&&themeSource.includes("window.addEventListener('pageshow'"),'Resume must reassert the committed theme');
 assert(!storageSource.includes('installResumeThemeHold')&&!themeSource.includes('setTimeout('),'Storage scoping must not compete with the theme controller or use resume timers');
 
 assert(storageSource.includes("const UID_PERSISTED_KEY='flympus-auth-scope-last-uid'"),'Cold PWA relaunch must have a durable UID namespace hint');
 assert(storageSource.includes("rawGet(session,UID_SESSION_KEY)||rawGet(local,UID_PERSISTED_KEY)"),'Session UID must fall back to the durable namespace hint');
 
-assert(themeSource.includes("if(now-visibleSince<1500){reassertStableTheme();return}"),'Transient iOS media-query changes during resume must be ignored');
+assert(!themeSource.includes("addEventListener('change'"),'Transient iOS media-query changes must never change a committed System result');

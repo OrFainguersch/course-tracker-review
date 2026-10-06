@@ -286,3 +286,18 @@ html[data-flympus-theme="dark"] .flympusSignedInAdmin{border-color:#31526c;backg
   .flympusUserInviteForm{grid-template-columns:1fr 1fr}.flympusUserInviteForm .email{grid-column:1/-1}.flympusUserAddButton{width:100%}
   .flympusUserCard{grid-template-columns:40px minmax(0,1fr)}.flympusUserAvatar{width:40px;height:40px}.flympusUserActions{grid-column:1/-1;justify-content:stretch}.flympusUserAction{flex:1}.flympusCurrentAdmin{margin-left:51px}
 }
+
+/* Authentication/startup surfaces inherit the same pre-paint device theme.
+   A fixed navy canvas or white auth card must not become a theme flash. */
+html[data-flympus-theme] #flympusAuthRoot{background:var(--flympus-canvas);color:var(--flympus-ink)}
+html[data-flympus-theme="light"] .flympusAuthBrand img{background:#07294c;border-radius:14px;padding:10px}
+html[data-flympus-theme="dark"] .flympusAuthCard,
+html[data-flympus-theme="dark"] .flympusAuthProvider,
+html[data-flympus-theme="dark"] .flympusAuthAccount,
+html[data-flympus-theme="dark"] .flympusAuthStatus{background:#102235;color:#eef5fb;border-color:#294158}
+html[data-flympus-theme="dark"] .flympusAuthTitle,
+html[data-flympus-theme="dark"] .flympusAuthStatus b,
+html[data-flympus-theme="dark"] .flympusAuthAccount b{color:#eaf4fc}
+html[data-flympus-theme="dark"] .flympusAuthCopy,
+html[data-flympus-theme="dark"] .flympusAuthFine,
+html[data-flympus-theme="dark"] .flympusAuthStatus span{color:#9fb0bf;border-color:#294158}

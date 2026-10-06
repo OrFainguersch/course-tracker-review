@@ -604,7 +604,7 @@ assert(html.includes("html.flympusLargeText body{font-size:17px!important}")&&ht
   "Large text must scale body copy, controls and table content rather than only titles");
 assert(html.includes("Complete dark theme audit")&&html.includes("html[data-flympus-theme=\"dark\"] .packageSyllabusTable")&&html.includes("html[data-flympus-theme=\"dark\"] .pveExecutionOverview>div"),
   "Dark mode must cover reusable workflow surfaces across Course Management and daily operations");
-assert(html.includes('./theme-controller.js?v=20261005-theme1'),
+assert(html.includes('id="flympus-theme-bootstrap"'),
   "The authoritative theme and text controller must run before first paint");
 
 assert(html.includes("Dark completeness pass · settings + workflow surfaces")&&html.includes('html[data-flympus-theme="dark"] .myCourseCard')&&html.includes('html[data-flympus-theme="dark"] .wizardCreateBar'),
@@ -650,22 +650,21 @@ assert(themeController.includes("document.addEventListener('visibilitychange'")&
   themeController.includes("window.addEventListener('pageshow'")&&
   !themeController.includes('setTimeout('),
   "Resume must reassert the stable theme without timeout-driven competing writers");
-assert(themeController.includes("if(now-visibleSince<1500){reassertStableTheme();return}")&&
-  themeController.includes("commit(event.matches?'dark':'light','system')"),
-  "A genuine visible System change may commit, while transient resume events are ignored");
-assert(themeController.includes("root.style.backgroundColor=dark?'#091522':'#f4f8fc'"),
-  "The resolved document background must be set by the pre-paint controller");
+assert(!themeController.includes("addEventListener('change'")&&themeController.includes("const SYSTEM_KEY='flympus-system-resolved-theme'"),
+  "System has a persisted resolution and must not accept delayed media-query transitions");
+assert(themeController.includes("background=dark?'#07131f':'#f4f8fc'"),
+  "The pre-paint canvas must match the final CSS canvas");
 assert(html.includes("snap.visualVersion===3")&&html.includes("snapFresh=snapAge<=15*60*1000")&&
   html.includes("snap.resolvedTheme===currentResolvedTheme")&&html.includes("viewportCompatible"),
   "Reload snapshots must be fresh, viewport-compatible and visually compatible before they are painted");
 assert(html.includes("visualVersion:3")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
   html.includes("largerText:!!root?.classList.contains('flympusLargeText')")&&html.includes("localDay,"),
   "Saved reload snapshots must include the visual preference signature and local-day key used for first-paint validation");
-assert(html.indexOf('<meta name="theme-color" content="#07294c" />')<html.indexOf('./theme-controller.js?v=20261005-theme1'),
-  "theme-color metadata must exist before the early bootstrap so status-bar color can be corrected before first paint");
+assert(html.indexOf('<meta name="theme-color" content="#f4f8fc" />')<html.indexOf('id="flympus-theme-bootstrap"'),
+  "Metadata must exist before the embedded theme authority executes");
 assert(html.includes('<meta name="color-scheme" content="light" />')&&
-  themeController.includes("document.querySelector('meta[name=\"color-scheme\"]')?.setAttribute('content',theme)"),
-  "Native browser controls and the document color-scheme must stay aligned with the resolved FLYMPUS theme");
+  themeController.includes("document.querySelector('meta[name=\"color-scheme\"]')?.setAttribute('content',resolved)"),
+  "Native controls follow the exact committed resolution");
 
 assert(html.includes("function flympusContinuitySnapshotHtml(content)")&&
   html.includes("clone.querySelectorAll?.('.modal.open')")&&

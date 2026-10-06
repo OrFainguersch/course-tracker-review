@@ -27,6 +27,7 @@
   const DEVICE_KEYS=new Set([
     'flympus-app-preferences',
     'flympus-last-resolved-theme',
+    'flympus-system-resolved-theme',
     'flympus-last-visible-theme-at',
     'flympus-device-test',
     'ct-review-standalone-migration-dismissed'

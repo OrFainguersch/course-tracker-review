@@ -22,7 +22,23 @@ earlier Work run completed deployment.
   course workflows. Do not treat Chrome tests as iPhone PWA verification.
 - Stop for the owner only for a genuinely required authentication/approval step.
 
-## Verified on 2026-10-05
+## Current production checkpoint — 2026-10-06
+
+This section supersedes the historical deployment blockers below. Repository
+variables were saved, and Hosting workflow run `37353905377` succeeded for
+`d591015756cd8a1863a19bdd01850617c34e2e30` with real WIF/ADC access, Hosting-only
+deployment and production file/hash/helper verification. The owner confirms
+Google sign-in works on their physical iPhone in Safari and Home Screen.
+Do not repeat Cloud configuration, deploy credentials, or physical Google login
+setup. No new key was created or downloaded for this deployment.
+
+The attached 847-frame recording demonstrates a remaining System theme
+lifecycle problem. The theme-only follow-up removes media-event/timing-based
+resolution, embeds the same authority before HTML/worker first paint, and adds
+recording-sequence regressions. See `THEME_LIFECYCLE.md`. Physical iPhone theme
+acceptance is still pending; Chrome/VM tests cannot prove iOS compositor frames.
+
+## Historical verification on 2026-10-05
 
 - Main initially contained `c7f263c` (Firebase auth / iOS lifecycle stabilization).
 - GitHub Pages served the current auth13, storage7 and theme1 assets.

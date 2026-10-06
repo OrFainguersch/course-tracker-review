@@ -10,13 +10,13 @@ const storage=fs.readFileSync('storage-scope.js','utf8');
 const theme=fs.readFileSync('theme-controller.js','utf8');
 
 assert(html.includes('./firebase-config.js?v=20261004-auth2'),'Firebase config must load from the static app');
-assert(html.includes('./storage-scope.js?v=20261005-auth7'),'UID storage scope must load from the static app');
-assert(html.includes('./auth.css?v=20261005-auth5'),'Authentication UI CSS must be loaded');
+assert(html.includes('./storage-scope.js?v=20261006-auth8'),'UID storage scope must load from the static app');
+assert(html.includes('./auth.css?v=20261006-theme6'),'Authentication UI CSS must be loaded');
 assert(html.includes('type="module" src="./auth.js?v=20261005-auth13"'),'Authentication runtime must load as a module');
 assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"'),'Firebase Authentication must preload before the post-login reload');
 assert(html.indexOf('./firebase-config.js')<html.indexOf('</head>'),'Firebase config must load before first body paint');
-assert(html.indexOf('./theme-controller.js')<html.indexOf('./firebase-config.js'),'First-paint theme must resolve before network-dependent Firebase startup scripts');
-assert(html.indexOf('./theme-controller.js')<html.indexOf('./storage-scope.js'),'Device-level appearance preferences must resolve before private application storage is installed');
+assert(html.indexOf('id="flympus-theme-bootstrap"')<html.indexOf('./firebase-config.js'),'First-paint theme must resolve before network-dependent Firebase startup scripts');
+assert(html.indexOf('id="flympus-theme-bootstrap"')<html.indexOf('./storage-scope.js'),'Device-level appearance preferences must resolve before private application storage is installed');
 assert(html.includes("document.documentElement.classList.add(returning?'flympusAuthReturning':'flympusAuthBooting')"),
   'Returning sessions must avoid the hidden boot shell while new sessions remain fail-closed');
 
@@ -84,7 +84,7 @@ assert(auth.includes('data-user-invite-form')&&auth.includes('name="email"')&&au
 assert(auth.includes("preauthorized?'active':'pending'"),'A pre-authorized email must become active on first sign-in');
 assert(rules.includes('match /invitations/{email}')&&rules.includes('request.auth.token.email.lower() == email'),'Invitation reads must be bound to the signed-in normalized email');
 assert(rules.includes('invitedUserCreate(request.resource.data)'),'First sign-in may inherit only an administrator-created invitation role');
-assert(theme.includes('authoritative first-paint and iOS lifecycle theme controller'),'Theme lifecycle must have one authoritative writer');
+assert(theme.includes('Single theme authority'),'Theme lifecycle must have one authoritative writer');
 assert(theme.includes("window.addEventListener('pageshow'")&&theme.includes('reassertStableTheme()'),'iOS resume must reassert the committed theme without probing transient state');
 assert(!storage.includes('installResumeThemeHold')&&!theme.includes('setTimeout('),'Theme lifecycle must not retain competing timeout-based resume writers');
 
