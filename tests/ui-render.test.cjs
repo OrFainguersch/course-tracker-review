@@ -18,6 +18,8 @@ assert.equal(manifest.short_name,"FLYMPUS","Web app manifest must identify FLYMP
 assert.equal(manifest.display,"standalone","Home Screen installation must use standalone display mode");
 assert.equal(manifest.start_url,"./","Home Screen app must start inside the same GitHub Pages scope");
 assert(html.includes('rel="manifest" href="./manifest.webmanifest"')&&html.includes('apple-mobile-web-app-title" content="FLYMPUS"'),"Index must advertise the FLYMPUS manifest and iOS app title");
+assert(html.includes('maximum-scale=1, user-scalable=no')&&html.includes('id="flympus-mobile-zoom-guard"'),"Mobile application pages must suppress accidental browser zoom");
+assert(html.includes("event.touches?.length>1&&!insideCrop(event.target)")&&html.includes("closest('.personalCropViewport')"),"Global mobile zoom suppression must preserve the intentional profile-photo crop pinch gesture");
 assert(html.includes('<main id="content"><div class="flympusBootShell" aria-hidden="true">'),"The initial HTML must contain the first-paint shell so standalone iOS never waits for hydration JS before showing app-owned content");
 assert(html.includes("tile('platform','Platform',platformValue)")&&html.includes("tile('training','Training type',meta.trainingKind)")&&html.includes("countryTile=tile('country','Country',meta.country,showContext?'':'countryWide')"),"My Courses must render course details as visible metadata tiles");
 assert(html.includes("platformLabels:{rc_simulator:'RC Simulator',rc_model:'Shahak'"),"Shahak must be the default display name for rc_model");
