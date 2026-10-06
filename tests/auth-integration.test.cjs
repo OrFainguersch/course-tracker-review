@@ -63,6 +63,12 @@ assert(html.includes("case'user-management':html=userManagementScreen()")&&auth.
   'User Management must render as a real application screen');
 assert(css.includes('#flympusUserManagementPageRoot')&&css.includes('.flympusRoleGuideGrid'),
   'User Management page must include dedicated responsive page and role-guide styling');
+assert(!auth.includes('flympusRoleGlyph')&&auth.includes('flympusUserRoleBadge'),
+  'Role guide cards must not render decorative role icons and user cards must use aligned role badges');
+assert(auth.includes("'Edit':'עריכה'")&&css.includes('#flympusUserManagementPageRoot[dir="rtl"] .flympusUserCard{direction:rtl}'),
+  'User Management Edit controls and card geometry must support mirrored Hebrew RTL layout');
+assert(css.includes('.flympusRoleGuideCard.training_manager{border-color:#9fcfeb')&&!css.includes('.flympusRoleGuideCard.training_manager{border-color:#cbe7dc'),
+  'Training Manager role styling must use the application-role blue palette rather than Active-status green');
 assert(auth.includes("window.FLYMPUS_NAVIGATE('user-management')"),
   'Profile shortcut must navigate to the same User Management screen');
 

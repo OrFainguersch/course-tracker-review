@@ -87,10 +87,32 @@
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js" crossorigin />
-<link rel="modulepreload" href="./auth.js?v=20261006-auth21" />
+<link rel="modulepreload" href="./auth.js?v=20261006-auth22" />
 <script src="./firebase-config.js?v=20261004-auth2"></script>
 <script src="./storage-scope.js?v=20261006-auth8"></script>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<style id="flympus-mobile-zoom-guard-style">
+@media (hover:none) and (pointer:coarse){
+  html,body,.app{touch-action:pan-x pan-y}
+  .personalCropModal,.personalCropViewport{touch-action:none}
+}
+</style>
+<script id="flympus-mobile-zoom-guard">
+(()=>{
+  'use strict';
+  let mobile=false;
+  try{mobile=window.matchMedia('(hover: none) and (pointer: coarse)').matches||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent||'')}catch{}
+  if(!mobile)return;
+  const insideCrop=target=>target instanceof Element&&!!target.closest('.personalCropViewport');
+  const blockGesture=event=>{if(!insideCrop(event.target)&&event.cancelable)event.preventDefault()};
+  document.addEventListener('gesturestart',blockGesture,{passive:false});
+  document.addEventListener('gesturechange',blockGesture,{passive:false});
+  document.addEventListener('gestureend',blockGesture,{passive:false});
+  document.addEventListener('touchmove',event=>{
+    if(event.touches?.length>1&&!insideCrop(event.target)&&event.cancelable)event.preventDefault()
+  },{passive:false})
+})();
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="FLYMPUS" />
@@ -4616,7 +4638,7 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
   .topCourseContext{display:none!important}
 }
 </style>
-<link rel="stylesheet" href="./auth.css?v=20261006-auth11" />
+<link rel="stylesheet" href="./auth.css?v=20261006-auth12" />
 <script>
 /* Authentication is fail-closed only after it is explicitly enabled.
    Until the Firebase project and UID-scoped data migration are ready,
@@ -10606,6 +10628,6 @@ if(['roster','planned','home','record','reports'].includes(earlyNavTarget)){
   }
 })();
 </script>
-<script type="module" src="./auth.js?v=20261006-auth21"></script>
+<script type="module" src="./auth.js?v=20261006-auth22"></script>
 </body>
 </html>

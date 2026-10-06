@@ -253,7 +253,7 @@ html.flympusUserManagementOpen body{position:fixed!important;left:0!important;ri
 .flympusUserGroup{margin-top:18px}.flympusUserGroupHead{display:flex;align-items:center;gap:8px;margin-bottom:8px}.flympusUserGroupHead h2{margin:0;color:#123d64;font-size:15px}.flympusUserGroupHead span{min-width:23px;height:23px;display:grid;place-items:center;border-radius:999px;background:#e5f2fc;color:#176da9;font-size:9px;font-weight:900}
 .flympusUserList{display:grid;gap:8px}.flympusUserCard{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:11px;align-items:center;padding:12px 13px;border:1px solid #dce7f0;border-radius:15px;background:#fff}
 .flympusUserAvatar{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;background:#e7f3fd;color:#176da9;font-size:15px;font-weight:950}.flympusUserIdentity{min-width:0}.flympusUserIdentity>b{display:block;color:#143d62;font-size:11.5px}.flympusUserIdentity>span{display:block;margin-top:2px;color:#71859a;font-size:9.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.flympusUserIdentity>.flympusUserPreferred{color:#4d6d88;font-size:8.8px;font-weight:750}
-.flympusUserNameLine{display:flex;align-items:center;gap:7px;min-width:0}.flympusUserNameLine>b{min-width:0;color:#143d62;font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.flympusUserNameEdit{flex:0 0 auto;border:0;background:transparent;color:#2774ad;font-size:8px;font-weight:900;cursor:pointer;padding:3px 4px;border-radius:7px}.flympusUserNameEdit:hover,.flympusUserNameEdit:focus-visible{background:#edf6fc;outline:none}.flympusManagedNameForm{display:flex;align-items:flex-end;gap:7px;min-width:0;margin-bottom:4px}.flympusManagedNameForm label{min-width:0;flex:1}.flympusManagedNameForm label>span{display:block;margin-bottom:4px;color:#7890a4;font-size:7.5px;font-weight:900}.flympusManagedNameForm input{width:100%;height:34px;padding:0 9px;border:1px solid #cdddea;border-radius:9px;background:#fff;color:#173d61;font-size:10px;font-weight:800;outline:none}.flympusManagedNameForm input:focus{border-color:#74b9e8;box-shadow:0 0 0 3px rgba(22,135,232,.10)}.flympusManagedNameForm>div{display:flex;gap:5px}.flympusManagedNameForm button{height:34px;padding:0 9px;border:1px solid #cdddea;border-radius:9px;background:#fff;color:#315b7e;font-size:8px;font-weight:900;cursor:pointer;white-space:nowrap}.flympusManagedNameForm button[type="submit"]{border-color:#9dcef0;background:#eaf6ff;color:#116cae}.flympusManagedNameForm button:disabled,.flympusManagedNameForm input:disabled{opacity:.55;cursor:wait}.flympusUserMeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.flympusUserMeta i{display:inline-flex;align-items:center;min-height:22px;padding:4px 9px;border-radius:999px;background:#eef3f7;color:#587086;font-style:normal;font-size:8.5px;line-height:1;font-weight:850;letter-spacing:.01em;text-transform:none}.flympusUserMeta i.role{background:#edf3f8;color:#526a80}.flympusUserMeta i.role.user{background:#edf3f8;color:#526a80}.flympusUserMeta i.role.training_manager{background:#e4f6ee;color:#176d53}.flympusUserMeta i.role.admin{background:#eeeafd;color:#6550a8}.flympusUserMeta i.role.owner{background:#fff1c9;color:#805f18}
+.flympusUserNameLine{display:flex;align-items:center;gap:7px;min-width:0}.flympusUserNameLine>b{min-width:0;color:#143d62;font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.flympusUserNameEdit{flex:0 0 auto;border:0;background:transparent;color:#2774ad;font-size:8px;font-weight:900;cursor:pointer;padding:3px 4px;border-radius:7px}.flympusUserNameEdit:hover,.flympusUserNameEdit:focus-visible{background:#edf6fc;outline:none}.flympusManagedNameForm{display:flex;align-items:flex-end;gap:7px;min-width:0;margin-bottom:4px}.flympusManagedNameForm label{min-width:0;flex:1}.flympusManagedNameForm label>span{display:block;margin-bottom:4px;color:#7890a4;font-size:7.5px;font-weight:900}.flympusManagedNameForm input{width:100%;height:34px;padding:0 9px;border:1px solid #cdddea;border-radius:9px;background:#fff;color:#173d61;font-size:10px;font-weight:800;outline:none}.flympusManagedNameForm input:focus{border-color:#74b9e8;box-shadow:0 0 0 3px rgba(22,135,232,.10)}.flympusManagedNameForm>div{display:flex;gap:5px}.flympusManagedNameForm button{height:34px;padding:0 9px;border:1px solid #cdddea;border-radius:9px;background:#fff;color:#315b7e;font-size:8px;font-weight:900;cursor:pointer;white-space:nowrap}.flympusManagedNameForm button[type="submit"]{border-color:#9dcef0;background:#eaf6ff;color:#116cae}.flympusManagedNameForm button:disabled,.flympusManagedNameForm input:disabled{opacity:.55;cursor:wait}.flympusUserMeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.flympusUserMeta i{display:inline-flex;align-items:center;min-height:22px;padding:4px 9px;border-radius:999px;background:#eef3f7;color:#587086;font-style:normal;font-size:8.5px;line-height:1;font-weight:850;letter-spacing:.01em;text-transform:none}.flympusUserMeta i.role{background:#edf3f8;color:#526a80}.flympusUserMeta i.role.user{background:#edf3f8;color:#526a80}.flympusUserMeta i.role.training_manager{background:#e3f3fd;color:#1d699a}.flympusUserMeta i.role.admin{background:#eeeafd;color:#6550a8}.flympusUserMeta i.role.owner{background:#fff1c9;color:#805f18}
 .flympusUserActions{display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap}.flympusUserAction{min-height:34px;padding:0 10px;border:1px solid #cdddea;border-radius:10px;background:#fff;color:#315b7e;font-size:8.5px;font-weight:900;cursor:pointer}.flympusUserAction.primary{border-color:#9dcef0;background:#eaf6ff;color:#116cae}.flympusUserAction.danger{border-color:#f0c6ca;background:#fff5f6;color:#b52d3d}.flympusUserAction:disabled{opacity:.5;cursor:wait}.flympusCurrentAdmin{display:inline-flex;align-items:center;min-height:26px;padding:4px 9px;border-radius:999px;background:#edf3f8;color:#526a80;font-size:8.5px;font-weight:850}.flympusUserEmpty{padding:18px;border:1px dashed #cfdce8;border-radius:14px;color:#8495a5;text-align:center;font-size:10px}
 
 
@@ -380,7 +380,7 @@ html[data-flympus-theme="dark"] .flympusAuthStatus span{color:#9fb0bf;border-col
 }
 .flympusRoleGuideCard.owner{border-color:#e6d6a9;background:#fffaf0}
 .flympusRoleGuideCard.admin{border-color:#cdddf5;background:#f7f9ff}
-.flympusRoleGuideCard.training_manager{border-color:#cbe7dc;background:#f7fcfa}
+.flympusRoleGuideCard.training_manager{border-color:#9fcfeb;background:#f5fbff}
 .flympusRoleGuideTitle{display:flex;align-items:center;gap:9px}
 .flympusRoleGlyph{
   width:31px;height:31px;flex:0 0 31px;
@@ -392,7 +392,7 @@ html[data-flympus-theme="dark"] .flympusAuthStatus span{color:#9fb0bf;border-col
   font-weight:950
 }
 .flympusRoleGuideCard.owner .flympusRoleGlyph{background:#f8eac1;color:#8a6414}
-.flympusRoleGuideCard.training_manager .flympusRoleGlyph{background:#dff5eb;color:#187357}
+.flympusRoleGuideCard.training_manager .flympusRoleGlyph{background:#e3f3fd;color:#1d699a}
 .flympusRoleGuideTitle b{display:block;color:#153d62;font-size:10.5px}
 .flympusRoleGuideTitle small{display:block;margin-top:2px;color:#7b8fa1;font-size:8px;font-weight:800}
 .flympusRoleGuideCard p{margin:10px 0 8px;color:#6f8497;font-size:8.6px;line-height:1.5}
@@ -452,7 +452,7 @@ html[data-flympus-theme="dark"] .flympusUserSummary>div,
 html[data-flympus-theme="dark"] .flympusUserCard{background:#102235;border-color:#294158}
 html[data-flympus-theme="dark"] .flympusRoleGuideCard{background:#0d1e2f;border-color:#294158}
 html[data-flympus-theme="dark"] .flympusRoleGuideCard.owner{background:#201c12;border-color:#66562d}
-html[data-flympus-theme="dark"] .flympusRoleGuideCard.training_manager{background:#10261f;border-color:#285448}
+html[data-flympus-theme="dark"] .flympusRoleGuideCard.training_manager{background:#102433;border-color:#31566d}
 html[data-flympus-theme="dark"] .flympusRoleGuideHead h2,
 html[data-flympus-theme="dark"] .flympusRoleGuideTitle b,
 html[data-flympus-theme="dark"] .flympusUserInviteHead h2,
@@ -465,7 +465,7 @@ html[data-flympus-theme="dark"] .flympusUserInviteHead p,
 html[data-flympus-theme="dark"] .flympusUserIdentity>span{color:#9fb0bf}
 html[data-flympus-theme="dark"] .flympusUserIdentity>.flympusUserPreferred{color:#b3c7d8}
 html[data-flympus-theme="dark"] .flympusUserMeta i.role.user{background:#243444;color:#b7c8d8}
-html[data-flympus-theme="dark"] .flympusUserMeta i.role.training_manager{background:#16362e;color:#8dd6bb}
+html[data-flympus-theme="dark"] .flympusUserMeta i.role.training_manager{background:#173348;color:#8fcaf0}
 html[data-flympus-theme="dark"] .flympusUserMeta i.role.admin{background:#2b2747;color:#c5b8f5}
 html[data-flympus-theme="dark"] .flympusUserMeta i.role.owner{background:#3a321d;color:#ebcf82}
 html[data-flympus-theme="dark"] .flympusCurrentAdmin{background:#243444;color:#b7c8d8}
@@ -494,4 +494,193 @@ html[data-flympus-theme="dark"] .flympusUserInviteForm select{background:#0c1c2c
   #flympusUserManagementPageRoot .flympusRoleSelectWrap select{width:100%;min-width:0}
   #flympusUserManagementPageRoot .flympusCurrentAdmin,
   #flympusUserManagementPageRoot .flympusOwnerProtected{grid-column:1/-1;margin:0;justify-self:start}
+}
+
+
+/* ===== User Management alignment · role palette + roster-consistent cards ===== */
+/* Application roles use their own non-status palette. Green remains reserved
+   for lifecycle/status meaning such as Active. */
+#flympusUserManagementPageRoot .flympusRoleGuideCard{
+  position:relative;
+  padding:14px;
+  border-width:1px;
+  border-top-width:3px;
+  background:#f9fbfd
+}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.owner{border-color:#d8ba70;background:#fffaf1}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.admin{border-color:#bdb4ef;background:#faf9ff}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.training_manager{border-color:#9fcfeb;background:#f5fbff}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.user{border-color:#c9d4df;background:#f8fafc}
+#flympusUserManagementPageRoot .flympusRoleGuideTitle{display:block}
+#flympusUserManagementPageRoot .flympusRoleGuideTitle>b{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:5px 9px;
+  border-radius:999px;
+  color:#153d62;
+  font-size:9.5px;
+  line-height:1;
+  font-weight:900;
+  white-space:nowrap
+}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.owner .flympusRoleGuideTitle>b{background:#fff0c8;color:#805f18}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.admin .flympusRoleGuideTitle>b{background:#eeeafd;color:#6550a8}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.training_manager .flympusRoleGuideTitle>b{background:#e3f3fd;color:#1d699a}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.user .flympusRoleGuideTitle>b{background:#edf3f8;color:#526a80}
+#flympusUserManagementPageRoot .flympusRoleGuideTitle small{
+  display:block;
+  margin-top:5px;
+  color:#7b8fa1;
+  font-size:8px;
+  line-height:1.25;
+  font-weight:850;
+  letter-spacing:.035em
+}
+#flympusUserManagementPageRoot .flympusRoleGuideCard p{margin-top:11px}
+
+/* User cards follow the Course Roster rhythm: avatar, identity/badge, action. */
+#flympusUserManagementPageRoot .flympusUserCard{
+  gap:12px;
+  padding:12px 13px;
+  border-radius:18px;
+  align-items:center
+}
+#flympusUserManagementPageRoot .flympusUserAvatar{
+  width:56px;
+  height:56px;
+  border-radius:14px;
+  background:#e7f3fd;
+  color:#176da9;
+  font-size:18px;
+  font-weight:950
+}
+#flympusUserManagementPageRoot .flympusUserNameLine{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  flex-wrap:wrap
+}
+#flympusUserManagementPageRoot .flympusUserNameLine>b{
+  color:#143d62;
+  font-size:13.5px;
+  line-height:1.15;
+  font-weight:900
+}
+#flympusUserManagementPageRoot .flympusUserIdentity>span{
+  margin-top:4px;
+  font-size:10px
+}
+#flympusUserManagementPageRoot .flympusUserRoleBadge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:24px;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:9px;
+  line-height:1;
+  font-weight:900;
+  white-space:nowrap
+}
+#flympusUserManagementPageRoot .flympusUserRoleBadge:before{
+  content:"";
+  width:6px;
+  height:6px;
+  flex:0 0 6px;
+  border-radius:50%;
+  background:currentColor;
+  opacity:.86
+}
+#flympusUserManagementPageRoot .flympusUserRoleBadge.owner{background:#fff1c9;color:#805f18}
+#flympusUserManagementPageRoot .flympusUserRoleBadge.admin{background:#eeeafd;color:#6550a8}
+#flympusUserManagementPageRoot .flympusUserRoleBadge.training_manager{background:#e3f3fd;color:#1d699a}
+#flympusUserManagementPageRoot .flympusUserRoleBadge.user{background:#edf3f8;color:#526a80}
+#flympusUserManagementPageRoot .flympusUserMeta{margin-top:7px}
+#flympusUserManagementPageRoot .flympusUserMeta i.role.training_manager{background:#e3f3fd;color:#1d699a}
+#flympusUserManagementPageRoot .flympusCurrentAdmin{
+  min-height:24px;
+  padding:5px 9px;
+  background:#edf3f8;
+  color:#526a80;
+  font-size:9px;
+  line-height:1;
+  font-weight:850
+}
+#flympusUserManagementPageRoot .flympusUserActions{
+  align-items:center;
+  justify-content:flex-end
+}
+#flympusUserManagementPageRoot .flympusUserNameEdit{
+  min-width:78px;
+  height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  flex:0 0 auto;
+  padding:0 12px;
+  border:1px solid #d5e0e9;
+  border-radius:10px;
+  background:#edf3f8;
+  color:#285d87;
+  font-size:10.5px;
+  line-height:1;
+  font-weight:850;
+  cursor:pointer;
+  white-space:nowrap
+}
+#flympusUserManagementPageRoot .flympusUserNameEdit:hover,
+#flympusUserManagementPageRoot .flympusUserNameEdit:focus-visible{
+  outline:none;
+  background:#e5eef6;
+  border-color:#bfd2e1
+}
+#flympusUserManagementPageRoot .flympusUserCard.currentAccount{
+  grid-template-columns:56px minmax(0,1fr) auto
+}
+
+/* Full RTL mirror: avatar starts on the right, the action column moves left,
+   and labels/badges keep the same baseline and proportions. */
+#flympusUserManagementPageRoot[dir="rtl"] .flympusUserCard{direction:rtl}
+#flympusUserManagementPageRoot[dir="rtl"] .flympusUserNameLine{justify-content:flex-start}
+#flympusUserManagementPageRoot[dir="rtl"] .flympusUserActions{justify-content:flex-start}
+#flympusUserManagementPageRoot[dir="rtl"] .flympusUserNameEdit{direction:rtl}
+
+/* Dark theme keeps the same role distinctions without borrowing Active green. */
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.owner{background:#211c12;border-color:#6b592d}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.admin{background:#1c1930;border-color:#4e477e}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.training_manager{background:#102433;border-color:#31566d}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.user{background:#0d1e2f;border-color:#3a5065}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.owner .flympusRoleGuideTitle>b,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserRoleBadge.owner{background:#3a321d;color:#ebcf82}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.admin .flympusRoleGuideTitle>b,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserRoleBadge.admin{background:#2b2747;color:#c5b8f5}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.training_manager .flympusRoleGuideTitle>b,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserRoleBadge.training_manager,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserMeta i.role.training_manager{background:#173348;color:#8fcaf0}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.user .flympusRoleGuideTitle>b,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserRoleBadge.user{background:#243444;color:#b7c8d8}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserNameEdit{background:#15293b;border-color:#36516a;color:#9fd3f4}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserNameEdit:hover,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserNameEdit:focus-visible{background:#1b354b;border-color:#486985}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusCurrentAdmin{background:#243444;color:#b7c8d8}
+
+@media(max-width:520px){
+  #flympusUserManagementPageRoot .flympusUserAvatar{width:52px;height:52px;border-radius:14px;font-size:17px}
+  #flympusUserManagementPageRoot .flympusUserNameLine>b{font-size:13px}
+  #flympusUserManagementPageRoot .flympusUserNameEdit{min-width:76px;height:40px;font-size:10px}
+  #flympusUserManagementPageRoot .flympusUserCard.currentAccount{
+    grid-template-columns:52px minmax(0,1fr) auto;
+    gap:11px
+  }
+  #flympusUserManagementPageRoot .flympusUserCard.currentAccount .flympusUserActions{
+    grid-column:auto;
+    display:flex;
+    grid-template-columns:none;
+    justify-content:flex-end;
+    align-self:center
+  }
+  #flympusUserManagementPageRoot[dir="rtl"] .flympusUserCard.currentAccount .flympusUserActions{justify-content:flex-start}
 }
