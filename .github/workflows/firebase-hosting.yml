@@ -1,8 +1,12 @@
 name: Deploy FLYMPUS to Firebase Hosting
 
-# Enable automatic main deployments after the first verified production release.
-# Until deployment authorization is connected, this is explicitly on demand.
+# Production Hosting is verified. Every reviewed main commit now runs the
+# complete test suite and deploys through keyless WIF; manual dispatch remains
+# available for an explicit retry.
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
