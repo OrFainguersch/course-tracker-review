@@ -506,7 +506,7 @@ async function addManagedUser(form){
   }
 }
 async function updateManagedInvitation(email,action,button){if(!canManageUsers()||!validManagedEmail(email))return;const ref=firestoreSdk.doc(db,'invitations',canonicalEmail(email));button.disabled=true;try{if(action==='remove-invite'){const ok=typeof window.siteConfirm==='function'?await window.siteConfirm(tr('The email will no longer be pre-authorized for FLYMPUS.'),{title:tr('Remove this invitation?'),confirmLabel:tr('Remove'),tone:'danger'}):false;if(!ok){button.disabled=false;return}await firestoreSdk.deleteDoc(ref)}else{const role=action==='invite-admin'?'admin':action==='invite-training-manager'?'training_manager':'user';await firestoreSdk.setDoc(ref,{role,updatedAt:firestoreSdk.serverTimestamp(),invitedBy:currentUser.uid},{merge:true})}managedDirectoryCache=await loadManagedDirectory();renderUserManagement(managedDirectoryCache)}catch(err){console.error('FLYMPUS invitation update failed',err);button.disabled=false;renderUserManagement(lastManagedDirectory,String(err?.message||tr('Update failed')))}}
-async async function updateManagedUserRole(uid,role,select){
+async function updateManagedUserRole(uid,role,select){
   role=normalizeAppRole(role);if(!canManageUsers()||!uid||uid===currentUser?.uid||!canAssignAppRole(role))return;
   const previous=lastManagedDirectory.users.find(x=>x.uid===uid)?.role||'user';
   if(previous===role)return;
