@@ -145,6 +145,14 @@ assert(html.includes("safety:'<path d=\"M12 3.5 19 6v5.3c0 4.5-2.7 7.7-7 9.2-4.3
 assert(html.includes(".recordHubCard.eval{border-top:3px solid var(--record-eval)}")&&html.includes(".recordHubCard.safety{border-top:3px solid var(--record-safety)}")&&html.includes(".recordHubCard.exam{border-top:3px solid var(--record-exam)}"),"Forms hub cards must keep the Evaluation, Safety and Exam color identity used by trainee record actions");
 
 assert(html.includes("Course safety history")&&html.includes("safetyHistorySearch")&&html.includes("safetyHistorySeverity")&&html.includes("safetyHistoryClassification")&&html.includes("safetyHistoryTrainee")&&html.includes("safetyHistoryInstructor"),"Safety must provide course-specific history with search and operational filters");
+assert(html.includes("const SAFETY_SEVERITY_DEFS=Object.freeze([")&&html.includes("value:'Minor'")&&html.includes("value:'Moderate'")&&html.includes("value:'Major'")&&html.includes("value:'Critical'"),"Safety must use the four-level Minor, Moderate, Major and Critical severity model");
+assert(html.includes("function normalizeSafetySeverity(value)")&&html.includes("low:'Minor'")&&html.includes("medium:'Moderate'")&&html.includes("high:'Major'"),"Legacy Low, Medium and High safety records must normalize into the new four-level model");
+assert(html.includes('class="safetySeverityGuide"')&&html.includes('id="safetySeverityGuideTitle"')&&html.includes('aria-describedby="safetySeverityGuideIntro"'),"Safety severity guidance must be visible and programmatically associated with the severity control");
+assert(html.includes("Minor impact, with no real danger or significant effect on the mission.")&&html.includes("Immediate or significant danger to the aircraft, personnel, or flight safety."),"Safety severity guide must explain the operational meaning of the lowest and highest levels");
+assert(html.includes(".safetySeverity-minor{--severity:#2ca66f")&&html.includes(".safetySeverity-moderate{--severity:#d9a000")&&html.includes(".safetySeverity-major{--severity:#e98216")&&html.includes(".safetySeverity-critical{--severity:#cf3f4d"),"Safety severity guide must preserve green, amber, orange and red visual coding");
+assert(html.includes('html[data-flympus-language="he"] .safetySeverityGuide')&&html.includes('html[data-flympus-theme="dark"] .safetySeverityGuide')&&html.includes('html.flympusLargeText .safetySeverityGuideHead h3'),"Safety severity guide must support Hebrew RTL, dark mode and Larger Text");
+assert(html.includes('value="Minor"')&&html.includes('value="Moderate"')&&html.includes('value="Major"')&&html.includes('value="Critical"')&&!html.includes('<option>Low</option><option>Medium</option><option>High</option>'),"Safety form must store canonical severity values independent of translated option text");
+assert(html.includes("safetyRows.map(x=>normalizeSafetySeverity(x.severity)).filter(Boolean)"),"Safety analytics must group legacy and current records using normalized severity values");
 assert(html.includes('data-evaluation-view="new"')&&html.includes('data-evaluation-view="history"')&&html.includes("Evaluation history")&&html.includes("evaluationHistorySearch")&&html.includes("evaluationHistoryTrainee")&&html.includes("evaluationHistoryInstructor")&&html.includes("evaluationHistorySyllabus"),"Evaluation must use the same New/History pattern with course-specific searchable history");
 assert(html.includes("if(state.screen==='evaluation')bindEval();")&&!html.includes("if($('#evalForm'))bindEval();"),"Evaluation tab handlers must bind on the History view even when the evaluation form is not rendered");
 assert(html.includes('data-exams-view="new"')&&html.includes('data-exams-view="history"')&&html.includes("Exam history")&&html.includes("examHistorySearch")&&html.includes("examHistoryExam")&&html.includes("examHistoryResult")&&html.includes("examHistoryTrainee"),"Exams must use the same New/History pattern with course-specific searchable history");
@@ -693,10 +701,10 @@ assert(!themeController.includes("addEventListener('change'")&&themeController.i
   "System has a persisted resolution and must not accept delayed media-query transitions");
 assert(themeController.includes("background=dark?'#07131f':'#f4f8fc'"),
   "The pre-paint canvas must match the final CSS canvas");
-assert(html.includes("snap.visualVersion===8")&&html.includes("snapFresh=snapAge<=15*60*1000")&&
+assert(html.includes("snap.visualVersion===9")&&html.includes("snapFresh=snapAge<=15*60*1000")&&
   html.includes("snap.resolvedTheme===currentResolvedTheme")&&html.includes("viewportCompatible"),
   "Reload snapshots must be fresh, viewport-compatible and visually compatible before they are painted");
-assert(html.includes("visualVersion:8")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
+assert(html.includes("visualVersion:9")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
   html.includes("largerText:!!root?.classList.contains('flympusLargeText')")&&html.includes("localDay,"),
   "Saved reload snapshots must include the visual preference signature and local-day key used for first-paint validation");
 assert(html.indexOf('<meta name="theme-color" content="#f4f8fc" />')<html.indexOf('id="flympus-theme-bootstrap"'),
