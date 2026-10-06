@@ -26,6 +26,7 @@
       .normalize('NFKD')
       .replace(/[\u0591-\u05c7]/g,'')
       .replace(/[^a-z0-9\u0590-\u05ff.]+/g,' ')
+      .replace(/\./g,(mark,offset,input)=>/\d/.test(input[offset-1]||'')&&/\d/.test(input[offset+1]||'')?mark:' ')
       .replace(/\s+/g,' ')
       .trim();
   }
