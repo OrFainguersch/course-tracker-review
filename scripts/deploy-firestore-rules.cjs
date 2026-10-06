@@ -4,7 +4,8 @@ const path=require('node:path');
 async function main(){
   const firebaseToolsRoot=process.argv[2];
   if(!firebaseToolsRoot)throw new Error('firebase-tools package root is required');
-  const {GoogleAuth}=require(path.join(firebaseToolsRoot,'node_modules','google-auth-library'));
+  const firebaseNodeModules=path.dirname(firebaseToolsRoot);
+  const {GoogleAuth}=require(path.join(firebaseNodeModules,'google-auth-library'));
   const project=String(process.env.GOOGLE_CLOUD_PROJECT||process.env.GCLOUD_PROJECT||'flympus').trim();
   const rulesPath=path.resolve(__dirname,'..','firestore.rules');
   const source={files:[{name:'firestore.rules',content:fs.readFileSync(rulesPath,'utf8')}]};
