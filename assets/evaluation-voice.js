@@ -49,14 +49,21 @@
 
   function criterionAliases(name){
     const n=normalize(name),aliases=[n];
+    if(/flight path/.test(n))aliases.push('flight path','flight control','נתיב טיסה','שליטה בנתיב');
     if(/altitude/.test(n))aliases.push('altitude','altitude control','גובה','שמירת גובה');
     if(/airmanship/.test(n))aliases.push('airmanship','אויראות','אוויראות');
-    if(/work method|workflow|work flow/.test(n))aliases.push('work method','workflow','work flow','שיטת עבודה');
-    if(/emergency/.test(n))aliases.push('emergency handling','emergency management','טיפול בחירום','ניהול חירום');
+    if(/work method|working method|workflow|work flow/.test(n))aliases.push('work method','working method','workflow','work flow','שיטת עבודה');
+    if(/emergency/.test(n))aliases.push('emergency handling','emergency management','emergencies','טיפול בחירום','ניהול חירום','חירומים');
+    if(/brief/.test(n)&&/debrief/.test(n))aliases.push('brief debrief','briefing debriefing','debrief','תדריך תחקיר','תחקיר');
+    if(/system control/.test(n))aliases.push('system control','שליטה במערכת');
+    if(/procedure/.test(n))aliases.push('procedure','procedures','procedure discipline','procedure compliance','נוהל','נהלים','משמעת נהלים');
+    if(/teamwork/.test(n))aliases.push('teamwork','ip ep teamwork','עבודת צוות');
+    if(/technical quality/.test(n))aliases.push('technical quality','quality','איכות טכנית');
+    if(/safety/.test(n))aliases.push('safety','בטיחות');
+    if(/independent/.test(n))aliases.push('independent execution','independence','עצמאות','ביצוע עצמאי');
     if(/planning/.test(n))aliases.push('planning','תכנון');
     if(/communication/.test(n))aliases.push('communication','communications','תקשורת');
     if(/situational/.test(n))aliases.push('situational awareness','awareness','מודעות מצבית');
-    if(/procedure/.test(n))aliases.push('procedure','procedures','נוהל','נהלים');
     return distinct(aliases);
   }
 
@@ -83,15 +90,23 @@
     const n=normalize(name),aliases=[n];
     if(/vertigo/.test(n))aliases.push('vertigo','ורטיגו');
     if(/flight box/.test(n)||/\bsbx\b/.test(n))aliases.push('flight box','sbx');
-    if(/\bins\b/.test(n))aliases.push('ins');
-    if(/\bias\b/.test(n))aliases.push('ias');
+    if(/single ins/.test(n))aliases.push('single ins','one ins');
+    if(/dual ins/.test(n))aliases.push('dual ins','both ins','two ins');
+    if(/ias sensor stuck/.test(n))aliases.push('ias stuck','stuck ias');
+    if(/ias sensor drift/.test(n))aliases.push('ias drift');
     if(/\batol\b/.test(n))aliases.push('atol');
     if(/intercom/.test(n))aliases.push('intercom');
     if(/kangaroo/.test(n))aliases.push('kangaroo','kangaroo landing');
-    if(/spin/.test(n))aliases.push('spin');
-    if(/stall/.test(n))aliases.push('stall');
+    if(/spin/.test(n))aliases.push('spin','spin recovery');
+    if(/stall/.test(n))aliases.push('stall','stall recovery');
     if(/no report/.test(n))aliases.push('no report');
     if(/engine cut/.test(n))aliases.push('engine cut');
+    if(/generator failure/.test(n))aliases.push('generator','generator failure');
+    if(/gps failure/.test(n))aliases.push('gps','gps failure');
+    if(/flat tire/.test(n))aliases.push('flat tire');
+    if(/gear asymmetry/.test(n))aliases.push('gear asymmetry','landing gear asymmetry');
+    if(/veering off runway/.test(n))aliases.push('runway excursion','veering off runway');
+    if(/arresting cable/.test(n))aliases.push('cable run through','cable runthrough','arresting cable');
     return distinct(aliases);
   }
 
@@ -165,8 +180,11 @@
       emergencyMatches.set(id,{id,name:String(em.name||id),count:countNearAlias(text,alias,idx),alias})
     });
     ambiguous.forEach(alias=>{
-      const already=[...emergencyMatches.values()].some(row=>normalize(row.name)===alias);
-      if(!already)warnings.push('Emergency phrase “'+alias+'” matches more than one configured emergency; say the full emergency name.')
+      const covered=[...emergencyMatches.values()].some(row=>{
+        const matched=normalize(row.alias||''),name=normalize(row.name||'');
+        return matched!==alias&&(matched.startsWith(alias+' ')||name.startsWith(alias+' '))
+      });
+      if(!covered)warnings.push('Emergency phrase “'+alias+'” matches more than one configured emergency; say the full emergency name.')
     });
 
     const takeoffs=counterValue(text,['takeoff','takeoffs','המראה','המראות']),
