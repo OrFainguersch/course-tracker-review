@@ -13,18 +13,18 @@ owner_id=335200333
 actual_number=$(gcloud projects describe "$project" --format='value(projectNumber)')
 [[ "$actual_number" == "$project_number" ]] || { echo 'Unexpected Google project number'; exit 1; }
 
-gcloud services enable iam.googleapis.com iamcredentials.googleapis.com sts.googleapis.com firebasehosting.googleapis.com --project="$project"
+gcloud services enable iam.googleapis.com iamcredentials.googleapis.com sts.googleapis.com firebasehosting.googleapis.com firestore.googleapis.com firebaserules.googleapis.com --project="$project"
 if ! gcloud iam service-accounts describe "$account" --project="$project" >/dev/null 2>&1; then
-  gcloud iam service-accounts create flympus-hosting-deployer --project="$project" --display-name='FLYMPUS Hosting deployment only'
+  gcloud iam service-accounts create flympus-hosting-deployer --project="$project" --display-name='FLYMPUS production deployment'
 fi
 existing_roles=$(gcloud projects get-iam-policy "$project" --flatten='bindings[].members' --filter="bindings.members:serviceAccount:$account" --format='value(bindings.role)')
 while IFS= read -r role; do
   case "$role" in
-    ''|roles/firebasehosting.admin|roles/serviceusage.apiKeysViewer) ;;
+    ''|roles/firebasehosting.admin|roles/serviceusage.apiKeysViewer|roles/serviceusage.serviceUsageViewer|roles/firebaserules.admin) ;;
     *) echo "Dedicated account has unexpected project role: $role. Review before proceeding."; exit 1 ;;
   esac
 done <<< "$existing_roles"
-for role in roles/firebasehosting.admin roles/serviceusage.apiKeysViewer; do
+for role in roles/firebasehosting.admin roles/serviceusage.apiKeysViewer roles/serviceusage.serviceUsageViewer roles/firebaserules.admin; do
   gcloud projects add-iam-policy-binding "$project" --member="serviceAccount:$account" --role="$role" --condition=None >/dev/null
 done
 if ! gcloud iam workload-identity-pools describe "$pool" --project="$project" --location=global >/dev/null 2>&1; then
