@@ -648,12 +648,12 @@ assert(html.includes("Restore this device's app preferences without changing cou
   "Data & Device copy must make clear that resetting preferences does not touch training data");
 
 /* Device-relevant sound and haptic settings */
-assert(html.includes("const hapticsRelevant=isFlympusIOSHapticTarget()||(Number(navigator.maxTouchPoints||0)>0&&!!window.matchMedia?.('(hover:none) and (pointer:coarse)')?.matches)"),
-  "Settings must only expose haptic controls on touch/coarse-pointer devices or iOS haptic targets");
-assert(html.includes("(hapticsRelevant?appPreferenceSwitch('haptics','Haptic feedback'"),
-  "Desktop Settings must omit the Haptic feedback row while retaining it on relevant mobile devices");
-assert(html.includes("const feedbackTitle=hapticsRelevant?'Sounds & Haptics':'Sounds'"),
-  "Desktop Settings must label the section Sounds when haptics are not relevant");
+assert(html.includes("const coarseTouch=Number(navigator.maxTouchPoints||0)>0&&!!window.matchMedia?.('(hover:none) and (pointer:coarse)')?.matches")&&html.includes("const hapticsRelevant=isFlympusIOSHapticTarget()||coarseTouch"),
+  "Settings must detect touch/coarse-pointer devices and iOS haptic targets");
+assert(html.includes("(hapticsRelevant?appPreferenceSwitch('haptics','Haptic feedback'")&&html.includes("appPreferenceUnavailable('Haptic feedback','Available only on supported touch devices.','Touch only')"),
+  "Desktop Settings must keep Haptic feedback visible but disabled with a clear touch-only explanation");
+assert(html.includes("pullRefreshRelevant?appPreferenceSwitch('refreshSound'")&&html.includes("appPreferenceUnavailable('Pull-to-refresh sound','Available only in the installed mobile/touch app.','Mobile / touch only')"),
+  "Pull-to-refresh feedback must be active only in a relevant installed touch app and otherwise explain why it is unavailable");
 
 /* iOS/PWA foreground visual lifecycle */
 const themeController=fs.readFileSync('theme-controller.js','utf8');
