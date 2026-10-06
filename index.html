@@ -2710,10 +2710,10 @@ html,body,.app{background:var(--flympus-canvas,#f4f8fc)!important}
 <style>
 /* ===== Bottom dock · slower hide/show motion ===== */
 .mobileBottomNav{
-  transition:transform .58s cubic-bezier(.32,.72,0,1)!important;
+  transition:transform var(--flympus-chrome-show-duration,.58s) var(--flympus-chrome-ease,cubic-bezier(.32,.72,0,1))!important;
 }
 .mobileBottomNav.dockHidden{
-  transition-duration:.64s!important;
+  transition-duration:var(--flympus-chrome-hide-duration,.64s)!important;
 }
 @media(prefers-reduced-motion:reduce){
   .mobileBottomNav{transition:none!important}
@@ -2736,15 +2736,32 @@ body::-webkit-scrollbar{
   display:none!important;
 }
 
+:root{
+  --flympus-chrome-show-duration:.58s;
+  --flympus-chrome-hide-duration:.64s;
+  --flympus-chrome-ease:cubic-bezier(.32,.72,0,1);
+}
 .top{
   margin-bottom:0!important;
-  transition:transform .58s cubic-bezier(.32,.72,0,1)!important;
+  transition:transform var(--flympus-chrome-show-duration) var(--flympus-chrome-ease)!important;
   will-change:transform!important;
 }
 .top.topHidden{
   transform:translate3d(0,calc(-100% - 2px),0)!important;
-  transition-duration:.64s!important;
+  transition-duration:var(--flympus-chrome-hide-duration)!important;
   pointer-events:none!important;
+}
+/* While the translated sticky header is returning, cover only the few pixels
+   behind its travel path with the exact computed header surface. This layer is
+   removed as soon as the transform finishes, so it can never become a
+   permanent top cover while the header is hidden. */
+body.flympusChromeReturning .flympusPullBackdrop{
+  opacity:1;
+  height:calc(var(--flympus-top-chrome-height,78px) + 3px);
+  background:var(--flympus-top-reveal-bg,#0d3156);
+}
+body.flympusChromeReturning.flympusPullActive .flympusPullBackdrop{
+  height:min(58vh,560px);
 }
 
 /* Only the small chrome layers animate on touch devices. The long document
@@ -6591,11 +6608,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     window.matchMedia?.('(display-mode: minimal-ui)')?.matches||
     String(document.referrer||'').startsWith('ios-app://')
   );
-  const flympusTouchPullMode=()=>!!(
-    flympusStandaloneMode()||
-    Number(window.navigator?.maxTouchPoints||0)>0||
-    window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches
-  );
+  const flympusTouchPullMode=()=>flympusStandaloneMode();
   document.documentElement?.classList.toggle('flympusStandaloneApp',flympusStandaloneMode());
 
   const pullNodes=()=>[$('.top'),$('#content')].filter(Boolean);
@@ -6831,13 +6844,18 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
 
     const top=Math.max(0,Number(document.scrollingElement?.scrollTop??window.scrollY??0));
     const customPull=flympusTouchPullMode();
-    if(!customPull&&top>12)return;
+    /* Never convert a normal page scroll into pull-to-refresh after momentum
+       reaches y=0. That conversion was the source of the large exposed canvas
+       and it also cancelled the header's return transition while the bottom
+       dock kept animating. Pull-to-refresh is now an explicit installed-PWA
+       gesture that must begin at the top. */
+    if(!customPull||top>2)return;
 
     const t=e.touches?.[0];if(!t)return;
     pullStartY=t.clientY;pullStartX=t.clientX;
-    pullOriginY=top<=2?t.clientY:null;
+    pullOriginY=t.clientY;
     pullTracking=true;
-    pullStandaloneGesture=customPull;
+    pullStandaloneGesture=true;
 
     // Touch-down alone is ordinary scrolling, not a pull. Do not move chrome.
     pullRefreshGraph=armFlympusRefreshSound();
@@ -6854,18 +6872,8 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     if(pullStandaloneGesture){
       const topNow=Math.max(0,Number(document.scrollingElement?.scrollTop??window.scrollY??0));
 
-      if(pullOriginY===null){
-        if(topNow>1)return;
-        /* Claim the gesture on the very first frame that reaches the top.
-           Previously we returned here without preventDefault, which allowed one
-           native rubber-band frame to open the white seam on a fast pull. */
-        pullOriginY=t.clientY;
-        setPullRootActive(true);
-        ensurePullChromeVisible();
-        if(e.cancelable)e.preventDefault();
-        renderPull(0,0);
-        return;
-      }
+      if(pullOriginY===null)return;
+      if(topNow>2)return;
 
       pullDy=t.clientY-pullOriginY;
       if(pullDy<=0)return;
@@ -6930,7 +6938,7 @@ window.addEventListener('scroll',()=>{
   clearTimeout(bottomNavScrollSaveTimer);
   bottomNavScrollSaveTimer=setTimeout(rememberBottomNavScroll,80);
 },{passive:true});
-let bottomDockLastScrollY=Math.max(0,Number(window.scrollY||0)),bottomDockLastScrollTime=performance.now?.()||Date.now(),bottomDockVelocity=0,bottomDockTicking=false,bottomDockLastSwitchTime=0,bottomDockTransitionLockUntil=0,bottomDockDirection=0,bottomDockDirectionTravel=0;
+let bottomDockLastScrollY=Math.max(0,Number(window.scrollY||0)),bottomDockLastScrollTime=performance.now?.()||Date.now(),bottomDockVelocity=0,bottomDockTicking=false,bottomDockLastSwitchTime=0,bottomDockTransitionLockUntil=0,bottomDockDirection=0,bottomDockDirectionTravel=0,bottomDockRevealGuardTimer=null,bottomDockRevealGuardEpoch=0;
 function setBottomDockHidden(hidden){
   const dock=$('#mobileBottomNav'),topBar=$('.top'),next=!!hidden,body=document.body;
   const dockChanged=!!dock&&dock.classList.contains('dockHidden')!==next;
@@ -6944,6 +6952,24 @@ function setBottomDockHidden(hidden){
   if(topBar){
     const topHeight=Math.max(0,topBar.getBoundingClientRect?.().height||topBar.offsetHeight||0);
     if(topHeight)document.documentElement?.style?.setProperty('--flympus-top-chrome-height',topHeight+'px');
+  }
+
+  if(topBar&&topChanged){
+    clearTimeout(bottomDockRevealGuardTimer);
+    const revealEpoch=++bottomDockRevealGuardEpoch;
+    if(!next){
+      const computed=getComputedStyle(topBar);
+      const surface=computed?.backgroundImage&&computed.backgroundImage!=='none'
+        ?computed.backgroundImage
+        :(computed?.backgroundColor||'#0d3156');
+      document.documentElement?.style?.setProperty('--flympus-top-reveal-bg',surface);
+      body?.classList.add('flympusChromeReturning');
+      bottomDockRevealGuardTimer=setTimeout(()=>{
+        if(revealEpoch===bottomDockRevealGuardEpoch)body?.classList.remove('flympusChromeReturning')
+      },660);
+    }else{
+      body?.classList.remove('flympusChromeReturning');
+    }
   }
 
   dock?.classList.toggle('dockHidden',next);
