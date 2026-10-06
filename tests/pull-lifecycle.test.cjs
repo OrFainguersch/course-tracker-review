@@ -4,13 +4,13 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
 const source=html.slice(html.indexOf("if(document.addEventListener&&!window.__flympusPullRefreshSoundBound)"),html.indexOf('let bottomNavScrollSaveTimer=null;'));
-function harness(){
+function harness({standalone=true,maxTouchPoints=5}={}){
   const handlers=new Map(),windowHandlers=new Map(),animations=[],timers=new Map();
   const classes=()=>{const values=new Set();return {add:v=>values.add(v),remove:v=>values.delete(v),contains:v=>values.has(v),toggle(v,on){if(on)values.add(v);else values.delete(v)}}};
   const node=()=>({classList:classes(),style:{setProperty(k,v){this[k]=v},removeProperty(k){delete this[k]}},getBoundingClientRect:()=>({height:78}),animate(){let resolve,reject;const finished=new Promise((a,b)=>{resolve=a;reject=b});const animation={finished,resolve,cancelled:false,cancel(){this.cancelled=true;reject(new Error('cancelled'))}};animations.push(animation);return animation}});
   const top=node(),content=node(),dock=node(),indicator=node(),root=node(),body=node();
   const document={documentElement:root,body,visibilityState:'visible',scrollingElement:{scrollTop:0},addEventListener(type,fn){handlers.set(type,fn)}};
-  const window={navigator:{standalone:true},addEventListener(type,fn){windowHandlers.set(type,fn)}};
+  const window={navigator:{standalone,maxTouchPoints},matchMedia:()=>({matches:maxTouchPoints>0}),addEventListener(type,fn){windowHandlers.set(type,fn)}};
   let reloads=0,timerId=0;
   const context={document,window,$:s=>({'.top':top,'#content':content,'#mobileBottomNav':dock,'#flympusStandaloneRefreshIndicator':indicator})[s],location:{reload(){reloads++}},performance:{now:()=>0},getComputedStyle:()=>({opacity:'1',transform:'none'}),setTimeout(fn){timers.set(++timerId,fn);return timerId},clearTimeout:id=>timers.delete(id),cancelAnimationFrame(){},requestAnimationFrame(){},armFlympusRefreshSound:()=>null,stopFlympusRefreshSound(){},triggerFlympusPortableHaptic(){},fireFlympusRefreshSound(){},resetFlympusAudioSession(){}};
   vm.runInNewContext(source,context);
@@ -38,4 +38,13 @@ test('backgrounding cancels an armed return without a stale callback reloading t
   h.document.visibilityState='hidden';h.handlers.get('visibilitychange')();
   await new Promise(setImmediate);
   assert(h.animations.every(a=>a.cancelled));assert.equal(h.reloads(),0);assert(!h.window.__FLYMPUS_PULL_ACTIVE__);assert.equal(h.content.style.transform,undefined);
+});
+test('touch Safari claims pull after a long page reaches the top and blocks native overscroll',()=>{
+  const h=harness({standalone:false,maxTouchPoints:5});
+  h.document.scrollingElement.scrollTop=500;
+  h.touch('touchstart',100);
+  h.document.scrollingElement.scrollTop=0;
+  const reachedTop=h.touch('touchmove',240);
+  assert(reachedTop.prevented);
+  assert(h.window.__FLYMPUS_PULL_ACTIVE__);
 });

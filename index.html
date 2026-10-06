@@ -2594,10 +2594,10 @@ body::before{
   position:fixed;
   left:0;
   right:0;
-  top:-1px;
-  height:calc(env(safe-area-inset-top) + 2px);
+  top:-140px;
+  height:180px;
   background:#0d3156;
-  z-index:32;
+  z-index:29;
   pointer-events:none;
   transform:translateZ(0);
   backface-visibility:hidden;
@@ -2789,6 +2789,21 @@ body::-webkit-scrollbar{
      for fixed dialogs. When one is open, keep the overlay viewport-bound. */
   body.topChromeHidden:has(#content .modal.open) #content{
     transform:none!important;
+  }
+
+  /* Touch browsers already animate their own URL/status chrome. Keep the app
+     header, page canvas and dock geometrically stable underneath it. */
+  .top.topHidden{
+    transform:none!important;
+    pointer-events:auto!important;
+  }
+  body.topChromeHidden #content{
+    transform:none!important;
+  }
+  .mobileBottomNav.dockHidden{
+    transform:none!important;
+    opacity:1!important;
+    pointer-events:auto!important;
   }
 }
 
@@ -4439,7 +4454,7 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
   const viewportWidth=Math.round(window.innerWidth||document.documentElement?.clientWidth||0),viewportHeight=Math.round(window.innerHeight||document.documentElement?.clientHeight||0);
   const snapAge=Math.max(0,Date.now()-Number(snap?.savedAt||0)),snapFresh=snapAge<=15*60*1000;
   const viewportCompatible=!snap?.viewportWidth||Math.abs(Number(snap.viewportWidth)-viewportWidth)<=2;
-  const snapMatches=!!(snap&&snap.visualVersion===3&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
+  const snapMatches=!!(snap&&snap.visualVersion===4&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen===String(ui.screen||'home')&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
   const content=document.querySelector('#content');
   const bottomNav=document.querySelector('#mobileBottomNav');
   window.__FLYMPUS_RUNTIME_READY__=false;
@@ -4588,7 +4603,8 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
     }
     window.__FLYMPUS_RELOAD_SNAPSHOT__=snap;
     const y=Math.max(0,Number(snap.scrollY||0));
-    if(snap.topHidden&&y>64){
+    const touchChromeStable=Number(navigator.maxTouchPoints||0)>0||window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches||window.matchMedia?.('(max-width: 899px)')?.matches;
+    if(snap.topHidden&&y>64&&!touchChromeStable){
       document.body.classList.add('topChromeHidden');
       document.querySelector('.top')?.classList.add('topHidden');
       bottomNav?.classList.add('dockHidden');
@@ -6627,6 +6643,11 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     window.matchMedia?.('(display-mode: minimal-ui)')?.matches||
     String(document.referrer||'').startsWith('ios-app://')
   );
+  const flympusTouchPullMode=()=>!!(
+    flympusStandaloneMode()||
+    Number(window.navigator?.maxTouchPoints||0)>0||
+    window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches
+  );
   document.documentElement?.classList.toggle('flympusStandaloneApp',flympusStandaloneMode());
 
   const pullNodes=()=>[$('.top'),$('#content')].filter(Boolean);
@@ -6861,14 +6882,14 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     if(e.target?.closest?.('#mobileBottomNav,#flympusUserManagementRoot,#flympusAuthRoot,.siteDialogOverlay,.modal.open'))return;
 
     const top=Math.max(0,Number(document.scrollingElement?.scrollTop??window.scrollY??0));
-    const standalone=flympusStandaloneMode();
-    if((standalone&&top>120)||(!standalone&&top>12))return;
+    const customPull=flympusTouchPullMode();
+    if(!customPull&&top>12)return;
 
     const t=e.touches?.[0];if(!t)return;
     pullStartY=t.clientY;pullStartX=t.clientX;
     pullOriginY=top<=2?t.clientY:null;
     pullTracking=true;
-    pullStandaloneGesture=standalone;
+    pullStandaloneGesture=customPull;
 
     // Touch-down alone is ordinary scrolling, not a pull. Do not move chrome.
     pullRefreshGraph=armFlympusRefreshSound();
@@ -6963,7 +6984,11 @@ window.addEventListener('scroll',()=>{
 },{passive:true});
 let bottomDockLastScrollY=Math.max(0,Number(window.scrollY||0)),bottomDockLastScrollTime=performance.now?.()||Date.now(),bottomDockVelocity=0,bottomDockTicking=false,bottomDockLastSwitchTime=0,bottomDockTransitionLockUntil=0,bottomDockDirection=0,bottomDockDirectionTravel=0;
 function setBottomDockHidden(hidden){
-  const dock=$('#mobileBottomNav'),topBar=$('.top'),next=!!hidden,body=document.body;
+  const dock=$('#mobileBottomNav'),topBar=$('.top'),touchChromeStable=!!(
+    Number(window.navigator?.maxTouchPoints||0)>0||
+    window.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches||
+    window.matchMedia?.('(max-width: 899px)')?.matches
+  ),next=touchChromeStable?false:!!hidden,body=document.body;
   const dockChanged=!!dock&&dock.classList.contains('dockHidden')!==next;
   const topChanged=!!topBar&&topBar.classList.contains('topHidden')!==next;
   const bodyChanged=!!body&&body.classList.contains('topChromeHidden')!==next;
@@ -10073,7 +10098,7 @@ function saveFlympusReloadSnapshot(){
     const d=new Date(),pad=n=>String(n).padStart(2,'0'),localDay=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
     const scrollY=Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0));
     const snapshot={
-      visualVersion:3,
+      visualVersion:4,
       screen:String(state.screen||'home'),
       courseId:String(currentCourseId||'AEP-26'),
       resolvedTheme:resolvedTheme==='dark'?'dark':'light',
@@ -10096,7 +10121,7 @@ function saveFlympusReloadSnapshot(){
         };
       })(),
       scrollY,
-      topHidden:scrollY>64&&!!$('.top')?.classList.contains('topHidden'),
+      topHidden:scrollY>64&&Number(navigator.maxTouchPoints||0)===0&&!!$('.top')?.classList.contains('topHidden'),
       savedAt:Date.now()
     };
     sessionStorage.setItem('ct-review-reload-snapshot',JSON.stringify(snapshot));
