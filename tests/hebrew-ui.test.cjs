@@ -94,3 +94,14 @@ assert(html.includes("if(!known)return true;"),
   "Protected configured values may translate only when they have an explicit UI translation");
 assert(html.includes("Hebrew composition QA · home and mixed-direction values"),
   "Final RTL composition layer must cover mixed-direction home content");
+
+/* User Management role hierarchy and mirrored page */
+const auth=fs.readFileSync('auth.js','utf8');
+assert(auth.includes("'Owner':'בעלים'")&&auth.includes("'Training Manager':'מנהל הדרכה'"),
+  'Owner and Training Manager must remain translated in Hebrew');
+assert(auth.includes("'Manage Training Managers and Users':'ניהול מנהלי הדרכה ומשתמשים'"),
+  'Administrator hierarchy explanation must remain translated');
+assert(html.includes('html[data-flympus-language="he"] #flympusUserManagementPageRoot .flympusUserManagementPageHead'),
+  'User Management page must explicitly join the Hebrew RTL layout layer');
+assert(html.includes('html[data-flympus-language="he"] .recordReturnBtn svg{transform:scaleX(-1)'),
+  'Directional back navigation must mirror in Hebrew');
