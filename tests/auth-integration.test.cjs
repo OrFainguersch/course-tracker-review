@@ -108,11 +108,11 @@ assert(auth.includes("'User Management':'ניהול משתמשים'")&&auth.incl
 assert(auth.includes('bindAuthLanguageSync()'),'Dynamic auth/admin UI must react when the app language changes');
 assert(auth.includes('roleGuideHtml()')&&!auth.includes('flympusRoleSeparationNote'),
   'User Management role guide must stay concise and must not render a separate explanatory note box');
-assert(auth.includes("['owner','Full system control',['May appoint: Owner, Administrator, Training Manager or User','Manage all courses and global Packages','Primary Owner is protected']]")&&
-  auth.includes("['admin','System administration',['May appoint: Training Manager or User','Manage lower-level accounts and all courses','Manage global Packages']]")&&
-  auth.includes("['training_manager','Training administration',['May appoint: User','Create and manage courses','Manage course rosters','Create course-specific Package overrides']]")&&
-  auth.includes("['user','Operational access',['Work in assigned courses','Submit evaluations and forms','No structural course editing']]"),
-  'Role guide must stay concise, list positive appointment rights once, and avoid redundant appointment-denial bullets');
+assert(auth.includes("['owner','Full system control',['May appoint: Owner, Administrator, Training Manager or User','Full access to all courses and global Packages','Full User Management and role control','Primary Owner is protected']]")&&
+  auth.includes("['admin','System administration',['May appoint: Training Manager or User','Manage Users and lower-level roles','Manage all courses and global Packages','Full training administration']]")&&
+  auth.includes("['training_manager','Training administration',['May appoint: User','Create and manage assigned training courses','Manage course rosters','Create course-specific Package overrides','Submit and manage training records/evaluations']]")&&
+  auth.includes("['user','Operational access',['Work in assigned courses','Submit evaluations and forms','No User Management','No course structure, roster or Package editing']]"),
+  'Role guide must concisely explain scope, appointment rights and the key boundaries of every application role');
 assert(auth.includes('Managed at a higher level')&&!auth.includes('Direct appointment follows the hierarchy:'),
   'User Management must keep appointment rights inside the role cards without a duplicated hierarchy note');
 assert(auth.includes('data-managed-user-form')&&auth.includes('updateManagedUserDetails')&&auth.includes('name="role"')&&auth.includes('Email is tied to the sign-in account and cannot be changed here.'),
