@@ -24,6 +24,10 @@ assert(html.includes("'IN PROGRESS':'בתהליך'"),'Course lifecycle badges mu
 assert(html.includes("'COURSE FORMS':'טפסי הקורס'"),'Forms eyebrow must translate');
 assert(html.includes("'Record flight performance, grades, criteria and emergency practice.':'תעד ביצועי טיסה, ציונים, קריטריונים ותרגול מצבי חירום.'"),'Evaluation form description must translate');
 assert(html.includes("'Log a safety event, operational observation or real emergency.':'תעד אירוע בטיחות, תצפית תפעולית או מצב חירום אמיתי.'"),'Safety form description must translate');
+assert(html.includes("'Severity / Impact':'חומרה / השפעה'")&&html.includes("'Select severity / impact':'בחר חומרה / השפעה'")&&html.includes("'Severity / Impact guide':'מדריך חומרה / השפעה'"),'Safety severity control and guide must translate to Hebrew');
+assert(html.includes("'Minor':'קלה'")&&html.includes("'Moderate':'בינונית'")&&html.includes("'Major':'חמורה'")&&html.includes("'Critical':'קריטית'"),'All four Safety severity levels must translate to Hebrew');
+assert(html.includes("'Minor impact, with no real danger or significant effect on the mission.':'השפעה קלה, ללא סכנה ממשית או השפעה משמעותית על המשימה.'")&&html.includes("'Immediate or significant danger to the aircraft, personnel, or flight safety.':'סכנה מיידית או משמעותית לכלי הטיס, לאנשי הצוות או לבטיחות הטיסה.'"),'Safety severity explanations must have explicit Hebrew translations');
+assert(html.includes('html[data-flympus-language="he"] .safetySeverityGuide')&&html.includes('direction:rtl;text-align:right'),'Safety severity guide must mirror correctly in Hebrew');
 assert(html.includes("'Record theoretical exam results against the required passing grade.':'תעד תוצאות מבחן עיוני מול ציון המעבר הנדרש.'"),'Exam form description must translate');
 assert(html.includes("'Create a course':'יצירת קורס'"),'Course creation heading must translate');
 assert(html.includes("'Create and manage courses, tailor a selected course, and maintain reusable training Packages and course architecture.'"),'Course Management intro must be covered by Hebrew dictionary');
