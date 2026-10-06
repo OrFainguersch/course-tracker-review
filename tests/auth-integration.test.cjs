@@ -111,7 +111,8 @@ assert(!storage.includes('installResumeThemeHold')&&!theme.includes('setTimeout(
 assert(auth.includes("returningScopedSession=!!window.FLYMPUS_STORAGE_SCOPE?.currentUid?.()"),'Refresh auth should recognize an already UID-scoped returning session');
 assert(auth.includes('function scheduleSilentAuthLoading')&&auth.includes('},2200)'),'Returning sessions should delay the visible auth splash instead of showing it on every refresh');
 assert(auth.includes("if(returningScopedSession)scheduleSilentAuthLoading('Starting secure authentication…')"),'Auth boot must stay silent for a returning session');
-assert(auth.includes("if(returningScopedSession)scheduleSilentAuthLoading('Verifying FLYMPUS access…')"),'Profile verification must also remain silent for a returning session');
+assert(auth.includes("else api.status='booting';"),'Signed-out first paint should keep the compact login surface instead of flashing a loading card');
+assert(auth.includes("scheduleSilentAuthLoading('Verifying FLYMPUS access…');"),'Profile verification should stay visually silent long enough for fast sign-ins to return directly to the app');
 assert(auth.includes('function cancelSilentAuthLoading()')&&auth.includes('function unlockApp(){cancelSilentAuthLoading();'),'Successful auth must cancel the delayed splash before it can paint');
 
 
