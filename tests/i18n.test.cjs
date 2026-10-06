@@ -51,8 +51,8 @@ assert(auth.includes("'Owner':'בעלים'")&&auth.includes("'Administrator':'מ
   'All application roles must translate to Hebrew');
 assert(auth.includes("'FLYMPUS role and course role are separate. A person can be a User in FLYMPUS and still be the Course Manager of a specific course.'"),
   'The role-separation guidance must be explicitly translatable');
-assert(auth.includes("'Role assignment follows the pyramid: Owner → Administrator → Training Manager → User. Owner may also appoint another Owner.':'הקצאת תפקידים פועלת בפירמידה: בעלים ← מנהל מערכת ← מנהל הדרכה ← משתמש. בעלים יכול גם למנות בעלים נוסף.'"),
-  'The explicit role pyramid must translate to Hebrew');
+assert(auth.includes("'Direct appointment follows the hierarchy: Owner may appoint any role; Administrator may appoint Training Manager or User; Training Manager may appoint User. The Primary Owner remains protected.':'מינוי ישיר פועל לפי ההיררכיה: בעלים יכול למנות כל תפקיד; מנהל מערכת יכול למנות מנהל הדרכה או משתמש; מנהל הדרכה יכול למנות משתמש. הבעלים הראשי נשאר מוגן.'"),
+  'The explicit direct-appointment hierarchy must translate to Hebrew');
 assert(html.includes('html[data-flympus-language="he"] #flympusUserManagementPageRoot')&&auth.includes("host.dir=authLanguage()==='he'?'rtl':'ltr'"),
   'User Management must switch to a mirrored RTL page in Hebrew');
 assert(auth.includes('syncAuthAdjacentChromeLanguage'),'Profile and notification dropdown additions must synchronize with Hebrew');
@@ -63,3 +63,8 @@ assert(auth.includes("'FLYMPUS role and course role are separate. A person can b
 assert(html.includes('html[data-flympus-language="he"] #flympusUserManagementPageRoot')&&
   html.includes('html[data-flympus-language="he"] .recordReturnBtn svg{transform:scaleX(-1)'),
   'Hebrew User Management must use RTL composition and mirrored directional navigation');
+
+assert(auth.includes("'May appoint: Owner, Administrator, Training Manager or User':'יכול למנות: בעלים, מנהל מערכת, מנהל הדרכה או משתמש'")&&
+  auth.includes("'May appoint: Training Manager or User':'יכול למנות: מנהל הדרכה או משתמש'")&&
+  auth.includes("'May appoint: User':'יכול למנות: משתמש'"),
+  'Every User Management appointment option must have a Hebrew translation');
