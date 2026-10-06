@@ -696,7 +696,7 @@ assert(themeController.includes("background=dark?'#07131f':'#f4f8fc'"),
 assert(html.includes("snap.visualVersion===5")&&html.includes("snapFresh=snapAge<=15*60*1000")&&
   html.includes("snap.resolvedTheme===currentResolvedTheme")&&html.includes("viewportCompatible"),
   "Reload snapshots must be fresh, viewport-compatible and visually compatible before they are painted");
-assert(html.includes("visualVersion:5")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
+assert(html.includes("visualVersion:6")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
   html.includes("largerText:!!root?.classList.contains('flympusLargeText')")&&html.includes("localDay,"),
   "Saved reload snapshots must include the visual preference signature and local-day key used for first-paint validation");
 assert(html.indexOf('<meta name="theme-color" content="#f4f8fc" />')<html.indexOf('id="flympus-theme-bootstrap"'),
@@ -747,3 +747,8 @@ assert(html.includes("aria-checked=\"'+(checked?'true':'false')+'\""),
   "App Settings switches must render accessibility state together with their checked state");
 assert(html.includes("el.setAttribute('aria-checked',el.checked?'true':'false')"),
   "Visual switches must keep aria state aligned after real user changes");
+
+assert(html.includes('Full-site typography alignment · 2026-10-06')&&
+  html.includes('html.flympusLargeText .evaluationVoiceTranscript')&&
+  html.includes('body{font-size:14px}'),
+  'Typography must use one final site-wide scale and Larger Text must cover late-loaded Evaluation voice controls');
