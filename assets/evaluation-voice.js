@@ -128,9 +128,9 @@
 
   function countNearAlias(text,alias,index){
     const after=text.slice(index+alias.length).trimStart();
-    if(/^(?:twice|פעמיים)\b/i.test(after))return 2;
-    if(/^(?:thrice)\b/i.test(after))return 3;
-    const m=after.match(/^([0-9]+)\s*(?:times|time|פעמים|פעם|x)\b/i);
+    if(/^(?:twice\b|פעמיים(?:\s|$))/i.test(after))return 2;
+    if(/^thrice\b/i.test(after))return 3;
+    const m=after.match(/^([0-9]+)\s*(?:(?:times|time|x)\b|(?:פעמים|פעם)(?:\s|$))/i);
     if(m)return Math.max(1,Math.min(99,Number(m[1])||1));
     return 1;
   }
