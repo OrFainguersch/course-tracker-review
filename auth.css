@@ -398,17 +398,6 @@ html[data-flympus-theme="dark"] .flympusAuthStatus span{color:#9fb0bf;border-col
 .flympusRoleGuideCard p{margin:10px 0 8px;color:#6f8497;font-size:8.6px;line-height:1.5}
 .flympusRoleGuideCard ul{margin:0;padding-left:15px;color:#4d657b;font-size:8.2px;line-height:1.55}
 .flympusRoleGuideCard li+li{margin-top:2px}
-.flympusRoleSeparationNote{
-  margin-top:12px;
-  padding:10px 12px;
-  border-radius:12px;
-  background:#edf7ff;
-  color:#35617f;
-  font-size:8.8px;
-  font-weight:750;
-  line-height:1.45
-}
-
 .flympusRoleSelectWrap{display:grid;gap:4px;min-width:132px}
 .flympusRoleSelectWrap>span{color:#7890a4;font-size:7.5px;font-weight:900}
 .flympusRoleSelectWrap select{
@@ -470,7 +459,6 @@ html[data-flympus-theme="dark"] .flympusUserMeta i.role.admin{background:#2b2747
 html[data-flympus-theme="dark"] .flympusUserMeta i.role.owner{background:#3a321d;color:#ebcf82}
 html[data-flympus-theme="dark"] .flympusCurrentAdmin{background:#243444;color:#b7c8d8}
 html[data-flympus-theme="dark"] .flympusOwnerProtected{background:#3a321d;color:#ebcf82}
-html[data-flympus-theme="dark"] .flympusRoleSeparationNote{background:#17324a;color:#9ed4f7}
 html[data-flympus-theme="dark"] .flympusRoleSelectWrap select,
 html[data-flympus-theme="dark"] .flympusUserInviteForm input,
 html[data-flympus-theme="dark"] .flympusUserInviteForm select{background:#0c1c2c;border-color:#36516a;color:#dfeaf4}
@@ -833,7 +821,6 @@ html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusManagedUs
 #flympusUserManagementPageRoot .flympusRoleGuideTitle small{font-size:10.5px;line-height:1.35}
 #flympusUserManagementPageRoot .flympusRoleGuideCard p{font-size:11.5px;line-height:1.55}
 #flympusUserManagementPageRoot .flympusRoleGuideCard ul{font-size:11.5px;line-height:1.55;padding-inline-start:18px}
-#flympusUserManagementPageRoot .flympusRoleSeparationNote{font-size:11.5px;line-height:1.55}
 #flympusUserManagementPageRoot .flympusUserInviteHead h2,
 #flympusUserManagementPageRoot .flympusUserGroupHead h2{font-size:15px}
 #flympusUserManagementPageRoot .flympusUserInviteHead p,
@@ -865,8 +852,7 @@ html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusManagedUs
 #flympusUserManagementPageRoot .flympusUserFieldError{font-size:10.5px;line-height:1.4}
 #flympusUserManagementPageRoot[dir="rtl"] .flympusUserInviteForm,
 #flympusUserManagementPageRoot[dir="rtl"] .flympusManagedUserFields,
-#flympusUserManagementPageRoot[dir="rtl"] .flympusRoleGuideCard,
-#flympusUserManagementPageRoot[dir="rtl"] .flympusRoleSeparationNote{direction:rtl;text-align:right}
+#flympusUserManagementPageRoot[dir="rtl"] .flympusRoleGuideCard{direction:rtl;text-align:right}
 #flympusUserManagementPageRoot[dir="rtl"] input[type="email"]{direction:ltr;text-align:left;unicode-bidi:isolate}
 
 html.flympusLargeText #flympusUserManagementPageRoot{font-size:17px}
@@ -878,7 +864,6 @@ html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleGuideTitle>b,
 html.flympusLargeText #flympusUserManagementPageRoot .flympusUserNameLine>b{font-size:15px}
 html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleGuideCard p,
 html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleGuideCard ul,
-html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleSeparationNote,
 html.flympusLargeText #flympusUserManagementPageRoot .flympusUserManagementPageHead p,
 html.flympusLargeText #flympusUserManagementPageRoot .flympusUserInviteHead p,
 html.flympusLargeText #flympusUserManagementPageRoot .flympusUserGroupTitle small,
