@@ -673,8 +673,9 @@ assert(html.includes("function flympusContinuitySnapshotHtml(content)")&&
 assert(html.includes("topHidden:scrollY>64&&")&&html.includes("if(snap.topHidden&&y>64)"),
   "Snapshots retain auto-hide on all devices without hiding chrome at the page top");
 assert(!html.includes("touchChromeStable?false:!!hidden")&&
-  html.includes("flympusTouchPullMode")&&html.includes("pullStandaloneGesture=customPull"),
-  "Touch auto-hide remains enabled and Safari shares the custom pull owner");
+  html.includes("const flympusTouchPullMode=()=>flympusStandaloneMode();")&&
+  html.includes("if(!customPull||top>2)return;")&&html.includes("pullStandaloneGesture=true"),
+  "Touch auto-hide stays enabled while custom pull-to-refresh is isolated to an explicit top-start gesture in the installed PWA");
 assert(html.includes("snap.localDay===localDay"),
   "A snapshot from a previous local day must never flash before today's plan renders");
 
