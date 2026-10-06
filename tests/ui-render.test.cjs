@@ -36,6 +36,11 @@ assert(html.includes("<span>Personal</span>")&&html.includes("across all courses
 assert(html.includes("Notification preferences")&&html.includes('data-notification-pref="assignments"')&&html.includes('data-notification-pref="requiredActions"'),"Personal notifications must expose per-category preferences");
 assert(html.includes("getNotificationPreferences()")&&html.includes("saveNotificationPreferences"),"Notification preferences must persist in browser-local personal settings");
 assert(html.includes('id="topPersonalProfileBtn"')&&html.includes('aria-label="Personal profile"'),"The top-right personal avatar must open the personal profile editor");
+assert(html.includes("@keyframes flympusHeaderPopoverIn")&&
+  html.includes(".topNotificationDropdown:not([hidden])")&&
+  html.includes(".topPersonalProfileDropdown:not([hidden])")&&
+  html.includes("transform-origin:top right"),
+  "Bell and personal-profile popovers must zoom/fade from their header controls instead of appearing abruptly");
 assert(html.includes('id="personalPhotoInput"')&&html.includes('id="removePersonalPhoto"'),"Personal profile editing must support changing or removing the user's photo");
 assert(html.includes(".personalPhotoActions .btn{flex:1;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important}"),"Personal photo action labels must be visually centered");
 assert(html.includes('id="personalCropModal"')&&html.includes('id="personalCropViewport"')&&html.includes('id="personalCropImage"'),"Personal photo selection must open a crop-and-adjust editor");
