@@ -87,7 +87,7 @@
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js" crossorigin />
-<link rel="modulepreload" href="./auth.js?v=20261006-auth14" />
+<link rel="modulepreload" href="./auth.js?v=20261006-auth15" />
 <script src="./firebase-config.js?v=20261004-auth2"></script>
 <script src="./storage-scope.js?v=20261006-auth8"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -4218,6 +4218,13 @@ html[data-flympus-theme="dark"] .pushStatus.unsupported{background:#42212a!impor
 html[data-flympus-theme="dark"] .flympusBootCard i{background:#203447!important}
 </style>
 <style>
+/* User-management RTL page additions */
+html[data-flympus-language="he"] #flympusUserManagementPageRoot .flympusUserManagementPageHead,
+html[data-flympus-language="he"] #flympusUserManagementPageRoot .flympusRoleGuide,
+html[data-flympus-language="he"] #flympusUserManagementPageRoot .flympusUserInviteBox,
+html[data-flympus-language="he"] #flympusUserManagementPageRoot .flympusUserGroup{text-align:right}
+html[data-flympus-language="he"] #flympusUserManagementPageRoot .flympusUserActions{justify-content:flex-start}
+
 /* ===== Hebrew adaptive mirror audit · 2026-10-04 ===== */
 /* Hebrew is a composed RTL layout, not just right-aligned English. Mirror the
    structural anchors while keeping dates, times, grades and codes readable. */
@@ -4425,7 +4432,7 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
   .topCourseDropdown{position:fixed;left:calc(14px + env(safe-area-inset-left));right:calc(14px + env(safe-area-inset-right));width:auto;max-width:none}
 }
 </style>
-<link rel="stylesheet" href="./auth.css?v=20261006-auth7" />
+<link rel="stylesheet" href="./auth.css?v=20261006-auth8" />
 <script>
 /* Authentication is fail-closed only after it is explicitly enabled.
    Until the Firebase project and UID-scoped data migration are ready,
@@ -4442,7 +4449,7 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
 <body>
 <div id="flympusAuthRoot" class="flympusAuthInitial" role="dialog" aria-modal="true" aria-label="FLYMPUS sign in"><div class="flympusAuthShell"><div class="flympusAuthBrand"><img src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><section class="flympusAuthCard"><div class="flympusAuthCardBody"><div class="flympusAuthSpinner" aria-hidden="true"></div><p class="flympusAuthEyebrow">SECURE SIGN IN</p><h1 class="flympusAuthTitle">Opening FLYMPUS</h1><p class="flympusAuthCopy">Starting secure authentication…</p></div></section></div></div>
 <script>if(document.documentElement.getAttribute('data-flympus-language')==='he'){const r=document.getElementById('flympusAuthRoot');r.dir='rtl';r.querySelector('.flympusAuthEyebrow').textContent='כניסה מאובטחת';r.querySelector('.flympusAuthTitle').textContent='פותח את FLYMPUS';r.querySelector('.flympusAuthCopy').textContent='מפעיל אימות מאובטח…'}</script>
-<div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><div class="notificationCenterFooter"><button class="notificationSettingsLink" id="notificationSettingsLink" type="button">Notification settings</button></div></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"><div class="flympusBootShell" aria-hidden="true"><div class="flympusBootHero"><i></i><b></b><span></span><span></span><span></span></div><div class="flympusBootCard"><b></b><i></i><i></i><i></i><i></i></div></div></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0729 · user management polish</div><div class="toast" id="toast"></div></div>
+<div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><div class="notificationCenterFooter"><button class="notificationSettingsLink" id="notificationSettingsLink" type="button">Notification settings</button></div></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Personal profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown" id="topPersonalProfileDropdown" role="dialog" aria-label="Personal profile" hidden><div class="personalProfileHead"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small>Personal profile</small></div></div><div class="personalProfileBody"><p>You can change your personal photo here. Your name, email and course role are managed by course administration.</p><div class="personalPhotoActions"><label class="btn secondary small" id="choosePersonalPhotoAction" style="cursor:pointer">Choose photo<input id="personalPhotoInput" type="file" accept="image/*" style="display:none"></label><button class="btn secondary small" type="button" id="editPersonalPhoto" hidden>Edit photo</button><button class="btn secondary small" type="button" id="removePersonalPhoto" hidden>Remove photo</button></div><p class="personalPhotoNote">The photo is compressed and stored with this device's FLYMPUS data.</p></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><div class="drawerFooter"><div class="avatar"><span data-current-user-avatar>OF</span></div><div><b>Or Fainguersch</b><small>Instructor · local review</small></div></div></aside></div><main id="content"><div class="flympusBootShell" aria-hidden="true"><div class="flympusBootHero"><i></i><b></b><span></span><span></span><span></span></div><div class="flympusBootCard"><b></b><i></i><i></i><i></i><i></i></div></div></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0730 · role permissions</div><div class="toast" id="toast"></div></div>
 <script>
 (()=>{try{
   /* The selected-course control is injected before application hydration so
@@ -4861,6 +4868,11 @@ Object.assign(FLYMPUS_HE_UI,{
   'Could not disable notifications on this device':'לא ניתן היה להשבית את ההתראות במכשיר זה',
   'Enable FLYMPUS notifications on this device before sending a test.':'יש להפעיל התראות FLYMPUS במכשיר זה לפני שליחת בדיקה.',
   'Course Roster':'סגל הקורס','Manage roster':'ניהול סגל','Manage':'ניהול','Done':'סיום','Done editing':'סיום עריכה',
+  'Administration':'ניהול מערכת','User Management':'ניהול משתמשים','Open':'פתח','Access unavailable':'הגישה אינה זמינה','ACCESS':'גישה',
+  'Your FLYMPUS role does not include permission to change this area.':'תפקידך ב־FLYMPUS אינו כולל הרשאה לשנות אזור זה.',
+  'Manage who can access FLYMPUS. Course membership and course roles remain in Course Management.':'נהל מי יכול לגשת ל־FLYMPUS. שיוך לקורס ותפקידי קורס נשארים בניהול הקורס.',
+  'Invite users, approve access, block accounts and manage application-level administrator permissions.':'הזמן משתמשים, אשר גישה, חסום חשבונות ונהל הרשאות מערכת.',
+
   'Add trainee':'הוסף חניך','Add instructor':'הוסף מדריך','Add person':'הוסף אדם','Existing person':'אדם קיים','New person':'אדם חדש',
   'View':'הצג','View / Edit':'הצג / ערוך','Edit instructor':'עריכת מדריך','Edit trainee':'עריכת חניך',
   'Identity changes apply everywhere in the review.':'שינויי זהות חלים בכל המערכת.','Status in this course':'סטטוס בקורס זה','Role in this course':'תפקיד בקורס זה',
@@ -5595,7 +5607,7 @@ function captureAdvancedArchitectureSnapshot(){
 function beginAdvancedArchitectureEditSession(){advancedArchitectureEditSnapshot=captureAdvancedArchitectureSnapshot()}
 function discardAdvancedArchitectureSession(){restoreLocalStorageScope(advancedArchitectureEditSnapshot);advancedArchitectureEditSnapshot=null;state.packageAddFlow=null;state.packageCreateOpen=null}
 
-const appScreenIds=new Set(['home','courses','record','evaluation','roster','profile','instructor','settings','preferences','reports','safety','exams','planned']);
+const appScreenIds=new Set(['home','courses','record','evaluation','roster','profile','instructor','settings','preferences','user-management','reports','safety','exams','planned']);
 const appRootScreens=new Set(['courses','roster','planned','record','reports','settings','preferences']);
 let appNavHistory=[];try{const stored=JSON.parse(sessionStorage.getItem('ct-review-nav-history')||'[]');if(Array.isArray(stored))appNavHistory=stored.filter(x=>appScreenIds.has(x))}catch{}
 if(state.screen==='home')appNavHistory=[];else if(appRootScreens.has(state.screen))appNavHistory=['home'];else if(!appNavHistory.length||appNavHistory[0]!=='home')appNavHistory=['home',...appNavHistory.filter(x=>x!=='home')];
@@ -5603,6 +5615,18 @@ function saveAppNavHistory(){try{sessionStorage.setItem('ct-review-nav-history',
 saveAppNavHistory();
 function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,safetyView:state.safetyView,evaluationView:state.evaluationView,examsView:state.examsView,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace,packageWorkspace:state.packageWorkspace,packageFocusId:state.packageFocusId,packageEditId:state.packageEditId,emergencyProfileFilter:state.emergencyProfileFilter,builderType:state.builderType,builderPhase:state.builderPhase,builderPlatform:state.builderPlatform,builderTraining:state.builderTraining,builderProgram:state.builderProgram,builderDay:state.builderDay,builderCountry:state.builderCountry,builderName:state.builderName,builderNameManual:state.builderNameManual,builderCode:state.builderCode,builderCodeManual:state.builderCodeManual,builderStartsOn:state.builderStartsOn,libraryProfession:state.libraryProfession,packageCategoryFilter:state.packageCategoryFilter,myCoursesStatus:state.myCoursesStatus,myCoursesSector:state.myCoursesSector,myCoursesPhase:state.myCoursesPhase,myCoursesPlatform:state.myCoursesPlatform,myCoursesCountry:state.myCoursesCountry,myCoursesTraining:state.myCoursesTraining,myCoursesRole:state.myCoursesRole,myCoursesFiltersOpen:state.myCoursesFiltersOpen,rosterStatuses:state.rosterStatuses,rosterRoles:state.rosterRoles,rosterDateFrom:state.rosterDateFrom,rosterDateTo:state.rosterDateTo,reportTrainees:state.reportTrainees,reportInstructors:state.reportInstructors,reportSyllabi:state.reportSyllabi,reportDateFrom:state.reportDateFrom,reportDateTo:state.reportDateTo,myCoursesStatuses:state.myCoursesStatuses,myCoursesSectors:state.myCoursesSectors,myCoursesPhases:state.myCoursesPhases,myCoursesPlatforms:state.myCoursesPlatforms,myCoursesTrainings:state.myCoursesTrainings,myCoursesCountries:state.myCoursesCountries,myCoursesRoles:state.myCoursesRoles,myCoursesDateFrom:state.myCoursesDateFrom,myCoursesDateTo:state.myCoursesDateTo,packageNameFilters:state.packageNameFilters,packagePhaseFilters:state.packagePhaseFilters,packagePlatformFilters:state.packagePlatformFilters,packageCategoryFilters:state.packageCategoryFilters,packageContextFilters:state.packageContextFilters}))}catch{}}
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function currentUserCourseRole(){
+  try{return courseMembershipFor(currentUserId,'INSTRUCTOR',{role:allInstructors().find(x=>x.id===currentUserId)?.role||'INSTRUCTOR'}).role||'INSTRUCTOR'}catch{return'INSTRUCTOR'}
+}
+function flympusCan(capability){
+  if(window.FLYMPUS_AUTH?.can?.(capability)===true)return true;
+  const courseManager=currentUserCourseRole()==='COURSE_MANAGER';
+  return courseManager&&['courses.manageAssigned','packages.overrideCourse','roster.manage'].includes(String(capability||''))
+}
+function flympusRole(){return String(window.FLYMPUS_AUTH?.role?.()||'user')}
+function flympusAccessDenied(title='Access unavailable'){
+  return '<section class="card settingBox accessDeniedCard"><div class="eyebrow">ACCESS</div><h2>'+esc(title)+'</h2><p class="sub">Your FLYMPUS role does not include permission to change this area.</p></section>'
+}
 function alphaByName(list){return [...(list||[])].sort((a,b)=>String(a?.name||'').localeCompare(String(b?.name||''),undefined,{sensitivity:'base'}))}
 function normalizeMultiFilterValue(value){
  if(Array.isArray(value))return [...new Set(value.map(String).filter(x=>x&&x!=='ALL'))];
@@ -5945,7 +5969,7 @@ function setDrawerOpen(open){
  document.body?.classList.toggle('drawerPushOpen',isOpen);
  menuBtn?.setAttribute?.('aria-expanded',isOpen?'true':'false');
 }
-function renderNav(){const n=$('#nav');n.innerHTML=nav.map(([id,ic,l])=>id==='__label'?'<div class="navLabel">'+l+'</div>':`<button class="navBtn ${state.screen===id?'active':''}" data-nav="${id}">${navIconSvg(ic)}<span class="navText">${l}</span></button>`).join('');n.querySelectorAll('[data-nav]').forEach(b=>{b.onclick=e=>{e?.preventDefault?.();setDrawerOpen(false);go(b.dataset.nav)}});}
+function renderNav(){const n=$('#nav');if(!n)return;const visible=nav.filter(([id])=>id!=='settings'||flympusCan('courses.create')||flympusCan('courses.manageAssigned')||flympusCan('packages.manageGlobal'));n.innerHTML=visible.map(([id,ic,l])=>id==='__label'?'<div class="navLabel">'+l+'</div>':`<button class="navBtn ${state.screen===id?'active':''}" data-nav="${id}">${navIconSvg(ic)}<span class="navText">${l}</span></button>`).join('');n.querySelectorAll('[data-nav]').forEach(b=>{b.onclick=e=>{e?.preventDefault?.();setDrawerOpen(false);go(b.dataset.nav)}});}
 let bottomDockNavigationTransition=false,bottomDockProgrammaticRestoreUntil=0;
 window.__flympusBottomNavTaskToken=Number(window.__flympusBottomNavTaskToken||0);
 function scheduleFlympusBottomNavigation(target){
@@ -7124,6 +7148,7 @@ function go(screen,extra={},options={}){
   Object.assign(state,extra,{screen:target});saveAppNavHistory();setDrawerOpen(false);render({fastNavigation:!!options.fastNavigation});
   if(personScreen)forcePageTop()
 }
+window.FLYMPUS_NAVIGATE=(screen,extra={})=>go(screen,extra);
 function goBack(){
   if(state.screen==='home')return false;
   let target='home';
@@ -7335,7 +7360,7 @@ function roster(){
  getActivityEvents().forEach(x=>rememberTraineeActivity(x.traineeId,x.date));
  const allT=courseTrainees().map(t=>{const m=courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'});rememberTraineeActivity(t.id,t.lastActivity);return {...t,status:m.status||'Active',lastActivity:traineeLastActivity.get(String(t.id))||'',type:'TRAINEE'}});
  const allI=courseInstructors().map(i=>{const m=courseMembershipFor(i.id,'INSTRUCTOR',{role:i.role||'INSTRUCTOR'});return {...i,role:m.role||'INSTRUCTOR',type:'INSTRUCTOR'}});
- const type=state.rosterType||'TRAINEE',base=type==='TRAINEE'?allT:allI,manage=!!state.rosterManage,unassignedExisting=alphaByName([...allTrainees().map(x=>({...x,type:'TRAINEE'})),...allInstructors().map(x=>({...x,type:'INSTRUCTOR'}))].filter(x=>!coursePersonIsAssignedTo(x,x.type,currentCourseId)));
+ const type=state.rosterType||'TRAINEE',base=type==='TRAINEE'?allT:allI,canManageRoster=flympusCan('roster.manage'),manage=canManageRoster&&!!state.rosterManage,unassignedExisting=alphaByName([...allTrainees().map(x=>({...x,type:'TRAINEE'})),...allInstructors().map(x=>({...x,type:'INSTRUCTOR'}))].filter(x=>!coursePersonIsAssignedTo(x,x.type,currentCourseId)));
  const statusSel=normalizeMultiFilterValue(state.rosterStatuses),roleSel=normalizeMultiFilterValue(state.rosterRoles),dateFrom=state.rosterDateFrom||'',dateTo=state.rosterDateTo||'',singleStatus=(statusSel.length===1&&['Active','Inactive'].includes(statusSel[0]))?statusSel[0]:'ALL';
  let list=base.filter(t=>type==='TRAINEE'?((singleStatus==='ALL'||String(t.status)===singleStatus)&&filterDateMatches(t.lastActivity,dateFrom,dateTo)):(multiFilterMatches(t.role,roleSel)&&filterDateMatches(t.lastActivity,dateFrom,dateTo)));
  if(state.search)list=list.filter(t=>(t.name+' '+(t.email||'')).toLowerCase().includes(state.search.toLowerCase()));
@@ -7350,7 +7375,7 @@ function roster(){
    else{const ma=a.role==='COURSE_MANAGER',mb=b.role==='COURSE_MANAGER';if(ma!==mb)return ma?-1:1;if(Number(a.workloadRank||999)!==Number(b.workloadRank||999))return Number(a.workloadRank||999)-Number(b.workloadRank||999)}
    return String(a.name).localeCompare(String(b.name),undefined,{sensitivity:'base'})
  });
- return '<div class="rosterTopbar"><div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div>'+(!manage?'<button class="btn edit" id="toggleRosterManage">✎ Manage</button>':'')+'</div>'+
+ return '<div class="rosterTopbar"><div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div>'+((canManageRoster&&!manage)?'<button class="btn edit" id="toggleRosterManage">✎ Manage</button>':'')+'</div>'+
  (manage?'<div class="manageBanner rosterManageBanner"><div class="rosterManageBannerCopy"><b>Manage mode</b><span> · Edit identity, photo and course membership safely.</span></div><div class="rosterManageBannerActions"><button class="btn sky small rosterDoneEditing" id="toggleRosterManage" type="button">✓ Done editing</button><button class="btn edit small rosterAddPerson" id="addPersonBtn" type="button">+ Add person</button></div></div>':'')+
  '<section class="card rosterControls"><div class="scrollTabs"><button class="seg '+(type==='TRAINEE'?'active':'')+'" data-roster-type="TRAINEE">Trainees ('+allT.length+')</button><button class="seg '+(type==='INSTRUCTOR'?'active':'')+'" data-roster-type="INSTRUCTOR">Instructors ('+allI.length+')</button></div>'+
  '<div class="rosterSearchRow"><input class="input" id="rosterSearch" placeholder="Search '+(type==='TRAINEE'?'trainees':'instructors')+'..." value="'+esc(state.search)+'"></div>'+
@@ -7661,6 +7686,7 @@ function personAvatar(p,editable=false){
   return '<span class="avatarWrap"><span class="bigAvatar personAvatarSize">'+content+'</span>'+(editable?'<button class="avatarEdit" data-person-edit="'+p.type+':'+p.id+'" aria-label="Edit person">✎</button>':'')+'</span>';
 }
 function personEditModal(){
+  if(!flympusCan('roster.manage'))return '';
   const key=state.personEditKey||'',parts=key.split(':'),type=parts[0],id=parts.slice(1).join(':'),list=type==='INSTRUCTOR'?allInstructors():allTrainees(),p=list.find(x=>x.id===id);
   if(!p)return '';
   const membership=courseMembershipFor(id,type,{status:p.status||'Active',role:p.role||'INSTRUCTOR'}),effectivePhoto=state.personPhotoDraft!==undefined?state.personPhotoDraft:p.photoData,hasPhoto=!!effectivePhoto;
@@ -7732,7 +7758,7 @@ function getRosterExtras(){return safeArrayStorage('ct-review-roster')}
 function instructorProfile(){
  const allI=allInstructors(),base=allI.find(x=>x.id===state.selectedInstructor)||allI[0]||applyPersonOverride(instructors[0]),membership=courseMembershipFor(base.id,'INSTRUCTOR',{role:base.role||'INSTRUCTOR'}),i={...base,role:membership.role||'INSTRUCTOR'};
  const total=Math.max(1,(i.traineeDistribution||[]).reduce((a,x)=>a+x[1],0)),assignedCourses=instructorAssignedCourses(i.id);
- return '<div class="profileNav" style="justify-content:flex-end"><button class="btn edit small" data-person-edit="INSTRUCTOR:'+i.id+'">✎ Edit profile</button></div>'+
+ return (flympusCan('roster.manage')?'<div class="profileNav" style="justify-content:flex-end"><button class="btn edit small" data-person-edit="INSTRUCTOR:'+i.id+'">✎ Edit profile</button></div>':'')+
  '<section class="card profileHero instructorProfileHero"><div class="profileTop">'+personAvatar({...i,type:'INSTRUCTOR'},false)+'<div class="profileIdentity" style="min-width:0;flex:1"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h2>'+esc(i.name)+'</h2><span class="instructorRole '+(i.role==='COURSE_MANAGER'?'manager':'')+'">'+(i.role==='COURSE_MANAGER'?'Course Manager':'Instructor')+'</span></div><p>Last activity '+esc(formatDateDMY(i.lastActivity))+'</p><div class="profileIdentityMeta"><span>Instructed Flights<b>'+Number(i.flights||0)+'</b></span><span>Course Share<b>'+Number(i.percent||0)+'%</b></span><span>Trainees Covered<b>'+Number(i.trainees||0)+'</b></span><span>Workload Rank<b>#'+(i.workloadRank||'—')+'</b></span></div></div></div></section>'+
  '<div class="reportsGrid" style="margin-top:12px"><section class="card settingBox"><h3>Trainees instructed</h3><p class="sub">Open a trainee directly from the instructor context.</p>'+ (i.traineeDistribution||[]).map(x=>{const t=allTrainees().find(t=>t.name===x[0]);return '<button class="peopleLink" '+(t?'data-trainee="'+t.id+'"':'')+'><span><b>'+esc(x[0])+'</b><small>'+x[1]+' instructed flights</small></span><strong>'+Math.round(x[1]/total*100)+'%</strong></button>'}).join('')+'</section>'+
  '<section class="card settingBox"><h3>Recent activity</h3><p class="sub">Instructed flights by week.</p><div class="chart">'+(i.activitySeries||[]).map(v=>'<div class="bar" data-v="'+v+'" style="height:'+Math.max(8,Math.round(v/Math.max(...i.activitySeries)*100))+'%"></div>').join('')+'</div></section>'+
@@ -7759,7 +7785,7 @@ function traineeProfile(){
  const savedSolos=getSoloFlights().filter(x=>x.traineeId===t.id),soloTotal=Number(t.soloFlights||0)+savedSolos.length,tracking=currentCourseTrackingCounters();
  const eventSummary=tracking.length?'<div class="eventSummary">'+tracking.map(x=>'<div class="eventMetric"><strong>'+Number(totals[x.type]||0)+'</strong><span>'+esc(x.label)+'</span></div>').join('')+'</div>':'';
  const tabs=[['overview','Overview'],['syllabus','Syllabus'],['evaluations','Evaluations'],...(tracking.length?[['activity','Experience']]:[]),['emergencies','Emergencies'],['safety','Safety'],['exams','Exams']];
- return '<div class="profileNav" style="justify-content:flex-end"><button class="btn edit small" data-person-edit="TRAINEE:'+t.id+'">✎ Edit profile</button></div>'+
+ return (flympusCan('roster.manage')?'<div class="profileNav" style="justify-content:flex-end"><button class="btn edit small" data-person-edit="TRAINEE:'+t.id+'">✎ Edit profile</button></div>':'')+
  '<section class="card profileHero"><div class="profileTop">'+personAvatar({...t,type:'TRAINEE'},false)+'<div class="profileIdentity" style="min-width:0;flex:1"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h2>'+esc(t.name)+'</h2><span class="pill '+(t.status==='Active'?'green':'amber')+'">'+esc(t.status)+'</span></div><p>EP Trainee · Start '+esc(formatDateDMY(t.startDate))+'</p><div class="profileIdentityMeta"><span>Course Rank<b>'+(t.rank?'#'+t.rank+' of '+allT.filter(x=>courseMembershipFor(x.id,'TRAINEE',{status:x.status||'Active'}).status==='Active').length:'—')+'</b></span><span>Average Grade<b>'+(t.average==null?'—':Number(t.average).toFixed(1)+' / '+evaluationGradingSettings().max.toFixed(1))+'</b></span></div></div></div></section>'+
  '<div class="scrollTabs profileTabs">'+tabs.map(([id,l])=>'<button class="seg '+(tab===id?'active':'')+'" data-profile-tab="'+id+'">'+l+'</button>').join('')+'</div>'+traineeRecordDock(t.id)+
  (tab==='overview'?
@@ -8813,6 +8839,10 @@ function appSettingsSectionIcon(kind){
   };
   return '<svg class="settingsSectionGlyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">'+(paths[kind]||paths.general)+'</svg>'
 }
+function userManagementScreen(){
+  if(window.FLYMPUS_AUTH?.isAdmin?.()!==true)return flympusAccessDenied('User Management');
+  return '<div id="flympusUserManagementPageRoot" class="flympusUserManagementPageRoot" aria-live="polite"></div>'
+}
 function appPreferencesScreen(){
   const p=getFlympusAppPreferences(),theme=['system','light','dark'].includes(p.theme)?p.theme:'system',language=p.language==='he'?'he':'en',startScreen=['home','courses','roster','planned','record','reports'].includes(p.startScreen)?p.startScreen:'home';
   const inAppNotificationPrefs=getNotificationPreferences(),pushNotificationPrefs=getPushNotificationPreferences();
@@ -8822,7 +8852,7 @@ function appPreferencesScreen(){
   const hapticsRelevant=isFlympusIOSHapticTarget()||(Number(navigator.maxTouchPoints||0)>0&&!!window.matchMedia?.('(hover:none) and (pointer:coarse)')?.matches);
   const feedbackTitle=hapticsRelevant?'Sounds & Haptics':'Sounds';
   const feedbackCopy=hapticsRelevant?'Control the interaction feedback generated by this device.':'Control the sound feedback generated by this device.';
-  const adminAccess=window.FLYMPUS_AUTH?.isAdmin?.()===true;
+  const adminAccess=window.FLYMPUS_AUTH?.can?.('users.manage')===true;
   return '<div class="appSettingsHead"><div><div class="eyebrow">APP SETTINGS</div><h1 class="pageTitle">Settings</h1><p class="sub">Personal device, interface and notification preferences. Course configuration stays in Course Management.</p></div></div>'+
   '<div class="appSettingsGrid">'+
     '<section class="card appSettingsCard"><div class="appSettingsCardHead"><span class="appSettingsIcon">'+appSettingsSectionIcon('general')+'</span><div><h3>General</h3><p>Choose how FLYMPUS opens and how much guidance the interface shows.</p></div></div>'+
@@ -8859,19 +8889,22 @@ function appPreferencesScreen(){
   '</div>';
 }
 function settings(){
-  const c=cfgGet(),tab=state.settingsTab==='profiles'?'builder':state.settingsTab==='packages'?'catalog':(state.settingsTab||'builder');
+  const canCreate=flympusCan('courses.create'),canManageCourse=flympusCan('courses.manageAssigned'),canGlobalPackages=flympusCan('packages.manageGlobal');
+  if(!canCreate&&!canManageCourse&&!canGlobalPackages)return flympusAccessDenied('Course Management');
+  const requestedTab=state.settingsTab==='profiles'?'builder':state.settingsTab==='packages'?'catalog':(state.settingsTab||'builder'),tab=requestedTab==='catalog'&&!canGlobalPackages?(canManageCourse?'overrides':'builder'):requestedTab;
+  const c=cfgGet();
   const type=state.builderType||'',phases=type?c.phases.filter(x=>x.type===type):[],phase=state.builderPhase&&phases.some(x=>x.id===state.builderPhase)?state.builderPhase:'';
   const training=state.builderTraining||'',time=state.builderDay||'',country=state.builderCountry||'',platform=state.builderPlatform||'',programId=state.builderProgram||'';
   const epPlatforms=window.FLYMPUS_TRAINING?.platformsFor(type,phase)||[];
   const builderPrograms=window.FLYMPUS_TRAINING?.programsFor({courseType:type,phaseId:phase,platformId:platform,trainingKind:training,country})||[];
   const sel={courseType:type,phaseId:phase,platformId:platform,trainingKind:training,programId,dayNight:time,country};
   let html='<h1 class="pageTitle">Course Management</h1><p class="sub">Create and manage courses, tailor a selected course, and maintain reusable training Packages and course architecture.</p>';
-  html+='<div class="scrollTabs"><button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">1 · Create course</button><button class="seg '+(tab==='overrides'?'active':'')+'" data-settings-tab="overrides">2 · Tailor course</button><button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">Advanced</button></div>';
-  if(tab==='overrides'){
+  html+='<div class="scrollTabs">'+(canCreate?'<button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">1 · Create course</button>':'')+(canManageCourse?'<button class="seg '+(tab==='overrides'?'active':'')+'" data-settings-tab="overrides">'+(canCreate?'2 · ':'')+'Tailor course</button>':'')+(canGlobalPackages?'<button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">Advanced</button>':'')+'</div>';
+  if(tab==='overrides'&&canManageCourse){
     html+=courseOverridesHtml();
   }
 
-  if(tab==='builder'){
+  if(tab==='builder'&&canCreate){
     const today=new Date().toISOString().slice(0,10),startsOn=state.builderStartsOn||today,countryId=state.builderCountry||'israel',packages=type?(window.FLYMPUS_TRAINING?.packageCatalog?.(type)||[]):[],selected=builderPackage(),suggestedName=builderSuggestedName(type,countryId,state.builderProgram||'',startsOn),courseName=state.builderNameManual?(state.builderName||''):suggestedName,suggestedCode=courseName?uniqueAutoCourseCode(courseName,type,startsOn):'',courseCode=state.builderCodeManual?(state.builderCode||''):suggestedCode;
     const choice=(value,label,active,small='')=>'<button class="wizardChoice '+(active?'active':'')+'" type="button" data-builder-program="'+esc(value)+'"><b>'+esc(label)+'</b>'+(small?'<small>'+esc(small)+'</small>':'')+'</button>';
     let step=1;
@@ -8884,7 +8917,7 @@ function settings(){
     html+='<div class="wizardCreateBar"><div><b>'+(selected?(courseName.trim()?'Ready to create':'Course name required'):'Select a Package')+'</b><small>'+(selected?(courseName.trim()?'Name and code are already suggested; edit them only if needed.':'Enter a course name, then press Create course.'):'Choose an existing Package or add a new one.')+'</small></div><button class="btn sky" id="courseBuilderSubmit" type="submit" aria-disabled="'+(!selected)+'">'+(selected?'Create course':'Select Package')+'</button></div></form></section>';
   }
 
-  if(tab==='catalog'){
+  if(tab==='catalog'&&canGlobalPackages){
     const validScope=c.courseTypes.some(x=>x.id===state.typeWorkspace),scope=validScope?state.typeWorkspace:(c.courseTypes[0]?.id||''),scopeName=cfgItem(c.courseTypes,scope)?.name||scope,advancedEditing=!!state.advancedArchitectureEditing;
     html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><section class="advancedSequence" style="margin-top:14px"><div class="advancedStepLabel"><span>1</span><div><b>Define sectors</b><small>Add, rename or remove sectors first.</small></div></div>'+cfgCatalogCard('Sectors','courseTypes',c.courseTypes)+'</section></fieldset>';
     html+='<section class="card settingBox advancedSectorPicker"><div class="advancedStepLabel"><span>2</span><div><b>Select sector to edit</b><small>Everything below is scoped to this sector.</small></div></div><div class="field" style="margin-top:12px"><label>Sector</label><select id="typeWorkspace" '+(advancedEditing?'disabled':'')+'>'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></section>';
@@ -9253,6 +9286,7 @@ function buildFlympusScreenHtml(screen){
     case'instructor':html=instructorProfile();break;
     case'settings':html=settings();break;
     case'preferences':html=appPreferencesScreen();break;
+    case'user-management':html=userManagementScreen();break;
     case'reports':html=reports();break;
     case'safety':html=safetyScreen();break;
     case'exams':html=examsScreen();break;
@@ -9395,6 +9429,7 @@ function render(options={}){
   }
 }
 
+document.addEventListener('flympus:auth-ready',()=>{try{render()}catch{}});
 function renderPreservingManagementView(update){
   const root=$('#content'),docEl=document.documentElement,body=document.body,scrollTop=Number(window.scrollY||docEl?.scrollTop||body?.scrollTop||0),openStates=root?[...root.querySelectorAll('details')].map(x=>!!x.open):[];
   const anchorSelector='.card,.packageRules,.advancedStepLabel,.personCard,.rosterControls,.trainingStatusStack',anchorNodes=root?[...root.querySelectorAll(anchorSelector)]:[],viewportTop=Math.max(72,Math.min(Number(window.innerHeight||800)-40,96));
@@ -9498,6 +9533,7 @@ if($('#editPersonForm'))$('#editPersonForm').onsubmit=async e=>{e.preventDefault
 if(state.screen==='evaluation')bindEval();
 if(state.screen==='settings')bindSettings();
 if(state.screen==='preferences')bindAppPreferences();
+if(state.screen==='user-management')window.FLYMPUS_AUTH?.mountUserManagementPage?.($('#flympusUserManagementPageRoot'));
 if(state.screen==='reports')bindReports();
 if(state.screen==='planned')bindPlanned();
 if(state.screen==='safety')bindSafety();
@@ -10277,6 +10313,6 @@ if(['roster','planned','home','record','reports'].includes(earlyNavTarget)){
   }
 })();
 </script>
-<script type="module" src="./auth.js?v=20261005-auth13"></script>
+<script type="module" src="./auth.js?v=20261006-auth15"></script>
 </body>
 </html>
