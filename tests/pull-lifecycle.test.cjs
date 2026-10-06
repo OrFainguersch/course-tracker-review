@@ -4,6 +4,13 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
 const source=html.slice(html.indexOf("if(document.addEventListener&&!window.__flympusPullRefreshSoundBound)"),html.indexOf('let bottomNavScrollSaveTimer=null;'));
+test('hidden header cannot leave a permanent cover or override the authoritative page canvas',()=>{
+  assert.doesNotMatch(html,/body::before/,'A fixed body cover remains visible after the header slides out');
+  assert.match(html,/html,body,\.app\{background:var\(--flympus-canvas,#f4f8fc\)!important\}/);
+  assert.doesNotMatch(html,/html(?:\.flympusPullRoot)?\s*\{[^}]*background:#0d3156/s,'Scroll/pull must not recolour the root canvas');
+  assert.match(html,/\.flympusPullBackdrop\{[^}]*opacity:0;/s);
+  assert.match(html,/body\.flympusPullActive \.flympusPullBackdrop\{opacity:1\}/);
+});
 function harness({standalone=true,maxTouchPoints=5}={}){
   const handlers=new Map(),windowHandlers=new Map(),animations=[],timers=new Map();
   const classes=()=>{const values=new Set();return {add:v=>values.add(v),remove:v=>values.delete(v),contains:v=>values.has(v),toggle(v,on){if(on)values.add(v);else values.delete(v)}}};

@@ -2578,30 +2578,11 @@ body.drawerPushOpen .backdrop{
 </style>
 
 <style>
-/* ===== Touch-browser top overscroll · prevent first-paint flash ===== */
-html{
-  background:#0d3156!important;
-}
-body{
-  background:#0d3156!important;
-}
-.app{
-  background:#f5f7fa!important;
-  min-height:100vh;
-}
-body::before{
-  content:"";
-  position:fixed;
-  left:0;
-  right:0;
-  top:-140px;
-  height:180px;
-  background:#0d3156;
-  z-index:29;
-  pointer-events:none;
-  transform:translateZ(0);
-  backface-visibility:hidden;
-}
+/* The document canvas belongs to the pre-paint theme authority. There is no
+   fixed header-coloured cover: it would remain after auto-hide and obscure
+   the scrolling page. Only the header itself paints the branded top bar. */
+html,body,.app{background:var(--flympus-canvas,#f4f8fc)!important}
+.app{min-height:100vh}
 .top{
   isolation:isolate;
   transform:translateZ(0);
@@ -2611,9 +2592,6 @@ body::before{
      layer is translated during pull-to-refresh. */
   -webkit-backdrop-filter:none!important;
   backdrop-filter:none!important;
-}
-@media(min-width:900px) and (hover:hover) and (pointer:fine){
-  body::before{display:none}
 }
 </style>
 
@@ -2792,8 +2770,7 @@ body::-webkit-scrollbar{
 }
 @media(prefers-reduced-motion:reduce){
   .top,
-  #content,
-  body::before{transition:none!important}
+  #content{transition:none!important}
 }
 </style>
 
@@ -2994,16 +2971,14 @@ body.flympusPullActive .top{
 body.flympusPullActive #content{
   position:relative;
   z-index:30;
-  background:#f5f7fa;
+  background:var(--flympus-canvas,#f4f8fc);
   will-change:transform;
 }
 /* A claimed pull owns these transforms until its return finishes. Chrome's
    scroll transitions must never animate the same nodes concurrently. */
 body.flympusPullActive .top,
 body.flympusPullActive #content{transition:none!important}
-html[data-flympus-theme="dark"] body::before{background:#0d1e2f}
 html.flympusPullRoot{
-  background:#0d3156!important;
   overscroll-behavior-y:none!important;
 }
 html.flympusPullRoot body{
