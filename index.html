@@ -7599,6 +7599,74 @@ function evaluationHistoryViewHtml(list){
  '<button class="btn secondary small safetyHistoryReset" type="button" id="evaluationHistoryReset">Reset filters</button>'+filterSelectionsHtml('evaluationHistorySelections',[])+'</div>'+
  '<div class="safetyHistoryList" id="evaluationHistoryList">'+(rows||'<div class="recordHistoryEmpty"><h3>No evaluations yet.</h3><p>New evaluations recorded for this course will appear here.</p></div>')+'</div></section>'
 }
+
+function evaluationVoiceInputHtml(){
+  const he=getFlympusAppPreferences().language==='he',lang=he?'he-IL':'en-US';
+  return '<section class="evaluationVoiceBlock" id="evaluationVoiceBlock">'+
+    '<div class="evaluationVoiceHead"><div><div class="evaluationVoiceEyebrow">VOICE INPUT · BETA</div><h3>Fill Evaluation by voice</h3><p>Say criterion grades, emergencies performed and flight counters. Review the detected values before applying them.</p></div>'+
+    '<button class="evaluationVoiceRecord" type="button" id="evaluationVoiceRecord"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="3" width="8" height="12" rx="4"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"></path></svg><span>Start recording</span></button></div>'+
+    '<div class="evaluationVoiceMeta"><label><span>Recognition language</span><select id="evaluationVoiceLanguage"><option value="he-IL" '+(lang==='he-IL'?'selected':'')+'>Hebrew</option><option value="en-US" '+(lang==='en-US'?'selected':'')+'>English</option></select></label>'+
+    '<div class="evaluationVoiceTrust"><span>No paid AI/API</span><span>Audio is not stored</span></div></div>'+
+    '<textarea class="evaluationVoiceTranscript" name="voiceTranscript" id="evaluationVoiceTranscript" placeholder="Example: All criteria 4 except Altitude Control 3. Emergencies: Vertigo and SBX. Two takeoffs, three landings."></textarea>'+
+    '<div class="evaluationVoiceStatus" id="evaluationVoiceStatus">Ready to analyze</div>'+
+    '<div class="evaluationVoicePreview" id="evaluationVoicePreview" hidden></div>'+
+    '<div class="evaluationVoiceActions"><button class="btn secondary small" type="button" id="evaluationVoiceAnalyze">Analyze transcript</button><button class="btn sky small" type="button" id="evaluationVoiceApply" disabled>Apply detected values</button><button class="btn secondary small" type="button" id="evaluationVoiceClear">Clear transcript</button></div>'+
+    '<p class="sub" style="margin:9px 0 0">Browser speech recognition is used. FLYMPUS does not send this to a paid AI/API or save the audio.</p>'+
+  '</section>'
+}
+function evaluationVoiceWarningLabel(value){
+  const text=String(value||'');if(getFlympusAppPreferences().language!=='he')return text;
+  let m;if((m=text.match(/^All-criteria grade (.+) is outside the configured scale\.$/)))return 'הציון '+m[1]+' לכל הקריטריונים נמצא מחוץ לסולם המוגדר.';
+  if((m=text.match(/^(.+) grade (.+) is outside the configured scale\.$/)))return 'הציון '+m[2]+' עבור '+m[1]+' נמצא מחוץ לסולם המוגדר.';
+  if((m=text.match(/^Emergency phrase “(.+)” matches more than one configured emergency/)))return 'הביטוי "'+m[1]+'" מתאים ליותר ממצב חירום אחד; אמור את השם המלא.';
+  if((m=text.match(/^Touch-and-go count was heard \((\d+)\)/)))return 'זוהה מונה Touch-and-Go ('+m[1]+'), אך כרגע אין שדה T&G ייעודי ב־Evaluation.';
+  return text
+}
+function evaluationVoicePreviewHtml(result){
+  if(!result?.hasValues&&!result?.warnings?.length)return '<div class="evaluationVoicePreviewHead"><b>Nothing recognized yet. Say the configured criterion or emergency names clearly.</b></div>';
+  const groups=[];
+  if(result.criteria?.length)groups.push('<div class="evaluationVoiceDetectedGroup"><b>Detected criteria</b><div class="evaluationVoiceChips">'+result.criteria.map(x=>'<span class="evaluationVoiceChip">'+esc(x.name)+' · '+esc(x.score)+'</span>').join('')+'</div></div>');
+  if(result.emergencies?.length)groups.push('<div class="evaluationVoiceDetectedGroup"><b>Detected emergencies</b><div class="evaluationVoiceChips">'+result.emergencies.map(x=>'<span class="evaluationVoiceChip emergency">'+esc(x.name)+' · '+esc(x.count)+'×</span>').join('')+'</div></div>');
+  const counters=[];if(result.counters?.takeoffs!==null)counters.push('Takeoffs · '+result.counters.takeoffs);if(result.counters?.landings!==null)counters.push('Landings · '+result.counters.landings);
+  if(counters.length)groups.push('<div class="evaluationVoiceDetectedGroup"><b>Detected counters</b><div class="evaluationVoiceChips">'+counters.map(x=>'<span class="evaluationVoiceChip counter">'+esc(x)+'</span>').join('')+'</div></div>');
+  const warnings=(result.warnings||[]).map(x=>'<div class="evaluationVoiceWarning">'+esc(evaluationVoiceWarningLabel(x))+'</div>').join('');
+  return '<div class="evaluationVoicePreviewHead"><b>Review before applying</b><span class="pill blue">'+(result.criteria.length+result.emergencies.length+counters.length)+' detected</span></div><div class="evaluationVoicePreviewGroups">'+groups.join('')+'</div>'+(warnings?'<div class="evaluationVoiceWarnings">'+warnings+'</div>':'')
+}
+function bindEvaluationVoiceInput(form,hooks={}){
+  const api=window.FLYMPUS_EVALUATION_VOICE,block=$('#evaluationVoiceBlock'),record=$('#evaluationVoiceRecord'),recordLabel=record?.querySelector('span'),language=$('#evaluationVoiceLanguage'),transcript=$('#evaluationVoiceTranscript'),status=$('#evaluationVoiceStatus'),preview=$('#evaluationVoicePreview'),analyze=$('#evaluationVoiceAnalyze'),apply=$('#evaluationVoiceApply'),clear=$('#evaluationVoiceClear');
+  if(!block||!form||!transcript)return;
+  let latest=null,recognizer=null,baseTranscript='',lastFinal='';
+  const setStatus=(message,tone='')=>{if(!status)return;status.textContent=message;status.className='evaluationVoiceStatus '+tone};
+  const parse=()=>{latest=api?.parse?.(transcript.value,{criteria:evaluationCriteriaDefs(),emergencies:evaluationEmergencyDefs(),grading:evaluationGradingSettings()})||null;if(preview){preview.hidden=false;preview.innerHTML=evaluationVoicePreviewHtml(latest)}if(apply)apply.disabled=!latest?.hasValues;applyFlympusLanguage(preview);return latest};
+  const dispatchValue=el=>{if(!el)return;try{el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))}catch{}};
+  const setListening=on=>{record?.classList.toggle('listening',on);if(recordLabel)recordLabel.textContent=on?'Stop recording':'Start recording';if(language)language.disabled=on};
+  const stop=()=>{if(recognizer?.active)recognizer.stop();setListening(false)};
+  if(api?.recognitionSupported?.()){
+    recognizer=api.createRecognition({
+      langProvider:()=>language?.value||'en-US',
+      onStatus:value=>{if(value==='listening'){setListening(true);setStatus('Listening…','listening')}else if(value==='ended'){setListening(false);setStatus('Ready to analyze')}},
+      onText:payload=>{const combined=[baseTranscript,payload.combined].filter(Boolean).join(baseTranscript&&payload.combined?' ':'').trim();transcript.value=combined;if(payload.finalText!==lastFinal){lastFinal=payload.finalText;dispatchValue(transcript)}},
+      onError:error=>{setListening(false);setStatus('Voice recognition error · '+error,'error')},
+      onEnd:()=>{if(transcript.value.trim())parse()}
+    });
+    record.onclick=()=>{if(recognizer.active){stop();return}baseTranscript=transcript.value.trim();lastFinal='';try{recognizer.start()}catch(err){setListening(false);setStatus('Voice recognition error · '+String(err?.message||err),'error')}};
+  }else{
+    record.disabled=true;setStatus('Voice recognition is not supported by this browser. You can still type or paste a transcript and analyze it.','error')
+  }
+  analyze.onclick=()=>{parse();setStatus('Ready to analyze')};
+  clear.onclick=()=>{stop();transcript.value='';latest=null;if(preview){preview.hidden=true;preview.innerHTML=''}if(apply)apply.disabled=true;dispatchValue(transcript);hooks.persistDraft?.();setStatus('Ready to analyze')};
+  transcript.addEventListener('input',()=>{latest=null;if(apply)apply.disabled=true});
+  apply.onclick=()=>{
+    const result=latest||parse();if(!result?.hasValues)return;
+    result.criteria.forEach(row=>{const el=[...form.elements].find(x=>x.name==='score_'+row.id);if(!el)return;el.value=String(row.score);dispatchValue(el);const box=el.closest('.criterion');box?.classList.add('voiceApplied');setTimeout(()=>box?.classList.remove('voiceApplied'),1450)});
+    result.emergencies.forEach(row=>{const el=[...form.elements].find(x=>x.name==='emid_'+row.id);if(!el)return;el.value=String(row.count);dispatchValue(el);const item=el.closest('.emergencyRow'),group=el.closest('.emergencyGroup');if(group)group.open=true;item?.classList.add('voiceApplied');setTimeout(()=>item?.classList.remove('voiceApplied'),1450)});
+    if(result.counters?.takeoffs!==null){const el=[...form.elements].find(x=>x.name==='takeoffs');if(el){el.value=String(result.counters.takeoffs);dispatchValue(el)}}
+    if(result.counters?.landings!==null){const el=[...form.elements].find(x=>x.name==='landings');if(el){el.value=String(result.counters.landings);dispatchValue(el)}}
+    hooks.recalc?.();hooks.updateEmergencyUi?.();hooks.setEmergencyMode?.('USED');hooks.applyEmergencyFilter?.();hooks.updateMissingPanel?.();hooks.persistDraft?.();setStatus('Applied from voice — review before submitting.');toast('Voice input applied','success')
+  };
+  if(window.MutationObserver){const observer=new MutationObserver(()=>{if(!document.body.contains(block)){try{recognizer?.abort()}catch{}observer.disconnect()}});observer.observe(document.body,{childList:true,subtree:true})}
+  if(transcript.value.trim())parse()
+}
 function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.find(x=>x.id===state.editingEval):null,autoDraft=getActivityDraft('evaluation'),allT=courseTrainees(),activeT=alphaByName(allT.filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active')),tracking=currentCourseTrackingCounters(),tracks=type=>tracking.some(x=>x.type===type),prefillTrainee=edit?.traineeId||state.evaluationTraineeId||'',evalCriteria=evaluationCriteriaDefs(),grading=evaluationGradingSettings(),gradeOptions=evaluationGradeOptions(),view=edit?'new':(state.evaluationView||'new'),tabs='<div class="safetyViewTabs"><button type="button" class="'+(view==='new'?'active':'')+'" data-evaluation-view="new">New evaluation</button><button type="button" class="'+(view==='history'?'active':'')+'" data-evaluation-view="history">History <span>'+list.length+'</span></button></div>',head='<div class="recordChildHead"><h1 class="pageTitle">Evaluation</h1><p class="sub">Record, review and revise flight evaluations with weighted criteria and emergency practice.</p></div>'+tabs;if(view==='history')return head+evaluationHistoryViewHtml(list);return head+`<section class="card formCard recordSingleForm"><div class="formTitle"><h2>${edit?`Edit evaluation · revision ${edit.revision}`:'New evaluation'}</h2><span class="autoDraftNote" id="draftBadge">${autoDraft?draftSavedLabel('evaluation'):'Auto-save ready'}</span></div>
 <form id="evalForm">
 <div class="evalMissingPanel formCompletionPanel" id="evalMissingPanel" hidden><div class="evalMissingHead"><span class="evalMissingIcon">!</span><div><b id="evalMissingTitle">Required before submission</b><span>Complete the required fields below before submitting this evaluation.</span></div></div><div class="evalMissingChips" id="evalMissingChips"></div></div>
