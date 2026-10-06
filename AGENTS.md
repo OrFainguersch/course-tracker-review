@@ -17,3 +17,11 @@ These rules exist specifically to prevent repeated GitHub Actions failure emails
 - Capture-phase handlers may preload, decode, or resume audio, but must never claim/consume the audible navigation gesture before the target navigation binding.
 - Do not reintroduce a cold round-robin media fallback where unloaded pool entries can make the first N presses silent.
 - Any change touching navigation audio, hydration, lifecycle, bottom navigation, or sound preferences must preserve and update regression coverage for this first-press guarantee.
+
+## Instructor nickname identity invariant
+
+- User-facing terminology is **Nickname**, not Preferred Name. The persisted Firestore field may remain `preferredName` for backward compatibility.
+- Nickname is an instructor/account concept only. Trainees do not have nicknames; a trainee's course-managed full name is the name shown throughout the training UI.
+- Instructor cards and instructor profiles keep the official full name as the primary identity and show Nickname only as secondary text when one exists.
+- Nickname must remain searchable alongside official full name and email. It must never replace the stable official identity used for course assignment.
+- Course Roster management may edit trainee identity and instructor course role, but must not overwrite an instructor's official full name or Nickname.
