@@ -573,7 +573,7 @@ async function updateOwnPreferredName(value){
 async function updateManagedUserOfficialName(uid,value,form=null){
   if(!canManageUsers()||!uid||!db||!firestoreSdk)throw new Error(tr('Could not update official name'));
   const target=(lastManagedDirectory.users||[]).find(user=>user.uid===uid);
-  const self=uid===currentUser?.uid,allowed=self?normalizeAppRole(currentProfile?.role)==='owner':!!target&&canManageTargetRole(target.role);
+  const self=uid===currentUser?.uid,allowed=self?normalizeAppRole(currentProfile?.role)==='owner':!!target&&canManageTargetRole(target.role,uid);
   if(!allowed)throw new Error(tr('Only the Owner can perform this action.'));
   const displayName=normalizeDisplayName(value),input=form?.querySelector?.('input[name="displayName"]');
   if(displayName.length<2){if(input)setManagedFieldError(input,'Enter an official name.');return false}
@@ -601,7 +601,7 @@ async function updateManagedUserOfficialName(uid,value,form=null){
 async function updateManagedUserDetails(uid,form=null){
   if(!canManageUsers()||!uid||!db||!firestoreSdk)throw new Error(tr('Update failed'));
   const target=(lastManagedDirectory.users||[]).find(user=>user.uid===uid);
-  const self=uid===currentUser?.uid,allowed=self?normalizeAppRole(currentProfile?.role)==='owner':!!target&&canManageTargetRole(target.role);
+  const self=uid===currentUser?.uid,allowed=self?normalizeAppRole(currentProfile?.role)==='owner':!!target&&canManageTargetRole(target.role,uid);
   if(!target||!allowed)throw new Error(tr('Only the Owner can perform this action.'));
   const displayName=normalizeDisplayName(String(form?.elements?.displayName?.value||'')),nameInput=form?.elements?.displayName;
   if(displayName.length<2){if(nameInput)setManagedFieldError(nameInput,'Enter an official name.');return false}
