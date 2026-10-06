@@ -125,7 +125,7 @@
    still owns notification permission/subscription later; this early call only
    makes the next cold launch independent of mobile network latency. */
 try{
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(()=>{})
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261006-role-guide-clarity-3',{scope:'./',updateViaCache:'none'}).catch(()=>{})
 }catch{}
 </script>
 <title>FLYMPUS — Train. Track. Progress.</title>
