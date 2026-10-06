@@ -4,16 +4,28 @@ const crypto=require('node:crypto');
 const assert=require('node:assert/strict');
 const base='https://flympus.firebaseapp.com/';
 const expected=JSON.parse(fs.readFileSync(path.join(__dirname,'..','dist','deploy-info.json'),'utf8'));
-async function get(filename){
-  const response=await fetch(new URL(filename,base),{cache:'no-store',signal:AbortSignal.timeout(20000)});
+async function get(filename,attempt=0){
+  const url=new URL(filename,base);
+  url.searchParams.set('__flympus_verify',expected.commit+'-'+attempt);
+  const response=await fetch(url,{cache:'no-store',headers:{'Cache-Control':'no-cache, no-store','Pragma':'no-cache'},signal:AbortSignal.timeout(20000)});
   assert.equal(response.status,200,`${filename} returned ${response.status}`);
   return response;
+}
+async function deployedInfo(){
+  let last=null;
+  for(let attempt=0;attempt<8;attempt++){
+    const response=await get('deploy-info.json',attempt);
+    last=await response.json();
+    if(last?.commit===expected.commit)return last;
+    await new Promise(resolve=>setTimeout(resolve,1500))
+  }
+  return last
 }
 async function main(){
   const html=await (await get('')).text();
   assert.match(html,/FLYMPUS — Train\. Track\. Progress\./,'Production must serve FLYMPUS');
   assert.doesNotMatch(html,/Site Not Found/,'Hosting has not been deployed');
-  const deployed=await (await get('deploy-info.json')).json();
+  const deployed=await deployedInfo();
   assert.equal(deployed.commit,expected.commit,'Production commit differs from the reviewed bundle');
   for(const [filename,digest] of Object.entries(expected.files)){
     const response=await get(filename);
