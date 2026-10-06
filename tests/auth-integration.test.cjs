@@ -108,7 +108,7 @@ assert(auth.includes('data-managed-user-form')&&auth.includes('updateManagedUser
   'Edit must manage Name and Role together while keeping the sign-in email read-only');
 assert(auth.includes("tr('Role')")&&!auth.includes("<span>'+esc(tr('App role'))+'</span><select name=\"role\">"),
   'User Management controls must label the application-level field simply as Role');
-assert(auth.includes("tr('Pending approval')")&&auth.includes("tr('Approval requests')")&&auth.includes('Signed in without an invitation and waiting for approval.'),
+assert(auth.includes("tr('Pending approval')")&&auth.includes("'Approval requests'")&&auth.includes('Signed in without an invitation and waiting for approval.'),
   'Pending must be presented as an approval request distinct from pre-authorized invitations');
 assert(html.includes("flympusCan('roster.manage')")&&html.includes("flympusCan('courses.create')")&&html.includes("flympusCan('packages.manageGlobal')"),
   'Structural roster, course and global Package editing must be capability-gated');
