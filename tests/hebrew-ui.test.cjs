@@ -55,6 +55,9 @@ assert(html.includes("drawerCloseSwipeIsRight()?dx>=58:dx<=-58"),'Hebrew drawer 
 /* Hebrew adaptive mirror audit */
 assert(html.includes("Hebrew adaptive mirror audit · 2026-10-04"),
   "Hebrew must use a deliberate mirrored layout layer, not only text-align:right");
+assert(html.includes('html[data-flympus-language="he"] #flympusUserManagementPageRoot .flympusUserManagementPageHead')&&
+  html.includes('html[data-flympus-language="he"] #flympusUserManagementPageRoot .flympusUserActions{justify-content:flex-start}'),
+  "User Management must deliberately mirror its page structure and action alignment in Hebrew");
 assert(html.includes('html[data-flympus-language="he"] .mobileHero .homeCourseStatusBadge')&&html.includes('right:auto!important;left:18px!important'),
   "Home status badge must mirror to the left in Hebrew");
 assert(html.includes('html[data-flympus-language="he"] .homePlanTags{justify-content:flex-start!important}'),
