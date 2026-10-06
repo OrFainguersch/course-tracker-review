@@ -62,7 +62,8 @@ assert(html.includes("const FLYMPUS_PUSH_NOTIFICATION_PREFS_KEY='ct-review-push-
   'Push categories must have their own persisted preference store');
 assert(html.includes("preferences:getPushNotificationPreferences()"),
   'Push subscriptions must send Push-specific categories rather than in-app display preferences');
-assert(html.includes('data-push-notification-pref="requiredActions"')&&html.includes('data-inapp-notification-pref="assignments"'),
+assert(html.includes("const attr=channel==='push'?'data-push-notification-pref':'data-inapp-notification-pref'")&&
+  html.includes("notificationCategoryDefinitions"),
   'Settings must render independent per-category controls for Push and optional in-app notifications');
 assert(html.includes("prefs.requiredActions=true")&&html.includes('class="notificationAlwaysOn"'),
   'Required actions must stay visible in the in-app notification center even when Push delivery is disabled');
