@@ -6964,7 +6964,7 @@ function setDrawerOpen(open){
  document.body?.classList.toggle('drawerPushOpen',isOpen);
  menuBtn?.setAttribute?.('aria-expanded',isOpen?'true':'false');
  if(!isOpen){
-   drawerCanvasReleaseTimer=setTimeout(releaseDrawerCanvas,Math.max(230,Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--drawer-close-duration'))||200)+35)
+   drawerCanvasReleaseTimer=setTimeout(releaseDrawerCanvas,235)
  }
  if(menuHaptic){
    if(!isOpen)menuHaptic.disabled=getFlympusAppPreferences().haptics===false;
