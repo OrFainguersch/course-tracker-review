@@ -33,7 +33,7 @@ console.log('Hebrew UI/RTL integration checks passed');
 ].forEach(x=>assert(html.includes(x), 'Missing full-site Hebrew UI translation: '+x));
 
 assert(html.includes("trim.match(/^·\\s*(.+)$/)"),'Punctuation-prefixed helper copy must still translate');
-assert(html.includes("body.drawerPushOpen .backdrop{\n  background:transparent!important;"),'Push drawer must leave the displaced page visible');
+assert(html.includes("background:rgba(4,18,32,.24)!important"),'Push drawer must keep the displaced page visible with the same restrained dim as the Facebook reference');
 assert(html.includes("html[data-flympus-language=\"he\"] .personCard.traineeRosterCard .rosterTraineeHead{\n  width:100%!important;"),'Hebrew trainee identity must occupy the mirrored content edge');
 
 
