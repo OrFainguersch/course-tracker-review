@@ -72,10 +72,11 @@ test('explicit theme selections apply synchronously and locale is available befo
   assert.equal(app.attributes.get('data-flympus-theme-mode'),'light');
   assert.equal(app.attributes.get('lang'),'he');
   assert.equal(app.attributes.get('dir'),'rtl');
+  assert.equal(app.metas['theme-color'].content,'#0b3157');
 
   app.window.FLYMPUS_THEME.applyPreferences({theme:'dark'},{selectionChanged:true});
   assert.equal(app.attributes.get('data-flympus-theme'),'dark');
-  assert.equal(app.metas['theme-color'].content,'#07131f');
+  assert.equal(app.metas['theme-color'].content,'#0d1e2f');
 });
 
 for(const mode of ['light','dark'])test(`${mode} wins over opposite persisted/System values on every lifecycle`,()=>{
