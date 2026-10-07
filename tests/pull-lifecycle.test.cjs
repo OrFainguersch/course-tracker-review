@@ -98,3 +98,5 @@ test('touch chrome still hides on down-scroll and returns on up-scroll without m
     assert(!h.top.classList.contains('topHidden'));assert(!h.dock.classList.contains('dockHidden'));
   }
 });
+
+// 0754 seam regression guard: keep pull geometry device-pixel aligned on iOS.
