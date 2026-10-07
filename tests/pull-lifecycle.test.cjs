@@ -4,6 +4,13 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
 const source=html.slice(html.indexOf("if(document.addEventListener&&!window.__flympusPullRefreshSoundBound)"),html.indexOf('let bottomNavScrollSaveTimer=null;'));
+test('iOS pull reveal has an overlap guard and device-pixel-aligned transforms',()=>{
+  assert.match(html,/body\.flympusPullActive \.top::before\{[\s\S]*top:-4px;[\s\S]*height:6px;[\s\S]*background:#0d3156;/);
+  assert.match(source,/const pullDevicePixelRatio=Math\.max\(1,Number\(window\.devicePixelRatio\)\|\|1\)/);
+  assert.match(source,/const snapPullOffset=value=>Math\.round\(Math\.max\(0,Number\(value\)\|\|0\)\*pullDevicePixelRatio\)\/pullDevicePixelRatio/);
+  assert.match(source,/pullOffset=snapPullOffset\(offset\)/);
+  assert.match(source,/snapPullOffset\(from\*ratio\)\.toFixed\(3\)/);
+});
 test('hidden header cannot leave a permanent cover or override the authoritative page canvas',()=>{
   assert.doesNotMatch(html,/body::before/,'A fixed body cover remains visible after the header slides out');
   assert.match(html,/html,body,\.app\{background:var\(--flympus-canvas,#f4f8fc\)!important\}/);
