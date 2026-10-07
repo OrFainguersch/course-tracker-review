@@ -787,7 +787,7 @@ async function boot(){
       else{
         cancelSilentAuthLoading();returningScopedSession=false;
         currentUser=null;currentProfile=null;api.currentUser=null;api.profile=null;
-        clearRoleContext();removeAuthenticatedChrome();
+        clearRoleContext();removeAuthenticatedChrome();clearVerifiedActive();
         /* A passive Firebase null is not an explicit FLYMPUS sign-out. Keep the
            last verified UID namespace intact while the login gate is locked.
            Only signOutCurrentUser() may clear the durable UID hint. This avoids
