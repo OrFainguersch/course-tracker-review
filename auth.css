@@ -18,6 +18,9 @@ html.flympusAuthPreview .app{
 }
 
 #flympusAuthRoot[hidden]{display:none!important}
+/* Returning launches revalidate silently. The static sign-in card is reserved
+   for a genuinely signed-out state, never for refresh/cold-open verification. */
+html.flympusAuthReturning #flympusAuthRoot.flympusAuthInitial{display:none!important}
 html:not(.flympusAuthBooting):not(.flympusAuthReturning) #flympusAuthRoot.flympusAuthInitial{display:none!important}
 #flympusAuthRoot{
   position:fixed;
