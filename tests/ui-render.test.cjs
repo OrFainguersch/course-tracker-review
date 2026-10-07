@@ -750,6 +750,12 @@ assert(html.includes("iOS top-chrome upward extension · 0757")&&
   html.includes("background:inherit")&&
   !html.includes("iOS top-chrome slot underlay · 0756")&&!html.includes(".app::before{content:none}"),
   "Fast iOS reverse/pull motion must be covered by a navy extension attached to the moving header itself, not by a static document underlay or changed chrome timing");
+assert(html.includes("Viewport-owned mobile chrome · 0758")&&
+  html.includes(":root{--flympus-top-chrome-height:78px}")&&
+  html.includes("padding-top:var(--flympus-top-chrome-height,78px)!important")&&
+  html.includes("position:fixed!important")&&html.includes("top:0!important")&&
+  html.includes("right:0!important")&&html.includes("width:100%!important"),
+  "Touch/mobile top chrome must be viewport-owned with a preserved 78px document footprint so its approved transform timing is not distorted by sticky scroll geometry");
 assert(html.includes("snap.localDay===localDay"),
   "A snapshot from a previous local day must never flash before today's plan renders");
 assert(html.includes("initialUiState.screen='home'")&&html.includes("if(flympusPushBootScreen&&")&&
