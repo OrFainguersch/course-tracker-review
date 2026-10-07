@@ -743,6 +743,13 @@ assert(!html.includes("touchChromeStable?false:!!hidden")&&
   html.includes("const flympusTouchPullMode=()=>flympusStandaloneMode();")&&
   html.includes("if(!customPull||top>2)return;")&&html.includes("pullStandaloneGesture=true"),
   "Touch auto-hide stays enabled while custom pull-to-refresh is isolated to an explicit top-start gesture in the installed PWA");
+assert(html.includes("iOS top-chrome slot underlay · 0756")&&
+  html.includes(".app::before{")&&
+  html.includes("height:var(--flympus-top-chrome-height,78px)")&&
+  html.includes("background:#0d3156")&&
+  html.includes("#content{position:relative;z-index:1}")&&
+  !html.includes(".top,\n#content{\n  position:relative;"),
+  "Fast reverse scroll must expose a document-attached navy header slot rather than the light page canvas, without replacing the header's sticky positioning");
 assert(html.includes("snap.localDay===localDay"),
   "A snapshot from a previous local day must never flash before today's plan renders");
 assert(html.includes("initialUiState.screen='home'")&&html.includes("if(flympusPushBootScreen&&")&&
