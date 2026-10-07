@@ -707,8 +707,14 @@ async function boot(){
     return
   }
   if(enforce&&!returningScopedSession)lockApp();
-  if(returningScopedSession)scheduleSilentAuthLoading('Starting secure authentication…');
-  else api.status='booting';
+  if(returningScopedSession){
+    /* A stored UID scope only tells us which local namespace was last verified;
+       it is never authorization for the current launch. Keep the application
+       opaque until Firebase restores the session AND Firestore confirms an
+       active profile. This also prevents offline/airplane-mode Home flashes. */
+    lockApp();
+    showLoading('Starting secure authentication…')
+  }else api.status='booting';
   try{
     const [appModule,authModule,firestoreModule]=await Promise.all([
       import('https://www.gstatic.com/firebasejs/'+SDK_VERSION+'/firebase-app.js'),
