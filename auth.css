@@ -16,11 +16,20 @@ html.flympusAuthPreview .app{
   pointer-events:none!important;
   user-select:none!important
 }
+/* Previously ACTIVE sessions may keep their already-rendered screen visible
+   during online revalidation. It is continuity only: interaction remains
+   disabled until Firebase + Firestore confirm ACTIVE again. */
+html.flympusAuthResuming .app{
+  visibility:visible!important;
+  pointer-events:none!important;
+  user-select:none!important
+}
 
 #flympusAuthRoot[hidden]{display:none!important}
-/* Returning launches revalidate silently. The static sign-in card is reserved
-   for a genuinely signed-out state, never for refresh/cold-open verification. */
-html.flympusAuthReturning #flympusAuthRoot.flympusAuthInitial{display:none!important}
+/* Returning launches never present a sign-in/opening card. Fully opaque
+   returning sessions and verified visual resumes both suppress it. */
+html.flympusAuthReturning #flympusAuthRoot.flympusAuthInitial,
+html.flympusAuthResuming #flympusAuthRoot.flympusAuthInitial{display:none!important}
 html:not(.flympusAuthBooting):not(.flympusAuthReturning) #flympusAuthRoot.flympusAuthInitial{display:none!important}
 #flympusAuthRoot{
   position:fixed;
