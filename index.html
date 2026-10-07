@@ -2916,14 +2916,10 @@ html,body,.app{background:var(--flympus-canvas,#f4f8fc)!important}
   pointer-events:none;
   z-index:0;
 }
-/* Keep real application surfaces above the slot paint without creating a new
-   scrolling/compositing context for the long document. */
-.top,
-#content{
-  position:relative;
-}
+/* Keep real application surfaces above the slot paint. The header keeps its
+   existing position:sticky; only main needs an explicit stacking level. */
 .top{z-index:30}
-#content{z-index:1}
+#content{position:relative;z-index:1}
 </style>
 
 <style>
