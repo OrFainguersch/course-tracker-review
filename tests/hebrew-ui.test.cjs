@@ -13,7 +13,7 @@ const html=fs.readFileSync('index.html','utf8');
   "'Edit identity, photo and course membership safely.':'ערוך זהות, תמונה ושיוך לקורס באופן בטוח.'"
 ].forEach(x=>assert(html.includes(x), 'Missing Hebrew UI translation: '+x));
 
-assert(html.includes('html[data-flympus-language="he"] body.drawerPushOpen .app')&&html.includes('transform:translate3d(calc(-1 * var(--drawer-push-width)),0,0)!important')&&html.includes('right:calc(-1 * var(--drawer-push-width))!important'),'Hebrew drawer must mirror the single frozen-canvas push while keeping the panel attached to the canvas edge');
+assert(html.includes('html[data-flympus-language="he"] body.drawerCanvasFrozen.drawerPushOpen .app')&&html.includes('transform:translate3d(calc(-1 * var(--drawer-push-width)),0,0)!important')&&html.includes('right:calc(-1 * var(--drawer-push-width))!important'),'Hebrew drawer must mirror the temporary frozen-canvas push while keeping the panel attached to the canvas edge');
 assert(html.includes('html[data-flympus-language="he"] .rosterTraineeHead{'),'Hebrew roster override must exist');
 assert(html.includes('justify-items:start!important'),'Hebrew trainee name/status must align to the mirrored start edge');
 assert(html.includes("attributeFilter:['placeholder','title','aria-label']"),'Dynamic translated attributes must remain synchronized');
