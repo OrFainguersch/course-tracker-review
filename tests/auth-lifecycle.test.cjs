@@ -16,6 +16,7 @@ function setup({scopeChanged=false,migrated=0}={}){
     ensureUserProfile(user){return new Promise((resolve,reject)=>pending.set(user.uid,{resolve,reject}))},
     ensureOwnerBootstrap(user,profile){return Promise.resolve(profile)},
     normalizeProfile:profile=>profile,
+    markVerifiedActive(){},
     scheduleSilentAuthLoading(){},showLoading(){},
     showPending(user,profile){events.push(['pending',user.uid,profile.status])},
     showFatal(){events.push(['fatal'])},
