@@ -1866,6 +1866,7 @@ html.flympusLargeText .safetySeverityGuideHead h3{font-size:19px!important}html.
   clip-path:inset(0 round 14px)!important
 }
 html.flympusHapticsOff .menuHapticSwitch{display:none!important;pointer-events:none!important}
+@media(min-width:760px) and (max-width:899px){.menuBtnWrap{display:none!important}}
 .menuBtn{
   position:relative!important;
   display:grid!important;
@@ -6637,10 +6638,14 @@ function bottomNavIconSvg(name,filled=false){
   return '<span class="mobileBottomIconInner bottomNavFilled" aria-hidden="true"><svg viewBox="0 0 24 24">'+(filledPaths[name]||'')+'</svg></span>';
 }
 function setDrawerOpen(open){
- const drawer=$('#drawer'),menuBtn=$('#menuBtn'),isOpen=!!open;
+ const drawer=$('#drawer'),menuBtn=$('#menuBtn'),menuHaptic=$('#menuHapticSwitch'),isOpen=!!open;
  if(drawer)drawer.classList.toggle('open',isOpen);
  document.body?.classList.toggle('drawerPushOpen',isOpen);
  menuBtn?.setAttribute?.('aria-expanded',isOpen?'true':'false');
+ if(menuHaptic){
+   if(!isOpen)menuHaptic.disabled=getFlympusAppPreferences().haptics===false;
+   else setTimeout(()=>{if(drawer?.classList?.contains('open'))menuHaptic.disabled=true},340);
+ }
 }
 function renderNav(){const n=$('#nav');if(!n)return;const visible=nav.filter(([id])=>id!=='settings'||flympusCan('courses.create')||flympusCan('courses.manageAssigned')||flympusCan('packages.manageGlobal'));n.innerHTML=visible.map(([id,ic,l])=>id==='__label'?'<div class="navLabel">'+l+'</div>':`<button class="navBtn ${state.screen===id?'active':''}" data-nav="${id}">${navIconSvg(ic)}<span class="navText">${l}</span></button>`).join('');n.querySelectorAll('[data-nav]').forEach(b=>{b.onclick=e=>{e?.preventDefault?.();setDrawerOpen(false);go(b.dataset.nav)}});}
 let bottomDockNavigationTransition=false,bottomDockProgrammaticRestoreUntil=0;
@@ -7193,6 +7198,7 @@ function ensureFlympusMenuHapticOverlay(menuBtn){
     input.type='checkbox';
     input.setAttribute('switch','');
     input.className='menuHapticSwitch';
+    input.id='menuHapticSwitch';
     input.tabIndex=-1;
     input.setAttribute('aria-hidden','true');
     wrap.appendChild(input);
