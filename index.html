@@ -4704,11 +4704,25 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
   .topCourseContext{display:none!important}
 }
 </style>
-<link rel="stylesheet" href="./auth.css?v=20261007-auth17" />
+<style id="flympus-auth-critical-gate">
+/* Security-critical first paint: enforced authentication hides cached app
+   content before any deferred/network-dependent auth stylesheet or Firebase
+   module can resolve. A stored UID is only a namespace hint, never access. */
+html.flympusAuthBooting body,
+html.flympusAuthReturning body,
+html.flympusAuthLocked body{overflow:hidden!important}
+html.flympusAuthBooting .app,
+html.flympusAuthReturning .app,
+html.flympusAuthLocked .app{
+  visibility:hidden!important;
+  pointer-events:none!important;
+  user-select:none!important
+}
+</style>
 <script>
-/* Authentication is fail-closed only after it is explicitly enabled.
-   Until the Firebase project and UID-scoped data migration are ready,
-   production keeps the existing review experience unchanged. */
+/* Fail closed before body paint. Returning sessions are visually locked too:
+   cached Home/course content may appear only after Firebase restores the
+   session and Firestore confirms an ACTIVE profile. */
 (()=>{try{
   const cfg=window.FLYMPUS_FIREBASE_CONFIG||{};
   if(cfg.enabled===true&&cfg.enforceAuth===true){
@@ -4717,6 +4731,7 @@ html[data-flympus-language="he"] .homeAllCoursesArrow{transform:none!important}
   }
 }catch{}})();
 </script>
+<link rel="stylesheet" href="./auth.css?v=20261007-auth17" />
 <style id="evaluationVoiceStyles">
 .evaluationVoiceBlock{margin:14px 0 18px;padding:14px;border:1px solid #cfe0ee;border-radius:18px;background:linear-gradient(180deg,#fbfdff,#f5faff);box-shadow:0 7px 22px rgba(18,60,96,.05)}
 .evaluationVoiceHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.evaluationVoiceHead h3{margin:2px 0 3px;color:#123d64;font-size:15px}.evaluationVoiceHead p{margin:0;color:#6f8498;font-size:9.5px;line-height:1.45}.evaluationVoiceEyebrow{color:#1687e8;font-size:8px;font-weight:950;letter-spacing:.11em}.evaluationVoiceRecord{min-width:132px;height:42px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #b9d9ef;border-radius:11px;background:#eaf6ff;color:#116cae;font-size:10px;font-weight:900;cursor:pointer}.evaluationVoiceRecord svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9}.evaluationVoiceRecord.listening{background:#fff0f2;border-color:#efb8c0;color:#b43242;box-shadow:0 0 0 4px rgba(180,50,66,.08)}.evaluationVoiceRecord:disabled{opacity:.48;cursor:not-allowed}
