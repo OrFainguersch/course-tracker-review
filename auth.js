@@ -694,11 +694,11 @@ async function updateManagedInvitationRole(email,role,select){
 async function confirmManagedUserAction(action){const copy={approve:['Approve this user?','This account will be able to access FLYMPUS.'],block:['Block this user?','This account will immediately lose application access.'],reactivate:['Reactivate this user?','This account will regain application access.'],'make-admin':['Make this user an administrator?','Administrators can approve users and change application access.'],'make-user':['Remove administrator access?','The account remains active but loses User Management permissions.']}[action]||['Update this user?','The account permissions will be changed.'];if(typeof window.siteConfirm==='function')return window.siteConfirm(tr(copy[1]),{title:tr(copy[0]),confirmLabel:tr('Confirm'),tone:action==='block'?'danger':'primary'});return false}
 async function updateManagedUser(uid,action,button){if(!canManageUsers()||!uid||uid===currentUser?.uid)return;const target=lastManagedDirectory.users.find(x=>x.uid===uid);if(!target||!canManageTargetRole(target.role,uid))return;if(!(await confirmManagedUserAction(action)))return;const changes={updatedAt:firestoreSdk.serverTimestamp(),updatedBy:currentUser.uid};if(action==='approve'||action==='reactivate')changes.status='active';if(action==='block')changes.status='blocked';if(action==='make-admin')changes.role='admin';if(action==='make-user')changes.role='user';button.disabled=true;try{await firestoreSdk.updateDoc(firestoreSdk.doc(db,'users',uid),changes);managedDirectoryCache=await loadManagedDirectory();renderUserManagement(managedDirectoryCache)}catch(err){console.error('FLYMPUS user-management update failed',err);button.disabled=false;renderUserManagement(lastManagedDirectory,String(err?.message||tr('Update failed')))}}
 function bindAuthLanguageSync(){if(window.__FLYMPUS_AUTH_LANGUAGE_BOUND__)return;window.__FLYMPUS_AUTH_LANGUAGE_BOUND__=true;syncAuthAdjacentChromeLanguage();if(typeof MutationObserver!=='function')return;const observer=new MutationObserver(records=>{if(!records.some(x=>x.attributeName==='data-flympus-language'))return;syncAuthAdjacentChromeLanguage();if(currentUser&&currentProfile)syncAuthenticatedChrome(currentUser,currentProfile);const manager=document.getElementById('flympusUserManagementPageRoot')||document.getElementById('flympusUserManagementRoot');if(manager&&(!manager.hidden||manager.id==='flympusUserManagementPageRoot'))renderUserManagement(lastManagedDirectory,lastManagedError,manager)});observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-flympus-language']})}
-async function handleSignedIn(user,version=authStateVersion){
-  /* A passive returning launch must never look like a new sign-in. Keep it
-     visually silent while Firebase and Firestore revalidate the existing
-     session. Only an explicit provider sign-in may show a delayed auth loader. */
-  if(!returningScopedSession)scheduleSilentAuthLoading('Verifying FLYMPUS access…');
+async function handleSignedIn(user,version=authStateVersion,{silent=false}={}){
+  /* Passive returning launches and in-place refreshes must never look like a
+     new sign-in. Only an explicit provider sign-in may escalate to the delayed
+     authentication loader if profile verification is unusually slow. */
+  if(!returningScopedSession&&!silent)scheduleSilentAuthLoading('Verifying FLYMPUS access…');
   try{
     let profile=normalizeProfile(await ensureUserProfile(user));profile=normalizeProfile(await ensureOwnerBootstrap(user,profile));
     /* Token refreshes and rapid iOS lifecycle changes can deliver a newer auth
@@ -727,7 +727,7 @@ async function handleSignedIn(user,version=authStateVersion){
 async function refreshCurrentSession(){
   if(!auth?.currentUser)return false;
   const version=++authStateVersion;
-  await handleSignedIn(auth.currentUser,version);
+  await handleSignedIn(auth.currentUser,version,{silent:true});
   return api.status==='active'
 }
 async function boot(){
