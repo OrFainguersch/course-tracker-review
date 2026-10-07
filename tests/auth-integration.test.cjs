@@ -17,8 +17,8 @@ assert(html.includes('rel="modulepreload" href="https://www.gstatic.com/firebase
 assert(html.indexOf('./firebase-config.js')<html.indexOf('</head>'),'Firebase config must load before first body paint');
 assert(html.indexOf('id="flympus-theme-bootstrap"')<html.indexOf('./firebase-config.js'),'First-paint theme must resolve before network-dependent Firebase startup scripts');
 assert(html.indexOf('id="flympus-theme-bootstrap"')<html.indexOf('./storage-scope.js'),'Device-level appearance preferences must resolve before private application storage is installed');
-assert(html.includes("document.documentElement.classList.add(returning?'flympusAuthReturning':'flympusAuthBooting')"),
-  'Returning sessions must be identified before body paint so cached content remains fail-closed until verification');
+assert(html.includes("active&&online?'flympusAuthResuming':'flympusAuthReturning'")&&html.includes("flympus-auth-verified-active-v1")&&html.includes("navigator.onLine!==false"),
+  'First paint must distinguish previously ACTIVE online resumes from opaque offline/unverified returning sessions');
 assert(html.includes('id="flympus-auth-critical-gate"')&&html.indexOf('id="flympus-auth-critical-gate"')<html.indexOf('./auth.css?v='),
   'Critical auth hiding must be inline before the external auth stylesheet for offline/cold-start protection');
 
@@ -143,17 +143,17 @@ assert(!storage.includes('installResumeThemeHold')&&!theme.includes('setTimeout(
 
 assert(auth.includes("returningScopedSession=!!window.FLYMPUS_STORAGE_SCOPE?.currentUid?.()"),'Refresh auth should recognize an already UID-scoped returning session');
 assert(auth.includes('function scheduleSilentAuthLoading')&&auth.includes('},2200)'),'Profile verification may still defer a secondary loading surface after a trusted sign-in gesture');
-assert(auth.includes("if(returningScopedSession){")&&auth.includes("lockApp();\n    api.status='booting'")&&!auth.includes("lockApp();\n    showLoading('Starting secure authentication…')"),'Returning launches must fail closed without presenting a login/loading card');
+assert(auth.includes("if(returningScopedSession){")&&auth.includes("if(!trustedVisualResumeFor())lockApp();")&&!auth.includes("lockApp();\n    showLoading('Starting secure authentication…')"),'Returning launches must preserve only a previously ACTIVE online screen; all other returning launches stay opaque without a login/loading card');
 assert(auth.includes("else api.status='booting';"),'Signed-out first paint should keep the compact login surface instead of flashing a loading card');
 assert(auth.includes("if(!returningScopedSession)scheduleSilentAuthLoading('Verifying FLYMPUS access…');"),'Only an explicit provider sign-in may escalate to the delayed authentication loader; passive refresh/cold-open revalidation stays silent');
 assert(auth.includes('function cancelSilentAuthLoading()')&&auth.includes('function unlockApp(){cancelSilentAuthLoading();'),'Successful auth must cancel any delayed splash before unlocking the application');
 
 
-assert(css.includes('html.flympusAuthReturning .app')&&css.includes('visibility:hidden!important')&&css.includes('pointer-events:none!important'),'Returning auth refresh must hide cached app content as well as block interaction until verification succeeds');
-assert(css.includes('html.flympusAuthReturning #flympusAuthRoot.flympusAuthInitial')&&css.includes('display:none!important'),'Returning first paint must suppress the static authentication card while keeping Home fail-closed');
+assert(css.includes('html.flympusAuthReturning .app')&&css.includes('visibility:hidden!important')&&css.includes('html.flympusAuthResuming .app')&&css.includes('visibility:visible!important')&&css.includes('pointer-events:none!important'),'Offline/unverified returning auth must remain opaque while a previously ACTIVE online resume may preserve pixels but never interaction');
+assert(css.includes('html.flympusAuthReturning #flympusAuthRoot.flympusAuthInitial')&&css.includes('html.flympusAuthResuming #flympusAuthRoot.flympusAuthInitial')&&css.includes('display:none!important'),'Both returning modes must suppress the static authentication card');
 assert(auth.includes('if(enforce&&!returningScopedSession)lockApp();'),'Fresh enforced sessions must still enter the opaque auth lock');
 assert(auth.includes("showFatal('Authentication unavailable','Could not load the Firebase authentication service. Check the connection and Firebase setup.')"),'Offline Firebase startup must keep the gate closed and render the authentication error');
-assert(auth.includes("classList.remove('flympusAuthBooting','flympusAuthReturning','flympusAuthLocked'"),'Only successful verified auth may clear the returning-session guard');
+assert(auth.includes("classList.remove('flympusAuthBooting','flympusAuthReturning','flympusAuthResuming','flympusAuthLocked'"),'Only successful verified auth may clear all returning-session guards');
 
 
 assert(storage.includes("const UID_PERSISTED_KEY='flympus-auth-scope-last-uid'"),'Returning PWA launches must retain a durable UID namespace hint');
@@ -162,6 +162,7 @@ assert(storage.includes('rawRemove(local,UID_PERSISTED_KEY)'),'Sign-out must cle
 
 
 assert(auth.includes('let authStateVersion=0')&&auth.includes('version!==authStateVersion'),'Stale asynchronous auth callbacks must never unlock or rescope the app');
+assert(auth.includes("const VERIFIED_ACTIVE_KEY='flympus-auth-verified-active-v1'")&&auth.includes('markVerifiedActive(user,profile)')&&auth.includes('clearVerifiedActive()')&&auth.includes('refreshSession:()=>refreshCurrentSession()'),'Verified-session continuity must be granted only after ACTIVE Firestore verification and must support in-place auth refresh');
 
 console.log('Authentication foundation checks passed');
 
