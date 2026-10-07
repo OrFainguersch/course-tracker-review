@@ -145,7 +145,7 @@ assert(auth.includes("returningScopedSession=!!window.FLYMPUS_STORAGE_SCOPE?.cur
 assert(auth.includes('function scheduleSilentAuthLoading')&&auth.includes('},2200)'),'Profile verification may still defer a secondary loading surface after a trusted sign-in gesture');
 assert(auth.includes("if(returningScopedSession){")&&auth.includes("if(!trustedVisualResumeFor())lockApp();")&&!auth.includes("lockApp();\n    showLoading('Starting secure authentication…')"),'Returning launches must preserve only a previously ACTIVE online screen; all other returning launches stay opaque without a login/loading card');
 assert(auth.includes("else api.status='booting';"),'Signed-out first paint should keep the compact login surface instead of flashing a loading card');
-assert(auth.includes("if(!returningScopedSession)scheduleSilentAuthLoading('Verifying FLYMPUS access…');"),'Only an explicit provider sign-in may escalate to the delayed authentication loader; passive refresh/cold-open revalidation stays silent');
+assert(auth.includes("if(!returningScopedSession&&!silent)scheduleSilentAuthLoading('Verifying FLYMPUS access…');")&&auth.includes("handleSignedIn(auth.currentUser,version,{silent:true})"),'Only an explicit provider sign-in may escalate to the delayed authentication loader; passive cold-open and in-place refresh revalidation stay silent');
 assert(auth.includes('function cancelSilentAuthLoading()')&&auth.includes('function unlockApp(){cancelSilentAuthLoading();'),'Successful auth must cancel any delayed splash before unlocking the application');
 
 
