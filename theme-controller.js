@@ -26,14 +26,17 @@
     // Flush the old and new styles while transitions are disabled, in this
     // same task. No timer or animation frame may expose an intermediate palette.
     if(changing){root.classList.add('flympusThemeCommit');void root.offsetWidth}
-    const dark=resolved==='dark',background=dark?'#07131f':'#f4f8fc';
+    const dark=resolved==='dark',background=dark?'#07131f':'#f4f8fc',chromeTheme=dark?'#0d1e2f':'#0b3157';
     root.setAttribute('data-flympus-theme',resolved);
     root.setAttribute('data-flympus-theme-mode',mode);
     root.style.colorScheme=resolved;
     root.style.backgroundColor=background;
     root.style.setProperty('--flympus-canvas',background);
     root.style.setProperty('--flympus-ink',dark?'#eef5fb':'#0f172a');
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',background);
+    /* Keep iOS/PWA launch/status chrome branded even while the page canvas is
+       light. A light theme-color is what produces the white launch flash before
+       the first application paint on some standalone iOS restores. */
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',chromeTheme);
     document.querySelector('meta[name="color-scheme"]')?.setAttribute('content',resolved);
     writeTheme(RESOLVED_KEY,resolved);
     if(systemResolved)writeTheme(SYSTEM_KEY,systemResolved);
