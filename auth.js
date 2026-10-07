@@ -34,6 +34,32 @@ let silentAuthLoadingTimer=null;
 let silentAuthLoadingCopy='Starting secure authentication…';
 let signInPromise=null;
 let authStateVersion=0;
+const VERIFIED_ACTIVE_KEY='flympus-auth-verified-active-v1';
+
+function verifiedActiveRecord(){
+  try{
+    const value=JSON.parse(localStorage.getItem(VERIFIED_ACTIVE_KEY)||'null');
+    return value&&typeof value==='object'?value:null
+  }catch{return null}
+}
+function markVerifiedActive(user,profile){
+  if(!user?.uid||profile?.status!=='active')return;
+  try{
+    localStorage.setItem(VERIFIED_ACTIVE_KEY,JSON.stringify({
+      uid:String(user.uid),
+      status:'active',
+      role:normalizeAppRole(profile.role),
+      verifiedAt:Date.now()
+    }))
+  }catch{}
+}
+function clearVerifiedActive(){
+  try{localStorage.removeItem(VERIFIED_ACTIVE_KEY)}catch{}
+}
+function trustedVisualResumeFor(uid=returningScopedSession?window.FLYMPUS_STORAGE_SCOPE?.currentUid?.():''){
+  const record=verifiedActiveRecord();
+  return !!(uid&&record?.uid===String(uid)&&record?.status==='active'&&document.documentElement.classList.contains('flympusAuthResuming'))
+}
 
 const APP_ROLE_ORDER=Object.freeze(['user','training_manager','admin','owner']);
 const APP_ROLE_DEFINITIONS=Object.freeze({
@@ -83,7 +109,8 @@ const api=window.FLYMPUS_AUTH={
   isActive:()=>currentProfile?.status==='active',
   can:capability=>hasCapability(capability),
   role:()=>normalizeAppRole(currentProfile?.role),
-  roleDefinition:role=>roleDefinition(role)
+  roleDefinition:role=>roleDefinition(role),
+  refreshSession:()=>refreshCurrentSession()
 };
 
 const AUTH_HE_UI=Object.freeze({
@@ -165,8 +192,8 @@ function scheduleSilentAuthLoading(copy='Starting secure authentication…'){
     showLoading(silentAuthLoadingCopy)
   },2200)
 }
-function lockApp(){document.documentElement.classList.add(preview&&!enabled?'flympusAuthPreview':'flympusAuthLocked');document.documentElement.classList.remove('flympusAuthBooting','flympusAuthReturning')}
-function unlockApp(){cancelSilentAuthLoading();document.documentElement.classList.remove('flympusAuthBooting','flympusAuthReturning','flympusAuthLocked','flympusAuthPreview');const el=document.getElementById('flympusAuthRoot');if(el)el.hidden=true}
+function lockApp(){document.documentElement.classList.add(preview&&!enabled?'flympusAuthPreview':'flympusAuthLocked');document.documentElement.classList.remove('flympusAuthBooting','flympusAuthReturning','flympusAuthResuming')}
+function unlockApp(){cancelSilentAuthLoading();document.documentElement.classList.remove('flympusAuthBooting','flympusAuthReturning','flympusAuthResuming','flympusAuthLocked','flympusAuthPreview');const el=document.getElementById('flympusAuthRoot');if(el)el.hidden=true}
 function statusBlock(kind,title,copy){const icon=kind==='error'?'!':kind==='pending'?'…':'✓';return '<div class="flympusAuthStatus '+esc(kind)+'"><span class="flympusAuthStatusIcon">'+icon+'</span><div><b>'+esc(title)+'</b><span>'+esc(copy)+'</span></div></div>'}
 function showLoading(copy='Checking your account…'){api.status='loading';shell('<div class="flympusAuthSpinner" aria-hidden="true"></div><p class="flympusAuthEyebrow">'+esc(tr('SECURE SIGN IN'))+'</p><h1 class="flympusAuthTitle">'+esc(tr('Opening FLYMPUS'))+'</h1><p class="flympusAuthCopy">'+esc(tr(copy))+'</p>')}
 function providerButtons(disabled=false){const microsoftButton=cfg.microsoftEnabled===true?'<button class="flympusAuthProvider" type="button" data-auth-provider="microsoft" '+(disabled?'disabled':'')+'><span class="flympusAuthProviderMark flympusMicrosoftMark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span data-auth-provider-label>'+esc(tr('Continue with Microsoft'))+'</span></button>':'';return '<div class="flympusAuthProviders"><button class="flympusAuthProvider" type="button" data-auth-provider="google" '+(disabled?'disabled':'')+'><span class="flympusAuthProviderMark" aria-hidden="true">G</span><span data-auth-provider-label>'+esc(tr('Continue with Google'))+'</span></button>'+microsoftButton+'</div>'}
@@ -196,7 +223,7 @@ async function waitForSignedInUser(timeoutMs=4500){
   })
 }
 function showLogin({setupPreview=false,error=''}={}){cancelSilentAuthLoading();api.status=setupPreview?'preview':'signed-out';lockApp();const setup=setupPreview?statusBlock('pending',tr('Authentication preview'),tr('The Google sign-in experience is ready.')):'';const err=error?statusBlock('error',tr('Sign-in failed'),error):'';shell('<h1 class="flympusAuthTitle">'+esc(tr('Sign in to FLYMPUS'))+'</h1><p class="flympusAuthCopy">'+esc(tr('Continue with the Google account assigned to you.'))+'</p>'+providerButtons(setupPreview)+setup+err+'<p class="flympusAuthFine">'+esc(tr('FLYMPUS uses your account only to verify your identity. It does not read your Gmail or Outlook.'))+'</p>');if(!setupPreview)bindProviderButtons()}
-function showPending(user,profile){cancelSilentAuthLoading();api.status=profile?.status==='blocked'?'blocked':'pending';lockApp();const blocked=profile?.status==='blocked';shell('<p class="flympusAuthEyebrow">'+esc(tr('ACCOUNT ACCESS'))+'</p><h1 class="flympusAuthTitle">'+esc(tr(blocked?'Access unavailable':'Approval required'))+'</h1><p class="flympusAuthCopy">'+esc(tr(blocked?'This FLYMPUS account is currently blocked.':'Your identity is verified. An administrator still needs to approve access to FLYMPUS.'))+'</p>'+statusBlock(blocked?'error':'pending',tr(blocked?'Account blocked':'Pending administrator approval'),tr(blocked?'Contact a FLYMPUS administrator if you believe this is incorrect.':'You do not have access to course data until approval is granted.'))+'<div class="flympusAuthAccount"><b>'+esc(user.displayName||tr('Signed-in user'))+'</b><span>'+esc(user.email||'')+'</span></div><div class="flympusAuthActions"><button class="flympusAuthAction" type="button" data-auth-signout>'+esc(tr('Sign out'))+'</button></div>');document.querySelector('[data-auth-signout]')?.addEventListener('click',signOutCurrentUser)}
+function showPending(user,profile){cancelSilentAuthLoading();clearVerifiedActive();api.status=profile?.status==='blocked'?'blocked':'pending';lockApp();const blocked=profile?.status==='blocked';shell('<p class="flympusAuthEyebrow">'+esc(tr('ACCOUNT ACCESS'))+'</p><h1 class="flympusAuthTitle">'+esc(tr(blocked?'Access unavailable':'Approval required'))+'</h1><p class="flympusAuthCopy">'+esc(tr(blocked?'This FLYMPUS account is currently blocked.':'Your identity is verified. An administrator still needs to approve access to FLYMPUS.'))+'</p>'+statusBlock(blocked?'error':'pending',tr(blocked?'Account blocked':'Pending administrator approval'),tr(blocked?'Contact a FLYMPUS administrator if you believe this is incorrect.':'You do not have access to course data until approval is granted.'))+'<div class="flympusAuthAccount"><b>'+esc(user.displayName||tr('Signed-in user'))+'</b><span>'+esc(user.email||'')+'</span></div><div class="flympusAuthActions"><button class="flympusAuthAction" type="button" data-auth-signout>'+esc(tr('Sign out'))+'</button></div>');document.querySelector('[data-auth-signout]')?.addEventListener('click',signOutCurrentUser)}
 function showFatal(title,copy){cancelSilentAuthLoading();api.status='error';lockApp();shell('<p class="flympusAuthEyebrow">'+esc(tr('AUTHENTICATION'))+'</p><h1 class="flympusAuthTitle">'+esc(tr(title))+'</h1>'+statusBlock('error','FLYMPUS could not complete sign-in',copy)+'<div class="flympusAuthActions"><button class="flympusAuthAction" type="button" data-auth-retry>'+esc(tr('Try again'))+'</button></div>');document.querySelector('[data-auth-retry]')?.addEventListener('click',()=>location.reload())}
 function firebaseConfigReady(){
   const f=cfg.firebase||{};
@@ -267,6 +294,7 @@ async function signOutCurrentUser(){
     api.currentUser=null;api.profile=null;
     clearRoleContext();
     removeAuthenticatedChrome();
+    clearVerifiedActive();
     const scopeChanged=window.FLYMPUS_STORAGE_SCOPE?.clearUid?.()===true;
     if(scopeChanged){location.reload();return}
     if(enforce||preview||setupMode)showLogin({setupPreview:preview&&!enabled});else unlockApp()
@@ -679,6 +707,7 @@ async function handleSignedIn(user,version=authStateVersion){
     if(version!==authStateVersion||auth?.currentUser?.uid!==user.uid)return;
     const scopeChanged=window.FLYMPUS_STORAGE_SCOPE?.setUid?.(user.uid)===true;
     if(profile.status!=='active'){showPending(user,profile);return}
+    markVerifiedActive(user,profile);
     let migratedLegacyCount=0;
     if(profile.role==='owner'||profile.role==='admin'){
       const migration=window.FLYMPUS_STORAGE_SCOPE?.claimLegacy?.(user.uid,{admin:true});
@@ -695,6 +724,12 @@ async function handleSignedIn(user,version=authStateVersion){
     showFatal('Account verification failed',String(err?.message||'Firestore user access is not configured yet.'))
   }
 }
+async function refreshCurrentSession(){
+  if(!auth?.currentUser)return false;
+  const version=++authStateVersion;
+  await handleSignedIn(auth.currentUser,version);
+  return api.status==='active'
+}
 async function boot(){
   if(!enabled){
     api.status='disabled';
@@ -708,11 +743,11 @@ async function boot(){
   }
   if(enforce&&!returningScopedSession)lockApp();
   if(returningScopedSession){
-    /* A stored UID scope only tells us which local namespace was last verified;
-       it is never authorization for the current launch. Keep the application
-       opaque until Firebase restores the session AND Firestore confirms an
-       active profile, but do not present this passive revalidation as a login. */
-    lockApp();
+    /* A UID scope alone is never authorization. A previously server-verified
+       ACTIVE account may preserve its already-rendered screen while online
+       revalidation runs, but interaction stays disabled. Offline or unverified
+       launches remain fully opaque and fail closed. */
+    if(!trustedVisualResumeFor())lockApp();
     api.status='booting'
   }else api.status='booting';
   try{
