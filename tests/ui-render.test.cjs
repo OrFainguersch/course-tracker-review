@@ -718,13 +718,16 @@ assert(themeController.includes("background=dark?'#07131f':'#f4f8fc'"),
   "The pre-paint canvas must match the final CSS canvas");
 assert(html.includes("snap.visualVersion===12")&&html.includes("snapFresh=snapAge<=24*60*60*1000")&&
   html.includes("snap.localDay===localDay")&&html.includes("snap.resolvedTheme===currentResolvedTheme")&&html.includes("viewportCompatible")&&
-  html.includes("sessionStorage.getItem('ct-review-reload-snapshot')||localStorage.getItem('ct-review-reload-snapshot')"),
-  "Continuity snapshots must remain same-day, bounded, viewport-compatible, visually compatible and survive a real PWA termination");
+  html.includes("localStorage.getItem('ct-review-cold-home-snapshot')")&&html.includes("snap.screen==='home'"),
+  "Cold-launch first paint may use only a same-day, compatible HOME snapshot; previous non-Home screens must never become a killed-app launch destination");
 assert(html.includes("visualVersion:12")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
-  html.includes("largerText:!!root?.classList.contains('flympusLargeText')")&&html.includes("localStorage.setItem('ct-review-reload-snapshot',serialized)"),
-  "Saved continuity snapshots must include the visual preference signature and a UID-scoped local copy for cold-open restoration");
-assert(html.indexOf('<meta name="theme-color" content="#f4f8fc" />')<html.indexOf('id="flympus-theme-bootstrap"'),
-  "Metadata must exist before the embedded theme authority executes");
+  html.includes("largerText:!!root?.classList.contains('flympusLargeText')")&&
+  html.includes("if(snapshot.screen==='home')localStorage.setItem('ct-review-cold-home-snapshot',serialized)"),
+  "HOME must keep a dedicated compatible first-paint snapshot without promoting later screens into cold-launch state");
+assert(html.indexOf('<meta name="theme-color" content="#0b3157" />')<html.indexOf('id="flympus-theme-bootstrap"')&&
+  html.includes("document.documentElement.classList.add('flympusColdBoot')")&&
+  html.includes("html.flympusColdBoot body")&&html.includes("background:#0b3157!important"),
+  "iOS cold launch must start on the branded navy canvas before any light application paint can occur");
 assert(html.includes('<meta name="color-scheme" content="light" />')&&
   themeController.includes("document.querySelector('meta[name=\"color-scheme\"]')?.setAttribute('content',resolved)"),
   "Native controls follow the exact committed resolution");
@@ -733,14 +736,18 @@ assert(html.includes("function flympusContinuitySnapshotHtml(content)")&&
   html.includes("clone.querySelectorAll?.('.modal.open')")&&
   html.includes("clone.querySelectorAll?.('.multiFilterMenu,.datePickerPanel')"),
   "Continuity snapshots must strip transient dialogs, menus and picker overlays that would otherwise flash on resume");
-assert(html.includes("topHidden:scrollY>64&&")&&html.includes("if(snap.topHidden&&y>64)"),
-  "Snapshots retain auto-hide on all devices without hiding chrome at the page top");
+assert(html.includes("topHidden:scrollY>64&&")&&html.includes("window.__FLYMPUS_RELOAD_SNAPSHOT__={...snap,scrollY:0,topHidden:false,screen:'home'}")&&
+  html.includes("window.scrollTo?.(0,0)"),
+  "Cold launch must explicitly restore HOME with visible chrome at scroll zero while ordinary saved snapshots may still record live auto-hide state");
 assert(!html.includes("touchChromeStable?false:!!hidden")&&
   html.includes("const flympusTouchPullMode=()=>flympusStandaloneMode();")&&
   html.includes("if(!customPull||top>2)return;")&&html.includes("pullStandaloneGesture=true"),
   "Touch auto-hide stays enabled while custom pull-to-refresh is isolated to an explicit top-start gesture in the installed PWA");
 assert(html.includes("snap.localDay===localDay"),
   "A snapshot from a previous local day must never flash before today's plan renders");
+assert(html.includes("initialUiState.screen='home'")&&html.includes("if(flympusPushBootScreen&&")&&
+  !html.includes("const landing=getFlympusAppPreferences().startScreen"),
+  "A newly created document must start at HOME regardless of the previous session screen; only an explicit push deep-link may override it");
 
 
 
