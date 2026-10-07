@@ -5424,10 +5424,10 @@ body:not(.drawerCanvasFrozen) .mobileBottomNav{
   const root=document.documentElement,currentResolvedTheme=String(root.getAttribute('data-flympus-theme')||'light'),currentLanguage=String(root.getAttribute('data-flympus-language')||'en'),currentLargeText=root.classList.contains('flympusLargeText');
   const localDay=(()=>{const d=new Date(),pad=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())})();
   const viewportWidth=Math.round(window.innerWidth||document.documentElement?.clientWidth||0),viewportHeight=Math.round(window.innerHeight||document.documentElement?.clientHeight||0);
-  const snapAge=Math.max(0,Date.now()-Number(snap?.savedAt||0)),snapFresh=snapAge<=7*24*60*60*1000;
+  const snapAge=Math.max(0,Date.now()-Number(snap?.savedAt||0)),snapFresh=snapAge<=24*60*60*1000;
   const viewportCompatible=!snap?.viewportWidth||Math.abs(Number(snap.viewportWidth)-viewportWidth)<=2;
   const targetScreen=String(ui.screen||snap?.screen||'home');
-  const snapMatches=!!(snap&&snap.visualVersion===12&&snapFresh&&viewportCompatible&&typeof snap.html==='string'&&snap.screen===targetScreen&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
+  const snapMatches=!!(snap&&snap.visualVersion===12&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen===targetScreen&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
   const content=document.querySelector('#content');
   const bottomNav=document.querySelector('#mobileBottomNav');
   window.__FLYMPUS_RUNTIME_READY__=false;
