@@ -2902,19 +2902,24 @@ html,body,.app{background:var(--flympus-canvas,#f4f8fc)!important}
    it occupies only the header's original slot and scrolls away with the page.
    Therefore normal auto-hide behavior, chrome timings, and content scrolling
    are unchanged once the slot has left the viewport. */
-.app{
-  position:relative;
-}
-.app::before{
-  content:"";
-  position:absolute;
-  left:0;
-  right:0;
-  top:0;
-  height:var(--flympus-top-chrome-height,78px);
-  background:#0d3156;
-  pointer-events:none;
-  z-index:0;
+.app{position:relative}
+.app::before{content:none}
+@media(max-width:899px), (hover:none) and (pointer:coarse){
+  .app::before{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    top:0;
+    height:var(--flympus-top-chrome-height,78px);
+    background:#0d3156;
+    pointer-events:none;
+    z-index:0;
+  }
+  /* Drawer freeze temporarily converts .app into a viewport-fixed canvas.
+     Suppress the document-slot underlay for that short interaction so it can
+     never become a fixed navy strip after the slot has already scrolled away. */
+  body.drawerCanvasFrozen .app::before{content:none}
 }
 /* Keep real application surfaces above the slot paint. The header keeps its
    existing position:sticky; only main needs an explicit stacking level. */
