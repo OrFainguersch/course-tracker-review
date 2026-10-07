@@ -716,10 +716,10 @@ assert(!themeController.includes("addEventListener('change'")&&themeController.i
   "System has a persisted resolution and must not accept delayed media-query transitions");
 assert(themeController.includes("background=dark?'#07131f':'#f4f8fc'"),
   "The pre-paint canvas must match the final CSS canvas");
-assert(html.includes("snap.visualVersion===12")&&html.includes("snapFresh=snapAge<=7*24*60*60*1000")&&
-  html.includes("snap.resolvedTheme===currentResolvedTheme")&&html.includes("viewportCompatible")&&
+assert(html.includes("snap.visualVersion===12")&&html.includes("snapFresh=snapAge<=24*60*60*1000")&&
+  html.includes("snap.localDay===localDay")&&html.includes("snap.resolvedTheme===currentResolvedTheme")&&html.includes("viewportCompatible")&&
   html.includes("sessionStorage.getItem('ct-review-reload-snapshot')||localStorage.getItem('ct-review-reload-snapshot')"),
-  "Continuity snapshots must remain bounded, viewport-compatible, visually compatible and survive a real PWA termination");
+  "Continuity snapshots must remain same-day, bounded, viewport-compatible, visually compatible and survive a real PWA termination");
 assert(html.includes("visualVersion:12")&&html.includes("resolvedTheme:resolvedTheme==='dark'?'dark':'light'")&&
   html.includes("largerText:!!root?.classList.contains('flympusLargeText')")&&html.includes("localStorage.setItem('ct-review-reload-snapshot',serialized)"),
   "Saved continuity snapshots must include the visual preference signature and a UID-scoped local copy for cold-open restoration");
