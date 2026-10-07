@@ -50,27 +50,100 @@ jobs:
         with:
           node-version: 22
 
-      - name: Verify application before production deployment
-        id: app_verify
+      - name: Production gate · training core
+        id: prod_training_core
         if: steps.freshness.outputs.current == 'true'
         continue-on-error: true
-        shell: bash
-        run: |
-          node tests/training-core.test.cjs &&
-          node tests/ui-render.test.cjs &&
-          node tests/evaluation-voice.test.cjs &&
-          node tests/ios-audio-lifecycle.test.cjs &&
-          node tests/push-notifications.test.cjs &&
-          node --test tests/sw-routing.test.cjs &&
-          node tests/auth-integration.test.cjs &&
-          node --test tests/auth-lifecycle.test.cjs &&
-          node --test tests/auth-syntax.test.cjs &&
-          node tests/deployment-email-guard.test.cjs &&
-          node --test tests/pull-lifecycle.test.cjs &&
-          node --test tests/theme-controller.test.cjs &&
-          node tests/storage-scope.test.cjs &&
-          node tests/hebrew-ui.test.cjs &&
-          node tests/i18n.test.cjs
+        run: node tests/training-core.test.cjs
+
+      - name: Production gate · UI render
+        id: prod_ui_render
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node tests/ui-render.test.cjs
+
+      - name: Production gate · evaluation voice
+        id: prod_evaluation_voice
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node tests/evaluation-voice.test.cjs
+
+      - name: Production gate · iOS audio lifecycle
+        id: prod_ios_audio
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node tests/ios-audio-lifecycle.test.cjs
+
+      - name: Production gate · Web Push
+        id: prod_push
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node tests/push-notifications.test.cjs
+
+      - name: Production gate · Firebase reserved routes
+        id: prod_sw_routing
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node --test tests/sw-routing.test.cjs
+
+      - name: Production gate · authentication foundation
+        id: prod_auth_integration
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node tests/auth-integration.test.cjs
+
+      - name: Production gate · authentication lifecycle
+        id: prod_auth_lifecycle
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node --test tests/auth-lifecycle.test.cjs
+
+      - name: Production gate · authentication syntax
+        id: prod_auth_syntax
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node --test tests/auth-syntax.test.cjs
+
+      - name: Production gate · deployment email guard
+        id: prod_deployment_guard
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node tests/deployment-email-guard.test.cjs
+
+      - name: Production gate · pull lifecycle
+        id: prod_pull_lifecycle
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node --test tests/pull-lifecycle.test.cjs
+
+      - name: Production gate · theme lifecycle
+        id: prod_theme
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node --test tests/theme-controller.test.cjs
+
+      - name: Production gate · UID storage
+        id: prod_storage
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node tests/storage-scope.test.cjs
+
+      - name: Production gate · Hebrew UI
+        id: prod_hebrew_ui
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node tests/hebrew-ui.test.cjs
+
+      - name: Production gate · Hebrew i18n
+        id: prod_i18n
+        if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node tests/i18n.test.cjs
+
+      - name: Verify application before production deployment
+        id: app_verify
+        if: steps.freshness.outputs.current == 'true' && steps.prod_training_core.outcome == 'success' && steps.prod_ui_render.outcome == 'success' && steps.prod_evaluation_voice.outcome == 'success' && steps.prod_ios_audio.outcome == 'success' && steps.prod_push.outcome == 'success' && steps.prod_sw_routing.outcome == 'success' && steps.prod_auth_integration.outcome == 'success' && steps.prod_auth_lifecycle.outcome == 'success' && steps.prod_auth_syntax.outcome == 'success' && steps.prod_deployment_guard.outcome == 'success' && steps.prod_pull_lifecycle.outcome == 'success' && steps.prod_theme.outcome == 'success' && steps.prod_storage.outcome == 'success' && steps.prod_hebrew_ui.outcome == 'success' && steps.prod_i18n.outcome == 'success'
+        run: echo "All production-gate tests passed."
 
       - name: Confirm deployment authorization is configured
         id: deploy_auth_config
