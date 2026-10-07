@@ -1,16 +1,14 @@
 /* FLYMPUS authentication shell · Google + Microsoft · Firebase Spark */
 html.flympusAuthBooting body,
+html.flympusAuthReturning body,
 html.flympusAuthLocked body,
 html.flympusAuthPreview body{overflow:hidden!important}
 
-/* Returning authenticated refreshes keep the last rendered app visible while
-   Firebase silently revalidates the persisted session. Interaction remains
-   blocked until verification completes. */
-html.flympusAuthReturning .app{
-  pointer-events:none!important;
-  user-select:none!important
-}
-
+/* A persisted UID hint is not proof of a currently verified session. Returning
+   launches are fail-closed visually as well as interactively: cached Home
+   content must never paint before Firebase + the active Firestore profile are
+   verified. */
+html.flympusAuthReturning .app,
 html.flympusAuthBooting .app,
 html.flympusAuthLocked .app,
 html.flympusAuthPreview .app{
@@ -20,7 +18,7 @@ html.flympusAuthPreview .app{
 }
 
 #flympusAuthRoot[hidden]{display:none!important}
-html:not(.flympusAuthBooting) #flympusAuthRoot.flympusAuthInitial{display:none!important}
+html:not(.flympusAuthBooting):not(.flympusAuthReturning) #flympusAuthRoot.flympusAuthInitial{display:none!important}
 #flympusAuthRoot{
   position:fixed;
   inset:0;
