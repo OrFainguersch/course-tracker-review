@@ -178,7 +178,7 @@ function syncAuthAdjacentChromeLanguage(){
   document.getElementById('topNotificationBtn')?.setAttribute('aria-label',tr('Notifications'));document.getElementById('topPersonalProfileBtn')?.setAttribute('aria-label',tr('Account menu'))
 }
 function root(){let el=document.getElementById('flympusAuthRoot');if(el)return el;el=document.createElement('div');el.id='flympusAuthRoot';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','FLYMPUS sign in');el.hidden=true;document.body.appendChild(el);return el}
-function shell(body){const el=root();el.classList.remove('flympusAuthInitial');el.dir=authLanguage()==='he'?'rtl':'ltr';el.innerHTML='<div class="flympusAuthShell"><section class="flympusAuthCard"><div class="flympusAuthCardBody"><div class="flympusAuthMiniBrand" aria-hidden="true"><img src="./assets/flympus-app-icon.webp" alt=""></div>'+body+'</div></section></div>';el.hidden=false;return el}
+function shell(body){document.documentElement.classList.remove('flympusColdBoot');const el=root();el.classList.remove('flympusAuthInitial');el.dir=authLanguage()==='he'?'rtl':'ltr';el.innerHTML='<div class="flympusAuthShell"><section class="flympusAuthCard"><div class="flympusAuthCardBody"><div class="flympusAuthMiniBrand" aria-hidden="true"><img src="./assets/flympus-app-icon.webp" alt=""></div>'+body+'</div></section></div>';el.hidden=false;return el}
 function cancelSilentAuthLoading(){
   if(silentAuthLoadingTimer!==null){clearTimeout(silentAuthLoadingTimer);silentAuthLoadingTimer=null}
 }
@@ -193,7 +193,7 @@ function scheduleSilentAuthLoading(copy='Starting secure authentication…'){
   },2200)
 }
 function lockApp(){document.documentElement.classList.add(preview&&!enabled?'flympusAuthPreview':'flympusAuthLocked');document.documentElement.classList.remove('flympusAuthBooting','flympusAuthReturning','flympusAuthResuming')}
-function unlockApp(){cancelSilentAuthLoading();document.documentElement.classList.remove('flympusAuthBooting','flympusAuthReturning','flympusAuthResuming','flympusAuthLocked','flympusAuthPreview');const el=document.getElementById('flympusAuthRoot');if(el)el.hidden=true}
+function unlockApp(){cancelSilentAuthLoading();document.documentElement.classList.remove('flympusColdBoot','flympusAuthBooting','flympusAuthReturning','flympusAuthResuming','flympusAuthLocked','flympusAuthPreview');const el=document.getElementById('flympusAuthRoot');if(el)el.hidden=true}
 function statusBlock(kind,title,copy){const icon=kind==='error'?'!':kind==='pending'?'…':'✓';return '<div class="flympusAuthStatus '+esc(kind)+'"><span class="flympusAuthStatusIcon">'+icon+'</span><div><b>'+esc(title)+'</b><span>'+esc(copy)+'</span></div></div>'}
 function showLoading(copy='Checking your account…'){api.status='loading';shell('<div class="flympusAuthSpinner" aria-hidden="true"></div><p class="flympusAuthEyebrow">'+esc(tr('SECURE SIGN IN'))+'</p><h1 class="flympusAuthTitle">'+esc(tr('Opening FLYMPUS'))+'</h1><p class="flympusAuthCopy">'+esc(tr(copy))+'</p>')}
 function providerButtons(disabled=false){const microsoftButton=cfg.microsoftEnabled===true?'<button class="flympusAuthProvider" type="button" data-auth-provider="microsoft" '+(disabled?'disabled':'')+'><span class="flympusAuthProviderMark flympusMicrosoftMark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span data-auth-provider-label>'+esc(tr('Continue with Microsoft'))+'</span></button>':'';return '<div class="flympusAuthProviders"><button class="flympusAuthProvider" type="button" data-auth-provider="google" '+(disabled?'disabled':'')+'><span class="flympusAuthProviderMark" aria-hidden="true">G</span><span data-auth-provider-label>'+esc(tr('Continue with Google'))+'</span></button>'+microsoftButton+'</div>'}
@@ -734,7 +734,7 @@ async function boot(){
   if(!enabled){
     api.status='disabled';
     if(preview){showLogin({setupPreview:true})}
-    else document.documentElement.classList.remove('flympusAuthBooting','flympusAuthReturning','flympusAuthLocked','flympusAuthPreview');
+    else document.documentElement.classList.remove('flympusColdBoot','flympusAuthBooting','flympusAuthReturning','flympusAuthLocked','flympusAuthPreview');
     return
   }
   if(!firebaseConfigReady()){
