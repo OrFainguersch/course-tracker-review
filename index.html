@@ -1,11 +1,22 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script>document.documentElement.classList.add('flympusColdBoot')</script>
+<style id="flympus-cold-boot-style">
+html.flympusColdBoot,
+html.flympusColdBoot body{
+  background:#0b3157!important
+}
+html.flympusColdBoot .app,
+html.flympusColdBoot #flympusAuthRoot{
+  visibility:hidden!important
+}
+</style>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta charset="utf-8" />
-<meta name="theme-color" content="#f4f8fc" />
+<meta name="theme-color" content="#0b3157" />
 <meta name="color-scheme" content="light" />
 <!-- FLYMPUS_THEME_BOOTSTRAP_START -->
 <script id="flympus-theme-bootstrap">
@@ -37,14 +48,17 @@
     // Flush the old and new styles while transitions are disabled, in this
     // same task. No timer or animation frame may expose an intermediate palette.
     if(changing){root.classList.add('flympusThemeCommit');void root.offsetWidth}
-    const dark=resolved==='dark',background=dark?'#07131f':'#f4f8fc';
+    const dark=resolved==='dark',background=dark?'#07131f':'#f4f8fc',chromeTheme=dark?'#0d1e2f':'#0b3157';
     root.setAttribute('data-flympus-theme',resolved);
     root.setAttribute('data-flympus-theme-mode',mode);
     root.style.colorScheme=resolved;
     root.style.backgroundColor=background;
     root.style.setProperty('--flympus-canvas',background);
     root.style.setProperty('--flympus-ink',dark?'#eef5fb':'#0f172a');
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',background);
+    /* Keep iOS/PWA launch/status chrome branded even while the page canvas is
+       light. A light theme-color is what produces the white launch flash before
+       the first application paint on some standalone iOS restores. */
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',chromeTheme);
     document.querySelector('meta[name="color-scheme"]')?.setAttribute('content',resolved);
     writeTheme(RESOLVED_KEY,resolved);
     if(systemResolved)writeTheme(SYSTEM_KEY,systemResolved);
@@ -125,7 +139,7 @@
    still owns notification permission/subscription later; this early call only
    makes the next cold launch independent of mobile network latency. */
 try{
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261007-ios-seam-0754',{scope:'./',updateViaCache:'none'}).catch(()=>{})
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261007-cold-home-0755',{scope:'./',updateViaCache:'none'}).catch(()=>{})
 }catch{}
 </script>
 <title>FLYMPUS — Train. Track. Progress.</title>
@@ -5415,7 +5429,7 @@ body:not(.drawerCanvasFrozen) .mobileBottomNav{
 <body>
 <div id="flympusAuthRoot" class="flympusAuthInitial" role="dialog" aria-modal="true" aria-label="FLYMPUS sign in"><div class="flympusAuthShell"><section class="flympusAuthCard"><div class="flympusAuthCardBody"><div class="flympusAuthMiniBrand" aria-hidden="true"><img src="./assets/flympus-app-icon.webp" alt=""></div><h1 class="flympusAuthTitle">Sign in to FLYMPUS</h1><p class="flympusAuthCopy">Continue with the Google account assigned to you.</p><div class="flympusAuthProviders"><button class="flympusAuthProvider" type="button" disabled><span class="flympusAuthProviderMark" aria-hidden="true">G</span><span class="flympusAuthProviderLabel">Continue with Google</span></button></div><p class="flympusAuthFine">FLYMPUS uses your account only to verify your identity. It does not read your Gmail or Outlook.</p></div></section></div></div>
 <script>(()=>{const r=document.getElementById('flympusAuthRoot');if(!r)return;const he=document.documentElement.getAttribute('data-flympus-language')==='he',returning=document.documentElement.classList.contains('flympusAuthReturning')||document.documentElement.classList.contains('flympusAuthResuming');if(he)r.dir='rtl';if(returning){r.hidden=true;return}if(he){r.querySelector('.flympusAuthTitle').textContent='כניסה ל־FLYMPUS';r.querySelector('.flympusAuthCopy').textContent='התחבר עם חשבון Google שהוקצה לך.';r.querySelector('.flympusAuthProviderLabel').textContent='המשך עם Google';r.querySelector('.flympusAuthFine').textContent='FLYMPUS משתמש בחשבון רק לצורך זיהוי. אין לו גישה ל־Gmail או ל־Outlook שלך.'}})()</script>
-<div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><div class="menuBtnWrap"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button></div><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><div class="notificationCenterFooter"><button class="notificationSettingsLink" id="notificationSettingsLink" type="button">Notification settings</button></div></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Account menu" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown accountQuickMenu" id="topPersonalProfileDropdown" role="dialog" aria-label="Account menu" hidden><button class="personalProfileHead accountProfileShortcut" id="quickMyProfile" type="button" aria-label="Open My Profile"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small id="personalProfileRole">Account</small></div><span class="accountProfileChevron" aria-hidden="true">›</span></button><div class="personalProfileBody accountQuickActions"><button class="accountQuickAction accountQuickSignOut" type="button" id="quickSignOut"><span class="accountQuickIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M10 5H5v14h5"></path><path d="M14 8l4 4-4 4M18 12H9"></path></svg></span><span><b>Sign out of FLYMPUS</b><small id="personalProfileEmail"></small></span></button><input id="personalPhotoInput" type="file" accept="image/*" hidden></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><button class="drawerFooter drawerProfileShortcut" id="drawerProfileShortcut" type="button" data-go="my-profile" aria-label="Open My Profile"><div class="avatar"><span data-current-user-avatar>OF</span></div><div class="drawerProfileCopy"><b id="drawerProfileName">Or Fainguersch</b><small id="drawerProfileRole">Account</small></div><span class="drawerProfileArrow" aria-hidden="true">›</span></button></aside></div><main id="content"><div class="flympusBootShell" aria-hidden="true"><div class="flympusBootHero"><i></i><b></b><span></span><span></span><span></span></div><div class="flympusBootCard"><b></b><i></i><i></i><i></i><i></i></div></div></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0754 · iOS pull seam guard + verified continuity</div><div class="toast" id="toast"></div></div>
+<div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><div class="menuBtnWrap"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button></div><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><div class="notificationCenterFooter"><button class="notificationSettingsLink" id="notificationSettingsLink" type="button">Notification settings</button></div></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Account menu" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown accountQuickMenu" id="topPersonalProfileDropdown" role="dialog" aria-label="Account menu" hidden><button class="personalProfileHead accountProfileShortcut" id="quickMyProfile" type="button" aria-label="Open My Profile"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><small id="personalProfileRole">Account</small></div><span class="accountProfileChevron" aria-hidden="true">›</span></button><div class="personalProfileBody accountQuickActions"><button class="accountQuickAction accountQuickSignOut" type="button" id="quickSignOut"><span class="accountQuickIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M10 5H5v14h5"></path><path d="M14 8l4 4-4 4M18 12H9"></path></svg></span><span><b>Sign out of FLYMPUS</b><small id="personalProfileEmail"></small></span></button><input id="personalPhotoInput" type="file" accept="image/*" hidden></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><button class="drawerFooter drawerProfileShortcut" id="drawerProfileShortcut" type="button" data-go="my-profile" aria-label="Open My Profile"><div class="avatar"><span data-current-user-avatar>OF</span></div><div class="drawerProfileCopy"><b id="drawerProfileName">Or Fainguersch</b><small id="drawerProfileRole">Account</small></div><span class="drawerProfileArrow" aria-hidden="true">›</span></button></aside></div><main id="content"><div class="flympusBootShell" aria-hidden="true"><div class="flympusBootHero"><i></i><b></b><span></span><span></span><span></span></div><div class="flympusBootCard"><b></b><i></i><i></i><i></i><i></i></div></div></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0755 · cold HOME top + branded launch + iOS seam guard</div><div class="toast" id="toast"></div></div>
 <script>
 (()=>{try{
   /* Keep course context visible without turning the global header into a
@@ -5431,12 +5445,8 @@ body:not(.drawerCanvasFrozen) .mobileBottomNav{
   try{if('scrollRestoration' in history)history.scrollRestoration='manual'}catch{}
   document.documentElement.classList.add('flympusHydrating');
 
-  let snap=null,ui={};
-  try{
-    const raw=sessionStorage.getItem('ct-review-reload-snapshot')||localStorage.getItem('ct-review-reload-snapshot')||'null';
-    snap=JSON.parse(raw)
-  }catch{}
-  try{ui=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
+  let snap=null;
+  try{snap=JSON.parse(localStorage.getItem('ct-review-cold-home-snapshot')||'null')}catch{}
   const active=JSON.parse(localStorage.getItem('ct-review-active-course')||'{}')||{};
   const activeCourse=String(active.courseCode||'AEP-26');
   const root=document.documentElement,currentResolvedTheme=String(root.getAttribute('data-flympus-theme')||'light'),currentLanguage=String(root.getAttribute('data-flympus-language')||'en'),currentLargeText=root.classList.contains('flympusLargeText');
@@ -5444,8 +5454,8 @@ body:not(.drawerCanvasFrozen) .mobileBottomNav{
   const viewportWidth=Math.round(window.innerWidth||document.documentElement?.clientWidth||0),viewportHeight=Math.round(window.innerHeight||document.documentElement?.clientHeight||0);
   const snapAge=Math.max(0,Date.now()-Number(snap?.savedAt||0)),snapFresh=snapAge<=24*60*60*1000;
   const viewportCompatible=!snap?.viewportWidth||Math.abs(Number(snap.viewportWidth)-viewportWidth)<=2;
-  const targetScreen=String(ui.screen||snap?.screen||'home');
-  const snapMatches=!!(snap&&snap.visualVersion===12&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen===targetScreen&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
+  const targetScreen='home';
+  const snapMatches=!!(snap&&snap.visualVersion===12&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen==='home'&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
   const content=document.querySelector('#content');
   const bottomNav=document.querySelector('#mobileBottomNav');
   window.__FLYMPUS_RUNTIME_READY__=false;
@@ -5597,19 +5607,12 @@ body:not(.drawerCanvasFrozen) .mobileBottomNav{
         }
       }
     }
-    window.__FLYMPUS_RELOAD_SNAPSHOT__=snap;
-    const y=Math.max(0,Number(snap.scrollY||0));
-    if(snap.topHidden&&y>64){
-      document.body.classList.add('topChromeHidden');
-      document.querySelector('.top')?.classList.add('topHidden');
-      bottomNav?.classList.add('dockHidden');
-    }else{
-      document.body.classList.remove('topChromeHidden');
-      document.querySelector('.top')?.classList.remove('topHidden');
-      bottomNav?.classList.remove('dockHidden');
-    }
-    try{window.scrollTo(0,y)}catch{}
-    requestAnimationFrame?.(()=>{try{window.scrollTo(0,y)}catch{}});
+    window.__FLYMPUS_RELOAD_SNAPSHOT__={...snap,scrollY:0,topHidden:false,screen:'home'};
+    document.body.classList.remove('topChromeHidden');
+    document.querySelector('.top')?.classList.remove('topHidden');
+    bottomNav?.classList.remove('dockHidden');
+    try{window.scrollTo(0,0)}catch{}
+    requestAnimationFrame?.(()=>{try{window.scrollTo(0,0)}catch{}});
   }else if(content){
     content.innerHTML='<div class="flympusBootShell" aria-hidden="true"><div class="flympusBootHero"><i></i><b></b><span></span><span></span><span></span></div><div class="flympusBootCard"><b></b><i></i><i></i><i></i><i></i></div></div>';
   }
@@ -6568,11 +6571,12 @@ if(!window.__flympusI18nObserverBound&&window.MutationObserver){
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
 const flympusPushBootParams=(()=>{try{return new URLSearchParams(location.search)}catch{return new URLSearchParams()}})();
 const flympusPushBootScreen=String(flympusPushBootParams.get('pushScreen')||''),flympusPushBootCourse=String(flympusPushBootParams.get('pushCourse')||'');
+/* A new document means a real cold launch/reload, not a resume. Cold launches
+   always enter HOME at the top. Background/minimize resumes never execute this
+   bootstrap and therefore keep the live screen + scroll position untouched.
+   Push navigation is the only deliberate cold-launch screen override. */
+initialUiState.screen='home';
 if(flympusPushBootScreen&&['home','courses','roster','planned','record','reports','evaluation','safety','exams'].includes(flympusPushBootScreen))initialUiState.screen=flympusPushBootScreen;
-else if(!sessionStorage.getItem('ct-review-ui')){
-  const landing=getFlympusAppPreferences().startScreen;
-  if(['home','courses','roster','planned','record','reports'].includes(landing))initialUiState.screen=landing
-}
 const state={screen:'home',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',rosterStatuses:[],rosterRoles:[],rosterDateFrom:'',rosterDateTo:'',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',reportTrainees:[],reportInstructors:[],reportSyllabi:[],reportDateFrom:'',reportDateTo:'',myCoursesStatuses:[],myCoursesSectors:[],myCoursesPhases:[],myCoursesPlatforms:[],myCoursesTrainings:[],myCoursesCountries:[],myCoursesRoles:[],myCoursesDateFrom:'',myCoursesDateTo:'',packageNameFilters:[],packagePhaseFilters:[],packagePlatformFilters:[],packageCategoryFilters:[],packageContextFilters:[],safetyView:'new',evaluationView:'new',examsView:'new',...initialUiState};
 let courseTailorEditSnapshot=null;
 let advancedArchitectureEditSnapshot=null;
@@ -11548,6 +11552,7 @@ function saveFlympusReloadSnapshot(){
     const serialized=JSON.stringify(snapshot);
     sessionStorage.setItem('ct-review-reload-snapshot',serialized);
     localStorage.setItem('ct-review-reload-snapshot',serialized);
+    if(snapshot.screen==='home')localStorage.setItem('ct-review-cold-home-snapshot',serialized);
   }catch{}
 }
 window.addEventListener('pagehide',saveFlympusReloadSnapshot,{capture:true});
@@ -11572,21 +11577,21 @@ if(['roster','planned','home','record','reports'].includes(earlyNavTarget)){
   render();
 }
 
-/* If this is a real reload, keep Safari's scroll restoration under app control
-   and reveal the fully rendered screen only after the exact previous viewport
-   has been put back. No intermediate Home/skeleton frame is shown. */
+/* A newly created document is a cold launch/reload. It must never inherit the
+   previous document's scroll offset. A simple minimize/resume keeps the same
+   document and therefore bypasses this reset entirely. */
 (()=>{
-  const snap=window.__FLYMPUS_RELOAD_SNAPSHOT__;
-  if(!snap){
-    document.documentElement.classList.remove('flympusHydrating');
-    return;
-  }
-  const y=Math.max(0,Number(snap.scrollY||0));
-  const restore=()=>{try{window.scrollTo(0,y)}catch{}};
-  restore();
+  const restoreTop=()=>{try{
+    const scroller=document.scrollingElement||document.documentElement;
+    if(scroller)scroller.scrollTop=0;
+    if(document.documentElement)document.documentElement.scrollTop=0;
+    if(document.body)document.body.scrollTop=0;
+    window.scrollTo?.(0,0)
+  }catch{}};
+  restoreTop();
   if(typeof requestAnimationFrame==='function'){
-    requestAnimationFrame(()=>{restore();requestAnimationFrame(()=>{
-      restore();
+    requestAnimationFrame(()=>{restoreTop();requestAnimationFrame(()=>{
+      restoreTop();
       document.documentElement.classList.remove('flympusHydrating');
       window.__FLYMPUS_RELOAD_SNAPSHOT__=null;
     })});
