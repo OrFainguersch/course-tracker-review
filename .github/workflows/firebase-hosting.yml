@@ -55,7 +55,7 @@ jobs:
         if: steps.freshness.outputs.current == 'true'
         continue-on-error: true
         shell: bash
-        run: node --test tests/*.test.cjs
+        run: node --test --test-concurrency=1 tests/*.test.cjs
 
       - name: Confirm deployment authorization is configured
         id: deploy_auth_config
