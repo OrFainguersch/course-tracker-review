@@ -5330,8 +5330,7 @@ html[data-flympus-language="he"] body.drawerCanvasFrozen.drawerPushOpen .app{
    canvas. Header and bottom dock remain viewport chrome; only the document
    content is offset by the saved page scroll. */
 body.drawerCanvasFrozen main{
-  position:relative!important;
-  top:calc(-1 * var(--drawer-freeze-y,0px))!important
+  position:relative!important
 }
 body.drawerCanvasFrozen .top{
   top:0!important
@@ -6939,21 +6938,21 @@ function bottomNavIconSvg(name,filled=false){
 }
 let drawerCanvasFreezeY=0,drawerCanvasReleaseTimer=0;
 function freezeDrawerCanvas(){
-  const body=document.body,app=document.querySelector('.app');
+  const body=document.body,app=document.querySelector('.app'),content=$('#content');
   if(!body||body.classList.contains('drawerCanvasFrozen'))return;
   clearTimeout(drawerCanvasReleaseTimer);
   drawerCanvasFreezeY=Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0));
-  body.style.setProperty('--drawer-freeze-y',drawerCanvasFreezeY+'px');
+  if(content?.style)content.style.top=(-drawerCanvasFreezeY)+'px';
   body.classList.add('drawerCanvasFrozen');
   /* Flush the exact unshifted frozen viewport before the horizontal state is
      applied. This preserves the approved 0749 push/pull animation. */
   void app?.offsetWidth
 }
 function releaseDrawerCanvas(){
-  const body=document.body;
+  const body=document.body,content=$('#content');
   if(!body)return;
   body.classList.remove('drawerCanvasFrozen');
-  body.style.removeProperty('--drawer-freeze-y');
+  if(content?.style)content.style.top='';
   drawerCanvasFreezeY=0
 }
 function setDrawerOpen(open){
