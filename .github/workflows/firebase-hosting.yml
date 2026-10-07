@@ -53,18 +53,13 @@ jobs:
       - name: Verify application before production deployment
         id: app_verify
         if: steps.freshness.outputs.current == 'true'
+        continue-on-error: true
         shell: bash
-        run: |
-          if node --test tests/*.test.cjs; then
-            echo "deploy_ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "::warning::Application verification failed. Production remains unchanged."
-            echo "deploy_ready=false" >> "$GITHUB_OUTPUT"
-          fi
+        run: node --test tests/*.test.cjs
 
       - name: Confirm deployment authorization is configured
         id: deploy_auth_config
-        if: steps.freshness.outputs.current == 'true' && steps.app_verify.outputs.deploy_ready == 'true'
+        if: steps.freshness.outputs.current == 'true' && steps.app_verify.outcome == 'success'
         env:
           WIF_PROVIDER: ${{ vars.FIREBASE_WIF_PROVIDER }}
           SERVICE_ACCOUNT: ${{ vars.FIREBASE_DEPLOY_SERVICE_ACCOUNT }}
@@ -129,7 +124,7 @@ jobs:
         if: always() && steps.freshness.outputs.current == 'true'
         shell: bash
         run: |
-          if [ "${{ steps.app_verify.outputs.deploy_ready }}" != "true" ]; then
+          if [ "${{ steps.app_verify.outcome }}" != "success" ]; then
             echo "::warning::Verification did not pass. Production was not changed."
           elif [ "${{ steps.deploy_auth_config.outputs.configured }}" != "true" ]; then
             echo "::warning::Deployment credentials are unavailable. Production was not changed."
