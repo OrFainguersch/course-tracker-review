@@ -147,13 +147,15 @@ assert(auth.includes("if(returningScopedSession){")&&auth.includes("if(!trustedV
 assert(auth.includes("else api.status='booting';"),'Signed-out first paint should keep the compact login surface instead of flashing a loading card');
 assert(auth.includes("if(!returningScopedSession&&!silent)scheduleSilentAuthLoading('Verifying FLYMPUS access…');")&&auth.includes("handleSignedIn(auth.currentUser,version,{silent:true})"),'Only an explicit provider sign-in may escalate to the delayed authentication loader; passive cold-open and in-place refresh revalidation stay silent');
 assert(auth.includes('function cancelSilentAuthLoading()')&&auth.includes('function unlockApp(){cancelSilentAuthLoading();'),'Successful auth must cancel any delayed splash before unlocking the application');
+assert(html.includes("document.documentElement.classList.add('flympusColdBoot')")&&html.includes("html.flympusColdBoot .app")&&html.includes("html.flympusColdBoot #flympusAuthRoot"),
+  'Cold document startup must stay on an opaque branded canvas until auth chooses the application or a real auth screen');
 
 
 assert(css.includes('html.flympusAuthReturning .app')&&css.includes('visibility:hidden!important')&&css.includes('html.flympusAuthResuming .app')&&css.includes('visibility:visible!important')&&css.includes('pointer-events:none!important'),'Offline/unverified returning auth must remain opaque while a previously ACTIVE online resume may preserve pixels but never interaction');
 assert(css.includes('html.flympusAuthReturning #flympusAuthRoot.flympusAuthInitial')&&css.includes('html.flympusAuthResuming #flympusAuthRoot.flympusAuthInitial')&&css.includes('display:none!important'),'Both returning modes must suppress the static authentication card');
 assert(auth.includes('if(enforce&&!returningScopedSession)lockApp();'),'Fresh enforced sessions must still enter the opaque auth lock');
 assert(auth.includes("showFatal('Authentication unavailable','Could not load the Firebase authentication service. Check the connection and Firebase setup.')"),'Offline Firebase startup must keep the gate closed and render the authentication error');
-assert(auth.includes("classList.remove('flympusAuthBooting','flympusAuthReturning','flympusAuthResuming','flympusAuthLocked'"),'Only successful verified auth may clear all returning-session guards');
+assert(auth.includes("classList.remove('flympusColdBoot','flympusAuthBooting','flympusAuthReturning','flympusAuthResuming','flympusAuthLocked'")&&auth.includes("function shell(body){document.documentElement.classList.remove('flympusColdBoot')"),'A real auth destination must release the branded cold canvas, and only verified auth may clear all returning-session guards');
 
 
 assert(storage.includes("const UID_PERSISTED_KEY='flympus-auth-scope-last-uid'"),'Returning PWA launches must retain a durable UID namespace hint');
