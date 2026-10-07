@@ -86,6 +86,10 @@ test('returning top chrome uses the same timing authority as the bottom dock wit
   assert.doesNotMatch(html,/flympusChromeReturning/);
   assert.doesNotMatch(html,/--flympus-top-reveal-bg/);
 });
+test('mobile top chrome is fixed to the viewport while preserving its flow footprint',()=>{
+  assert.match(html,/Viewport-owned mobile chrome · 0758/);
+  assert.match(html,/@media\(max-width:899px\), \(hover:none\) and \(pointer:coarse\)\{[\s\S]*\.app\{[\s\S]*padding-top:var\(--flympus-top-chrome-height,78px\)!important[\s\S]*\.top\{[\s\S]*position:fixed!important[\s\S]*top:0!important[\s\S]*width:100%!important/);
+});
 test('touch chrome still hides on down-scroll and returns on up-scroll without moving document content',()=>{
   const h=harness({standalone:false,maxTouchPoints:5});
   const setter=html.slice(html.indexOf('function setBottomDockHidden(hidden)'),html.indexOf('function updateBottomDockFromScroll()'));
