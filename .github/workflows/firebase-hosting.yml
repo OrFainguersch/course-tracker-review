@@ -55,7 +55,22 @@ jobs:
         if: steps.freshness.outputs.current == 'true'
         continue-on-error: true
         shell: bash
-        run: node --test --test-concurrency=1 tests/*.test.cjs
+        run: |
+          node tests/training-core.test.cjs &&
+          node tests/ui-render.test.cjs &&
+          node tests/evaluation-voice.test.cjs &&
+          node tests/ios-audio-lifecycle.test.cjs &&
+          node tests/push-notifications.test.cjs &&
+          node --test tests/sw-routing.test.cjs &&
+          node tests/auth-integration.test.cjs &&
+          node --test tests/auth-lifecycle.test.cjs &&
+          node --test tests/auth-syntax.test.cjs &&
+          node tests/deployment-email-guard.test.cjs &&
+          node --test tests/pull-lifecycle.test.cjs &&
+          node --test tests/theme-controller.test.cjs &&
+          node tests/storage-scope.test.cjs &&
+          node tests/hebrew-ui.test.cjs &&
+          node tests/i18n.test.cjs
 
       - name: Confirm deployment authorization is configured
         id: deploy_auth_config
