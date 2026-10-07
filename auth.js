@@ -667,10 +667,10 @@ async function confirmManagedUserAction(action){const copy={approve:['Approve th
 async function updateManagedUser(uid,action,button){if(!canManageUsers()||!uid||uid===currentUser?.uid)return;const target=lastManagedDirectory.users.find(x=>x.uid===uid);if(!target||!canManageTargetRole(target.role,uid))return;if(!(await confirmManagedUserAction(action)))return;const changes={updatedAt:firestoreSdk.serverTimestamp(),updatedBy:currentUser.uid};if(action==='approve'||action==='reactivate')changes.status='active';if(action==='block')changes.status='blocked';if(action==='make-admin')changes.role='admin';if(action==='make-user')changes.role='user';button.disabled=true;try{await firestoreSdk.updateDoc(firestoreSdk.doc(db,'users',uid),changes);managedDirectoryCache=await loadManagedDirectory();renderUserManagement(managedDirectoryCache)}catch(err){console.error('FLYMPUS user-management update failed',err);button.disabled=false;renderUserManagement(lastManagedDirectory,String(err?.message||tr('Update failed')))}}
 function bindAuthLanguageSync(){if(window.__FLYMPUS_AUTH_LANGUAGE_BOUND__)return;window.__FLYMPUS_AUTH_LANGUAGE_BOUND__=true;syncAuthAdjacentChromeLanguage();if(typeof MutationObserver!=='function')return;const observer=new MutationObserver(records=>{if(!records.some(x=>x.attributeName==='data-flympus-language'))return;syncAuthAdjacentChromeLanguage();if(currentUser&&currentProfile)syncAuthenticatedChrome(currentUser,currentProfile);const manager=document.getElementById('flympusUserManagementPageRoot')||document.getElementById('flympusUserManagementRoot');if(manager&&(!manager.hidden||manager.id==='flympusUserManagementPageRoot'))renderUserManagement(lastManagedDirectory,lastManagedError,manager)});observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-flympus-language']})}
 async function handleSignedIn(user,version=authStateVersion){
-  /* Keep the compact sign-in surface in place while profile verification runs.
-     Fast successful sign-ins now return directly to the app without flashing a
-     second full-screen loading card; slow verification still fails closed. */
-  scheduleSilentAuthLoading('Verifying FLYMPUS access…');
+  /* A passive returning launch must never look like a new sign-in. Keep it
+     visually silent while Firebase and Firestore revalidate the existing
+     session. Only an explicit provider sign-in may show a delayed auth loader. */
+  if(!returningScopedSession)scheduleSilentAuthLoading('Verifying FLYMPUS access…');
   try{
     let profile=normalizeProfile(await ensureUserProfile(user));profile=normalizeProfile(await ensureOwnerBootstrap(user,profile));
     /* Token refreshes and rapid iOS lifecycle changes can deliver a newer auth
@@ -711,9 +711,9 @@ async function boot(){
     /* A stored UID scope only tells us which local namespace was last verified;
        it is never authorization for the current launch. Keep the application
        opaque until Firebase restores the session AND Firestore confirms an
-       active profile. This also prevents offline/airplane-mode Home flashes. */
+       active profile, but do not present this passive revalidation as a login. */
     lockApp();
-    showLoading('Starting secure authentication…')
+    api.status='booting'
   }else api.status='booting';
   try{
     const [appModule,authModule,firestoreModule]=await Promise.all([
