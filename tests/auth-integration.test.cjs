@@ -18,7 +18,9 @@ assert(html.indexOf('./firebase-config.js')<html.indexOf('</head>'),'Firebase co
 assert(html.indexOf('id="flympus-theme-bootstrap"')<html.indexOf('./firebase-config.js'),'First-paint theme must resolve before network-dependent Firebase startup scripts');
 assert(html.indexOf('id="flympus-theme-bootstrap"')<html.indexOf('./storage-scope.js'),'Device-level appearance preferences must resolve before private application storage is installed');
 assert(html.includes("document.documentElement.classList.add(returning?'flympusAuthReturning':'flympusAuthBooting')"),
-  'Returning sessions must avoid the hidden boot shell while new sessions remain fail-closed');
+  'Returning sessions must be identified before body paint so cached content remains fail-closed until verification');
+assert(html.includes('id="flympus-auth-critical-gate"')&&html.indexOf('id="flympus-auth-critical-gate"')<html.indexOf('./auth.css?v='),
+  'Critical auth hiding must be inline before the external auth stylesheet for offline/cold-start protection');
 
 assert(config.includes('enabled:true'),'Firebase authentication must be connected');
 assert(config.includes('enforceAuth:true'),'Authentication must be enforced after UID-scoped migration');
