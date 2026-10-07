@@ -7050,12 +7050,13 @@ function bottomNavIconSvg(name,filled=false){
   };
   return '<span class="mobileBottomIconInner bottomNavFilled" aria-hidden="true"><svg viewBox="0 0 24 24">'+(filledPaths[name]||'')+'</svg></span>';
 }
-let drawerCanvasFreezeY=0,drawerCanvasReleaseTimer=0;
+let drawerCanvasFreezeY=0,drawerCanvasFreezeScreen='',drawerCanvasReleaseTimer=0;
 function freezeDrawerCanvas(){
   const body=document.body,app=document.querySelector('.app'),content=$('#content');
   if(!body||body.classList.contains('drawerCanvasFrozen'))return;
   clearTimeout(drawerCanvasReleaseTimer);
   drawerCanvasFreezeY=Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0));
+  drawerCanvasFreezeScreen=String(state?.screen||'');
   if(content?.style)content.style.top=(-drawerCanvasFreezeY)+'px';
   body.classList.add('drawerCanvasFrozen');
   /* Flush the exact unshifted frozen viewport before the horizontal state is
@@ -7064,10 +7065,33 @@ function freezeDrawerCanvas(){
 }
 function releaseDrawerCanvas(){
   const body=document.body,content=$('#content');
-  if(!body)return;
+  if(!body||!body.classList.contains('drawerCanvasFrozen'))return;
+  const restoreY=Math.max(0,Number(drawerCanvasFreezeY||0));
+  const restoreSameScreen=String(state?.screen||'')===drawerCanvasFreezeScreen;
+  const now=performance.now?.()||Date.now();
+
+  /* position:fixed temporarily clamps the document's real scroll offset to 0
+     on iOS. Restore the saved offset in the same task that releases the fixed
+     canvas, before the browser can paint the underlying page at the top. */
+  if(restoreSameScreen){
+    bottomDockProgrammaticRestoreUntil=Math.max(Number(bottomDockProgrammaticRestoreUntil||0),now+180);
+  }
   body.classList.remove('drawerCanvasFrozen');
   if(content?.style)content.style.top='';
-  drawerCanvasFreezeY=0
+  if(restoreSameScreen){
+    void body.offsetHeight;
+    try{window.scrollTo?.(0,restoreY)}catch{
+      const scroller=document.scrollingElement||document.documentElement;
+      if(scroller)scroller.scrollTop=restoreY;
+    }
+    bottomDockLastScrollY=restoreY;
+    bottomDockLastScrollTime=now;
+    bottomDockVelocity=0;
+    bottomDockDirection=0;
+    bottomDockDirectionTravel=0;
+  }
+  drawerCanvasFreezeY=0;
+  drawerCanvasFreezeScreen=''
 }
 function setDrawerOpen(open){
  const drawer=$('#drawer'),menuBtn=$('#menuBtn'),menuHaptic=$('#menuHapticSwitch'),isOpen=!!open;
@@ -7221,6 +7245,7 @@ function persistBottomNavScroll(){
   try{sessionStorage.setItem('ct-review-bottom-scroll',JSON.stringify(bottomNavScrollPositions))}catch{}
 }
 function rememberBottomNavScroll(){
+  if(document.body?.classList.contains('drawerCanvasFrozen'))return;
   const root=bottomNavRootForScreen(state.screen);
   if(!root||state.screen!==root)return;
   bottomNavScrollPositions[root]=Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||document.body?.scrollTop||0));
@@ -7820,7 +7845,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
 
   let pullStartY=0,pullStartX=0,pullOriginY=null,pullTracking=false;
   let pullRefreshSoundPlayed=false,pullRefreshGraph=null,pullStandaloneGesture=false;
-  let pullOffset=0,pullArmed=false,pullReturning=false,pullAnimations=[],pullFallbackRaf=null,pullFallbackTimer=null,pullReturnEpoch=0;
+  let pullOffset=0,pullArmed=false,pullReturning=false,pullReturnRefresh=false,pullAnimations=[],pullFallbackRaf=null,pullFallbackTimer=null,pullReturnEpoch=0;
 
   const pullThreshold=96;
   const pullMaxVisual=108;
@@ -7850,6 +7875,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     pullAnimations.forEach(a=>{try{a.cancel()}catch{}});
     pullAnimations=[];
     pullReturning=false;
+    pullReturnRefresh=false;
   };
 
   const resetPullStyles=()=>{
@@ -7909,6 +7935,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
     pullAnimations=[];
     clearTimeout(pullFallbackTimer);
     pullReturning=false;
+    pullReturnRefresh=false;
 
     pullNodes().forEach(el=>{
       el.style.setProperty('transform','translate3d(0,0,0)');
@@ -7988,6 +8015,7 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   const returnPull=refresh=>{
     if(pullReturning)return;
     pullReturning=true;
+    pullReturnRefresh=!!refresh;
     const epoch=++pullReturnEpoch;
 
     const from=Math.max(0,pullOffset);
@@ -8054,7 +8082,14 @@ if(document.addEventListener&&!window.__flympusPullRefreshSoundBound){
   };
 
   document.addEventListener('touchstart',e=>{
-    if(pullReturning)return;
+    /* The 680 ms spring is visual polish, not an input lock. A new physical
+       interaction ends that tail immediately so normal scrolling and chrome
+       auto-hide can respond to the finger without waiting for the spring. */
+    if(pullReturning){
+      const refresh=pullReturnRefresh;
+      cancelPullReturn();
+      finishPullReturn(refresh);
+    }
     resetPullTracking();
     if(document.documentElement.classList.contains('flympusUserManagementOpen')||document.documentElement.classList.contains('flympusPhotoCropOpen'))return;
     if(e.target?.closest?.('#mobileBottomNav,#flympusUserManagementRoot,#flympusAuthRoot,.siteDialogOverlay,.modal.open,#personalCropModal,.personalCropModal:not([hidden])'))return;
@@ -8176,13 +8211,20 @@ function setBottomDockHidden(hidden){
   body?.classList.toggle('topChromeHidden',next);
   const now=performance.now?.()||Date.now();
   bottomDockLastSwitchTime=now;
-  bottomDockTransitionLockUntil=now+(next?670:610);
+  /* The visual transition keeps its approved .58/.64s cadence, but input is
+     only debounced briefly. Do not make a decisive reverse swipe wait for the
+     entire animation to finish before it can retarget the chrome. */
+  bottomDockTransitionLockUntil=now+150;
   bottomDockVelocity=0;
   bottomDockDirection=0;
   bottomDockDirectionTravel=0;
 }
 function updateBottomDockFromScroll(){
   bottomDockTicking=false;
+  /* Opening the drawer temporarily fixes the app canvas and iOS may report a
+     synthetic scroll-to-zero. That is not user scroll and must not change the
+     chrome state or its direction baseline. */
+  if(document.body?.classList.contains('drawerCanvasFrozen'))return;
   const now=performance.now?.()||Date.now();
   const scroller=document.scrollingElement||document.documentElement;
   const rawY=Number(window.scrollY||scroller?.scrollTop||0);
@@ -8215,7 +8257,7 @@ function updateBottomDockFromScroll(){
   bottomDockLastScrollY=y;
   bottomDockLastScrollTime=now;
 
-  // Do not hide the sticky header before its normal-flow slot has scrolled away.
+  // Do not hide the viewport header before its reserved flow slot has scrolled away.
   const headerSlot=Math.max(18,Number($('.top')?.offsetHeight||78));
   if(y<=headerSlot){
     bottomDockVelocity=0;
@@ -8225,8 +8267,8 @@ function updateBottomDockFromScroll(){
     return;
   }
 
-  /* Do not allow a layout/elastic correction or a tiny reverse movement to
-     interrupt an animation that is already in flight. */
+  /* Filter only the first instant after a state switch. The animation itself
+     must never become a long input lock. */
   if(now<bottomDockTransitionLockUntil){
     bottomDockVelocity=0;
     return;

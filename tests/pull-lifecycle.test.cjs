@@ -103,4 +103,22 @@ test('touch chrome still hides on down-scroll and returns on up-scroll without m
   }
 });
 
+test('a new touch interrupts the pull return tail so scrolling can take ownership immediately',()=>{
+  const h=harness();
+  h.touch('touchstart',100);h.touch('touchmove',230);h.touch('touchend',230);
+  assert(h.window.__FLYMPUS_PULL_ACTIVE__);
+  h.touch('touchstart',100);
+  assert(!h.window.__FLYMPUS_PULL_ACTIVE__);
+  assert.equal(h.refreshes(),1);
+  assert(h.animations.every(a=>a.cancelled));
+});
+
+test('chrome decision debounce is short and drawer close restores the frozen page offset',()=>{
+  assert.match(html,/bottomDockTransitionLockUntil=now\+150/);
+  assert.doesNotMatch(html,/bottomDockTransitionLockUntil=now\+\(next\?670:610\)/);
+  assert.match(html,/function rememberBottomNavScroll\(\)\{\s*if\(document\.body\?\.classList\.contains\('drawerCanvasFrozen'\)\)return;/);
+  assert.match(html,/function updateBottomDockFromScroll\(\)\{[\s\S]*if\(document\.body\?\.classList\.contains\('drawerCanvasFrozen'\)\)return;/);
+  assert.match(html,/function releaseDrawerCanvas\(\)\{[\s\S]*const restoreY=Math\.max\(0,Number\(drawerCanvasFreezeY\|\|0\)\);[\s\S]*restoreSameScreen[\s\S]*window\.scrollTo\?\.\(0,restoreY\)/);
+});
+
 // 0754 seam regression guard: keep pull geometry device-pixel aligned on iOS.
