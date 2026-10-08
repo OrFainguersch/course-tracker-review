@@ -367,7 +367,7 @@ function applyRoleContext(user,profile){
     document.dispatchEvent(new CustomEvent('flympus:auth-ready',{detail:{
       uid:user.uid,
       email:user.email||'',
-      displayName:profile.preferredName||profile.displayName||user.displayName||'',
+      displayName:profile.displayName||user.displayName||'',
       officialName:profile.displayName||user.displayName||'',
       preferredName:profile.preferredName||'',
       nickname:profile.preferredName||'',
