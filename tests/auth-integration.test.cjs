@@ -118,7 +118,7 @@ assert(auth.includes("['owner','Full system control',['May appoint: Owner, Admin
   auth.includes("['admin','System administration',['May appoint: Training Manager, User or Duty Trainee'")&&
   auth.includes("['training_manager','Training administration',['May appoint: User or Duty Trainee'")&&
   auth.includes("['user','Operational access',['Higher than Duty Trainee; cannot appoint Duty Trainees'")&&
-  auth.includes("['duty_trainee','Restricted daily operations',['Home, Plan, Aircraft Serviceability and personal Settings only'"),
+  auth.includes("['duty_trainee','Restricted daily operations',['Home, Plan, Fleet and personal Settings only'"),
   'Role guide must enumerate all legal appointments while placing User above restricted Duty Trainee');
 assert(auth.includes("if(actor==='owner')return ['owner','admin','training_manager','duty_trainee','user']")&&
   auth.includes("if(actor==='admin')return ['training_manager','duty_trainee','user']")&&

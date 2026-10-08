@@ -1,0 +1,61 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const M=require('../assets/safety-workflow.js');
+const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
+test('Legacy records remain open until explicitly resolved and no acknowledgement is invented',()=>{
+  const old={id:'old',title:'Legacy event'};
+  assert.equal(M.status(old),'OPEN');assert.equal(M.isOpen(old),true);
+  assert.deepEqual(M.progress(old),{total:0,acknowledged:0,pending:0});
+  assert.equal(M.notification(old,'instructor-1'),false);
+  assert.equal(M.isOpen({status:'CLOSED'}),false);assert.equal(M.isOpen({status:'RESOLVED'}),false);
+  assert.equal(M.isOpen({status:'IN_PROGRESS'}),true);
+});
+test('Opening is not an acknowledgement; each assigned instructor signs independently',()=>{
+  const e={status:'OPEN',requiredAckUids:['uid1','uid2','uid2'],seenBy:{uid1:'2026-10-08'},ackBy:{uid2:'2026-10-08'}};
+  assert.deepEqual(M.recipientUids(e),['uid1','uid2']);
+  assert.equal(M.viewed(e,'uid1'),true);assert.equal(M.acknowledged(e,'uid1'),false);
+  assert.equal(M.notification(e,'uid1'),true);
+  assert.equal(M.notification(e,'uid2'),false);assert.equal(M.notification(e,'outsider'),false);
+  assert.deepEqual(M.pending(e),['uid1']);
+  assert.deepEqual(M.progress(e),{total:2,acknowledged:1,pending:1});
+  assert.equal(M.notification({...e,status:'RESOLVED'},'uid1'),false);
+});
+test('Safety backend requires verified Firebase UID enrollment; account-local roster alone is insufficient',()=>{
+  const rules=read('firestore.rules'),auth=read('auth.js');
+  assert.match(rules,/match \/courseSafety\/\{courseId\}/);
+  assert.match(rules,/function member\(\)/);
+  assert.match(rules,/request\.auth\.uid in get\(/);
+  assert.match(rules,/request\.resource\.data\.ackBy == \{\}/);
+  assert.match(rules,/ownMark\('ackBy'\)/);
+  assert.match(rules,/ownMark\('seenBy'\)/);
+  assert.match(rules,/request\.resource\.data\.diff\(resource\.data\)\.affectedKeys\(\)\.hasOnly\(\['status','statusBy','statusAt'\]\)/);
+  assert.match(auth,/rosterPreview\(emails\)/);
+  assert.match(auth,/canManageUsers\(\)/);
+  assert.match(auth,/api\.safetyCloud=Object\.freeze/);
+  assert.match(auth,/serverTimestamp\(\)/);
+});
+test('Home open-event action and notification center are wired without treating viewing as sign-off',()=>{
+  const page=read('index.html'),ui=read('assets/safety-ui.js');
+  assert.match(page,/getSafetyRecords\(\)\.filter\(window\.FLYMPUS_SAFETY_WORKFLOW\.isOpen\)/);
+  assert.match(page,/data-go="safety"/);
+  assert.match(page,/safetyUI\.banner\(\)/);
+  assert.match(page,/safetyUI\.actions\(x\)/);
+  assert.match(page,/safetyUI\.submit\(report\)/);
+  assert.match(page,/safetyUI\.inbox\(\)/);
+  assert.match(page,/safetyUI\.connect\(\)/);
+  assert.match(ui,/Acknowledge reading/);
+  assert.match(ui,/ctx\.confirm\('Confirm that you have read/);
+  assert.match(ui,/api\(\)\.viewed\(/);
+  assert.match(ui,/api\(\)\.acknowledge\(/);
+  assert.match(ui,/data-safety-status/);
+  assert.match(ui,/Events created here are NOT delivered/);
+});
+test('Fleet model is loaded under the new name without changing persisted serviceability key',()=>{
+  const page=read('index.html'),model=read('assets/fleet-model.js');
+  assert.match(page,/assets\/fleet-model\.js/);
+  assert.doesNotMatch(page,/assets\/fleet-serviceability\.js/);
+  assert.match(page,/function fleetScreen\(/);
+  assert.match(page,/function bindFleet\(/);
+  assert.match(page,/ct-review-aircraft-serviceability/);
+  assert.match(model,/FLYMPUS_FLEET_MODEL/);
+});
