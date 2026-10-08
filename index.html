@@ -8790,7 +8790,7 @@ function home(){
    '</section>'+
    '<section class="homePrimaryGrid">'+
      '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Today\'s Plan</h2><p>Scheduled flights and activities for today</p></div></div><span class="homeDateChip">▣ '+esc(todayLabel)+'</span></div></div>'+
-       '<div class="homePlanList">'+plan.map(x=>'<button class="homePlanRow" data-start-eval="'+esc(x.t.id)+'"><span class="homePlanTime">◷ '+x.time+'</span><span class="homeInitial">'+initials(x.t)+'</span><span class="homePlanMain"><b>'+esc(x.t.name)+'</b><small>'+esc(x.activity)+'</small></span><span class="homePlanTags"><span class="homeTag">'+esc(currentCourseMeta.phase)+'</span><span class="homeTag '+(x.mode==='Solo'?'solo':'instructed')+'">'+esc(x.mode)+'</span></span></button>').join('')+
+       '<div class="homePlanList">'+(function(){const flights=getDailyFlightBoard().filter(x=>x.date===todayIsoDate()&&x.platformId===currentFleetPlatform()).sort((a,b)=>String(a.time).localeCompare(String(b.time)));return flights.length?flights.map(x=>'<button class="homePlanRow" data-go="planned"><span class="homePlanTime">◷ '+esc(x.time)+'</span><span class="homeInitial">✈</span><span class="homePlanMain"><b>'+esc(x.traineeName||'Trainee')+'</b><small>'+esc(x.syllabus)+' · '+esc(x.tail)+'</small></span><span class="homePlanTags"><span class="homeTag '+(x.mode==='SOLO'?'solo':'instructed')+'">'+esc(x.mode==='SOLO'?'Solo':'Instructed')+'</span>'+(window.FLYMPUS_FLEET_MODEL.flightIssues(x,getFleetAircraft(),currentFleetPlatform())?'<span class="homeTag" style="color:#b42318">Unavailable</span>':'')+'</span></button>').join(''):'<button class="homePlanRow" data-go="planned"><span class="homePlanMain"><b>No flights scheduled yet</b><small>Open Daily Flight Board to plan flights for this course.</small></span></button>'})()+
        '</div>'+
      '</div>'+
      '<div class="homePanel homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Quick Actions</h2><p>Common daily tasks</p></div></div></div>'+
@@ -8802,6 +8802,7 @@ function home(){
        '</div>'+
      '</div>'+
    '</section>'+
+   window.FLYMPUS_FLEET_VIEW.home(currentFleetContext())+
    '<section class="homePanel homePanelPad">'+
      '<div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Course Pulse</h2><p>Key indicators for current course</p></div></div><button class="homeInlineLink" data-go="reports">View Reports</button></div>'+
      '<div class="homePulseGrid">'+
@@ -10894,6 +10895,7 @@ function plannedVsExecuted(){
  (planStarted?staticRequiredCompletionPanel('planned',planMissing):'')+
  '<section class="card pveOverview"><div class="formTitle"><h2>Day overview</h2><span class="autoDraftNote" id="plannedDraftBadge">'+(draftWrap?draftSavedLabel('planned'):'Auto-save ready')+'</span></div><div class="pveDateRow"><div><p>Instructed flights are counted automatically from submitted Evaluations. Solo flights are recorded below.</p></div><div class="pveDateControl"><label for="pveDate">Date</label><input class="input dateDmy" id="pveDate" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" required value="'+esc(dateInputValue(date))+'" placeholder="DD/MM/YYYY"></div></div>'+
  '<div class="pveSummary"><div class="pveMetric"><span>Planned</span><strong>'+total+'</strong><small>'+pi+' instructed · '+ps+' solo</small></div><div class="pveMetric"><span>Executed</span><strong>'+executed+'</strong><small>'+executedInstructed+' instructed · '+executedSolo+' solo</small></div><div class="pveMetric '+(cancelled?'short':'match')+'"><span>Cancelled</span><strong>'+cancelled+'</strong><small>'+cancelSummary+'</small></div></div></section>'+
+ courseFlightScheduleHtml(date)+
  '<section class="card pvePanel"><div class="pvePanelHead"><span class="pveSectionNo">1</span><div><h2>Plan</h2><p>Enter the number of instructed and solo flights intended for this date.</p></div></div><div class="pvePanelBody"><div class="pvePlanGrid"><label class="pveCountField" for="pvePlannedInstructed"><span>Instructed</span><small>Planned flights</small><input class="input" id="pvePlannedInstructed" type="number" min="0" step="1" required value="'+pi+'"></label><label class="pveCountField" for="pvePlannedSolo"><span>Solo</span><small>Planned flights</small><input class="input" id="pvePlannedSolo" type="number" min="0" step="1" required value="'+ps+'"></label></div></div></section>'+
  '<section class="card pvePanel"><div class="pvePanelHead"><span class="pveSectionNo">2</span><div><h2>Execution</h2><p>Instructed is automatic. Solo entry opens only when at least one solo flight is planned.</p></div></div><div class="pvePanelBody">'+
  '<div class="pveExecutionOverview"><div><span>Instructed</span><strong>'+executedInstructed+'</strong><small>From submitted Evaluations on '+esc(formatDateDMY(date))+'.</small></div><div><span>Solo</span><strong>'+executedSolo+'</strong><small>Recorded for this date</small></div></div>'+
@@ -11305,7 +11307,8 @@ if(state.screen==='settings')bindSettings();
 if(state.screen==='preferences')bindAppPreferences();
 if(state.screen==='user-management')window.FLYMPUS_AUTH?.mountUserManagementPage?.($('#flympusUserManagementPageRoot'));
 if(state.screen==='reports')bindReports();
-if(state.screen==='planned')bindPlanned();
+if(state.screen==='planned'){bindPlanned();bindDailyFlightBoard()}
+if(state.screen==='fleet')bindFleetServiceability();
 if(state.screen==='safety')bindSafety();
 if(state.screen==='exams')bindExams();
 if(state.screen==='profile'){bindActivity();bindTraineeEvaluationHistory();
@@ -11417,7 +11420,7 @@ function bindPlanned(){
    if(Number(flight.minutes)>0)events.unshift({id:'evt_'+Date.now()+'_hr',traineeId:flight.traineeId,date:flight.date,type:'TRAINING_HOUR',quantity:Math.round(Number(flight.minutes)/60*100)/100,source:'Solo flight',sourceId:flight.id,note:flight.syllabus,createdAt:stamp});
    saveActivityEvents(events)
  };
- if($('#pveDate'))$('#pveDate').onchange=e=>{const iso=normalizeDateValue(e.target.value);if(!iso)return;state.planDate=iso;state.soloEditId=null;delete state.planInstructed;delete state.planSolo;saveActivityDraft('planned',{date:iso,plannedInstructed:0,plannedSolo:0,cancellations:[],reason:'',solo:{}});syncAttentionBadges();render()};
+ if($('#pveDate'))$('#pveDate').onchange=e=>{const iso=normalizeDateValue(e.target.value);if(!iso)return;state.planDate=iso;state.flightBoardEditId=null;state.soloEditId=null;delete state.planInstructed;delete state.planSolo;saveActivityDraft('planned',{date:iso,plannedInstructed:0,plannedSolo:0,cancellations:[],reason:'',solo:{}});syncAttentionBadges();render()};
  ['pvePlannedInstructed','pvePlannedSolo'].forEach(id=>{if($('#'+id))$('#'+id).onchange=refreshPlan});
  document.querySelectorAll('.pveCancellationReason').forEach(el=>el.onchange=()=>{persistPlannedDraft();render()});
  const soloForm=$('#soloExecutionForm');if(soloForm){soloForm.addEventListener('input',persistPlannedDraft);soloForm.addEventListener('change',persistPlannedDraft);soloForm.onsubmit=e=>{
