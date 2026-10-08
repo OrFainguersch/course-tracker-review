@@ -54,6 +54,10 @@ jobs:
         id: auth_lifecycle
         continue-on-error: true
         run: node --test tests/auth-lifecycle.test.cjs
+      - name: Account switcher session isolation tests
+        id: account_switcher
+        continue-on-error: true
+        run: node --test tests/account-switcher.test.cjs
       - name: Authentication syntax test
         id: auth_syntax
         continue-on-error: true
@@ -88,7 +92,7 @@ jobs:
         shell: bash
         run: |
           failed=0
-          for result in             "${{ steps.training_core.outcome }}"             "${{ steps.ui_render.outcome }}"             "${{ steps.evaluation_voice.outcome }}"             "${{ steps.ios_audio.outcome }}"             "${{ steps.push.outcome }}"             "${{ steps.sw_routing.outcome }}"             "${{ steps.auth_integration.outcome }}"             "${{ steps.auth_lifecycle.outcome }}"             "${{ steps.auth_syntax.outcome }}"             "${{ steps.deployment_guard.outcome }}"             "${{ steps.pull_lifecycle.outcome }}"             "${{ steps.theme.outcome }}"             "${{ steps.storage.outcome }}"             "${{ steps.hebrew_ui.outcome }}"             "${{ steps.i18n.outcome }}"; do
+          for result in             "${{ steps.training_core.outcome }}"             "${{ steps.ui_render.outcome }}"             "${{ steps.evaluation_voice.outcome }}"             "${{ steps.ios_audio.outcome }}"             "${{ steps.push.outcome }}"             "${{ steps.sw_routing.outcome }}"             "${{ steps.auth_integration.outcome }}"             "${{ steps.auth_lifecycle.outcome }}"             "${{ steps.auth_syntax.outcome }}"             "${{ steps.account_switcher.outcome }}"             "${{ steps.deployment_guard.outcome }}"             "${{ steps.pull_lifecycle.outcome }}"             "${{ steps.theme.outcome }}"             "${{ steps.storage.outcome }}"             "${{ steps.hebrew_ui.outcome }}"             "${{ steps.i18n.outcome }}"; do
             if [ "$result" != "success" ]; then failed=1; fi
           done
 
