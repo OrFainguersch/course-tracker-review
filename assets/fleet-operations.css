@@ -236,7 +236,7 @@ html.flympusLargeText .coursePlanTabs button,html.flympusLargeText .dailyPlanSum
 .dailyFlightPlan .dailyPlanHeader{display:flex;align-items:center;justify-content:flex-end;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important;min-height:0}
 .dailyFlightPlan .dailyPlanDateField{width:190px;min-width:160px;flex:0 0 auto}
 .dailyFlightPlan>.fleetSchedulePlain{display:flex;flex-direction:column;gap:18px;width:100%;min-width:0;padding:0!important;border:0!important;box-shadow:none!important;background:transparent!important;margin:0!important}
-.dailyFlightPlan .fleetSchedulePlain .fleetSortieForm{max-width:1220px;width:100%;margin:0 auto;border-radius:17px;border:1px solid #d5e5f1;background:#f8fbff;box-shadow:0 4px 22px rgba(24,72,121,.045);padding:26px 28px}
+.dailyFlightPlan .fleetSchedulePlain .fleetSortieForm{max-width:none;width:100%;margin:0 auto;border-radius:17px;border:1px solid #d5e5f1;background:#f8fbff;box-shadow:0 4px 22px rgba(24,72,121,.045);padding:22px 24px}
 .fleetPlanFormHeading{display:flex;align-items:center;justify-content:space-between;margin-bottom:23px}
 .fleetPlanFormHeading h2{font-size:20px;line-height:1.3;color:#0b3159;margin:0 0 6px}
 .fleetPlanFormHeading p{font-size:13px;color:#637d92;margin:0}
@@ -377,6 +377,10 @@ html[data-flympus-theme="dark"] .fleetTimeFlowHeading small{color:#b9cedd}
 
 /* Plan: consistent required markers, readable field actions and derived report totals. */
 .dailyFlightPlan .fleetRequired,.coursePlanWorkspace .fleetRequired{color:#c62828!important;font-weight:900!important;font-size:1em}
+/* The UI already supplies a single explicit star inside the label. Suppress only
+   the generic label ::after required-marker when that star exists. Retains native
+   required validation and keeps optional / SOLO fields unchanged. */
+.fleetSortieFormGrid label:has(.fleetRequired)::after{content:none!important;display:none!important}
 .fleetFieldHead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:7px;min-width:0}
 .dailyFlightPlan .fleetSortieFormGrid .fleetFieldHead label{margin:0;line-height:1.5}
 .fleetFieldHead .fleetInlineFleet{margin:0;min-height:25px;display:inline-flex;align-items:center}
@@ -424,7 +428,7 @@ html.flympusLargeText .dailyFlightPlan .fleetTimingSettings summary{
 .coursePlanWorkspace{gap:14px;padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
 .coursePlanWorkspaceHead .sub{font-size:14px;line-height:1.5}
 .coursePlanTabs button{font-size:13px;line-height:1.35;min-height:40px;font-weight:750}
-.dailyFlightPlan{max-width:1220px;width:100%;margin:0 auto;min-width:0}
+.dailyFlightPlan{max-width:none;width:100%;margin:0 auto;min-width:0}
 .dailyFlightPlan .dailyPlanHeader.dailyPlanDateSpotlight{max-width:100%;width:100%;margin:0!important}
 .dailyFlightPlan>.fleetSchedulePlain{width:100%;max-width:100%;margin:0!important}
 .dailyFlightPlan .fleetSchedulePlain>.fleetTimingSettings,
@@ -448,7 +452,7 @@ html.flympusLargeText .dailyPlanDateSpotlight .dailyPlanDateField label{font-siz
 
 /* One flight-day date, selected above the form and reused for both Plan views. */
 .dailyFlightPlan .dailyPlanHeader.dailyPlanDateSpotlight{
-  width:100%;max-width:1220px;margin:0 auto!important;
+  width:100%;max-width:none;margin:0 auto!important;
   display:flex;justify-content:space-between;align-items:center;
   gap:18px;padding:16px 20px!important;
   background:linear-gradient(110deg,rgba(228,240,250,.92),rgba(238,246,253,.6))!important;
