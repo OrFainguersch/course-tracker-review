@@ -87,12 +87,17 @@ jobs:
         continue-on-error: true
         run: node tests/i18n.test.cjs
 
+      - name: Operational analytics regression tests
+        id: reports_dashboard
+        continue-on-error: true
+        run: node --test tests/reports-dashboard.test.cjs
+
       - name: Review verification summary
         if: always()
         shell: bash
         run: |
           failed=0
-          for result in             "${{ steps.training_core.outcome }}"             "${{ steps.ui_render.outcome }}"             "${{ steps.evaluation_voice.outcome }}"             "${{ steps.ios_audio.outcome }}"             "${{ steps.push.outcome }}"             "${{ steps.sw_routing.outcome }}"             "${{ steps.auth_integration.outcome }}"             "${{ steps.auth_lifecycle.outcome }}"             "${{ steps.auth_syntax.outcome }}"             "${{ steps.account_switcher.outcome }}"             "${{ steps.deployment_guard.outcome }}"             "${{ steps.pull_lifecycle.outcome }}"             "${{ steps.theme.outcome }}"             "${{ steps.storage.outcome }}"             "${{ steps.hebrew_ui.outcome }}"             "${{ steps.i18n.outcome }}"; do
+          for result in             "${{ steps.training_core.outcome }}"             "${{ steps.ui_render.outcome }}"             "${{ steps.evaluation_voice.outcome }}"             "${{ steps.ios_audio.outcome }}"             "${{ steps.push.outcome }}"             "${{ steps.sw_routing.outcome }}"             "${{ steps.auth_integration.outcome }}"             "${{ steps.auth_lifecycle.outcome }}"             "${{ steps.auth_syntax.outcome }}"             "${{ steps.account_switcher.outcome }}"             "${{ steps.reports_dashboard.outcome }}"             "${{ steps.deployment_guard.outcome }}"             "${{ steps.pull_lifecycle.outcome }}"             "${{ steps.theme.outcome }}"             "${{ steps.storage.outcome }}"             "${{ steps.hebrew_ui.outcome }}"             "${{ steps.i18n.outcome }}"; do
             if [ "$result" != "success" ]; then failed=1; fi
           done
 
