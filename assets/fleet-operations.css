@@ -464,3 +464,52 @@ html.flympusLargeText .dailyFlightPlan .fleetTimingSettings summary{
 @media(max-width:560px){
   .dailyFlightPlan .fleetSchedulePlain>.fleetTimingSettings{padding:12px 14px}
 }
+
+
+/* One flight-day date, selected above the form and reused for both Plan views. */
+.dailyFlightPlan .dailyPlanHeader.dailyPlanDateSpotlight{
+  width:100%;max-width:1220px;margin:0 auto!important;
+  display:flex;justify-content:space-between;align-items:center;
+  gap:18px;padding:16px 20px!important;
+  background:linear-gradient(110deg,rgba(228,240,250,.92),rgba(238,246,253,.6))!important;
+  border:1px solid #d5e5f2!important;border-inline-start:3px solid #c5a35d!important;
+  border-radius:14px!important;box-shadow:none!important;
+}
+.dailyPlanDateIntro{display:grid;gap:5px;min-width:0;flex:1}
+.dailyPlanDateIntro span{font-size:11px;font-weight:850;letter-spacing:.09em;color:#1c698f}
+.dailyPlanDateIntro p{font-size:13px;line-height:1.55;color:#587790;margin:0}
+.dailyFlightPlan .dailyPlanDateSpotlight .dailyPlanDateField{min-width:190px;width:220px;max-width:100%;flex:0 0 220px}
+.dailyFlightPlan .dailyPlanDateSpotlight .dailyPlanDateField label{font-size:13px;margin-bottom:8px}
+.dailyFlightPlan .dailyPlanDateSpotlight .dailyPlanDateField .input{background:#fff;min-height:46px;font-size:15px;font-weight:700;text-align:center;direction:ltr}
+.coursePlanWorkspace .pveDateReadOnly{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:6px;min-width:0}
+.coursePlanWorkspace .pveDateReadOnly span{font-size:11px;font-weight:800;color:#557994}
+.coursePlanWorkspace .pveDateReadOnly strong{font-size:16px;font-weight:800;letter-spacing:.02em;color:#123b5c;unicode-bidi:isolate}
+.coursePlanWorkspace .pveDateReadOnly .pveChangePlanDate{appearance:none;border:0;background:transparent;color:#176fa8;text-decoration:underline;text-underline-offset:3px;padding:5px 0;min-height:30px;font-size:12px;font-weight:750;cursor:pointer;text-align:start;max-width:100%;line-height:1.45}
+.coursePlanWorkspace .pveDateReadOnly .pveChangePlanDate:focus-visible{outline:3px solid #67b1ef;outline-offset:2px;border-radius:5px}
+html[data-flympus-language="he"] .dailyPlanDateSpotlight,
+html[data-flympus-language="he"] .pveDateReadOnly{direction:rtl;text-align:right}
+html[data-flympus-theme="dark"] .dailyFlightPlan .dailyPlanHeader.dailyPlanDateSpotlight{
+  background:linear-gradient(110deg,rgba(25,53,75,.98),rgba(21,42,60,.95))!important;
+  border-color:#385a74!important;border-inline-start-color:#c2a56e!important;
+}
+html[data-flympus-theme="dark"] .dailyPlanDateIntro span{color:#add9f3}
+html[data-flympus-theme="dark"] .dailyPlanDateIntro p,
+html[data-flympus-theme="dark"] .pveDateReadOnly span{color:#b8d2e4}
+html[data-flympus-theme="dark"] .pveDateReadOnly strong{color:#ebf7ff}
+html[data-flympus-theme="dark"] .pveDateReadOnly .pveChangePlanDate{color:#a7dfff}
+html.flympusLargeText .dailyPlanDateIntro span,
+html.flympusLargeText .coursePlanWorkspace .pveDateReadOnly span{font-size:15px!important}
+html.flympusLargeText .dailyPlanDateIntro p,
+html.flympusLargeText .coursePlanWorkspace .pveDateReadOnly .pveChangePlanDate{font-size:16px!important;line-height:1.5}
+html.flympusLargeText .coursePlanWorkspace .pveDateReadOnly strong{font-size:19px!important}
+html.flympusLargeText .dailyPlanDateSpotlight .dailyPlanDateField .input{font-size:17px!important}
+@media(max-width:660px){
+  .dailyFlightPlan .dailyPlanHeader.dailyPlanDateSpotlight{align-items:stretch;flex-direction:column;gap:14px;padding:16px!important}
+  .dailyFlightPlan .dailyPlanDateSpotlight .dailyPlanDateField{width:100%;min-width:0;flex:0 0 auto}
+  .coursePlanWorkspace .pveDateReadOnly{align-items:flex-start}
+}
+@media(max-width:480px){
+  .dailyFlightPlan .dailyPlanHeader.dailyPlanDateSpotlight{padding:13px!important}
+  .dailyPlanDateIntro p{font-size:12px}
+  .coursePlanWorkspace .pveDateReadOnly .pveChangePlanDate{font-size:12px}
+}
