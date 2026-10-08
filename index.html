@@ -107,6 +107,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
 <link rel="stylesheet" href="./assets/fleet-operations.css?v=20261008-fleet02" />
+<link rel="stylesheet" href="./assets/home-operations.css?v=20261008-home01" />
 <script src="./assets/fleet-serviceability.js?v=20261008-fleet02"></script>
 <script src="./assets/fleet-views.js?v=20261008-fleet02"></script>
 <script src="./assets/home-operations.js?v=20261008-home01"></script>
@@ -8851,14 +8852,14 @@ function home(){
      '<div class="homePulseGrid">'+
        '<div class="homePulseCard"><div class="homePulseIcon">♙</div><div class="homePulseValue">'+activeT.length+'</div><div class="homePulseLabel">Active Trainees</div><div class="homePulseNote neutral">Current roster</div></div>'+
        '<div class="homePulseCard"><div class="homePulseIcon">◔</div><div class="homePulseValue">'+avgProgress+'%</div><div class="homePulseLabel">Average Progress</div><div class="homePulseNote">Course status</div></div>'+
-       '<div class="homePulseCard"><div class="homePulseIcon">✈</div><div class="homePulseValue">'+weeklyFlights+'</div><div class="homePulseLabel">Flights Completed<br>This Week</div><div class="homePulseNote neutral">'+weekly.instructed+' Instructed · '+weekly.solo+' Solo</div></div>'+
+       '<div class="homePulseCard"><div class="homePulseIcon">✈</div><div class="homePulseValue">'+weeklyFlights+'</div><div class="homePulseLabel">Flights Completed<br>This Week</div><div class="homePulseNote neutral">'+weekly.instructed+' '+(homeHebrew?'מודרכות':'Instructed')+' · '+weekly.solo+' '+(homeHebrew?'סולו':'Solo')+'</div></div>'+
        '<div class="homePulseCard"><div class="homePulseIcon" style="background:#f7f0df;color:#8a6a22">★</div><div class="homePulseValue">'+(avgGrade?avgGrade.toFixed(1):'—')+'</div><div class="homePulseLabel">Average Grade</div><div class="homePulseNote">Active trainees</div></div>'+
        '<div class="homePulseCard"><div class="homePulseIcon safety">'+navIconSvg('safety')+'</div><div class="homePulseValue">'+openSafety+'</div><div class="homePulseLabel">Open Safety Events</div><div class="homePulseNote">'+(openSafety===0?'Good standing':'Needs review')+'</div></div>'+
      '</div>'+
    '</section>'+
    '<section class="homePrimaryGrid">'+
      '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Today\'s Plan</h2><p>Scheduled flights and activities for today</p></div></div><span class="homeDateChip">▣ '+esc(todayLabel)+'</span></div></div>'+
-       '<div class="homePlanList">'+(function(){const flights=getDailyFlightBoard().filter(x=>x.date===todayIsoDate()&&x.platformId===currentFleetPlatform()).sort((a,b)=>String(a.time).localeCompare(String(b.time)));return flights.length?flights.map(x=>'<button class="homePlanRow" data-go="planned"><span class="homePlanTime">◷ '+esc(x.time)+'</span><span class="homeInitial">✈</span><span class="homePlanMain"><b>'+esc(x.traineeName||'Trainee')+'</b><small>'+esc(x.syllabus)+' · '+esc(x.tail)+'</small></span><span class="homePlanTags"><span class="homeTag '+(x.mode==='SOLO'?'solo':'instructed')+'">'+esc(x.mode==='SOLO'?'Solo':'Instructed')+'</span>'+(window.FLYMPUS_FLEET_MODEL.flightIssues(x,getFleetAircraft(),currentFleetPlatform())?'<span class="homeTag" style="color:#b42318">Unavailable</span>':'')+'</span></button>').join(''):'<button class="homePlanRow" data-go="planned"><span class="homePlanMain"><b>No flights scheduled yet</b><small>Open Daily Flight Board to plan flights for this course.</small></span></button>'})()+
+       '<div class="homePlanList">'+(function(){const flights=getDailyFlightBoard().filter(x=>x.date===todayIsoDate()&&x.platformId===currentFleetPlatform()).sort((a,b)=>String(a.time).localeCompare(String(b.time)));return flights.length?flights.map(x=>'<button class="homePlanRow" data-go="planned"><span class="homePlanTime">◷ '+esc(x.time)+'</span><span class="homeInitial">✈</span><span class="homePlanMain"><b>'+esc(x.traineeName||'Trainee')+'</b><small>'+esc(x.syllabus)+' · '+esc(x.tail)+'</small></span><span class="homePlanTags"><span class="homeTag '+(x.mode==='SOLO'?'solo':'instructed')+'">'+esc(x.mode==='SOLO'?'Solo':'Instructed')+'</span>'+(window.FLYMPUS_FLEET_MODEL.flightIssues(x,getFleetAircraft(),currentFleetPlatform())?'<span class="homeTag" style="color:#b42318">Unavailable</span>':'')+'</span></button>').join(''):'<button class="homePlanRow homePlanEmpty" data-go="planned"><span class="homePlanMain"><b>No flights scheduled yet</b><small>Open Daily Flight Board to plan flights for this course.</small></span></button>'})()+
        '</div>'+
      '</div>'+
      (window.FLYMPUS_FLEET_VIEW?.home?.(currentFleetContext())||'')+
