@@ -9596,12 +9596,12 @@ function traineeDraftAttentionCount(name,traineeId){
 }
 function traineeDraftNeedsAttention(name,traineeId){return traineeDraftAttentionCount(name,traineeId)>0}
 function attentionBadgeHtml(key,extraClass='',dotOnly=false){
- const n=Number(courseAttentionCounts()[key]||0),content=n?(dotOnly?'':key==='planned'?String(n):formatAttentionCount(n)):'';
+ const n=Number(courseAttentionCounts()[key]||0),content=n?(dotOnly?'':formatAttentionCount(n)):'';
  return '<span class="attentionBadge '+extraClass+'" data-attention-badge="'+esc(key)+'" '+(dotOnly?'data-attention-dot="true" ':'')+(n?'aria-label="'+esc(n+' items need attention')+'" title="'+esc(n+' items need attention')+'" ':'hidden')+'>'+content+'</span>'
 }
 function syncAttentionBadges(){
  const counts=courseAttentionCounts();
- document.querySelectorAll('[data-attention-badge]').forEach(el=>{const key=el.dataset.attentionBadge,n=Number(counts[key]||0),dotOnly=el.dataset.attentionDot==='true';el.textContent=n?(dotOnly?'':key==='planned'?String(n):formatAttentionCount(n)):'';el.hidden=!n;if(n){el.setAttribute('aria-label',n+' items need attention');el.setAttribute('title',n+' items need attention')}else{el.removeAttribute('aria-label');el.removeAttribute('title')}});
+ document.querySelectorAll('[data-attention-badge]').forEach(el=>{const key=el.dataset.attentionBadge,n=Number(counts[key]||0),dotOnly=el.dataset.attentionDot==='true';el.textContent=n?(dotOnly?'':formatAttentionCount(n)):'';el.hidden=!n;if(n){el.setAttribute('aria-label',n+' items need attention');el.setAttribute('title',n+' items need attention')}else{el.removeAttribute('aria-label');el.removeAttribute('title')}});
  document.querySelectorAll('[data-trainee-attention]').forEach(el=>{const n=traineeDraftAttentionCount(el.dataset.traineeAttention,el.dataset.traineeId);el.textContent=n?formatAttentionCount(n):'';el.hidden=!n});
  document.querySelectorAll('[data-record-attention-summary]').forEach(el=>{const n=counts.record;el.hidden=!n;const copy=el.querySelector('[data-record-attention-copy]');if(copy)copy.textContent=n===1?'Item needs attention':'Items need attention';const badge=el.querySelector('[data-attention-badge]');if(badge&&n){badge.setAttribute('aria-label',n+' items need attention');badge.setAttribute('title',n+' items need attention')}})
 }
