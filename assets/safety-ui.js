@@ -40,12 +40,13 @@ function create(ctx){
     const key=String(ctx.courseId());
     if(cloud.courseId===key&&cloud.mode!=='idle')return;
     reset();cloud.courseId=key;cloud.mode='checking';
+    const session=cloud;
     api().course(key).then(course=>{
-      if(cloud.courseId!==key)return;
+      if(cloud!==session||cloud.courseId!==key)return;
       if(!course||course.unavailable){cloud.mode=course?.unavailable?'unavailable':'local';refresh();return}
       cloud.mode='shared';cloud.members=course.members||{};cloud.unmatched=course.unmatchedEmails||[];
       cloud.unsubscribe=api().listen(key,entries=>{
-        if(cloud.courseId!==key)return;
+        if(cloud!==session||cloud.courseId!==key)return;
         const before=JSON.stringify(cloud.records);
         const next=(entries||[]).map(model.normalize);
         if(cloud.initialized&&next.some(x=>!cloud.records.some(old=>old.id===x.id)&&x.createdBy!==uid()&&model.notification(x,uid()))){
@@ -57,7 +58,7 @@ function create(ctx){
         if(before!==JSON.stringify(cloud.records))refresh();else inbox();
       },err=>{cloud.error=String(err?.message||err);cloud.mode='unavailable';refresh()});
       refresh();
-    }).catch(err=>{if(cloud.courseId!==key)return;cloud.error=String(err?.message||err);cloud.mode='unavailable';refresh()});
+    }).catch(err=>{if(cloud!==session||cloud.courseId!==key)return;cloud.error=String(err?.message||err);cloud.mode='unavailable';refresh()});
   }
   function manager(){
     if(active())return api()?.manager?.()===true||cloud.members[uid()]?.role==='COURSE_MANAGER';
