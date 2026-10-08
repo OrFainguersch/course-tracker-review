@@ -5631,8 +5631,16 @@ body:not(.drawerCanvasFrozen) .mobileBottomNav{
   const viewportWidth=Math.round(window.innerWidth||document.documentElement?.clientWidth||0),viewportHeight=Math.round(window.innerHeight||document.documentElement?.clientHeight||0);
   const snapAge=Math.max(0,Date.now()-Number(snap?.savedAt||0)),snapFresh=snapAge<=24*60*60*1000;
   const viewportCompatible=!snap?.viewportWidth||Math.abs(Number(snap.viewportWidth)-viewportWidth)<=2;
-  const targetScreen='home';
-  const snapMatches=!!(snap&&snap.visualVersion===12&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen==='home'&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
+  /* A browser refresh keeps its screen; a newly opened app still begins at HOME.
+     Never replay a HOME snapshot above a non-HOME refresh while JS is loading. */
+  const reloadNavigation=(()=>{try{
+    const entry=performance.getEntriesByType?.('navigation')?.[0];
+    return entry?.type==='reload'||(!entry&&performance.navigation?.type===1)
+  }catch{return false}})();
+  let reloadTargetScreen='home';
+  if(reloadNavigation)try{reloadTargetScreen=String(JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')?.screen||'home')}catch{}
+  const targetScreen=reloadNavigation?reloadTargetScreen:'home';
+  const snapMatches=!!(targetScreen==='home'&&snap&&snap.visualVersion===12&&snapFresh&&viewportCompatible&&snap.localDay===localDay&&typeof snap.html==='string'&&snap.screen==='home'&&String(snap.courseId||'AEP-26')===activeCourse&&snap.resolvedTheme===currentResolvedTheme&&snap.language===currentLanguage&&!!snap.largerText===currentLargeText);
   const content=document.querySelector('#content');
   const bottomNav=document.querySelector('#mobileBottomNav');
   window.__FLYMPUS_RUNTIME_READY__=false;
@@ -6746,14 +6754,18 @@ if(!window.__flympusI18nObserverBound&&window.MutationObserver){
   if(document.body)start();else document.addEventListener('DOMContentLoaded',start,{once:true})
 }
 
+const appScreenIds=new Set(['home','courses','record','evaluation','roster','profile','instructor','settings','preferences','my-profile','user-management','reports','safety','exams','planned']);
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
+const flympusRealPageReload=(()=>{try{
+  const entry=performance.getEntriesByType?.('navigation')?.[0];
+  return entry?.type==='reload'||(!entry&&performance.navigation?.type===1)
+}catch{return false}})();
 const flympusPushBootParams=(()=>{try{return new URLSearchParams(location.search)}catch{return new URLSearchParams()}})();
 const flympusPushBootScreen=String(flympusPushBootParams.get('pushScreen')||''),flympusPushBootCourse=String(flympusPushBootParams.get('pushCourse')||'');
-/* A new document means a real cold launch/reload, not a resume. Cold launches
-   always enter HOME at the top. Background/minimize resumes never execute this
-   bootstrap and therefore keep the live screen + scroll position untouched.
-   Push navigation is the only deliberate cold-launch screen override. */
-initialUiState.screen='home';
+/* Browser refreshes restore the active screen and its saved view state.
+   Fresh tabs and installed-app cold launches retain the HOME starting screen.
+   A push deep link may explicitly override either destination. */
+if(!flympusRealPageReload||!appScreenIds.has(String(initialUiState.screen||'')))initialUiState.screen='home';
 if(flympusPushBootScreen&&['home','courses','roster','planned','record','reports','evaluation','safety','exams'].includes(flympusPushBootScreen))initialUiState.screen=flympusPushBootScreen;
 const state={screen:'home',reportTab:'operations',reportGranularity:'week',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',rosterStatuses:[],rosterRoles:[],rosterDateFrom:'',rosterDateTo:'',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',reportTrainees:[],reportInstructors:[],reportSyllabi:[],reportDateFrom:'',reportDateTo:'',myCoursesStatuses:[],myCoursesSectors:[],myCoursesPhases:[],myCoursesPlatforms:[],myCoursesTrainings:[],myCoursesCountries:[],myCoursesRoles:[],myCoursesDateFrom:'',myCoursesDateTo:'',packageNameFilters:[],packagePhaseFilters:[],packagePlatformFilters:[],packageCategoryFilters:[],packageContextFilters:[],safetyView:'new',evaluationView:'new',examsView:'new',...initialUiState};
 let courseTailorEditSnapshot=null;
@@ -6813,7 +6825,6 @@ function captureAdvancedArchitectureSnapshot(){
 function beginAdvancedArchitectureEditSession(){advancedArchitectureEditSnapshot=captureAdvancedArchitectureSnapshot()}
 function discardAdvancedArchitectureSession(){restoreLocalStorageScope(advancedArchitectureEditSnapshot);advancedArchitectureEditSnapshot=null;state.packageAddFlow=null;state.packageCreateOpen=null}
 
-const appScreenIds=new Set(['home','courses','record','evaluation','roster','profile','instructor','settings','preferences','my-profile','user-management','reports','safety','exams','planned']);
 const appRootScreens=new Set(['courses','roster','planned','record','reports','settings','preferences']);
 let appNavHistory=[];try{const stored=JSON.parse(sessionStorage.getItem('ct-review-nav-history')||'[]');if(Array.isArray(stored))appNavHistory=stored.filter(x=>appScreenIds.has(x))}catch{}
 if(state.screen==='home')appNavHistory=[];else if(appRootScreens.has(state.screen))appNavHistory=['home'];else if(!appNavHistory.length||appNavHistory[0]!=='home')appNavHistory=['home',...appNavHistory.filter(x=>x!=='home')];
