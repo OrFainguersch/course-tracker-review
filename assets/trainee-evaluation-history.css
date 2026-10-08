@@ -26,3 +26,62 @@ html.flympusLargeText .profileEvalHistoryTotal,html.flympusLargeText .profileEva
 html.flympusLargeText .profileEvalFilters .field>label,html.flympusLargeText .profileEvalComments{font-size:15px!important}
 @media(max-width:1150px){.profileEvalFilters{grid-template-columns:repeat(2,minmax(0,1fr))}.profileEvalFilters .filterDateRange{grid-column:1/-1}.profileEvalReset{grid-column:1/-1;width:max-content}}
 @media(max-width:640px){.profileEvalFilters{grid-template-columns:1fr;padding:11px;gap:10px}.profileEvalFilters .filterDateRange{grid-column:auto}.profileEvalReset{grid-column:auto;width:100%}.profileEvalHistoryHead{align-items:center}.profileEvalHistoryTotal{font-size:10px}}
+/* Expandable saved evaluation sheet: native keyboard-accessible <details>. */
+.profileEvalDisclosure{overflow:hidden}
+.profileEvalSummary{display:block;cursor:pointer;list-style:none;border-radius:9px;outline-offset:4px}
+.profileEvalSummary::-webkit-details-marker{display:none}
+.profileEvalSummary::marker{content:''}
+.profileEvalSummary:focus-visible{outline:2px solid #2378c5}
+.profileEvalSummaryActions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.profileEvalToggleLabel{color:#1b619e;font-size:11px;font-weight:800;white-space:nowrap}
+.profileEvalCloseText,.profileEvalDisclosure[open] .profileEvalOpenText{display:none}
+.profileEvalDisclosure[open] .profileEvalCloseText{display:inline}
+.profileEvalChevron{display:block;flex:none;width:9px;height:9px;border-right:2px solid #1b619e;border-bottom:2px solid #1b619e;transform:rotate(45deg);transition:transform .18s ease;margin:0 5px 4px 3px}
+.profileEvalDisclosure[open] .profileEvalChevron{transform:rotate(225deg);margin-top:5px;margin-bottom:0}
+.profileEvalDisclosure[open]{border-color:#b9d9f0}
+.profileEvalDetails{margin-top:12px;padding-top:15px;border-top:1px solid #dce8f3;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.profileEvalDetailGroup{padding:13px 14px;background:#f7fbff;border:1px solid #e1ebf4;border-radius:12px;min-width:0}
+.profileEvalDetailGroup h4{margin:0 0 10px;color:#153b61;font-size:12px;font-weight:850}
+.profileEvalDetailEmpty{margin:0;color:#6b7f93;font-size:11px}
+.profileEvalDetails>.profileEvalDetailEmpty{grid-column:1/-1;padding:11px 13px;background:#fff8e9;border-radius:10px}
+.profileEvalFacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+.profileEvalFact{display:flex;flex-direction:column;gap:3px;min-width:0}
+.profileEvalFact>span{font-size:10px;color:#5f7992}
+.profileEvalFact>strong{font-size:12px;color:#173955;overflow-wrap:anywhere}
+.profileEvalScoreRow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid #e3edf6;font-size:11px}
+.profileEvalScoreRow:last-child{border-bottom:0}
+.profileEvalScoreRow>span{overflow-wrap:anywhere}
+.profileEvalScoreRow small{margin-inline-start:6px;font-size:10px;color:#637d95}
+.profileEvalScoreRow>strong{color:#184f82;white-space:nowrap}
+.profileEvalEmergencyRow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:4px 8px;padding:9px 0;border-bottom:1px solid #e1ebf4}
+.profileEvalEmergencyRow:last-child{border-bottom:0}
+.profileEvalEmergencyRow strong{display:block;font-size:11px;color:#173955;overflow-wrap:anywhere}
+.profileEvalEmergencyRow small{display:block;font-size:10px;color:#647f95;margin-top:3px}
+.profileEvalCount{font-size:11px;font-weight:850;color:#1b619e}
+.profileEvalEmergencyRow .profileEvalNote{grid-column:1/-1}
+.profileEvalNote{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:#3d5974;font-size:11px;line-height:1.55}
+.profileEvalBulletList{margin:0;padding-inline-start:19px;font-size:11px;color:#3d5974;line-height:1.65;overflow-wrap:anywhere}
+.profileEvalBulletList li+li{margin-top:5px}
+html[data-flympus-theme="dark"] .profileEvalDisclosure[open]{border-color:#40617c}
+html[data-flympus-theme="dark"] .profileEvalDetails{border-top-color:#35526b}
+html[data-flympus-theme="dark"] .profileEvalDetailGroup{background:#162f44;border-color:#35526b}
+html[data-flympus-theme="dark"] .profileEvalDetailGroup h4,
+html[data-flympus-theme="dark"] .profileEvalFact>strong,
+html[data-flympus-theme="dark"] .profileEvalEmergencyRow strong{color:#ecf5ff}
+html[data-flympus-theme="dark"] .profileEvalToggleLabel,
+html[data-flympus-theme="dark"] .profileEvalCount,
+html[data-flympus-theme="dark"] .profileEvalScoreRow>strong{color:#96caff}
+html[data-flympus-theme="dark"] .profileEvalChevron{border-color:#96caff}
+html[data-flympus-theme="dark"] .profileEvalFact>span,
+html[data-flympus-theme="dark"] .profileEvalScoreRow small,
+html[data-flympus-theme="dark"] .profileEvalEmergencyRow small,
+html[data-flympus-theme="dark"] .profileEvalDetailEmpty{color:#bed0df}
+html[data-flympus-theme="dark"] .profileEvalNote,
+html[data-flympus-theme="dark"] .profileEvalBulletList{color:#d4e3f0}
+html[data-flympus-theme="dark"] .profileEvalScoreRow,
+html[data-flympus-theme="dark"] .profileEvalEmergencyRow{border-bottom-color:#35526b}
+html[data-flympus-theme="dark"] .profileEvalDetails>.profileEvalDetailEmpty{background:#403525;color:#e5d5bd}
+html.flympusLargeText .profileEvalDetails :is(h4,p,li,span,strong,small){font-size:15px!important}
+html.flympusLargeText .profileEvalToggleLabel{font-size:15px!important}
+@media(max-width:640px){.profileEvalDetails{grid-template-columns:1fr;gap:9px}.profileEvalDetailGroup{padding:12px}.profileEvalToggleLabel{font-size:10px}.profileEvalSummaryActions{gap:7px}}
+@media(prefers-reduced-motion:reduce){.profileEvalChevron{transition:none}}
