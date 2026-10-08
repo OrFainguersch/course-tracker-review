@@ -55,6 +55,7 @@
   const list=Array.isArray(rows)?rows:[],old=input?.id?list.find(x=>x.id===input.id&&x.platformId===platform&&x.date===date):null;
   if(input?.id&&!old)throw Error('Scheduled flight not found.');
   const valid=checkedSortie(input,aircraft,platform,date,allowed,old),id=old?.id||idFactory();
+  if(list.some(x=>x.id!==id&&x.date===date&&x.platformId===String(platform)&&x.aircraftId===valid.aircraftId&&x.time===valid.time))throw Error('Aircraft is already scheduled at this time.');
   const record={...valid,id,createdAt:old?.createdAt||now,updatedAt:now};
   return old?list.map(x=>x===old?record:x):[...list,record];
  }
