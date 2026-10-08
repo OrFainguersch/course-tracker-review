@@ -107,7 +107,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
 <link rel="stylesheet" href="./assets/fleet-operations.css?v=20261008-fleet02" />
-<script src="./assets/fleet-serviceability.js?v=20261008-fleet01"></script>
+<script src="./assets/fleet-serviceability.js?v=20261008-fleet02"></script>
 <script src="./assets/fleet-views.js?v=20261008-fleet02"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
@@ -8682,7 +8682,7 @@ function saveFleetForm(form){
  const fd=new FormData(form);
  const input={id:String(fd.get('id')||''),tail:String(fd.get('tail')||''),status:String(fd.get('status')||''),reason:String(fd.get('reason')||''),since:normalizeDateValue(fd.get('since'))};
  const model=window.FLYMPUS_FLEET_MODEL,now=new Date().toISOString(),idFactory=()=>window.crypto?.randomUUID?.()||('ac_'+Date.now()+'_'+Math.random().toString(36).slice(2));
- return persistCourseOperations('ct-review-aircraft-serviceability',model.upsertAircraft(getFleetAircraft(),input,currentFleetPlatform(),now,idFactory));
+ return persistCourseOperations('ct-review-aircraft-serviceability',model.upsertAircraft(getFleetAircraft(),input,currentFleetPlatform(),now,idFactory,String(window.FLYMPUS_AUTH?.profile?.displayName||window.FLYMPUS_AUTH?.currentUser?.displayName||window.FLYMPUS_AUTH?.currentUser?.email||'').trim()));
 }
 function fleetSaveError(){toast('Unable to save. Check device storage; no changes were submitted.','error')}
 function bindFleetServiceability(){
