@@ -8677,7 +8677,7 @@ function courseFlightScheduleHtml(date){
 }
 function saveFleetForm(form){
  const fd=new FormData(form);
- const input={id:String(fd.get('id')||''),tail:String(fd.get('tail')||''),status:String(fd.get('status')||''),reason:String(fd.get('reason')||''),since:String(fd.get('since')||'')};
+ const input={id:String(fd.get('id')||''),tail:String(fd.get('tail')||''),status:String(fd.get('status')||''),reason:String(fd.get('reason')||''),since:normalizeDateValue(fd.get('since'))};
  const model=window.FLYMPUS_FLEET_MODEL,now=new Date().toISOString(),idFactory=()=>window.crypto?.randomUUID?.()||('ac_'+Date.now()+'_'+Math.random().toString(36).slice(2));
  return persistCourseOperations('ct-review-aircraft-serviceability',model.upsertAircraft(getFleetAircraft(),input,currentFleetPlatform(),now,idFactory));
 }
