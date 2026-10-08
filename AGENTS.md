@@ -93,3 +93,10 @@ Any change touching mobile header positioning, bottom-nav auto-hide, pull-to-ref
 - When the sidebar is temporarily frozen/open, its desktop panel MUST be **flex-direction:column**: centered FLYMPUS wordmark first, full-width vertically stacked COURSE/APP menu second, app role footer at bottom. Do not allow flex-row to place logo and navigation side by side. Keep existing 200/230ms single-canvas motion and saved scroll position.
 - Desktop must use the same app-level language selection/i18n translations, RTL sidebar/right-side mirror and negative push transform, Dark theme palette, and Large Text setting as mobile. Test both languages, both themes, normal and large text when changing the shell; never force LTR/light or small fonts in desktop-specific overrides.
 - Preserve mobile shell geometry and CSS unchanged when implementing desktop parity. Regression tests for desktop-specific chrome and drawer layout are in tests/pull-lifecycle.test.cjs and run in review/production gates.
+
+## Firebase account switcher and Notifications focus (2026-10-08)
+- Profile popover displays **authenticated name, email, system role** together. Sign out is an action only; never show email below Sign out.
+- Add Another Account means authenticating an existing Google/Firebase identity, not creating or inviting users. Available regardless of system role.
+- Each additional identity must use separate named Firebase Auth browserLocalPersistence; picker metadata is display-only, never a credential or permission grant. Only primary Auth drives Firestore, and on UID changes the app locks, server-verifies active profile, and reloads UID-scoped data. Do not expose prior user's app screen to the new UID.
+- Expired secondary sessions require fresh provider sign-in. Sign out of active account leaves other accounts available; credentials are never copied to the app's own localStorage keys.
+- Bell > Notification settings should directly center the Notifications **section heading** (not the full tall card) in Settings, on desktop and mobile. Avoid conflicting top-reset scroll timers. Maintain RTL, dark theme, and large-text behavior.
