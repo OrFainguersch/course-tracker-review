@@ -90,14 +90,10 @@ function create(ctx){
       '<p class="sub">Instructor accounts are enrolled automatically by Training Managers. Safety reports cannot be silently saved to one device instead of notifying the course.</p></section>';
   }
   async function submit(record){
-    if(pending())throw new Error('Wait for shared Safety access verification before submitting');
-    if(active()){
-      if((record.photos||[]).length)throw new Error('Photos are stored only on this device. Remove photos before submitting a shared safety report.');
-      await api().submit(ctx.courseId(),record);
-      return 'shared';
-    }
-    if(!ctx.saveLocal([record,...local()]))throw new Error('Unable to save the event in device storage.');
-    return 'local';
+    if(!active())throw new Error('Secure course Safety is not connected. Ask a Training Manager to verify the instructor accounts; this report has NOT been submitted.');
+    if((record.photos||[]).length)throw new Error('Photos are currently device-only and cannot be submitted with shared Safety reports.');
+    await api().submit(ctx.courseId(),record);
+    return 'shared';
   }
   async function enroll(){
     if(!api()?.manager?.())return notify('A Training Manager must enroll course instructors.','error');
@@ -153,7 +149,7 @@ function create(ctx){
       }catch(err){notify(String(err?.message||err),'error');b.disabled=false}
     });
   }
-  return Object.freeze({records,connect,reset,banner,actions,bind,inbox,submit,isShared:active,isChecking:pending});
+  return Object.freeze({records,connect,reset,banner,settings,actions,bind,inbox,submit,isShared:active,isChecking:pending,reconcile});
 }
 root.FLYMPUS_SAFETY_UI=Object.freeze({create});
 })(window);
