@@ -192,6 +192,11 @@ api.safetyCloud=Object.freeze({
       })),onError
     );
   },
+  watchCourses(onCourses,onError){
+    if(!safetyCloudReady())throw new Error('Sign in to load Safety notifications');
+    const q=firestoreSdk.query(firestoreSdk.collection(db,'courseSafety'),firestoreSdk.where('memberUids','array-contains',String(currentUser.uid)));
+    return firestoreSdk.onSnapshot(q,snapshot=>onCourses(snapshot.docs.map(doc=>({...doc.data(),documentId:doc.id,members:doc.data().members||{}}))),onError);
+  },
   async submit(courseId,data){
     if(!safetyCloudReady())throw new Error('Sign in before submitting a shared safety event');
     const course=await this.course(courseId);
