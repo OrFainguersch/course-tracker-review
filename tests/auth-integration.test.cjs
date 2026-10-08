@@ -182,3 +182,37 @@ assert(accounts.includes('authSdk.updateCurrentUser(secondary,user)'),'Each acco
 assert(accounts.includes('lockApp();')&&accounts.includes('showLoading(')&&accounts.includes('authSdk.updateCurrentUser(primary,user)'),'Switching must lock the old user screen before changing primary Auth');
 assert(auth.includes("import('./account-switcher.js?v=20261008-switcher01')")&&auth.includes('accountModule.createAccountSwitcher({'),'Auth runtime must initialize the isolated switcher');
 assert(html.includes('id="accountAddAnother"')&&html.includes('id="personalProfileEmail"'),'Account menu must show Add account and email under the current name');
+
+
+// Regression: sidebar, top account menu and every header avatar must use
+// the Firestore official name even when a different nickname is configured.
+{
+  const vm=require('node:vm');
+  const beginning=html.indexOf('function renderPersonalIdentity(){');
+  const ending=html.indexOf('\nfunction courseHasExplicitMembership(',beginning);
+  assert(beginning>=0&&ending>beginning,'Personal identity renderer must be present');
+  const renderer=html.slice(beginning,ending);
+  const nodes=new Map(['#personalProfileName','#personalProfileRole','#personalProfileEmail',
+    '#drawerProfileName','#drawerProfileRole'].map(key=>[key,{textContent:''}]));
+  const avatars=Array.from({length:3},()=>({innerHTML:''}));
+  const ctx={
+    window:{FLYMPUS_AUTH:{
+      currentUser:{uid:'test-owner',email:'owner@example.com',displayName:'Provider Name'},
+      profile:{displayName:'Or Fainguersch',preferredName:'אור',role:'owner'}
+    }},
+    allInstructors:()=>[],
+    currentUserId:'i1',
+    personInitials:p=>String(p.name||'?').split(/\s+/).filter(Boolean).map(x=>x[0]).join('').slice(0,2).toUpperCase(),
+    currentAppRoleDisplay:()=> 'Owner',
+    document:{querySelectorAll:selector=>selector==='[data-current-user-avatar]'?avatars:[]},
+    $:selector=>nodes.get(selector)||null,
+    esc:value=>String(value)
+  };
+  vm.runInNewContext(renderer+'\nrenderPersonalIdentity();',ctx,{filename:'index.html identity renderer'});
+  assert.equal(nodes.get('#personalProfileName').textContent,'Or Fainguersch','Account menu uses the official name');
+  assert.equal(nodes.get('#drawerProfileName').textContent,'Or Fainguersch','Sidebar uses the official name');
+  avatars.forEach(avatar=>assert.equal(avatar.innerHTML,'OF','Avatars use official-name initials, not nickname'));
+  assert.equal(nodes.get('#personalProfileRole').textContent,'Owner');
+  assert.equal(nodes.get('#drawerProfileRole').textContent,'Owner');
+  assert.equal(nodes.get('#personalProfileEmail').textContent,'owner@example.com');
+}
