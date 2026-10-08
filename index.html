@@ -9587,7 +9587,7 @@ function formatCompactBadgeCount(value){
 }
 function formatAttentionCount(value){return formatCompactBadgeCount(value)}
 function courseAttentionCounts(){
- const evaluation=draftAttentionCount('evaluation'),safety=draftAttentionCount('safety'),exams=draftAttentionCount('exams'),planned=draftAttentionCount('planned');
+ const evaluation=draftAttentionCount('evaluation'),safety=draftAttentionCount('safety'),exams=draftAttentionCount('exams'),planned=plannedAttentionCount();
  return {evaluation,safety,exams,record:evaluation+safety+exams,planned}
 }
 function traineeDraftAttentionCount(name,traineeId){
@@ -9596,12 +9596,12 @@ function traineeDraftAttentionCount(name,traineeId){
 }
 function traineeDraftNeedsAttention(name,traineeId){return traineeDraftAttentionCount(name,traineeId)>0}
 function attentionBadgeHtml(key,extraClass='',dotOnly=false){
- const n=Number(courseAttentionCounts()[key]||0),content=n?(dotOnly?'':formatAttentionCount(n)):'';
+ const n=Number(courseAttentionCounts()[key]||0),content=n?(dotOnly?'':key==='planned'?String(n):formatAttentionCount(n)):'';
  return '<span class="attentionBadge '+extraClass+'" data-attention-badge="'+esc(key)+'" '+(dotOnly?'data-attention-dot="true" ':'')+(n?'aria-label="'+esc(n+' items need attention')+'" title="'+esc(n+' items need attention')+'" ':'hidden')+'>'+content+'</span>'
 }
 function syncAttentionBadges(){
  const counts=courseAttentionCounts();
- document.querySelectorAll('[data-attention-badge]').forEach(el=>{const n=Number(counts[el.dataset.attentionBadge]||0),dotOnly=el.dataset.attentionDot==='true';el.textContent=n?(dotOnly?'':formatAttentionCount(n)):'';el.hidden=!n});
+ document.querySelectorAll('[data-attention-badge]').forEach(el=>{const key=el.dataset.attentionBadge,n=Number(counts[key]||0),dotOnly=el.dataset.attentionDot==='true';el.textContent=n?(dotOnly?'':key==='planned'?String(n):formatAttentionCount(n)):'';el.hidden=!n;if(n){el.setAttribute('aria-label',n+' items need attention');el.setAttribute('title',n+' items need attention')}else{el.removeAttribute('aria-label');el.removeAttribute('title')}});
  document.querySelectorAll('[data-trainee-attention]').forEach(el=>{const n=traineeDraftAttentionCount(el.dataset.traineeAttention,el.dataset.traineeId);el.textContent=n?formatAttentionCount(n):'';el.hidden=!n});
  document.querySelectorAll('[data-record-attention-summary]').forEach(el=>{const n=counts.record;el.hidden=!n;const copy=el.querySelector('[data-record-attention-copy]');if(copy)copy.textContent=n===1?'Item needs attention':'Items need attention';const badge=el.querySelector('[data-attention-badge]');if(badge&&n){badge.setAttribute('aria-label',n+' items need attention');badge.setAttribute('title',n+' items need attention')}})
 }
@@ -10686,14 +10686,14 @@ function myCourses(){
 }
 function getSettings(){try{return JSON.parse(localStorage.getItem('ct-review-settings')||'{}')}catch{return {}}}function saveSettings(x){try{localStorage.setItem('ct-review-settings',JSON.stringify(x))}catch{}}
 
-function plannedVsExecuted(){
- const reports=getDailyReports(),draftWrap=getActivityDraft('planned'),draft=draftWrap?.data||{},date=state.planDate||draft.date||new Date().toISOString().slice(0,10),saved=reports.find(x=>x.date===date)||{},soloDraft=draft.solo||{};
+/* One source of truth for the daily plan's missing required entries.
+   Used both by the plan's Required panel and the navigation badge. */
+function plannedCompleteness(){
+ const reports=getDailyReports(),draftWrap=getActivityDraft('planned'),draft=draftWrap?.data||{},date=state.planDate||draft.date||new Date().toISOString().slice(0,10),saved=reports.find(x=>x.date===date)||{};
  const executedInstructed=getEvaluations().filter(x=>(x.flightDate||x.date)===date).length;
  const soloRows=getSoloFlights().filter(x=>x.date===date).sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
  const pi=Number(state.planInstructed??draft.plannedInstructed??saved.plannedInstructed??0),ps=Number(state.planSolo??draft.plannedSolo??saved.plannedSolo??0);
- const total=pi+ps,executedSolo=soloRows.length,executed=executedInstructed+executedSolo,instructedCancelled=Math.max(0,pi-executedInstructed),soloCancelled=Math.max(0,ps-executedSolo),cancelled=instructedCancelled+soloCancelled;
- const hasPlan=total>0,allT=alphaByName(courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active')),tracking=currentCourseTrackingCounters(),tracks=type=>tracking.some(x=>x.type===type);
- const syllabusDefs=evaluationSyllabusDefs(),soloDefs=syllabusDefs.filter(x=>String(x.mode||'').toUpperCase()==='SOLO'||String(x.instructorPresence||'').toUpperCase()==='WITHOUT INSTRUCTOR'||x.solo===true),soloSyllabusNames=(soloDefs.length?soloDefs:syllabusDefs).map(x=>x.name);
+ const total=pi+ps,hasPlan=total>0,instructedCancelled=Math.max(0,pi-executedInstructed),soloCancelled=Math.max(0,ps-soloRows.length);
  const reasonCatalog=cfgGet().cancellationReasons||[],stored=Array.isArray(draft.cancellations)?draft.cancellations:Array.isArray(saved.cancellations)?saved.cancellations:[],legacyReason=String(draft.reason||saved.reason||'').trim();
  const specs=[...Array.from({length:instructedCancelled},(_,i)=>({key:'INSTRUCTED_'+(i+1),type:'Instructed'})),...Array.from({length:soloCancelled},(_,i)=>({key:'SOLO_'+(i+1),type:'Solo'}))],used=new Set();
  const cancellationRows=specs.map((spec,index)=>{
@@ -10707,6 +10707,18 @@ function plannedVsExecuted(){
  const ready=hasPlan&&cancellationRows.every(x=>x.reasonId||(!reasonCatalog.length&&x.reasonLabel));
  const planMissing=!hasPlan?[{label:'Planned flights'}]:cancellationRows.map((x,i)=>x.reasonId||(!reasonCatalog.length&&x.reasonLabel)?null:{label:'Cancellation reason '+(i+1)}).filter(Boolean);
  const planStarted=!!draftWrap||Boolean(saved.date)||hasPlan;
+ return {draftWrap,draft,date,saved,soloRows,pi,ps,executedInstructed,instructedCancelled,soloCancelled,reasonCatalog,cancellationRows,hasPlan,ready,planMissing,planStarted}
+}
+function plannedAttentionCount(){
+ const plan=plannedCompleteness();
+ return plan.planStarted?plan.planMissing.length:0
+}
+function plannedVsExecuted(){
+ const {draftWrap,draft,date,saved,soloRows,pi,ps,executedInstructed,instructedCancelled,soloCancelled,reasonCatalog,cancellationRows,hasPlan,ready,planMissing,planStarted}=plannedCompleteness();
+ const soloDraft=draft.solo||{};
+ const total=pi+ps,executedSolo=soloRows.length,executed=executedInstructed+executedSolo,cancelled=instructedCancelled+soloCancelled;
+ const allT=alphaByName(courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active')),tracking=currentCourseTrackingCounters(),tracks=type=>tracking.some(x=>x.type===type);
+ const syllabusDefs=evaluationSyllabusDefs(),soloDefs=syllabusDefs.filter(x=>String(x.mode||'').toUpperCase()==='SOLO'||String(x.instructorPresence||'').toUpperCase()==='WITHOUT INSTRUCTOR'||x.solo===true),soloSyllabusNames=(soloDefs.length?soloDefs:syllabusDefs).map(x=>x.name);
  const soloEntryOpen=ps>0;
  const cancelSummary=cancelled?(instructedCancelled+' instructed · '+soloCancelled+' solo'):'No cancellations';
  const editSolo=(x)=>{
@@ -11234,7 +11246,7 @@ function bindPlanned(){
  const collectCancellations=()=>[...document.querySelectorAll('.pveCancellationReason')].map(el=>({key:String(el.dataset.cancelKey||''),type:String(el.dataset.cancelType||''),reasonId:String(el.value||''),reasonLabel:String(el.selectedOptions?.[0]?.textContent||'').trim()}));
  const persistPlannedDraft=()=>{
    const solo=$('#soloExecutionForm'),prior=getActivityDraft('planned')?.data||{},cancellations=collectCancellations(),data={date:normalizeDateValue($('#pveDate')?.value)||state.planDate||todayIsoDate(),plannedInstructed:Number($('#pvePlannedInstructed')?.value||0),plannedSolo:Number($('#pvePlannedSolo')?.value||0),cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),solo:solo?serializeFormDraft(solo):(prior.solo||{})};
-   if(activityDraftMeaningful('planned',data))data.__attentionCount=Math.max(1,draftDataMissingCount('planned',data));
+   // The Plan badge recomputes from live required items; never persist a stale count.
    saveActivityDraft('planned',data);if($('#plannedDraftBadge'))$('#plannedDraftBadge').textContent=draftSavedLabel('planned');syncAttentionBadges();return data
  };
  const refreshPlan=()=>{state.planInstructed=Number($('#pvePlannedInstructed')?.value||0);state.planSolo=Number($('#pvePlannedSolo')?.value||0);persistPlannedDraft();render()};
