@@ -8779,6 +8779,32 @@ function bindFleet(){
   }catch(err){toast(err.message||'Unable to remove aircraft','error')}
  });
 }
+function planScheduleError(err){
+ const english=String(err?.message||err||'Unable to schedule flight');
+ if(getFlympusAppPreferences().language!=='he')return english;
+ let m;
+ if((m=english.match(/^Instructor (.*?) is already occupied by briefing, flight or debriefing for the (.*?) flight\. Available after (.*?)\.$/)))
+  return 'המדריך '+m[1]+' כבר משובץ לתדריך, טיסה או תחקיר של טיסת '+m[2]+'. פנוי לאחר '+m[3]+'.';
+ if((m=english.match(/^Trainee (.*?) is already occupied by briefing, flight or debriefing for the (.*?) flight\. Available after (.*?)\.$/)))
+  return 'החניך '+m[1]+' כבר משובץ לתדריך, טיסה או תחקיר של טיסת '+m[2]+'. פנוי לאחר '+m[3]+'.';
+ if((m=english.match(/^Aircraft (.*?) is already booked (.*?)\. Choose a non-overlapping flight time\.$/)))
+  return 'כלי הטיס '+m[1]+' כבר משובץ בין '+m[2]+'. יש לבחור זמן טיסה שאינו חופף.';
+ if(english.startsWith('Existing flight on '))return 'קיימת טיסה קודמת ללא משך טיסה תקין. יש לעדכן אותה לפני שיבוץ נוסף של אותם משתתפים או אותו כלי.';
+ const known={
+  'Choose a valid flight date and time.':'יש לבחור תאריך ושעת טיסה תקינים.',
+  'Choose Solo or Instructed flight.':'יש לבחור סוג טיסה: סולו או מודרכת.',
+  'Choose a trainee assigned to this course.':'יש לבחור חניך המשויך לקורס.',
+  'Choose an instructor assigned to this course.':'יש לבחור מדריך המשויך לקורס.',
+  'A person cannot be both trainee and instructor on the same flight.':'אותו אדם אינו יכול להיות גם חניך וגם מדריך באותה טיסה.',
+  'Select the flight syllabus.':'יש לבחור סילבוס לטיסה.',
+  'Planned flight duration must be between 1 and 720 minutes.':'משך הטיסה המתוכנן חייב להיות בין דקה אחת ל־720 דקות.',
+  'Briefing time must be between 0 and 180 minutes.':'משך התדריך חייב להיות בין 0 ל־180 דקות.',
+  'Debriefing time must be between 0 and 180 minutes.':'משך התחקיר חייב להיות בין 0 ל־180 דקות.',
+  'The selected aircraft is not serviceable. Choose a serviceable aircraft.':'כלי הטיס שנבחר אינו שמיש. יש לבחור כלי שמיש.',
+  'Scheduled flight not found.':'לא נמצא שיבוץ הטיסה לעריכה.'
+ };
+ return known[english]||english;
+}
 function bindDailyFlightBoard(){
  if(!flympusCan('operations.flightBoard.write'))return;
  const form=$('#fleetSortieForm'),mode=$('#fleetFlightMode');
@@ -8819,12 +8845,12 @@ function bindDailyFlightBoard(){
    defaults[type]={};
    for(const key of ['briefingMinutes','debriefMinutes']){
     const raw=String(data.get(type+'_'+key)||'');
-    if(!/^\d+$/.test(raw)||Number(raw)>180){toast('Timing defaults must be between 0 and 180 minutes.','error');return}
+    if(!/^\d+$/.test(raw)||Number(raw)>180){toast(planUiText('Timing defaults must be between 0 and 180 minutes.','ברירות המחדל חייבות להיות בין 0 ל־180 דקות.'),'error');return}
     defaults[type][key]=Number(raw);
    }
   }
   if(!persistCourseOperations('ct-review-plan-timing-defaults',defaults)){fleetSaveError();return}
-  toast('Planning defaults saved for this course on this device','success');render();
+  toast(planUiText('Planning defaults saved for this course on this device','ברירות המחדל לתכנון נשמרו לקורס במכשיר זה'),'success');render();
  };
  if(form)form.onsubmit=e=>{
   e.preventDefault();if(!flympusCan('operations.flightBoard.write'))return;
@@ -8835,8 +8861,8 @@ function bindDailyFlightBoard(){
     const all=model.upsertSortie(getDailyFlightBoard(),input,getFleetAircraft(),currentFleetPlatform(),date,
     {trainees:courseTrainees().map(x=>x.id),instructors:courseInstructors().map(x=>x.id)},new Date().toISOString(),()=>window.crypto?.randomUUID?.()||('flight_'+Date.now()+'_'+Math.random().toString(36).slice(2)),getPlanTimingDefaults());
     if(!persistCourseOperations('ct-review-flight-board',all)){fleetSaveError();return}
-    state.flightBoardEditId=null;toast('Flight board updated','success');render();
-  }catch(err){toast(err.message||'Unable to schedule flight','error')}
+    state.flightBoardEditId=null;toast(planUiText('Flight board updated','שיבוץ הטיסה נשמר בהצלחה'),'success');render();
+  }catch(err){toast(planScheduleError(err),'error')}
  };
  document.querySelectorAll('[data-flight-edit]').forEach(b=>b.onclick=()=>{if(!flympusCan('operations.flightBoard.write'))return;state.flightBoardEditId=b.dataset.flightEdit;render()});
  if($('#fleetFlightCancel'))$('#fleetFlightCancel').onclick=()=>{state.flightBoardEditId=null;render()};
