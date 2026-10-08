@@ -85,6 +85,63 @@ function create(ctx){
       (localCount?' '+localCount+' old device-only reports are not shared.':'')+
       '</small></div></div>';
   }
+
+  /* Management overview is separate from the form, and does not require
+     opening individual history entries. Numbers are instructor-event pairs. */
+  function canTrack(){return manager()}
+  function tracking(){
+    if(!manager())return '<div class="empty"><h3>Manager access required</h3></div>';
+    if(!active()){
+      return '<section class="card safetyTracking"><h2>Reading acknowledgements</h2>'+
+        '<p class="sub">Waiting for secure course Safety data. Tracking only covers synchronized events; no viewing status is inferred from local records.</p></section>';
+    }
+    const events=records().slice().sort((a,b)=>String(b.createdAt||b.date||'').localeCompare(String(a.createdAt||a.date||'')));
+    const totals={notViewed:0,viewed:0,acknowledged:0};
+    for(const entry of events){
+      for(const person of model.recipientUids(entry)){
+        if(model.acknowledged(entry,person))totals.acknowledged++;
+        else if(model.viewed(entry,person))totals.viewed++;
+        else totals.notViewed++;
+      }
+    }
+    const fmt=value=>{
+      if(!value)return '—';
+      try{
+        const date=value?.toDate?.()||new Date(value);
+        return Number.isFinite(date?.getTime?.())?date.toLocaleString():'—';
+      }catch{return '—'}
+    };
+    const tiles='<div class="safetyTrackingTotals" aria-label="Reading acknowledgement summary">'+
+      '<div><strong>'+totals.notViewed+'</strong><span>Not viewed</span></div>'+
+      '<div><strong>'+totals.viewed+'</strong><span>Viewed · not acknowledged</span></div>'+
+      '<div><strong>'+totals.acknowledged+'</strong><span>Acknowledged</span></div></div>';
+    const pending=totals.notViewed+totals.viewed;
+    const cards=events.map(entry=>{
+      const event=model.normalize(entry),people=model.recipientUids(event),count=model.progress(event);
+      const notViewed=people.filter(id=>!model.viewed(event,id)&&!model.acknowledged(event,id)).length;
+      const waiting=people.filter(id=>model.viewed(event,id)&&!model.acknowledged(event,id)).length;
+      const title=escape(event.title||'Safety event');
+      const table=people.length?'<div class="safetyAuditTableWrap"><table><thead><tr><th>Instructor</th><th>Reading status</th><th>Viewed at</th><th>Acknowledged at</th></tr></thead><tbody>'+
+        people.map(id=>{
+          const viewed=event.seenBy?.[id],ack=event.ackBy?.[id];
+          const state=ack?'Acknowledged':viewed?'Viewed · awaiting acknowledgement':'Not viewed';
+          const css=ack?'isAck':viewed?'isViewed':'isUnread';
+          return '<tr><td><b>'+escape(recipientName(event,id))+'</b></td><td><span class="safetyTrackingState '+css+'">'+state+'</span></td>'+
+            '<td>'+escape(fmt(viewed))+'</td><td>'+escape(fmt(ack))+'</td></tr>';
+        }).join('')+'</tbody></table></div>':'<p class="sub">No verified recipients were recorded for this event.</p>';
+      return '<article class="safetyTrackingEvent"><div class="safetyTrackingEventHead"><div><h3>'+title+'</h3>'+
+        '<p>'+escape(event.date||'')+' · '+escape(model.status(event).replaceAll('_',' '))+'</p></div>'+
+        '<span class="safetyTrackingProgress">'+count.acknowledged+' / '+count.total+' acknowledged</span></div>'+
+        '<p class="safetyTrackingRemaining">'+notViewed+' not viewed · '+waiting+' viewed, awaiting acknowledgement</p>'+table+'</article>';
+    }).join('');
+    return '<section class="card safetyTracking" aria-label="Safety reading tracking">'+
+      '<div class="safetyTrackingHeader"><h2>Reading acknowledgements</h2>'+
+      '<p class="sub">Manager overview · who opened each report, who confirmed reading and who still needs follow-up. Reading status is independent of event resolution.</p></div>'+
+      tiles+(events.length?'<p class="safetyTrackingMeta">'+events.length+' events · '+pending+' outstanding reading acknowledgements</p>'+
+      '<div class="safetyTrackingList">'+cards+'</div>':'<div class="empty"><h3>No shared safety events yet</h3>'+
+      '<p>When a report is submitted, every assigned instructor and their reading status will appear here automatically.</p></div>')+
+      '</section>';
+  }
   function settings(){
     return '<section class="card settingBox"><h3>Safety notifications and acknowledgements</h3>'+
       '<p class="sub">Always enabled for verified instructors. Each new event requires a separate view and reading acknowledgement.</p>'+
@@ -137,7 +194,7 @@ function create(ctx){
       }catch(err){notify(String(err?.message||err),'error');b.disabled=false}
     });
   }
-  return Object.freeze({records,connect,reset,banner,settings,actions,bind,inbox,submit,isShared:active,isChecking:pending,reconcile});
+  return Object.freeze({records,connect,reset,banner,settings,actions,canTrack,tracking,bind,inbox,submit,isShared:active,isChecking:pending,reconcile});
 }
 root.FLYMPUS_SAFETY_UI=Object.freeze({create});
 })(window);

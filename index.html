@@ -108,10 +108,10 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/reports-dashboard.js?v=0767"></script>
 <link rel="stylesheet" href="./assets/fleet-operations.css?v=20261008-fleet03" />
 <link rel="stylesheet" href="./assets/home-operations.css?v=20261008-home02" />
-<link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety02" />
+<link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
 <script src="./assets/safety-global-inbox.js?v=20261008-safety02"></script>
-<script src="./assets/safety-ui.js?v=20261008-safety02"></script>
+<script src="./assets/safety-ui.js?v=20261008-safety03"></script>
 <script src="./assets/fleet-model.js?v=20261008-fleet04"></script>
 <script src="./assets/fleet-views.js?v=20261008-fleet03"></script>
 <script src="./assets/home-operations.js?v=20261008-home02"></script>
@@ -11036,8 +11036,10 @@ function recordHub(){
 }
 function safetyScreen(){
  const local=getSafetyRecords().slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.createdAt||'').localeCompare(String(a.createdAt||''))),draft=getActivityDraft('safety'),view=state.safetyView||'new',traineesAlpha=alphaByName(courseTrainees()),instructorsAlpha=alphaByName(courseInstructors());
- const tabs='<div class="safetyViewTabs"><button type="button" class="'+(view==='new'?'active':'')+'" data-safety-view="new">New event</button><button type="button" class="'+(view==='history'?'active':'')+'" data-safety-view="history">History <span>'+local.length+'</span></button></div>';
- const head='<div class="recordChildHead"><h1 class="pageTitle">Safety</h1><p class="sub">Report safety events and review the course-specific record.</p></div>'+safetyUI.banner()+tabs;
+ const managerTab=safetyUI.canTrack()?'<button type="button" class="'+(view==='tracking'?'active':'')+'" data-safety-view="tracking">Reading tracking</button>':'';
+ const tabs='<div class="safetyViewTabs"><button type="button" class="'+(view==='new'?'active':'')+'" data-safety-view="new">New event</button><button type="button" class="'+(view==='history'?'active':'')+'" data-safety-view="history">History <span>'+local.length+'</span></button>'+managerTab+'</div>';
+ const head='<div class="recordChildHead"><h1 class="pageTitle">Safety</h1><p class="sub">Report safety events and review the course-specific record.</p></div>'+tabs;
+ if(view==='tracking'&&safetyUI.canTrack())return head+safetyUI.tracking();
  if(view==='history'){
    const rows=local.map(x=>{const severity=normalizeSafetySeverity(x.severity),severityDef=safetySeverityDefinition(severity),brief=String(x.briefDescription||x.details||''),findings=String(x.findings||''),lessons=String(x.lessonsLearned||''),hay=[x.title,brief,findings,lessons,x.traineeName,x.instructorName,x.classification,severity,flympusTranslateUiString(severity)].filter(Boolean).join(' ').toLowerCase(),detailRows=[brief?['Brief event description',brief]:null,findings?['Findings',findings]:null,lessons?['Lessons learned / Conclusions',lessons]:null].filter(Boolean);return '<article class="safetyHistoryItem" data-safety-history-item data-safety-record-id="'+esc(x.id)+'" data-date="'+esc(normalizeDateValue(x.date)||'')+'" data-severity="'+esc(severity)+'" data-classification="'+esc(x.classification||'')+'" data-trainee="'+esc(x.traineeId||'')+'" data-instructor="'+esc(x.instructorId||'')+'" data-search="'+esc(hay)+'"><div class="safetyHistoryTop"><div><b>'+esc(x.title||'Untitled safety event')+'</b><p>'+esc(formatDateDMY(x.date))+' · '+esc(x.classification||'—')+'</p></div><span class="safetySeverityPill safetySeverity-'+esc(severityDef?.tone||'minor')+'"><span class="safetySeverityDot" aria-hidden="true"></span>'+esc(severity||'—')+'</span></div><div class="safetyHistoryMeta">'+(x.traineeName?'<span>Trainee · '+esc(x.traineeName)+'</span>':'')+(x.instructorName?'<span>Instructor · '+esc(x.instructorName)+'</span>':'')+'</div>'+(detailRows.length?'<div class="safetyHistoryEventDetails">'+detailRows.map(([label,value])=>'<div><b>'+esc(label)+'</b><p>'+esc(value)+'</p></div>').join('')+'</div>':'')+(window.FLYMPUS_SAFETY_ATTACHMENTS.parseIds(x.photos).length?'<div class="safetyHistoryPhotos" data-safety-history-photos="'+esc(JSON.stringify(window.FLYMPUS_SAFETY_ATTACHMENTS.parseIds(x.photos)))+'"></div>':'')+safetyUI.actions(x)+'</article>'}).join('');
    return head+'<section class="card safetyHistoryCard"><div class="inlineHead"><div><h2>Course safety history</h2><p class="sub">Only entries recorded for the active course are shown.</p></div></div>'+
