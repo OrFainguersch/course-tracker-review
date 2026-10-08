@@ -11595,7 +11595,7 @@ function bindSafety(){
   try{
     const destination=await safetyUI.submit(report);
     playFlympusFormSubmitSound();discardActivityDraft('safety');state.safetyView='history';
-    toast(destination==='shared'?'Shared safety event submitted':'Safety event saved locally (not delivered to instructors)','success');
+    toast(destination==='partial'?'Safety event saved, but some instructors have no active linked accounts':destination==='shared'?'Shared safety event submitted':'Safety report not submitted',destination==='partial'?'warning':'success');
     render();forcePageTop();
   }catch(err){toast(String(err?.message||err),'error');if(submitBtn)submitBtn.disabled=false}
 };
