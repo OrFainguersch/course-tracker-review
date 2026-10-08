@@ -792,9 +792,35 @@ assert(html.includes("Viewport-owned mobile chrome · 0758")&&
   "Touch/mobile top chrome must be viewport-owned with a preserved 78px document footprint so its approved transform timing is not distorted by sticky scroll geometry");
 assert(html.includes("snap.localDay===localDay"),
   "A snapshot from a previous local day must never flash before today's plan renders");
-assert(html.includes("initialUiState.screen='home'")&&html.includes("if(flympusPushBootScreen&&")&&
+assert(html.includes("if(!flympusRealPageReload||!appScreenIds.has(String(initialUiState.screen||'')))initialUiState.screen='home'")&&
+  html.includes("if(flympusPushBootScreen&&")&&
+  html.includes("targetScreen==='home'&&snap")&&
   !html.includes("const landing=getFlympusAppPreferences().startScreen"),
-  "A newly created document must start at HOME regardless of the previous session screen; only an explicit push deep-link may override it");
+  "Only fresh/cold launches must start HOME. Reload restores valid saved screens without flashing a HOME snapshot; push targets override either.");
+// Functional regression for Desktop F5/Ctrl+R, mobile reload, and PWA cold launch.
+{
+  const start=html.indexOf("const appScreenIds=new Set(['home','courses'");
+  const end=html.indexOf('const state={screen:',start);
+  assert(start>=0&&end>start,'Shared navigation bootstrap must be present');
+  const bootstrap=html.slice(start,end);
+  const run=({screen='home',navigation='navigate',push='',fallback=false}={})=>{
+    const result=vm.runInNewContext(bootstrap+'\n({screen:initialUiState.screen,params:flympusPushBootScreen})',{
+      sessionStorage:{getItem:key=>key==='ct-review-ui'?JSON.stringify({screen,settingsTab:'catalog'}):null},
+      location:{search:push?('?pushScreen='+encodeURIComponent(push)):''},
+      URLSearchParams,
+      performance:fallback?{getEntriesByType:()=>[],navigation:{type:navigation==='reload'?1:0}}:
+        {getEntriesByType:()=>[{type:navigation}]}
+    });
+    return result;
+  };
+  for(const screen of ['roster','profile','instructor','courses','settings','preferences','my-profile','user-management','reports','planned','record','evaluation','safety','exams']){
+    assert.equal(run({screen,navigation:'reload'}).screen,screen,'Refresh must stay on '+screen);
+  }
+  assert.equal(run({screen:'reports',navigation:'navigate'}).screen,'home','Fresh tab starts HOME');
+  assert.equal(run({screen:'invalid-screen',navigation:'reload'}).screen,'home','Unknown screen resets safely');
+  assert.equal(run({screen:'settings',navigation:'reload',push:'roster'}).screen,'roster','Push deep link overrides saved screen');
+  assert.equal(run({screen:'roster',navigation:'reload',fallback:true}).screen,'roster','Legacy navigation timing fallback restores screen');
+}
 
 
 
