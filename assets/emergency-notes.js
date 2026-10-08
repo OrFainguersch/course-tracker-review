@@ -41,5 +41,47 @@
     }
     return results.sort((a,b)=>b.date.localeCompare(a.date)||b.evaluationId.localeCompare(a.evaluationId));
   }
-  return Object.freeze({MAX_LENGTH,normalize,collect,positiveCount});
+  // Only submitted, course-scoped evaluations are supplied by the caller.
+  // Plans and synthetic review flights must never establish a performance date.
+  function canonicalDate(value){
+    const raw=String(value??'').trim();
+    let match=raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:T.*)?$/),year,month,day;
+    if(match){year=Number(match[1]);month=Number(match[2]);day=Number(match[3])}
+    else{
+      match=raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if(!match)return '';
+      day=Number(match[1]);month=Number(match[2]);year=Number(match[3]);
+    }
+    const date=new Date(Date.UTC(year,month-1,day));
+    if(date.getUTCFullYear()!==year||date.getUTCMonth()!==month-1||date.getUTCDate()!==day)return '';
+    return String(year).padStart(4,'0')+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+  }
+  function latestPerformedDates(evaluations,traineeId,emergencyDefs,legacyNames){
+    const latest=Object.create(null),knownIds=new Set(),byName=new Map();
+    for(const def of emergencyDefs||[]){
+      const id=String(def?.id??'').trim(),name=String(def?.name??'').trim().toLocaleLowerCase('en');
+      if(!id)continue;
+      knownIds.add(id);
+      if(name&&!byName.has(name))byName.set(name,id);
+    }
+    for(const ev of evaluations||[]){
+      if(String(ev?.traineeId)!==String(traineeId)||ev?.source==='mock')continue;
+      const date=canonicalDate(ev?.flightDate||ev?.date);
+      if(!date)continue;
+      const hasKeyedCounts=ev.emergencyCounts&&typeof ev.emergencyCounts==='object'&&!Array.isArray(ev.emergencyCounts);
+      if(hasKeyedCounts){
+        for(const [id,n] of Object.entries(ev.emergencyCounts)){
+          if(knownIds.has(id)&&positiveCount(n)&&(latest[id]===undefined||date>latest[id]))latest[id]=date;
+        }
+      }else if(Array.isArray(ev.emergencies)){
+        ev.emergencies.forEach((count,index)=>{
+          if(!positiveCount(count))return;
+          const id=byName.get(String(legacyNames?.[index]||'').trim().toLocaleLowerCase('en'));
+          if(id&&(latest[id]===undefined||date>latest[id]))latest[id]=date;
+        });
+      }
+    }
+    return latest;
+  }
+  return Object.freeze({MAX_LENGTH,normalize,collect,positiveCount,latestPerformedDates});
 });
