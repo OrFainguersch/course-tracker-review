@@ -62,32 +62,32 @@ function trustedVisualResumeFor(uid=returningScopedSession?window.FLYMPUS_STORAG
   return !!(uid&&record?.uid===String(uid)&&record?.status==='active'&&document.documentElement.classList.contains('flympusAuthResuming'))
 }
 
-const APP_ROLE_ORDER=Object.freeze(['user','duty_trainee','training_manager','admin','owner']);
+const APP_ROLE_ORDER=Object.freeze(['duty_trainee','user','training_manager','admin','owner']);
 const APP_ROLE_DEFINITIONS=Object.freeze({
   owner:Object.freeze({
     label:'Owner',
-    description:'Complete control of FLYMPUS. An Owner may appoint another Owner, an Administrator, a Training Manager or a User, and may manage every role below Owner. The Primary Owner remains protected.',
+    description:'Complete control of FLYMPUS. An Owner may appoint Owner, Administrator, Training Manager, User or Duty Trainee. The Primary Owner remains protected.',
     capabilities:Object.freeze(['users.manage','courses.create','courses.manageAll','courses.manageAssigned','packages.manageGlobal','packages.overrideCourse','roster.manage','evaluations.write','operations.daily.write','operations.flightBoard.write','operations.solo.write','fleet.serviceability.write'])
   }),
   admin:Object.freeze({
     label:'Administrator',
-    description:'Manages lower-level accounts and all training operations. An Administrator may appoint a Training Manager or a User, but cannot appoint another Administrator or an Owner.',
+    description:'Manages lower-level accounts and all training operations. An Administrator may appoint Training Manager, User or Duty Trainee, but not Administrator or Owner.',
     capabilities:Object.freeze(['users.manage','courses.create','courses.manageAll','courses.manageAssigned','packages.manageGlobal','packages.overrideCourse','roster.manage','evaluations.write','operations.daily.write','operations.flightBoard.write','operations.solo.write','fleet.serviceability.write'])
   }),
   training_manager:Object.freeze({
     label:'Training Manager',
-    description:'Creates and manages training, course rosters and course-specific Package changes. A Training Manager may invite, approve and appoint Users, but cannot appoint another Training Manager or any higher role.',
+    description:'Creates and manages training, rosters and course-specific Package changes. A Training Manager may appoint User or Duty Trainee, but no higher role.',
     capabilities:Object.freeze(['users.manage','courses.create','courses.manageAssigned','packages.overrideCourse','roster.manage','evaluations.write','operations.daily.write','operations.flightBoard.write','operations.solo.write','fleet.serviceability.write'])
   }),
   duty_trainee:Object.freeze({
     label:'Duty Trainee',
-    description:'Can edit daily flight boards, Planned vs Executed, solo flights and aircraft serviceability for assigned courses. Cannot manage users, course structure, roster, or training Packages.',
+    description:'Restricted to Home, Plan, Aircraft Serviceability and personal Settings. Can edit assigned-course flight boards, Planned vs Executed, solo flights and serviceability. All other sections are off limits; own photo only, not official identity.',
     capabilities:Object.freeze(['operations.daily.write','operations.flightBoard.write','operations.solo.write','fleet.serviceability.write'])
   }),
   user:Object.freeze({
     label:'User',
-    description:'Works inside assigned courses and records operational data such as evaluations and forms, without changing course structure, rosters or Packages.',
-    capabilities:Object.freeze(['evaluations.write'])
+    description:'Higher than Duty Trainee. May submit evaluations/forms and perform Duty Trainee operations in assigned courses. Cannot appoint Duty Trainees or manage users, roster, course structure or Packages.',
+    capabilities:Object.freeze(['evaluations.write','operations.daily.write','operations.flightBoard.write','operations.solo.write','fleet.serviceability.write'])
   })
 });
 function normalizeAppRole(role){return APP_ROLE_ORDER.includes(String(role||''))?String(role):'user'}
@@ -122,7 +122,7 @@ const api=window.FLYMPUS_AUTH={
   refreshSession:()=>refreshCurrentSession()
 };
 
-const AUTH_HE_UI=Object.freeze({
+const AUTH_HE_UI=Object.freeze({"Full system control":"שליטה מלאה במערכת","System administration":"ניהול מערכת","Training administration":"ניהול הדרכה","Operational access":"גישה תפעולית","Restricted daily operations":"גישה תפעולית מוגבלת","May appoint: Owner, Administrator, Training Manager, User or Duty Trainee":"רשאי למנות: בעלים, מנהל מערכת, מנהל הדרכה, משתמש או חניך תורן","May appoint: Training Manager, User or Duty Trainee":"רשאי למנות: מנהל הדרכה, משתמש או חניך תורן","May appoint: User or Duty Trainee":"רשאי למנות: משתמש או חניך תורן","Higher than Duty Trainee; cannot appoint Duty Trainees":"בכיר מחניך תורן; אינו רשאי למנות חניכים תורנים","Edit Plan, daily flight boards, solo flights and serviceability":"עריכת התכנון, לוחות הטיסות, גיחות סולו ושמישות כלי טיס","No User Management or course structure, roster or Package editing":"ללא ניהול משתמשים, מבנה קורס, סגל או חבילות הדרכה","Home, Plan, Aircraft Serviceability and personal Settings only":"גישה לבית, תכנון, שמישות כלי טיס והגדרות אישיות בלבד","Edit daily flight boards and Planned vs Executed":"עריכת לוח טיסות יומי ותכנון מול ביצוע","May change own photo; name and role are read-only":"ניתן לשנות תמונה אישית בלבד; שם ותפקיד אינם ניתנים לעריכה","No access to any other application sections or data":"אין גישה למסכים או לנתונים אחרים באפליקציה",
   'FLYMPUS ACCOUNT':'חשבון FLYMPUS','SECURE SIGN IN':'כניסה מאובטחת','ACCOUNT ACCESS':'גישה לחשבון','AUTHENTICATION':'אימות',
   'Opening FLYMPUS':'פותח את FLYMPUS','Checking your account…':'בודק את החשבון שלך…','Starting secure authentication…':'מפעיל אימות מאובטח…','Verifying FLYMPUS access…':'מאמת הרשאת גישה ל־FLYMPUS…',
   'Sign in to continue':'התחבר כדי להמשיך','Sign in to FLYMPUS':'כניסה ל־FLYMPUS','Continue with the Google account assigned to you.':'התחבר עם חשבון Google שהוקצה לך.','FLYMPUS uses your account only to verify your identity. It does not read your Gmail or Outlook.':'FLYMPUS משתמש בחשבון רק לצורך זיהוי. אין לו גישה ל־Gmail או ל־Outlook שלך.','Opening Google…':'פותח את Google…','Continue with Google':'המשך עם Google','Continue with Microsoft':'המשך עם Microsoft',
@@ -493,11 +493,11 @@ function canAssignAppRole(role){
 }
 function roleGuideHtml(){
   const defs=[
-    ['owner','Full system control',['May appoint: Owner, Administrator, Training Manager or User','Full access to all courses and global Packages','Full User Management and role control','Primary Owner is protected']],
-    ['admin','System administration',['May appoint: Training Manager or User','Manage Users and lower-level roles','Manage all courses and global Packages','Full training administration']],
-    ['training_manager','Training administration',['May appoint: User','Create and manage assigned training courses','Manage course rosters','Create course-specific Package overrides','Submit and manage training records/evaluations']],
-    ['duty_trainee','Daily flight operations',['Edit daily flight boards','Edit Planned vs Executed','Record and edit solo flights','Manage aircraft serviceability for assigned courses','No user, roster or course structure management']],
-    ['user','Operational access',['Work in assigned courses','Submit evaluations and forms','No User Management','No course structure, roster or Package editing']]
+    ['owner','Full system control',['May appoint: Owner, Administrator, Training Manager, User or Duty Trainee','Full access to all courses and global Packages','Full User Management and role control','Primary Owner is protected']],
+    ['admin','System administration',['May appoint: Training Manager, User or Duty Trainee','Manage Users and lower-level roles','Manage all courses and global Packages','Full training administration']],
+    ['training_manager','Training administration',['May appoint: User or Duty Trainee','Create and manage assigned training courses','Manage course rosters','Create course-specific Package overrides','Submit and manage training records/evaluations']],
+    ['user','Operational access',['Higher than Duty Trainee; cannot appoint Duty Trainees','Work in assigned courses','Submit evaluations and forms','Edit Plan, daily flight boards, solo flights and serviceability','No User Management or course structure, roster or Package editing']],
+    ['duty_trainee','Restricted daily operations',['Home, Plan, Aircraft Serviceability and personal Settings only','Edit daily flight boards and Planned vs Executed','Record and edit solo flights','Manage aircraft serviceability for assigned courses','May change own photo; name and role are read-only','No access to any other application sections or data']]
   ];
   return '<section class="flympusRoleGuide"><div class="flympusRoleGuideHead"><div><span>'+esc(tr('Role guide'))+'</span><h2>'+esc(tr('What each role can do'))+'</h2></div></div><div class="flympusRoleGuideGrid">'+defs.map(([role,title,items])=>'<article class="flympusRoleGuideCard '+esc(role)+'"><div class="flympusRoleGuideTitle"><b>'+esc(managementRoleLabel(role))+'</b><small>'+esc(tr(title))+'</small></div><ul>'+items.map(item=>'<li>'+esc(tr(item))+'</li>').join('')+'</ul></article>').join('')+'</div></section>'
 }
