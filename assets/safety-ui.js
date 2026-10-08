@@ -14,6 +14,24 @@ function create(ctx){
   function records(){return active()?cloud.records:local()}
   function reset(){try{cloud.unsubscribe?.()}catch{}cloud={courseId:'',mode:'idle',records:[],members:{},unsubscribe:null,error:'',initialized:false}}
   function refresh(){if(['home','safety'].includes(ctx.screen()))ctx.render();else inbox()}
+  let lastRosterCheck=0,rosterChecking=false,unmatchedEmails=[];
+  async function reconcile(){
+    if(!api()?.manager?.()||rosterChecking||Date.now()-lastRosterCheck<60000)return;
+    lastRosterCheck=Date.now();rosterChecking=true;
+    const key=String(ctx.courseId());
+    try{
+      const entries=ctx.instructors().filter(p=>p.email).map(p=>({email:p.email,role:ctx.instructorRole?.(p)==='COURSE_MANAGER'?'COURSE_MANAGER':'INSTRUCTOR'}));
+      const preview=await api().rosterPreview(entries);unmatchedEmails=preview.missing;
+      const existing=await api().course(key),current=existing?.members||{};
+      const desired=[...preview.matched,{uid:api().uid(),role:'COURSE_MANAGER'}];
+      const changed=!existing||!Array.isArray(existing.memberUids)||Object.keys(current).length!==desired.length||desired.some(p=>current[p.uid]?.role!==p.role);
+      if(changed){
+        await api().enable(key,ctx.courseName(),preview.matched);
+        if(cloud.courseId===key){reset();connect()}
+      }
+    }catch(err){console.warn('Safety auto enrollment',err);unmatchedEmails=['Firebase instructor sync failed: '+String(err?.message||err)]}
+    finally{rosterChecking=false}
+  }
   function connect(){
     if(!api()?.ready?.()||ctx.isDuty())return;
     ctx.startGlobalInbox?.();
