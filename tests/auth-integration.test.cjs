@@ -219,3 +219,20 @@ assert(html.includes('id="accountAddAnother"')&&html.includes('id="personalProfi
 }
 
 assert(html.includes('id="drawerProfileEmail"')&&html.includes('class="drawerProfileEmail"'),'Sidebar account card contains a dedicated email element');
+
+
+// The My Profile role pill must use the very same role palette as the account
+// menu and User Management. Never fall back to an untyped blue status pill.
+assert(
+  html.includes('myProfileBadges"><span data-flympus-role-badge="') &&
+  html.includes("esc(String(window.FLYMPUS_AUTH?.role?.()||'user'))"),
+  'My Profile role badge must bind to the authenticated application role'
+);
+for(const role of ['owner','admin','training_manager','user']){
+  assert(css.includes('[data-flympus-role-badge="'+role+'"]'),
+    role+' must be included in the shared application role palette');
+}
+assert(css.includes('--role-owner-bg:#fff1c9')&&css.includes('--role-owner-fg:#805f18'),
+  'Owner role badge must retain the established gold palette');
+assert(css.includes('--role-owner-bg:#3a321d')&&css.includes('--role-owner-fg:#ebcf82'),
+  'Owner role badge must retain the accessible dark-theme gold palette');
