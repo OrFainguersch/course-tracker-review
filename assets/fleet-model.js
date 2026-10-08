@@ -119,9 +119,13 @@
   const record={...valid,id,createdAt:old?.createdAt||now,updatedAt:now};
   return old?list.map(x=>x===old?record:x):[...list,record];
  }
+ function plannedFlightCounts(rows,date,platform){
+  const flights=(Array.isArray(rows)?rows:[]).filter(x=>x?.date===date&&String(x?.platformId||'')===String(platform));
+  return {total:flights.length,instructed:flights.filter(x=>x.mode==='INSTRUCTED').length,solo:flights.filter(x=>x.mode==='SOLO').length};
+ }
  function flightIssues(flight,aircraft,platform){
   const match=active(aircraft,platform).find(x=>x.id===flight.aircraftId);
   return !match?'Aircraft removed from the active fleet':match.status!==AVAILABLE?'Aircraft unserviceable: '+clean(match.reason,200):'';
  }
- return Object.freeze({AVAILABLE,UNAVAILABLE,dateValid,clockValid,active,count,validAircraft,upsertAircraft,archiveAircraft,checkedSortie,upsertSortie,flightIssues,flightTimeline,TIMING_DEFAULTS,configuredTimings});
+ return Object.freeze({AVAILABLE,UNAVAILABLE,dateValid,clockValid,active,count,validAircraft,upsertAircraft,archiveAircraft,checkedSortie,upsertSortie,flightIssues,flightTimeline,TIMING_DEFAULTS,configuredTimings,plannedFlightCounts});
 });
