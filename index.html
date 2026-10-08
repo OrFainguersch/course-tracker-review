@@ -300,9 +300,9 @@ main{padding:16px 14px calc(30px + env(safe-area-inset-bottom));max-width:1220px
 .homeBlockTitle p{margin:3px 0 0;color:#71849a;font-size:10.5px}
 .homeDateChip{border:1px solid #dce8f3;background:#f8fbfe;border-radius:10px;padding:7px 9px;color:#365c82;font-size:10px;font-weight:750;white-space:nowrap}
 .homePlanList{display:grid}
-.homePlanRow{appearance:none;border:0;border-top:1px solid #e8eff6;background:#fff;width:100%;padding:11px 12px;display:grid;grid-template-columns:54px 32px minmax(0,1fr) auto;gap:9px;align-items:center;text-align:left;cursor:pointer}
+.homePlanRow{appearance:none;border:0;border-top:1px solid #e8eff6;background:#fff;width:100%;padding:11px 12px;display:grid;grid-template-columns:54px 32px minmax(0,1fr) auto;gap:9px;align-items:center;text-align:left;cursor:default}
 .homePlanRow:first-child{border-top:0}
-.homePlanRow:hover{background:#f8fbfe}
+.homePlanRow:hover{background:#fff}
 .homePlanTime{font-size:11px;color:#2f5f8d;font-weight:850}
 .homeInitial{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;background:#e8f3fb;color:#285f8c;font-size:9px;font-weight:900}
 .homePlanMain b{display:block;color:#0b315b;font-size:11.5px}
@@ -3953,7 +3953,7 @@ html[data-flympus-theme="dark"] .mutedHint,
 html[data-flympus-theme="dark"] .fieldHelp,
 html[data-flympus-theme="dark"] .detail{color:#9fb0bf!important}
 html[data-flympus-theme="dark"] .homePlanRow{background:#0d1e2f!important;border-color:#294158!important;color:#eaf4fc!important}
-html[data-flympus-theme="dark"] .homePlanRow:hover{background:#132a40!important}
+html[data-flympus-theme="dark"] .homePlanRow:hover{background:#0d1e2f!important}
 html[data-flympus-theme="dark"] .accountProfileShortcut:hover,
 html[data-flympus-theme="dark"] .accountProfileShortcut:focus-visible{background:#142b40!important}
 html[data-flympus-theme="dark"] .personalProfileHead{border-bottom-color:#294158}
@@ -8861,7 +8861,7 @@ function home(){
      '<div class="heroMeta homeHeroFooter"><span class="homeHeroMetaLine"><span class="homeHeroCountry" data-i18n-skip>'+esc(homeCountryLabel)+'</span>'+(currentCourseMeta.startsOn?'<span class="homeHeroMetaSep" aria-hidden="true">·</span><span class="homeHeroStartLabel">Start date</span><bdi class="homeHeroStartDate">'+esc(formatCourseDate(currentCourseMeta.startsOn))+'</bdi>':'')+'</span><button class="homeAllCoursesLink" type="button" data-go="courses">View all courses <i class="homeAllCoursesArrow" aria-hidden="true" data-i18n-skip>'+homeForwardArrow+'</i></button></div>'+
    '</section>'+
    '<section class="homePanel homePanelPad">'+
-     '<div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Course Pulse</h2><p>Key indicators for current course</p></div></div><button class="homeInlineLink" data-go="reports">View Reports</button></div>'+
+     '<div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Course Pulse</h2><p>Key indicators for current course</p></div></div></div>'+
      '<div class="homePulseGrid">'+
        '<div class="homePulseCard"><div class="homePulseIcon">♙</div><div class="homePulseValue">'+activeT.length+'</div><div class="homePulseLabel">Active Trainees</div><div class="homePulseNote neutral">Current roster</div></div>'+
        '<div class="homePulseCard"><div class="homePulseIcon">◔</div><div class="homePulseValue">'+avgProgress+'%</div><div class="homePulseLabel">Average Progress</div><div class="homePulseNote">Course status</div></div>'+
@@ -8871,8 +8871,8 @@ function home(){
      '</div>'+
    '</section>'+
    '<section class="homePrimaryGrid">'+
-     '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2><button type="button" class="homePlanTitleButton" data-go="planned" data-plan-today="true">Today\'s Plan</button></h2><p>Scheduled flights and activities for today</p></div></div><button type="button" class="homeDateChip homePlanDateButton" data-go="planned" data-plan-today="true">▣ '+esc(todayLabel)+'</button></div></div>'+
-       '<div class="homePlanList">'+(function(){const flights=getDailyFlightBoard().filter(x=>x.date===todayIsoDate()&&x.platformId===currentFleetPlatform()).sort((a,b)=>String(a.time).localeCompare(String(b.time)));return flights.length?flights.map(x=>'<button class="homePlanRow" data-go="planned" data-plan-today="true"><span class="homePlanTime">◷ '+esc(x.time)+'</span><span class="homeInitial">✈</span><span class="homePlanMain"><b>'+esc(x.traineeName||'Trainee')+'</b><small>'+esc(x.syllabus)+' · '+esc(x.tail)+(x.instructorName?' · '+esc(x.instructorName):'')+(x.estimatedMinutes?' · '+esc(x.estimatedMinutes)+' min':'')+'</small></span><span class="homePlanTags"><span class="homeTag '+(x.mode==='SOLO'?'solo':'instructed')+'">'+esc(x.mode==='SOLO'?'Solo':'Instructed')+'</span>'+(window.FLYMPUS_FLEET_MODEL.flightIssues(x,getFleetAircraft(),currentFleetPlatform())?'<span class="homeTag" style="color:#b42318">Unavailable</span>':'')+'</span></button>').join(''):'<button class="homePlanRow homePlanEmpty" data-go="planned" data-plan-today="true"><span class="homePlanMain"><b>No flights scheduled yet</b><small>Open Daily Flight Board to plan flights for this course.</small></span></button>'})()+
+     '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Today\'s Plan</h2><p>Scheduled flights and activities for today</p></div></div><span class="homeDateChip">▣ '+esc(todayLabel)+'</span></div></div>'+
+       '<div class="homePlanList">'+(function(){const flights=getDailyFlightBoard().filter(x=>x.date===todayIsoDate()&&x.platformId===currentFleetPlatform()).sort((a,b)=>String(a.time).localeCompare(String(b.time)));return flights.length?flights.map(x=>'<div class="homePlanRow"><span class="homePlanTime">◷ '+esc(x.time)+'</span><span class="homeInitial">✈</span><span class="homePlanMain"><b>'+esc(x.traineeName||'Trainee')+'</b><small>'+esc(x.syllabus)+' · '+esc(x.tail)+(x.instructorName?' · '+esc(x.instructorName):'')+(x.estimatedMinutes?' · '+esc(x.estimatedMinutes)+' min':'')+'</small></span><span class="homePlanTags"><span class="homeTag '+(x.mode==='SOLO'?'solo':'instructed')+'">'+esc(x.mode==='SOLO'?'Solo':'Instructed')+'</span>'+(window.FLYMPUS_FLEET_MODEL.flightIssues(x,getFleetAircraft(),currentFleetPlatform())?'<span class="homeTag" style="color:#b42318">Unavailable</span>':'')+'</span></div>').join(''):'<div class="homePlanRow homePlanEmpty"><span class="homePlanMain"><b>No flights scheduled yet</b><small>Scheduled flights will appear here when added in Plan.</small></span></div>'})()+
        '</div>'+
      '</div>'+
      (window.FLYMPUS_FLEET_VIEW?.home?.(currentFleetContext())||'')+
