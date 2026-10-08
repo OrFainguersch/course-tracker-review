@@ -237,7 +237,7 @@ html.flympusLargeText .coursePlanTabs button,html.flympusLargeText .dailyPlanSum
 .coursePlanTabs button{font-size:13px;line-height:1.35;min-height:40px;font-weight:750}
 .dailyFlightPlan{grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end}
 .dailyPlanHeader{grid-column:2;grid-row:1;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;justify-content:flex-end}
-.dailyPlanHeader>div:first-child{display:none}
+/* Date is now the only child of .dailyPlanHeader; it must stay visible. */
 .dailyPlanDateField{width:185px;min-width:160px;flex:0 1 185px}
 .dailyPlanDateField label{font-size:13px;line-height:1.35;font-weight:750;margin-bottom:7px}
 .dailyPlanDateField .input{min-height:44px;font-size:14px}
@@ -376,3 +376,47 @@ html.flympusLargeText .fleetTimingSettings summary{font-size:15px!important}
 
 .fleetPlanScopeNote{font-size:11px;line-height:1.5;color:#648097;margin:14px 0 0}
 html[data-flympus-theme="dark"] .fleetPlanScopeNote{color:#b5cee0}
+
+
+/* Plan accessibility and layout parity: language, theme, larger type and narrow iPhones. */
+.dailyFlightPlan .dailyPlanHeader .dailyPlanDateField{display:block!important;visibility:visible!important}
+html.flympusLargeText .fleetPlanFormHeading h2{font-size:23px!important;line-height:1.4}
+html.flympusLargeText .fleetPlanFormHeading p,
+html.flympusLargeText .fleetPlanScopeNote,
+html.flympusLargeText .fleetTimeFlowHeading small,
+html.flympusLargeText .fleetTimingSettings .sub,
+html.flympusLargeText .fleetBookedFlights .fleetSortieMain small{font-size:15px!important;line-height:1.6}
+html.flympusLargeText .fleetTimeFlowHeading b,
+html.flympusLargeText .fleetBookedHeading h3{font-size:17px!important;line-height:1.4}
+html.flympusLargeText .fleetTimeFlowTimes strong{font-size:18px!important}
+html.flympusLargeText .fleetInlineFleet,
+html.flympusLargeText .fleetTimingSettingsGrid label,
+html.flympusLargeText .fleetTimingSettings .input,
+html.flympusLargeText .fleetBookedHeading span{font-size:15px!important;line-height:1.5}
+html.flympusLargeText .fleetTimingSettings summary{font-size:16px!important;line-height:1.5}
+html.flympusLargeText .fleetPlanFormActions .btn{min-height:48px;padding:10px 17px}
+.fleetPlanFormHeading,.fleetTimeFlow,.fleetTimingSettings,.fleetBookedFlights{min-width:0}
+.fleetTimeFlowTimes strong{overflow-wrap:anywhere;white-space:normal;line-height:1.4}
+.fleetTimeFlowLegend{display:none;flex-wrap:wrap;align-items:center;gap:12px;margin-top:10px}
+.fleetTimeFlowLegend span{display:inline-flex;align-items:center;gap:6px;color:#4f6c85;font-size:12px;font-weight:700}
+.fleetTimeFlowLegend i{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
+.fleetTimeFlowLegend [data-phase="brief"] i{background:#d7a64c}
+.fleetTimeFlowLegend [data-phase="flight"] i{background:#408bd0}
+.fleetTimeFlowLegend [data-phase="debrief"] i{background:#56b387}
+html[data-flympus-language="he"] .fleetTimeFlowTimes strong{direction:ltr;unicode-bidi:isolate}
+html[data-flympus-theme="dark"] .fleetInlineFleet{color:#a0d9ff}
+html[data-flympus-theme="dark"] .fleetTimeFlowLegend span{color:#d1e4f1}
+html[data-flympus-theme="dark"] .fleetTimeFlowHeading small{color:#b9cedd}
+@media(max-width:480px){
+ .fleetTimeFlowTrack span{font-size:0!important}
+ .fleetTimeFlowLegend{display:flex}
+ .dailyFlightPlan .fleetSortieFormGrid .field[data-plan-notes]:last-child{grid-column:1}
+ .dailyFlightPlan .fleetSchedulePlain .fleetSortieForm{padding:19px 14px}
+ html.flympusLargeText .fleetTimeFlowLegend span{font-size:15px!important}
+ html.flympusLargeText .fleetTimeFlowTimes strong{font-size:16px!important}
+}
+@media(max-width:365px){
+ .fleetTimeFlowTimes{gap:10px}
+ .fleetTimeFlowLegend{gap:9px}
+ .fleetTimingSettingsGrid{grid-template-columns:1fr}
+}
