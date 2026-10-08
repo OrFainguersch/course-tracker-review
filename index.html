@@ -8669,8 +8669,9 @@ function persistCourseOperations(base,items){
 function currentFleetContext(extra={}){
  return {fleet:getFleetAircraft(),flights:getDailyFlightBoard(),platformId:currentFleetPlatform(),platformLabel:epPlatformLabel(currentCourseMeta.platformId)||currentCourseMeta.platformId||'—',courseLabel:currentCourseMeta.courseName||currentCourseId,today:todayIsoDate(),canWrite:flympusCan('fleet.serviceability.write'),...extra};
 }
-function fleetServiceabilityScreen(){return window.FLYMPUS_FLEET_VIEW.fleet(currentFleetContext({editId:state.fleetEditId||null}))}
+function fleetServiceabilityScreen(){return window.FLYMPUS_FLEET_VIEW?.fleet?.(currentFleetContext({editId:state.fleetEditId||null}))||flympusAccessDenied('Aircraft Serviceability')}
 function courseFlightScheduleHtml(date){
+ if(!window.FLYMPUS_FLEET_VIEW)return '';
  return window.FLYMPUS_FLEET_VIEW.schedule(currentFleetContext({date,editId:state.flightBoardEditId||null,canWrite:flympusCan('operations.flightBoard.write'),
   trainees:courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active').map(x=>({id:x.id,name:x.name})),
   instructors:courseInstructors().map(x=>({id:x.id,name:x.name})),syllabi:evaluationSyllabusNames()}));
@@ -8814,7 +8815,7 @@ function home(){
        '</div>'+
      '</div>'+
    '</section>'+
-   window.FLYMPUS_FLEET_VIEW.home(currentFleetContext())+
+   (window.FLYMPUS_FLEET_VIEW?.home?.(currentFleetContext())||'')+
    '<section class="homePanel homePanelPad">'+
      '<div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Course Pulse</h2><p>Key indicators for current course</p></div></div><button class="homeInlineLink" data-go="reports">View Reports</button></div>'+
      '<div class="homePulseGrid">'+
