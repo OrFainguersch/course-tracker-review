@@ -255,9 +255,9 @@ assert(html.includes("if(!canViewDutyScreen(screen))return flympusAccessDenied('
 assert(html.includes("isOperationalPrivilege(capability)&&window.FLYMPUS_AUTH?.can?.(capability)===true&&isDutyTraineeAssigned()"),
   'Duty Trainee capability checks must override course manager permissions');
 assert(html.includes("const visible=isDutyTrainee()?[['__label','','OPERATIONS']")&&
-  html.includes("const items=isDutyTrainee()?[['home','home','Home']")&&
+  html.includes("const items=isDutyTrainee()?[['planned','planned','Plan'],['home','home','Home'],['fleet','fleet','Maintenance']]")&&
   html.includes("if(isDutyTrainee())return DUTY_ALLOWED_SCREENS.has(screen)?screen:'home'"),
-  'Side nav and bottom dock must expose only Home, Plan, Maintenance and personal Settings');
+  'Sidebar and bottom dock must expose only the three operational pages; personal Settings stays in the profile menu');
 assert(html.includes("if(isDutyTrainee())return dutyTraineeSettingsScreen()")&&
   html.includes("await window.FLYMPUS_AUTH?.updateOwnPhoto?.('')"),
   'Duty Trainee Settings must have own-photo editing and a read-only identity');
