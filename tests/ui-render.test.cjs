@@ -830,3 +830,13 @@ assert(html.includes('Full-site typography alignment · 2026-10-06')&&
   html.includes('html.flympusLargeText .evaluationVoiceTranscript')&&
   html.includes('body{font-size:14px}'),
   'Typography must use one final site-wide scale and Larger Text must cover late-loaded Evaluation voice controls');
+
+// Bell settings deep-link: center the section heading after routing.
+assert(html.includes("go('preferences',{}, {focusNotificationSettings:true})"),'Bell settings must target Notifications, not merely open Settings');
+assert(html.includes("function focusNotificationSettings()"),'Notifications focus helper must exist');
+assert(html.includes("heading.scrollIntoView?.({behavior:reduceMotion?'auto':'smooth',block:'center',inline:'nearest'})"),
+  'Notifications section header must center after render, supporting reduced motion');
+assert(html.includes("if(startAtTop&&!options.focusNotificationSettings)forcePageTop()"),'Top reset must not undo the Notifications focus');
+assert(html.includes("id=\"accountSwitchList\"")&&html.includes("id=\"accountAddAnother\""),'Account picker must be part of shared desktop/mobile profile menu');
+assert(html.includes('class="personalProfileEmail" id="personalProfileEmail"'),'Email must appear immediately below active account name');
+assert(html.includes('Sign out of this account'),'Signout explanation must replace account email in destructive action');
