@@ -230,8 +230,22 @@ assert(html.includes("manage?'manageCard':'personCardOpen'")&&html.includes("dat
 assert(!html.includes("Restore original Package defaults"),"Bulk Package restore-to-defaults must be removed");
 assert(!html.includes("Revert to Package defaults"),"Bulk course revert-to-defaults must be removed");
 assert(html.includes(".packageRules>summary>span{font-size:9px;color:#8092a5}"),"Summary helper styling must target only the direct helper span so counts inside titles keep the title font");
-const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(match=>match[1]).filter(x=>x.trim());
+assert(html.includes('.drawer.open .panel::before{')&&html.includes('top:calc(env(safe-area-inset-top) - 2px)')&&html.includes('height:5px;')&&html.includes('background:#102f51;'),"iOS drawer must paint the status-bar boundary with panel-owned navy, not a global fixed underlay");
+assert(!html.includes("drawerRole.textContent=appRole+' · '+courseRole"),"Drawer footer must never append a course-specific position to the system role");
+const scripts=[...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/g)].map(match=>match[1]).filter(x=>x.trim());
 assert(scripts.length>=2);const appSource=scripts.at(-1).split('const earlyNavTarget=')[0];vm.runInContext(appSource,context,{filename:"index-inline.js"});
+// Drawer footer is global identity. A person's course-role membership must not
+// leak into the footer, even if the current course assigns Course Manager.
+elements.set("#drawerProfileRole",new ElementStub());
+const previousAppRole=context.FLYMPUS_AUTH.role;
+for(const [systemRole,expectedLabel] of [["owner","Owner"],["admin","Administrator"],["training_manager","Training Manager"],["user","User"]]){
+  context.FLYMPUS_AUTH.role=()=>systemRole;
+  vm.runInContext("renderPersonalIdentity()",context);
+  assert.equal(elements.get("#drawerProfileRole").textContent,expectedLabel,
+    "Drawer footer must show only the active user's app role ("+systemRole+"), never Course Manager/Instructor");
+}
+context.FLYMPUS_AUTH.role=previousAppRole;
+vm.runInContext("renderPersonalIdentity()",context);
 const switcherOrder=vm.runInContext("sortCourseSwitcherRows([{key:'done',course:{startsOn:'2025-01-01'},lifecycle:{id:'COMPLETED'}},{key:'future2',course:{startsOn:'2027-03-01'},lifecycle:{id:'UPCOMING'}},{key:'current',course:{startsOn:'2024-01-01'},lifecycle:{id:'COMPLETED'}},{key:'runOld',course:{startsOn:'2026-01-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'runNew',course:{startsOn:'2026-08-01'},lifecycle:{id:'IN_PROGRESS'}},{key:'future1',course:{startsOn:'2027-01-01'},lifecycle:{id:'UPCOMING'}}],'current').map(x=>x.key).join(',')",context);
 assert.equal(switcherOrder,"current,runNew,runOld,future1,future2,done","Quick switcher order must be Selected, In Progress newest first, Upcoming soonest first, then Completed");
 assert.equal(vm.runInContext("activityDraftMeaningful('evaluation',{date:'2026-10-01',gradeMode:'SUGGESTED',takeoffs:'0',landings:'0'})",context),false,"Evaluation defaults alone must not count as unfinished");

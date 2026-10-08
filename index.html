@@ -5474,6 +5474,26 @@ body.drawerCanvasFrozen .drawer.open .panel{
   opacity:1!important
 }
 
+/* iOS installed-PWA safe-area seam: the status-bar / content boundary can
+   composite a one-device-pixel pale line across the exposed drawer. Paint
+   only the 5px boundary on the drawer panel's own layer, in the identical
+   navy as the panel. The cover moves WITH the frozen canvas (never with
+   document scroll), leaves the logo/links untouched, and cannot change
+   the established drawer open/close timing or the header/dock chrome. */
+@media(max-width:899px){
+  .drawer.open .panel::before{
+    content:"";
+    position:absolute;
+    top:calc(env(safe-area-inset-top) - 2px);
+    left:0;
+    right:0;
+    height:5px;
+    background:#102f51;
+    pointer-events:none;
+    z-index:1;
+  }
+}
+
 /* Normal scrolling must use the pre-drawer chrome behavior exactly. */
 body:not(.drawerCanvasFrozen) .top,
 body:not(.drawerCanvasFrozen) main,
@@ -9006,13 +9026,13 @@ function currentCourseRoleDisplay(){
   return getFlympusAppPreferences().language==='he'?(role==='COURSE_MANAGER'?'מנהל קורס':'מדריך'):en
 }
 function renderPersonalIdentity(){
-  const me=allInstructors().find(x=>x.id===currentUserId)||{id:currentUserId,name:'Or Fainguersch'},initials=personInitials(me),hasPhoto=!!me.photoData,appRole=currentAppRoleDisplay(),courseRole=currentCourseRoleDisplay(),email=String(window.FLYMPUS_AUTH?.currentUser?.email||'');
+  const me=allInstructors().find(x=>x.id===currentUserId)||{id:currentUserId,name:'Or Fainguersch'},initials=personInitials(me),hasPhoto=!!me.photoData,appRole=currentAppRoleDisplay(),email=String(window.FLYMPUS_AUTH?.currentUser?.email||'');
   document.querySelectorAll('[data-current-user-avatar]').forEach(el=>{el.innerHTML=hasPhoto?'<img class="currentUserAvatarPhoto" src="'+me.photoData+'" alt="">':esc(initials)});
   const name=$('#personalProfileName');if(name)name.textContent=me.name||'Personal profile';
   const role=$('#personalProfileRole');if(role)role.textContent=appRole;
   const emailEl=$('#personalProfileEmail');if(emailEl)emailEl.textContent=email;
   const drawerName=$('#drawerProfileName');if(drawerName)drawerName.textContent=me.name||'Personal profile';
-  const drawerRole=$('#drawerProfileRole');if(drawerRole)drawerRole.textContent=appRole+' · '+courseRole;
+  const drawerRole=$('#drawerProfileRole');if(drawerRole)drawerRole.textContent=appRole;
 }
 function courseHasExplicitMembership(courseKey=currentCourseId){return getDraftCourses().some(x=>(x.code||x.id)===courseKey)}
 function coursePersonIsAssignedTo(p,type,courseKey){

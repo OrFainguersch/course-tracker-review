@@ -71,3 +71,10 @@ Any change touching mobile header positioning, bottom-nav auto-hide, pull-to-ref
 - immediate handoff from pull-return tail to a new touch
 - drawer close restoring the frozen scroll offset
 - synthetic drawer scroll events not contaminating saved scroll or chrome direction state
+
+## Sidebar identity + safe-area invariants
+
+- The sidebar footer identity shows the signed-in user's **system/application role only** (for example Owner, Administrator, Training Manager, User), using the canonical auth role label. Never append Course Manager, Instructor, or another role from the selected course. Show course membership only in course-scoped screens.
+- On iOS standalone PWA, the sidebar's dark-navy fill must have **no pale separator across the safe-area/status-bar boundary**. Any boundary correction must be painted by the sliding drawer panel itself, not a static document/body patch or an independently moving layer.
+- Preserve the 200ms opening, 230ms closing, exact scroll-position restoration, header/bottom-nav auto-hide, and drawer push-canvas synchronization when modifying sidebar visuals.
+- Keep regression checks covering the drawer's system-only role across different accounts and its panel-owned safe-area boundary paint.
