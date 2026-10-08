@@ -343,6 +343,7 @@ test('Plan displays consistently red required markers and read-only board-derive
  const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'../assets/fleet-operations.css'),'utf8');
  assert.match(css,/\.dailyFlightPlan \.fleetRequired,\.coursePlanWorkspace \.fleetRequired\{color:#c62828!important/);
  assert.match(css,/html\[data-flympus-theme="dark"\] \.fleetRequired/);
+ assert.match(css,/\.fleetSortieFormGrid label:has\(\.fleetRequired\)::after\{content:none!important;display:none!important\}/);
  assert.match(css,/html\.flympusLargeText \.pveBoardLinkedNote/);
 });
 
@@ -413,7 +414,7 @@ test('Daily Flight Plan owns the only editable flight-date selector for both Pla
 });
 
 
-test('Plan contract stays coherent: one centered flight day, settings, required fields, theme and execution totals',()=>{
+test('Plan contract stays coherent: full-width flight day, settings, required fields, theme and execution totals',()=>{
  const vm=require('node:vm');
  const lang={value:'en'},context={window:{FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=>lang.value}};
  vm.runInNewContext(ui,context,{filename:'fleet-views.js'});
@@ -428,7 +429,7 @@ test('Plan contract stays coherent: one centered flight day, settings, required 
  assert.equal((screen.match(/fleetRequired/g)||[]).length,8);
  assert.match(screen,/data-go="fleet"/);
  const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'../assets/fleet-operations.css'),'utf8');
- assert.match(css,/\.dailyFlightPlan\{max-width:1220px;width:100%;margin:0 auto/);
+ assert.match(css,/\.dailyFlightPlan\{max-width:none;width:100%;margin:0 auto/);
  assert.match(css,/\.dailyFlightPlan \.dailyPlanHeader\.dailyPlanDateSpotlight\{max-width:100%;width:100%;margin:0!important/);
  assert.match(css,/\.dailyFlightPlan \.fleetSchedulePlain>\.fleetTimingSettings,/);
  assert.match(css,/\.dailyFlightPlan \.fleetSchedulePlain>\.fleetSortieForm,/);
