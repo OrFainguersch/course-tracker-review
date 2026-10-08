@@ -1201,3 +1201,31 @@ html.flympusLargeText .accountSwitcherExpired{font-size:12px}
 html[data-flympus-theme="dark"] .accountQuickMenu .flympusAccountSignoutDivider{
   background:#36526a;
 }
+
+/* Single source of truth for application ROLE badges (not status badges).
+   Consistent across all screens, responsive modes and account panels. */
+:root{
+  --role-owner-bg:#fff1c9;--role-owner-fg:#805f18;
+  --role-admin-bg:#eeeafd;--role-admin-fg:#6550a8;
+  --role-training-manager-bg:#e8eeff;--role-training-manager-fg:#365fae;
+  --role-user-bg:#e2f5ff;--role-user-fg:#126e9c;
+}
+html[data-flympus-theme="dark"]{
+  --role-owner-bg:#3a321d;--role-owner-fg:#ebcf82;
+  --role-admin-bg:#2b2747;--role-admin-fg:#c5b8f5;
+  --role-training-manager-bg:#202d55;--role-training-manager-fg:#a9bdf5;
+  --role-user-bg:#14364a;--role-user-fg:#8fd0f3;
+}
+[data-flympus-role-badge="owner"],
+#flympusUserManagementPageRoot .flympusUserRoleBadge.owner,
+.flympusUserMeta i.role.owner,
+.flympusOwnerProtected{background:var(--role-owner-bg)!important;color:var(--role-owner-fg)!important}
+[data-flympus-role-badge="admin"],
+#flympusUserManagementPageRoot .flympusUserRoleBadge.admin,
+.flympusUserMeta i.role.admin{background:var(--role-admin-bg)!important;color:var(--role-admin-fg)!important}
+[data-flympus-role-badge="training_manager"],
+#flympusUserManagementPageRoot .flympusUserRoleBadge.training_manager,
+.flympusUserMeta i.role.training_manager{background:var(--role-training-manager-bg)!important;color:var(--role-training-manager-fg)!important}
+[data-flympus-role-badge="user"],
+#flympusUserManagementPageRoot .flympusUserRoleBadge.user,
+.flympusUserMeta i.role.user{background:var(--role-user-bg)!important;color:var(--role-user-fg)!important}
