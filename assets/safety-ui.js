@@ -49,10 +49,6 @@ function create(ctx){
         if(cloud!==session||cloud.courseId!==key)return;
         const before=JSON.stringify(cloud.records);
         const next=(entries||[]).map(model.normalize);
-        if(cloud.initialized&&next.some(x=>!cloud.records.some(old=>old.id===x.id)&&x.createdBy!==uid()&&model.notification(x,uid()))){
-          notify('New course safety event · acknowledgement required','warning');
-          ctx.notifySound?.();
-        }
         cloud.initialized=true;
         cloud.records=next;
         if(before!==JSON.stringify(cloud.records))refresh();else inbox();
