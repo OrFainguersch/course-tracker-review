@@ -11573,13 +11573,12 @@ function bindSafety(){
  form.onsubmit=async e=>{
   e.preventDefault();await photoController.ready();
   const fd=new FormData(form),traineeId=String(fd.get('trainee')||''),instructorId=String(fd.get('instructor')||'');
-  const allT=allTrainees(),allI=allInstructors(),briefDescription=String(fd.get('briefDescription')||'');
+  const allT=allTrainees(),allI=allInstructors(),briefDescription=String(fd.get('briefDescription')||''),findings=String(fd.get('findings')||''),lessonsLearned=String(fd.get('lessonsLearned')||'');
   const report={
     id:'s_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),
     date:normalizeDateValue(fd.get('date')),traineeId,instructorId,
     title:String(fd.get('title')||''),severity:normalizeSafetySeverity(fd.get('severity')),
-    classification:String(fd.get('classification')||''),details:briefDescription,briefDescription,
-    findings:String(fd.get('findings')||''),lessonsLearned:String(fd.get('lessonsLearned')||''),
+    classification:String(fd.get('classification')||''),details:briefDescription,briefDescription,findings,lessonsLearned,
     photos:window.FLYMPUS_SAFETY_ATTACHMENTS.parseIds(fd.get('photoIds')),
     traineeName:allT.find(t=>t.id===traineeId)?.name||'',instructorName:allI.find(i=>i.id===instructorId)?.name||'',
     status:'OPEN',createdAt:new Date().toISOString()
