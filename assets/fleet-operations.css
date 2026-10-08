@@ -187,3 +187,45 @@ html.flympusLargeText .fleetTable th,html.flympusLargeText .fleetTable td,html.f
  .homeTaskBtn{padding:5px 7px;font-size:9px}
 }
 @media print{.fleetAddBtn,.homeTaskStrip,.fleetEditor,.fleetItemActions{display:none!important}}
+
+
+/* Unified daily planning workspace: one date-scoped flight board, PVE is a separate tab. */
+.coursePlanWorkspace{display:grid;gap:12px;min-width:0}
+.coursePlanWorkspaceHead{display:grid;gap:4px}
+.coursePlanWorkspaceHead .pageTitle{margin:0}
+.coursePlanWorkspaceHead .sub{margin:0;color:#6d8398}
+.coursePlanTabs{display:flex;gap:5px;padding:5px;background:#eaf2f8;border:1px solid #d6e4ef;border-radius:12px;width:max-content;max-width:100%;min-width:0}
+.coursePlanTabs button{appearance:none;border:0;border-radius:9px;background:transparent;color:#456783;padding:10px 14px;font-size:11px;font-weight:850;cursor:pointer;min-width:0}
+.coursePlanTabs button.active{background:#fff;color:#006bc8;box-shadow:0 2px 8px rgba(16,58,99,.11)}
+.coursePlanTabs button:focus-visible,.homePlanTitleButton:focus-visible,.homePlanDateButton:focus-visible{outline:3px solid #66aaf0;outline-offset:2px}
+.dailyFlightPlan{display:grid;gap:11px;min-width:0}
+.dailyPlanHeader{background:#fff;border:1px solid #dce8f1;border-radius:15px;padding:15px 17px;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.dailyPlanHeader h2{font-size:18px;color:#0b3159;font-weight:900;margin:0 0 5px}
+.dailyPlanHeader .sub{margin:0;max-width:620px}
+.dailyPlanDateField{margin:0;min-width:150px;width:170px;flex:0 1 170px}
+.dailyPlanDateField label{font-weight:800}
+.dailyPlanSummary{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.dailyPlanSummary span{border-radius:999px;background:#f0f7ff;border:1px solid #d7e6f4;padding:5px 10px;font-size:10px;font-weight:800;color:#376386}
+.dailyFlightPlan .fleetSchedule{margin:0}
+.dailyFlightPlan .fleetSortieFormGrid{align-items:start}
+.fleetSortieNote{display:block;margin-top:5px;white-space:pre-wrap;color:#627d90;overflow-wrap:anywhere}
+.coursePlanWorkspace .pvePageHead{display:none}
+.homePlanTitleButton{font:inherit;letter-spacing:inherit;color:inherit;text-align:start;border:0;background:transparent;padding:0;cursor:pointer}
+.homePlanTitleButton:hover{color:#0070cc}
+.homePlanDateButton{font:inherit;cursor:pointer;appearance:none}
+html[data-flympus-theme="dark"] .coursePlanTabs{background:#1c3448;border-color:#38556b}
+html[data-flympus-theme="dark"] .coursePlanTabs button{color:#c2d6e5}
+html[data-flympus-theme="dark"] .coursePlanTabs button.active{background:#2e526d;color:#eff8ff}
+html[data-flympus-theme="dark"] .dailyPlanHeader{background:#183045;border-color:#36546a}
+html[data-flympus-theme="dark"] .dailyPlanHeader h2{color:#e7f2fe}
+html[data-flympus-theme="dark"] .dailyPlanSummary span{background:#1f3d56;border-color:#41627a;color:#cbe1f3}
+html[data-flympus-theme="dark"] .fleetSortieNote{color:#c6d5e4}
+html.flympusLargeText .coursePlanTabs button,html.flympusLargeText .dailyPlanSummary span{font-size:15px!important}
+@media(max-width:600px){
+ .coursePlanTabs{width:100%}
+ .coursePlanTabs button{flex:1;padding:10px 5px;font-size:10px}
+ .dailyPlanHeader{padding:13px 12px;gap:10px}
+ .dailyPlanHeader h2{font-size:16px}
+ .dailyPlanDateField{width:100%;flex:1 1 100%}
+ .dailyPlanSummary{gap:5px}
+}
