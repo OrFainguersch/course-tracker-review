@@ -45,6 +45,7 @@ test('scheduled flights can only select serviceable aircraft and valid assigned 
  assert.throws(()=>M.upsertSortie([],{...base,time:'25:00'},planes,'shahak','2026-10-08',ids),/valid flight date and time/);
  let board=M.upsertSortie([],{...base},planes,'shahak','2026-10-08',ids,now,()=> 'flight1');
  assert.equal(board.length,1);assert.equal(board[0].tail,'01');
+ assert.throws(()=>M.upsertSortie(board,{...base},planes,'shahak','2026-10-08',ids,now,()=> 'flight2'),/already scheduled/);
  assert.equal(M.flightIssues(board[0],planes,'shahak'),'');
  planes=M.upsertAircraft(planes,{id:'a01',tail:'01',status:'UNSERVICEABLE',reason:'Fuel system',since:'2026-10-08'},'shahak',now);
  assert.match(M.flightIssues(board[0],planes,'shahak'),/Fuel system/);
