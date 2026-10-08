@@ -5870,6 +5870,7 @@ body:not(.drawerCanvasFrozen) .mobileBottomNav{
 </script>
 <script src="./assets/evaluation-voice.js?v=0742"></script>
 <script src="./assets/safety-attachments.js?v=20261008-safety01"></script>
+<script src="./assets/emergency-notes.js?v=20261008-notes01"></script>
 <script src="./assets/ep-catalog.js?v=0684"></script>
 <script src="./assets/aerostar-platform.js?v=0684"></script>
 <script src="./assets/ip-catalog.js?v=0684"></script>
@@ -9447,6 +9448,14 @@ function evaluationEmergencyDefs(){
 
 
 
+function latestEmergencyNoteHtml(rows){
+ if(!rows?.length)return '';
+ const byline=row=>'<div class="emergencyNoteBy"><b>Instructor note</b><small>'+esc(formatDateDMY(row.date))+' · '+esc(row.instructorName)+'</small></div>';
+ const body=row=>'<p class="emergencyNoteText">'+esc(row.note)+'</p>';
+ return '<div class="emergencyPracticeNotes"><div class="emergencyNoteLatest">'+byline(rows[0])+body(rows[0])+'</div>'+
+ (rows.length>1?'<details class="emergencyPreviousNotes"><summary>Previous instructor notes ('+(rows.length-1)+')</summary>'+
+ rows.slice(1).map(row=>'<div class="emergencyPreviousNote">'+byline(row)+body(row)+'</div>').join('')+'</details>':'')+'</div>';
+}
 const mockSoloBreakdown={
  t1:[['Circuits',5],['Basic Emergencies B',3],['Complex Emergencies',3]],
  t2:[['Circuits',4],['Basic Emergencies A',2]],
@@ -9661,15 +9670,15 @@ function traineeEmergencyHistory(traineeId,excludeEvalId){
 }
 
 function renderTraineeEmergencyProfile(traineeId){
-  const defs=evaluationEmergencyDefs(),history=traineeEmergencyHistory(traineeId,null),plan=getTraineeEmergencyPlan(traineeId),planned=new Set(plan.emergencyIds||[]),filter=state.emergencyProfileFilter||'ALL',groups={};
-  defs.forEach(x=>{const cat=x.category||'General / Operational';(groups[cat]||(groups[cat]=[])).push({...x,count:Number(history[x.id]||0),planned:planned.has(x.id)})});
+  const defs=evaluationEmergencyDefs(),history=traineeEmergencyHistory(traineeId,null),plan=getTraineeEmergencyPlan(traineeId),planned=new Set(plan.emergencyIds||[]),filter=state.emergencyProfileFilter||'ALL',groups={},savedRecords=getEvaluations().filter(e=>e.traineeId===traineeId);
+  defs.forEach(x=>{const cat=x.category||'General / Operational';const noteRows=window.FLYMPUS_EMERGENCY_NOTES.collect(savedRecords,traineeId,x.id);(groups[cat]||(groups[cat]=[])).push({...x,count:Number(history[x.id]||0),planned:planned.has(x.id),notes:noteRows})});
   const categoryOrder=emergencyCategoryNames(),ordered=[...categoryOrder,...Object.keys(groups).filter(x=>!categoryOrder.includes(x))].filter(x=>groups[x]?.length);
   const practiced=defs.filter(x=>Number(history[x.id]||0)>0).length,totalOccurrences=defs.reduce((a,x)=>a+Number(history[x.id]||0),0),missing=Math.max(0,defs.length-practiced),filterTabs='<div class="profileFilterTabs"><button class="'+(filter==='ALL'?'active':'')+'" data-emergency-profile-filter="ALL">All ('+defs.length+')</button><button class="'+(filter==='MISSING'?'active':'')+'" data-emergency-profile-filter="MISSING">Not practiced ('+missing+')</button></div>';
   return '<div class="emergencyPlanCard"><div class="inlineHead"><div><h4>Plan next sortie</h4><p>Select the emergencies you intend to practice. This does not count as completed training; it only preloads the Evaluation form.</p></div><span class="emergencyPlanCount" id="emergencyPlanCount">'+planned.size+' selected</span></div><div class="emergencyPlanToolbar"><span class="mutedHint">'+(plan.updatedAt?'Plan saved · '+formatDateDMY(plan.updatedAt):'No saved plan yet')+'</span><div class="toolbar" style="margin:0"><button class="btn secondary small" type="button" id="clearEmergencyPlan">Clear</button><button class="btn sky small" type="button" id="saveEmergencyPlan">Save plan</button></div></div>'+(planned.size?'<div class="planReady"><span class="pill green">✓ Ready in Evaluation</span><span class="mutedHint">'+planned.size+' planned</span><button class="btn secondary small" type="button" data-start-eval="'+traineeId+'">Open Evaluation</button></div>':'')+'</div>'+
     '<div class="emergencyProfileSummary"><div class="emergencySummaryMetric"><strong>'+practiced+'/'+defs.length+'</strong><span>Practiced</span></div><div class="emergencySummaryMetric"><strong>'+totalOccurrences+'</strong><span>Total occurrences</span></div><div class="emergencySummaryMetric"><strong>'+missing+'</strong><span>Not practiced</span></div></div>'+filterTabs+
     (missing&&filter==='ALL'?'<div class="emergencyMissingNote">Focus area: '+missing+' emergency'+(missing===1?' has':'ies have')+' not yet been practiced.</div>':'')+
     '<div class="emergencyProfileGroups">'+ordered.map(cat=>{const allRows=groups[cat],rows=filter==='MISSING'?allRows.filter(x=>x.count===0):allRows;if(!rows.length)return '';const done=allRows.filter(x=>x.count>0).length,reps=allRows.reduce((a,x)=>a+x.count,0),pct=Math.round(done/Math.max(1,allRows.length)*100),open=filter==='MISSING'||done<allRows.length||allRows.some(x=>x.planned);
-      return '<details class="emergencyProfileGroup" '+(open?'open':'')+'><summary><div class="emergencyProfileGroupHead"><div><b>'+esc(cat)+'</b><small>'+done+' of '+allRows.length+' practiced · '+reps+' total occurrence'+(reps===1?'':'s')+'</small><div class="emergencyGroupProgress"><i style="width:'+pct+'%"></i></div></div><span class="profileGroupPct">'+pct+'%</span></div></summary><div class="emergencyProfileRows">'+rows.map(x=>'<label class="emergencyProfileRow '+(x.planned?'planSelected':'')+'"><input class="emergencyPlanCheck" type="checkbox" data-plan-emergency="'+esc(x.id)+'" '+(x.planned?'checked':'')+'><span class="emergencyStatusDot '+(x.count?'done':'missing')+'">'+(x.count?'✓':'!')+'</span><div><b>'+esc(x.name)+'</b><small>'+(x.count?'Practiced':'Not practiced yet')+'</small>'+(x.planned?'<span class="planHint">Planned for next sortie</span>':'')+'</div><span class="emergencyProfileCount">'+x.count+'×</span></label>').join('')+'</div></details>';
+      return '<details class="emergencyProfileGroup" '+(open?'open':'')+'><summary><div class="emergencyProfileGroupHead"><div><b>'+esc(cat)+'</b><small>'+done+' of '+allRows.length+' practiced · '+reps+' total occurrence'+(reps===1?'':'s')+'</small><div class="emergencyGroupProgress"><i style="width:'+pct+'%"></i></div></div><span class="profileGroupPct">'+pct+'%</span></div></summary><div class="emergencyProfileRows">'+rows.map(x=>'<div class="emergencyProfileEntry"><label class="emergencyProfileRow '+(x.planned?'planSelected':'')+'"><input class="emergencyPlanCheck" type="checkbox" data-plan-emergency="'+esc(x.id)+'" '+(x.planned?'checked':'')+'><span class="emergencyStatusDot '+(x.count?'done':'missing')+'">'+(x.count?'✓':'!')+'</span><div><b>'+esc(x.name)+'</b><small>'+(x.count?'Practiced':'Not practiced yet')+'</small>'+(x.planned?'<span class="planHint">Planned for next sortie</span>':'')+'</div><span class="emergencyProfileCount">'+x.count+'×</span></label>'+latestEmergencyNoteHtml(x.notes)+'</div>').join('')+'</div></details>';
     }).join('')+'</div>';
 }
 function renderEmergencyPractice(edit,traineeId){
