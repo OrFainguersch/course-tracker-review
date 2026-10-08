@@ -100,3 +100,20 @@ test('Hebrew chart headings and table labels are rendered in RTL-ready content',
  assert(htmlText.includes('תכנון מול ביצוע לאורך זמן'));
  assert(htmlText.includes('סיבות ביטול'));
 });
+
+test('future planned sorties remain upcoming and never become cancellation or overdue gap',()=>{
+ const out=R.operations({plans:[{date:'2027-11-20',plannedInstructed:3,plannedSolo:2,cancellations:[]}],
+   evaluations:[],soloFlights:[],today:'2026-10-08'});
+ assert.equal(out.totals.cancelled,0);
+ assert.equal(out.totals.unresolved,0);
+ assert.equal(out.totals.upcoming,5);
+ assert(R.plannedHtml(out,'he').includes('טיסות עתידיות'));
+ const csv=R.operationsCsv(out);
+ assert(csv.includes('"Upcoming"'));
+});
+test('Planned vs Executed form uses the same submitted execution sources as dashboard',()=>{
+ assert(!html.includes('const executedInstructed=allEvaluationsForAnalytics().filter'));
+ assert(!html.includes('instructedCount=allEvaluationsForAnalytics().filter'));
+ assert(html.includes("const executedInstructed=getEvaluations().filter"));
+ assert(html.includes("instructedCount=getEvaluations().filter"));
+});
