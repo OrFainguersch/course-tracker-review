@@ -106,14 +106,14 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/reports-dashboard.css?v=0767" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
-<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261008-plan05" />
+<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261008-plan07" />
 <link rel="stylesheet" href="./assets/home-operations.css?v=20261008-home02" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
 <script src="./assets/safety-global-inbox.js?v=20261008-safety02"></script>
 <script src="./assets/safety-ui.js?v=20261008-safety03"></script>
-<script src="./assets/fleet-model.js?v=20261008-plan05"></script>
-<script src="./assets/fleet-views.js?v=20261008-plan05"></script>
+<script src="./assets/fleet-model.js?v=20261008-plan07"></script>
+<script src="./assets/fleet-views.js?v=20261008-plan07"></script>
 <script src="./assets/home-operations.js?v=20261008-home02"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
@@ -8734,6 +8734,15 @@ window.FLYMPUS_FLEET_LANGUAGE=()=>getFlympusAppPreferences().language;
 function currentFleetPlatform(){return String(currentCourseMeta.platformId||'unspecified')}
 function getFleetAircraft(){return readCourseArray('ct-review-aircraft-serviceability')}
 function getDailyFlightBoard(){return readCourseArray('ct-review-flight-board')}
+function flightBoardPlanStatus(date){
+ const flights=getDailyFlightBoard(),totals=window.FLYMPUS_FLEET_MODEL.plannedFlightCounts(flights,date,currentFleetPlatform());
+ const managed=readCourseArray('ct-review-flight-board-managed-dates').includes(date);
+ return {...totals,linked:managed||totals.total>0};
+}
+function markFlightBoardPlanManaged(date){
+ const dates=readCourseArray('ct-review-flight-board-managed-dates');
+ return dates.includes(date)||persistCourseOperations('ct-review-flight-board-managed-dates',[...dates,date]);
+}
 function getPlanTimingDefaults(){return readCourseObject('ct-review-plan-timing-defaults')}
 function persistCourseOperations(base,items){
  try{localStorage.setItem(courseScopedKey(base),JSON.stringify(items));return true}catch{return false}
@@ -8860,7 +8869,7 @@ function bindDailyFlightBoard(){
   try{
     const all=model.upsertSortie(getDailyFlightBoard(),input,getFleetAircraft(),currentFleetPlatform(),date,
     {trainees:courseTrainees().map(x=>x.id),instructors:courseInstructors().map(x=>x.id)},new Date().toISOString(),()=>window.crypto?.randomUUID?.()||('flight_'+Date.now()+'_'+Math.random().toString(36).slice(2)),getPlanTimingDefaults());
-    if(!persistCourseOperations('ct-review-flight-board',all)){fleetSaveError();return}
+    if(!markFlightBoardPlanManaged(date)||!persistCourseOperations('ct-review-flight-board',all)){fleetSaveError();return}
     state.flightBoardEditId=null;toast(planUiText('Flight board updated','שיבוץ הטיסה נשמר בהצלחה'),'success');render();
   }catch(err){toast(planScheduleError(err),'error')}
  };
@@ -8870,7 +8879,7 @@ function bindDailyFlightBoard(){
   if(!flympusCan('operations.flightBoard.write'))return;
   const id=b.dataset.flightDelete,record=getDailyFlightBoard().find(x=>x.id===id&&x.platformId===currentFleetPlatform());
   if(!record||!(await siteConfirm('Remove this scheduled flight? Submitted evaluations and solo flights are not affected.',{title:'Remove flight?',confirmLabel:'Remove',tone:'warning'})))return;
-  if(!persistCourseOperations('ct-review-flight-board',getDailyFlightBoard().filter(x=>x.id!==id))){fleetSaveError();return}
+  if(!markFlightBoardPlanManaged(record.date)||!persistCourseOperations('ct-review-flight-board',getDailyFlightBoard().filter(x=>x.id!==id))){fleetSaveError();return}
   state.flightBoardEditId=null;toast('Scheduled flight removed');render();
  });
 }
@@ -11002,7 +11011,9 @@ function plannedCompleteness(){
  const reports=getDailyReports(),draftWrap=getActivityDraft('planned'),draft=draftWrap?.data||{},date=state.planDate||draft.date||new Date().toISOString().slice(0,10),saved=reports.find(x=>x.date===date)||{};
  const executedInstructed=getEvaluations().filter(x=>(x.flightDate||x.date)===date).length;
  const soloRows=getSoloFlights().filter(x=>x.date===date).sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
- const pi=Number(state.planInstructed??draft.plannedInstructed??saved.plannedInstructed??0),ps=Number(state.planSolo??draft.plannedSolo??saved.plannedSolo??0);
+ const boardPlan=flightBoardPlanStatus(date);
+ const pi=boardPlan.linked?boardPlan.instructed:Number(state.planInstructed??draft.plannedInstructed??saved.plannedInstructed??0);
+ const ps=boardPlan.linked?boardPlan.solo:Number(state.planSolo??draft.plannedSolo??saved.plannedSolo??0);
  const total=pi+ps,hasPlan=total>0,instructedCancelled=Math.max(0,pi-executedInstructed),soloCancelled=Math.max(0,ps-soloRows.length);
  const reasonCatalog=cfgGet().cancellationReasons||[],stored=Array.isArray(draft.cancellations)?draft.cancellations:Array.isArray(saved.cancellations)?saved.cancellations:[],legacyReason=String(draft.reason||saved.reason||'').trim();
  const specs=[...Array.from({length:instructedCancelled},(_,i)=>({key:'INSTRUCTED_'+(i+1),type:'Instructed'})),...Array.from({length:soloCancelled},(_,i)=>({key:'SOLO_'+(i+1),type:'Solo'}))],used=new Set();
@@ -11017,7 +11028,7 @@ function plannedCompleteness(){
  const ready=hasPlan&&cancellationRows.every(x=>x.reasonId||(!reasonCatalog.length&&x.reasonLabel));
  const planMissing=!hasPlan?[{label:'Planned flights'}]:cancellationRows.map((x,i)=>x.reasonId||(!reasonCatalog.length&&x.reasonLabel)?null:{label:'Cancellation reason '+(i+1)}).filter(Boolean);
  const planStarted=!!draftWrap||Boolean(saved.date)||hasPlan;
- return {draftWrap,draft,date,saved,soloRows,pi,ps,executedInstructed,instructedCancelled,soloCancelled,reasonCatalog,cancellationRows,hasPlan,ready,planMissing,planStarted}
+ return {draftWrap,draft,date,saved,soloRows,pi,ps,boardLinked:boardPlan.linked,executedInstructed,instructedCancelled,soloCancelled,reasonCatalog,cancellationRows,hasPlan,ready,planMissing,planStarted}
 }
 function plannedAttentionCount(){
  const plan=plannedCompleteness();
@@ -11044,7 +11055,7 @@ function bindPlanWorkspace(){
  if(date)date.onchange=e=>{const normalized=normalizeDateValue(e.target.value);if(!normalized){toast(planUiText('Enter a valid flight date','יש להזין תאריך טיסה תקין'),'error');return}state.planDate=normalized;state.flightBoardEditId=null;render()};
 }
 function plannedVsExecuted(){
- const {draftWrap,draft,date,saved,soloRows,pi,ps,executedInstructed,instructedCancelled,soloCancelled,reasonCatalog,cancellationRows,hasPlan,ready,planMissing,planStarted}=plannedCompleteness();
+ const {draftWrap,draft,date,saved,soloRows,pi,ps,boardLinked,executedInstructed,instructedCancelled,soloCancelled,reasonCatalog,cancellationRows,hasPlan,ready,planMissing,planStarted}=plannedCompleteness();
  const soloDraft=draft.solo||{};
  const total=pi+ps,executedSolo=soloRows.length,executed=executedInstructed+executedSolo,cancelled=instructedCancelled+soloCancelled;
  const allT=alphaByName(courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active')),tracking=currentCourseTrackingCounters(),tracks=type=>tracking.some(x=>x.type===type);
@@ -11065,7 +11076,7 @@ function plannedVsExecuted(){
  (planStarted?staticRequiredCompletionPanel('planned',planMissing):'')+
  '<section class="card pveOverview"><div class="formTitle"><h2>Day overview</h2><span class="autoDraftNote" id="plannedDraftBadge">'+(draftWrap?draftSavedLabel('planned'):'Auto-save ready')+'</span></div><div class="pveDateRow"><div><p>Instructed flights are counted automatically from submitted Evaluations. Solo flights are recorded below.</p></div><div class="pveDateControl"><label for="pveDate">Date</label><input class="input dateDmy" id="pveDate" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" required value="'+esc(dateInputValue(date))+'" placeholder="DD/MM/YYYY"></div></div>'+
  '<div class="pveSummary"><div class="pveMetric"><span>Planned</span><strong>'+total+'</strong><small>'+pi+' instructed · '+ps+' solo</small></div><div class="pveMetric"><span>Executed</span><strong>'+executed+'</strong><small>'+executedInstructed+' instructed · '+executedSolo+' solo</small></div><div class="pveMetric '+(cancelled?'short':'match')+'"><span>Cancelled</span><strong>'+cancelled+'</strong><small>'+cancelSummary+'</small></div></div></section>'+
- '<section class="card pvePanel"><div class="pvePanelHead"><span class="pveSectionNo">1</span><div><h2>Plan</h2><p>Enter the number of instructed and solo flights intended for this date.</p></div></div><div class="pvePanelBody"><div class="pvePlanGrid"><label class="pveCountField" for="pvePlannedInstructed"><span>Instructed</span><small>Planned flights</small><input class="input" id="pvePlannedInstructed" type="number" min="0" step="1" required value="'+pi+'"></label><label class="pveCountField" for="pvePlannedSolo"><span>Solo</span><small>Planned flights</small><input class="input" id="pvePlannedSolo" type="number" min="0" step="1" required value="'+ps+'"></label></div></div></section>'+
+ '<section class="card pvePanel"><div class="pvePanelHead"><span class="pveSectionNo">1</span><div><h2>Plan</h2><p>Enter the number of instructed and solo flights intended for this date.</p>'+(boardLinked?'<p class="pveBoardLinkedNote">Counts are calculated automatically from Daily Flight Plan. Add, edit or remove scheduled flights to update these totals.</p>':'')+'</div></div><div class="pvePanelBody"><div class="pvePlanGrid"><label class="pveCountField" for="pvePlannedInstructed"><span>Instructed</span><small>Planned flights</small><input class="input" id="pvePlannedInstructed" type="number" min="0" step="1" required '+(boardLinked?'readonly aria-readonly="true" title="Managed by Daily Flight Plan"':'')+' value="'+pi+'"></label><label class="pveCountField" for="pvePlannedSolo"><span>Solo</span><small>Planned flights</small><input class="input" id="pvePlannedSolo" type="number" min="0" step="1" required '+(boardLinked?'readonly aria-readonly="true" title="Managed by Daily Flight Plan"':'')+' value="'+ps+'"></label></div></div></section>'+
  '<section class="card pvePanel"><div class="pvePanelHead"><span class="pveSectionNo">2</span><div><h2>Execution</h2><p>Instructed is automatic. Solo entry opens only when at least one solo flight is planned.</p></div></div><div class="pvePanelBody">'+
  '<div class="pveExecutionOverview"><div><span>Instructed</span><strong>'+executedInstructed+'</strong><small>From submitted Evaluations on '+esc(formatDateDMY(date))+'.</small></div><div><span>Solo</span><strong>'+executedSolo+'</strong><small>Recorded for this date</small></div></div>'+
  (soloEntryOpen?'<div class="pveSoloBlock"><div class="pveBlockTitle"><div><h3>Add executed solo flight</h3><p>Assign the completed flight to the trainee and solo syllabus actually flown.</p></div><span class="pveRecordedBadge">'+executedSolo+' recorded</span></div>'+
@@ -11590,11 +11601,11 @@ function bindPlanned(){
  document.querySelectorAll('[data-plan-required-index]').forEach(btn=>btn.onclick=()=>{const label=String(btn.textContent||''),target=label.startsWith('Cancellation')?document.querySelector('.pveCancellationList'):document.querySelector('.pvePlanGrid');target?.scrollIntoView?.({behavior:'smooth',block:'center'});setTimeout(()=>target?.querySelector?.('input,select')?.focus?.({preventScroll:true}),180)});
  const collectCancellations=()=>[...document.querySelectorAll('.pveCancellationReason')].map(el=>({key:String(el.dataset.cancelKey||''),type:String(el.dataset.cancelType||''),reasonId:String(el.value||''),reasonLabel:String(el.selectedOptions?.[0]?.textContent||'').trim()}));
  const persistPlannedDraft=()=>{
-   const solo=$('#soloExecutionForm'),prior=getActivityDraft('planned')?.data||{},cancellations=collectCancellations(),data={date:normalizeDateValue($('#pveDate')?.value)||state.planDate||todayIsoDate(),plannedInstructed:Number($('#pvePlannedInstructed')?.value||0),plannedSolo:Number($('#pvePlannedSolo')?.value||0),cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),solo:solo?serializeFormDraft(solo):(prior.solo||{})};
+   const solo=$('#soloExecutionForm'),prior=getActivityDraft('planned')?.data||{},cancellations=collectCancellations(),date=normalizeDateValue($('#pveDate')?.value)||state.planDate||todayIsoDate(),board=flightBoardPlanStatus(date),data={date,plannedInstructed:board.linked?board.instructed:Number($('#pvePlannedInstructed')?.value||0),plannedSolo:board.linked?board.solo:Number($('#pvePlannedSolo')?.value||0),cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),solo:solo?serializeFormDraft(solo):(prior.solo||{})};
    // The Plan badge recomputes from live required items; never persist a stale count.
    saveActivityDraft('planned',data);if($('#plannedDraftBadge'))$('#plannedDraftBadge').textContent=draftSavedLabel('planned');syncAttentionBadges();return data
  };
- const refreshPlan=()=>{state.planInstructed=Number($('#pvePlannedInstructed')?.value||0);state.planSolo=Number($('#pvePlannedSolo')?.value||0);persistPlannedDraft();render()};
+ const refreshPlan=()=>{if(flightBoardPlanStatus(state.planDate||todayIsoDate()).linked)return;state.planInstructed=Number($('#pvePlannedInstructed')?.value||0);state.planSolo=Number($('#pvePlannedSolo')?.value||0);persistPlannedDraft();render()};
  const syncSoloEvents=flight=>{
    let events=getActivityEvents().filter(x=>x.sourceId!==flight.id),stamp=new Date().toISOString();
    if(Number(flight.takeoffs)>0)events.unshift({id:'evt_'+Date.now()+'_to',traineeId:flight.traineeId,date:flight.date,type:'TAKEOFF',quantity:Number(flight.takeoffs),source:'Solo flight',sourceId:flight.id,note:flight.syllabus,createdAt:stamp});
@@ -11619,7 +11630,7 @@ function bindPlanned(){
  document.querySelectorAll('[data-solo-delete]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.soloDelete;saveSoloFlights(getSoloFlights().filter(x=>x.id!==id));saveActivityEvents(getActivityEvents().filter(x=>x.sourceId!==id));if(state.soloEditId===id)state.soloEditId=null;toast('Solo flight and linked activity removed');render()});
  if($('#discardPlannedDraft'))$('#discardPlannedDraft').onclick=async()=>{if(await siteConfirm('The auto-saved Planned vs Executed draft will be discarded. Recorded solo flights will not be deleted.',{title:'Discard draft?',confirmLabel:'Discard',tone:'danger'})){discardActivityDraft('planned');state.soloEditId=null;delete state.planInstructed;delete state.planSolo;toast('Planned vs Executed draft discarded');render()}};
  if($('#pveSave'))$('#pveSave').onclick=()=>{
-   const plannedInstructed=Number($('#pvePlannedInstructed').value||0),plannedSolo=Number($('#pvePlannedSolo').value||0),plannedTotal=plannedInstructed+plannedSolo,cancellations=collectCancellations(),missing=[...document.querySelectorAll('.pveCancellationReason')].filter(x=>!x.value);
+   const planDate=normalizeDateValue($('#pveDate').value)||state.planDate||todayIsoDate(),board=flightBoardPlanStatus(planDate),plannedInstructed=board.linked?board.instructed:Number($('#pvePlannedInstructed').value||0),plannedSolo=board.linked?board.solo:Number($('#pvePlannedSolo').value||0),plannedTotal=plannedInstructed+plannedSolo,cancellations=collectCancellations(),missing=[...document.querySelectorAll('.pveCancellationReason')].filter(x=>!x.value);
    if(plannedTotal<=0){toast('Set at least one planned flight before submitting the daily report.','error');document.querySelector('.pvePlanGrid')?.scrollIntoView?.({behavior:'smooth',block:'center'});return}
    if(missing.length){missing.forEach(x=>x.classList.add('fieldInvalidControl'));toast('Select a cancellation reason for every non-executed flight before submitting.','error');missing[0].scrollIntoView?.({behavior:'smooth',block:'center'});missing[0].focus?.();return}
    const arr=getDailyReports(),date=normalizeDateValue($('#pveDate').value),soloCount=getSoloFlights().filter(x=>x.date===date).length,instructedCount=getEvaluations().filter(x=>(x.flightDate||x.date)===date).length,obj={date,plannedInstructed,plannedSolo,instructedExecuted:instructedCount,soloExecuted:soloCount,cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),savedAt:new Date().toISOString()},next=arr.some(x=>x.date===date)?arr.map(x=>x.date===date?obj:x):[obj,...arr];
