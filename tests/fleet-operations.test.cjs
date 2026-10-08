@@ -68,7 +68,7 @@ test('User Management Duty Trainee role has operational permissions without stru
 test('Fleet and daily board are accessible per course from Home; refresh and theme parity remain intact',()=>{
  for(const item of ["case'fleet'",'bindFleetServiceability()','bindDailyFlightBoard()',
  'appScreenIds=new Set(','getFleetAircraft()','getDailyFlightBoard()','courseScopedKey(base)','flightBoardEditId',
- 'window.FLYMPUS_FLEET_VIEW.home(currentFleetContext())','courseFlightScheduleHtml(date)'])assert.ok(html.includes(item),item);
+ 'window.FLYMPUS_FLEET_VIEW?.home?.(currentFleetContext())','courseFlightScheduleHtml(date)'])assert.ok(html.includes(item),item);
  assert.ok(ui.includes("M.flightIssues(f,c.fleet,c.platformId)"));
  assert.ok(ui.includes("const available=M.active(c.fleet,c.platformId).filter(x=>x.status===M.AVAILABLE)"));
  assert.ok(html.includes('html[data-flympus-theme="dark"]')||fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8').includes('html[data-flympus-theme="dark"]'));
