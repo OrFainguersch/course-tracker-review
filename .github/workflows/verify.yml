@@ -29,7 +29,7 @@ jobs:
       - name: UI render smoke tests
         id: ui_render
         continue-on-error: true
-        run: node tests/ui-render.test.cjs && node --test tests/trainee-evaluation-history.test.cjs && node --test tests/emergency-notes.test.cjs
+        run: node tests/ui-render.test.cjs && node --test tests/fleet-operations.test.cjs && node --test tests/trainee-evaluation-history.test.cjs && node --test tests/emergency-notes.test.cjs
       - name: Evaluation voice input tests
         id: evaluation_voice
         continue-on-error: true

@@ -1,0 +1,67 @@
+/* Fleet & daily flight board — desktop/mobile, LTR/RTL, dark, large text. */
+.fleetPage{display:grid;gap:14px;min-width:0}
+.fleetPage .fleetHeading{margin-bottom:5px}
+.fleetOverview,.fleetEditor,.fleetInventory,.fleetSchedule{min-width:0}
+.fleetMetrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.fleetMetric{border-radius:13px;padding:13px 16px;background:#eef4f9;border:1px solid #d8e6ef;min-width:0}
+.fleetMetric.ready{background:#e9f8f0;border-color:#b6ead1}
+.fleetMetric.down{background:#fff2ef;border-color:#f4d0cc}
+.fleetMetric b{display:block;font-size:24px;color:#163753;font-weight:900;font-variant-numeric:tabular-nums}
+.fleetMetric.ready b{color:#087858}.fleetMetric.down b{color:#b33131}
+.fleetMetric span{display:block;font-size:11px;color:#567086;margin-top:4px;font-weight:800}
+.fleetQuiet{font-size:12px;color:#6b8397;line-height:1.5;margin:10px 0}
+.fleetHomePanel .fleetMetrics{margin:12px 0}
+.fleetHomeIssues{display:grid;gap:5px}
+.fleetHomeIssue{display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:9px;align-items:center;border-radius:10px;background:#fff3ee;padding:10px}
+.fleetHomeIssue b{color:#a8322a}.fleetHomeIssue span{font-size:11px;overflow-wrap:anywhere}.fleetHomeIssue small{color:#9c5c53;font-size:10px}
+.fleetFormGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:15px 0}
+.fleetFormGrid .field,.fleetSortieFormGrid .field{min-width:0}
+.fleetFormGrid label,.fleetSortieFormGrid label{display:block;font-size:11px;font-weight:850;color:#36556f;margin-bottom:7px}
+.fleetFormGrid .input,.fleetSortieFormGrid .input{width:100%;min-width:0}
+.fleetFormGrid textarea{resize:vertical;min-height:72px}
+.fleetSectionHead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.fleetSectionHead h2{font-size:17px;margin:0}
+.fleetSectionHead>.sub,.fleetSectionHead p{margin:4px 0 0}
+.fleetItems{display:grid;gap:8px}
+.fleetItem{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;background:#f9fcff;border:1px solid #dce7f0;border-radius:12px;padding:12px}
+.fleetItem.down{background:#fff7f5;border-color:#efd0c8}
+.fleetItemMain{display:flex;gap:12px;align-items:center;min-width:0;flex:1}
+.fleetTail{display:grid;place-items:center;min-width:55px;height:42px;padding:0 8px;font-size:16px;font-weight:950;color:#073f6d;border-radius:10px;background:#e2f2ff;flex-shrink:0}
+.fleetItem.down .fleetTail{background:#ffe4dc;color:#a02e24}
+.fleetItemMain>div{min-width:0}.fleetItemMain strong{font-size:12px}.fleetItemMain small{display:block;color:#72869a;margin-top:4px;font-size:10px}
+.fleetItemMain p{font-size:11px;margin:3px 0;color:#925141;white-space:pre-wrap;overflow-wrap:anywhere}
+.fleetItemActions,.fleetSortieActions{display:flex;flex-wrap:wrap;gap:6px}
+.fleetHistory{width:100%;padding-top:8px;border-top:1px solid #e3edf4;font-size:11px;color:#506b81}
+.fleetHistory summary{cursor:pointer;font-weight:800}.fleetHistory p{margin:6px 0}
+.fleetSchedule{margin:14px 0}
+.fleetSorties{display:grid;gap:7px;margin:12px 0}
+.fleetSortie{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:11px 12px;gap:9px;border:1px solid #dce7f0;background:#f8fbff;border-radius:11px}
+.fleetSortie.conflict{border-color:#e9b3a2;background:#fff4ef}
+.fleetSortieMain{display:flex;align-items:center;gap:11px;min-width:0;flex:1}
+.fleetSortieMain>div{min-width:0}.fleetSortieMain strong{display:block;font-size:12px;color:#173b5d}
+.fleetSortieMain small{display:block;font-size:10px;color:#58758d;line-height:1.5;overflow-wrap:anywhere}
+.fleetSortieTail{display:grid;place-items:center;padding:6px 9px;border-radius:9px;color:#1265a5;background:#e8f4ff}
+.fleetConflict{color:#ae372e!important;font-weight:850}
+.fleetSortieForm{margin-top:13px;padding:13px;border:1px solid #cee2f1;border-radius:12px;background:#f8fbff}
+.fleetSortieForm h3{font-size:14px;margin:0 0 12px}
+.fleetSortieFormGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 12px}
+html[data-flympus-language="he"] .fleetPage,html[data-flympus-language="he"] .fleetHomePanel,html[data-flympus-language="he"] .fleetSchedule{direction:rtl;text-align:right}
+html[data-flympus-theme="dark"] .fleetMetric{background:#1a3042;border-color:#36566d}
+html[data-flympus-theme="dark"] .fleetMetric.ready{background:#113b31;border-color:#2b7057}
+html[data-flympus-theme="dark"] .fleetMetric.down{background:#41282a;border-color:#78454b}
+html[data-flympus-theme="dark"] .fleetMetric b{color:#e2eefa}
+html[data-flympus-theme="dark"] .fleetMetric.ready b{color:#93e6be}
+html[data-flympus-theme="dark"] .fleetMetric.down b{color:#ffa99e}
+html[data-flympus-theme="dark"] .fleetMetric span,html[data-flympus-theme="dark"] .fleetQuiet{color:#bfd0dd}
+html[data-flympus-theme="dark"] .fleetHomeIssue,html[data-flympus-theme="dark"] .fleetItem.down,html[data-flympus-theme="dark"] .fleetSortie.conflict{background:#39282a;border-color:#804c45}
+html[data-flympus-theme="dark"] .fleetHomeIssue b,html[data-flympus-theme="dark"] .fleetItemMain p{color:#ffa99e}
+html[data-flympus-theme="dark"] .fleetItem,html[data-flympus-theme="dark"] .fleetSortie,html[data-flympus-theme="dark"] .fleetSortieForm{background:#142b3c;border-color:#35536a}
+html[data-flympus-theme="dark"] .fleetTail,html[data-flympus-theme="dark"] .fleetSortieTail{background:#264960;color:#c2e5ff}
+html[data-flympus-theme="dark"] .fleetItemMain strong,html[data-flympus-theme="dark"] .fleetSortieMain strong{color:#e9f3fa}
+html[data-flympus-theme="dark"] .fleetItemMain small,html[data-flympus-theme="dark"] .fleetSortieMain small{color:#b3c9da}
+html[data-flympus-theme="dark"] .fleetFormGrid label,html[data-flympus-theme="dark"] .fleetSortieFormGrid label{color:#c1d6e6}
+html.flympusLargeText .fleetMetric span,html.flympusLargeText .fleetHomeIssue span,html.flympusLargeText .fleetItemMain small,html.flympusLargeText .fleetSortieMain small,html.flympusLargeText .fleetQuiet{font-size:15px!important}
+html.flympusLargeText .fleetFormGrid label,html.flympusLargeText .fleetSortieFormGrid label{font-size:15px!important}
+@media(max-width:850px){.fleetSortieFormGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.fleetFormGrid,.fleetSortieFormGrid{grid-template-columns:1fr}.fleetItem,.fleetSortie{align-items:stretch}.fleetItemActions,.fleetSortieActions{width:100%}.fleetItemActions .btn,.fleetSortieActions .btn{flex:1}.fleetMetric{padding:11px 7px;text-align:center}.fleetMetric b{font-size:21px}.fleetMetric span{font-size:10px}.fleetHomeIssue{grid-template-columns:48px minmax(0,1fr);gap:6px}.fleetHomeIssue small{grid-column:2}.fleetSortieForm{padding:10px}}
+@media print{.fleetEditor,.fleetSortieForm,.fleetItemActions,.fleetSortieActions{display:none!important}.fleetOverview,.fleetInventory,.fleetSchedule{break-inside:avoid}}
