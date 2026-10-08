@@ -862,6 +862,7 @@ assert(html.includes("if(!flympusRealPageReload||!appScreenIds.has(String(initia
     const solos=Array.from({length:executedSolo},(_,i)=>({date,id:'solo-'+i}));
     const scope={
       getDailyReports:()=>savedReports,getActivityDraft:()=>draft,
+      flightBoardPlanStatus:()=>({linked:false,instructed:0,solo:0}),
       getEvaluations:()=>records,getSoloFlights:()=>solos,
       state:{planDate:selectedDate||null},cfgGet:()=>({cancellationReasons:[{id:'weather',name:'Weather'}]}),
       Date,Number,Math,String,Array,Set
