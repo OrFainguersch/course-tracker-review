@@ -74,3 +74,43 @@ test('Home ordering, no duplicate Quick Actions, actual data wiring and Roster O
  assert.ok(html.includes('attentionRows.length?'),'No fake row when no trainee is at risk');
  assert.ok(html.includes("screen==='profile'?{...extra,profileTab:'overview'}:extra"));
 });
+
+
+test('Recent Flight Activity is exactly the latest seven calendar dates, with saved Solo and instructed flights only',()=>{
+ const today='2026-10-08';
+ const rows=M.recentFlights({today,
+  evaluations:[ev('a','2026-10-01',4),ev('a','2026-10-02',4),ev('b','2026-10-08',3.4),ev('a','2026-10-09',5)],
+  soloFlights:[{id:'solo-old',traineeId:'b',date:'2026-10-01',grade:5},{id:'solo-in',traineeId:'b',date:'2026-10-07',syllabus:'Solo Circuits',grade:5},{id:'solo-future',date:'2026-10-09'}]});
+ assert.equal(rows.length,3);
+ assert.deepEqual(rows.map(x=>x.date),['2026-10-08','2026-10-07','2026-10-02']);
+ assert.deepEqual(rows.map(x=>x.mode),['INSTRUCTED','SOLO','INSTRUCTED']);
+ assert.ok(rows.every(x=>!Object.hasOwn(x,'grade')),'no grade or score should be passed to Home');
+});
+test('Recent flights are limited to 10 even with more records; invalid and future dates are excluded',()=>{
+ const evals=Array.from({length:8},(_,i)=>({...ev('a','2026-10-08',4),id:'eval'+i,createdAt:'2026-10-08T10:'+String(i).padStart(2,'0')+':00Z'}));
+ const solos=Array.from({length:8},(_,i)=>({id:'solo'+i,traineeId:'a',date:'2026-10-07',syllabus:'Solo',createdAt:'2026-10-07T08:00:00Z'}));
+ const result=M.recentFlights({today:'2026-10-08',evaluations:evals,soloFlights:solos});
+ assert.equal(result.length,10);
+ assert.equal(result.filter(x=>x.mode==='INSTRUCTED').length,8);
+ assert.equal(result.filter(x=>x.mode==='SOLO').length,2);
+ assert.equal(result[0].id,'eval7','newest saved same-day time is first');
+ assert.deepEqual(M.recentFlights({today:'invalid',evaluations:evals,soloFlights:solos}),[]);
+ assert.deepEqual(M.recentFlights({today:'2026-10-08',evaluations:[ev('a','2026-02-31',4)]}),[]);
+});
+test('Home has only a full-width recent flight card, no grades/upcoming, and Duty Trainee cannot see Course Pulse',()=>{
+ const home=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
+ const duty=html.slice(html.indexOf('function dutyTraineeHome(){'),html.indexOf('function dutyTraineeSettingsScreen(){'));
+ assert.ok(home.includes('FLYMPUS_HOME_OPERATIONS.recentFlights('));
+ assert.ok(home.includes('evaluations:getEvaluations(),soloFlights:getSoloFlights()'));
+ assert.ok(home.includes('Recent Flight Activity'));
+ assert.ok(!home.includes('homeBottomGrid'));
+ assert.ok(!home.includes('homeScore'));
+ assert.ok(!home.includes('<h2>Upcoming Items</h2>'));
+ assert.ok(!home.includes('courseMockEvalHistory()'));
+ assert.ok(!home.includes('homeUpcomingItem'));
+ assert.ok(home.includes('homeRecentEmpty'));
+ assert.ok(home.includes("if(isDutyTrainee())return dutyTraineeHome();"));
+ assert.ok(!duty.includes('Course Pulse'));
+ assert.ok(!duty.includes('homePulseGrid'));
+ assert.ok(html.includes('assets/home-operations.js?v=20261008-home02'));
+});
