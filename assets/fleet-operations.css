@@ -65,3 +65,125 @@ html.flympusLargeText .fleetFormGrid label,html.flympusLargeText .fleetSortieFor
 @media(max-width:850px){.fleetSortieFormGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.fleetFormGrid,.fleetSortieFormGrid{grid-template-columns:1fr}.fleetItem,.fleetSortie{align-items:stretch}.fleetItemActions,.fleetSortieActions{width:100%}.fleetItemActions .btn,.fleetSortieActions .btn{flex:1}.fleetMetric{padding:11px 7px;text-align:center}.fleetMetric b{font-size:21px}.fleetMetric span{font-size:10px}.fleetHomeIssue{grid-template-columns:48px minmax(0,1fr);gap:6px}.fleetHomeIssue small{grid-column:2}.fleetSortieForm{padding:10px}}
 @media print{.fleetEditor,.fleetSortieForm,.fleetItemActions,.fleetSortieActions{display:none!important}.fleetOverview,.fleetInventory,.fleetSchedule{break-inside:avoid}}
+
+/* Fleet dashboard refresh: tables first, compact summary, progressive editor. */
+.fleetPage{gap:12px}
+.fleetPageTop{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.fleetPageTop .pageTitle{margin:5px 0}
+.fleetPageTop .sub{margin:0}
+.fleetAddBtn{white-space:nowrap}
+.fleetOverview{padding:12px 16px!important}
+.fleetOverview .fleetQuiet{margin:7px 2px 1px}
+.fleetStats{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.fleetStats>span{display:inline-flex;align-items:baseline;gap:5px;border:1px solid #dae6ef;border-radius:999px;background:#f3f8fc;color:#496780;padding:7px 11px;font-size:11px;font-weight:800}
+.fleetStats b{font-size:17px;font-weight:950;color:#123554;font-variant-numeric:tabular-nums}
+.fleetStats .ready{border-color:#bce8d3;background:#eaf8f0;color:#0b7450}
+.fleetStats .ready b{color:#087858}
+.fleetStats .down{border-color:#f0ccc7;background:#fff2ef;color:#a9342c}
+.fleetStats .down b{color:#ac2b25}
+.fleetInventory{padding:14px!important}
+.fleetInventoryCount{border:1px solid #e1eaf1;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:800;color:#657c90;white-space:nowrap}
+.fleetTableWrap{width:100%;min-width:0;overflow-x:auto;border:1px solid #e4ecf3;border-radius:12px}
+.fleetTable{width:100%;border-collapse:collapse;table-layout:auto}
+.fleetTable th{background:#f5f9fc;color:#657b8e;text-align:start;font-size:10px;font-weight:850;letter-spacing:.01em;padding:10px 12px;border-bottom:1px solid #e4ecf3}
+.fleetTable td{padding:11px 12px;border-bottom:1px solid #ecf0f5;text-align:start;vertical-align:middle;font-size:11px;color:#23445f;line-height:1.45;overflow-wrap:anywhere}
+.fleetTable tr:last-child td{border-bottom:0}
+.fleetTable tbody tr:hover{background:#f9fcff}
+.fleetTable tbody tr.fleetRowDown{background:#fffaf8}
+.fleetTable tbody tr.fleetRowDown:hover{background:#fff4f0}
+.fleetInventoryTail,.fleetHomeTail{font-size:13px!important;font-weight:950!important;color:#073f6d!important;white-space:nowrap}
+.fleetStatusBadge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 8px;border:1px solid #d5e5ee;background:#f1f6f9;color:#476176;font-size:10px;line-height:1.2;font-weight:850;white-space:nowrap}
+.fleetStatusBadge i{display:block;width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.fleetStatusBadge.ready{background:#eaf9f0;border-color:#bce6ce;color:#0a7950}
+.fleetStatusBadge.down{background:#fff0ec;border-color:#f1cac0;color:#b32f29}
+.fleetDate{font-size:10px!important;color:#6b7e8d!important;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fleetMuted{color:#93a3b1}
+.fleetReasonCell{max-width:360px}
+.fleetReasonText{display:block;white-space:pre-wrap;overflow-wrap:anywhere}
+.fleetHistory{margin-top:6px;padding:0;border:0;color:#446c8b;font-size:10px}
+.fleetHistory summary{width:max-content;max-width:100%;color:#176fae;cursor:pointer}
+.fleetHistoryList{margin-top:7px;padding:8px 10px;background:#f2f7fb;border:1px solid #dfeaf3;border-radius:8px}
+.fleetHistoryList p{margin:5px 0;overflow-wrap:anywhere}
+.fleetItemActions{justify-content:flex-start;flex-wrap:nowrap}
+.fleetItemActions .btn{white-space:nowrap}
+.fleetEmpty{display:grid;justify-items:center;gap:8px;text-align:center;padding:35px 10px;color:#71869a}
+.fleetEmpty>span{font-size:27px;color:#84a7c5}
+.fleetEmpty strong{font-size:14px;color:#244661}
+.fleetEmpty p{margin:0;font-size:11px}
+.fleetEditor[hidden]{display:none!important}
+.fleetEditor{max-width:800px;width:100%;justify-self:center}
+.fleetEditor .fleetFormGrid{margin:10px 0 14px}
+.fleetEditor .fleetSectionHead{margin-bottom:8px}
+.fleetEditor .toolbar{margin-top:6px}
+.fleetEditor .field[hidden]{display:none!important}
+.fleetHomePanel{min-width:0}
+.fleetHomePanel .homeBlockHead{margin-bottom:11px}
+.fleetHomeSummary{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px}
+.fleetHomeCount{display:inline-flex;align-items:baseline;gap:4px;padding:6px 9px;border:1px solid #cae6d9;border-radius:9px;background:#effaf4;color:#15724e;font-weight:800;font-size:10px;white-space:nowrap}
+.fleetHomeCount b{font-size:17px;font-weight:950}
+.fleetHomeCount.hasDown{background:#f4f8fc;border-color:#dae5ef;color:#23435f}
+.fleetHomeWarning{color:#af342a;font-size:10px;font-weight:850}
+.fleetHomeTableWrap{border-radius:9px}
+.fleetHomeTable th{padding:8px;font-size:9px}
+.fleetHomeTable td{padding:9px 8px;font-size:10px}
+.fleetHomeTable .fleetStatusBadge{padding:4px 6px;font-size:9px}
+.fleetCellReason{display:block;color:#9f4d40;font-size:9px;line-height:1.35;margin-top:4px;overflow-wrap:anywhere}
+.fleetHomeMore{margin:10px 1px 0;font-size:10px;color:#607e97}
+.homeTaskStrip{display:flex;flex-wrap:wrap;align-items:center;gap:7px;border-top:1px solid #e7eef6;padding:9px 12px}
+.homeTaskBtn{border:1px solid #dbe7f1;background:#f3f8fc;color:#205078;border-radius:9px;padding:6px 10px;min-height:32px;display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:850;cursor:pointer}
+.homeTaskBtn.primary{background:#087cf0;border-color:#087cf0;color:#fff}
+.homeTaskBtn:disabled{opacity:.45;cursor:default}
+.homeTaskBtn .homeQuickIcon{width:20px;height:20px;border-radius:6px;font-size:12px}
+.homeTaskBtn .homeQuickIcon svg{height:15px;width:15px}
+.homeTaskBtn .homeQuickIcon.safety{color:var(--record-safety)}
+.homeTaskBtn em{font-style:normal;background:#e8493d;color:#fff;border-radius:99px;min-width:16px;text-align:center;padding:1px 4px;font-size:9px}
+html[data-flympus-theme="dark"] .fleetOverview,html[data-flympus-theme="dark"] .fleetInventory,html[data-flympus-theme="dark"] .fleetEditor{color:#dbe9f3}
+html[data-flympus-theme="dark"] .fleetStats>span,html[data-flympus-theme="dark"] .fleetInventoryCount{background:#203749;border-color:#415b70;color:#c9d8e3}
+html[data-flympus-theme="dark"] .fleetStats b{color:#edf7ff}
+html[data-flympus-theme="dark"] .fleetStats .ready{background:#123c30;border-color:#2e7258;color:#99e3bf}
+html[data-flympus-theme="dark"] .fleetStats .down{background:#42272a;border-color:#7f4445;color:#ffb6ab}
+html[data-flympus-theme="dark"] .fleetTableWrap{border-color:#345065}
+html[data-flympus-theme="dark"] .fleetTable th{background:#192f41;border-color:#385166;color:#bed3e1}
+html[data-flympus-theme="dark"] .fleetTable td{color:#e0ecf5;border-color:#344c61}
+html[data-flympus-theme="dark"] .fleetTable tbody tr:hover{background:#1a3448}
+html[data-flympus-theme="dark"] .fleetTable tbody tr.fleetRowDown{background:#39282a}
+html[data-flympus-theme="dark"] .fleetInventoryTail,html[data-flympus-theme="dark"] .fleetHomeTail{color:#d8ecff!important}
+html[data-flympus-theme="dark"] .fleetStatusBadge.ready{background:#153e32;border-color:#2e7058;color:#9fe5c2}
+html[data-flympus-theme="dark"] .fleetStatusBadge.down{background:#432a2b;border-color:#875152;color:#ffc2b8}
+html[data-flympus-theme="dark"] .fleetDate{color:#bed1df!important}
+html[data-flympus-theme="dark"] .fleetHistoryList{background:#192e41;border-color:#41566a}
+html[data-flympus-theme="dark"] .fleetHistory summary{color:#8bcaff}
+html[data-flympus-theme="dark"] .fleetEmpty strong{color:#e0eef9}
+html[data-flympus-theme="dark"] .fleetHomeCount{background:#153e32;border-color:#2e7258;color:#a0e8c7}
+html[data-flympus-theme="dark"] .fleetHomeCount.hasDown{background:#20384d;border-color:#45647a;color:#dceefa}
+html[data-flympus-theme="dark"] .fleetHomeWarning,html[data-flympus-theme="dark"] .fleetCellReason{color:#ffb1a5}
+html[data-flympus-theme="dark"] .fleetHomeMore{color:#c0d1df}
+html[data-flympus-theme="dark"] .homeTaskStrip{border-color:#344b61}
+html[data-flympus-theme="dark"] .homeTaskBtn{background:#243f55;color:#d8ecfc;border-color:#385e79}
+html[data-flympus-theme="dark"] .homeTaskBtn.primary{background:#087cf0;border-color:#087cf0;color:#fff}
+html.flympusLargeText .fleetTable th,html.flympusLargeText .fleetTable td,html.flympusLargeText .fleetStatusBadge,html.flympusLargeText .fleetStats>span,html.flympusLargeText .fleetHomeCount,html.flympusLargeText .homeTaskBtn{font-size:15px!important}
+@media(max-width:900px){.fleetItemActions{flex-wrap:wrap}.fleetInventoryTable .fleetTableWrap{overflow-x:auto}}
+@media(max-width:680px){
+ .fleetPageTop{align-items:flex-start}
+ .fleetPageTop .fleetAddBtn{width:100%}
+ .fleetStats{gap:5px}
+ .fleetStats>span{padding:6px 8px;font-size:10px}
+ .fleetStats b{font-size:15px}
+ .fleetInventoryTable,.fleetInventoryTable tbody,.fleetInventoryTable tr{display:block;width:100%}
+ .fleetInventoryTable thead{display:none}
+ .fleetInventoryTable tbody{padding:8px;display:grid;gap:8px}
+ .fleetInventoryTable tr{padding:9px 10px;border:1px solid #e0e9f1;border-radius:10px;background:#fbfdff}
+ .fleetInventoryTable tr.fleetRowDown{border-color:#f0d2cd;background:#fff9f6}
+ .fleetInventoryTable td{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:6px 0;border:0!important;text-align:end}
+ .fleetInventoryTable td:before{content:attr(data-label);font-weight:800;color:#6a8092;text-align:start;font-size:10px;flex:0 0 95px}
+ .fleetInventoryTable td.fleetReasonCell{max-width:none;display:block;text-align:start}
+ .fleetInventoryTable td.fleetReasonCell:before{display:block;margin-bottom:6px}
+ .fleetInventoryTable td:last-child{border:0}
+ .fleetItemActions{justify-content:flex-end}
+ html[data-flympus-theme="dark"] .fleetInventoryTable tr{background:#182f41;border-color:#344f66}
+ html[data-flympus-theme="dark"] .fleetInventoryTable tr.fleetRowDown{background:#362729;border-color:#6e4548}
+ html[data-flympus-theme="dark"] .fleetInventoryTable td:before{color:#b9cfdd}
+ .homeTaskStrip{gap:5px;padding:8px}
+ .homeTaskBtn{padding:5px 7px;font-size:9px}
+}
+@media print{.fleetAddBtn,.homeTaskStrip,.fleetEditor,.fleetItemActions{display:none!important}}

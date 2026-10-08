@@ -106,9 +106,9 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/reports-dashboard.css?v=0767" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
-<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261008-fleet01" />
-<script src="./assets/fleet-serviceability.js?v=20261008-fleet01"></script>
-<script src="./assets/fleet-views.js?v=20261008-fleet01"></script>
+<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261008-fleet02" />
+<script src="./assets/fleet-serviceability.js?v=20261008-fleet02"></script>
+<script src="./assets/fleet-views.js?v=20261008-fleet02"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
 
@@ -8682,18 +8682,20 @@ function saveFleetForm(form){
  const fd=new FormData(form);
  const input={id:String(fd.get('id')||''),tail:String(fd.get('tail')||''),status:String(fd.get('status')||''),reason:String(fd.get('reason')||''),since:normalizeDateValue(fd.get('since'))};
  const model=window.FLYMPUS_FLEET_MODEL,now=new Date().toISOString(),idFactory=()=>window.crypto?.randomUUID?.()||('ac_'+Date.now()+'_'+Math.random().toString(36).slice(2));
- return persistCourseOperations('ct-review-aircraft-serviceability',model.upsertAircraft(getFleetAircraft(),input,currentFleetPlatform(),now,idFactory));
+ return persistCourseOperations('ct-review-aircraft-serviceability',model.upsertAircraft(getFleetAircraft(),input,currentFleetPlatform(),now,idFactory,String(window.FLYMPUS_AUTH?.profile?.displayName||window.FLYMPUS_AUTH?.currentUser?.displayName||window.FLYMPUS_AUTH?.currentUser?.email||'').trim()));
 }
 function fleetSaveError(){toast('Unable to save. Check device storage; no changes were submitted.','error')}
 function bindFleetServiceability(){
  const form=$('#fleetAircraftForm');
- const syncReason=()=>{const status=$('#fleetStatus'),reason=$('#fleetReason');if(reason&&status)reason.required=status.value==='UNSERVICEABLE'};
+ const syncReason=()=>{const status=$('#fleetStatus'),reason=$('#fleetReason'),holder=document.querySelector('[data-fleet-reason-field]');if(!reason||!status)return;const down=status.value==='UNSERVICEABLE';reason.required=down;if(holder)holder.hidden=!down};
+ const showEditor=()=>{const panel=$('#fleetEditorPanel');if(!panel)return;panel.hidden=false;panel.scrollIntoView?.({behavior:'smooth',block:'start'});panel.querySelector('[name="tail"]')?.focus?.({preventScroll:true})};
  if($('#fleetStatus'))$('#fleetStatus').onchange=syncReason;syncReason();
+ document.querySelectorAll('[data-fleet-add]').forEach(b=>b.onclick=()=>{if(!flympusCan('fleet.serviceability.write'))return;if(state.fleetEditId){state.fleetEditId=null;render()}showEditor()});
  if(form)form.onsubmit=e=>{
   e.preventDefault();if(!flympusCan('fleet.serviceability.write'))return;
   try{if(!saveFleetForm(form)){fleetSaveError();return}state.fleetEditId=null;toast('Aircraft serviceability saved','success');render()}catch(err){toast(err.message||'Unable to save aircraft','error')}
  };
- document.querySelectorAll('[data-fleet-edit]').forEach(b=>b.onclick=()=>{if(!flympusCan('fleet.serviceability.write'))return;state.fleetEditId=b.dataset.fleetEdit;render()});
+ document.querySelectorAll('[data-fleet-edit]').forEach(b=>b.onclick=()=>{if(!flympusCan('fleet.serviceability.write'))return;state.fleetEditId=b.dataset.fleetEdit;render();showEditor()});
  if($('#fleetCancelEdit'))$('#fleetCancelEdit').onclick=()=>{state.fleetEditId=null;render()};
  document.querySelectorAll('[data-fleet-archive]').forEach(b=>b.onclick=async()=>{
   if(!flympusCan('fleet.serviceability.write'))return;
@@ -8807,17 +8809,14 @@ function home(){
      '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Today\'s Plan</h2><p>Scheduled flights and activities for today</p></div></div><span class="homeDateChip">▣ '+esc(todayLabel)+'</span></div></div>'+
        '<div class="homePlanList">'+(function(){const flights=getDailyFlightBoard().filter(x=>x.date===todayIsoDate()&&x.platformId===currentFleetPlatform()).sort((a,b)=>String(a.time).localeCompare(String(b.time)));return flights.length?flights.map(x=>'<button class="homePlanRow" data-go="planned"><span class="homePlanTime">◷ '+esc(x.time)+'</span><span class="homeInitial">✈</span><span class="homePlanMain"><b>'+esc(x.traineeName||'Trainee')+'</b><small>'+esc(x.syllabus)+' · '+esc(x.tail)+'</small></span><span class="homePlanTags"><span class="homeTag '+(x.mode==='SOLO'?'solo':'instructed')+'">'+esc(x.mode==='SOLO'?'Solo':'Instructed')+'</span>'+(window.FLYMPUS_FLEET_MODEL.flightIssues(x,getFleetAircraft(),currentFleetPlatform())?'<span class="homeTag" style="color:#b42318">Unavailable</span>':'')+'</span></button>').join(''):'<button class="homePlanRow" data-go="planned"><span class="homePlanMain"><b>No flights scheduled yet</b><small>Open Daily Flight Board to plan flights for this course.</small></span></button>'})()+
        '</div>'+
-     '</div>'+
-     '<div class="homePanel homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Quick Actions</h2><p>Common daily tasks</p></div></div></div>'+
-       '<div class="homeQuickActions">'+
-         '<button class="homeQuickBtn primary" data-go="evaluation"><span class="homeQuickIcon">▷</span><span>Start Evaluation</span></button>'+
-         '<button class="homeQuickBtn" '+(draft?'data-go="evaluation"':'disabled')+'><span class="homeQuickIcon">▤</span><span>'+(draft?'Resume Draft':'No Draft to Resume')+'</span>'+(draft?'<em>1</em>':'')+'</button>'+
-         '<button class="homeQuickBtn" data-go="planned"><span class="homeQuickIcon">▣</span><span>Today\'s Plan</span></button>'+
-         '<button class="homeQuickBtn" data-go="safety"><span class="homeQuickIcon safety">'+navIconSvg('safety')+'</span><span>Log Safety Event</span></button>'+
+       '<div class="homeTaskStrip">'+
+         '<button type="button" class="homeTaskBtn primary" data-go="evaluation"><span class="homeQuickIcon">▷</span>Start Evaluation</button>'+
+         (draft?'<button type="button" class="homeTaskBtn" data-go="evaluation"><span class="homeQuickIcon">▤</span>Resume Draft <em>1</em></button>':'')+
+         '<button type="button" class="homeTaskBtn" data-go="safety"><span class="homeQuickIcon safety">'+navIconSvg('safety')+'</span>Log Safety Event</button>'+
        '</div>'+
      '</div>'+
+     (window.FLYMPUS_FLEET_VIEW?.home?.(currentFleetContext())||'')+
    '</section>'+
-   (window.FLYMPUS_FLEET_VIEW?.home?.(currentFleetContext())||'')+
    '<section class="homePanel homePanelPad">'+
      '<div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Course Pulse</h2><p>Key indicators for current course</p></div></div><button class="homeInlineLink" data-go="reports">View Reports</button></div>'+
      '<div class="homePulseGrid">'+

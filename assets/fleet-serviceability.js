@@ -22,14 +22,14 @@
   if(duplicates)throw Error('This aircraft already exists in this course and platform.');
   return {id,tail,status,reason:status===UNAVAILABLE?reason:'',since:since||'',platformId:String(platform)};
  };
- function upsertAircraft(rows,input,platform,now=new Date().toISOString(),idFactory=()=>String(Date.now())){
+ function upsertAircraft(rows,input,platform,now=new Date().toISOString(),idFactory=()=>String(Date.now()),actor=''){
   const list=Array.isArray(rows)?rows:[],data=validAircraft(list,input,platform),previous=list.find(x=>x.id===data.id&&!x.archivedAt);
   if(data.id&&(!previous||String(previous.platformId)!==String(platform)))throw Error('Aircraft record not found in this platform.');
   const id=previous?.id||idFactory();
   if(list.some(x=>x.id===id&&!previous))throw Error('Aircraft ID conflict.');
   const changed=!previous||previous.status!==data.status||previous.since!==data.since||previous.reason!==data.reason;
   const next={...(previous||{}),...data,id,createdAt:previous?.createdAt||now,updatedAt:now,
-   history:changed?[...(previous?.history||[]),{status:data.status,reason:data.reason,since:data.since,recordedAt:now}]:[...(previous?.history||[])]};
+   history:changed?[...(previous?.history||[]),{status:data.status,reason:data.reason,since:data.since,recordedAt:now,...(clean(actor,120)?{recordedBy:clean(actor,120)}:{})}]:[...(previous?.history||[])]};
   return previous?list.map(x=>x.id===id?next:x):[...list,next];
  }
  function archiveAircraft(rows,id,platform,now=new Date().toISOString()){
