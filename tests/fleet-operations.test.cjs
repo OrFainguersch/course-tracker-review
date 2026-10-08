@@ -39,13 +39,13 @@ test('scheduled flights can only select serviceable aircraft and valid assigned 
  let planes=add([],'a01','01');
  planes=add(planes,'a03','03','UNSERVICEABLE','Needs propeller','2026-10-03');
  const ids={trainees:['t1'],instructors:['i1']};
- const base={time:'09:30',aircraftId:'a01',traineeId:'t1',traineeName:'Pilot 1',instructorId:'i1',instructorName:'Coach',syllabus:'Circuits',mode:'INSTRUCTED'};
+ const base={time:'09:30',aircraftId:'a01',traineeId:'t1',traineeName:'Pilot 1',instructorId:'i1',instructorName:'Coach',syllabus:'Circuits',mode:'INSTRUCTED',estimatedMinutes:'30'};
  assert.throws(()=>M.upsertSortie([],{...base,aircraftId:'a03'},planes,'shahak','2026-10-08',ids),/not serviceable/);
  assert.throws(()=>M.upsertSortie([],{...base,traineeId:'else'},planes,'shahak','2026-10-08',ids),/assigned to this course/);
  assert.throws(()=>M.upsertSortie([],{...base,time:'25:00'},planes,'shahak','2026-10-08',ids),/valid flight date and time/);
  let board=M.upsertSortie([],{...base},planes,'shahak','2026-10-08',ids,now,()=> 'flight1');
  assert.equal(board.length,1);assert.equal(board[0].tail,'01');
- assert.throws(()=>M.upsertSortie(board,{...base},planes,'shahak','2026-10-08',ids,now,()=> 'flight2'),/already scheduled/);
+ assert.throws(()=>M.upsertSortie(board,{...base},planes,'shahak','2026-10-08',ids,now,()=> 'flight2'),/already booked/);
  assert.equal(M.flightIssues(board[0],planes,'shahak'),'');
  planes=M.upsertAircraft(planes,{id:'a01',tail:'01',status:'UNSERVICEABLE',reason:'Fuel system',since:'2026-10-08'},'shahak',now);
  assert.match(M.flightIssues(board[0],planes,'shahak'),/Fuel system/);
@@ -157,7 +157,7 @@ test('Plan opens on the date-specific Daily Flight Plan with separate Planned vs
  assert.ok(html.includes("case'reports':html=reports();break"),'Reports navigation remains available');
  assert.ok(!html.includes("courseFlightScheduleHtml(date)+\n '<section class=\"card pvePanel\">"));
 });
-test('Scheduled sortie accepts optional planned duration and notes without changing serviceability constraints',()=>{
+test('Scheduled sortie requires planned duration and preserves notes without changing serviceability constraints',()=>{
  const fleet=add([],'ac1','01'),allowed={trainees:['trainee1'],instructors:['ip1']};
  const flight={date:'2026-10-08',time:'11:30',mode:'INSTRUCTED',aircraftId:'ac1',traineeId:'trainee1',instructorId:'ip1',instructorName:'IP',traineeName:'EP',syllabus:'Circuits',estimatedMinutes:'35',note:'Winds and circuit work'};
  const result=M.upsertSortie([],flight,fleet,'shahak','2026-10-08',allowed,now,()=> 'sortie1');
@@ -177,4 +177,64 @@ test('Duty trainee can open Plan board, while Fleet and Plan restrictions stay s
  assert.ok(html.includes("if(!flympusCan('operations.flightBoard.write'))return;"));
  assert.ok(html.includes("if(!flympusCan('operations.daily.write'))"));
  assert.ok(html.includes("if(!canViewDutyScreen(screen))"));
+});
+
+test('Flight planning timeline reserves briefing and debriefing across midnight',()=>{
+ const flight={date:'2026-10-08',time:'23:50',mode:'INSTRUCTED',estimatedMinutes:30,briefingMinutes:20,debriefMinutes:15};
+ const t=M.flightTimeline(flight);
+ assert.deepEqual(t.clock,{briefing:'23:30',takeoff:'23:50',landing:'00:20 (+1d)',debrief:'00:35 (+1d)'});
+ assert.equal(t.debriefEnd-t.briefingStart,65);
+ assert.equal(M.flightTimeline({...flight,estimatedMinutes:0}),null);
+ assert.deepEqual(M.configuredTimings(null,'INSTRUCTED'),{briefingMinutes:20,debriefMinutes:15});
+ assert.deepEqual(M.configuredTimings({SOLO:{briefingMinutes:5,debriefMinutes:12}},'SOLO'),{briefingMinutes:5,debriefMinutes:12});
+});
+test('Aircraft, trainee, and instructor cannot be assigned within occupied time windows',()=>{
+ const planes=[add([],'ac1','01')[0],add([],'ac2','02')[0]];
+ const allowed={trainees:['t1','t2'],instructors:['i1','i2']};
+ const base={time:'08:00',aircraftId:'ac1',traineeId:'t1',traineeName:'Trainee One',instructorId:'i1',instructorName:'Instructor One',mode:'INSTRUCTED',syllabus:'Circuits',estimatedMinutes:30,briefingMinutes:20,debriefMinutes:15};
+ const first=M.upsertSortie([],{...base},planes,'shahak','2026-10-08',allowed,now,()=> 'one');
+ const attempt=change=>M.upsertSortie(first,{...base,...change},planes,'shahak','2026-10-08',allowed,now,()=> 'two');
+ assert.throws(()=>attempt({time:'08:20',traineeId:'t2',instructorId:'i2'}),/Aircraft .* already booked/);
+ assert.throws(()=>attempt({time:'08:35',aircraftId:'ac2',traineeId:'t2'}),/Instructor .* briefing, flight or debriefing/);
+ assert.throws(()=>attempt({time:'08:40',aircraftId:'ac2',instructorId:'i2'}),/Trainee .* briefing, flight or debriefing/);
+ assert.equal(attempt({time:'08:20',aircraftId:'ac2',traineeId:'t2',instructorId:'i2'}).length,2);
+ assert.equal(attempt({time:'09:05',aircraftId:'ac2',traineeId:'t2'}).length,2);
+ assert.equal(attempt({id:'one',time:'08:10'}).length,1);
+ assert.throws(()=>attempt({estimatedMinutes:''}),/duration/);
+ assert.throws(()=>attempt({briefingMinutes:-1}),/Briefing time/);
+ assert.throws(()=>attempt({debriefMinutes:181}),/Debriefing time/);
+});
+test('Next-day activity and SOLO flight reservations respect human availability',()=>{
+ const planes=[add([],'ac1','01')[0],add([],'ac2','02')[0]],ids={trainees:['t1','t2'],instructors:['i1','i2']};
+ const first=M.upsertSortie([],{time:'23:50',mode:'INSTRUCTED',aircraftId:'ac1',traineeId:'t1',instructorId:'i1',syllabus:'Circuits',estimatedMinutes:30,briefingMinutes:20,debriefMinutes:15},planes,'shahak','2026-10-08',ids,now,()=> 'late');
+ const solo={time:'00:25',mode:'SOLO',aircraftId:'ac2',traineeId:'t1',syllabus:'Solo',estimatedMinutes:20,briefingMinutes:10,debriefMinutes:10};
+ assert.throws(()=>M.upsertSortie(first,solo,planes,'shahak','2026-10-09',ids),/Trainee/);
+ assert.equal(M.upsertSortie(first,{...solo,time:'00:45'},planes,'shahak','2026-10-09',ids).length,2);
+ assert.throws(()=>M.upsertSortie(first,{...solo,aircraftId:'ac1',traineeId:'t2',time:'00:05'},planes,'shahak','2026-10-09',ids),/Aircraft/);
+ const legacy=[{...first[0],estimatedMinutes:null}];
+ assert.throws(()=>M.upsertSortie(legacy,{...solo,time:'08:00'},planes,'shahak','2026-10-08',ids),/Existing flight/);
+});
+test('Plan shows one standalone form without old board chrome and displays computed timeline',()=>{
+ const vm=require('node:vm'),context={window:{FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=> 'en'}};
+ vm.runInNewContext(ui,context,{filename:'fleet-views.js'});
+ const V=context.window.FLYMPUS_FLEET_VIEW;
+ const planes=add([],'ac1','01'),ctx={fleet:planes,flights:[],date:'2026-10-08',platformId:'shahak',platformLabel:'Shahak',
+   trainees:[{id:'t1',name:'Pilot'}],instructors:[{id:'i1',name:'Coach'}],syllabi:['Circuits'],canWrite:true,canConfigureTiming:true};
+ const empty=V.schedule(ctx);
+ assert.match(empty,/Add scheduled flight/);
+ assert.match(empty,/Calculated timeline/);
+ assert.match(empty,/data-flight-clock="briefing">07:40/);
+ assert.match(empty,/name="estimatedMinutes"[^>]*required/);
+ assert.match(empty,/name="briefingMinutes"/);
+ assert.match(empty,/name="debriefMinutes"/);
+ assert.doesNotMatch(empty,/Daily Flight Board|No scheduled flights for this day|card fleetSchedule/);
+ assert.match(empty,/fleetTimingDefaultsForm/);
+ const flight={id:'scheduled',date:'2026-10-08',platformId:'shahak',time:'08:00',mode:'INSTRUCTED',aircraftId:'ac1',tail:'01',traineeId:'t1',syllabus:'Circuits',estimatedMinutes:30,briefingMinutes:20,debriefMinutes:15};
+ const booked=V.schedule({...ctx,flights:[flight]});
+ assert.match(booked,/Scheduled flights/);
+ assert.match(booked,/08:45/);
+ assert.match(booked,/data-flight-edit="scheduled"/);
+ assert.match(html,/getPlanTimingDefaults\(\)/);
+ assert.match(html,/name="briefingMinutes"/);
+ assert.match(html,/fleetTimeFlow/);
 });
