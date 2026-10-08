@@ -238,3 +238,39 @@ test('Plan shows one standalone form without old board chrome and displays compu
  assert.match(html,/fd\.get\('briefingMinutes'\)/);
  assert.match(html,/data-flight-clock/);
 });
+
+
+test('Plan UI reads language preference, keeps RTL dates visible, and scales for small screens',()=>{
+ const vm=require('node:vm');
+ let language='he';
+ const context={window:{FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=>language}};
+ vm.runInNewContext(ui,context,{filename:'fleet-views.js'});
+ const ctx={fleet:add([],'ac1','01'),flights:[],date:'2026-10-08',platformId:'shahak',platformLabel:'Shahak',
+   trainees:[{id:'t1',name:'חניך'}],instructors:[{id:'i1',name:'מדריך'}],syllabi:['Circuits'],canWrite:true,canConfigureTiming:true};
+ const he=context.window.FLYMPUS_FLEET_VIEW.schedule(ctx);
+ assert.match(he,/הוספת טיסה מתוכננת/);
+ assert.match(he,/ציר זמנים מחושב/);
+ assert.match(he,/תדריך/);
+ assert.match(he,/תחקיר/);
+ assert.match(he,/fleetTimeFlowLegend/);
+ assert.match(he,/עריכת ברירות מחדל/);
+ language='en';
+ const en=context.window.FLYMPUS_FLEET_VIEW.schedule(ctx);
+ assert.match(en,/Add scheduled flight/);
+ assert.match(en,/Calculated timeline/);
+ assert.match(en,/Flight planning notes/);
+ assert.doesNotMatch(en,/ציר זמנים מחושב/);
+ const styles=require('node:fs').readFileSync(require('node:path').join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.doesNotMatch(styles,/\.dailyPlanHeader>div:first-child\{display:none\}/);
+ assert.match(styles,/\.dailyFlightPlan \.dailyPlanHeader \.dailyPlanDateField\{display:block!important/);
+ assert.match(styles,/html\[data-flympus-language="he"\] \.fleetTimeFlowTimes strong/);
+ assert.match(styles,/html\[data-flympus-theme="dark"\] \.dailyFlightPlan/);
+ assert.match(styles,/html\.flympusLargeText \.fleetPlanFormHeading h2/);
+ assert.match(styles,/@media\(max-width:480px\)/);
+ assert.match(styles,/@media\(max-width:365px\)/);
+ assert.match(styles,/calc\(112px \+ env\(safe-area-inset-bottom,0px\)\)/);
+ assert.match(html,/planUiText\('Flight date','תאריך טיסה'\)/);
+ assert.match(html,/planUiText\('Daily Flight Plan','תוכנית טיסות יומית'\)/);
+ assert.match(html,/planUiText\('Planned vs Executed','מתוכנן מול בוצע'\)/);
+ assert.match(html,/key==='theme'\|\|key==='density'\|\|key==='language'\)render\(\)/);
+});
