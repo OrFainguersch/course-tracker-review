@@ -78,3 +78,9 @@ Any change touching mobile header positioning, bottom-nav auto-hide, pull-to-ref
 - On iOS standalone PWA, the sidebar's dark-navy fill must have **no pale separator across the safe-area/status-bar boundary**. Any boundary correction must be painted by the sliding drawer panel itself, not a static document/body patch or an independently moving layer.
 - Preserve the 200ms opening, 230ms closing, exact scroll-position restoration, header/bottom-nav auto-hide, and drawer push-canvas synchronization when modifying sidebar visuals.
 - Keep regression checks covering the drawer's system-only role across different accounts and its panel-owned safe-area boundary paint.
+
+### Approved sidebar logo (2026-10-08)
+
+- Sidebar wordmark asset: `assets/flympus-sidebar-uploaded-0762.webp`, a transparent, tight-cropped export of the user-provided silver/white FLYMPUS wordmark with subtle gold details and the TRAIN. TRACK. PROGRESS. tagline.
+- It replaces the previous wordmark completely in the sidebar. Do not revert the source or overlay a secondary/duplicate logo.
+- Keep the image centered horizontally for mobile and desktop, with the original aspect ratio, inside the existing sidebar brand row. It must not affect the fixed-canvas drawer timing, scroll restoration, or safe-area boundary fix.

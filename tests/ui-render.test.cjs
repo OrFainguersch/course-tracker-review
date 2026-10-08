@@ -232,6 +232,20 @@ assert(!html.includes("Revert to Package defaults"),"Bulk course revert-to-defau
 assert(html.includes(".packageRules>summary>span{font-size:9px;color:#8092a5}"),"Summary helper styling must target only the direct helper span so counts inside titles keep the title font");
 assert(html.includes('.drawer.open .panel::before{')&&html.includes('top:calc(env(safe-area-inset-top) - 2px)')&&html.includes('height:5px;')&&html.includes('background:#102f51;'),"iOS drawer must paint the status-bar boundary with panel-owned navy, not a global fixed underlay");
 assert(!html.includes("drawerRole.textContent=appRole+' · '+courseRole"),"Drawer footer must never append a course-specific position to the system role");
+
+const approvedSidebarLogo='assets/flympus-sidebar-uploaded-0762.webp';
+assert(html.includes('class="sidebarFlympusWordmark" src="./'+approvedSidebarLogo+'"'),"Sidebar must use the exact user-provided replacement logo");
+assert(!html.includes('class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp"'),"Sidebar must no longer render the previous logo");
+assert(html.includes('.panel .brand .sidebarFlympusWordmark{')&&
+  html.includes('width:min(232px,100%)!important;')&&
+  html.includes('margin:0 auto!important;')&&
+  html.includes('object-position:center center!important;')&&
+  html.includes('justify-content:center!important;'),
+  "The new logo must stay horizontally centered, with its full aspect ratio, on phone and desktop");
+assert(fs.existsSync(approvedSidebarLogo)&&fs.statSync(approvedSidebarLogo).size>10000,
+  "The new logo must be bundled locally in the site, not linked to a transient upload");
+assert.equal(fs.readFileSync(approvedSidebarLogo).toString('ascii',0,4),'RIFF',
+  "The replacement logo must be a valid local WebP file");
 const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(match=>match[1]).filter(x=>x.trim());
 assert(scripts.length>=2);const appSource=scripts.at(-1).split('const earlyNavTarget=')[0];vm.runInContext(appSource,context,{filename:"index-inline.js"});
 // Drawer footer is global identity. A person's course-role membership must not
