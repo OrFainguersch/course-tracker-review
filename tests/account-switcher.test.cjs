@@ -39,6 +39,7 @@ function harness(){
   const document={
     documentElement:{getAttribute:()=> 'en'},
     getElementById:()=>null,
+    querySelectorAll:()=>[],
     addEventListener:(type,fn)=>handlers.set(type,fn)
   };
   const ctx={document,localStorage:storage,console,Map,Set,Promise,JSON,String,Number,Error};
