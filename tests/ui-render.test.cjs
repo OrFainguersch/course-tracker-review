@@ -240,11 +240,11 @@ assert(serviceWorker.includes("'./"+approvedSidebarLogo+"'")&&!serviceWorker.inc
 assert(html.includes('class="sidebarFlympusWordmark" src="./'+approvedSidebarLogo+'"'),"Sidebar must use the exact user-provided replacement logo");
 assert(!html.includes('class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp"'),"Sidebar must no longer render the previous logo");
 assert(html.includes('.panel .brand .sidebarFlympusWordmark{')&&
-  html.includes('width:min(232px,100%)!important;')&&
+  html.includes('width:min(198px,100%)!important;')&&
   html.includes('margin:0 auto!important;')&&
   html.includes('object-position:center center!important;')&&
   html.includes('justify-content:center!important;'),
-  "The new logo must stay horizontally centered, with its full aspect ratio, on phone and desktop");
+  "The user-approved new logo must stay horizontally centered at the balanced 198px width, with full aspect ratio, on phone and desktop");
 assert(fs.existsSync(approvedSidebarLogo)&&fs.statSync(approvedSidebarLogo).size>10000,
   "The new logo must be bundled locally in the site, not linked to a transient upload");
 assert.equal(fs.readFileSync(approvedSidebarLogo).toString('ascii',0,4),'RIFF',

@@ -84,3 +84,4 @@ Any change touching mobile header positioning, bottom-nav auto-hide, pull-to-ref
 - Sidebar wordmark asset: `assets/flympus-sidebar-uploaded-0762.webp`, a transparent, tight-cropped export of the user-provided silver/white FLYMPUS wordmark with subtle gold details and the TRAIN. TRACK. PROGRESS. tagline.
 - It replaces the previous wordmark completely in the sidebar. Do not revert the source or overlay a secondary/duplicate logo.
 - Keep the image centered horizontally for mobile and desktop, with the original aspect ratio, inside the existing sidebar brand row. It must not affect the fixed-canvas drawer timing, scroll restoration, or safe-area boundary fix.
+- **Approved responsive wordmark width (2026-10-08): 198px**, the midpoint between the older 164px mobile logo and the too-large 232px replacement. Keep centering, `max-width:100%`, `height:auto`, and `object-fit:contain`. Do not reintroduce the 232px oversized presentation without an explicit new request.
