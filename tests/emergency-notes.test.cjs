@@ -31,7 +31,7 @@ test('the roster displays notes from submitted evaluations for the matching trai
 test('evaluation UI, autosaved drafts, revised evaluations and roster note panels are connected',()=>{
   for(const marker of [
     'name="emnote_','data-emergency-note-area','data-emergency-note-toggle',
-    'data-emergency-practice-entry','emergencyNotes:',
+    'data-emergency-practice-entry','emergencyNotes,',
     'FLYMPUS_EMERGENCY_NOTES.normalize','FLYMPUS_EMERGENCY_NOTES.collect',
     'latestEmergencyNoteHtml','emergencyPreviousNotes',
     "persistDraft()","data-emergency-profile-filter"
