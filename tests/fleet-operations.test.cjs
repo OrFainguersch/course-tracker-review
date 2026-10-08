@@ -371,3 +371,43 @@ test('Course timing defaults appear directly before scheduled flight form in all
  assert.match(css,/html\[data-flympus-theme="dark"\] \.dailyFlightPlan \.fleetSchedulePlain>\.fleetTimingSettings/);
  assert.match(css,/@media\(max-width:560px\)/);
 });
+
+
+test('Daily Flight Plan owns the only editable flight-date selector for both Plan tabs',()=>{
+ const vm=require('node:vm');
+ const source=html.slice(html.indexOf('function planUiText('),html.indexOf('function planWorkspace(){'));
+ const context={
+  state:{planDate:'2026-10-08'},todayIsoDate:()=> '2026-10-09',
+  getFlympusAppPreferences:()=>({language:'en'}),
+  esc:x=>String(x),dateInputValue:date=>date.slice(8)+'/'+date.slice(5,7)+'/'+date.slice(0,4),
+  courseFlightScheduleHtml:date=>'<aside data-board-date="'+date+'"></aside>'
+ };
+ vm.runInNewContext(source,context);
+ const daily=context.dailyFlightPlan();
+ assert.match(daily,/dailyPlanDateSpotlight/);
+ assert.match(daily,/id="dailyPlanDate" type="text"/);
+ assert.match(daily,/value="08\/10\/2026"/);
+ assert.match(daily,/data-board-date="2026-10-08"/);
+ assert.match(daily,/One date for all scheduled flights/);
+ assert.equal((daily.match(/id="dailyPlanDate"/g)||[]).length,1);
+ const report=html.slice(html.indexOf('function plannedVsExecuted(){'),html.indexOf('function bindPlanned(){'));
+ assert.match(report,/class="pveDateControl pveDateReadOnly"/);
+ assert.match(report,/type="hidden" value=/);
+ assert.match(report,/id="pveDate" type="hidden"/);
+ assert.match(report,/data-plan-view="board"/);
+ assert.doesNotMatch(report,/id="pveDate" type="text"/);
+ const dateHandler=html.slice(html.indexOf('function bindPlanWorkspace(){'),html.indexOf('function plannedVsExecuted(){'));
+ assert.match(dateHandler,/const normalized=normalizeDateValue\(e\.target\.value\)/);
+ assert.match(dateHandler,/state\.planDate=normalized/);
+ assert.match(dateHandler,/saveUiState\(\)/);
+ assert.doesNotMatch(html,/if\(\$\('#pveDate'\)\)\$\('#pveDate'\)\.onchange/);
+ assert.match(html,/planDate:state\.planDate,planView:state\.planView/);
+ const uiCSS=require('node:fs').readFileSync(require('node:path').join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(uiCSS,/\.dailyPlanHeader\.dailyPlanDateSpotlight/);
+ assert.match(uiCSS,/html\[data-flympus-theme="dark"\] \.dailyFlightPlan \.dailyPlanHeader\.dailyPlanDateSpotlight/);
+ assert.match(uiCSS,/html\.flympusLargeText \.dailyPlanDateSpotlight/);
+ assert.match(uiCSS,/@media\(max-width:660px\)/);
+ assert.match(uiCSS,/\.pveDateReadOnly/);
+ context.getFlympusAppPreferences=()=>({language:'he'});
+ assert.match(context.dailyFlightPlan(),/תאריך אחד לשיבוצי הטיסות/);
+});
