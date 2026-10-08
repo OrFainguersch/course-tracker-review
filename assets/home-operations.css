@@ -11,3 +11,18 @@ html.flympusLargeText .homeAttentionIssues .homeIssue{font-size:15px!important}
  .homeAttentionIssues{display:grid;justify-items:start}
  .homeAttentionTable td:nth-child(2){min-width:220px;max-width:none}
 }
+
+
+/* Last-seven-days actual flight feed, one full-width Home card. */
+.homeRecentFlights{min-width:0}
+.homeRecentFlights .homeFeed{min-width:0}
+.homeRecentFlights .homeFeedItem{grid-template-columns:10px 29px minmax(0,1fr) auto;min-width:0}
+.homeRecentFlights .homeFeedMain{min-width:0;overflow-wrap:anywhere}
+.homeRecentMode{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;border-radius:8px;border:1px solid #c9dff1;background:#eef7ff;color:#165d95;padding:6px 9px;font-size:10px;font-weight:850}
+.homeRecentMode.solo{background:#fdf7e9;border-color:#f2e2bc;color:#896116}
+.homeRecentEmpty{margin:12px 0 2px;color:#637c91;font-size:11px}
+html[data-flympus-theme="dark"] .homeRecentMode.instructed{background:#183a57;border-color:#3c6285;color:#bddfff}
+html[data-flympus-theme="dark"] .homeRecentMode.solo{background:#43371f;border-color:#80632e;color:#ffdea1}
+html[data-flympus-theme="dark"] .homeRecentEmpty{color:#b9cad8}
+html.flympusLargeText .homeRecentMode,html.flympusLargeText .homeRecentEmpty{font-size:15px!important}
+@media(max-width:680px){.homeRecentFlights .homeFeedItem{grid-template-columns:8px 29px minmax(0,1fr) auto;gap:6px}.homeRecentMode{padding:5px 6px;font-size:9px}}

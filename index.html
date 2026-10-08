@@ -107,10 +107,10 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
 <link rel="stylesheet" href="./assets/fleet-operations.css?v=20261008-fleet02" />
-<link rel="stylesheet" href="./assets/home-operations.css?v=20261008-home01" />
+<link rel="stylesheet" href="./assets/home-operations.css?v=20261008-home02" />
 <script src="./assets/fleet-serviceability.js?v=20261008-fleet02"></script>
 <script src="./assets/fleet-views.js?v=20261008-fleet02"></script>
-<script src="./assets/home-operations.js?v=20261008-home01"></script>
+<script src="./assets/home-operations.js?v=20261008-home02"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
 
@@ -6371,6 +6371,10 @@ Object.assign(FLYMPUS_HE_UI,{
   "Last Flight": "טיסה אחרונה",
   "Review": "סקירה",
   "Recent Activity": "פעילות אחרונה",
+  "Recent Flight Activity": "פעילות טיסות אחרונה",
+  "Last 7 days · Up to 10 completed flights (Instructed & Solo)": "שבעת הימים האחרונים · עד 10 טיסות שבוצעו (מודרכות וסולו)",
+  "No completed flights recorded in the last 7 days.": "לא תועדו טיסות שבוצעו בשבעת הימים האחרונים.",
+  "Flight completed": "טיסה שבוצעה",
   "Latest updates across the course": "העדכונים האחרונים בקורס",
   "Upcoming Items": "פריטים קרובים",
   "Exams, milestones and deadlines": "מבחנים, אבני דרך ומועדי יעד",
@@ -8791,7 +8795,7 @@ function home(){
  const homeCountryRaw=currentCourseMeta.country||'—';
  const homeCountryLabel=homeHebrew?flympusTranslateUiString(homeCountryRaw):homeCountryRaw;
  const activeT=courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active');
- const evals=allEvaluationsForAnalytics().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+
  const avgProgress=Math.round(mean(activeT.map(t=>Number(t.progress)||0))||0);
  const avgGrade=mean(activeT.map(t=>Number(t.average)).filter(Number.isFinite));
  const weekly=window.FLYMPUS_HOME_OPERATIONS.weeklyFlights({
@@ -8830,19 +8834,13 @@ function home(){
    {time:'11:00',t:activeT[2]||activeT[0],def:pickDef(activeT[2]?.currentSyllabus,'Engine Emergencies')},
    {time:'13:30',t:activeT[3]||activeT[0],def:pickDef(activeT[3]?.currentSyllabus,'Complex Emergencies')}
  ].filter(x=>x.t).map(x=>({...x,activity:x.def.name,mode:x.def.mode==='SOLO'?'Solo':'Instructed'}));
- const recent=evals.slice(0,5);
+ const recent=window.FLYMPUS_HOME_OPERATIONS.recentFlights({
+   today:todayIsoDate(),evaluations:getEvaluations(),soloFlights:getSoloFlights()
+ });
  const draft=getActivityDraft('evaluation');
  const todayLabel=formatDateDMY(todayIsoDate());
  const fmtDate=s=>formatDateDMY(s);
  const initials=t=>esc(t.initials||personInitials(t));
- const theoryExams=epTheoryExamDefs();
- const nextRequired=(activeProgram?.syllabi||[]).find(x=>!x.optional&&x.minimum!=null);
- const upcoming=[
-   ...(theoryExams.slice(0,2).map((x,i)=>[i===0?'2026-09-30':'2026-10-01',x.name,x.type||'Exam',i===0?'Course requirement':'Theory requirement',i===0?'soon':''])),
-   ...(nextRequired?[[ '2026-10-02',nextRequired.name,'Practical syllabus · Min '+nextRequired.minimum,'Next syllabus','' ]]:[]),
-   ...(activeProgram?.completion?[[ '2026-10-05','Stage Completion Gate',activeProgram.completion,'Program gate','' ]]:[]),
-   ...(currentCourseMeta.dayNight==='Day'&&currentCourseMeta.phase==='Full Scale'?[[ '2026-10-10','Night Package','Available after Day prerequisites','Next package','' ]]:[])
- ].slice(0,4);
  return '<div class="homeDashboard">'+
    '<section class="mobileHero">'+
      '<span class="courseStateBadge homeCourseStatusBadge '+homeCourseLifecycle.className+'">'+esc(homeCourseLifecycle.label)+'</span>'+
@@ -8875,13 +8873,13 @@ function home(){
        attentionRows.map(t=>'<tr><td><span class="homePersonCell"><span class="homeMiniAvatar">'+initials(t)+'</span>'+esc(t.name)+'</span></td><td><div class="homeAttentionIssues">'+t.issues.map(i=>'<span class="homeIssue">'+esc(attentionText(i))+'</span>').join('')+'</div></td><td>'+esc(t.lastFlight?fmtDate(t.lastFlight):'—')+'</td><td><span class="homeProgressCell"><b>'+esc(t.progress)+'%</b><span class="homeProgressBar"><i style="width:'+Math.max(0,Math.min(100,Number(t.progress)||0))+'%"></i></span></span></td><td><button class="homeReviewBtn" data-trainee="'+esc(t.id)+'">Review</button></td></tr>').join('')+
      '</tbody></table></div>'+
    '</section>':'')+
-   '<section class="homeBottomGrid">'+
-     '<div class="homePanel homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Recent Activity</h2><p>Latest updates across the course</p></div></div><button class="homeInlineLink" data-go="reports">View All</button></div><div class="homeFeed">'+
-       recent.map((e,i)=>{const t=allTrainees().find(x=>x.id===e.traineeId)||{name:'Trainee',initials:'TR'};return '<div class="homeFeedItem"><span class="homeFeedDot '+(i===3?'gold':'')+'"></span><span class="homeMiniAvatar">'+initials(t)+'</span><span class="homeFeedMain"><b>'+esc(t.name)+'</b><small>'+esc(e.syllabus||'Evaluation completed')+' · '+esc(fmtDate(e.date))+'</small></span><span class="homeScore">'+(Number.isFinite(Number(e.grade))?Number(e.grade).toFixed(1):'✓')+'</span></div>'}).join('')+
-     '</div></div>'+
-     '<div class="homePanel homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Upcoming Items</h2><p>Exams, milestones and deadlines</p></div></div><button class="homeInlineLink" data-go="planned">View All</button></div><div class="homeUpcoming">'+
-       upcoming.map(x=>'<div class="homeUpcomingItem"><span class="homeCalendar"><span>'+esc(formatDateDMY(x[0]))+'</span></span><span class="homeUpcomingMain"><b>'+esc(x[1])+'</b><small>'+esc(x[2])+'</small></span><span class="homeDue '+x[4]+'">'+esc(x[3])+'</span></div>').join('')+
-     '</div></div>'+
+   '<section class="homePanel homePanelPad homeRecentFlights" aria-label="Recent completed flights">'+
+     '<div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Recent Flight Activity</h2><p>Last 7 days · Up to 10 completed flights (Instructed &amp; Solo)</p></div></div></div>'+
+     (recent.length?'<div class="homeFeed">'+
+       recent.map(f=>{const t=courseTrainees().find(x=>String(x.id)===f.traineeId),name=f.traineeName||t?.name||'Trainee',avatar=t||{name};
+         return '<div class="homeFeedItem"><span class="homeFeedDot"></span><span class="homeMiniAvatar">'+initials(avatar)+'</span><span class="homeFeedMain"><b>'+esc(name)+'</b><small>'+esc(f.syllabus||'Flight completed')+' · '+esc(fmtDate(f.date))+'</small></span><span class="homeRecentMode '+(f.mode==='SOLO'?'solo':'instructed')+'">'+(f.mode==='SOLO'?'Solo':'Instructed')+'</span></div>';
+       }).join('')+
+     '</div>':'<p class="homeRecentEmpty">No completed flights recorded in the last 7 days.</p>')+
    '</section>'+
  '</div>';
 }

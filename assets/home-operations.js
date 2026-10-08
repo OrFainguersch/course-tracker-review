@@ -25,6 +25,26 @@
   const instructed=arr(evaluations).filter(within).length,solo=arr(soloFlights).filter(within).length;
   return {...w,instructed,solo,total:instructed+solo};
  }
+ // The latest seven course-local calendar dates, including today.
+ // Use only submitted flight evaluations and logged Solo completions.
+ function recentFlights({evaluations=[],soloFlights=[],today}={}){
+  const d=day(today);if(!d)return [];
+  const start=new Date(d.getTime());start.setUTCDate(start.getUTCDate()-6);
+  const from=start.toISOString().slice(0,10),to=d.toISOString().slice(0,10);
+  const normalize=(row,mode,index)=>{
+   if(!row||typeof row!=='object')return null;
+   const date=iso(mode==='SOLO'?row.date:(row.flightDate||row.date));
+   if(!day(date)||date<from||date>to)return null;
+   return {id:String(row.id||mode+'-'+index),date,mode,
+    traineeId:String(row.traineeId||''),traineeName:String(row.traineeName||''),
+    syllabus:String(row.syllabus||''),createdAt:String(row.createdAt||'')};
+  };
+  const flights=[
+   ...arr(evaluations).map((row,i)=>normalize(row,'INSTRUCTED',i)),
+   ...arr(soloFlights).map((row,i)=>normalize(row,'SOLO',i))
+  ].filter(Boolean);
+  return flights.sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt.localeCompare(a.createdAt)||b.id.localeCompare(a.id)).slice(0,10);
+ }
  function attention({trainees=[],evaluations=[],soloFlights=[],exams=[],progressions={},today}={}){
   const active=arr(trainees).filter(t=>String(t.status||'').toLowerCase()==='active'),ids=new Set(active.map(t=>String(t.id)));
   const evals=arr(evaluations).filter(e=>ids.has(String(e.traineeId))&&day(e.flightDate||e.date));
@@ -88,5 +108,5 @@
    return {...t,lastFlight,issues};
   }).filter(t=>t.issues.length).sort((a,b)=>b.issues.length-a.issues.length||String(a.name).localeCompare(String(b.name)));
  }
- return Object.freeze({weekBounds,weeklyFlights,attention});
+ return Object.freeze({weekBounds,weeklyFlights,recentFlights,attention});
 });
