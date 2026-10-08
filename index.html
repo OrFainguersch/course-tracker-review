@@ -11038,7 +11038,7 @@ function planUiText(en,he){return getFlympusAppPreferences().language==='he'?he:
 function dailyFlightPlan(){
  const date=state.planDate||todayIsoDate();
  return '<div class="dailyFlightPlan">'+
-  '<div class="dailyPlanHeader"><div class="field dailyPlanDateField"><label for="dailyPlanDate">'+planUiText('Flight date','תאריך טיסה')+' *</label><input class="input dateDmy" id="dailyPlanDate" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" value="'+esc(dateInputValue(date))+'" placeholder="DD/MM/YYYY"></div></div>'+
+  '<div class="dailyPlanHeader"><div class="field dailyPlanDateField"><label for="dailyPlanDate">'+planUiText('Flight date','תאריך טיסה')+' <span class="fleetRequired" aria-hidden="true">*</span></label><input class="input dateDmy" id="dailyPlanDate" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" value="'+esc(dateInputValue(date))+'" placeholder="DD/MM/YYYY"></div></div>'+
   courseFlightScheduleHtml(date)+'</div>';
 }
 
@@ -11052,7 +11052,7 @@ function planWorkspace(){
 function bindPlanWorkspace(){
  document.querySelectorAll('[data-plan-view]').forEach(b=>b.onclick=()=>{const next=b.dataset.planView;if(!['board','report'].includes(next)||state.planView===next)return;state.planView=next;state.flightBoardEditId=null;render();forcePageTop()});
  const date=$('#dailyPlanDate');
- if(date)date.onchange=e=>{const normalized=normalizeDateValue(e.target.value);if(!normalized){toast(planUiText('Enter a valid flight date','יש להזין תאריך טיסה תקין'),'error');return}state.planDate=normalized;state.flightBoardEditId=null;render()};
+ if(date)date.onchange=e=>{const normalized=normalizeDateValue(e.target.value);if(!normalized){toast(planUiText('Enter a valid flight date','יש להזין תאריך טיסה תקין'),'error');return}if(state.planDate!==normalized){delete state.planInstructed;delete state.planSolo}state.planDate=normalized;state.flightBoardEditId=null;render()};
 }
 function plannedVsExecuted(){
  const {draftWrap,draft,date,saved,soloRows,pi,ps,boardLinked,executedInstructed,instructedCancelled,soloCancelled,reasonCatalog,cancellationRows,hasPlan,ready,planMissing,planStarted}=plannedCompleteness();
@@ -11613,7 +11613,7 @@ function bindPlanned(){
    if(Number(flight.minutes)>0)events.unshift({id:'evt_'+Date.now()+'_hr',traineeId:flight.traineeId,date:flight.date,type:'TRAINING_HOUR',quantity:Math.round(Number(flight.minutes)/60*100)/100,source:'Solo flight',sourceId:flight.id,note:flight.syllabus,createdAt:stamp});
    saveActivityEvents(events)
  };
- if($('#pveDate'))$('#pveDate').onchange=e=>{const iso=normalizeDateValue(e.target.value);if(!iso)return;state.planDate=iso;state.flightBoardEditId=null;state.soloEditId=null;delete state.planInstructed;delete state.planSolo;saveActivityDraft('planned',{date:iso,plannedInstructed:0,plannedSolo:0,cancellations:[],reason:'',solo:{}});syncAttentionBadges();render()};
+ if($('#pveDate'))$('#pveDate').onchange=e=>{const iso=normalizeDateValue(e.target.value);if(!iso)return;state.planDate=iso;state.flightBoardEditId=null;state.soloEditId=null;delete state.planInstructed;delete state.planSolo;const previous=getDailyReports().find(x=>x.date===iso)||{},board=flightBoardPlanStatus(iso);saveActivityDraft('planned',{date:iso,plannedInstructed:board.linked?board.instructed:Number(previous.plannedInstructed||0),plannedSolo:board.linked?board.solo:Number(previous.plannedSolo||0),cancellations:previous.cancellations||[],reason:previous.reason||'',solo:{}});syncAttentionBadges();render()};
  ['pvePlannedInstructed','pvePlannedSolo'].forEach(id=>{if($('#'+id))$('#'+id).onchange=refreshPlan});
  document.querySelectorAll('.pveCancellationReason').forEach(el=>el.onchange=()=>{persistPlannedDraft();render()});
  const soloForm=$('#soloExecutionForm');if(soloForm){soloForm.addEventListener('input',persistPlannedDraft);soloForm.addEventListener('change',persistPlannedDraft);soloForm.onsubmit=e=>{
