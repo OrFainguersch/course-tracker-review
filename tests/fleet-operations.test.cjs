@@ -274,3 +274,74 @@ test('Plan UI reads language preference, keeps RTL dates visible, and scales for
  assert.match(html,/planUiText\('Planned vs Executed','מתוכנן מול בוצע'\)/);
  assert.match(html,/key==='theme'\|\|key==='density'\|\|key==='language'\)render\(\)/);
 });
+
+
+test('Daily board flight counts automatically feed Planned vs Executed for the right date and platform',()=>{
+ const board=[
+  {id:'1',date:'2026-10-08',platformId:'shahak',mode:'INSTRUCTED'},
+  {id:'2',date:'2026-10-08',platformId:'shahak',mode:'INSTRUCTED'},
+  {id:'3',date:'2026-10-08',platformId:'shahak',mode:'SOLO'},
+  {id:'4',date:'2026-10-09',platformId:'shahak',mode:'SOLO'},
+  {id:'5',date:'2026-10-08',platformId:'aerostar',mode:'SOLO'}
+ ];
+ assert.deepEqual(M.plannedFlightCounts(board,'2026-10-08','shahak'),{total:3,instructed:2,solo:1});
+ assert.deepEqual(M.plannedFlightCounts(board,'2026-10-09','shahak'),{total:1,instructed:0,solo:1});
+ assert.deepEqual(M.plannedFlightCounts(board,'2026-10-08','aerostar'),{total:1,instructed:0,solo:1});
+ const env={window:{FLYMPUS_FLEET_MODEL:M},getDailyFlightBoard:()=>board,currentFleetPlatform:()=> 'shahak',
+  readCourseArray:()=>[],persistCourseOperations:()=>true};
+ const helper=html.slice(html.indexOf('function flightBoardPlanStatus('),html.indexOf('function getPlanTimingDefaults(){'));
+ const vm=require('node:vm');
+ vm.runInNewContext(helper,env);
+ assert.equal(env.flightBoardPlanStatus('2026-10-08').linked,true);
+ assert.equal(env.flightBoardPlanStatus('2026-10-08').instructed,2);
+ assert.equal(env.flightBoardPlanStatus('2026-10-08').solo,1);
+ let persisted=[];
+ env.getDailyFlightBoard=()=>[];
+ env.readCourseArray=()=>persisted;
+ env.persistCourseOperations=(key,dates)=>{persisted=dates;return true};
+ assert.equal(env.flightBoardPlanStatus('2026-10-08').linked,false);
+ assert.equal(env.markFlightBoardPlanManaged('2026-10-08'),true);
+ assert.equal(env.flightBoardPlanStatus('2026-10-08').linked,true);
+ assert.equal(env.flightBoardPlanStatus('2026-10-08').total,0);
+});
+test('Planned vs Executed uses booked counts over old manual values without cross-date draft leakage',()=>{
+ const vm=require('node:vm');
+ const source=html.slice(html.indexOf('function plannedCompleteness(){'),html.indexOf('function plannedAttentionCount(){'));
+ const day='2026-10-08',other='2026-10-09';
+ const base={state:{planDate:day,planInstructed:9,planSolo:8},
+  getDailyReports:()=>[{date:day,plannedInstructed:7,plannedSolo:6}],
+  getActivityDraft:()=>({data:{date:other,plannedInstructed:88,plannedSolo:77}}),
+  getEvaluations:()=>[],getSoloFlights:()=>[],cfgGet:()=>({cancellationReasons:[]}),
+  flightBoardPlanStatus:()=>({linked:true,instructed:2,solo:1})};
+ vm.runInNewContext(source,base);
+ let data=base.plannedCompleteness();
+ assert.equal(data.pi,2);assert.equal(data.ps,1);assert.equal(data.boardLinked,true);
+ assert.equal(data.draft.plannedInstructed,undefined);
+ base.state={planDate:day};
+ base.flightBoardPlanStatus=()=>({linked:false,instructed:0,solo:0});
+ data=base.plannedCompleteness();
+ assert.equal(data.pi,7);assert.equal(data.ps,6);assert.equal(data.boardLinked,false);
+});
+test('Plan displays consistently red required markers and read-only board-derived PVE totals',()=>{
+ const vm=require('node:vm');
+ const context={window:{FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=> 'en'}};
+ vm.runInNewContext(ui,context,{filename:'fleet-views.js'});
+ const screen=context.window.FLYMPUS_FLEET_VIEW.schedule({
+  fleet:add([],'ac1','01'),flights:[],date:'2026-10-08',platformId:'shahak',
+  trainees:[{id:'t1',name:'Trainee'}],instructors:[{id:'i1',name:'Instructor'}],
+  syllabi:['Circuits'],canWrite:true,canConfigureTiming:true});
+ assert.equal((screen.match(/fleetRequired/g)||[]).length,8);
+ assert.doesNotMatch(screen,/<label>[^<]* \*<\/label>/);
+ assert.match(screen,/fleetFieldHead/);
+ assert.doesNotMatch(screen,/<label>Aircraft \* <button/);
+ assert.match(html,/planUiText\('Flight date','תאריך טיסה'\).*fleetRequired/);
+ assert.match(html,/boardLinked\?'readonly aria-readonly="true"/);
+ assert.match(html,/board\.linked\?board\.instructed/);
+ assert.match(html,/board\.linked\?board\.solo/);
+ assert.match(html,/markFlightBoardPlanManaged\(date\)/);
+ assert.match(html,/markFlightBoardPlanManaged\(record\.date\)/);
+ const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(css,/\.dailyFlightPlan \.fleetRequired,\.coursePlanWorkspace \.fleetRequired\{color:#c62828!important/);
+ assert.match(css,/html\[data-flympus-theme="dark"\] \.fleetRequired/);
+ assert.match(css,/html\.flympusLargeText \.pveBoardLinkedNote/);
+});
