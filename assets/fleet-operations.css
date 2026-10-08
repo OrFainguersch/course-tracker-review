@@ -229,3 +229,50 @@ html.flympusLargeText .coursePlanTabs button,html.flympusLargeText .dailyPlanSum
  .dailyPlanDateField{width:100%;flex:1 1 100%}
  .dailyPlanSummary{gap:5px}
 }
+
+
+/* Plan workspace: focused layout and readable field typography (2026-10-08). */
+.coursePlanWorkspace{gap:14px;padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
+.coursePlanWorkspaceHead .sub{font-size:14px;line-height:1.5}
+.coursePlanTabs button{font-size:13px;line-height:1.35;min-height:40px;font-weight:750}
+.dailyFlightPlan{grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end}
+.dailyPlanHeader{grid-column:2;grid-row:1;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;justify-content:flex-end}
+.dailyPlanHeader>div:first-child{display:none}
+.dailyPlanDateField{width:185px;min-width:160px;flex:0 1 185px}
+.dailyPlanDateField label{font-size:13px;line-height:1.35;font-weight:750;margin-bottom:7px}
+.dailyPlanDateField .input{min-height:44px;font-size:14px}
+.dailyPlanSummary{grid-column:1;grid-row:1;min-height:44px;align-self:end;gap:8px}
+.dailyPlanSummary span{font-size:12px;font-weight:750;padding:9px 12px}
+.dailyPlanSummary span:nth-child(2){display:none}
+.dailyFlightPlan>.fleetSchedule{grid-column:1/-1;grid-row:2;margin:0;padding:16px 18px}
+.dailyFlightPlan .fleetSectionHead{align-items:center;margin-bottom:11px}
+.dailyFlightPlan .fleetSectionHead h2{font-size:18px;line-height:1.3;font-weight:850}
+.dailyFlightPlan .fleetSectionHead .sub{font-size:13px;line-height:1.5}
+.dailyFlightPlan .fleetSchedule>.fleetQuiet{display:none}
+.dailyFlightPlan .fleetSorties{margin:8px 0 14px}
+.dailyFlightPlan .fleetSorties>.fleetQuiet{font-size:13px;line-height:1.5;padding:10px 12px;background:#f6faff;border:1px solid #e1ebf3;border-radius:9px;margin:0}
+.dailyFlightPlan .fleetSortieForm{padding:18px 20px;max-width:1380px;margin:0 auto 5px;width:100%}
+.dailyFlightPlan .fleetSortieForm h3{font-size:16px;line-height:1.35;margin-bottom:16px}
+.dailyFlightPlan .fleetSortieFormGrid{column-gap:16px;row-gap:15px}
+.dailyFlightPlan .fleetSortieFormGrid label{font-size:13px;line-height:1.35;font-weight:750;margin-bottom:7px}
+.dailyFlightPlan .fleetSortieFormGrid .input{font-size:14px;line-height:1.4;min-height:44px}
+.dailyFlightPlan .fleetSortieFormGrid .field:last-child{grid-column:span 2}
+.dailyFlightPlan .fleetSortieFormGrid textarea.input{min-height:76px;resize:vertical}
+.dailyFlightPlan .fleetSortieForm .btn{font-size:13px;min-height:40px}
+html[data-flympus-language="he"] .coursePlanWorkspace{direction:rtl;text-align:right}
+html[data-flympus-theme="dark"] .dailyFlightPlan .fleetSorties>.fleetQuiet{background:#192f41;border-color:#38556b;color:#c4d8e7}
+html.flympusLargeText .dailyFlightPlan .fleetSortieFormGrid label,
+html.flympusLargeText .dailyFlightPlan .fleetSortieFormGrid .input,
+html.flympusLargeText .dailyPlanDateField label,
+html.flympusLargeText .dailyPlanDateField .input,
+html.flympusLargeText .dailyFlightPlan .fleetSorties>.fleetQuiet{font-size:15px!important}
+@media(max-width:600px){
+ .dailyFlightPlan{grid-template-columns:1fr;align-items:stretch}
+ .dailyPlanHeader{grid-column:1;grid-row:1}
+ .dailyPlanSummary{grid-column:1;grid-row:2;min-height:0}
+ .dailyFlightPlan>.fleetSchedule{grid-column:1;grid-row:3;padding:13px 10px}
+ .dailyPlanDateField{width:100%;flex:1 1 100%}
+ .dailyFlightPlan .fleetSortieForm{padding:13px 11px;margin:0}
+ .dailyFlightPlan .fleetSortieFormGrid{grid-template-columns:1fr;gap:12px}
+ .dailyFlightPlan .fleetSortieFormGrid .field:last-child{grid-column:auto}
+}
