@@ -66,7 +66,7 @@ test('No flight only after 8 full calendar days, based on latest saved Solo or E
  assert.ok(!has(solo,'a','no-flight'));
 });
 test('Home ordering, no duplicate Quick Actions, actual data wiring and Roster Overview routing',()=>{
- assert.ok(html.includes('assets/home-operations.js?v=20261008-home01'));
+ assert.ok(html.includes('assets/home-operations.js?v=20261008-home02'));
  assert.ok(html.indexOf('<h2>Course Pulse</h2>')<html.indexOf('<h2>Today\\\'s Plan</h2>'));
  assert.ok(!html.includes("'<div class=\"homeTaskStrip\">'"));
  assert.ok(html.includes('weekly.instructed')&&html.includes('weekly.solo'));
