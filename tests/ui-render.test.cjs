@@ -15,7 +15,7 @@ for(const file of ["assets/ep-catalog.js","assets/aerostar-platform.js","assets/
 vm.runInContext(fs.readFileSync("assets/evaluation-voice.js","utf8"),context,{filename:"assets/evaluation-voice.js"});
 // Home delegates course-scoped flight counts and trainee attention to this production helper.
 vm.runInContext(fs.readFileSync("assets/home-operations.js","utf8"),context,{filename:"assets/home-operations.js"});
-for(const file of ["assets/safety-workflow.js","assets/safety-ui.js"])vm.runInContext(fs.readFileSync(file,"utf8"),context,{filename:file});
+for(const file of ["assets/safety-workflow.js","assets/safety-global-inbox.js","assets/safety-ui.js"])vm.runInContext(fs.readFileSync(file,"utf8"),context,{filename:file});
 assert.equal(typeof context.FLYMPUS_HOME_OPERATIONS?.weeklyFlights,"function",
   "The UI smoke environment must load the same Home operations module as the application");
 const voiceParse=context.FLYMPUS_EVALUATION_VOICE?.parse;
