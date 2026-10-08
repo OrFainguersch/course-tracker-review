@@ -234,6 +234,9 @@ assert(html.includes('.drawer.open .panel::before{')&&html.includes('top:calc(en
 assert(!html.includes("drawerRole.textContent=appRole+' · '+courseRole"),"Drawer footer must never append a course-specific position to the system role");
 
 const approvedSidebarLogo='assets/flympus-sidebar-uploaded-0762.webp';
+const serviceWorker=fs.readFileSync('sw.js','utf8');
+assert(serviceWorker.includes("'./"+approvedSidebarLogo+"'")&&!serviceWorker.includes("'./assets/flympus-sidebar-final.webp'"),
+  "Offline/PWA shell cache must preload the new approved sidebar logo rather than the previous one");
 assert(html.includes('class="sidebarFlympusWordmark" src="./'+approvedSidebarLogo+'"'),"Sidebar must use the exact user-provided replacement logo");
 assert(!html.includes('class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-final.webp"'),"Sidebar must no longer render the previous logo");
 assert(html.includes('.panel .brand .sidebarFlympusWordmark{')&&
