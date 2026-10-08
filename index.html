@@ -9143,7 +9143,7 @@ function currentCourseRoleDisplay(){
 function renderPersonalIdentity(){
   const signedUser=window.FLYMPUS_AUTH?.currentUser,signedProfile=window.FLYMPUS_AUTH?.profile;
   const rosterMatch=signedUser?.email?allInstructors().find(x=>String(x.email||'').toLowerCase()===String(signedUser.email).toLowerCase()):null;
-  const me=signedUser?{id:signedUser.uid,name:String(signedProfile?.preferredName||signedProfile?.displayName||signedUser.displayName||signedUser.email||'Personal profile'),photoData:rosterMatch?.photoData||''}:(allInstructors().find(x=>x.id===currentUserId)||{id:currentUserId,name:'Or Fainguersch'});
+  const me=signedUser?{id:signedUser.uid,name:String(signedProfile?.displayName||signedUser.displayName||signedUser.email||'Personal profile'),photoData:rosterMatch?.photoData||''}:(allInstructors().find(x=>x.id===currentUserId)||{id:currentUserId,name:'Or Fainguersch'});
   const initials=personInitials(me),hasPhoto=!!me.photoData,appRole=currentAppRoleDisplay(),email=String(signedUser?.email||'');
   document.querySelectorAll('[data-current-user-avatar]').forEach(el=>{el.innerHTML=hasPhoto?'<img class="currentUserAvatarPhoto" src="'+me.photoData+'" alt="">':esc(initials)});
   const name=$('#personalProfileName');if(name)name.textContent=me.name||'Personal profile';
