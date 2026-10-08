@@ -25,9 +25,9 @@ function create(ctx){
       unmatchedEmails=[...preview.missing,...ctx.instructors().filter(p=>!String(p.email||'').trim()).map(p=>(p.name||'Instructor')+' (missing email)')];
       const existing=await api().course(key),current=existing?.members||{};
       const desired=[...new Map([...preview.matched,{uid:api().uid(),role:'COURSE_MANAGER'}].map(p=>[p.uid,p])).values()];
-      const changed=!existing||!Array.isArray(existing.memberUids)||Object.keys(current).length!==desired.length||desired.some(p=>current[p.uid]?.role!==p.role);
+      const changed=!existing||!Array.isArray(existing.memberUids)||Object.keys(current).length!==desired.length||desired.some(p=>current[p.uid]?.role!==p.role)||JSON.stringify(existing.unmatchedEmails||[])!==JSON.stringify(unmatchedEmails);
       if(changed){
-        await api().enable(key,ctx.courseName(),preview.matched);
+        await api().enable(key,ctx.courseName(),preview.matched,unmatchedEmails);
         if(cloud.courseId===key){reset();connect()}
       }
     }catch(err){console.warn('Safety auto enrollment',err);unmatchedEmails=['Firebase instructor sync failed: '+String(err?.message||err)]}
@@ -43,7 +43,7 @@ function create(ctx){
     api().course(key).then(course=>{
       if(cloud.courseId!==key)return;
       if(!course||course.unavailable){cloud.mode=course?.unavailable?'unavailable':'local';refresh();return}
-      cloud.mode='shared';cloud.members=course.members||{};
+      cloud.mode='shared';cloud.members=course.members||{};cloud.unmatched=course.unmatchedEmails||[];
       cloud.unsubscribe=api().listen(key,entries=>{
         if(cloud.courseId!==key)return;
         const before=JSON.stringify(cloud.records);
