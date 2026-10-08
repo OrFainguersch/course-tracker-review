@@ -16,6 +16,8 @@ function create(ctx){
   function refresh(){if(['home','safety'].includes(ctx.screen()))ctx.render();else inbox()}
   function connect(){
     if(!api()?.ready?.()||ctx.isDuty())return;
+    ctx.startGlobalInbox?.();
+    if(api().manager?.())void reconcile();
     const key=String(ctx.courseId());
     if(cloud.courseId===key&&cloud.mode!=='idle')return;
     reset();cloud.courseId=key;cloud.mode='checking';
