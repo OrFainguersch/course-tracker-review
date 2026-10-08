@@ -160,7 +160,7 @@ api.safetyCloud=Object.freeze({
     });
     return {matched,missing};
   },
-  async enable(courseId,courseName,members){
+  async enable(courseId,courseName,members,unmatchedEmails=[]){
     if(!safetyCloudReady()||!canManageUsers())throw new Error('Training Manager access is required to enable shared Safety.');
     const me={uid:String(currentUser.uid),email:String(currentUser.email||'').toLowerCase(),name:String(currentProfile?.displayName||currentUser.displayName||'Course manager'),role:'COURSE_MANAGER'};
     const map={};
@@ -170,7 +170,7 @@ api.safetyCloud=Object.freeze({
       map[id]={name:String(p.name||p.email||'Instructor').slice(0,100),email:String(p.email||'').toLowerCase().slice(0,200),role:p.role==='COURSE_MANAGER'?'COURSE_MANAGER':'INSTRUCTOR'};
     });
     await firestoreSdk.setDoc(safetyCloudDocument(courseId),{
-      courseId:String(courseId),name:String(courseName||courseId).slice(0,160),members:map,memberUids:Object.keys(map),
+      courseId:String(courseId),name:String(courseName||courseId).slice(0,160),members:map,memberUids:Object.keys(map),unmatchedEmails:[...new Set(unmatchedEmails.map(v=>String(v).slice(0,200)))].slice(0,100),
       updatedAt:firestoreSdk.serverTimestamp(),updatedBy:me.uid
     },{merge:true});
     return {members:map};
