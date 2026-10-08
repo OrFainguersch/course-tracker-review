@@ -157,3 +157,31 @@ test('desktop respects the shared Hebrew RTL mirror, dark mode, and larger-text 
   assert.match(html,/root\?\.setAttribute\('dir',language==='he'\?'rtl':'ltr'\)/);
   assert.match(html,/root\?\.classList\.toggle\('flympusLargeText',prefs\.largerText===true\)/);
 });
+
+test('desktop wheel scroll hides and restores both chrome bars with one shared controller',()=>{
+  const h=harness({standalone:false,maxTouchPoints:0});
+  let now=1000;
+  h.context.performance.now=()=>now;
+  h.window.innerHeight=900;
+  h.window.scrollY=0;
+  h.document.scrollingElement.scrollHeight=4000;
+  const start=html.indexOf('function setBottomDockHidden(hidden)');
+  const end=html.indexOf("window.addEventListener('scroll',()=>",start);
+  assert(start>=0&&end>start,'The shared scroll controller must be present');
+  const controller=html.slice(start,end);
+  vm.runInNewContext('let bottomDockLastScrollY=0,bottomDockLastScrollTime=0,bottomDockVelocity=0,bottomDockTicking=false,bottomDockLastSwitchTime=0,bottomDockTransitionLockUntil=0,bottomDockDirection=0,bottomDockDirectionTravel=0,bottomDockProgrammaticRestoreUntil=0;'+controller,h.context);
+  h.window.scrollY=260;
+  vm.runInNewContext('updateBottomDockFromScroll()',h.context);
+  assert(h.top.classList.contains('topHidden'),'Desktop scroll-down must hide top header');
+  assert(h.dock.classList.contains('dockHidden'),'Desktop scroll-down must hide bottom dock in the same decision');
+  now+=300;
+  h.window.scrollY=130;
+  vm.runInNewContext('updateBottomDockFromScroll()',h.context);
+  assert(!h.top.classList.contains('topHidden'),'Desktop scroll-up must restore top header');
+  assert(!h.dock.classList.contains('dockHidden'),'Desktop scroll-up must restore bottom dock');
+  h.body.classList.add('drawerCanvasFrozen');
+  now+=300;h.window.scrollY=0;
+  vm.runInNewContext('updateBottomDockFromScroll()',h.context);
+  assert(!h.top.classList.contains('topHidden'));
+  assert(!h.dock.classList.contains('dockHidden'));
+});
