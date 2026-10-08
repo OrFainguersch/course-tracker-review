@@ -106,6 +106,9 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/reports-dashboard.css?v=0767" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
+<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261008-fleet01" />
+<script src="./assets/fleet-serviceability.js?v=20261008-fleet01"></script>
+<script src="./assets/fleet-views.js?v=20261008-fleet01"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
 
@@ -6847,7 +6850,7 @@ if(!window.__flympusI18nObserverBound&&window.MutationObserver){
   if(document.body)start();else document.addEventListener('DOMContentLoaded',start,{once:true})
 }
 
-const appScreenIds=new Set(['home','courses','record','evaluation','roster','profile','instructor','settings','preferences','my-profile','user-management','reports','safety','exams','planned']);
+const appScreenIds=new Set(['home','courses','record','evaluation','roster','profile','instructor','settings','preferences','my-profile','user-management','reports','safety','exams','planned','fleet']);
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
 const flympusRealPageReload=(()=>{try{
   const entry=performance.getEntriesByType?.('navigation')?.[0];
@@ -6918,7 +6921,7 @@ function captureAdvancedArchitectureSnapshot(){
 function beginAdvancedArchitectureEditSession(){advancedArchitectureEditSnapshot=captureAdvancedArchitectureSnapshot()}
 function discardAdvancedArchitectureSession(){restoreLocalStorageScope(advancedArchitectureEditSnapshot);advancedArchitectureEditSnapshot=null;state.packageAddFlow=null;state.packageCreateOpen=null}
 
-const appRootScreens=new Set(['courses','roster','planned','record','reports','settings','preferences']);
+const appRootScreens=new Set(['courses','roster','planned','record','reports','settings','preferences','fleet']);
 let appNavHistory=[];try{const stored=JSON.parse(sessionStorage.getItem('ct-review-nav-history')||'[]');if(Array.isArray(stored))appNavHistory=stored.filter(x=>appScreenIds.has(x))}catch{}
 if(state.screen==='home')appNavHistory=[];else if(appRootScreens.has(state.screen))appNavHistory=['home'];else if(!appNavHistory.length||appNavHistory[0]!=='home')appNavHistory=['home',...appNavHistory.filter(x=>x!=='home')];
 function saveAppNavHistory(){try{sessionStorage.setItem('ct-review-nav-history',JSON.stringify(appNavHistory))}catch{}}
@@ -6934,10 +6937,19 @@ function currentUserCourseRole(){
     return courseMembershipFor(instructor.id,'INSTRUCTOR',{role:instructor.role||'INSTRUCTOR'}).role||'INSTRUCTOR'
   }catch{return'INSTRUCTOR'}
 }
+function isDutyTraineeAssigned(courseKey=currentCourseId){
+ if(window.FLYMPUS_AUTH?.role?.()!=='duty_trainee'||window.FLYMPUS_AUTH?.isActive?.()!==true)return false;
+ const email=String(window.FLYMPUS_AUTH?.profile?.email||window.FLYMPUS_AUTH?.currentUser?.email||'').trim().toLowerCase();
+ if(!email)return false;
+ return allTrainees().some(t=>String(t.email||'').trim().toLowerCase()===email&&coursePersonIsAssignedTo(t,'TRAINEE',courseKey)&&
+  courseMembershipForCourse(t.id,'TRAINEE',courseKey,{status:t.status||'Active'}).status!=='Inactive');
+}
+function isOperationalPrivilege(capability){return ['operations.daily.write','operations.flightBoard.write','operations.solo.write','fleet.serviceability.write'].includes(capability)}
 function flympusCan(capability){
+  if(window.FLYMPUS_AUTH?.role?.()==='duty_trainee'&&isOperationalPrivilege(capability))return window.FLYMPUS_AUTH?.can?.(capability)===true&&isDutyTraineeAssigned();
   if(window.FLYMPUS_AUTH?.can?.(capability)===true)return true;
   const courseManager=currentUserCourseRole()==='COURSE_MANAGER';
-  return courseManager&&['courses.manageAssigned','packages.overrideCourse','roster.manage'].includes(String(capability||''))
+  return courseManager&&['courses.manageAssigned','packages.overrideCourse','roster.manage','operations.daily.write','operations.flightBoard.write','operations.solo.write','fleet.serviceability.write'].includes(String(capability||''))
 }
 function flympusRole(){return String(window.FLYMPUS_AUTH?.role?.()||'user')}
 function flympusAccessDenied(title='Access unavailable'){
@@ -7250,9 +7262,10 @@ function siteEditDecision(message,{title='Unsaved changes'}={}){
 }
 
 function getEvaluations(){return readCourseArray('ct-review-evals')}function setEvaluations(x){writeCourseArray('ct-review-evals',x)}
-const nav=[['__label','','COURSE'],['courses','courses','My Courses'],['settings','settings','Course Management'],['__label','','APP'],['preferences','preferences','Settings']];
+const nav=[['__label','','COURSE'],['courses','courses','My Courses'],['fleet','fleet','Aircraft Serviceability'],['settings','settings','Course Management'],['__label','','APP'],['preferences','preferences','Settings']];
 function navIconSvg(name){
   const paths={
+    fleet:'<path d="M2.5 13 10 10l3-6h2l-1 7 7 2v2l-7 1-1 4h-2l-1-4-7-1z"></path>',
     courses:'<rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"></rect><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="1"></rect><rect x="14" y="14" width="6.5" height="6.5" rx="1"></rect>',
     home:'<path d="M3.5 10.5 12 3.8l8.5 6.7"></path><path d="M5.5 9.8v10.4h13V9.8"></path><path d="M9.5 20.2v-6h5v6"></path>',
     evaluation:'<path d="M8 4.5h8"></path><path d="M9 3h6v3H9z"></path><rect x="5" y="5.5" width="14" height="15" rx="2"></rect><path d="m8.5 13 2.2 2.2 4.8-5"></path>',
@@ -8644,6 +8657,81 @@ function safetySeverityTone(value){return safetySeverityDefinition(value)?.tone|
 function safetySeverityGuideHtml(){
  return '<section class="safetySeverityGuide" role="note" aria-labelledby="safetySeverityGuideTitle" aria-describedby="safetySeverityGuideIntro"><div class="safetySeverityGuideHead"><h3 id="safetySeverityGuideTitle">Severity / Impact guide</h3><p id="safetySeverityGuideIntro">Choose the level that best reflects the actual safety impact and reduced safety margin.</p></div><div class="safetySeverityGuideGrid" role="list">'+SAFETY_SEVERITY_DEFS.map(x=>'<article class="safetySeverityGuideItem safetySeverity-'+esc(x.tone)+'" data-safety-severity-guide="'+esc(x.value)+'" role="listitem"><span class="safetySeverityDot" aria-hidden="true"></span><div><b>'+esc(x.value)+'</b><p>'+esc(x.description)+'</p></div></article>').join('')+'</div></section>'
 }
+/* Aircraft and flights belong to the active course. Flight board is per date and platform.
+   The current review storage is local/UID-scoped, not a shared server database. */
+window.FLYMPUS_FLEET_LANGUAGE=()=>getFlympusAppPreferences().language;
+function currentFleetPlatform(){return String(currentCourseMeta.platformId||'unspecified')}
+function getFleetAircraft(){return readCourseArray('ct-review-aircraft-serviceability')}
+function getDailyFlightBoard(){return readCourseArray('ct-review-flight-board')}
+function persistCourseOperations(base,items){
+ try{localStorage.setItem(courseScopedKey(base),JSON.stringify(items));return true}catch{return false}
+}
+function currentFleetContext(extra={}){
+ return {fleet:getFleetAircraft(),flights:getDailyFlightBoard(),platformId:currentFleetPlatform(),platformLabel:epPlatformLabel(currentCourseMeta.platformId)||currentCourseMeta.platformId||'—',courseLabel:currentCourseMeta.courseName||currentCourseId,today:todayIsoDate(),canWrite:flympusCan('fleet.serviceability.write'),...extra};
+}
+function fleetServiceabilityScreen(){return window.FLYMPUS_FLEET_VIEW?.fleet?.(currentFleetContext({editId:state.fleetEditId||null}))||flympusAccessDenied('Aircraft Serviceability')}
+function courseFlightScheduleHtml(date){
+ if(!window.FLYMPUS_FLEET_VIEW)return '';
+ return window.FLYMPUS_FLEET_VIEW.schedule(currentFleetContext({date,editId:state.flightBoardEditId||null,canWrite:flympusCan('operations.flightBoard.write'),
+  trainees:courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active').map(x=>({id:x.id,name:x.name})),
+  instructors:courseInstructors().map(x=>({id:x.id,name:x.name})),syllabi:evaluationSyllabusNames()}));
+}
+function saveFleetForm(form){
+ const fd=new FormData(form);
+ const input={id:String(fd.get('id')||''),tail:String(fd.get('tail')||''),status:String(fd.get('status')||''),reason:String(fd.get('reason')||''),since:normalizeDateValue(fd.get('since'))};
+ const model=window.FLYMPUS_FLEET_MODEL,now=new Date().toISOString(),idFactory=()=>window.crypto?.randomUUID?.()||('ac_'+Date.now()+'_'+Math.random().toString(36).slice(2));
+ return persistCourseOperations('ct-review-aircraft-serviceability',model.upsertAircraft(getFleetAircraft(),input,currentFleetPlatform(),now,idFactory));
+}
+function fleetSaveError(){toast('Unable to save. Check device storage; no changes were submitted.','error')}
+function bindFleetServiceability(){
+ const form=$('#fleetAircraftForm');
+ const syncReason=()=>{const status=$('#fleetStatus'),reason=$('#fleetReason');if(reason&&status)reason.required=status.value==='UNSERVICEABLE'};
+ if($('#fleetStatus'))$('#fleetStatus').onchange=syncReason;syncReason();
+ if(form)form.onsubmit=e=>{
+  e.preventDefault();if(!flympusCan('fleet.serviceability.write'))return;
+  try{if(!saveFleetForm(form)){fleetSaveError();return}state.fleetEditId=null;toast('Aircraft serviceability saved','success');render()}catch(err){toast(err.message||'Unable to save aircraft','error')}
+ };
+ document.querySelectorAll('[data-fleet-edit]').forEach(b=>b.onclick=()=>{if(!flympusCan('fleet.serviceability.write'))return;state.fleetEditId=b.dataset.fleetEdit;render()});
+ if($('#fleetCancelEdit'))$('#fleetCancelEdit').onclick=()=>{state.fleetEditId=null;render()};
+ document.querySelectorAll('[data-fleet-archive]').forEach(b=>b.onclick=async()=>{
+  if(!flympusCan('fleet.serviceability.write'))return;
+  const item=getFleetAircraft().find(x=>x.id===b.dataset.fleetArchive&&x.platformId===currentFleetPlatform()&&!x.archivedAt);
+  if(!item||!(await siteConfirm('Remove aircraft '+item.tail+' from the active fleet? Historical flight assignments and serviceability changes will be retained.',{title:'Remove aircraft?',confirmLabel:'Remove',tone:'warning'})))return;
+  try{
+   const next=window.FLYMPUS_FLEET_MODEL.archiveAircraft(getFleetAircraft(),item.id,currentFleetPlatform());
+   if(!persistCourseOperations('ct-review-aircraft-serviceability',next)){fleetSaveError();return}
+   if(state.fleetEditId===item.id)state.fleetEditId=null;
+   toast('Aircraft removed from active fleet');render();
+  }catch(err){toast(err.message||'Unable to remove aircraft','error')}
+ });
+}
+function bindDailyFlightBoard(){
+ if(!flympusCan('operations.flightBoard.write'))return;
+ const form=$('#fleetSortieForm'),mode=$('#fleetFlightMode');
+ if(mode){const refreshMode=()=>{const instructor=form.querySelector('[name="instructorId"]'),holder=form.querySelector('[data-fleet-instructor-field]'),solo=mode.value==='SOLO';if(holder)holder.hidden=solo;if(instructor)instructor.required=!solo};mode.onchange=refreshMode;refreshMode()}
+ if(form)form.onsubmit=e=>{
+  e.preventDefault();if(!flympusCan('operations.flightBoard.write'))return;
+  const fd=new FormData(form),date=state.planDate||normalizeDateValue($('#pveDate')?.value)||todayIsoDate(),traineeId=String(fd.get('traineeId')||''),instructorId=String(fd.get('instructorId')||''),
+    t=courseTrainees().find(x=>x.id===traineeId),i=courseInstructors().find(x=>x.id===instructorId);
+  const input={id:String(fd.get('id')||''),date,time:String(fd.get('time')||''),aircraftId:String(fd.get('aircraftId')||''),mode:String(fd.get('mode')||''),traineeId,traineeName:t?.name||'',instructorId,instructorName:i?.name||'',syllabus:String(fd.get('syllabus')||'')};
+  try{
+    const all=window.FLYMPUS_FLEET_MODEL.upsertSortie(getDailyFlightBoard(),input,getFleetAircraft(),currentFleetPlatform(),date,
+    {trainees:courseTrainees().map(x=>x.id),instructors:courseInstructors().map(x=>x.id)},new Date().toISOString(),()=>window.crypto?.randomUUID?.()||('flight_'+Date.now()+'_'+Math.random().toString(36).slice(2)));
+    if(!persistCourseOperations('ct-review-flight-board',all)){fleetSaveError();return}
+    state.flightBoardEditId=null;toast('Flight board updated','success');render();
+  }catch(err){toast(err.message||'Unable to schedule flight','error')}
+ };
+ document.querySelectorAll('[data-flight-edit]').forEach(b=>b.onclick=()=>{if(!flympusCan('operations.flightBoard.write'))return;state.flightBoardEditId=b.dataset.flightEdit;render()});
+ if($('#fleetFlightCancel'))$('#fleetFlightCancel').onclick=()=>{state.flightBoardEditId=null;render()};
+ document.querySelectorAll('[data-flight-delete]').forEach(b=>b.onclick=async()=>{
+  if(!flympusCan('operations.flightBoard.write'))return;
+  const id=b.dataset.flightDelete,record=getDailyFlightBoard().find(x=>x.id===id&&x.platformId===currentFleetPlatform());
+  if(!record||!(await siteConfirm('Remove this scheduled flight? Submitted evaluations and solo flights are not affected.',{title:'Remove flight?',confirmLabel:'Remove',tone:'warning'})))return;
+  if(!persistCourseOperations('ct-review-flight-board',getDailyFlightBoard().filter(x=>x.id!==id))){fleetSaveError();return}
+  state.flightBoardEditId=null;toast('Scheduled flight removed');render();
+ });
+}
+
 function getExamRecords(){return readCourseArray('ct-review-exams')}
 function saveExamRecords(v){writeCourseArray('ct-review-exams',v)}
 function currentActivityCounts(){return {evaluation:getEvaluations().length,safety:courseMockSafetyEvents().length+getSafetyRecords().length,exams:courseMockExamAttempts().length+getExamRecords().length,planned:getDailyReports().length,roster:courseTrainees().length+courseInstructors().length}}
@@ -8715,7 +8803,7 @@ function home(){
    '</section>'+
    '<section class="homePrimaryGrid">'+
      '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Today\'s Plan</h2><p>Scheduled flights and activities for today</p></div></div><span class="homeDateChip">▣ '+esc(todayLabel)+'</span></div></div>'+
-       '<div class="homePlanList">'+plan.map(x=>'<button class="homePlanRow" data-start-eval="'+esc(x.t.id)+'"><span class="homePlanTime">◷ '+x.time+'</span><span class="homeInitial">'+initials(x.t)+'</span><span class="homePlanMain"><b>'+esc(x.t.name)+'</b><small>'+esc(x.activity)+'</small></span><span class="homePlanTags"><span class="homeTag">'+esc(currentCourseMeta.phase)+'</span><span class="homeTag '+(x.mode==='Solo'?'solo':'instructed')+'">'+esc(x.mode)+'</span></span></button>').join('')+
+       '<div class="homePlanList">'+(function(){const flights=getDailyFlightBoard().filter(x=>x.date===todayIsoDate()&&x.platformId===currentFleetPlatform()).sort((a,b)=>String(a.time).localeCompare(String(b.time)));return flights.length?flights.map(x=>'<button class="homePlanRow" data-go="planned"><span class="homePlanTime">◷ '+esc(x.time)+'</span><span class="homeInitial">✈</span><span class="homePlanMain"><b>'+esc(x.traineeName||'Trainee')+'</b><small>'+esc(x.syllabus)+' · '+esc(x.tail)+'</small></span><span class="homePlanTags"><span class="homeTag '+(x.mode==='SOLO'?'solo':'instructed')+'">'+esc(x.mode==='SOLO'?'Solo':'Instructed')+'</span>'+(window.FLYMPUS_FLEET_MODEL.flightIssues(x,getFleetAircraft(),currentFleetPlatform())?'<span class="homeTag" style="color:#b42318">Unavailable</span>':'')+'</span></button>').join(''):'<button class="homePlanRow" data-go="planned"><span class="homePlanMain"><b>No flights scheduled yet</b><small>Open Daily Flight Board to plan flights for this course.</small></span></button>'})()+
        '</div>'+
      '</div>'+
      '<div class="homePanel homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Quick Actions</h2><p>Common daily tasks</p></div></div></div>'+
@@ -8727,6 +8815,7 @@ function home(){
        '</div>'+
      '</div>'+
    '</section>'+
+   (window.FLYMPUS_FLEET_VIEW?.home?.(currentFleetContext())||'')+
    '<section class="homePanel homePanelPad">'+
      '<div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Course Pulse</h2><p>Key indicators for current course</p></div></div><button class="homeInlineLink" data-go="reports">View Reports</button></div>'+
      '<div class="homePulseGrid">'+
@@ -10708,6 +10797,7 @@ function instructorCourseRole(courseKeyValue,instructorId){
   return courseMembershipForCourse(instructorId,'INSTRUCTOR',courseKeyValue,{role:isDefaultReviewCourse(courseKeyValue)?(instructor.role||'INSTRUCTOR'):'INSTRUCTOR'}).role||'INSTRUCTOR';
 }
 function instructorAssignedCourses(instructorId){
+  if(window.FLYMPUS_AUTH?.role?.()==='duty_trainee')return allCourses().filter(c=>isDutyTraineeAssigned(courseKey(c))).map(c=>({...c,assignedRole:'DUTY_TRAINEE'}));
   return allCourses().filter(c=>instructorCourseRole(courseKey(c),instructorId)).map(c=>({...c,assignedRole:instructorCourseRole(courseKey(c),instructorId)}));
 }
 function ensureMultiCourseMemberships(){
@@ -10717,7 +10807,7 @@ function ensureMultiCourseMemberships(){
 }
 function switchCourseByKey(key,opts={}){
   const record=courseByKey(key);if(!record)return false;
-  if(!opts.force&&!instructorCourseRole(courseKey(record),currentUserId)){toast('This course is not assigned to you');return false}
+  if(!opts.force&&!(window.FLYMPUS_AUTH?.role?.()==='duty_trainee'?isDutyTraineeAssigned(courseKey(record)):instructorCourseRole(courseKey(record),currentUserId))){toast('This course is not assigned to you');return false}
   currentCourseId=courseKey(record);Object.assign(currentCourseMeta,courseRuntimeMeta(record));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta));
   state.editingEval=null;state.evaluationTraineeId=null;state.selectedInstructor=currentUserId;state.selectedTrainee=courseTrainees()[0]?.id||null;state.profileTab='overview';state.reportTrainee='ALL';state.reportInstructor='ALL';state.reportSyllabus='ALL';state.reportTrainees=[];state.reportInstructors=[];state.reportSyllabi=[];state.reportDateFrom='';state.reportDateTo='';state.reportTab='operations';state.reportGranularity='week';state.screen=opts.screen||'home';appNavHistory=state.screen==='home'?[]:['home'];saveUiState();saveAppNavHistory();
   if(opts.render!==false){toast((record.name||'Course')+' opened');render()}return true;
@@ -10736,7 +10826,7 @@ function courseMetaIconSvg(kind){
   return '<span class="courseMetaIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none">'+(paths[kind]||paths.context)+'</svg></span>';
 }
 function myCourses(){
-  const mine=instructorAssignedCourses(currentUserId),me=allInstructors().find(x=>x.id===currentUserId),selectedCourse=currentCourseId,rows=mine.map(c=>({course:c,key:courseKey(c),meta:courseRuntimeMeta(c),role:c.assignedRole==='COURSE_MANAGER'?'COURSE_MANAGER':'INSTRUCTOR',lifecycle:courseLifecycleInfo(c)})),cfg=cfgGet();
+  const mine=instructorAssignedCourses(currentUserId),me=allInstructors().find(x=>x.id===currentUserId),selectedCourse=currentCourseId,rows=mine.map(c=>({course:c,key:courseKey(c),meta:courseRuntimeMeta(c),role:c.assignedRole==='COURSE_MANAGER'?'COURSE_MANAGER':c.assignedRole==='DUTY_TRAINEE'?'DUTY_TRAINEE':'INSTRUCTOR',lifecycle:courseLifecycleInfo(c)})),cfg=cfgGet();
   const uniq=(values)=>[...new Set(values.filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{sensitivity:'base'})),platformLabel=x=>epPlatformLabel(x.meta.platformId)||x.meta.platformId||'';
   const statuses=[{id:'IN_PROGRESS',name:'In progress'},{id:'UPCOMING',name:'Upcoming'},{id:'COMPLETED',name:'Completed'}],sectorDefs=(cfg.courseTypes||[]).map(x=>({id:x.id,name:x.name}));
   const phases=uniq((cfg.phases||[]).map(x=>x.name)),platforms=uniq(sectorDefs.flatMap(x=>sectorPlatforms(x.id)).map(x=>x.name)),trainings=uniq((cfg.trainingKinds||[]).map(x=>x.name)),countries=uniq((cfg.countries||[]).map(x=>x.name)),roles=['COURSE_MANAGER','INSTRUCTOR'];
@@ -10766,7 +10856,7 @@ function myCourses(){
     (activeFilters?'<button class="btn secondary small safetyHistoryReset" type="button" id="myCoursesClearFilters">Reset filters</button>':'')+
     filterSelectionsHtml('',myCourseSelections)+'</div></details>':'';
   return '<div class="myCoursesHead"><div><h1 class="pageTitle">My Courses</h1><p class="sub">'+esc(me?.name||'Instructor')+' · choose the course you want to work in.</p></div></div>'+filters+
-    '<section class="myCourseGrid">'+(mine.length?(orderedFiltered.length?orderedFiltered.map(({course:c,key,meta,role,lifecycle},idx)=>{const roleLabel=role==='COURSE_MANAGER'?'Course Manager':'Instructor',selected=key===selectedCourse,program=packageFor(meta.type,meta.programId,key),showContext=meta.type!=='EP'||!!epQualificationId(program),contextLabel=meta.type==='EP'?'Qualification':meta.type==='IP'?'Configuration / qualification':'System / qualification',contextValue=meta.type==='EP'?packageConfigurationLabel('EP',program):(packageConfigurationLabel(meta.type,program)||meta.dayNight||'—'),platformValue=epPlatformLabel(meta.platformId)||meta.platformId||'—',tile=(kind,label,value,wide='')=>'<span class="courseMetaTile '+wide+'">'+courseMetaIconSvg(kind)+'<span class="courseMetaCopy"><small>'+esc(label)+'</small><b>'+esc(value||'—')+'</b></span></span>',contextTile=showContext?tile('context',contextLabel,contextValue):'',countryTile=tile('country','Country',meta.country,showContext?'':'countryWide'),action=selected?'<button class="btn myCourseOpen selectedState" disabled aria-current="true">✓ Selected</button>':'<button class="btn myCourseOpen selectAction" data-switch-course="'+esc(key)+'">Select course</button>',divider=selected&&idx===0&&orderedFiltered.length>1?'<div class="myCourseSelectedDivider" aria-hidden="true"></div>':'';return '<article class="card myCourseCard '+(selected?'selected':'')+'"><div class="myCourseStatusBar"><span class="courseStateBadge '+lifecycle.className+'">'+lifecycle.label+'</span><span class="myCourseRoleInline '+(role==='COURSE_MANAGER'?'manager':'instructor')+'"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m4 9 8-4 8 4-8 4-8-4Z"></path><path d="M7 11v5c2.8 2 7.2 2 10 0v-5"></path></svg><span class="myCourseRoleDivider" aria-hidden="true"></span><span>'+esc(roleLabel)+'</span></span></div><h2 class="myCourseTitle">'+esc(c.name||meta.courseName)+'</h2><div class="myCourseMeta">'+tile('code','Course code',key)+tile('phase','Phase',meta.phase)+tile('starts','Start date',meta.startsOn?formatCourseDate(meta.startsOn):'—')+tile('platform','Platform',platformValue)+tile('sector','Sector',meta.type)+tile('training','Training type',meta.trainingKind)+contextTile+countryTile+'</div>'+action+'</article>'+divider}).join(''):'<div class="card empty"><h3>No courses match these filters</h3><p>Clear or change a filter to show more courses.</p></div>'):'<div class="card empty"><h3>No courses assigned</h3><p>Ask a Course Manager to add you to a course.</p></div>')+'</section>';
+    '<section class="myCourseGrid">'+(mine.length?(orderedFiltered.length?orderedFiltered.map(({course:c,key,meta,role,lifecycle},idx)=>{const roleLabel=role==='COURSE_MANAGER'?'Course Manager':role==='DUTY_TRAINEE'?'Duty Trainee':'Instructor',selected=key===selectedCourse,program=packageFor(meta.type,meta.programId,key),showContext=meta.type!=='EP'||!!epQualificationId(program),contextLabel=meta.type==='EP'?'Qualification':meta.type==='IP'?'Configuration / qualification':'System / qualification',contextValue=meta.type==='EP'?packageConfigurationLabel('EP',program):(packageConfigurationLabel(meta.type,program)||meta.dayNight||'—'),platformValue=epPlatformLabel(meta.platformId)||meta.platformId||'—',tile=(kind,label,value,wide='')=>'<span class="courseMetaTile '+wide+'">'+courseMetaIconSvg(kind)+'<span class="courseMetaCopy"><small>'+esc(label)+'</small><b>'+esc(value||'—')+'</b></span></span>',contextTile=showContext?tile('context',contextLabel,contextValue):'',countryTile=tile('country','Country',meta.country,showContext?'':'countryWide'),action=selected?'<button class="btn myCourseOpen selectedState" disabled aria-current="true">✓ Selected</button>':'<button class="btn myCourseOpen selectAction" data-switch-course="'+esc(key)+'">Select course</button>',divider=selected&&idx===0&&orderedFiltered.length>1?'<div class="myCourseSelectedDivider" aria-hidden="true"></div>':'';return '<article class="card myCourseCard '+(selected?'selected':'')+'"><div class="myCourseStatusBar"><span class="courseStateBadge '+lifecycle.className+'">'+lifecycle.label+'</span><span class="myCourseRoleInline '+(role==='COURSE_MANAGER'?'manager':'instructor')+'"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m4 9 8-4 8 4-8 4-8-4Z"></path><path d="M7 11v5c2.8 2 7.2 2 10 0v-5"></path></svg><span class="myCourseRoleDivider" aria-hidden="true"></span><span>'+esc(roleLabel)+'</span></span></div><h2 class="myCourseTitle">'+esc(c.name||meta.courseName)+'</h2><div class="myCourseMeta">'+tile('code','Course code',key)+tile('phase','Phase',meta.phase)+tile('starts','Start date',meta.startsOn?formatCourseDate(meta.startsOn):'—')+tile('platform','Platform',platformValue)+tile('sector','Sector',meta.type)+tile('training','Training type',meta.trainingKind)+contextTile+countryTile+'</div>'+action+'</article>'+divider}).join(''):'<div class="card empty"><h3>No courses match these filters</h3><p>Clear or change a filter to show more courses.</p></div>'):'<div class="card empty"><h3>No courses assigned</h3><p>Ask a Course Manager to add you to a course.</p></div>')+'</section>';
 }
 function getSettings(){try{return JSON.parse(localStorage.getItem('ct-review-settings')||'{}')}catch{return {}}}function saveSettings(x){try{localStorage.setItem('ct-review-settings',JSON.stringify(x))}catch{}}
 
@@ -10819,6 +10909,7 @@ function plannedVsExecuted(){
  (planStarted?staticRequiredCompletionPanel('planned',planMissing):'')+
  '<section class="card pveOverview"><div class="formTitle"><h2>Day overview</h2><span class="autoDraftNote" id="plannedDraftBadge">'+(draftWrap?draftSavedLabel('planned'):'Auto-save ready')+'</span></div><div class="pveDateRow"><div><p>Instructed flights are counted automatically from submitted Evaluations. Solo flights are recorded below.</p></div><div class="pveDateControl"><label for="pveDate">Date</label><input class="input dateDmy" id="pveDate" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" required value="'+esc(dateInputValue(date))+'" placeholder="DD/MM/YYYY"></div></div>'+
  '<div class="pveSummary"><div class="pveMetric"><span>Planned</span><strong>'+total+'</strong><small>'+pi+' instructed · '+ps+' solo</small></div><div class="pveMetric"><span>Executed</span><strong>'+executed+'</strong><small>'+executedInstructed+' instructed · '+executedSolo+' solo</small></div><div class="pveMetric '+(cancelled?'short':'match')+'"><span>Cancelled</span><strong>'+cancelled+'</strong><small>'+cancelSummary+'</small></div></div></section>'+
+ courseFlightScheduleHtml(date)+
  '<section class="card pvePanel"><div class="pvePanelHead"><span class="pveSectionNo">1</span><div><h2>Plan</h2><p>Enter the number of instructed and solo flights intended for this date.</p></div></div><div class="pvePanelBody"><div class="pvePlanGrid"><label class="pveCountField" for="pvePlannedInstructed"><span>Instructed</span><small>Planned flights</small><input class="input" id="pvePlannedInstructed" type="number" min="0" step="1" required value="'+pi+'"></label><label class="pveCountField" for="pvePlannedSolo"><span>Solo</span><small>Planned flights</small><input class="input" id="pvePlannedSolo" type="number" min="0" step="1" required value="'+ps+'"></label></div></div></section>'+
  '<section class="card pvePanel"><div class="pvePanelHead"><span class="pveSectionNo">2</span><div><h2>Execution</h2><p>Instructed is automatic. Solo entry opens only when at least one solo flight is planned.</p></div></div><div class="pvePanelBody">'+
  '<div class="pveExecutionOverview"><div><span>Instructed</span><strong>'+executedInstructed+'</strong><small>From submitted Evaluations on '+esc(formatDateDMY(date))+'.</small></div><div><span>Solo</span><strong>'+executedSolo+'</strong><small>Recorded for this date</small></div></div>'+
@@ -10985,6 +11076,7 @@ function buildFlympusScreenHtml(screen){
     case'safety':html=safetyScreen();break;
     case'exams':html=examsScreen();break;
     case'planned':html=plannedVsExecuted();break;
+    case'fleet':html=fleetServiceabilityScreen();break;
     default:html=home();break;
   }
   if(screen!=='home')html=globalBackControl()+html;
@@ -11229,7 +11321,8 @@ if(state.screen==='settings')bindSettings();
 if(state.screen==='preferences')bindAppPreferences();
 if(state.screen==='user-management')window.FLYMPUS_AUTH?.mountUserManagementPage?.($('#flympusUserManagementPageRoot'));
 if(state.screen==='reports')bindReports();
-if(state.screen==='planned')bindPlanned();
+if(state.screen==='planned'){bindPlanned();bindDailyFlightBoard()}
+if(state.screen==='fleet')bindFleetServiceability();
 if(state.screen==='safety')bindSafety();
 if(state.screen==='exams')bindExams();
 if(state.screen==='profile'){bindActivity();bindTraineeEvaluationHistory();
@@ -11326,6 +11419,7 @@ function bindReports(){
  };
 }
 function bindPlanned(){
+ if(!flympusCan('operations.daily.write')){document.querySelectorAll('.pvePage input,.pvePage select,.pvePage textarea,.pvePage button:not([data-go])').forEach(x=>x.disabled=true);return}
  document.querySelectorAll('[data-plan-required-index]').forEach(btn=>btn.onclick=()=>{const label=String(btn.textContent||''),target=label.startsWith('Cancellation')?document.querySelector('.pveCancellationList'):document.querySelector('.pvePlanGrid');target?.scrollIntoView?.({behavior:'smooth',block:'center'});setTimeout(()=>target?.querySelector?.('input,select')?.focus?.({preventScroll:true}),180)});
  const collectCancellations=()=>[...document.querySelectorAll('.pveCancellationReason')].map(el=>({key:String(el.dataset.cancelKey||''),type:String(el.dataset.cancelType||''),reasonId:String(el.value||''),reasonLabel:String(el.selectedOptions?.[0]?.textContent||'').trim()}));
  const persistPlannedDraft=()=>{
@@ -11341,7 +11435,7 @@ function bindPlanned(){
    if(Number(flight.minutes)>0)events.unshift({id:'evt_'+Date.now()+'_hr',traineeId:flight.traineeId,date:flight.date,type:'TRAINING_HOUR',quantity:Math.round(Number(flight.minutes)/60*100)/100,source:'Solo flight',sourceId:flight.id,note:flight.syllabus,createdAt:stamp});
    saveActivityEvents(events)
  };
- if($('#pveDate'))$('#pveDate').onchange=e=>{const iso=normalizeDateValue(e.target.value);if(!iso)return;state.planDate=iso;state.soloEditId=null;delete state.planInstructed;delete state.planSolo;saveActivityDraft('planned',{date:iso,plannedInstructed:0,plannedSolo:0,cancellations:[],reason:'',solo:{}});syncAttentionBadges();render()};
+ if($('#pveDate'))$('#pveDate').onchange=e=>{const iso=normalizeDateValue(e.target.value);if(!iso)return;state.planDate=iso;state.flightBoardEditId=null;state.soloEditId=null;delete state.planInstructed;delete state.planSolo;saveActivityDraft('planned',{date:iso,plannedInstructed:0,plannedSolo:0,cancellations:[],reason:'',solo:{}});syncAttentionBadges();render()};
  ['pvePlannedInstructed','pvePlannedSolo'].forEach(id=>{if($('#'+id))$('#'+id).onchange=refreshPlan});
  document.querySelectorAll('.pveCancellationReason').forEach(el=>el.onchange=()=>{persistPlannedDraft();render()});
  const soloForm=$('#soloExecutionForm');if(soloForm){soloForm.addEventListener('input',persistPlannedDraft);soloForm.addEventListener('change',persistPlannedDraft);soloForm.onsubmit=e=>{

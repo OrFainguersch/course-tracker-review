@@ -1247,3 +1247,14 @@ html[data-flympus-theme="dark"]{
   font-weight:800!important;
   box-shadow:none!important;
 }
+
+/* Duty Trainee — restrained course-operations teal, separate from training status badges */
+#flympusUserManagementPageRoot .flympusRoleGuideCard.duty_trainee{border-color:#a8d9d9;background:#f4fbfb}
+#flympusUserManagementPageRoot .flympusRoleGuideCard.duty_trainee .flympusRoleGuideTitle>b{background:#def3f1;color:#186b72}
+#flympusUserManagementPageRoot .flympusUserRoleBadge.duty_trainee{background:#e0f4f0;color:#176c73}
+#flympusUserManagementPageRoot .flympusUserMeta i.role.duty_trainee{background:#e0f4f0;color:#176c73}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.duty_trainee{background:#102b30;border-color:#35716d}
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuideCard.duty_trainee .flympusRoleGuideTitle>b,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserRoleBadge.duty_trainee,
+html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserMeta i.role.duty_trainee{background:#164349;color:#9be0d5}
+html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleGuideCard.duty_trainee li{font-size:15px!important}

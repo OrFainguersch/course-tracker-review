@@ -43,7 +43,7 @@ service cloud.firestore {
     }
 
     function validRoleAndStatus(data) {
-      return data.role in ['user', 'training_manager', 'admin', 'owner']
+      return data.role in ['user', 'duty_trainee', 'training_manager', 'admin', 'owner']
         && data.status in ['pending', 'active', 'blocked'];
     }
 
@@ -60,7 +60,7 @@ service cloud.firestore {
         'createdAt', 'updatedAt', 'invitedBy'
       ])
         && data.email == data.email.lower()
-        && data.role in ['user', 'training_manager', 'admin', 'owner']
+        && data.role in ['user', 'duty_trainee', 'training_manager', 'admin', 'owner']
         && data.status == 'active';
     }
 
@@ -111,17 +111,17 @@ service cloud.firestore {
     }
 
     function roleMayBeGranted(actorRole, nextRole) {
-      return (actorRole == 'owner' && nextRole in ['owner', 'admin', 'training_manager', 'user'])
-        || (actorRole == 'admin' && nextRole in ['training_manager', 'user'])
-        || (actorRole == 'training_manager' && nextRole == 'user');
+      return (actorRole == 'owner' && nextRole in ['owner', 'admin', 'training_manager', 'duty_trainee', 'user'])
+        || (actorRole == 'admin' && nextRole in ['training_manager', 'duty_trainee', 'user'])
+        || (actorRole == 'training_manager' && nextRole in ['duty_trainee', 'user']);
     }
 
     function managerMayTarget(actorRole, targetRole, uid) {
       return uid != request.auth.uid
         && !(targetRole == 'owner' && systemAccessExists() && uid == systemOwnerUid())
         && ((actorRole == 'owner')
-          || (actorRole == 'admin' && targetRole in ['training_manager', 'user'])
-          || (actorRole == 'training_manager' && targetRole == 'user'));
+          || (actorRole == 'admin' && targetRole in ['training_manager', 'duty_trainee', 'user'])
+          || (actorRole == 'training_manager' && targetRole in ['duty_trainee', 'user']));
     }
 
     function managerManagesOther(uid) {
@@ -134,8 +134,8 @@ service cloud.firestore {
           || roleMayBeGranted(actorRole, nextRole)
           || (actorRole == 'owner'
             && ((currentRole == 'owner' && nextRole in ['admin', 'training_manager', 'user'])
-              || (currentRole == 'admin' && nextRole in ['training_manager', 'user'])
-              || (currentRole == 'training_manager' && nextRole == 'user')))
+              || (currentRole == 'admin' && nextRole in ['training_manager', 'duty_trainee', 'user'])
+              || (currentRole == 'training_manager' && nextRole in ['duty_trainee', 'user'])))
           || (actorRole == 'admin'
             && currentRole == 'training_manager'
             && nextRole == 'user'));
@@ -152,8 +152,8 @@ service cloud.firestore {
       let actorRole = currentUserRecord().data.role;
       return userManager()
         && (actorRole == 'owner'
-          || (actorRole == 'admin' && role in ['training_manager', 'user'])
-          || (actorRole == 'training_manager' && role == 'user'));
+          || (actorRole == 'admin' && role in ['training_manager', 'duty_trainee', 'user'])
+          || (actorRole == 'training_manager' && role in ['duty_trainee', 'user']));
     }
 
     function mayGrantInvitationRole(role) {

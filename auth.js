@@ -62,22 +62,27 @@ function trustedVisualResumeFor(uid=returningScopedSession?window.FLYMPUS_STORAG
   return !!(uid&&record?.uid===String(uid)&&record?.status==='active'&&document.documentElement.classList.contains('flympusAuthResuming'))
 }
 
-const APP_ROLE_ORDER=Object.freeze(['user','training_manager','admin','owner']);
+const APP_ROLE_ORDER=Object.freeze(['user','duty_trainee','training_manager','admin','owner']);
 const APP_ROLE_DEFINITIONS=Object.freeze({
   owner:Object.freeze({
     label:'Owner',
     description:'Complete control of FLYMPUS. An Owner may appoint another Owner, an Administrator, a Training Manager or a User, and may manage every role below Owner. The Primary Owner remains protected.',
-    capabilities:Object.freeze(['users.manage','courses.create','courses.manageAll','courses.manageAssigned','packages.manageGlobal','packages.overrideCourse','roster.manage','evaluations.write'])
+    capabilities:Object.freeze(['users.manage','courses.create','courses.manageAll','courses.manageAssigned','packages.manageGlobal','packages.overrideCourse','roster.manage','evaluations.write','operations.daily.write','operations.flightBoard.write','operations.solo.write','fleet.serviceability.write'])
   }),
   admin:Object.freeze({
     label:'Administrator',
     description:'Manages lower-level accounts and all training operations. An Administrator may appoint a Training Manager or a User, but cannot appoint another Administrator or an Owner.',
-    capabilities:Object.freeze(['users.manage','courses.create','courses.manageAll','courses.manageAssigned','packages.manageGlobal','packages.overrideCourse','roster.manage','evaluations.write'])
+    capabilities:Object.freeze(['users.manage','courses.create','courses.manageAll','courses.manageAssigned','packages.manageGlobal','packages.overrideCourse','roster.manage','evaluations.write','operations.daily.write','operations.flightBoard.write','operations.solo.write','fleet.serviceability.write'])
   }),
   training_manager:Object.freeze({
     label:'Training Manager',
     description:'Creates and manages training, course rosters and course-specific Package changes. A Training Manager may invite, approve and appoint Users, but cannot appoint another Training Manager or any higher role.',
-    capabilities:Object.freeze(['users.manage','courses.create','courses.manageAssigned','packages.overrideCourse','roster.manage','evaluations.write'])
+    capabilities:Object.freeze(['users.manage','courses.create','courses.manageAssigned','packages.overrideCourse','roster.manage','evaluations.write','operations.daily.write','operations.flightBoard.write','operations.solo.write','fleet.serviceability.write'])
+  }),
+  duty_trainee:Object.freeze({
+    label:'Duty Trainee',
+    description:'Can edit daily flight boards, Planned vs Executed, solo flights and aircraft serviceability for assigned courses. Cannot manage users, course structure, roster, or training Packages.',
+    capabilities:Object.freeze(['operations.daily.write','operations.flightBoard.write','operations.solo.write','fleet.serviceability.write'])
   }),
   user:Object.freeze({
     label:'User',
@@ -128,16 +133,17 @@ const AUTH_HE_UI=Object.freeze({
   'Your identity is verified. An administrator still needs to approve access to FLYMPUS.':'הזהות שלך אומתה. מנהל עדיין צריך לאשר לך גישה ל־FLYMPUS.',
   'This FLYMPUS account is currently blocked.':'חשבון FLYMPUS הזה חסום כרגע.','You do not have access to course data until approval is granted.':'אין לך גישה לנתוני הקורס עד לקבלת אישור.',
   'Contact a FLYMPUS administrator if you believe this is incorrect.':'אם לדעתך מדובר בטעות, פנה למנהל FLYMPUS.','Signed-in user':'משתמש מחובר','Sign out':'התנתק','Try again':'נסה שוב',
-  'Signed in':'מחובר','Owner':'בעלים','Administrator':'מנהל מערכת','Training Manager':'מנהל הדרכה','User':'משתמש','User Management':'ניהול משתמשים','Sign out of FLYMPUS':'התנתקות מ־FLYMPUS',
+  'Signed in':'מחובר','Duty Trainee':'חניך תורן','Owner':'בעלים','Administrator':'מנהל מערכת','Training Manager':'מנהל הדרכה','User':'משתמש','User Management':'ניהול משתמשים','Sign out of FLYMPUS':'התנתקות מ־FLYMPUS',
   'Application roles':'תפקידי מערכת','Application role':'תפקיד מערכת','Role':'תפקיד','Role guide':'מדריך תפקידים','What each role can do':'מה כל תפקיד מאפשר',
   'Complete control of FLYMPUS. An Owner may appoint another Owner, an Administrator, a Training Manager or a User, and may manage every role below Owner. The Primary Owner remains protected.':'שליטה מלאה ב־FLYMPUS. בעלים יכול למנות בעלים נוסף, מנהל מערכת, מנהל הדרכה או משתמש, ולנהל כל תפקיד שמתחת לבעלים. הבעלים הראשי נשאר מוגן.',
   'Manages lower-level accounts and all training operations. An Administrator may appoint a Training Manager or a User, but cannot appoint another Administrator or an Owner.':'מנהל חשבונות בדרגות נמוכות יותר ואת כלל פעילות ההדרכה. מנהל מערכת יכול למנות מנהל הדרכה או משתמש, אך אינו יכול למנות מנהל מערכת נוסף או בעלים.',
   'Creates and manages training, course rosters and course-specific Package changes. A Training Manager may invite, approve and appoint Users, but cannot appoint another Training Manager or any higher role.':'יוצר ומנהל הדרכות, סגלי קורס והתאמות חבילה ברמת הקורס. מנהל הדרכה יכול להזמין, לאשר ולמנות משתמשים, אך אינו יכול למנות מנהל הדרכה נוסף או תפקיד גבוה יותר.',
   'Works inside assigned courses and records operational data such as evaluations and forms, without changing course structure, rosters or Packages.':'עובד בקורסים שאליהם שובץ ומתעד נתונים תפעוליים כגון הערכות וטפסים, ללא שינוי מבנה הקורס, הסגל או החבילות.',
+  'Can edit daily flight boards, Planned vs Executed, solo flights and aircraft serviceability for assigned courses. Cannot manage users, course structure, roster, or training Packages.':'עריכת לוח טיסות יומי, תכנון מול ביצוע, טיסות סולו ושמישויות כלי טיס בקורסים משויכים, ללא הרשאות ניהול.',
   'Full system control':'שליטה מלאה במערכת','Manage users and administrators':'ניהול משתמשים ומנהלי מערכת','Manage all courses and global Packages':'ניהול כל הקורסים והחבילות הגלובליות','Full access to all courses and global Packages':'גישה מלאה לכל הקורסים והחבילות הגלובליות','Full User Management and role control':'ניהול מלא של משתמשים ותפקידי מערכת','Manage Users and lower-level roles':'ניהול משתמשים ותפקידים בדרגות נמוכות יותר','Full training administration':'ניהול מלא של מערך ההדרכה','Protected Owner account':'חשבון בעלים מוגן',
   'System administration':'ניהול מערכת','Manage Training Managers and Users':'ניהול מנהלי הדרכה ומשתמשים','Administrators are managed by the Owner':'מנהלי מערכת מנוהלים על ידי הבעלים','Manage all courses':'ניהול כל הקורסים','Manage global Packages':'ניהול חבילות גלובליות','Managed by Owner':'מנוהל על ידי הבעלים',
   'Training administration':'ניהול הדרכה','Create and manage courses':'יצירה וניהול קורסים','Create and manage assigned training courses':'יצירה וניהול של קורסי ההדרכה המשויכים','Manage course rosters':'ניהול סגלי קורס','Create course-specific Package overrides':'יצירת התאמות חבילה ברמת הקורס','Submit and manage training records/evaluations':'הזנה וניהול של רישומי הדרכה והערכות','No user administration':'ללא ניהול משתמשים','No user invitations or approvals':'ללא הזמנת משתמשים או אישורם','May appoint: Owner, Administrator, Training Manager or User':'יכול למנות: בעלים, מנהל מערכת, מנהל הדרכה או משתמש','May appoint: Training Manager or User':'יכול למנות: מנהל הדרכה או משתמש','May appoint: User':'יכול למנות: משתמש','Cannot appoint Administrator or Owner':'לא יכול למנות מנהל מערכת או בעלים','Cannot appoint Training Manager, Administrator or Owner':'לא יכול למנות מנהל הדרכה, מנהל מערכת או בעלים','Cannot appoint application roles':'לא יכול למנות תפקידי מערכת','Primary Owner is protected':'הבעלים הראשי מוגן','Manage lower-level accounts and all courses':'ניהול חשבונות בדרגות נמוכות יותר וכל הקורסים',
-  'Operational access':'גישה תפעולית','Work in assigned courses':'עבודה בקורסים משויכים','Submit evaluations and forms':'הזנת הערכות וטפסים','No User Management':'ללא ניהול משתמשים','No course structure, roster or Package editing':'ללא עריכת מבנה הקורס, סגל הקורס או החבילות','No structural course editing':'ללא עריכת מבנה הקורס',
+  'Daily flight operations':'תפעול טיסות יומי','Edit daily flight boards':'עריכת לוחות טיסות יומיים','Edit Planned vs Executed':'עריכת תכנון מול ביצוע','Record and edit solo flights':'הזנה ועריכה של טיסות סולו','Manage aircraft serviceability for assigned courses':'ניהול שמישויות כלי טיס בקורסים משויכים','No user, roster or course structure management':'ללא ניהול משתמשים, סגל או מבנה קורס','Operational access':'גישה תפעולית','Work in assigned courses':'עבודה בקורסים משויכים','Submit evaluations and forms':'הזנת הערכות וטפסים','No User Management':'ללא ניהול משתמשים','No course structure, roster or Package editing':'ללא עריכת מבנה הקורס, סגל הקורס או החבילות','No structural course editing':'ללא עריכת מבנה הקורס',
   'Managed at a higher level':'מנוהל בדרגה גבוהה יותר','You cannot manage or assign this role.':'אין לך הרשאה לנהל או להקצות תפקיד זה.',
   'Change role':'שנה תפקיד','Select role':'בחר תפקיד','Role updated':'התפקיד עודכן','Only the Owner can perform this action.':'רק בעל המערכת יכול לבצע פעולה זו.',
   'ADMINISTRATION':'ניהול מערכת','Application access is separate from course membership and course roles.':'הרשאת הגישה לאפליקציה נפרדת מהשיוך לקורס ומהתפקיד בקורס.','Close User Management':'סגור ניהול משתמשים',
@@ -323,7 +329,7 @@ async function ensureUserProfile(user){
   const email=canonicalEmail(user.email);let invitation=null;
   try{const snap=await firestoreSdk.getDoc(firestoreSdk.doc(db,'invitations',email));if(snap.exists())invitation=snap.data()}catch(err){console.warn('FLYMPUS invitation lookup failed; continuing as pending',err)}
   const preauthorized=invitation?.status==='active'&&canonicalEmail(invitation?.email)===email;
-  const profile={uid:user.uid,email,displayName:user.displayName||invitation?.displayName||'',preferredName:'',photoURL:user.photoURL||'',providerIds:(user.providerData||[]).map(x=>String(x?.providerId||'')).filter(Boolean),role:preauthorized&&['owner','admin','training_manager','user'].includes(invitation?.role)?invitation.role:'user',status:preauthorized?'active':'pending',createdAt:firestoreSdk.serverTimestamp()};
+  const profile={uid:user.uid,email,displayName:user.displayName||invitation?.displayName||'',preferredName:'',photoURL:user.photoURL||'',providerIds:(user.providerData||[]).map(x=>String(x?.providerId||'')).filter(Boolean),role:preauthorized&&['owner','admin','training_manager','duty_trainee','user'].includes(invitation?.role)?invitation.role:'user',status:preauthorized?'active':'pending',createdAt:firestoreSdk.serverTimestamp()};
   await firestoreSdk.setDoc(ref,profile);return profile
 }
 function normalizeProfile(profile={}){
@@ -461,9 +467,9 @@ async function sendManagedInvitationEmail(invitation){
 }
 function assignableAppRoles(actorRole=normalizeAppRole(currentProfile?.role)){
   const actor=normalizeAppRole(actorRole);
-  if(actor==='owner')return ['owner','admin','training_manager','user'];
-  if(actor==='admin')return ['training_manager','user'];
-  if(actor==='training_manager')return ['user'];
+  if(actor==='owner')return ['owner','admin','training_manager','duty_trainee','user'];
+  if(actor==='admin')return ['training_manager','duty_trainee','user'];
+  if(actor==='training_manager')return ['duty_trainee','user'];
   return []
 }
 function defaultAssignableRole(){return assignableAppRoles()[0]||'user'}
@@ -478,8 +484,8 @@ function canManageTargetRole(role,uid=''){
     if(uid&&String(uid)===String(primaryOwnerUid||''))return false;
     return true
   }
-  if(actor==='admin')return ['training_manager','user'].includes(target);
-  if(actor==='training_manager')return target==='user';
+  if(actor==='admin')return ['training_manager','duty_trainee','user'].includes(target);
+  if(actor==='training_manager')return ['duty_trainee','user'].includes(target);
   return false
 }
 function canAssignAppRole(role){
@@ -490,6 +496,7 @@ function roleGuideHtml(){
     ['owner','Full system control',['May appoint: Owner, Administrator, Training Manager or User','Full access to all courses and global Packages','Full User Management and role control','Primary Owner is protected']],
     ['admin','System administration',['May appoint: Training Manager or User','Manage Users and lower-level roles','Manage all courses and global Packages','Full training administration']],
     ['training_manager','Training administration',['May appoint: User','Create and manage assigned training courses','Manage course rosters','Create course-specific Package overrides','Submit and manage training records/evaluations']],
+    ['duty_trainee','Daily flight operations',['Edit daily flight boards','Edit Planned vs Executed','Record and edit solo flights','Manage aircraft serviceability for assigned courses','No user, roster or course structure management']],
     ['user','Operational access',['Work in assigned courses','Submit evaluations and forms','No User Management','No course structure, roster or Package editing']]
   ];
   return '<section class="flympusRoleGuide"><div class="flympusRoleGuideHead"><div><span>'+esc(tr('Role guide'))+'</span><h2>'+esc(tr('What each role can do'))+'</h2></div></div><div class="flympusRoleGuideGrid">'+defs.map(([role,title,items])=>'<article class="flympusRoleGuideCard '+esc(role)+'"><div class="flympusRoleGuideTitle"><b>'+esc(managementRoleLabel(role))+'</b><small>'+esc(tr(title))+'</small></div><ul>'+items.map(item=>'<li>'+esc(tr(item))+'</li>').join('')+'</ul></article>').join('')+'</div></section>'

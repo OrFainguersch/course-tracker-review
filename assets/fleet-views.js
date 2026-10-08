@@ -1,0 +1,46 @@
+(function(root){
+'use strict';
+const M=root.FLYMPUS_FLEET_MODEL;
+const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const L=(en,he)=>root.FLYMPUS_FLEET_LANGUAGE?.()==='he'?he:en;
+const F=d=>/^\d{4}-\d\d-\d\d$/.test(String(d||''))?d.slice(8)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'—';
+const O=(value,label,selected)=>'<option value="'+E(value)+'" '+(String(value)===String(selected)?'selected':'')+'>'+E(label)+'</option>';
+const status=s=>s===M.AVAILABLE?L('Serviceable','שמיש'):L('Unserviceable','לא שמיש');
+const metrics=(rows,platform)=>{const c=M.count(rows,platform);return '<div class="fleetMetrics"><div class="fleetMetric ready"><b>'+c.serviceable+'</b><span>'+L('Serviceable','שמישים')+'</span></div><div class="fleetMetric down"><b>'+c.unserviceable+'</b><span>'+L('Unserviceable','לא שמישים')+'</span></div><div class="fleetMetric"><b>'+c.total+'</b><span>'+L('Total fleet','סך הכל')+'</span></div></div>'};
+function home(c){
+ const down=M.active(c.fleet,c.platformId).filter(x=>x.status===M.UNAVAILABLE);
+ return '<section class="homePanel homePanelPad fleetHomePanel" data-fleet-home><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>'+L('Aircraft Serviceability','שמישויות כלי טיס')+'</h2><p>'+E(c.platformLabel)+' · '+L('Current course','קורס נוכחי')+'</p></div></div><button class="homeInlineLink" data-go="fleet">'+L('Open board','פתח לוח')+'</button></div>'+metrics(c.fleet,c.platformId)+
+ (down.length?'<div class="fleetHomeIssues">'+down.map(x=>'<div class="fleetHomeIssue"><b>'+E(x.tail)+'</b><span>'+E(x.reason)+'</span><small>'+F(x.since)+'</small></div>').join('')+'</div>':'<p class="fleetQuiet">'+(M.active(c.fleet,c.platformId).length?L('All registered aircraft serviceable.','כל הכלים הרשומים שמישים.'):L('No aircraft registered yet. Open the board to add aircraft.','טרם נוספו כלים. פתח את הלוח להוספת כלי טיס.'))+'</p>')+'</section>';
+}
+function fleet(c){
+ const rows=M.active(c.fleet,c.platformId),current=rows.find(x=>x.id===c.editId),can=c.canWrite;
+ const field=(label,input)=>'<div class="field"><label>'+label+'</label>'+input+'</div>';
+ return '<div class="fleetPage"><div class="eyebrow">'+L('COURSE OPERATIONS','תפעול הקורס')+'</div><h1 class="pageTitle">'+L('Aircraft Serviceability','לוח שמישויות כלי טיס')+'</h1><p class="sub">'+E(c.courseLabel)+' · '+E(c.platformLabel)+'</p><section class="card fleetOverview">'+metrics(c.fleet,c.platformId)+'<p class="fleetQuiet">'+L('Course and platform-specific. The daily flight board only allows serviceable aircraft.','ייחודי לקורס ולפלטפורמה. לוח הטיסות מאפשר שיבוץ של כלים שמישים בלבד.')+'</p></section>'+
+ (can?'<section class="card fleetEditor"><h2>'+L(current?'Edit aircraft':'Add aircraft',current?'עריכת כלי טיס':'הוספת כלי טיס')+'</h2><form id="fleetAircraftForm"><input name="id" type="hidden" value="'+E(current?.id||'')+'"><div class="fleetFormGrid">'+
+ field(L('Aircraft number','מספר כלי טיס'),'<input class="input" name="tail" maxlength="48" required placeholder="01" value="'+E(current?.tail||'')+'">')+
+ field(L('Serviceability','שמישות'),'<select class="input" name="status" id="fleetStatus">'+O(M.AVAILABLE,status(M.AVAILABLE),current?.status||M.AVAILABLE)+O(M.UNAVAILABLE,status(M.UNAVAILABLE),current?.status)+'</select>')+
+ field(L('Effective date','תאריך שינוי סטטוס'),'<input class="input dateDmy" type="text" name="since" required inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" placeholder="DD/MM/YYYY" value="'+F(current?.since||c.today)+'">')+
+ field(L('Unserviceability reason','סיבת אי־שמישות'),'<textarea class="input" name="reason" id="fleetReason" rows="2" maxlength="500" placeholder="'+L('Describe fault or limitation','תיאור התקלה או המגבלה')+'">'+E(current?.reason||'')+'</textarea>')+'</div><div class="toolbar"><button class="btn sky" type="submit">'+L(current?'Save changes':'Add aircraft',current?'שמור שינויים':'הוסף כלי טיס')+'</button>'+(current?'<button class="btn secondary" type="button" id="fleetCancelEdit">'+L('Cancel','ביטול')+'</button>':'')+'</div></form></section>':'')+
+ '<section class="card fleetInventory"><div class="fleetSectionHead"><h2>'+L('Aircraft inventory','מצבת כלי הטיס')+'</h2><span>'+rows.length+'</span></div><div class="fleetItems">'+(rows.length?rows.map(x=>'<article class="fleetItem '+(x.status===M.AVAILABLE?'ready':'down')+'"><div class="fleetItemMain"><b class="fleetTail">'+E(x.tail)+'</b><div><strong>'+status(x.status)+'</strong>'+(x.reason?'<p>'+E(x.reason)+'</p>':'')+'<small>'+L('Status date','תאריך סטטוס')+': '+F(x.since)+'</small></div></div>'+(can?'<div class="fleetItemActions"><button type="button" class="btn secondary small" data-fleet-edit="'+E(x.id)+'">'+L('Edit','עריכה')+'</button><button type="button" class="btn danger small" data-fleet-archive="'+E(x.id)+'">'+L('Remove','הסר')+'</button></div>':'')+(x.history?.length>1?'<details class="fleetHistory"><summary>'+L('Status history','היסטוריית סטטוסים')+' ('+x.history.length+')</summary>'+x.history.slice().reverse().map(h=>'<p>'+status(h.status)+' · '+F(h.since)+' · '+E(h.reason||'—')+'</p>').join('')+'</details>':'')+'</article>').join(''):'<p class="fleetQuiet">'+L('No registered aircraft.','אין כלי טיס רשומים.')+'</p>')+'</div></section></div>';
+}
+function schedule(c){
+ const available=M.active(c.fleet,c.platformId).filter(x=>x.status===M.AVAILABLE);
+ const flights=c.flights.filter(x=>x.date===c.date&&x.platformId===c.platformId).sort((a,b)=>a.time.localeCompare(b.time));
+ const current=flights.find(x=>x.id===c.editId),can=c.canWrite;
+ const select=(name,items,value,required=true)=>'<select class="input" name="'+name+'" '+(required?'required':'')+'><option value="" disabled '+(!value?'selected':'')+'>'+L('Select','בחר')+'</option>'+items.map(x=>O(x.id,x.name||x.tail,value)).join('')+'</select>';
+ const field=(label,inner)=>'<div class="field"><label>'+label+'</label>'+inner+'</div>';
+ return '<section class="card fleetSchedule" id="fleetFlightBoard"><div class="fleetSectionHead"><div><h2>'+L('Daily Flight Board','לוח טיסות יומי')+'</h2><p class="sub">'+F(c.date)+' · '+E(c.platformLabel)+'</p></div><button class="btn secondary small" type="button" data-go="fleet">'+L('Serviceability','שמישויות')+'</button></div><p class="fleetQuiet">'+L('Only serviceable aircraft can be selected. Existing flights are flagged if an aircraft becomes unavailable.','ניתן לשבץ רק כלים שמישים; שיבוצים קיימים יסומנו אם כלי יוצא משמישות.')+'</p>'+
+ '<div class="fleetSorties">'+(flights.length?flights.map(f=>{const issue=M.flightIssues(f,c.fleet,c.platformId);
+ return '<div class="fleetSortie '+(issue?'conflict':'')+'"><div class="fleetSortieMain"><b>'+E(f.time)+'</b><b class="fleetSortieTail">'+E(f.tail)+'</b><div><strong>'+E(f.traineeName||f.traineeId)+'</strong><small>'+E(f.syllabus)+' · '+(f.mode==='SOLO'?'Solo':L('Instructed','מודרכת'))+(f.instructorName?' · '+E(f.instructorName):'')+'</small>'+(issue?'<small class="fleetConflict">'+E(issue)+'</small>':'')+'</div></div>'+(can?'<div class="fleetSortieActions"><button class="btn secondary small" type="button" data-flight-edit="'+E(f.id)+'">'+L('Edit','ערוך')+'</button><button class="btn danger small" type="button" data-flight-delete="'+E(f.id)+'">'+L('Remove','הסר')+'</button></div>':'')+'</div>';
+ }).join(''):'<p class="fleetQuiet">'+L('No scheduled flights for this day.','אין טיסות משובצות לתאריך זה.')+'</p>')+'</div>'+
+ (can?'<form id="fleetSortieForm" class="fleetSortieForm"><h3>'+L(current?'Edit scheduled flight':'Add scheduled flight',current?'עריכת שיבוץ':'הוספת שיבוץ')+'</h3><input type="hidden" name="id" value="'+E(current?.id||'')+'"><div class="fleetSortieFormGrid">'+
+ field(L('Takeoff time','שעת המראה'),'<input class="input" name="time" type="time" required value="'+E(current?.time||'08:00')+'">')+
+ field(L('Aircraft','כלי טיס'),select('aircraftId',available.map(x=>({id:x.id,name:x.tail})),current?.aircraftId||''))+
+ field(L('Flight type','סוג טיסה'),'<select class="input" name="mode" id="fleetFlightMode">'+O('INSTRUCTED',L('Instructed','מודרכת'),current?.mode||'INSTRUCTED')+O('SOLO',L('Solo','סולו'),current?.mode)+'</select>')+
+ field(L('Trainee','חניך'),select('traineeId',c.trainees,current?.traineeId||''))+
+ '<div class="field" data-fleet-instructor-field><label>'+L('Instructor','מדריך')+'</label>'+select('instructorId',c.instructors,current?.instructorId||'',false)+'</div>'+
+ field(L('Syllabus','סילבוס'),select('syllabus',c.syllabi.map(s=>({id:s,name:s})),current?.syllabus||''))+
+ '</div><div class="toolbar"><button class="btn sky small" type="submit" '+(!available.length?'disabled':'')+'>'+L(current?'Save flight':'Add to board',current?'שמור טיסה':'הוסף ללוח')+'</button>'+(current?'<button class="btn secondary small" type="button" id="fleetFlightCancel">'+L('Cancel','ביטול')+'</button>':'')+'</div>'+(available.length?'':'<p class="fleetConflict">'+L('No serviceable aircraft. Update fleet status first.','אין כלים שמישים. יש לעדכן תחילה את לוח השמישויות.')+'</p>')+'</form>':'')+'</section>';
+}
+root.FLYMPUS_FLEET_VIEW=Object.freeze({home,fleet,schedule});
+})(window);
