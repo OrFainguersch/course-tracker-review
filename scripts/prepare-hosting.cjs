@@ -15,6 +15,20 @@ fs.mkdirSync(output,{recursive:true});
 for(const file of publicFiles)fs.copyFileSync(path.join(root,file),path.join(output,file));
 fs.cpSync(path.join(root,'assets'),path.join(output,'assets'),{recursive:true});
 const commit=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
+if(!/^[a-f0-9]{40}$/.test(commit))throw new Error('Invalid Git commit for deployment');
+/* Stamp every Firebase deployment with its actual commit. A constant source
+   worker version made iOS continue serving an older Safety interface. */
+const workerPath=path.join(output,'sw.js');
+const workerSource=fs.readFileSync(workerPath,'utf8');
+const workerPattern=/const FLYMPUS_SW_VERSION='[^']+';/;
+if(!workerPattern.test(workerSource))throw new Error('Missing Service Worker version constant');
+fs.writeFileSync(workerPath,workerSource.replace(workerPattern,
+  "const FLYMPUS_SW_VERSION='"+commit.slice(0,16)+"';"));
+const htmlPath=path.join(output,'index.html');
+const htmlSource=fs.readFileSync(htmlPath,'utf8');
+const deployToken='__FLYMPUS_DEPLOY_COMMIT__';
+if(!htmlSource.includes(deployToken))throw new Error('Missing HTML release token');
+fs.writeFileSync(htmlPath,htmlSource.replaceAll(deployToken,commit));
 const files={};
 function record(directory){
   for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
