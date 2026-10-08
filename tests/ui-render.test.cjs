@@ -13,6 +13,10 @@ const context={window:{},document,localStorage:storage(),sessionStorage:storage(
 context.window=context;vm.createContext(context);
 for(const file of ["assets/ep-catalog.js","assets/aerostar-platform.js","assets/ip-catalog.js","assets/technician-catalog.js","assets/training-core.js","assets/ep-lessons-screening.js","assets/ep-lessons-rc-1.js","assets/ep-lessons-rc-2.js","assets/ep-lessons-half.js","assets/ep-lessons-full-day-a.js","assets/ep-lessons-full-day-b.js","assets/ep-lessons-night.js"]){vm.runInContext(fs.readFileSync(file,"utf8"),context,{filename:file})}
 vm.runInContext(fs.readFileSync("assets/evaluation-voice.js","utf8"),context,{filename:"assets/evaluation-voice.js"});
+// Home delegates course-scoped flight counts and trainee attention to this production helper.
+vm.runInContext(fs.readFileSync("assets/home-operations.js","utf8"),context,{filename:"assets/home-operations.js"});
+assert.equal(typeof context.FLYMPUS_HOME_OPERATIONS?.weeklyFlights,"function",
+  "The UI smoke environment must load the same Home operations module as the application");
 const voiceParse=context.FLYMPUS_EVALUATION_VOICE?.parse;
 assert.equal(typeof voiceParse,"function","Evaluation voice helper must expose a deterministic parser without a paid AI dependency");
 const voiceSample=voiceParse("כל הקריטריונים ארבע חוץ מ Altitude Control שלוש. ביצענו Vertigo ו SBX. שתי המראות ושלוש נחיתות.",{
