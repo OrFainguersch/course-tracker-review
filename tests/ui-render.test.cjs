@@ -232,7 +232,7 @@ assert(!html.includes("Revert to Package defaults"),"Bulk course revert-to-defau
 assert(html.includes(".packageRules>summary>span{font-size:9px;color:#8092a5}"),"Summary helper styling must target only the direct helper span so counts inside titles keep the title font");
 assert(html.includes('.drawer.open .panel::before{')&&html.includes('top:calc(env(safe-area-inset-top) - 2px)')&&html.includes('height:5px;')&&html.includes('background:#102f51;'),"iOS drawer must paint the status-bar boundary with panel-owned navy, not a global fixed underlay");
 assert(!html.includes("drawerRole.textContent=appRole+' · '+courseRole"),"Drawer footer must never append a course-specific position to the system role");
-const scripts=[...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/g)].map(match=>match[1]).filter(x=>x.trim());
+const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(match=>match[1]).filter(x=>x.trim());
 assert(scripts.length>=2);const appSource=scripts.at(-1).split('const earlyNavTarget=')[0];vm.runInContext(appSource,context,{filename:"index-inline.js"});
 // Drawer footer is global identity. A person's course-role membership must not
 // leak into the footer, even if the current course assigns Course Manager.
