@@ -2,7 +2,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-const M=require('../assets/fleet-serviceability.js');
+const M=require('../assets/fleet-model.js');
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 const auth=fs.readFileSync(path.join(__dirname,'../auth.js'),'utf8');
 const rules=fs.readFileSync(path.join(__dirname,'../firestore.rules'),'utf8');
@@ -67,7 +67,7 @@ test('User Management Duty Trainee role has operational permissions without stru
  assert.ok(html.includes("if(!flympusCan('operations.flightBoard.write'))"));
 });
 test('Fleet and daily board are accessible per course from Home; refresh and theme parity remain intact',()=>{
- for(const item of ["case'fleet'",'bindFleetServiceability()','bindDailyFlightBoard()',
+ for(const item of ["case'fleet'",'bindFleet()','bindDailyFlightBoard()',
  'appScreenIds=new Set(','getFleetAircraft()','getDailyFlightBoard()','courseScopedKey(base)','flightBoardEditId',
  'window.FLYMPUS_FLEET_VIEW?.home?.(currentFleetContext())','courseFlightScheduleHtml(date)'])assert.ok(html.includes(item),item);
  assert.ok(ui.includes("M.flightIssues(f,c.fleet,c.platformId)"));
