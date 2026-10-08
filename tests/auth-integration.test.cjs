@@ -193,7 +193,7 @@ assert(html.includes('id="accountAddAnother"')&&html.includes('id="personalProfi
   assert(beginning>=0&&ending>beginning,'Personal identity renderer must be present');
   const renderer=html.slice(beginning,ending);
   const nodes=new Map(['#personalProfileName','#personalProfileRole','#personalProfileEmail',
-    '#drawerProfileName','#drawerProfileRole'].map(key=>[key,{textContent:''}]));
+    '#drawerProfileName','#drawerProfileEmail','#drawerProfileRole'].map(key=>[key,{textContent:''}]));
   const avatars=Array.from({length:3},()=>({innerHTML:''}));
   const ctx={
     window:{FLYMPUS_AUTH:{
@@ -215,4 +215,7 @@ assert(html.includes('id="accountAddAnother"')&&html.includes('id="personalProfi
   assert.equal(nodes.get('#personalProfileRole').textContent,'Owner');
   assert.equal(nodes.get('#drawerProfileRole').textContent,'Owner');
   assert.equal(nodes.get('#personalProfileEmail').textContent,'owner@example.com');
+  assert.equal(nodes.get('#drawerProfileEmail').textContent,'owner@example.com','Sidebar displays the signed-in email');
 }
+
+assert(html.includes('id="drawerProfileEmail"')&&html.includes('class="drawerProfileEmail"'),'Sidebar account card contains a dedicated email element');
