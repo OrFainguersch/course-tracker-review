@@ -29,7 +29,7 @@ test('Safety backend requires verified Firebase UID enrollment; account-local ro
   assert.match(rules,/ownMark\('ackBy'\)/);
   assert.match(rules,/ownMark\('seenBy'\)/);
   assert.match(rules,/request\.resource\.data\.diff\(resource\.data\)\.affectedKeys\(\)\.hasOnly\(\['status','statusBy','statusAt'\]\)/);
-  assert.match(auth,/rosterPreview\(emails\)/);
+  assert.match(auth,/rosterPreview\(instructors\)/);
   assert.match(auth,/canManageUsers\(\)/);
   assert.match(auth,/api\.safetyCloud=Object\.freeze/);
   assert.match(auth,/serverTimestamp\(\)/);
@@ -48,7 +48,7 @@ test('Home open-event action and notification center are wired without treating 
   assert.match(ui,/api\(\)\.viewed\(/);
   assert.match(ui,/api\(\)\.acknowledge\(/);
   assert.match(ui,/data-safety-status/);
-  assert.match(ui,/Events created here are NOT delivered/);
+  assert.match(ui,/Secure course Safety is not connected/);
 });
 test('Always-on Safety is enrolled and requires personal viewing before acknowledgement',()=>{
   const rules=read('firestore.rules'),auth=read('auth.js'),app=read('assets/safety-ui.js'),feed=read('assets/safety-global-inbox.js'),page=read('index.html');
