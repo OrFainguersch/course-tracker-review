@@ -18,7 +18,7 @@ test('Opening is not an acknowledgement; each assigned instructor signs independ
   assert.equal(M.notification(e,'uid2'),false);assert.equal(M.notification(e,'outsider'),false);
   assert.deepEqual(M.pending(e),['uid1']);
   assert.deepEqual(M.progress(e),{total:2,acknowledged:1,pending:1});
-  assert.equal(M.notification({...e,status:'RESOLVED'},'uid1'),false);
+  assert.equal(M.notification({...e,status:'RESOLVED'},'uid1'),true); // pending reading survives event resolution
 });
 test('Safety backend requires verified Firebase UID enrollment; account-local roster alone is insufficient',()=>{
   const rules=read('firestore.rules'),auth=read('auth.js');
@@ -49,6 +49,21 @@ test('Home open-event action and notification center are wired without treating 
   assert.match(ui,/api\(\)\.acknowledge\(/);
   assert.match(ui,/data-safety-status/);
   assert.match(ui,/Events created here are NOT delivered/);
+});
+test('Always-on Safety is enrolled and requires personal viewing before acknowledgement',()=>{
+  const rules=read('firestore.rules'),auth=read('auth.js'),app=read('assets/safety-ui.js'),feed=read('assets/safety-global-inbox.js'),page=read('index.html');
+  assert.match(rules,/request.auth.uid in resource.data.memberUids/);
+  assert.match(rules,/request.resource.data.memberUids.toSet\(\) == request.resource.data.members.keys\(\).toSet\(\)/);
+  assert.match(rules,/ownMark\('ackBy'\) && request.auth.uid in resource.data.seenBy.keys\(\)/);
+  assert.match(auth,/watchCourses\(onCourses,onError\)/);
+  assert.match(auth,/memberUids:Object.keys\(map\)/);
+  assert.match(app,/async function reconcile\(\)/);
+  assert.match(app,/function settings\(\)/);
+  assert.match(page,/safetyUI.settings\(\)/);
+  assert.match(page,/startGlobalInbox/);
+  assert.match(feed,/Safety event: instructor reading status updated/);
+  assert.match(feed,/acknowledge\(item.key,e.id\)/);
+  assert.doesNotMatch(app,/data-safety-enroll type="button"/);
 });
 test('Fleet model is loaded under the new name without changing persisted serviceability key',()=>{
   const page=read('index.html'),model=read('assets/fleet-model.js');
