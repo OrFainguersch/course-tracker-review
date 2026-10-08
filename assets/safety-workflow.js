@@ -13,7 +13,7 @@
   function viewed(record,userId){const id=uid(userId);return Boolean(id&&record?.seenBy&&Object.prototype.hasOwnProperty.call(record.seenBy,id))}
   function pending(record){return recipientUids(record).filter(id=>!acknowledged(record,id))}
   function progress(record){const total=recipientUids(record).length;return {total,acknowledged:total-pending(record).length,pending:pending(record).length}}
-  function notification(record,userId){return isOpen(record)&&recipientUids(record).includes(uid(userId))&&!acknowledged(record,userId)}
+  function notification(record,userId){return recipientUids(record).includes(uid(userId))&&!acknowledged(record,userId)}
   function normalize(record){return {...record,status:status(record),requiredAckUids:recipientUids(record),ackBy:record?.ackBy&&typeof record.ackBy==='object'?record.ackBy:{},seenBy:record?.seenBy&&typeof record.seenBy==='object'?record.seenBy:{}}}
   return Object.freeze({status,isOpen,recipientUids,acknowledged,viewed,pending,progress,notification,normalize});
 });
