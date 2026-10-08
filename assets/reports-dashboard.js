@@ -5,7 +5,7 @@
 'use strict';
 const LANG={
  en:{
-  planned:'Planned',executed:'Executed',cancelled:'Cancelled',unresolved:'Unclassified gap',extra:'Unplanned executions',
+  planned:'Planned',executed:'Executed',cancelled:'Cancelled',unresolved:'Unclassified gap',upcoming:'Upcoming flights',extra:'Unplanned executions',
   executionRate:'Execution rate',submittedDays:'Reported days',noData:'No recorded activity in this period.',
   planNote:'Only submitted daily plans count. Executions are based on saved Evaluations and Solo Flights; demo history is excluded.',
   gapNote:'A flight is counted as cancelled only when its cancellation reason was recorded. Other unexecuted plans remain unclassified.',
@@ -23,7 +23,7 @@ const LANG={
   hasPlan:'Submitted plan',missingPlan:'No submitted plan'
  },
  he:{
-  planned:'מתוכנן',executed:'בוצע',cancelled:'בוטל',unresolved:'פער ללא סיווג',extra:'ביצועים ללא תכנון',
+  planned:'מתוכנן',executed:'בוצע',cancelled:'בוטל',unresolved:'פער ללא סיווג',upcoming:'טיסות עתידיות',extra:'ביצועים ללא תכנון',
   executionRate:'אחוז ביצוע',submittedDays:'ימי דיווח',noData:'אין פעילות מתועדת בתקופה שנבחרה.',
   planNote:'רק תכניות יומיות שהוגשו נכללות בתכנון. הביצוע מחושב מהערכות וטיסות סולו שנשמרו, ללא נתוני הדגמה.',
   gapNote:'טיסה נספרת כמבוטלת רק אם נרשמה לה סיבת ביטול. שאר הפער בין התכנון לביצוע נשאר ללא סיווג.',
@@ -58,7 +58,9 @@ function bucket(date,granularity){
   if(granularity==='week')return mondayOf(date);
   return date
 }
-function operations({plans=[],evaluations=[],soloFlights=[],from='',to='',granularity='day'}={}){
+function operations({plans=[],evaluations=[],soloFlights=[],from='',to='',granularity='day',today=''}={}){
+  const now=new Date(),localToday=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  const reportToday=validDate(today)||localToday;
   const reportDates=new Map(),live=new Map();
   // The submitted plan is authoritative. NEVER add a draft or a mock flight.
   (plans||[]).forEach(p=>{const date=validDate(p?.date);if(date)reportDates.set(date,p)});
@@ -76,21 +78,22 @@ function operations({plans=[],evaluations=[],soloFlights=[],from='',to='',granul
     (p?.cancellations||[]).forEach(item=>{if(item?.reasonLabel||item?.reasonId||item?.reason)reasons.push(String(item.reasonLabel||item.reason||item.reasonId).trim())});
     if(!reasons.length&&p?.reason)reasons.push(String(p.reason).trim());
     const cancellations=reasons.slice(0,gap),cancelled=cancellations.length;
+    const openGap=gap-cancelled,isFuture=date>reportToday;
     return {date,hasPlan:!!p,plannedInstructed,plannedSolo,planned,executedInstructed:actual.instructed,
-      executedSolo:actual.solo,executed,cancelled,unresolved:gap-cancelled,extra:Math.max(0,executed-planned),
+      executedSolo:actual.solo,executed,cancelled,unresolved:isFuture?0:openGap,upcoming:isFuture?openGap:0,extra:Math.max(0,executed-planned),
       reasons:cancellations,executionRate:p?pct(Math.min(planned,executed),planned):null};
   });
   const groups=new Map();
   byDate.forEach(r=>{
     const key=bucket(r.date,granularity);
-    const g=groups.get(key)||{key,days:0,submittedDays:0,planned:0,plannedInstructed:0,plannedSolo:0,executed:0,executedInstructed:0,executedSolo:0,cancelled:0,unresolved:0,extra:0,reasons:[]};
+    const g=groups.get(key)||{key,days:0,submittedDays:0,planned:0,plannedInstructed:0,plannedSolo:0,executed:0,executedInstructed:0,executedSolo:0,cancelled:0,unresolved:0,upcoming:0,extra:0,reasons:[]};
     g.days++;if(r.hasPlan)g.submittedDays++;
-    ['planned','plannedInstructed','plannedSolo','executed','executedInstructed','executedSolo','cancelled','unresolved','extra'].forEach(k=>g[k]+=r[k]);
+    ['planned','plannedInstructed','plannedSolo','executed','executedInstructed','executedSolo','cancelled','unresolved','upcoming','extra'].forEach(k=>g[k]+=r[k]);
     g.reasons.push(...r.reasons);groups.set(key,g);
   });
   const rows=[...groups.values()].sort((a,b)=>a.key.localeCompare(b.key));
-  const totals={days:byDate.length,submittedDays:0,planned:0,plannedInstructed:0,plannedSolo:0,executed:0,executedInstructed:0,executedSolo:0,cancelled:0,unresolved:0,extra:0,reasons:[]};
-  rows.forEach(r=>{['submittedDays','planned','plannedInstructed','plannedSolo','executed','executedInstructed','executedSolo','cancelled','unresolved','extra'].forEach(k=>totals[k]+=r[k]);totals.reasons.push(...r.reasons)});
+  const totals={days:byDate.length,submittedDays:0,planned:0,plannedInstructed:0,plannedSolo:0,executed:0,executedInstructed:0,executedSolo:0,cancelled:0,unresolved:0,upcoming:0,extra:0,reasons:[]};
+  rows.forEach(r=>{['submittedDays','planned','plannedInstructed','plannedSolo','executed','executedInstructed','executedSolo','cancelled','unresolved','upcoming','extra'].forEach(k=>totals[k]+=r[k]);totals.reasons.push(...r.reasons)});
   totals.executionRate=pct(Math.min(totals.planned,Math.max(0,totals.executed-totals.extra)),totals.planned);
   const reasonCounts=new Map();
   totals.reasons.forEach(label=>{reasonCounts.set(label,(reasonCounts.get(label)||0)+1)});
@@ -145,7 +148,7 @@ function reasonsHtml(model,lang){
   return '<div class="insightReasonList">'+list.map(x=>'<div class="insightReason"><div><b>'+esc(x.name)+'</b><strong>'+x.value+'</strong></div><span class="insightReasonTrack"><i style="width:'+(x.value/max*100).toFixed(2)+'%"></i></span></div>').join('')+'</div>'
 }
 function summaryTable(model,lang){
- const h=['period','planned','executed','cancelled','unresolved','executionRate'];
+ const h=['period','planned','executed','cancelled','unresolved','upcoming','executionRate'];
  const cell=(v,k)=>k==='executionRate'?rateFormat(v):v;
  const header='<thead><tr>'+h.map(k=>'<th scope="col">'+esc(tr(k,lang))+'</th>').join('')+'</tr></thead>';
  const rows=model.rows.map(r=>{
@@ -164,6 +167,7 @@ function plannedHtml(model,lang='en'){
     [tr('executionRate',lang),rateFormat(t.executionRate),tr('unplannedNote',lang)],
     [tr('cancelled',lang),t.cancelled],
     [tr('unresolved',lang),t.unresolved],
+    [tr('upcoming',lang),t.upcoming],
     [tr('extra',lang),t.extra]
   ]);
   return '<section class="insightSection"><p class="insightSource">'+esc(tr('planNote',lang))+'</p>'+cards+
@@ -198,8 +202,8 @@ function csvCells(rows){return '\ufeff'+rows.map(r=>r.map(value=>{
   return '"'+v.replace(/"/g,'""')+'"'
 }).join(',')).join('\r\n')}
 function operationsCsv(model){
- const headers=['Period','Planned','Instructed Planned','Solo Planned','Executed','Instructed Executed','Solo Executed','Cancelled (reason recorded)','Unclassified gap','Unplanned executions','Execution %'];
- const row=r=>[r.key,r.planned,r.plannedInstructed,r.plannedSolo,r.executed,r.executedInstructed,r.executedSolo,r.cancelled,r.unresolved,r.extra,r.planned?pct(Math.min(r.planned,Math.max(0,r.executed-r.extra)),r.planned).toFixed(1):''];
+ const headers=['Period','Planned','Instructed Planned','Solo Planned','Executed','Instructed Executed','Solo Executed','Cancelled (reason recorded)','Unclassified gap','Upcoming','Unplanned executions','Execution %'];
+ const row=r=>[r.key,r.planned,r.plannedInstructed,r.plannedSolo,r.executed,r.executedInstructed,r.executedSolo,r.cancelled,r.unresolved,r.upcoming,r.extra,r.planned?pct(Math.min(r.planned,Math.max(0,r.executed-r.extra)),r.planned).toFixed(1):''];
  return csvCells([headers,...model.rows.map(row)])
 }
 function dashboardCsv(model){
