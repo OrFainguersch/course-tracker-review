@@ -2,7 +2,6 @@
 (function(root){
  'use strict';
  const api=root.FLYMPUS_TRAINEE_EVAL_HISTORY;
- const own=(value,key)=>Object.prototype.hasOwnProperty.call(value||{},key);
  const validNumber=value=>value!==null&&value!==undefined&&String(value).trim()!==''&&Number.isFinite(Number(value));
  function detailHtml(row,deps,gradeMax){
   const {esc}=deps;
@@ -41,7 +40,7 @@
    return '<div class="profileEvalScoreRow"><span>'+esc(def?.name||id)+(weight!==null?'<small>'+Math.round(weight*100)+'%</small>':'')+'</span><strong>'+esc(Number(value).toFixed(1))+' / '+gradeMax.toFixed(1)+'</strong></div>';
   }).join('');
   sections+=group('Assessment criteria',scoreHtml||muted('No individual criterion scores were saved.'));
-  const counts=row.emergencyCounts&&typeof row.emergencyCounts==='object'&&!Array.isArray(row.emergencyCounts)?row.emergencyCounts:{};
+  const counts=row.emergencyCounts&&typeof row.emergencyCounts==='object'&&!Array.isArray(row.emergencyCounts)?{...row.emergencyCounts}:{};
   const notes=row.emergencyNotes&&typeof row.emergencyNotes==='object'&&!Array.isArray(row.emergencyNotes)?row.emergencyNotes:{};
   // Older saved evaluations may only have a positional numeric list.
   if(!Object.keys(counts).length&&Array.isArray(row.emergencies)){
@@ -53,6 +52,10 @@
    return '<div class="profileEvalEmergencyRow"><div><strong>'+esc(def?.name||id)+'</strong>'+(def?.category?'<small>'+esc(def.category)+'</small>':'')+'</div><span class="profileEvalCount">'+count+'×</span>'+(note?'<p class="profileEvalNote">'+esc(note)+'</p>':'')+'</div>';
   }).join('');
   sections+=group('Emergencies practiced',practice||muted('No emergency practice was recorded.'));
+  const planned=Array.isArray(row.plannedEmergencyIds)?row.plannedEmergencyIds.filter(Boolean):[];
+  if(planned.length){
+   sections+=group('Planned emergencies','<ul class="profileEvalBulletList">'+planned.map(id=>'<li>'+esc(byEmergency.get(String(id))?.name||id)+'</li>').join('')+'</ul>');
+  }
   sections+=group('Instructor comments',comment?'<p class="profileEvalNote">'+esc(comment)+'</p>':muted('No instructor comments were entered.'));
   sections+=group('Next-flight emphases',emphases.length?'<ol class="profileEvalBulletList">'+emphases.map(value=>'<li>'+esc(value)+'</li>').join('')+'</ol>':muted('No next-flight emphases were entered.'));
   if(row.progressionDecision){
