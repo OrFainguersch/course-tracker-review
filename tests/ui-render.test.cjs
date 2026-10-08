@@ -971,3 +971,28 @@ assert(html.includes('.topNotificationBtn[hidden],.topNotificationDropdown[hidde
   'Duty Trainee hidden notification controls must override the explicit grid display rules');
 assert(html.includes("if(isDutyTrainee())return {evaluation:0,safety:0,exams:0,record:0,planned:isDutyTraineeAssigned()?plannedAttentionCount():0}"),
   'Duty Trainee attention badge calculation must not read evaluation, safety or exam drafts');
+
+/* Duty Trainee runs a purpose-built 3-tab dock, not hidden or disabled general tabs. */
+{
+ const dutyDock=html.match(/const items=isDutyTrainee\(\)\?(\[\['planned','planned','Plan'\][^;]+):\[\['roster'/);
+ assert(dutyDock,'Duty Trainee dock must be independently composed from allowed screens');
+ const dutyItems=dutyDock[1];
+ assert.equal((dutyItems.match(/\['(?:planned|home|fleet)'/g)||[]).length,3,
+   'Duty Trainee must have exactly three bottom tabs');
+ assert(dutyItems.startsWith("[['planned','planned','Plan'],['home','home','Home'],['fleet','fleet','Maintenance']]"),
+   'The physical dock order must be Plan (left), Home (middle), Maintenance (right)');
+ assert(!dutyItems.includes('preferences')&&!dutyItems.includes('roster')&&!dutyItems.includes('record')&&!dutyItems.includes('reports'),
+   'Forbidden and account settings tabs must never be constructed for Duty Trainee');
+ assert(html.includes('.mobileBottomNav.dutyDock{')&&html.includes('direction:ltr;')&&html.includes('grid-template-columns:repeat(3,minmax(0,1fr))'),
+   'Dock must be three equal columns with physical placement stable in Hebrew RTL');
+ assert(html.includes("const visible=isDutyTrainee()?[['__label','','OPERATIONS'],['home','home','Home'],['planned','planned','Plan'],['fleet','fleet','Aircraft Serviceability']]"),
+   'Duty Trainee sidebar must show only the three relevant operational destinations');
+ assert(html.includes("if(isDutyTrainee()&&screen==='my-profile')screen='preferences';")&&
+    html.includes("data-go=\"my-profile\""),
+   'Personal settings must remain available through the existing account/profile menu');
+ assert(html.includes("const DUTY_ALLOWED_SCREENS=new Set(['home','planned','fleet','preferences'])")&&
+    html.includes("if(!canViewDutyScreen(screen))return flympusAccessDenied('Access unavailable')"),
+   'Removing UI entries must not remove underlying security checks');
+ assert(html.includes("fleet:'<path d=\"M12 2.5 9.5 10"),
+   'Maintenance must use a recognizable aircraft icon, not the old four-point emblem');
+}
