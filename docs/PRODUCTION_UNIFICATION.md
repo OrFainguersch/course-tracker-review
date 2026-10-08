@@ -160,7 +160,7 @@ backed-up and compatibility-checked rules change. Authentication settings,
 Storage and database records are not written by this release workflow.
 
 `prepare-hosting.cjs` rejects uncommitted/untracked source and a mismatched CI
-SHA, prepares the existing 62-file allowlist, stamps the actual commit in HTML
+SHA, prepares the existing 61-file allowlist, stamps the actual commit in HTML
 and the worker, and records SHA-256 digests. The existing post-deploy verifier
 checks the exact commit, every bundled file and reserved Firebase auth routes.
 The explicit release result records `DEPLOYED`, `BLOCKED` or `FAILED`, the
@@ -173,6 +173,15 @@ manifest and the exact historical Git source, retaining only public files in
 its Actions artifact. It uses no Firebase credentials and is not a cloud-data
 backup. A deployment/audit artifact alone does not verify live sign-in, course
 records or iPhone behavior; those remain required acceptance checks.
+
+The initial candidate's actual Node 22 CI log confirmed 124 passed tests and
+zero failures. Its anonymous Hosting audit verified all 61 manifest-listed
+public files against their SHA-256 hashes and the exact live Git source, plus
+both reserved auth routes: live commit `ef3f427dae3d585708b223b4f08aa41ae78c0441`,
+build 0758. Evidence: Actions run `37841857907`, public artifact `11578600492`
+(`verified-public-hosting-audit`, retained until 2027-01-06). This is a verified
+public-bundle snapshot, not a database/Auth/Storage backup or a confirmed Hosting
+rollback version. Recheck current evidence before release.
 
 ## Rollback
 
