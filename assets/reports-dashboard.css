@@ -1,0 +1,96 @@
+/* FLYMPUS Reports & Analytics · unified responsive cards + printed report.
+   All sizes accommodate RTL, Dark Mode, and Large Text. */
+.insightRoot{--insight-border:#d7e4ee;--insight-muted:#70869d;--insight-ink:#123d62;--insight-paper:#fff;--insight-grid:#edf3f8;width:100%;min-width:0;max-width:100%;color:var(--insight-ink);padding-bottom:16px}
+.insightRoot .insightHeading{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:15px}
+.insightRoot .insightHeading .eyebrow{color:#9b7c3f;font-weight:850;font-size:10px;letter-spacing:1.2px}
+.insightRoot .insightHeadingActions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.insightTabNav{display:flex;align-items:stretch;gap:7px;padding:5px;background:#e9f1f7;border:1px solid var(--insight-border);border-radius:15px;max-width:100%;overflow-x:auto;scrollbar-width:thin;margin:0 0 15px}
+.insightTab{border:0;border-radius:11px;background:transparent;color:#607992;min-height:43px;padding:9px 16px;font:inherit;font-size:12px;font-weight:850;white-space:nowrap;cursor:pointer;flex:1}
+.insightTab:hover,.insightTab:focus-visible{background:#f6fbfe;color:#123b63;outline:2px solid transparent}
+.insightTab.active{background:#fff;color:#185f92;box-shadow:0 2px 9px rgba(17,59,97,.11)}
+.insightRoot .insightFilterPanel{padding:14px 17px;margin:0 0 15px;border:1px solid var(--insight-border);border-radius:18px;background:var(--insight-paper)}
+.insightFilterHeader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.insightFilterHeader strong{font-size:13px}
+.insightFilterControls{display:flex;flex-wrap:wrap;align-items:end;gap:10px 17px}
+.insightFilterControls>.field,.insightFilterControls>.dateRangeField{min-width:200px}
+.insightGroupBy{display:grid;gap:5px;color:#6d8398;font-size:10px;font-weight:800}
+.insightGroupBy select{min-width:145px;width:100%;font-weight:750}
+.insightSource{color:var(--insight-muted);font-size:11px;line-height:1.65;margin:0 0 13px}
+.insightMetrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 16px}
+.insightMetric{background:var(--insight-paper);border:1px solid var(--insight-border);border-radius:16px;padding:17px 17px 15px;min-width:0;display:flex;flex-direction:column;gap:6px;box-shadow:0 4px 13px rgba(17,59,97,.035)}
+.insightMetric:before{content:"";width:28px;height:3px;background:#bba066;border-radius:5px;display:block;margin:0 0 3px}
+.insightMetric span{color:var(--insight-muted);font-size:11px;font-weight:750}
+.insightMetric strong{font-size:29px;color:var(--insight-ink);font-weight:900;line-height:1.12;font-variant-numeric:tabular-nums}
+.insightMetric small{color:var(--insight-muted);font-size:10px;line-height:1.4}
+.insightCharts{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(270px,1fr);gap:14px;margin-bottom:14px;align-items:stretch}
+.insightRoot .insightPanel{background:var(--insight-paper);border:1px solid var(--insight-border);border-radius:18px;padding:17px 18px;min-width:0;box-shadow:none}
+.insightPanel h3{color:var(--insight-ink);font-size:16px;font-weight:850;margin:0 0 13px}
+.insightChartScroll{width:100%;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.insightChartSvg{display:block;min-width:480px;width:100%;height:auto;max-height:280px;overflow:visible;color:var(--insight-muted)}
+.insightAxis{fill:currentColor;font-size:11px;font-family:inherit}
+.insightLegend{display:flex;align-items:center;gap:15px;flex-wrap:wrap;font-size:10px;color:var(--insight-muted);font-weight:700;margin:10px 0 0}
+.insightLegend span{display:inline-flex;align-items:center;gap:7px}
+.insightLegend i{display:inline-block;width:11px;height:11px;border-radius:3px}
+.insightLegend .legPlan{background:#315a83}.insightLegend .legActual{background:#188ba0}.insightLegend .legCancel{background:#b55a62;border-radius:50%}
+.insightReasonList{display:grid;gap:15px;max-height:265px;overflow:auto;padding:3px 0}
+.insightReason>div{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--insight-ink);font-size:11px}
+.insightReason b{font-weight:750;min-width:0;overflow-wrap:anywhere}.insightReason strong{font-variant-numeric:tabular-nums}
+.insightReasonTrack{display:block;height:9px;border-radius:99px;background:var(--insight-grid);margin-top:6px;overflow:hidden}
+.insightReasonTrack i{display:block;height:100%;border-radius:99px;background:#d99b63}
+.insightEmpty{color:var(--insight-muted);font-size:12px;line-height:1.6;padding:30px 0;text-align:center}
+.insightTablePanel{margin:0 0 16px}
+.insightTableScroll{width:100%;overflow:auto;max-height:520px;overscroll-behavior-x:contain;border:1px solid var(--insight-border);border-radius:11px}
+.insightTable{border-collapse:separate;border-spacing:0;width:100%;min-width:670px;font-size:11px;color:var(--insight-ink)}
+.insightTable th,.insightTable td{padding:11px 10px;border-bottom:1px solid var(--insight-grid);text-align:start;vertical-align:middle;font-variant-numeric:tabular-nums}
+.insightTable thead th{background:#173c60;color:#fff;position:sticky;top:0;z-index:1;white-space:nowrap;font-weight:800;font-size:10px}
+.insightTable tbody tr:nth-child(even){background:rgba(50,115,156,.045)}
+.insightTable tbody th{font-weight:750}
+.insightTable tfoot th,.insightTable tfoot td{font-weight:850;background:#deebf5}
+.insightProgress{width:86px;height:6px;display:inline-block;border-radius:99px;overflow:hidden;background:#dfecf4;margin-inline-end:7px}
+.insightProgress span{display:block;height:100%;background:#188ba0;border-radius:99px}
+.insightTable td small{font-size:10px;color:var(--insight-muted)}
+/* Existing comprehensive analytics retain their filters and cards in Details. */
+.insightRoot .filterPanelCard{margin-top:16px}
+html[data-flympus-theme="dark"] .insightRoot{--insight-border:#37536d;--insight-muted:#a3bbce;--insight-ink:#e4f0fa;--insight-paper:#0f2a42;--insight-grid:#203d54}
+html[data-flympus-theme="dark"] .insightTabNav{background:#173750}
+html[data-flympus-theme="dark"] .insightTab{color:#a8c2d6}
+html[data-flympus-theme="dark"] .insightTab.active{background:#234a69;color:#e3f4ff}
+html[data-flympus-theme="dark"] .insightTab:hover{background:#1e4562;color:#fff}
+html[data-flympus-theme="dark"] .insightTable tfoot th,html[data-flympus-theme="dark"] .insightTable tfoot td{background:#214462}
+html[data-flympus-theme="dark"] .insightTable tbody tr:nth-child(even){background:rgba(255,255,255,.035)}
+html[data-flympus-language="he"] .insightRoot,html[data-flympus-language="he"] .insightTabNav{direction:rtl}
+html[data-flympus-language="he"] .insightRoot .insightHeadingActions{justify-content:flex-start}
+html[data-flympus-language="he"] .insightTable th,html[data-flympus-language="he"] .insightTable td{text-align:right}
+html.flympusLargeText .insightMetric span,html.flympusLargeText .insightSource,html.flympusLargeText .insightReason b{font-size:15px}
+html.flympusLargeText .insightMetric strong{font-size:34px}
+html.flympusLargeText .insightTab{font-size:15px;min-height:50px}
+html.flympusLargeText .insightTable,html.flympusLargeText .insightRoot .insightPanel h3{font-size:15px}
+html.flympusLargeText .insightTable thead th{font-size:13px}
+@media(max-width:930px){
+.insightCharts{grid-template-columns:minmax(0,1fr)}
+.insightMetrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+.insightRoot .insightHeading{flex-direction:column;gap:10px}
+.insightRoot .insightHeadingActions{width:100%;justify-content:stretch}
+.insightRoot .insightHeadingActions .btn{flex:1;min-width:0}
+.insightTabNav{gap:4px;padding:4px}
+.insightTab{flex:1 0 auto;font-size:10.5px;padding:9px 11px}
+.insightFilterControls>*{width:100%;min-width:0!important}
+.insightMetrics{gap:9px}
+.insightMetric{padding:12px 13px;border-radius:14px}
+.insightMetric strong{font-size:25px}
+.insightRoot .insightPanel{padding:13px}
+.insightTable{font-size:10.5px}
+}
+@media print{
+body:has(.insightRoot) .top,body:has(.insightRoot) .drawer,body:has(.insightRoot) .mobileBottomNav,
+body:has(.insightRoot) .insightHeadingActions,body:has(.insightRoot) .insightTabNav,
+body:has(.insightRoot) .insightFilterPanel,body:has(.insightRoot) #appBackBtn{display:none!important}
+.insightRoot{color:#102f51!important}
+.insightRoot .insightCharts{grid-template-columns:1fr 1fr}
+.insightRoot .insightTableScroll{max-height:none;overflow:visible}
+.insightRoot .insightChartScroll{overflow:visible}
+.insightRoot .insightPanel,.insightRoot .insightMetric{break-inside:avoid;box-shadow:none}
+.insightRoot .insightTable thead th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}

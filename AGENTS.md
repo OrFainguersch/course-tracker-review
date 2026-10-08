@@ -100,3 +100,11 @@ Any change touching mobile header positioning, bottom-nav auto-hide, pull-to-ref
 - Each additional identity must use separate named Firebase Auth browserLocalPersistence; picker metadata is display-only, never a credential or permission grant. Only primary Auth drives Firestore, and on UID changes the app locks, server-verifies active profile, and reloads UID-scoped data. Do not expose prior user's app screen to the new UID.
 - Expired secondary sessions require fresh provider sign-in. Sign out of active account leaves other accounts available; credentials are never copied to the app's own localStorage keys.
 - Bell > Notification settings should directly center the Notifications **section heading** (not the full tall card) in Settings, on desktop and mobile. Avoid conflicting top-reset scroll timers. Maintain RTL, dark theme, and large-text behavior.
+
+## Reports & Analytics · operational reporting baseline (2026-10-08)
+- Three distinct in-page views: **Planned vs Executed** (default), **Course dashboard**, **Detailed analytics** (preserve existing legacy panels and filters). No outer-tab duplicate buttons.
+- Only **submitted** course-scoped daily reports supply planned flight numbers. No draft/unsaved plan counts. Actual instructed flights come from submitted Evaluations, actual Solo flights from saved Solo records. Never include review/demo mock Evaluations in operational counts.
+- A scheduled sortie with no execution is **NOT automatically Cancelled**. Count cancellations only where a saved reason is recorded, never above the actual shortfall; remaining shortfall is **Unclassified gap**. Unplanned execution is a separate category; do not inflate execution rate above 100%.
+- Provide day/week/month grouping, date-range filtering, CSV export appropriate to current view, Print/PDF, responsive accessible charts, reason breakdown and trainee course dashboard. All data scoped to active course, user UID namespace.
+- Respect Light/Dark, English/Hebrew RTL, Large Text, desktop/mobile, print, and non-floating tab controls. Client-generated CSV must escape Excel formula injection from trainee names or cancellation text.
+- This architecture's pure data normalization, aggregation, export and localization is in assets/reports-dashboard.js and must be covered by tests/reports-dashboard.test.cjs (in review and production gates).

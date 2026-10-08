@@ -103,6 +103,9 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js" crossorigin />
 <link rel="modulepreload" href="./auth.js?v=20261008-switcher01" />
 <script src="./firebase-config.js?v=20261004-auth2"></script>
+<link rel="stylesheet" href="./assets/reports-dashboard.css?v=0767" />
+<script src="./assets/reports-dashboard.js?v=0767"></script>
+
 <script src="./storage-scope.js?v=20261006-auth8"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <style id="flympus-mobile-zoom-guard-style">
@@ -5893,7 +5896,7 @@ function applyFlympusAppPreferences(input,{themeSelectionChanged=false}={}){
 }
 applyFlympusAppPreferences();
 
-const FLYMPUS_HE_UI={
+const FLYMPUS_HE_UI={'Detailed analytics':'ניתוח מפורט','Course dashboard':'דשבורד הקורס','Reports & Analytics':'דוחות וניתוחים','REPORTS & ANALYTICS':'דוחות וניתוחים','Reporting period':'תקופת דיווח','Group by':'קיבוץ לפי','Daily, weekly and monthly execution, cancellation reasons and operational trends.':'ביצוע לפי יום, שבוע וחודש, סיבות ביטול ומגמות פעילות.','Trainee rankings, evaluations, solo activity and course completion.':'דירוג חניכים, הערכות, טיסות סולו והשלמת הקורס.',
   'Add another account':'הוסף חשבון נוסף','Other accounts':'חשבונות נוספים','Session expired':'פג תוקף ההתחברות','Sign out of this account':'התנתק מחשבון זה',
   'COURSE':'קורס','APP':'אפליקציה','My Courses':'הקורסים שלי','Course Management':'ניהול קורס','Settings':'הגדרות',
   'Roster':'סגל הקורס','Plan':'תכנון','Home':'בית','Forms':'טפסים','Reports':'דוחות',
@@ -6752,7 +6755,7 @@ const flympusPushBootScreen=String(flympusPushBootParams.get('pushScreen')||''),
    Push navigation is the only deliberate cold-launch screen override. */
 initialUiState.screen='home';
 if(flympusPushBootScreen&&['home','courses','roster','planned','record','reports','evaluation','safety','exams'].includes(flympusPushBootScreen))initialUiState.screen=flympusPushBootScreen;
-const state={screen:'home',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',rosterStatuses:[],rosterRoles:[],rosterDateFrom:'',rosterDateTo:'',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',reportTrainees:[],reportInstructors:[],reportSyllabi:[],reportDateFrom:'',reportDateTo:'',myCoursesStatuses:[],myCoursesSectors:[],myCoursesPhases:[],myCoursesPlatforms:[],myCoursesTrainings:[],myCoursesCountries:[],myCoursesRoles:[],myCoursesDateFrom:'',myCoursesDateTo:'',packageNameFilters:[],packagePhaseFilters:[],packagePlatformFilters:[],packageCategoryFilters:[],packageContextFilters:[],safetyView:'new',evaluationView:'new',examsView:'new',...initialUiState};
+const state={screen:'home',reportTab:'operations',reportGranularity:'week',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',rosterStatuses:[],rosterRoles:[],rosterDateFrom:'',rosterDateTo:'',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',reportTrainees:[],reportInstructors:[],reportSyllabi:[],reportDateFrom:'',reportDateTo:'',myCoursesStatuses:[],myCoursesSectors:[],myCoursesPhases:[],myCoursesPlatforms:[],myCoursesTrainings:[],myCoursesCountries:[],myCoursesRoles:[],myCoursesDateFrom:'',myCoursesDateTo:'',packageNameFilters:[],packagePhaseFilters:[],packagePlatformFilters:[],packageCategoryFilters:[],packageContextFilters:[],safetyView:'new',evaluationView:'new',examsView:'new',...initialUiState};
 let courseTailorEditSnapshot=null;
 let advancedArchitectureEditSnapshot=null;
 let courseTailorSessionDirty=false;
@@ -6816,7 +6819,7 @@ let appNavHistory=[];try{const stored=JSON.parse(sessionStorage.getItem('ct-revi
 if(state.screen==='home')appNavHistory=[];else if(appRootScreens.has(state.screen))appNavHistory=['home'];else if(!appNavHistory.length||appNavHistory[0]!=='home')appNavHistory=['home',...appNavHistory.filter(x=>x!=='home')];
 function saveAppNavHistory(){try{sessionStorage.setItem('ct-review-nav-history',JSON.stringify(appNavHistory))}catch{}}
 saveAppNavHistory();
-function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,safetyView:state.safetyView,evaluationView:state.evaluationView,examsView:state.examsView,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace,packageWorkspace:state.packageWorkspace,packageFocusId:state.packageFocusId,packageEditId:state.packageEditId,emergencyProfileFilter:state.emergencyProfileFilter,builderType:state.builderType,builderPhase:state.builderPhase,builderPlatform:state.builderPlatform,builderTraining:state.builderTraining,builderProgram:state.builderProgram,builderDay:state.builderDay,builderCountry:state.builderCountry,builderName:state.builderName,builderNameManual:state.builderNameManual,builderCode:state.builderCode,builderCodeManual:state.builderCodeManual,builderStartsOn:state.builderStartsOn,libraryProfession:state.libraryProfession,packageCategoryFilter:state.packageCategoryFilter,myCoursesStatus:state.myCoursesStatus,myCoursesSector:state.myCoursesSector,myCoursesPhase:state.myCoursesPhase,myCoursesPlatform:state.myCoursesPlatform,myCoursesCountry:state.myCoursesCountry,myCoursesTraining:state.myCoursesTraining,myCoursesRole:state.myCoursesRole,myCoursesFiltersOpen:state.myCoursesFiltersOpen,rosterStatuses:state.rosterStatuses,rosterRoles:state.rosterRoles,rosterDateFrom:state.rosterDateFrom,rosterDateTo:state.rosterDateTo,reportTrainees:state.reportTrainees,reportInstructors:state.reportInstructors,reportSyllabi:state.reportSyllabi,reportDateFrom:state.reportDateFrom,reportDateTo:state.reportDateTo,myCoursesStatuses:state.myCoursesStatuses,myCoursesSectors:state.myCoursesSectors,myCoursesPhases:state.myCoursesPhases,myCoursesPlatforms:state.myCoursesPlatforms,myCoursesTrainings:state.myCoursesTrainings,myCoursesCountries:state.myCoursesCountries,myCoursesRoles:state.myCoursesRoles,myCoursesDateFrom:state.myCoursesDateFrom,myCoursesDateTo:state.myCoursesDateTo,packageNameFilters:state.packageNameFilters,packagePhaseFilters:state.packagePhaseFilters,packagePlatformFilters:state.packagePlatformFilters,packageCategoryFilters:state.packageCategoryFilters,packageContextFilters:state.packageContextFilters}))}catch{}}
+function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,safetyView:state.safetyView,evaluationView:state.evaluationView,examsView:state.examsView,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace,packageWorkspace:state.packageWorkspace,packageFocusId:state.packageFocusId,packageEditId:state.packageEditId,emergencyProfileFilter:state.emergencyProfileFilter,builderType:state.builderType,builderPhase:state.builderPhase,builderPlatform:state.builderPlatform,builderTraining:state.builderTraining,builderProgram:state.builderProgram,builderDay:state.builderDay,builderCountry:state.builderCountry,builderName:state.builderName,builderNameManual:state.builderNameManual,builderCode:state.builderCode,builderCodeManual:state.builderCodeManual,builderStartsOn:state.builderStartsOn,libraryProfession:state.libraryProfession,packageCategoryFilter:state.packageCategoryFilter,myCoursesStatus:state.myCoursesStatus,myCoursesSector:state.myCoursesSector,myCoursesPhase:state.myCoursesPhase,myCoursesPlatform:state.myCoursesPlatform,myCoursesCountry:state.myCoursesCountry,myCoursesTraining:state.myCoursesTraining,myCoursesRole:state.myCoursesRole,myCoursesFiltersOpen:state.myCoursesFiltersOpen,rosterStatuses:state.rosterStatuses,rosterRoles:state.rosterRoles,rosterDateFrom:state.rosterDateFrom,rosterDateTo:state.rosterDateTo,reportTrainees:state.reportTrainees,reportInstructors:state.reportInstructors,reportSyllabi:state.reportSyllabi,reportDateFrom:state.reportDateFrom,reportDateTo:state.reportDateTo,reportTab:state.reportTab,reportGranularity:state.reportGranularity,myCoursesStatuses:state.myCoursesStatuses,myCoursesSectors:state.myCoursesSectors,myCoursesPhases:state.myCoursesPhases,myCoursesPlatforms:state.myCoursesPlatforms,myCoursesTrainings:state.myCoursesTrainings,myCoursesCountries:state.myCoursesCountries,myCoursesRoles:state.myCoursesRoles,myCoursesDateFrom:state.myCoursesDateFrom,myCoursesDateTo:state.myCoursesDateTo,packageNameFilters:state.packageNameFilters,packagePhaseFilters:state.packagePhaseFilters,packagePlatformFilters:state.packagePlatformFilters,packageCategoryFilters:state.packageCategoryFilters,packageContextFilters:state.packageContextFilters}))}catch{}}
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function currentUserCourseRole(){
   try{
@@ -10593,7 +10596,7 @@ function switchCourseByKey(key,opts={}){
   const record=courseByKey(key);if(!record)return false;
   if(!opts.force&&!instructorCourseRole(courseKey(record),currentUserId)){toast('This course is not assigned to you');return false}
   currentCourseId=courseKey(record);Object.assign(currentCourseMeta,courseRuntimeMeta(record));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta));
-  state.editingEval=null;state.evaluationTraineeId=null;state.selectedInstructor=currentUserId;state.selectedTrainee=courseTrainees()[0]?.id||null;state.profileTab='overview';state.reportTrainee='ALL';state.reportInstructor='ALL';state.reportSyllabus='ALL';state.reportTrainees=[];state.reportInstructors=[];state.reportSyllabi=[];state.reportDateFrom='';state.reportDateTo='';state.screen=opts.screen||'home';appNavHistory=state.screen==='home'?[]:['home'];saveUiState();saveAppNavHistory();
+  state.editingEval=null;state.evaluationTraineeId=null;state.selectedInstructor=currentUserId;state.selectedTrainee=courseTrainees()[0]?.id||null;state.profileTab='overview';state.reportTrainee='ALL';state.reportInstructor='ALL';state.reportSyllabus='ALL';state.reportTrainees=[];state.reportInstructors=[];state.reportSyllabi=[];state.reportDateFrom='';state.reportDateTo='';state.reportTab='operations';state.reportGranularity='week';state.screen=opts.screen||'home';appNavHistory=state.screen==='home'?[]:['home'];saveUiState();saveAppNavHistory();
   if(opts.render!==false){toast((record.name||'Course')+' opened');render()}return true;
 }
 function courseMetaIconSvg(kind){
@@ -10646,7 +10649,7 @@ function getSettings(){try{return JSON.parse(localStorage.getItem('ct-review-set
 
 function plannedVsExecuted(){
  const reports=getDailyReports(),draftWrap=getActivityDraft('planned'),draft=draftWrap?.data||{},date=state.planDate||draft.date||new Date().toISOString().slice(0,10),saved=reports.find(x=>x.date===date)||{},soloDraft=draft.solo||{};
- const executedInstructed=allEvaluationsForAnalytics().filter(x=>x.date===date).length;
+ const executedInstructed=getEvaluations().filter(x=>(x.flightDate||x.date)===date).length;
  const soloRows=getSoloFlights().filter(x=>x.date===date).sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
  const pi=Number(state.planInstructed??draft.plannedInstructed??saved.plannedInstructed??0),ps=Number(state.planSolo??draft.plannedSolo??saved.plannedSolo??0);
  const total=pi+ps,executedSolo=soloRows.length,executed=executedInstructed+executedSolo,instructedCancelled=Math.max(0,pi-executedInstructed),soloCancelled=Math.max(0,ps-executedSolo),cancelled=instructedCancelled+soloCancelled;
@@ -10761,7 +10764,7 @@ function examsScreen(){
  return head+
  '<section class="card formCard recordSingleForm"><div class="formTitle"><h2>Record exam</h2><span class="autoDraftNote" id="examDraftBadge">'+(draft?draftSavedLabel('exams'):'Auto-save ready')+'</span></div><form id="examForm">'+requiredCompletionPanelShell('exam')+'<div class="fields"><div class="field"><label>Date</label><input class="input dateDmy" name="date" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" required value="'+esc(dateInputValue(todayIsoDate()))+'" placeholder="DD/MM/YYYY"></div><div class="field"><label>Trainee</label><select name="trainee" required><option value="" selected disabled>Select trainee</option>'+alphaByName(courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active')).map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('')+'</select></div><div class="field"><label>Exam</label><select name="exam" id="examTypeSelect" required><option value="" '+(currentExam?'':'selected')+' disabled>Select exam</option>'+examDefs.map(x=>'<option value="'+esc(x.name)+'" data-pass="'+(x.pass==null?'':x.pass)+'" '+(currentExam===x.name?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div><div class="field"><label>Passing grade</label><input class="input" id="examPassInput" name="pass" type="number" min="0" max="100" required value="'+defaultPass+'"></div><div class="field"><label>Grade</label><input class="input" name="grade" type="number" min="0" max="100" required></div></div><div class="toolbar recordFormActions"><button class="btn sky" type="submit">Submit exam result</button><button class="btn secondary discardDraft" type="button" id="discardExamDraft">Discard draft</button></div></form></section>';
 }
-function reports(){
+function reportsLegacy(){
  const traineeSel=normalizeMultiFilterValue(state.reportTrainees),instructorSel=normalizeMultiFilterValue(state.reportInstructors),syllabusSel=normalizeMultiFilterValue(state.reportSyllabi),dateFrom=state.reportDateFrom||'',dateTo=state.reportDateTo||'';
  let rows=allEvaluationsForAnalytics().filter(x=>multiFilterMatches(x.traineeId,traineeSel)&&multiFilterMatches(x.instructorId,instructorSel)&&multiFilterMatches(x.syllabus,syllabusSel)&&filterDateMatches(x.date||x.flightDate,dateFrom,dateTo));
  let examRows=[...courseMockExamAttempts(),...getExamRecords()].filter(x=>multiFilterMatches(x.traineeId,traineeSel)&&filterDateMatches(x.date,dateFrom,dateTo));
@@ -10785,6 +10788,46 @@ function reports(){
  '<section class="reportKpis"><div><strong>'+courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active').length+'</strong><span>Active trainees</span></div><div><strong>'+rows.length+'</strong><span>Evaluations</span></div><div><strong>'+(avg==null?'—':avg.toFixed(1))+'</strong><span>Average grade</span></div><div><strong>'+safetyRows.length+'</strong><span>Safety events</span></div><div><strong>'+(passRate==null?'—':passRate.toFixed(0)+'%')+'</strong><span>Exam pass rate</span></div></section>'+
  '<div class="reportsGrid"><section class="card settingBox"><h3>Emergency exposure</h3><p class="sub">Recorded emergency practice across matched evaluated flights.</p>'+reportBars(emergencyDist,10)+'</section><section class="card settingBox"><h3>Syllabus activity</h3><p class="sub">Evaluations by syllabus.</p>'+reportBars(syllabusDist,10)+'</section><section class="card settingBox"><h3>Evaluation activity by trainee</h3>'+reportBars(traineeDist,10)+'</section><section class="card settingBox"><h3>Safety severity</h3>'+reportBars(safetyDist,8)+'</section><section class="card settingBox"><h3>Monthly activity</h3>'+reportBars(monthly,12)+'</section></div>';
 }
+
+/* Reports & Analytics: dedicated operational and trainee dashboards, with
+   detailed analytics retained unchanged as a third internal tab. Plans and
+   actual activity NEVER use demo evaluations for operational metrics. */
+function reportOpsData(){
+  return window.FLYMPUS_REPORTS?.operations?.({
+    plans:getDailyReports(),evaluations:getEvaluations(),soloFlights:getSoloFlights(),
+    from:state.reportDateFrom||'',to:state.reportDateTo||'',
+    granularity:state.reportGranularity||'week'
+  });
+}
+function reportCourseDashboardData(){
+  const trainees=courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active');
+  const progressions={};
+  trainees.forEach(t=>{progressions[t.id]=traineeResolvedGuidedProgression(t)||{current:t.currentSyllabus||''}});
+  return window.FLYMPUS_REPORTS?.dashboard?.({
+    trainees,evaluations:getEvaluations(),soloFlights:getSoloFlights(),progressions,
+    from:state.reportDateFrom||'',to:state.reportDateTo||''
+  })
+}
+function reports(){
+  const tab=['operations','dashboard','details'].includes(state.reportTab)?state.reportTab:'operations';
+  const controls=[['operations','Planned vs Executed'],['dashboard','Course dashboard'],['details','Detailed analytics']];
+  const nav='<nav class="insightTabNav" id="reportInnerTabs" aria-label="Analytics views">'+controls.map(([key,label])=>
+    '<button type="button" class="insightTab '+(tab===key?'active':'')+'" data-report-tab="'+key+'" aria-current="'+(tab===key?'page':'false')+'">'+label+'</button>').join('')+'</nav>';
+  if(tab==='details')return '<div class="insightRoot">'+nav+reportsLegacy()+'</div>';
+  const htmlData=tab==='operations'?
+    window.FLYMPUS_REPORTS?.plannedHtml?.(reportOpsData(),getFlympusAppPreferences().language==='he'?'he':'en'):
+    window.FLYMPUS_REPORTS?.dashboardHtml?.(reportCourseDashboardData(),getFlympusAppPreferences().language==='he'?'he':'en');
+  const dateFrom=state.reportDateFrom||'',dateTo=state.reportDateTo||'',
+    reportSubtitle=tab==='operations'?'Daily, weekly and monthly execution, cancellation reasons and operational trends.':'Trainee rankings, evaluations, solo activity and course completion.';
+  const periodSelector=tab==='operations'?'<label class="insightGroupBy">Group by <select class="input" id="reportGranularity" aria-label="Group by time period">'+
+     [['day','Day'],['week','Week'],['month','Month']].map(([v,label])=>'<option value="'+v+'" '+((state.reportGranularity||'week')===v?'selected':'')+'>'+label+'</option>').join('')+'</select></label>':'';
+  return '<div class="insightRoot"><div class="insightHeading"><div><div class="eyebrow">REPORTS & ANALYTICS</div><h1 class="pageTitle">Reports & Analytics</h1><p class="sub">'+reportSubtitle+'</p></div>'+
+   '<div class="insightHeadingActions"><button class="btn secondary small" id="reportsCsv" type="button">⇩ Export CSV</button><button class="btn sky small" id="reportsPrint" type="button">Print / PDF</button></div></div>'+
+   nav+'<section class="card insightFilterPanel"><div class="insightFilterHeader"><strong>Reporting period</strong><button class="btn secondary small" id="reportsReset" type="button">Reset filters</button></div><div class="insightFilterControls">'+
+   dateRangeFilterHtml('reportDate','Date range',dateFrom,dateTo)+periodSelector+'</div></section>'+
+   (htmlData||'<section class="card settingBox"><p class="sub">Analytics could not be loaded.</p></section>')+'</div>'
+}
+
 const flympusBottomScreenTemplates=new Map();
 let flympusBottomScreenPrewarmHandle=null;
 const FLYMPUS_BOTTOM_ROOT_SCREENS=['roster','planned','home','record','reports'];
@@ -11115,12 +11158,32 @@ function bindActivity(){
   });
 }
 function bindReports(){
+ document.querySelectorAll('[data-report-tab]').forEach(btn=>btn.onclick=()=>{
+   const next=btn.dataset.reportTab;
+   if(!['operations','dashboard','details'].includes(next)||state.reportTab===next)return;
+   state.reportTab=next;saveUiState();render();
+   const nav=$('#reportInnerTabs');
+   if(nav)requestAnimationFrame?.(()=>nav.scrollIntoView?.({block:'start',behavior:'auto'}))
+ });
+ if($('#reportGranularity'))$('#reportGranularity').onchange=e=>{
+   state.reportGranularity=['day','week','month'].includes(e.target.value)?e.target.value:'week';
+   saveUiState();render()
+ };
  [['reportTrainee','reportTrainees'],['reportInstructor','reportInstructors'],['reportSyllabus','reportSyllabi']].forEach(([id,key])=>{if($('#'+id))$('#'+id).addEventListener('filterapply',e=>{state[key]=e.detail?.values||[];saveUiState();render()})});
  if($('#reportDateFrom'))$('#reportDateFrom').onchange=e=>{state.reportDateFrom=normalizeDateValue(e.target.value)||'';saveUiState();render()};
  if($('#reportDateTo'))$('#reportDateTo').onchange=e=>{state.reportDateTo=normalizeDateValue(e.target.value)||'';saveUiState();render()};
  if($('#reportsReset'))$('#reportsReset').onclick=()=>{state.reportTrainees=[];state.reportInstructors=[];state.reportSyllabi=[];state.reportDateFrom='';state.reportDateTo='';saveUiState();render()};
  if($('#reportsPrint'))$('#reportsPrint').onclick=()=>window.print();
  if($('#reportsCsv'))$('#reportsCsv').onclick=()=>{
+   const tab=['operations','dashboard','details'].includes(state.reportTab)?state.reportTab:'operations';
+   if(tab!=='details'){
+     const analytics=window.FLYMPUS_REPORTS;
+     const csv=tab==='operations'?analytics?.operationsCsv?.(reportOpsData()):analytics?.dashboardCsv?.(reportCourseDashboardData());
+     if(!csv){toast('No report data available','error');return}
+     const link=document.createElement('a'),uri=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+     link.href=uri;link.download=tab==='operations'?'planned-vs-executed.csv':'course-dashboard.csv';link.click();
+     setTimeout(()=>URL.revokeObjectURL(uri),1500);return;
+   }
    const traineeSel=normalizeMultiFilterValue(state.reportTrainees),instructorSel=normalizeMultiFilterValue(state.reportInstructors),syllabusSel=normalizeMultiFilterValue(state.reportSyllabi);
    const rows=allEvaluationsForAnalytics().filter(x=>multiFilterMatches(x.traineeId,traineeSel)&&multiFilterMatches(x.instructorId,instructorSel)&&multiFilterMatches(x.syllabus,syllabusSel)&&filterDateMatches(x.date||x.flightDate,state.reportDateFrom,state.reportDateTo));
    const out=[['Date','Trainee','Instructor','Syllabus','Grade'],...rows.map(x=>[formatDateDMY(x.date||x.flightDate),allTrainees().find(t=>t.id===x.traineeId)?.name||x.traineeId,allInstructors().find(i=>i.id===x.instructorId)?.name||x.instructorId,x.syllabus,x.grade])];
@@ -11163,7 +11226,7 @@ function bindPlanned(){
    const plannedInstructed=Number($('#pvePlannedInstructed').value||0),plannedSolo=Number($('#pvePlannedSolo').value||0),plannedTotal=plannedInstructed+plannedSolo,cancellations=collectCancellations(),missing=[...document.querySelectorAll('.pveCancellationReason')].filter(x=>!x.value);
    if(plannedTotal<=0){toast('Set at least one planned flight before submitting the daily report.','error');document.querySelector('.pvePlanGrid')?.scrollIntoView?.({behavior:'smooth',block:'center'});return}
    if(missing.length){missing.forEach(x=>x.classList.add('fieldInvalidControl'));toast('Select a cancellation reason for every non-executed flight before submitting.','error');missing[0].scrollIntoView?.({behavior:'smooth',block:'center'});missing[0].focus?.();return}
-   const arr=getDailyReports(),date=normalizeDateValue($('#pveDate').value),soloCount=getSoloFlights().filter(x=>x.date===date).length,instructedCount=allEvaluationsForAnalytics().filter(x=>x.date===date).length,obj={date,plannedInstructed,plannedSolo,instructedExecuted:instructedCount,soloExecuted:soloCount,cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),savedAt:new Date().toISOString()},next=arr.some(x=>x.date===date)?arr.map(x=>x.date===date?obj:x):[obj,...arr];
+   const arr=getDailyReports(),date=normalizeDateValue($('#pveDate').value),soloCount=getSoloFlights().filter(x=>x.date===date).length,instructedCount=getEvaluations().filter(x=>(x.flightDate||x.date)===date).length,obj={date,plannedInstructed,plannedSolo,instructedExecuted:instructedCount,soloExecuted:soloCount,cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),savedAt:new Date().toISOString()},next=arr.some(x=>x.date===date)?arr.map(x=>x.date===date?obj:x):[obj,...arr];
    saveDailyReports(next);discardActivityDraft('planned');state.soloEditId=null;delete state.planInstructed;delete state.planSolo;toast('Daily report submitted','success');render()
  };
 }
