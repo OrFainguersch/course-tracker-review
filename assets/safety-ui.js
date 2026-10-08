@@ -123,7 +123,7 @@ function create(ctx){
       if(!event||!active()||!model.recipientUids(event).includes(uid())||model.acknowledged(event,uid()))return;
       if(!await ctx.confirm('Confirm that you have read this safety event? Merely viewing it does not acknowledge it.',{title:'Acknowledge safety event',confirmLabel:'Acknowledge'}))return;
       b.disabled=true;
-      try{await api().acknowledge(ctx.courseId(),id);notify('Safety event acknowledged.','success')}
+      try{if(!model.viewed(event,uid()))await api().viewed(ctx.courseId(),id);await api().acknowledge(ctx.courseId(),id);notify('Safety event acknowledged.','success')}
       catch(err){notify(String(err?.message||err),'error');b.disabled=false}
     });
     document.querySelectorAll('[data-safety-status]').forEach(b=>b.onclick=async()=>{
