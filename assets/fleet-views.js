@@ -48,7 +48,8 @@ function schedule(c){
  const duration=current?.estimatedMinutes??30,depart=current?.time||'08:00';
  const timeline=M.flightTimeline({date:c.date,time:depart,mode,estimatedMinutes:duration,briefingMinutes:briefing,debriefMinutes:debrief},c.timingDefaults);
  const select=(name,items,value,required=true)=>'<select class="input" name="'+name+'" '+(required?'required':'')+'><option value="" disabled '+(!value?'selected':'')+'>'+L('Select','בחר')+'</option>'+items.map(x=>O(x.id,x.name||x.tail,value)).join('')+'</select>';
- const field=(label,inner,extra='')=>'<div class="field" '+extra+'><label>'+label+'</label>'+inner+'</div>';
+ const field=(label,inner,extra='',action='')=>'<div class="field" '+extra+'><div class="fleetFieldHead"><label>'+label+'</label>'+action+'</div>'+inner+'</div>';
+ const requiredLabel=label=>label+' <span class="fleetRequired" aria-hidden="true">*</span>';
  const timeMark=(label,key)=>'<div><span>'+label+'</span><strong data-flight-clock="'+key+'">'+E(timeline?.clock[key]||'—')+'</strong></div>';
  const timelineBlock='<div class="fleetTimeFlow" aria-live="polite"><div class="fleetTimeFlowHeading"><b>'+L('Calculated timeline','ציר זמנים מחושב')+'</b><small>'+L('Instructor and trainee are reserved from briefing to the end of debriefing','המדריך והחניך משוריינים מתחילת התדריך ועד לסיום התחקיר')+'</small></div>'+
   '<div class="fleetTimeFlowTrack"><span data-phase="brief" style="flex:'+briefing+'">'+L('Briefing','תדריך')+'</span><span data-phase="flight" style="flex:'+duration+'">'+L('Flight','טיסה')+'</span><span data-phase="debrief" style="flex:'+debrief+'">'+L('Debrief','תחקיר')+'</span></div>'+
@@ -70,15 +71,15 @@ function schedule(c){
  return '<div class="fleetSchedule fleetSchedulePlain" id="fleetFlightBoard">'+
  (can?'<form id="fleetSortieForm" class="fleetSortieForm"><div class="fleetPlanFormHeading"><div><h2>'+L(current?'Edit scheduled flight':'Add scheduled flight',current?'עריכת טיסה משובצת':'הוספת טיסה מתוכננת')+'</h2><p>'+L('Plan the complete flight, including briefing and debriefing.','תכנן את כל הטיסה, כולל תדריך ותחקיר.')+'</p></div></div>'+
  '<input type="hidden" name="id" value="'+E(current?.id||'')+'"><div class="fleetSortieFormGrid">'+
- field(L('Takeoff time','שעת המראה')+' *','<input class="input" name="time" type="time" required value="'+E(depart)+'">')+
- field(L('Planned duration (min)','משך טיסה מתוכנן (דקות)')+' *','<input class="input" name="estimatedMinutes" type="number" required min="1" max="720" step="1" value="'+E(duration)+'">')+
- field(L('Aircraft','כלי טיס')+' * <button class="fleetInlineFleet" type="button" data-go="fleet">'+L('Open Fleet','פתח צי כלי טיס')+' ↗</button>',select('aircraftId',available.map(x=>({id:x.id,name:x.tail})),current?.aircraftId||''))+
+ field(requiredLabel(L('Takeoff time','שעת המראה')),'<input class="input" name="time" type="time" required value="'+E(depart)+'">')+
+ field(requiredLabel(L('Planned duration (min)','משך טיסה מתוכנן (דקות)')),'<input class="input" name="estimatedMinutes" type="number" required min="1" max="720" step="1" value="'+E(duration)+'">')+
+ field(requiredLabel(L('Aircraft','כלי טיס')),select('aircraftId',available.map(x=>({id:x.id,name:x.tail})),current?.aircraftId||''),'','<button class="fleetInlineFleet" type="button" data-go="fleet">'+L('Open Fleet','פתח צי כלי טיס')+' ↗</button>')+
  field(L('Flight type','סוג טיסה'),'<select class="input" name="mode" id="fleetFlightMode">'+O('INSTRUCTED',L('Instructed','מודרכת'),mode)+O('SOLO',L('Solo','סולו'),mode)+'</select>')+
- field(L('Trainee','חניך')+' *',select('traineeId',c.trainees,current?.traineeId||''))+
- '<div class="field" data-fleet-instructor-field><label>'+L('Instructor','מדריך')+' <span class="fleetRequired">*</span></label>'+select('instructorId',c.instructors,current?.instructorId||'',false)+'</div>'+
- field(L('Syllabus','סילבוס')+' *',select('syllabus',c.syllabi.map(s=>({id:s,name:s})),current?.syllabus||''))+
- field(L('Briefing (min)','תדריך (דקות)')+' *','<input class="input" name="briefingMinutes" type="number" required min="0" max="180" step="1" value="'+E(briefing)+'">')+
- field(L('Debriefing (min)','תחקיר (דקות)')+' *','<input class="input" name="debriefMinutes" type="number" required min="0" max="180" step="1" value="'+E(debrief)+'">')+
+ field(requiredLabel(L('Trainee','חניך')),select('traineeId',c.trainees,current?.traineeId||''))+
+ '<div class="field" data-fleet-instructor-field><div class="fleetFieldHead"><label>'+requiredLabel(L('Instructor','מדריך'))+'</label></div>'+select('instructorId',c.instructors,current?.instructorId||'',false)+'</div>'+
+ field(requiredLabel(L('Syllabus','סילבוס')),select('syllabus',c.syllabi.map(s=>({id:s,name:s})),current?.syllabus||''))+
+ field(requiredLabel(L('Briefing (min)','תדריך (דקות)')),'<input class="input" name="briefingMinutes" type="number" required min="0" max="180" step="1" value="'+E(briefing)+'">')+
+ field(requiredLabel(L('Debriefing (min)','תחקיר (דקות)')),'<input class="input" name="debriefMinutes" type="number" required min="0" max="180" step="1" value="'+E(debrief)+'">')+
  field(L('Planning notes (optional)','הערות לתכנון (לא חובה)'),'<textarea class="input" name="note" rows="2" maxlength="500" placeholder="'+L('Flight planning notes','הערות לתכנון הטיסה')+'">'+E(current?.note||'')+'</textarea>','data-plan-notes')+
  '</div>'+timelineBlock+'<div class="toolbar fleetPlanFormActions"><button class="btn sky" type="submit" '+(!available.length?'disabled':'')+'>'+L(current?'Save changes':'Add to board',current?'שמור שינויים':'הוסף ללוח')+'</button>'+(current?'<button class="btn secondary" type="button" id="fleetFlightCancel">'+L('Cancel','ביטול')+'</button>':'')+'</div>'+
  (available.length?'':'<p class="fleetConflict">'+L('No serviceable aircraft. Update fleet status first.','אין כלים שמישים. יש לעדכן תחילה את לוח השמישויות.')+'</p>')+'<p class="fleetPlanScopeNote" role="note">'+L('Conflict checks currently cover flights saved on this device only. Shared scheduling across devices is not yet enabled.','בדיקות חפיפה כוללות כעת רק טיסות השמורות במכשיר זה. שיבוץ משותף בין מכשירים עדיין אינו פעיל.')+'</p></form>':'')+
