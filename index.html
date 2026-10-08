@@ -8702,7 +8702,7 @@ const safetyUI=window.FLYMPUS_SAFETY_UI.create({
   readLocal:()=>readCourseArray('ct-review-safety'),saveLocal:saveSafetyRecords,
   courseId:()=>String(currentCourseId),courseName:()=>String(currentCourseMeta.courseName||currentCourseId),
   courseManager:()=>currentUserCourseRole()==='COURSE_MANAGER',screen:()=>state.screen,
-  isDuty:isDutyTrainee,instructors:()=>courseInstructors(),
+  isDuty:isDutyTrainee,instructors:()=>courseInstructors().filter(p=>courseMembershipFor(p.id,'INSTRUCTOR',{status:p.status||'Active'}).status!=='Inactive'),
   instructorRole:p=>courseMembershipFor(p.id,'INSTRUCTOR',{role:p.role||'INSTRUCTOR'}).role,
   startGlobalInbox:()=>safetyGlobal.start(),renderGlobalInbox:()=>safetyGlobal.render(),
   render:()=>render(),
