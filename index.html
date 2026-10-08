@@ -154,9 +154,11 @@ html.flympusColdBoot #flympusAuthRoot{
    still owns notification permission/subscription later; this early call only
    makes the next cold launch independent of mobile network latency. */
 try{
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261007-viewport-chrome-0758',{scope:'./',updateViaCache:'none'}).catch(()=>{})
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261008-safety-0780',{scope:'./',updateViaCache:'none'}).catch(()=>{})
 }catch{}
 </script>
+<meta name="flympus-deploy-commit" content="__FLYMPUS_DEPLOY_COMMIT__">
+<script defer src="./assets/app-update-notice.js?v=20261008-update01"></script>
 <title>FLYMPUS — Train. Track. Progress.</title>
 <style>
 :root{--navy:#07294c;--navy2:#0a315c;--sky:#13a8ee;--bg:#f4f8fc;--card:#fff;--line:#dbe5ef;--muted:#64748b;--text:#0f172a;--green:#047857;--amber:#b45309;--rose:#be123c;--violet:#7c3aed;--shadow:0 10px 30px rgba(31,71,112,.08)}
@@ -322,6 +324,8 @@ main{padding:16px 14px calc(30px + env(safe-area-inset-bottom));max-width:1220px
 .homePulseIcon .navIcon,.homePulseIcon svg{width:21px;height:21px}.homePulseIcon svg{stroke:currentColor;stroke-width:1.8}.homePulseIcon.safety{background:var(--record-safety-soft);color:var(--record-safety)}
 .empty .icon.safetyIcon .navIcon,.empty .icon.safetyIcon svg{width:38px;height:38px}.empty .icon.safetyIcon svg{stroke:var(--record-safety);stroke-width:1.6}
 .homeQuickBtn em{margin-left:auto;font-style:normal;background:#f04438;color:#fff;min-width:19px;height:19px;padding:0 5px;border-radius:99px;display:grid;place-items:center;font-size:8px}
+.homePulseCard[data-go="safety"]{appearance:none;display:block;width:100%;font:inherit;color:inherit;text-align:center;cursor:pointer}
+.homePulseCard[data-go="safety"]:focus-visible{outline:3px solid #2584d7;outline-offset:3px}
 .homePulseGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .homePulseCard{border:1px solid #e4ecf4;border-radius:16px;padding:12px 9px;background:#fff;text-align:center;min-height:112px}
 .homePulseIcon{width:38px;height:38px;margin:0 auto 7px;border-radius:50%;display:grid;place-items:center;background:#eef6ff;color:#087cf0;font-size:18px}
@@ -8874,7 +8878,7 @@ function home(){
        '<div class="homePulseCard"><div class="homePulseIcon">◔</div><div class="homePulseValue">'+avgProgress+'%</div><div class="homePulseLabel">Average Progress</div><div class="homePulseNote">Course status</div></div>'+
        '<div class="homePulseCard"><div class="homePulseIcon">✈</div><div class="homePulseValue">'+weeklyFlights+'</div><div class="homePulseLabel">Flights Completed<br>This Week</div><div class="homePulseNote neutral">'+weekly.instructed+' '+(homeHebrew?'מודרכות':'Instructed')+' · '+weekly.solo+' '+(homeHebrew?'סולו':'Solo')+'</div></div>'+
        '<div class="homePulseCard"><div class="homePulseIcon" style="background:#f7f0df;color:#8a6a22">★</div><div class="homePulseValue">'+(avgGrade?avgGrade.toFixed(1):'—')+'</div><div class="homePulseLabel">Average Grade</div><div class="homePulseNote">Active trainees</div></div>'+
-       '<button type="button" class="homePulseCard" data-go="safety" style="text-align:start;cursor:pointer"><div class="homePulseIcon safety">'+navIconSvg('safety')+'</div><div class="homePulseValue">'+openSafety+'</div><div class="homePulseLabel">Open Safety Events</div><div class="homePulseNote">'+(openSafety===0?'No open events':'Needs handling')+'</div></button>'+
+       '<button type="button" class="homePulseCard" data-go="safety"><div class="homePulseIcon safety">'+navIconSvg('safety')+'</div><div class="homePulseValue">'+openSafety+'</div><div class="homePulseLabel">Open Safety Events</div><div class="homePulseNote">'+(openSafety===0?'No open events':'Needs handling')+'</div></button>'+
      '</div>'+
    '</section>'+
    '<section class="homePrimaryGrid">'+
@@ -9185,7 +9189,7 @@ function syncNotificationPreferenceControls(){
   });
 }
 
-const FLYMPUS_PUSH_SW='./sw.js',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
+const FLYMPUS_PUSH_SW='./sw.js?v=20261008-safety-0780',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
 let flympusPushConfigCache=null,flympusPushConfigPromise=null;
 function getFlympusPushUserEnabled(){
   try{

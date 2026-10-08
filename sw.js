@@ -2,7 +2,7 @@
    - Instant PWA cold-start from a versioned same-origin app-shell cache
    - Background revalidation so deployments replace the cached shell safely
    - Web Push delivery and notification navigation */
-const FLYMPUS_SW_VERSION='2026-10-08-ops-reports-0767';
+const FLYMPUS_SW_VERSION='2026-10-08-safety-0780';
 const SHELL_CACHE='flympus-shell-'+FLYMPUS_SW_VERSION;
 const DEFAULT_ICON='./assets/flympus-app-icon.webp';
 const SHELL_URLS=[
@@ -13,6 +13,11 @@ const SHELL_URLS=[
   './account-switcher.js?v=20261008-switcher01',
   './assets/reports-dashboard.js?v=0767',
   './assets/reports-dashboard.css?v=0767',
+  './assets/safety-workflow.css?v=20261008-safety02',
+  './assets/safety-workflow.js?v=20261008-safety01',
+  './assets/safety-global-inbox.js?v=20261008-safety02',
+  './assets/safety-ui.js?v=20261008-safety02',
+  './assets/app-update-notice.js?v=20261008-update01',
   './firebase-config.js?v=20261004-auth2',
   './storage-scope.js?v=20261006-auth8',
   './assets/evaluation-voice.js?v=0742',
@@ -97,6 +102,12 @@ self.addEventListener('fetch',event=>{
     event.respondWith((async()=>{
       const cache=await caches.open(SHELL_CACHE);
       const cached=await cache.match('./')||await cache.match('./index.html');
+      /* A user-selected update must fetch the new HTML, rather than replaying
+         an earlier offline shell for another launch. Normal opens stay instant. */
+      if(url.searchParams.has('flympusFresh')){
+        const latest=await updateNavigationCache(request);
+        return latest||cached||offlineShell();
+      }
       const networkPromise=updateNavigationCache(request);
       if(cached){
         event.waitUntil(networkPromise.then(()=>{}).catch(()=>{}));
