@@ -23,7 +23,7 @@ function create(ctx){
       const entries=ctx.instructors().filter(p=>p.email).map(p=>({email:p.email,role:ctx.instructorRole?.(p)==='COURSE_MANAGER'?'COURSE_MANAGER':'INSTRUCTOR'}));
       const preview=await api().rosterPreview(entries);unmatchedEmails=preview.missing;
       const existing=await api().course(key),current=existing?.members||{};
-      const desired=[...preview.matched,{uid:api().uid(),role:'COURSE_MANAGER'}];
+      const desired=[...new Map([...preview.matched,{uid:api().uid(),role:'COURSE_MANAGER'}].map(p=>[p.uid,p])).values()];
       const changed=!existing||!Array.isArray(existing.memberUids)||Object.keys(current).length!==desired.length||desired.some(p=>current[p.uid]?.role!==p.role);
       if(changed){
         await api().enable(key,ctx.courseName(),preview.matched);
