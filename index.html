@@ -7299,6 +7299,7 @@ const nav=[['__label','','COURSE'],['courses','courses','My Courses'],['fleet','
 function navIconSvg(name){
   const paths={
     fleet:'<path d="M2.5 13 10 10l3-6h2l-1 7 7 2v2l-7 1-1 4h-2l-1-4-7-1z"></path>',
+    settings:'<circle cx="12" cy="12" r="3.5"></circle><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"></path>',
     courses:'<rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"></rect><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="1"></rect><rect x="14" y="14" width="6.5" height="6.5" rx="1"></rect>',
     home:'<path d="M3.5 10.5 12 3.8l8.5 6.7"></path><path d="M5.5 9.8v10.4h13V9.8"></path><path d="M9.5 20.2v-6h5v6"></path>',
     evaluation:'<path d="M8 4.5h8"></path><path d="M9 3h6v3H9z"></path><rect x="5" y="5.5" width="14" height="15" rx="2"></rect><path d="m8.5 13 2.2 2.2 4.8-5"></path>',
@@ -7490,7 +7491,7 @@ function renderMobileBottomNav(){
   bottomDockLastScrollY=Math.max(0,Number(window.scrollY||document.documentElement?.scrollTop||0));
   bottomDockLastScrollTime=performance.now?.()||Date.now();
   bottomDockVelocity=0;
-  const active=state.screen==='home'?'home':(['roster','profile','instructor'].includes(state.screen)?'roster':state.screen==='planned'?'planned':['record','evaluation','safety','exams'].includes(state.screen)?'record':state.screen==='reports'?'reports':'');
+  const active=isDutyTrainee()?bottomNavRootForScreen(state.screen):(state.screen==='home'?'home':(['roster','profile','instructor'].includes(state.screen)?'roster':state.screen==='planned'?'planned':['record','evaluation','safety','exams'].includes(state.screen)?'record':state.screen==='reports'?'reports':'');
   const items=isDutyTrainee()?[['home','home','Home'],['planned','planned','Plan'],['fleet','fleet','Maintenance'],['preferences','settings','Settings']]:[['roster','roster','Roster'],['planned','planned','Plan'],['home','home','Home'],['record','record','Forms'],['reports','reports','Reports']];
   const hadHalo=n.classList.contains('dockHaloMeasured');
   n.innerHTML='<span class="mobileBottomHalo" aria-hidden="true"></span>'+items.map(([id,icon,label])=>{const attentionKey=id==='record'?'record':id==='planned'?'planned':'';const attention=attentionKey?(id==='record'?attentionBadgeHtml('record','mobileNavAttention mobileNavRecordAttention',true):attentionBadgeHtml(attentionKey,'mobileNavAttention')):'';return '<div class="mobileBottomItem '+(id==='home'?'homeCenter ':'')+(active===id?'active':'')+'"><button class="mobileBottomIconButton" type="button" data-mobile-nav="'+id+'" aria-label="'+label+'" '+(active===id?'aria-current="page"':'')+'><span class="mobileBottomIcon">'+bottomNavIconSvg(icon,active===id)+'</span>'+attention+'<span class="mobileBottomLabel" aria-hidden="true">'+label+'</span></button>'+flympusDirectHapticOverlayHtml()+'</div>'}).join('');
@@ -10817,7 +10818,7 @@ function playHeaderPopoverClose(menu,btn,{focus=false,immediate=false}={}){
 function renderTopCourseSwitcher(){
   const name=document.querySelector('#topCourseName'),menu=document.querySelector('#topCourseDropdown'),btn=document.querySelector('#topCourseSwitch');
   if(name)name.textContent=isDutyTrainee()&&!isDutyTraineeAssigned()?'Duty operations':(currentCourseMeta.courseName||course.name);
-  if(menu){menu.innerHTML=topCourseSwitcherItemsHtml();menu.hidden=true;menu.style.top=''}
+  if(menu){menu.innerHTML=isDutyTrainee()?'':topCourseSwitcherItemsHtml();menu.hidden=true;menu.style.top=''}
   if(btn)btn.setAttribute?.('aria-expanded','false');
 }
 function defaultCourseRecord(){return {id:'course_default',name:'Aerostar EP Course',code:'AEP-26',summary:'EP · RC Model · RC Model · New Training · Day · Israel',startsOn:'2026-09-01',lifecycleStatus:'IN_PROGRESS',selection:{courseType:'EP',phaseId:'ep_rc',platformId:'rc_model',trainingKind:'new',programId:'ep_rc_new',dayNight:'day',country:'israel'},platformId:'rc_model',programId:'ep_rc_new',builtIn:true}}
@@ -11226,6 +11227,11 @@ function mountPersonEditModal(){
 }
 function render(options={}){
   cleanupMountedPersonEditModal();
+  const dutyRestricted=isDutyTrainee();
+  const bell=$('#topNotificationBtn'),panel=$('#topNotificationDropdown'),dot=$('#topNotificationDot');
+  if(bell){bell.hidden=dutyRestricted;bell.disabled=dutyRestricted;bell.setAttribute('aria-hidden',dutyRestricted?'true':'false')}
+  if(dot&&dutyRestricted)dot.hidden=true;
+  if(panel&&dutyRestricted){panel.hidden=true;panel.replaceChildren()}
   if(isDutyTrainee()&&!canViewDutyScreen(state.screen)){state.screen='home';appNavHistory=[];invalidateFlympusBottomScreenTemplates()}
   const fast=!!options.fastNavigation&&!isDutyTrainee();
   if(fast)syncNavigationActiveState();
