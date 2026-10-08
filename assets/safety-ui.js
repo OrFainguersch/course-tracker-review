@@ -74,10 +74,20 @@ function create(ctx){
     return '<div class="safetyWorkflowRow"><span class="safetyStatusPill '+(status==='IN_PROGRESS'?'in_progress':status==='RESOLVED'?'resolved':'')+'">'+label+'</span><div class="safetyAckSummary">'+summary+'</div><div class="safetyWorkflowActions">'+ack+statusControls+'</div></div>';
   }
   function banner(){
-    const mode=cloud.courseId===ctx.courseId()?cloud.mode:'idle',enroll=api()?.manager?.()===true;
-    const count=local().length;
-    if(active())return '<div class="safetySharedInfo shared"><div><b>Shared Safety · Firestore</b><small>Enrolled instructors receive events and acknowledge reading individually. Managers can track progress and resolve events.'+(count?' '+count+' older device-only records have NOT been published.':'')+' Photos are device-only and cannot be added to a shared report.</small></div>'+(enroll?'<button class="btn secondary small" data-safety-enroll type="button">Update recipients</button>':'')+'</div>';
-    return '<div class="safetySharedInfo local"><div><b>Device-only Safety'+(mode==='checking'?' · checking cloud access':'')+'</b><small>Events created here are NOT delivered to other instructors until secure shared Safety is activated.'+(cloud.error?' '+escape(cloud.error):'')+'</small></div>'+(enroll?'<button class="btn secondary small" data-safety-enroll type="button">Enable shared Safety</button>':'')+'</div>';
+    const localCount=local().length;
+    return '<div class="safetySharedInfo '+(active()?'shared':'local')+'"><div><b>Automatic Safety · '+(active()?'Connected':'Verifying instructor accounts')+'</b>'+
+      '<small>'+(active()?'Every enrolled instructor receives a required reading task.':'A verified Training Manager must synchronize this course roster before submitting shared reports.')+
+      (unmatchedEmails.length?' Unmatched accounts: '+escape(unmatchedEmails.join(', '))+'.':'')+
+      (localCount?' '+localCount+' old device-only reports are not shared.':'')+
+      '</small></div></div>';
+  }
+  function settings(){
+    return '<section class="card settingBox"><h3>Safety notifications and acknowledgements</h3>'+
+      '<p class="sub">Always enabled for verified instructors. Each new event requires a separate view and reading acknowledgement.</p>'+
+      '<p class="sub"><b>Sharing:</b> '+(active()?'Connected':'Waiting for secure roster synchronization')+'</p>'+
+      '<p class="sub"><b>Recipient accounts:</b> '+Object.keys(cloud.members||{}).length+'</p>'+
+      (unmatchedEmails.length?'<p class="sub" role="alert"><b>Unmatched emails:</b> '+escape(unmatchedEmails.join(', '))+'</p>':'')+
+      '<p class="sub">Instructor accounts are enrolled automatically by Training Managers. Safety reports cannot be silently saved to one device instead of notifying the course.</p></section>';
   }
   async function submit(record){
     if(pending())throw new Error('Wait for shared Safety access verification before submitting');
