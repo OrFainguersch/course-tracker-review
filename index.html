@@ -418,6 +418,34 @@ main{padding:16px 14px calc(30px + env(safe-area-inset-bottom));max-width:1220px
 .emergencyGroup summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:13px 14px;color:#0b315b;font-weight:850;font-size:12px;background:#f8fbfe}.emergencyGroup summary::-webkit-details-marker{display:none}.emergencyGroup summary:after{content:"›";margin-left:auto;font-size:20px;color:#6d86a0;transform:rotate(90deg);transition:.15s}.emergencyGroup[open] summary:after{transform:rotate(-90deg)}
 .emergencyGroupMeta{display:flex;gap:6px;align-items:center;margin-left:auto}.emergencyGroupCount{font-size:9px;color:#657b93;background:#edf3f8;border-radius:999px;padding:4px 7px}.emergencyGroupTotal{font-size:9px;color:#1269b9;background:#e4f2ff;border-radius:999px;padding:4px 7px}
 .emergencyRows{padding:5px 12px 9px}.emergencyRow{display:grid;grid-template-columns:minmax(0,1fr) 74px;gap:10px;align-items:center;padding:9px 2px;border-bottom:1px solid #edf2f7}.emergencyRow:last-child{border-bottom:0}.emergencyRow span{font-size:12px;font-weight:750;color:#263b53}.emergencyRow input{padding:9px 10px;text-align:center}
+
+.emergencyPracticeEntry,.emergencyProfileEntry{border-bottom:1px solid #e5edf5}
+.emergencyPracticeEntry:last-child,.emergencyProfileEntry:last-child{border-bottom:0}
+.emergencyPracticeEntry>.emergencyRow,.emergencyProfileEntry>.emergencyProfileRow{border-bottom:0}
+.emergencyNoteArea{padding:0 10px 10px 2px}
+.emergencyNoteArea[hidden],.emergencyNoteEditor[hidden],.emergencyNoteToggle[hidden]{display:none!important}
+.emergencyNoteToggle{padding:7px 11px;border:1px solid #b9d5ec;border-radius:9px;background:#f2f8fd;color:#15649e;font-size:10px;font-weight:850;cursor:pointer;min-height:33px}
+.emergencyNoteEditor{padding:10px;border:1px solid #d9e7f3;border-radius:12px;background:#f6faff}
+.emergencyNoteEditor>label{display:block;font-size:10px;font-weight:900;color:#1b5c8f;margin-bottom:7px}
+.emergencyNoteEditor textarea{display:block;width:100%;min-height:66px;padding:9px 10px;border:1px solid #caddec;border-radius:9px;background:#fff;color:#203e58;font-size:11px;line-height:1.5;resize:vertical;box-sizing:border-box}
+.emergencyPracticeNotes{margin:0 8px 11px 39px;border-left:3px solid #77b5e7;padding:8px 11px;background:#f2f8ff;border-radius:0 10px 10px 0;min-width:0}
+.emergencyNoteBy{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 10px}
+.emergencyNoteBy>b{font-size:10px;color:#165f98}
+.emergencyNoteBy>small{font-size:9.5px;color:#516f86}
+.emergencyNoteText{margin:5px 0 0;font-size:10.5px;color:#31495f;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
+.emergencyPreviousNotes{margin-top:8px;border-top:1px solid #d2e3f3;padding-top:8px}
+.emergencyPreviousNotes>summary{font-size:10px;color:#1269b9;font-weight:850;cursor:pointer}
+.emergencyPreviousNote{margin-top:10px;padding-top:9px;border-top:1px solid #dce8f1}
+html[data-flympus-language="he"] .emergencyNoteArea,html[data-flympus-language="he"] .emergencyPracticeNotes{direction:rtl;text-align:right}
+html[data-flympus-language="he"] .emergencyPracticeNotes{margin:0 39px 11px 8px;border-left:0;border-right:3px solid #77b5e7;border-radius:10px 0 0 10px}
+html[data-flympus-theme="dark"] .emergencyNoteToggle{background:#19364a;color:#9bd0f3;border-color:#386789}
+html[data-flympus-theme="dark"] .emergencyNoteEditor,html[data-flympus-theme="dark"] .emergencyPracticeNotes{background:#132c40;border-color:#355b78}
+html[data-flympus-theme="dark"] .emergencyNoteEditor>label,html[data-flympus-theme="dark"] .emergencyNoteBy>b,html[data-flympus-theme="dark"] .emergencyPreviousNotes>summary{color:#91c8f0}
+html[data-flympus-theme="dark"] .emergencyNoteEditor textarea{background:#0e2333;border-color:#385773;color:#e5f1f8}
+html[data-flympus-theme="dark"] .emergencyNoteBy>small,html[data-flympus-theme="dark"] .emergencyNoteText{color:#c2d3e1}
+html.flympusLargeText .emergencyNoteEditor>label,html.flympusLargeText .emergencyNoteBy>b{font-size:15px!important}
+html.flympusLargeText .emergencyNoteText,html.flympusLargeText .emergencyNoteEditor textarea{font-size:15px!important}
+@media(max-width:560px){.emergencyNoteArea{padding-inline:4px}.emergencyPracticeNotes{margin-left:32px}html[data-flympus-language="he"] .emergencyPracticeNotes{margin-right:32px}}
 .emergencyNoResults{display:none;padding:18px;text-align:center;color:#70839a;font-size:12px}
 .cfgEmergencyRow{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,.7fr) auto;gap:8px;align-items:center}
 @media(max-width:560px){.cfgEmergencyRow{grid-template-columns:1fr}.emergencyToolbar{align-items:stretch}.emergencySelected{min-width:76px;padding-left:8px;padding-right:8px}}
@@ -6116,6 +6144,7 @@ Object.assign(FLYMPUS_HE_UI,{
   'Evaluation':'הערכה','New evaluation':'הערכה חדשה','Evaluation history':'היסטוריית הערכות','Submit evaluation':'שלח הערכה','Edit revision':'עריכת תיקון',
   'Syllabus / task':'סילבוס / משימה','Select syllabus':'בחר סילבוס','Instructor Presence':'נוכחות מדריך','Assessment criteria':'קריטריוני הערכה',
   'Benchmark':'מדד ייחוס','Maximum grade':'ציון מרבי','Minimum grade':'ציון מינימלי','Weight (%)':'משקל (%)','Comments':'הערות',
+  'Instructor note':'הערת מדריך','Instructor note for this emergency':'הערת מדריך לחירום זה','+ Add note':'+ הוסף הערה','Previous instructor notes':'הערות מדריכים קודמות','What went well, issues and follow-up…':'מה בוצע היטב, קשיים ודגשים להמשך…',
   'Emergencies':'מצבי חירום','Emergency Exposure':'חשיפה למצבי חירום','Emergency requirements':'דרישות חירום','Practiced':'תורגל','Not practiced yet':'טרם תורגל',
   'Experience counters':'מוני ניסיון','Experience requirements':'דרישות ניסיון','Progression gates':'שערי התקדמות','Progression requirement':'דרישת התקדמות',
   'Exam':'מבחן','Pass grade':'ציון מעבר','Theory':'תיאוריה','Theory gate':'שער תיאוריה','Source':'מקור','Unit':'יחידה','Duration':'משך',
