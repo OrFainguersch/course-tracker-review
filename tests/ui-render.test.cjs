@@ -143,11 +143,15 @@ assert(!html.includes("function recordReturnControl()")&&!html.includes("functio
 
 assert(html.includes("function traineeRecordDock(traineeId)")&&html.includes(".profileRecordDock{")&&html.includes("position:sticky!important")&&html.includes("top:78px!important")&&html.includes("traineeRecordDock(t.id)")&&html.includes("--record-safety:#c84444"),"Trainee profiles must own the sticky Evaluation, Safety and Exam action bar with Safety in red");
 assert(html.includes("function courseAttentionCounts()")&&html.includes("record:evaluation+safety+exams")&&html.includes("attentionBadgeHtml('record','mobileNavAttention mobileNavRecordAttention',true)")&&html.includes('data-attention-dot="true"'),"Any unfinished Forms draft must roll up into a dot-only attention indicator on the Forms bottom-nav item");
-assert(html.includes(".attentionBadge[hidden]{display:none!important}")&&html.includes("el.textContent=n?(dotOnly?'':formatAttentionCount(n)):''")&&html.includes("el.hidden=!n"),"Zero-value attention badges must be completely hidden instead of displaying 0");
+assert(html.includes(".attentionBadge[hidden]{display:none!important}")&&html.includes("el.hidden=!n")&&
+  html.includes("key==='planned'?String(n):formatAttentionCount(n)"),
+  "Zero-value badges must be hidden; Plan must show the exact count rather than 9+");
 assert(html.includes("const attentionSummary=attention.record?")&&html.includes("recordAttentionSummary")&&html.includes("recordCardAttention"),"Forms must render aggregate and per-workflow unfinished indicators only when attention exists");
 assert(!html.includes("counts.evaluation+' saved'")&&!html.includes("counts.safety+' saved'")&&!html.includes("counts.exams+' saved'")&&!html.includes('<span class="recordHubCount">'),"Forms cards must not display saved-record counts");
 assert(html.includes("function traineeDraftNeedsAttention")&&html.includes("draftTrainee===id")&&html.includes("data-trainee-attention")&&html.includes("profileActionAttention"),"Trainee floating record actions must show an attention badge only when the unfinished draft belongs to that exact trainee");
-assert(html.includes("id==='planned'?'planned':''")&&html.includes("planned=draftAttentionCount('planned')"),"Plan must also expose an unfinished-draft badge on its bottom-nav item");
+assert(html.includes("id==='planned'?'planned':''")&&html.includes("planned=plannedAttentionCount()")&&
+  html.includes("function plannedCompleteness()")&&html.includes("plan.planMissing.length"),
+  "Plan must show exactly the same missing requirements as its Required panel");
 
 assert(html.includes("safety:'<path d=\"M12 3.5 19 6v5.3c0 4.5-2.7 7.7-7 9.2-4.3-1.5-7-4.7-7-9.2V6l7-2.5Z\"></path><path d=\"M12 8.2v5.1\"></path><path d=\"M12 16.4h.01\"></path>'")&&html.includes("homeQuickIcon safety")+html.includes("homePulseIcon safety")+html.includes("icon safetyIcon"),"Safety must use the shield-with-exclamation icon consistently across relevant surfaces");
 assert(html.includes(".recordHubCard.eval{border-top:3px solid var(--record-eval)}")&&html.includes(".recordHubCard.safety{border-top:3px solid var(--record-safety)}")&&html.includes(".recordHubCard.exam{border-top:3px solid var(--record-exam)}"),"Forms hub cards must keep the Evaluation, Safety and Exam color identity used by trainee record actions");
@@ -835,6 +839,46 @@ assert(html.includes("if(!flympusRealPageReload||!appScreenIds.has(String(initia
 }
 
 
+
+/* Plan navigation badge regression: same exact required-item list as the page,
+   not a stale __attentionCount=1 and not a truncated 9+ summary. */
+{
+  const start=html.indexOf("function plannedCompleteness(){");
+  const end=html.indexOf("function plannedVsExecuted(){",start);
+  assert(start>=0&&end>start,'Plan completeness helper must exist');
+  const helper=html.slice(start,end);
+  const run=({plan,executedInstructed=0,executedSolo=0,savedReports=[],selectedDate}={})=>{
+    const draft=plan?{data:plan}:null;
+    const date=selectedDate||plan?.date||'2026-10-08';
+    const records=Array.from({length:executedInstructed},(_,i)=>({date,id:'evaluation-'+i}));
+    const solos=Array.from({length:executedSolo},(_,i)=>({date,id:'solo-'+i}));
+    const scope={
+      getDailyReports:()=>savedReports,getActivityDraft:()=>draft,
+      getEvaluations:()=>records,getSoloFlights:()=>solos,
+      state:{planDate:selectedDate||null},cfgGet:()=>({cancellationReasons:[{id:'weather',name:'Weather'}]}),
+      Date,Number,Math,String,Array,Set
+    };
+    return vm.runInNewContext(helper+'\n({count:plannedAttentionCount(),missing:plannedCompleteness().planMissing.map(x=>x.label)})',scope);
+  };
+  const plan={date:'2026-10-08',plannedInstructed:1,plannedSolo:11,cancellations:[],__attentionCount:1};
+  const missing12=run({plan});
+  assert.equal(missing12.count,12,'The Plan nav badge shows twelve missing reasons, not the stale one');
+  assert.equal(missing12.missing.length,missing12.count,'Badge and missing panel have identical counts');
+  const twoReasons={...plan,cancellations:[
+    {key:'INSTRUCTED_1',type:'Instructed',reasonId:'weather',reasonLabel:'Weather'},
+    {key:'SOLO_1',type:'Solo',reasonId:'weather',reasonLabel:'Weather'}]};
+  assert.equal(run({plan:twoReasons}).count,10,'Completing two reasons reduces the badge count to ten');
+  const fullyComplete={...plan,cancellations:[
+    {key:'INSTRUCTED_1',type:'Instructed',reasonId:'weather'},
+    ...Array.from({length:11},(_,i)=>({key:'SOLO_'+(i+1),type:'Solo',reasonId:'weather'}))]};
+  assert.equal(run({plan:fullyComplete}).count,0,'All reasons completed removes the badge');
+  assert.equal(run({plan,executedInstructed:1}).count,11,'Executed flights reduce missing cancellations');
+  assert.equal(run({}).count,0,'No entered plan and no saved report require no badge');
+  assert.equal(run({savedReports:[{date:'2026-10-08',plannedInstructed:1,plannedSolo:11,cancellations:[]}]}).count,12,
+    'The badge reflects missing reasons even when the plan comes from a saved report');
+  assert(html.includes("key==='planned'?String(n):formatAttentionCount(n)"),
+    'Plan badges must display 12, not abbreviated 9+');
+}
 
 /* Navigation audio must never escape its initiating physical gesture, and the
    first press after cold launch/reload must not be sacrificed to audio warm-up. */
