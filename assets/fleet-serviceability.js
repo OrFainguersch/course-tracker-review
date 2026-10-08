@@ -45,11 +45,13 @@
   if(!traineeId||!allowedIds.trainees.includes(traineeId))throw Error('Choose a trainee assigned to this course.');
   if(mode==='INSTRUCTED'&&(!instructorId||!allowedIds.instructors.includes(instructorId)))throw Error('Choose an instructor assigned to this course.');
   if(!syllabus)throw Error('Select the flight syllabus.');
+  const durationRaw=clean(input?.estimatedMinutes,6),estimatedMinutes=durationRaw?Number(durationRaw):null;
+  if(durationRaw&&(!/^\d+$/.test(durationRaw)||!Number.isInteger(estimatedMinutes)||estimatedMinutes<1||estimatedMinutes>720))throw Error('Planned duration must be between 1 and 720 minutes.');
   const aircraft=active(rows,platform).find(x=>x.id===aircraftId);
   if(!aircraft||aircraft.status!==AVAILABLE)throw Error('The selected aircraft is not serviceable. Choose a serviceable aircraft.');
   return {id:existing?.id||clean(input?.id,100),date,platformId:String(platform),time,aircraftId,tail:aircraft.tail,traineeId,
    traineeName:clean(input?.traineeName,200),instructorId:mode==='SOLO'?'':instructorId,
-   instructorName:mode==='SOLO'?'':clean(input?.instructorName,200),syllabus,mode,note:clean(input?.note,500)};
+   instructorName:mode==='SOLO'?'':clean(input?.instructorName,200),syllabus,mode,estimatedMinutes,note:clean(input?.note,500)};
  }
  function upsertSortie(rows,input,aircraft,platform,date,allowed,now=new Date().toISOString(),idFactory=()=>String(Date.now())){
   const list=Array.isArray(rows)?rows:[],old=input?.id?list.find(x=>x.id===input.id&&x.platformId===platform&&x.date===date):null;
