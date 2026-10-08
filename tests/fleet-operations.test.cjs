@@ -330,8 +330,10 @@ test('Plan displays consistently red required markers and read-only board-derive
   fleet:add([],'ac1','01'),flights:[],date:'2026-10-08',platformId:'shahak',
   trainees:[{id:'t1',name:'Trainee'}],instructors:[{id:'i1',name:'Instructor'}],
   syllabi:['Circuits'],canWrite:true,canConfigureTiming:true});
- assert.equal((screen.match(/fleetRequired/g)||[]).length,8);
+ assert.equal((screen.match(/fleetRequired/g)||[]).length,1);
  assert.doesNotMatch(screen,/<label>[^<]* \*<\/label>/);
+ assert.match(screen,/<label>Takeoff time<\/label>.*?name="time" type="time" required/);
+ assert.match(screen,/<label>Instructor <span class="fleetRequired"/);
  assert.match(screen,/fleetFieldHead/);
  assert.doesNotMatch(screen,/<label>Aircraft \* <button/);
  assert.match(html,/planUiText\('Flight date','תאריך טיסה'\).*fleetRequired/);
@@ -426,7 +428,7 @@ test('Plan contract stays coherent: full-width flight day, settings, required fi
  assert.doesNotMatch(screen,/Daily Flight Board|No scheduled flights for this day/);
  assert.match(screen,/name="estimatedMinutes"[^>]*required/);
  assert.match(screen,/fleetTimeFlow/);
- assert.equal((screen.match(/fleetRequired/g)||[]).length,8);
+ assert.equal((screen.match(/fleetRequired/g)||[]).length,1);
  assert.match(screen,/data-go="fleet"/);
  const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'../assets/fleet-operations.css'),'utf8');
  assert.match(css,/\.dailyFlightPlan\{max-width:none;width:100%;margin:0 auto/);
