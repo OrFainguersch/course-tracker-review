@@ -107,7 +107,7 @@ test('Fleet Home uses real aircraft rows and places the inventory table in the p
  assert.ok(html.indexOf("FLYMPUS_FLEET_VIEW?.home?.(currentFleetContext())")>html.indexOf("'<section class=\"homePrimaryGrid\">'"));
  assert.ok(html.indexOf("<h2>Course Pulse</h2>")<html.indexOf("FLYMPUS_FLEET_VIEW?.home?.(currentFleetContext())"),"Course Pulse is the first Home dashboard block");
  assert.equal((html.match(/FLYMPUS_FLEET_VIEW\?\.home\?\.\(currentFleetContext\(\)\)/g)||[]).length,1);
- assert.ok(html.includes("homeTaskStrip")&&html.includes('data-go="evaluation"'));
+ assert.ok(!html.includes("\'<div class=\\\"homeTaskStrip\\\">\'"),"Redundant quick-actions strip is absent from Home");
  assert.ok(html.includes("holder.hidden=!down"),'Unavailable reason is only shown when relevant');
 });
 test('Serviceability history captures optional signed-in operator without changing old data',()=>{
