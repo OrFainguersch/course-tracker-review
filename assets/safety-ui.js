@@ -71,7 +71,13 @@ function create(ctx){
     const summary=active()?'<b>Acknowledged '+counts.acknowledged+' / '+counts.total+'</b><small>'+(unread.length?'Not yet viewed: '+escape(unread.map(p=>recipientName(x,p)).join(', '))+' · ':'')+(seenUnack.length?'Viewed, awaiting acknowledgement: '+escape(seenUnack.map(p=>recipientName(x,p)).join(', ')):'')+(!remaining.length?'All assigned instructors acknowledged':'')+'</small>':'<small>Local-only record · no shared read receipts</small>';
     const ack=active()&&model.recipientUids(x).includes(uid())&&!model.acknowledged(x,uid())?'<button class="btn sky small" type="button" data-safety-ack="'+id+'">Acknowledge reading</button>':'';
     const statusControls=manager()?(status==='OPEN'?'<button class="btn secondary small" type="button" data-safety-status="'+id+'" data-status="IN_PROGRESS">Start handling</button>':'')+(status!=='RESOLVED'?'<button class="btn secondary small" type="button" data-safety-status="'+id+'" data-status="RESOLVED">Resolve event</button>':'<button class="btn secondary small" type="button" data-safety-status="'+id+'" data-status="OPEN">Reopen</button>'):'';
-    return '<div class="safetyWorkflowRow"><span class="safetyStatusPill '+(status==='IN_PROGRESS'?'in_progress':status==='RESOLVED'?'resolved':'')+'">'+label+'</span><div class="safetyAckSummary">'+summary+'</div><div class="safetyWorkflowActions">'+ack+statusControls+'</div></div>';
+    const fmt=v=>{try{return (v?.toDate?.()||new Date(v)).toLocaleString()}catch{return'—'}};
+    const audit=active()&&manager()?'<details class="safetyReadAudit"><summary>Instructor reading audit · '+counts.acknowledged+' / '+counts.total+' acknowledged</summary>'+
+      '<div class="safetyAuditTableWrap"><table><thead><tr><th>Instructor</th><th>Viewed</th><th>Acknowledged</th></tr></thead><tbody>'+
+      model.recipientUids(x).map(person=>'<tr><td>'+escape(recipientName(x,person))+'</td><td>'+(x.seenBy?.[person]?escape(fmt(x.seenBy[person])):'Not viewed')+'</td>'+
+       '<td>'+(x.ackBy?.[person]?escape(fmt(x.ackBy[person])):'Pending')+'</td></tr>').join('')+
+      '</tbody></table></div></details>':'';
+    return '<div class="safetyWorkflowRow"><span class="safetyStatusPill '+(status==='IN_PROGRESS'?'in_progress':status==='RESOLVED'?'resolved':'')+'">'+label+'</span><div class="safetyAckSummary">'+summary+'</div><div class="safetyWorkflowActions">'+ack+statusControls+'</div></div>'+audit;
   }
   function banner(){
     const localCount=local().length;
