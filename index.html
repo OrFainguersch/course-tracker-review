@@ -110,7 +110,8 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/home-operations.css?v=20261008-home02" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety01" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
-<script src="./assets/safety-ui.js?v=20261008-safety01"></script>
+<script src="./assets/safety-global-inbox.js?v=20261008-safety02"></script>
+<script src="./assets/safety-ui.js?v=20261008-safety02"></script>
 <script src="./assets/fleet-model.js?v=20261008-fleet04"></script>
 <script src="./assets/fleet-views.js?v=20261008-fleet03"></script>
 <script src="./assets/home-operations.js?v=20261008-home02"></script>
@@ -8694,11 +8695,17 @@ function mean(values){const v=values.filter(x=>Number.isFinite(Number(x))).map(N
 
 function getSafetyRecords(){return safetyUI.records()}
 function saveSafetyRecords(v){try{localStorage.setItem(courseScopedKey('ct-review-safety'),JSON.stringify(Array.isArray(v)?v:[]));return true}catch{return false}}
+const safetyGlobal=window.FLYMPUS_GLOBAL_SAFETY.create({
+  escape:esc,toast,notifySound:playFlympusNotificationSound,isDuty:isDutyTrainee
+});
 const safetyUI=window.FLYMPUS_SAFETY_UI.create({
   readLocal:()=>readCourseArray('ct-review-safety'),saveLocal:saveSafetyRecords,
   courseId:()=>String(currentCourseId),courseName:()=>String(currentCourseMeta.courseName||currentCourseId),
   courseManager:()=>currentUserCourseRole()==='COURSE_MANAGER',screen:()=>state.screen,
-  isDuty:isDutyTrainee,instructors:()=>courseInstructors(),render:()=>render(),
+  isDuty:isDutyTrainee,instructors:()=>courseInstructors(),
+  instructorRole:p=>courseMembershipFor(p.id,'INSTRUCTOR',{role:p.role||'INSTRUCTOR'}).role,
+  startGlobalInbox:()=>safetyGlobal.start(),renderGlobalInbox:()=>safetyGlobal.render(),
+  render:()=>render(),
   openSafety:()=>{state.safetyView='history';go('safety')},escape:esc,toast,confirm:siteConfirm
 });
 const SAFETY_SEVERITY_DEFS=Object.freeze([
@@ -10684,7 +10691,7 @@ function settings(){
   let html='<h1 class="pageTitle">Course Management</h1><p class="sub">Create and manage courses, tailor a selected course, and maintain reusable training Packages and course architecture.</p>';
   html+='<div class="scrollTabs">'+(canCreate?'<button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">1 · Create course</button>':'')+(canManageCourse?'<button class="seg '+(tab==='overrides'?'active':'')+'" data-settings-tab="overrides">'+(canCreate?'2 · ':'')+'Tailor course</button>':'')+(canGlobalPackages?'<button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">Advanced</button>':'')+'</div>';
   if(tab==='overrides'&&canManageCourse){
-    html+=courseOverridesHtml();
+    html+=safetyUI.settings()+courseOverridesHtml();
   }
 
   if(tab==='builder'&&canCreate){
@@ -11300,6 +11307,7 @@ function render(options={}){
 }
 
 document.addEventListener('flympus:auth-ready',()=>{try{render()}catch{}});
+document.addEventListener('flympus:auth-signed-out',()=>safetyGlobal.stop());
 function renderPreservingManagementView(update){
   const root=$('#content'),docEl=document.documentElement,body=document.body,scrollTop=Number(window.scrollY||docEl?.scrollTop||body?.scrollTop||0),openStates=root?[...root.querySelectorAll('details')].map(x=>!!x.open):[];
   const anchorSelector='.card,.packageRules,.advancedStepLabel,.personCard,.rosterControls,.trainingStatusStack',anchorNodes=root?[...root.querySelectorAll(anchorSelector)]:[],viewportTop=Math.max(72,Math.min(Number(window.innerHeight||800)-40,96));
