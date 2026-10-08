@@ -154,9 +154,11 @@ html.flympusColdBoot #flympusAuthRoot{
    still owns notification permission/subscription later; this early call only
    makes the next cold launch independent of mobile network latency. */
 try{
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261007-viewport-chrome-0758',{scope:'./',updateViaCache:'none'}).catch(()=>{})
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261008-safety-0780',{scope:'./',updateViaCache:'none'}).catch(()=>{})
 }catch{}
 </script>
+<meta name="flympus-deploy-commit" content="__FLYMPUS_DEPLOY_COMMIT__">
+<script defer src="./assets/app-update-notice.js?v=20261008-update01"></script>
 <title>FLYMPUS — Train. Track. Progress.</title>
 <style>
 :root{--navy:#07294c;--navy2:#0a315c;--sky:#13a8ee;--bg:#f4f8fc;--card:#fff;--line:#dbe5ef;--muted:#64748b;--text:#0f172a;--green:#047857;--amber:#b45309;--rose:#be123c;--violet:#7c3aed;--shadow:0 10px 30px rgba(31,71,112,.08)}
@@ -9187,7 +9189,7 @@ function syncNotificationPreferenceControls(){
   });
 }
 
-const FLYMPUS_PUSH_SW='./sw.js',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
+const FLYMPUS_PUSH_SW='./sw.js?v=20261008-safety-0780',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
 let flympusPushConfigCache=null,flympusPushConfigPromise=null;
 function getFlympusPushUserEnabled(){
   try{
