@@ -60,7 +60,7 @@ jobs:
         id: prod_ui_render
         if: steps.freshness.outputs.current == 'true'
         continue-on-error: true
-        run: node tests/ui-render.test.cjs && node --test tests/emergency-notes.test.cjs
+        run: node tests/ui-render.test.cjs && node --test tests/trainee-evaluation-history.test.cjs && node --test tests/emergency-notes.test.cjs
 
       - name: Production gate · evaluation voice
         id: prod_evaluation_voice

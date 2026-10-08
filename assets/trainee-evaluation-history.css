@@ -1,0 +1,28 @@
+/* Roster · trainee full evaluation history */
+.profileEvalHistoryHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.profileEvalHistoryHead h3{margin:0}
+.profileEvalHistoryHead .sub{margin:5px 0 0}
+.profileEvalHistoryTotal{font-size:11px;font-weight:850;color:#185a8a;background:#eaf5fe;border:1px solid #cce3f5;border-radius:999px;padding:6px 10px;white-space:nowrap}
+.profileEvalFilters{display:grid;grid-template-columns:minmax(210px,1.55fr) repeat(2,minmax(165px,1fr)) minmax(210px,1.2fr) auto;gap:10px;align-items:end;margin:15px 0 12px;padding:13px;background:#f6faff;border:1px solid #dbe8f3;border-radius:14px}
+.profileEvalFilters .filterDateRange{min-width:0}
+.profileEvalFilters .filterDateRangeFields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.profileEvalFilters .field{min-width:0}
+.profileEvalFilters .field>label{display:block;margin-bottom:5px;font-size:10.5px;font-weight:850;color:#41637f}
+.profileEvalGradeFields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.profileEvalGradeFields .input{width:100%;min-width:0}
+.profileEvalReset{white-space:nowrap;min-height:40px}
+.profileEvalResultLine{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:11px;font-weight:800;color:#55758d}
+.profileEvalHistoryEmpty{padding:19px 12px;border:1px dashed #c9dce9;border-radius:13px;text-align:center;color:#647c92;font-size:12px}
+.profileEvalHistoryEmpty[hidden],.profileEvalHistoryList [data-trainee-evaluation-row][hidden]{display:none!important}
+.profileEvalSamplePill{font-size:9px!important}
+.profileEvalComments{margin:9px 0 0;padding-top:9px;border-top:1px solid #e5edf6;color:#4c6981;font-size:11px;white-space:pre-wrap;overflow-wrap:anywhere}
+html[data-flympus-language="he"] .profileEvalHistorySection,html[data-flympus-language="he"] .profileEvalFilters{direction:rtl;text-align:right}
+html[data-flympus-theme="dark"] .profileEvalFilters{background:#142b3d;border-color:#39576e}
+html[data-flympus-theme="dark"] .profileEvalHistoryTotal{background:#17364e;border-color:#325775;color:#abd7f6}
+html[data-flympus-theme="dark"] .profileEvalFilters .field>label,html[data-flympus-theme="dark"] .profileEvalResultLine{color:#b7cce0}
+html[data-flympus-theme="dark"] .profileEvalHistoryEmpty{border-color:#3a586f;color:#b3c8d9}
+html[data-flympus-theme="dark"] .profileEvalComments{color:#c3d4e2;border-top-color:#35526b}
+html.flympusLargeText .profileEvalHistoryTotal,html.flympusLargeText .profileEvalResultLine{font-size:15px!important}
+html.flympusLargeText .profileEvalFilters .field>label,html.flympusLargeText .profileEvalComments{font-size:15px!important}
+@media(max-width:1150px){.profileEvalFilters{grid-template-columns:repeat(2,minmax(0,1fr))}.profileEvalFilters .filterDateRange{grid-column:1/-1}.profileEvalReset{grid-column:1/-1;width:max-content}}
+@media(max-width:640px){.profileEvalFilters{grid-template-columns:1fr;padding:11px;gap:10px}.profileEvalFilters .filterDateRange{grid-column:auto}.profileEvalReset{grid-column:auto;width:100%}.profileEvalHistoryHead{align-items:center}.profileEvalHistoryTotal{font-size:10px}}
