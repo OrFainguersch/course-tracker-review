@@ -11026,7 +11026,7 @@ function recordHub(){
 function safetyScreen(){
  const local=getSafetyRecords().slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.createdAt||'').localeCompare(String(a.createdAt||''))),draft=getActivityDraft('safety'),view=state.safetyView||'new',traineesAlpha=alphaByName(courseTrainees()),instructorsAlpha=alphaByName(courseInstructors());
  const tabs='<div class="safetyViewTabs"><button type="button" class="'+(view==='new'?'active':'')+'" data-safety-view="new">New event</button><button type="button" class="'+(view==='history'?'active':'')+'" data-safety-view="history">History <span>'+local.length+'</span></button></div>';
- const head='<div class="recordChildHead"><h1 class="pageTitle">Safety</h1><p class="sub">Report safety events and review the course-specific record.</p></div>'+tabs;
+ const head='<div class="recordChildHead"><h1 class="pageTitle">Safety</h1><p class="sub">Report safety events and review the course-specific record.</p></div>'+safetyUI.banner()+tabs;
  if(view==='history'){
    const rows=local.map(x=>{const severity=normalizeSafetySeverity(x.severity),severityDef=safetySeverityDefinition(severity),brief=String(x.briefDescription||x.details||''),findings=String(x.findings||''),lessons=String(x.lessonsLearned||''),hay=[x.title,brief,findings,lessons,x.traineeName,x.instructorName,x.classification,severity,flympusTranslateUiString(severity)].filter(Boolean).join(' ').toLowerCase(),detailRows=[brief?['Brief event description',brief]:null,findings?['Findings',findings]:null,lessons?['Lessons learned / Conclusions',lessons]:null].filter(Boolean);return '<article class="safetyHistoryItem" data-safety-history-item data-safety-record-id="'+esc(x.id)+'" data-date="'+esc(normalizeDateValue(x.date)||'')+'" data-severity="'+esc(severity)+'" data-classification="'+esc(x.classification||'')+'" data-trainee="'+esc(x.traineeId||'')+'" data-instructor="'+esc(x.instructorId||'')+'" data-search="'+esc(hay)+'"><div class="safetyHistoryTop"><div><b>'+esc(x.title||'Untitled safety event')+'</b><p>'+esc(formatDateDMY(x.date))+' · '+esc(x.classification||'—')+'</p></div><span class="safetySeverityPill safetySeverity-'+esc(severityDef?.tone||'minor')+'"><span class="safetySeverityDot" aria-hidden="true"></span>'+esc(severity||'—')+'</span></div><div class="safetyHistoryMeta">'+(x.traineeName?'<span>Trainee · '+esc(x.traineeName)+'</span>':'')+(x.instructorName?'<span>Instructor · '+esc(x.instructorName)+'</span>':'')+'</div>'+(detailRows.length?'<div class="safetyHistoryEventDetails">'+detailRows.map(([label,value])=>'<div><b>'+esc(label)+'</b><p>'+esc(value)+'</p></div>').join('')+'</div>':'')+(window.FLYMPUS_SAFETY_ATTACHMENTS.parseIds(x.photos).length?'<div class="safetyHistoryPhotos" data-safety-history-photos="'+esc(JSON.stringify(window.FLYMPUS_SAFETY_ATTACHMENTS.parseIds(x.photos)))+'"></div>':'')+safetyUI.actions(x)+'</article>'}).join('');
    return head+'<section class="card safetyHistoryCard"><div class="inlineHead"><div><h2>Course safety history</h2><p class="sub">Only entries recorded for the active course are shown.</p></div></div>'+
@@ -11570,7 +11570,28 @@ function bindSafety(){
  bindAutoDraft(form,'safety',()=>{if($('#safetyDraftBadge'))$('#safetyDraftBadge').textContent=draftSavedLabel('safety')});
  const photoController=window.FLYMPUS_SAFETY_ATTACHMENTS.bindForm(form);
  if($('#discardSafetyDraft'))$('#discardSafetyDraft').onclick=async()=>{if(await siteConfirm('Discard this auto-saved safety draft?',{title:'Discard safety draft?',confirmLabel:'Discard',tone:'danger'})){await photoController.discard();discardActivityDraft('safety');toast('Safety draft discarded');render()}};
- form.onsubmit=async e=>{e.preventDefault();await photoController.ready();const fd=new FormData(form),arr=getSafetyRecords(),traineeId=String(fd.get('trainee')||''),instructorId=String(fd.get('instructor')||''),allT=allTrainees(),allI=allInstructors(),briefDescription=String(fd.get('briefDescription')||''),findings=String(fd.get('findings')||''),lessonsLearned=String(fd.get('lessonsLearned')||'');arr.unshift({id:'s_'+Date.now(),date:normalizeDateValue(fd.get('date')),traineeId,instructorId,title:String(fd.get('title')),severity:normalizeSafetySeverity(fd.get('severity')),classification:String(fd.get('classification')),details:briefDescription,briefDescription,findings,lessonsLearned,photos:window.FLYMPUS_SAFETY_ATTACHMENTS.parseIds(fd.get('photoIds')),traineeName:allT.find(t=>t.id===traineeId)?.name||'',instructorName:allI.find(i=>i.id===instructorId)?.name||'',createdAt:new Date().toISOString()});if(!saveSafetyRecords(arr)){toast('Unable to save safety event. Storage may be full.','error');return}playFlympusFormSubmitSound();discardActivityDraft('safety');state.safetyView='history';toast('Safety event submitted','success');render();forcePageTop()};
+ form.onsubmit=async e=>{
+  e.preventDefault();await photoController.ready();
+  const fd=new FormData(form),traineeId=String(fd.get('trainee')||''),instructorId=String(fd.get('instructor')||'');
+  const allT=allTrainees(),allI=allInstructors(),briefDescription=String(fd.get('briefDescription')||'');
+  const report={
+    id:'s_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),
+    date:normalizeDateValue(fd.get('date')),traineeId,instructorId,
+    title:String(fd.get('title')||''),severity:normalizeSafetySeverity(fd.get('severity')),
+    classification:String(fd.get('classification')||''),details:briefDescription,briefDescription,
+    findings:String(fd.get('findings')||''),lessonsLearned:String(fd.get('lessonsLearned')||''),
+    photos:window.FLYMPUS_SAFETY_ATTACHMENTS.parseIds(fd.get('photoIds')),
+    traineeName:allT.find(t=>t.id===traineeId)?.name||'',instructorName:allI.find(i=>i.id===instructorId)?.name||'',
+    status:'OPEN',createdAt:new Date().toISOString()
+  };
+  const submitBtn=form.querySelector('[type="submit"]');if(submitBtn)submitBtn.disabled=true;
+  try{
+    const destination=await safetyUI.submit(report);
+    playFlympusFormSubmitSound();discardActivityDraft('safety');state.safetyView='history';
+    toast(destination==='shared'?'Shared safety event submitted':'Safety event saved locally (not delivered to instructors)','success');
+    render();forcePageTop();
+  }catch(err){toast(String(err?.message||err),'error');if(submitBtn)submitBtn.disabled=false}
+};
 }
 function bindExams(){
  document.querySelectorAll('[data-exams-view]').forEach(btn=>btn.onclick=()=>{state.examsView=btn.dataset.examsView||'new';render();forcePageTop()});
