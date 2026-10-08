@@ -51,7 +51,7 @@ function schedule(c){
  const field=(label,inner,extra='')=>'<div class="field" '+extra+'><label>'+label+'</label>'+inner+'</div>';
  const timeMark=(label,key)=>'<div><span>'+label+'</span><strong data-flight-clock="'+key+'">'+E(timeline?.clock[key]||'—')+'</strong></div>';
  const timelineBlock='<div class="fleetTimeFlow" aria-live="polite"><div class="fleetTimeFlowHeading"><b>'+L('Calculated timeline','ציר זמנים מחושב')+'</b><small>'+L('Instructor and trainee are reserved from briefing to the end of debriefing','המדריך והחניך משוריינים מתחילת התדריך ועד לסיום התחקיר')+'</small></div>'+
-  '<div class="fleetTimeFlowTrack"><span data-phase="brief" style="flex:'+brief+'">'+L('Briefing','תדריך')+'</span><span data-phase="flight" style="flex:'+duration+'">'+L('Flight','טיסה')+'</span><span data-phase="debrief" style="flex:'+debrief+'">'+L('Debrief','תחקיר')+'</span></div>'+
+  '<div class="fleetTimeFlowTrack"><span data-phase="brief" style="flex:'+briefing+'">'+L('Briefing','תדריך')+'</span><span data-phase="flight" style="flex:'+duration+'">'+L('Flight','טיסה')+'</span><span data-phase="debrief" style="flex:'+debrief+'">'+L('Debrief','תחקיר')+'</span></div>'+
   '<div class="fleetTimeFlowTimes">'+timeMark(L('Briefing','תדריך'),'briefing')+timeMark(L('Takeoff','המראה'),'takeoff')+timeMark(L('Landing','נחיתה'),'landing')+timeMark(L('Available again','זמין שוב'),'debrief')+'</div></div>';
  const booked=flights.length?'<section class="fleetBookedFlights"><div class="fleetBookedHeading"><h3>'+L('Scheduled flights','טיסות משובצות')+'</h3><span>'+flights.length+'</span></div><div class="fleetSorties">'+flights.map(f=>{
   const issue=M.flightIssues(f,c.fleet,c.platformId),t=M.flightTimeline(f,c.timingDefaults);
