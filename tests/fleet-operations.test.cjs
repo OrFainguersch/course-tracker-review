@@ -345,3 +345,29 @@ test('Plan displays consistently red required markers and read-only board-derive
  assert.match(css,/html\[data-flympus-theme="dark"\] \.fleetRequired/);
  assert.match(css,/html\.flympusLargeText \.pveBoardLinkedNote/);
 });
+
+
+test('Course timing defaults appear directly before scheduled flight form in all modes',()=>{
+ const vm=require('node:vm'),language={value:'en'};
+ const scope={window:{FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=>language.value}};
+ vm.runInNewContext(ui,scope,{filename:'fleet-views.js'});
+ const ctx={fleet:[],flights:[],date:'2026-10-08',platformId:'shahak',platformLabel:'Shahak',
+  trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true};
+ const english=scope.window.FLYMPUS_FLEET_VIEW.schedule(ctx);
+ const settingsAt=english.indexOf('class="fleetTimingSettings"');
+ const formAt=english.indexOf('id="fleetSortieForm"');
+ assert.ok(settingsAt>0&&formAt>settingsAt);
+ assert.ok(english.indexOf('id="fleetFlightBoard"')<settingsAt);
+ assert.ok(english.indexOf('id="fleetTimingDefaultsForm"')>settingsAt&&english.indexOf('id="fleetTimingDefaultsForm"')<formAt);
+ assert.equal((english.match(/id="fleetTimingDefaultsForm"/g)||[]).length,1);
+ assert.equal((english.match(/id="fleetSortieForm"/g)||[]).length,1);
+ language.value='he';
+ const hebrew=scope.window.FLYMPUS_FLEET_VIEW.schedule(ctx);
+ assert.ok(hebrew.indexOf('עריכת ברירות מחדל לתדריך ולתחקיר')<hebrew.indexOf('הוספת טיסה מתוכננת'));
+ const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(css,/\.fleetSchedulePlain>\.fleetTimingSettings[\s\S]*?order:0/);
+ assert.match(css,/\.fleetSchedulePlain>\.fleetSortieForm\{order:1\}/);
+ assert.match(css,/\.fleetSchedulePlain>\.fleetBookedFlights\{order:2\}/);
+ assert.match(css,/html\[data-flympus-theme="dark"\] \.dailyFlightPlan \.fleetSchedulePlain>\.fleetTimingSettings/);
+ assert.match(css,/@media\(max-width:560px\)/);
+});
