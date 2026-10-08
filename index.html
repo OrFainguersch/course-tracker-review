@@ -106,6 +106,9 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/reports-dashboard.css?v=0767" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history01" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
+<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261008-fleet01" />
+<script src="./assets/fleet-serviceability.js?v=20261008-fleet01"></script>
+<script src="./assets/fleet-views.js?v=20261008-fleet01"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history01"></script>
 
@@ -6847,7 +6850,7 @@ if(!window.__flympusI18nObserverBound&&window.MutationObserver){
   if(document.body)start();else document.addEventListener('DOMContentLoaded',start,{once:true})
 }
 
-const appScreenIds=new Set(['home','courses','record','evaluation','roster','profile','instructor','settings','preferences','my-profile','user-management','reports','safety','exams','planned']);
+const appScreenIds=new Set(['home','courses','record','evaluation','roster','profile','instructor','settings','preferences','my-profile','user-management','reports','safety','exams','planned','fleet']);
 let initialUiState={};try{initialUiState=JSON.parse(sessionStorage.getItem('ct-review-ui')||'{}')||{}}catch{}
 const flympusRealPageReload=(()=>{try{
   const entry=performance.getEntriesByType?.('navigation')?.[0];
@@ -6918,7 +6921,7 @@ function captureAdvancedArchitectureSnapshot(){
 function beginAdvancedArchitectureEditSession(){advancedArchitectureEditSnapshot=captureAdvancedArchitectureSnapshot()}
 function discardAdvancedArchitectureSession(){restoreLocalStorageScope(advancedArchitectureEditSnapshot);advancedArchitectureEditSnapshot=null;state.packageAddFlow=null;state.packageCreateOpen=null}
 
-const appRootScreens=new Set(['courses','roster','planned','record','reports','settings','preferences']);
+const appRootScreens=new Set(['courses','roster','planned','record','reports','settings','preferences','fleet']);
 let appNavHistory=[];try{const stored=JSON.parse(sessionStorage.getItem('ct-review-nav-history')||'[]');if(Array.isArray(stored))appNavHistory=stored.filter(x=>appScreenIds.has(x))}catch{}
 if(state.screen==='home')appNavHistory=[];else if(appRootScreens.has(state.screen))appNavHistory=['home'];else if(!appNavHistory.length||appNavHistory[0]!=='home')appNavHistory=['home',...appNavHistory.filter(x=>x!=='home')];
 function saveAppNavHistory(){try{sessionStorage.setItem('ct-review-nav-history',JSON.stringify(appNavHistory))}catch{}}
@@ -7250,9 +7253,10 @@ function siteEditDecision(message,{title='Unsaved changes'}={}){
 }
 
 function getEvaluations(){return readCourseArray('ct-review-evals')}function setEvaluations(x){writeCourseArray('ct-review-evals',x)}
-const nav=[['__label','','COURSE'],['courses','courses','My Courses'],['settings','settings','Course Management'],['__label','','APP'],['preferences','preferences','Settings']];
+const nav=[['__label','','COURSE'],['courses','courses','My Courses'],['fleet','fleet','Aircraft Serviceability'],['settings','settings','Course Management'],['__label','','APP'],['preferences','preferences','Settings']];
 function navIconSvg(name){
   const paths={
+    fleet:'<path d="M2.5 13 10 10l3-6h2l-1 7 7 2v2l-7 1-1 4h-2l-1-4-7-1z"></path>',
     courses:'<rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"></rect><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="1"></rect><rect x="14" y="14" width="6.5" height="6.5" rx="1"></rect>',
     home:'<path d="M3.5 10.5 12 3.8l8.5 6.7"></path><path d="M5.5 9.8v10.4h13V9.8"></path><path d="M9.5 20.2v-6h5v6"></path>',
     evaluation:'<path d="M8 4.5h8"></path><path d="M9 3h6v3H9z"></path><rect x="5" y="5.5" width="14" height="15" rx="2"></rect><path d="m8.5 13 2.2 2.2 4.8-5"></path>',
@@ -8644,6 +8648,77 @@ function safetySeverityTone(value){return safetySeverityDefinition(value)?.tone|
 function safetySeverityGuideHtml(){
  return '<section class="safetySeverityGuide" role="note" aria-labelledby="safetySeverityGuideTitle" aria-describedby="safetySeverityGuideIntro"><div class="safetySeverityGuideHead"><h3 id="safetySeverityGuideTitle">Severity / Impact guide</h3><p id="safetySeverityGuideIntro">Choose the level that best reflects the actual safety impact and reduced safety margin.</p></div><div class="safetySeverityGuideGrid" role="list">'+SAFETY_SEVERITY_DEFS.map(x=>'<article class="safetySeverityGuideItem safetySeverity-'+esc(x.tone)+'" data-safety-severity-guide="'+esc(x.value)+'" role="listitem"><span class="safetySeverityDot" aria-hidden="true"></span><div><b>'+esc(x.value)+'</b><p>'+esc(x.description)+'</p></div></article>').join('')+'</div></section>'
 }
+/* Aircraft and flights belong to the active course. Flight board is per date and platform.
+   The current review storage is local/UID-scoped, not a shared server database. */
+window.FLYMPUS_FLEET_LANGUAGE=()=>getFlympusAppPreferences().language;
+function currentFleetPlatform(){return String(currentCourseMeta.platformId||'unspecified')}
+function getFleetAircraft(){return readCourseArray('ct-review-aircraft-serviceability')}
+function getDailyFlightBoard(){return readCourseArray('ct-review-flight-board')}
+function persistCourseOperations(base,items){
+ try{localStorage.setItem(courseScopedKey(base),JSON.stringify(items));return true}catch{return false}
+}
+function currentFleetContext(extra={}){
+ return {fleet:getFleetAircraft(),flights:getDailyFlightBoard(),platformId:currentFleetPlatform(),platformLabel:epPlatformLabel(currentCourseMeta.platformId)||currentCourseMeta.platformId||'—',courseLabel:currentCourseMeta.courseName||currentCourseId,today:todayIsoDate(),canWrite:flympusCan('fleet.serviceability.write'),...extra};
+}
+function fleetServiceabilityScreen(){return window.FLYMPUS_FLEET_VIEW.fleet(currentFleetContext({editId:state.fleetEditId||null}))}
+function courseFlightScheduleHtml(date){
+ return window.FLYMPUS_FLEET_VIEW.schedule(currentFleetContext({date,editId:state.flightBoardEditId||null,canWrite:flympusCan('operations.flightBoard.write'),
+  trainees:courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active').map(x=>({id:x.id,name:x.name})),
+  instructors:courseInstructors().map(x=>({id:x.id,name:x.name})),syllabi:evaluationSyllabusNames()}));
+}
+function saveFleetForm(form){
+ const fd=new FormData(form);
+ const input={id:String(fd.get('id')||''),tail:String(fd.get('tail')||''),status:String(fd.get('status')||''),reason:String(fd.get('reason')||''),since:String(fd.get('since')||'')};
+ const model=window.FLYMPUS_FLEET_MODEL,now=new Date().toISOString(),idFactory=()=>window.crypto?.randomUUID?.()||('ac_'+Date.now()+'_'+Math.random().toString(36).slice(2));
+ return persistCourseOperations('ct-review-aircraft-serviceability',model.upsertAircraft(getFleetAircraft(),input,currentFleetPlatform(),now,idFactory));
+}
+function fleetSaveError(){toast('Unable to save. Check device storage; no changes were submitted.','error')}
+function bindFleetServiceability(){
+ const form=$('#fleetAircraftForm');
+ if(form)form.onsubmit=e=>{
+  e.preventDefault();if(!flympusCan('fleet.serviceability.write'))return;
+  try{if(!saveFleetForm(form)){fleetSaveError();return}state.fleetEditId=null;toast('Aircraft serviceability saved','success');render()}catch(err){toast(err.message||'Unable to save aircraft','error')}
+ };
+ document.querySelectorAll('[data-fleet-edit]').forEach(b=>b.onclick=()=>{if(!flympusCan('fleet.serviceability.write'))return;state.fleetEditId=b.dataset.fleetEdit;render()});
+ if($('#fleetCancelEdit'))$('#fleetCancelEdit').onclick=()=>{state.fleetEditId=null;render()};
+ document.querySelectorAll('[data-fleet-archive]').forEach(b=>b.onclick=async()=>{
+  if(!flympusCan('fleet.serviceability.write'))return;
+  const item=getFleetAircraft().find(x=>x.id===b.dataset.fleetArchive&&x.platformId===currentFleetPlatform()&&!x.archivedAt);
+  if(!item||!(await siteConfirm('Remove aircraft '+item.tail+' from the active fleet? Historical flight assignments and serviceability changes will be retained.',{title:'Remove aircraft?',confirmLabel:'Remove',tone:'warning'})))return;
+  try{
+   const next=window.FLYMPUS_FLEET_MODEL.archiveAircraft(getFleetAircraft(),item.id,currentFleetPlatform());
+   if(!persistCourseOperations('ct-review-aircraft-serviceability',next)){fleetSaveError();return}
+   if(state.fleetEditId===item.id)state.fleetEditId=null;
+   toast('Aircraft removed from active fleet');render();
+  }catch(err){toast(err.message||'Unable to remove aircraft','error')}
+ });
+}
+function bindDailyFlightBoard(){
+ const form=$('#fleetSortieForm'),mode=$('#fleetFlightMode');
+ if(mode){const refreshMode=()=>{const instructor=form.querySelector('[name="instructorId"]'),holder=form.querySelector('[data-fleet-instructor-field]'),solo=mode.value==='SOLO';if(holder)holder.hidden=solo;if(instructor)instructor.required=!solo};mode.onchange=refreshMode;refreshMode()}
+ if(form)form.onsubmit=e=>{
+  e.preventDefault();if(!flympusCan('operations.flightBoard.write'))return;
+  const fd=new FormData(form),date=state.planDate||normalizeDateValue($('#pveDate')?.value)||todayIsoDate(),traineeId=String(fd.get('traineeId')||''),instructorId=String(fd.get('instructorId')||''),
+    t=courseTrainees().find(x=>x.id===traineeId),i=courseInstructors().find(x=>x.id===instructorId);
+  const input={id:String(fd.get('id')||''),date,time:String(fd.get('time')||''),aircraftId:String(fd.get('aircraftId')||''),mode:String(fd.get('mode')||''),traineeId,traineeName:t?.name||'',instructorId,instructorName:i?.name||'',syllabus:String(fd.get('syllabus')||'')};
+  try{
+    const all=window.FLYMPUS_FLEET_MODEL.upsertSortie(getDailyFlightBoard(),input,getFleetAircraft(),currentFleetPlatform(),date,
+    {trainees:courseTrainees().map(x=>x.id),instructors:courseInstructors().map(x=>x.id)},new Date().toISOString(),()=>window.crypto?.randomUUID?.()||('flight_'+Date.now()+'_'+Math.random().toString(36).slice(2)));
+    if(!persistCourseOperations('ct-review-flight-board',all)){fleetSaveError();return}
+    state.flightBoardEditId=null;toast('Flight board updated','success');render();
+  }catch(err){toast(err.message||'Unable to schedule flight','error')}
+ };
+ document.querySelectorAll('[data-flight-edit]').forEach(b=>b.onclick=()=>{if(!flympusCan('operations.flightBoard.write'))return;state.flightBoardEditId=b.dataset.flightEdit;render()});
+ if($('#fleetFlightCancel'))$('#fleetFlightCancel').onclick=()=>{state.flightBoardEditId=null;render()};
+ document.querySelectorAll('[data-flight-delete]').forEach(b=>b.onclick=async()=>{
+  if(!flympusCan('operations.flightBoard.write'))return;
+  const id=b.dataset.flightDelete,record=getDailyFlightBoard().find(x=>x.id===id&&x.platformId===currentFleetPlatform());
+  if(!record||!(await siteConfirm('Remove this scheduled flight? Submitted evaluations and solo flights are not affected.',{title:'Remove flight?',confirmLabel:'Remove',tone:'warning'})))return;
+  if(!persistCourseOperations('ct-review-flight-board',getDailyFlightBoard().filter(x=>x.id!==id))){fleetSaveError();return}
+  state.flightBoardEditId=null;toast('Scheduled flight removed');render();
+ });
+}
+
 function getExamRecords(){return readCourseArray('ct-review-exams')}
 function saveExamRecords(v){writeCourseArray('ct-review-exams',v)}
 function currentActivityCounts(){return {evaluation:getEvaluations().length,safety:courseMockSafetyEvents().length+getSafetyRecords().length,exams:courseMockExamAttempts().length+getExamRecords().length,planned:getDailyReports().length,roster:courseTrainees().length+courseInstructors().length}}
@@ -10985,6 +11060,7 @@ function buildFlympusScreenHtml(screen){
     case'safety':html=safetyScreen();break;
     case'exams':html=examsScreen();break;
     case'planned':html=plannedVsExecuted();break;
+    case'fleet':html=fleetServiceabilityScreen();break;
     default:html=home();break;
   }
   if(screen!=='home')html=globalBackControl()+html;
