@@ -50,6 +50,14 @@ function create(ctx){
      state.ready=true;render();
    },err=>{console.warn('FLYMPUS Safety inbox subscription',err);stop();render()});
  }
+ function managerNoticesSeenAt(){
+   try{return Number(localStorage.getItem('ct-review-safety-manager-read-'+state.uid)||0)}catch{return 0}
+ }
+ function markSeen(){
+   if(!state.uid)return;
+   try{localStorage.setItem('ct-review-safety-manager-read-'+state.uid,String(Date.now()))}catch{}
+   render();
+ }
  function items(){
    const user=state.uid,out=[];
    for(const [key,rows] of state.records){
@@ -113,7 +121,7 @@ function create(ctx){
    const rows=items(),outstanding=rows.filter(x=>x.type==='action');
    dot.hidden=outstanding.length===0&&rows.filter(x=>x.type!=='action').every(x=>{
      const stamp=x.at?.seconds?x.at.seconds*1000:new Date(x.at||0).getTime();
-     return !stamp||Date.now()-stamp>86400000;
+     return !stamp||stamp<=managerNoticesSeenAt();
    });
    if(empty)empty.hidden=!!rows.length;
    list.innerHTML=rows.slice(0,40).map((item,i)=>{
@@ -130,7 +138,7 @@ function create(ctx){
      panel.hidden=true;document.querySelector('#topNotificationBtn')?.setAttribute('aria-expanded','false');
    });
  }
- return Object.freeze({start,stop,render,items,when});
+ return Object.freeze({start,stop,render,items,when,markSeen});
 }
 root.FLYMPUS_GLOBAL_SAFETY=Object.freeze({create});
 })(window);
