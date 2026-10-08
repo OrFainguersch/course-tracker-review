@@ -1229,3 +1229,21 @@ html[data-flympus-theme="dark"]{
 [data-flympus-role-badge="user"],
 #flympusUserManagementPageRoot .flympusUserRoleBadge.user,
 .flympusUserMeta i.role.user{background:var(--role-user-bg)!important;color:var(--role-user-fg)!important}
+
+/* Keep role labels compact in account menus; never paint the entire identity row. */
+.accountQuickMenu .personalProfileIdentity [data-flympus-role-badge],
+.personalProfileIdentity [data-flympus-role-badge]{
+  display:inline-flex!important;
+  width:max-content!important;
+  max-width:100%!important;
+  flex:0 0 auto!important;
+  align-self:flex-start!important;
+  align-items:center!important;
+  padding:3px 8px!important;
+  min-height:19px!important;
+  border-radius:999px!important;
+  line-height:1.15!important;
+  font-size:10px!important;
+  font-weight:800!important;
+  box-shadow:none!important;
+}
