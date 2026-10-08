@@ -3,7 +3,7 @@
 'use strict';
 function create(ctx){
   const model=root.FLYMPUS_SAFETY_WORKFLOW;
-  let cloud={courseId:'',mode:'idle',records:[],members:{},unsubscribe:null,error:''};
+  let cloud={courseId:'',mode:'idle',records:[],members:{},unsubscribe:null,error:'',initialized:false};
   const api=()=>root.FLYMPUS_AUTH?.safetyCloud;
   const uid=()=>api()?.uid?.()||'';
   const local=()=>ctx.readLocal();
@@ -12,7 +12,7 @@ function create(ctx){
   const escape=ctx.escape;
   const notify=(message,tone)=>ctx.toast(message,tone);
   function records(){return active()?cloud.records:local()}
-  function reset(){try{cloud.unsubscribe?.()}catch{}cloud={courseId:'',mode:'idle',records:[],members:{},unsubscribe:null,error:''}}
+  function reset(){try{cloud.unsubscribe?.()}catch{}cloud={courseId:'',mode:'idle',records:[],members:{},unsubscribe:null,error:'',initialized:false}}
   function refresh(){if(['home','safety'].includes(ctx.screen()))ctx.render();else inbox()}
   function connect(){
     if(!api()?.ready?.()||ctx.isDuty())return;
@@ -26,7 +26,13 @@ function create(ctx){
       cloud.unsubscribe=api().listen(key,entries=>{
         if(cloud.courseId!==key)return;
         const before=JSON.stringify(cloud.records);
-        cloud.records=(entries||[]).map(model.normalize);
+        const next=(entries||[]).map(model.normalize);
+        if(cloud.initialized&&next.some(x=>!cloud.records.some(old=>old.id===x.id)&&x.createdBy!==uid()&&model.notification(x,uid()))){
+          notify('New course safety event · acknowledgement required','warning');
+          ctx.notifySound?.();
+        }
+        cloud.initialized=true;
+        cloud.records=next;
         if(before!==JSON.stringify(cloud.records))refresh();else inbox();
       },err=>{cloud.error=String(err?.message||err);cloud.mode='unavailable';refresh()});
       refresh();
@@ -40,7 +46,9 @@ function create(ctx){
   function actions(entry){
     const x=model.normalize(entry),status=model.status(x),id=escape(x.id),counts=model.progress(x),remaining=model.pending(x);
     const label=status==='IN_PROGRESS'?'In Progress':status==='RESOLVED'?'Resolved':'Open';
-    const summary=active()?'<b>Acknowledged '+counts.acknowledged+' / '+counts.total+'</b><small>'+(remaining.length?'Awaiting: '+escape(remaining.map(p=>recipientName(x,p)).join(', ')):'All assigned instructors acknowledged')+'</small>':'<small>Local-only record · no shared read receipts</small>';
+    const unread=remaining.filter(person=>!model.viewed(x,person));
+    const seenUnack=remaining.filter(person=>model.viewed(x,person));
+    const summary=active()?'<b>Acknowledged '+counts.acknowledged+' / '+counts.total+'</b><small>'+(unread.length?'Not yet viewed: '+escape(unread.map(p=>recipientName(x,p)).join(', '))+' · ':'')+(seenUnack.length?'Viewed, awaiting acknowledgement: '+escape(seenUnack.map(p=>recipientName(x,p)).join(', ')):'')+(!remaining.length?'All assigned instructors acknowledged':'')+'</small>':'<small>Local-only record · no shared read receipts</small>';
     const ack=active()&&model.recipientUids(x).includes(uid())&&!model.acknowledged(x,uid())?'<button class="btn sky small" type="button" data-safety-ack="'+id+'">Acknowledge reading</button>':'';
     const statusControls=manager()?(status==='OPEN'?'<button class="btn secondary small" type="button" data-safety-status="'+id+'" data-status="IN_PROGRESS">Start handling</button>':'')+(status!=='RESOLVED'?'<button class="btn secondary small" type="button" data-safety-status="'+id+'" data-status="RESOLVED">Resolve event</button>':'<button class="btn secondary small" type="button" data-safety-status="'+id+'" data-status="OPEN">Reopen</button>'):'';
     return '<div class="safetyWorkflowRow"><span class="safetyStatusPill '+(status==='IN_PROGRESS'?'in_progress':status==='RESOLVED'?'resolved':'')+'">'+label+'</span><div class="safetyAckSummary">'+summary+'</div><div class="safetyWorkflowActions">'+ack+statusControls+'</div></div>';
