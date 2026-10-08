@@ -90,7 +90,7 @@ export function createAccountSwitcher({authSdk,appSdk,config,getPrimaryAuth,getC
     await secondary.authStateReady();
     if(secondary.currentUser?.uid!==user.uid)await authSdk.updateCurrentUser(secondary,user);
     slot.email=String(user.email||'').slice(0,254);
-    slot.name=String(profile.preferredName||profile.displayName||user.displayName||slot.email).slice(0,120);
+    slot.name=String(profile.displayName||user.displayName||slot.email).slice(0,120);
     slot.provider=(user.providerData||[]).some(x=>x.providerId==='microsoft.com')?'microsoft':'google';
     if(!existing)list.push(slot);
     save(list);
