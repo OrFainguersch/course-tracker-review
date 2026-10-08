@@ -65,3 +65,62 @@ test('profile uses complete trainee history and mounted filters without changing
  assert.ok(viewSource.includes('api.filtered(scopedRows,filters)'));
  assert.ok(viewSource.includes('resetMultiFilter('));
 });
+test('saved evaluation expands as an accessible, read-only copy of the submitted form',()=>{
+ const context={window:{FLYMPUS_TRAINEE_EVAL_HISTORY:h}};
+ vm.runInNewContext(viewSource,context,{filename:'trainee-evaluation-view.js'});
+ const esc=value=>String(value).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ const full={
+  id:'saved-1',source:'saved',date:'2026-10-06',instructorName:'Instructor B',syllabus:'Circuits',grade:4.2,
+  duration:25,takeoffs:2,landings:3,gradeMode:'INSTRUCTOR',suggestedGrade:4.1,
+  scores:{alt:4,method:5},
+  criteriaSnapshot:[{id:'alt',name:'Altitude control',weight:.6},{id:'method',name:'Work method',weight:.4}],
+  plannedEmergencyIds:['gen'],emergencyCounts:{gen:2,flaps:1},
+  emergencySnapshot:[{id:'gen',name:'Generator malfunction',category:'Electrical'},{id:'flaps',name:'Flap failure',category:'Flight Controls'}],
+  emergencyNotes:{gen:'Observe the voltage <first>'},
+  comments:'Maintain a stable circuit <before> touch-and-go',
+  emphases:['Altitude', 'Trim <carefully>'],
+  progressionDecision:'CONTINUE',revision:2,changeReason:'Clarified instructor comments'
+ };
+ const output=context.window.FLYMPUS_TRAINEE_EVAL_VIEW.render([full],{
+  esc,grading:{min:1,max:5},formatCourseDate:x=>x,
+  dateRangeFilterHtml:()=>'<div id="traineeEvalHistoryDateFrom"></div><div id="traineeEvalHistoryDateTo"></div>',
+  multiFilterHtml:id=>'<div id="'+id+'"></div>',
+  criteriaDefs:[],emergencyDefs:[]
+ });
+ assert.match(output,/<details class="recentEvalCard profileEvalDisclosure" data-trainee-evaluation-row/);
+ assert.match(output,/<summary class="profileEvalSummary">/);
+ assert.match(output,/profileEvalChevron/);
+ assert.match(output,/Show details/);
+ assert.equal((output.match(/<span>Grade<strong>4\.2 \/ 5\.0<\/strong><\/span>/g)||[]).length,1);
+ assert.doesNotMatch(output,/class="grade"/);
+ for(const value of ['Altitude control','Work method','Generator malfunction','Flap failure',
+  'Planned emergencies','Instructor comments','Next-flight emphases','Duration','Takeoffs','Landings',
+  'Instructor-assigned grade','4.1 / 5.0','Not yet · Continue','Evaluation revision','Clarified instructor comments'])
+  assert.ok(output.includes(value),'Missing submitted field '+value);
+ assert.ok(output.includes('Observe the voltage &lt;first&gt;'));
+ assert.ok(output.includes('Maintain a stable circuit &lt;before&gt;'));
+ assert.ok(output.includes('Trim &lt;carefully&gt;'));
+ assert.ok(!output.includes('<before>')&&!output.includes('<carefully>'),'User-authored text must be escaped');
+});
+test('review samples expose only demo information and legacy saved rows use current catalog names',()=>{
+ const context={window:{FLYMPUS_TRAINEE_EVAL_HISTORY:h}};
+ vm.runInNewContext(viewSource,context,{filename:'trainee-evaluation-view.js'});
+ const deps={esc:s=>String(s),grading:{min:1,max:5},formatCourseDate:s=>s,
+  dateRangeFilterHtml:()=>'',multiFilterHtml:()=>'',criteriaDefs:[{id:'alt',name:'Altitude control',weight:1}],
+  emergencyDefs:[{id:'gen',name:'Generator malfunction'}]};
+ const mock=context.window.FLYMPUS_TRAINEE_EVAL_VIEW.render([{...rows[0],emergencies:['Engine cut'],emphases:['Keep altitude']}],deps);
+ assert.ok(mock.includes('Review sample — only demonstration details are available'));
+ assert.ok(mock.includes('Engine cut')&&mock.includes('Keep altitude'));
+ assert.ok(!mock.includes('No instructor comments were entered.'),'Do not fabricate absent submitted form fields for samples');
+ const legacy=context.window.FLYMPUS_TRAINEE_EVAL_VIEW.render([{...rows[1],scores:{alt:4},emergencyCounts:{gen:1},comments:'Good progress',emphases:[]}],deps);
+ assert.ok(legacy.includes('Altitude control')&&legacy.includes('Generator malfunction'));
+ assert.ok(legacy.includes('Good progress'));
+ assert.ok(legacy.includes('No next-flight emphases were entered.'));
+});
+test('profile read-only sheet uses course definitions and persists future form-label snapshots',()=>{
+ assert.ok(page.includes('criteriaDefs:evaluationCriteriaDefs(),emergencyDefs:evaluationEmergencyDefs()'));
+ assert.ok(page.includes('criteriaSnapshot:evalCriteria.map('));
+ assert.ok(page.includes('emergencySnapshot:emergencyDefs.map('));
+ assert.ok(page.includes('assets/trainee-evaluation-view.js?v=20261008-history02'));
+ assert.ok(page.includes('assets/trainee-evaluation-history.css?v=20261008-history02'));
+});
