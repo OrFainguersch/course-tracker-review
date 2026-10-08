@@ -929,3 +929,40 @@ assert(html.includes("if(startAtTop&&!options.focusNotificationSettings)forcePag
 assert(html.includes("id=\"accountSwitchList\"")&&html.includes("id=\"accountAddAnother\""),'Account picker must be part of shared desktop/mobile profile menu');
 assert(html.includes('class="personalProfileEmail" id="personalProfileEmail"'),'Email must appear immediately below active account name');
 assert(html.includes('Sign out of this account'),'Signout explanation must replace account email in destructive action');
+
+/* Duty Trainee hard-deny runtime smoke: direct function invocation cannot render forbidden screens. */
+{
+ const previous={role:context.FLYMPUS_AUTH.role,isActive:context.FLYMPUS_AUTH.isActive,can:context.FLYMPUS_AUTH.can,
+  profile:context.FLYMPUS_AUTH.profile,currentUser:context.FLYMPUS_AUTH.currentUser};
+ Object.assign(context.FLYMPUS_AUTH,{
+  role:()=>'duty_trainee',isActive:()=>true,can:()=>true,
+  profile:{uid:'test-duty',role:'duty_trainee',status:'active',displayName:'Duty Tester',email:'duty@example.invalid'},
+  currentUser:{uid:'test-duty',displayName:'Duty Tester',email:'duty@example.invalid'}
+ });
+ assert.equal(vm.runInContext("isDutyTrainee()",context),true);
+ assert.equal(vm.runInContext("canViewDutyScreen('home')",context),true,
+   'Unassigned Duty Trainee must still see a safe Home');
+ assert.equal(vm.runInContext("canViewDutyScreen('preferences')",context),true,
+   'Unassigned Duty Trainee must still see personal Settings');
+ for(const screen of ['roster','profile','instructor','courses','record','evaluation','safety','exams','reports','settings','user-management','my-profile']){
+   assert.equal(vm.runInContext('canViewDutyScreen('+JSON.stringify(screen)+')',context),false,screen+' must be forbidden');
+   const result=vm.runInContext('buildFlympusScreenHtml('+JSON.stringify(screen)+')',context);
+   assert(result.includes('accessDeniedCard')&&!result.includes('recentEvalCard'),screen+' must render no private data');
+ }
+ assert.equal(vm.runInContext("canViewDutyScreen('planned')",context),false,'Unassigned Duty Trainee must not read Plan');
+ assert.equal(vm.runInContext("canViewDutyScreen('fleet')",context),false,'Unassigned Duty Trainee must not read Maintenance');
+ for(const cap of ['roster.manage','evaluations.write','users.manage','courses.create','courses.manageAssigned','packages.overrideCourse','packages.manageGlobal']){
+   assert.equal(vm.runInContext('flympusCan('+JSON.stringify(cap)+')',context),false,cap+' must remain denied even when underlying can() says true');
+ }
+ const safeHome=vm.runInContext('home()',context);
+ assert(safeHome.includes('Course access not assigned')&&!safeHome.includes('Course Pulse')&&!safeHome.includes('Start Evaluation'));
+ const settings=vm.runInContext('appPreferencesScreen()',context);
+ assert(settings.includes('myProfilePhotoEdit')&&settings.includes('Official full name'));
+ assert(!settings.includes('myProfileEditOfficialName')&&!settings.includes('myProfileNicknameEditor')&&!settings.includes('openUserManagementSettings'));
+ const dutyState=vm.runInContext('state.screen',context);
+ vm.runInContext("go('roster')",context);
+ assert.equal(vm.runInContext('state.screen',context),dutyState,'Direct navigation must not change active screen');
+ vm.runInContext("go('my-profile')",context);
+ assert.equal(vm.runInContext('state.screen',context),'preferences','Profile menu must lead into restricted personal Settings');
+ Object.assign(context.FLYMPUS_AUTH,previous);
+}
