@@ -377,9 +377,10 @@ html[data-flympus-theme="dark"] .fleetTimeFlowHeading small{color:#b9cedd}
 
 /* Plan: consistent required markers, readable field actions and derived report totals. */
 .dailyFlightPlan .fleetRequired,.coursePlanWorkspace .fleetRequired{color:#c62828!important;font-weight:900!important;font-size:1em}
-/* The UI already supplies a single explicit star inside the label. Suppress only
-   the generic label ::after required-marker when that star exists. Retains native
-   required validation and keeps optional / SOLO fields unchanged. */
+/* Native required controls use the app's generic required marker, not an extra
+   manually inserted star. The Instructor field keeps one explicit fallback marker
+   when its required attribute is managed dynamically, so suppress any generated
+   pseudo-element only for labels already containing that marker. */
 .fleetSortieFormGrid label:has(.fleetRequired)::after{content:none!important;display:none!important}
 .fleetFieldHead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:7px;min-width:0}
 .dailyFlightPlan .fleetSortieFormGrid .fleetFieldHead label{margin:0;line-height:1.5}
