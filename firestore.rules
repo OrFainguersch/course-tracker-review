@@ -80,9 +80,11 @@ service cloud.firestore {
         && request.resource.data.email == resource.data.email
         && request.resource.data.role == resource.data.role
         && request.resource.data.status == resource.data.status
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'preferredName', 'photoURL', 'providerIds', 'lastLoginAt', 'updatedAt'
-        ]);
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+          resource.data.role == 'duty_trainee'
+          ? ['photoURL', 'providerIds', 'lastLoginAt', 'updatedAt']
+          : ['preferredName', 'photoURL', 'providerIds', 'lastLoginAt', 'updatedAt']
+        );
     }
 
     function ownerSelfIdentity(uid) {

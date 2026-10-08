@@ -40,7 +40,7 @@ assert(!auth.includes("addScope('mail.read')")&&!auth.includes("addScope('calend
 assert(auth.includes("['owner','admin','training_manager','duty_trainee','user'].includes(invitation?.role)")&&auth.includes("status:preauthorized?'active':'pending'"),
   'An uninvited first-time account must start as pending USER while a valid invitation may pre-authorize the exact hierarchy-granted role');
 assert(auth.includes("profile.status!=='active'"),'Only active profiles may unlock authenticated access');
-assert(auth.includes("APP_ROLE_ORDER=Object.freeze(['user','duty_trainee','training_manager','admin','owner'])")&&auth.includes("function hasCapability("),
+assert(auth.includes("APP_ROLE_ORDER=Object.freeze(['duty_trainee','user','training_manager','admin','owner'])")&&auth.includes("function hasCapability("),
   'Client role context must use explicit tiered application roles and capabilities');
 assert(auth.includes('openUserManagement')&&auth.includes("getDocs(firestoreSdk.collection(db,'users'))"),'Active user managers must have a Firestore-backed User Management screen');
 assert(auth.includes("action==='approve'")&&auth.includes("action==='block'")&&auth.includes("action==='reactivate'"),'User Management must support approval, blocking and reactivation');
@@ -114,11 +114,20 @@ assert(auth.includes("'User Management':'ניהול משתמשים'")&&auth.incl
 assert(auth.includes('bindAuthLanguageSync()'),'Dynamic auth/admin UI must react when the app language changes');
 assert(auth.includes('roleGuideHtml()')&&!auth.includes('flympusRoleSeparationNote'),
   'User Management role guide must stay concise and must not render a separate explanatory note box');
-assert(auth.includes("['owner','Full system control',['May appoint: Owner, Administrator, Training Manager or User','Full access to all courses and global Packages','Full User Management and role control','Primary Owner is protected']]")&&
-  auth.includes("['admin','System administration',['May appoint: Training Manager or User','Manage Users and lower-level roles','Manage all courses and global Packages','Full training administration']]")&&
-  auth.includes("['training_manager','Training administration',['May appoint: User','Create and manage assigned training courses','Manage course rosters','Create course-specific Package overrides','Submit and manage training records/evaluations']]")&&
-  auth.includes("['user','Operational access',['Work in assigned courses','Submit evaluations and forms','No User Management','No course structure, roster or Package editing']]"),
-  'Role guide must concisely explain scope, appointment rights and the key boundaries of every application role');
+assert(auth.includes("['owner','Full system control',['May appoint: Owner, Administrator, Training Manager, User or Duty Trainee'")&&
+  auth.includes("['admin','System administration',['May appoint: Training Manager, User or Duty Trainee'")&&
+  auth.includes("['training_manager','Training administration',['May appoint: User or Duty Trainee'")&&
+  auth.includes("['user','Operational access',['Higher than Duty Trainee; cannot appoint Duty Trainees'")&&
+  auth.includes("['duty_trainee','Restricted daily operations',['Home, Plan, Aircraft Serviceability and personal Settings only'"),
+  'Role guide must enumerate all legal appointments while placing User above restricted Duty Trainee');
+assert(auth.includes("if(actor==='owner')return ['owner','admin','training_manager','duty_trainee','user']")&&
+  auth.includes("if(actor==='admin')return ['training_manager','duty_trainee','user']")&&
+  auth.includes("if(actor==='training_manager')return ['duty_trainee','user']")&&
+  auth.includes("  return []"),
+  'Only Owner, Administrator and Training Manager may appoint Duty Trainees, never User');
+assert(auth.includes("capabilities:Object.freeze(['evaluations.write','operations.daily.write','operations.flightBoard.write','operations.solo.write','fleet.serviceability.write'])"),
+  'User retains all Duty Trainee operations plus evaluation capabilities');
+
 assert(auth.includes('Managed at a higher level')&&!auth.includes('Direct appointment follows the hierarchy:'),
   'User Management must keep appointment rights inside the role cards without a duplicated hierarchy note');
 assert(auth.includes('data-managed-user-form')&&auth.includes('updateManagedUserDetails')&&auth.includes('name="role"')&&auth.includes('Email is tied to the sign-in account and cannot be changed here.'),
@@ -236,3 +245,25 @@ assert(css.includes('--role-owner-bg:#fff1c9')&&css.includes('--role-owner-fg:#8
   'Owner role badge must retain the established gold palette');
 assert(css.includes('--role-owner-bg:#3a321d')&&css.includes('--role-owner-fg:#ebcf82'),
   'Owner role badge must retain the accessible dark-theme gold palette');
+
+assert(html.includes("function isDutyTrainee()")&&html.includes("const DUTY_ALLOWED_SCREENS=new Set(['home','planned','fleet','preferences'])"),
+  'Duty Trainee must have a small explicit screen allowlist');
+assert(html.includes("if(!canViewDutyScreen(screen))return flympusAccessDenied('Access unavailable')")&&
+  html.includes("if(!canViewDutyScreen(screen)){toast('Access unavailable for Duty Trainee'")&&
+  html.includes("if(isDutyTrainee())return dutyTraineeHome();"),
+  'Direct render, internal navigation and ordinary Home must all fail closed');
+assert(html.includes("isOperationalPrivilege(capability)&&window.FLYMPUS_AUTH?.can?.(capability)===true&&isDutyTraineeAssigned()"),
+  'Duty Trainee capability checks must override course manager permissions');
+assert(html.includes("const visible=isDutyTrainee()?[['__label','','OPERATIONS']")&&
+  html.includes("const items=isDutyTrainee()?[['home','home','Home']")&&
+  html.includes("if(isDutyTrainee())return DUTY_ALLOWED_SCREENS.has(screen)?screen:'home'"),
+  'Side nav and bottom dock must expose only Home, Plan, Maintenance and personal Settings');
+assert(html.includes("if(isDutyTrainee())return dutyTraineeSettingsScreen()")&&
+  html.includes("await window.FLYMPUS_AUTH?.updateOwnPhoto?.('')"),
+  'Duty Trainee Settings must have own-photo editing and a read-only identity');
+assert(auth.includes("updateOwnPhoto:dataUrl=>updateOwnProfilePhoto(dataUrl)")&&
+  auth.includes("if(normalizeAppRole(currentProfile?.role)==='duty_trainee')throw new Error"),
+  'Authenticated profile changes must reject Duty nickname changes and route photos to own uid');
+assert(rules.includes("resource.data.role == 'duty_trainee'")&&
+  rules.includes("['photoURL', 'providerIds', 'lastLoginAt', 'updatedAt']"),
+  'Firestore must reject Duty Trainee self nickname/name/role changes');
