@@ -144,8 +144,9 @@ assert(!html.includes("function recordReturnControl()")&&!html.includes("functio
 assert(html.includes("function traineeRecordDock(traineeId)")&&html.includes(".profileRecordDock{")&&html.includes("position:sticky!important")&&html.includes("top:78px!important")&&html.includes("traineeRecordDock(t.id)")&&html.includes("--record-safety:#c84444"),"Trainee profiles must own the sticky Evaluation, Safety and Exam action bar with Safety in red");
 assert(html.includes("function courseAttentionCounts()")&&html.includes("record:evaluation+safety+exams")&&html.includes("attentionBadgeHtml('record','mobileNavAttention mobileNavRecordAttention',true)")&&html.includes('data-attention-dot="true"'),"Any unfinished Forms draft must roll up into a dot-only attention indicator on the Forms bottom-nav item");
 assert(html.includes(".attentionBadge[hidden]{display:none!important}")&&html.includes("el.hidden=!n")&&
-  html.includes("key==='planned'?String(n):formatAttentionCount(n)"),
-  "Zero-value badges must be hidden; Plan must show the exact count rather than 9+");
+  html.includes("el.textContent=n?(dotOnly?'':formatAttentionCount(n)):''")&&
+  !html.includes("key==='planned'?String(n):formatAttentionCount(n)"),
+  "Zero-value badges must be hidden and all attention badges must use shared 9+ formatting");
 assert(html.includes("const attentionSummary=attention.record?")&&html.includes("recordAttentionSummary")&&html.includes("recordCardAttention"),"Forms must render aggregate and per-workflow unfinished indicators only when attention exists");
 assert(!html.includes("counts.evaluation+' saved'")&&!html.includes("counts.safety+' saved'")&&!html.includes("counts.exams+' saved'")&&!html.includes('<span class="recordHubCount">'),"Forms cards must not display saved-record counts");
 assert(html.includes("function traineeDraftNeedsAttention")&&html.includes("draftTrainee===id")&&html.includes("data-trainee-attention")&&html.includes("profileActionAttention"),"Trainee floating record actions must show an attention badge only when the unfinished draft belongs to that exact trainee");
@@ -840,8 +841,8 @@ assert(html.includes("if(!flympusRealPageReload||!appScreenIds.has(String(initia
 
 
 
-/* Plan navigation badge regression: same exact required-item list as the page,
-   not a stale __attentionCount=1 and not a truncated 9+ summary. */
+/* Plan navigation badge regression: count all required items accurately,
+   but continue to abbreviate the visual badge as 9+ above nine. */
 {
   const start=html.indexOf("function plannedCompleteness(){");
   const end=html.indexOf("function plannedVsExecuted(){",start);
@@ -876,8 +877,14 @@ assert(html.includes("if(!flympusRealPageReload||!appScreenIds.has(String(initia
   assert.equal(run({}).count,0,'No entered plan and no saved report require no badge');
   assert.equal(run({savedReports:[{date:'2026-10-08',plannedInstructed:1,plannedSolo:11,cancellations:[]}],selectedDate:'2026-10-08'}).count,12,
     'The badge reflects missing reasons even when the plan comes from a saved report');
-  assert(html.includes("key==='planned'?String(n):formatAttentionCount(n)"),
-    'Plan badges must display 12, not abbreviated 9+');
+  const badgeStart=html.indexOf('function formatCompactBadgeCount(value){');
+  const badgeEnd=html.indexOf('function courseAttentionCounts(){',badgeStart);
+  assert(badgeStart>=0&&badgeEnd>badgeStart,'Shared compact badge formatter is required');
+  const formatted=vm.runInNewContext(html.slice(badgeStart,badgeEnd)+'\n[formatAttentionCount(0),formatAttentionCount(1),formatAttentionCount(9),formatAttentionCount(10),formatAttentionCount(12)]');
+  assert.equal(Array.from(formatted).join(','),'0,1,9,9+,9+','Plan badge shows 9+ for 10 or more missing items');
+  assert(html.includes("const n=Number(courseAttentionCounts()[key]||0),content=n?(dotOnly?'':formatAttentionCount(n)):'';")&&
+    html.includes("el.textContent=n?(dotOnly?'':formatAttentionCount(n)):''"),
+    'Initial and live-updated badges both share the compact formatter');
 }
 
 /* Navigation audio must never escape its initiating physical gesture, and the
