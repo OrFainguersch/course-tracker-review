@@ -104,7 +104,10 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="modulepreload" href="./auth.js?v=20261008-switcher01" />
 <script src="./firebase-config.js?v=20261004-auth2"></script>
 <link rel="stylesheet" href="./assets/reports-dashboard.css?v=0767" />
+<link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history01" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
+<script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
+<script src="./assets/trainee-evaluation-view.js?v=20261008-history01"></script>
 
 <script src="./storage-scope.js?v=20261006-auth8"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -5993,7 +5996,7 @@ function applyFlympusAppPreferences(input,{themeSelectionChanged=false}={}){
 }
 applyFlympusAppPreferences();
 
-const FLYMPUS_HE_UI={'Detailed analytics':'ניתוח מפורט','Course dashboard':'דשבורד הקורס','Reports & Analytics':'דוחות וניתוחים','REPORTS & ANALYTICS':'דוחות וניתוחים','Reporting period':'תקופת דיווח','Group by':'קיבוץ לפי','Daily, weekly and monthly execution, cancellation reasons and operational trends.':'ביצוע לפי יום, שבוע וחודש, סיבות ביטול ומגמות פעילות.','Trainee rankings, evaluations, solo activity and course completion.':'דירוג חניכים, הערכות, טיסות סולו והשלמת הקורס.',
+const FLYMPUS_HE_UI={'Evaluation History':'היסטוריית הערכות','Complete guided evaluation history for this trainee.':'היסטוריית כל ההערכות המודרכות של חניך זה.','Grade range':'טווח ציונים','Minimum grade':'ציון מינימלי','Maximum grade':'ציון מקסימלי','All syllabi':'כל הסילבוסים','No evaluations match these filters.':'לא נמצאו הערכות התואמות למסננים.','Review sample':'דוגמת סקירה','Instructor comments':'הערות מדריך','Evaluation revision':'גרסת הערכה','total':'בסך הכול','Detailed analytics':'ניתוח מפורט','Course dashboard':'דשבורד הקורס','Reports & Analytics':'דוחות וניתוחים','REPORTS & ANALYTICS':'דוחות וניתוחים','Reporting period':'תקופת דיווח','Group by':'קיבוץ לפי','Daily, weekly and monthly execution, cancellation reasons and operational trends.':'ביצוע לפי יום, שבוע וחודש, סיבות ביטול ומגמות פעילות.','Trainee rankings, evaluations, solo activity and course completion.':'דירוג חניכים, הערכות, טיסות סולו והשלמת הקורס.',
   'Add another account':'הוסף חשבון נוסף','Other accounts':'חשבונות נוספים','Session expired':'פג תוקף ההתחברות','Sign out of this account':'התנתק מחשבון זה',
   'COURSE':'קורס','APP':'אפליקציה','My Courses':'הקורסים שלי','Course Management':'ניהול קורס','Settings':'הגדרות',
   'Roster':'סגל הקורס','Plan':'תכנון','Home':'בית','Forms':'טפסים','Reports':'דוחות',
@@ -9372,9 +9375,19 @@ function traineeRecordDock(traineeId){
  return '<div class="profileRecordDockWrap"><nav class="profileRecordDock" aria-label="Trainee forms">'+items.map(x=>'<button type="button" class="profileRecordAction '+x[3]+'" '+(x[0]==='evaluation'?'data-start-eval="'+esc(traineeId)+'"':'data-go="'+x[0]+'"')+'><span class="profileRecordIcon">'+navIconSvg(x[1])+'</span><span>'+x[2]+'</span><span class="attentionBadge profileActionAttention" data-trainee-attention="'+x[0]+'" data-trainee-id="'+esc(traineeId)+'" '+(traineeDraftNeedsAttention(x[0],traineeId)?'':'hidden')+'>'+formatAttentionCount(traineeDraftAttentionCount(x[0],traineeId))+'</span></button>').join('')+'</nav></div>';
 }
 
+function traineeEvaluationHistoryViewHtml(evalRows){
+ return window.FLYMPUS_TRAINEE_EVAL_VIEW.render(evalRows,{esc,formatCourseDate,grading:evaluationGradingSettings(),dateRangeFilterHtml,multiFilterHtml});
+}
+function bindTraineeEvaluationHistory(){
+ if(state.screen!=='profile'||state.profileTab!=='evaluations')return;
+ window.FLYMPUS_TRAINEE_EVAL_VIEW.bind($('#traineeEvalHistorySection'),traineeEvaluationHistory(state.selectedTrainee),{
+   find:$,multiFilterValues,resetMultiFilter,language:()=>getFlympusAppPreferences().language
+ });
+}
+
 function traineeProfile(){
  const allT=allTrainees(),base=allT.find(x=>x.id===state.selectedTrainee)||allT[0]||applyPersonOverride(trainees[0]),membership=courseMembershipFor(base.id,'TRAINEE',{status:base.status||'Active'}),t={...base,status:membership.status||'Active'},tab=state.profileTab||'overview';
- const evalRows=traineeEvaluationHistory(t.id).slice(0,5),soloBreakdown=traineeSoloBreakdown(t),focus=traineeAssessmentFocus(t.id,5),latestEmph=latestTraineeEmphases(t.id);
+ const evalRows=traineeEvaluationHistory(t.id),soloBreakdown=traineeSoloBreakdown(t),focus=traineeAssessmentFocus(t.id,5),latestEmph=latestTraineeEmphases(t.id);
  const prog=traineeResolvedGuidedProgression(t)||progressionByTrainee[t.id]||{current:t.currentSyllabus||'—',completed:0,minimum:0,reviewRequired:false,next:t.nextSyllabus||'—',optional:[]};
  const reqs=requirementProgress[t.id]||[],reqDone=reqs.filter(r=>r[1]>=r[2]).length;
  const gateMet=prog.minimum<=0||prog.completed>=prog.minimum,gateState=prog.reviewRequired&&gateMet?'Review needed':gateMet?'Minimum met':'In progress',guidedSnapshot=traineeGuidedSnapshot(t,prog),soloSnapshot=traineeSoloSnapshot(t);
@@ -9396,7 +9409,7 @@ function traineeProfile(){
  ''
  :'')+
  (tab==='syllabus'?epTraineeProgramProgressHtml(t)+(epCurrentProgram()?'':'<section class="card timeline"><div class="inlineHead"><h3>Progress Summary</h3><span class="pill blue">'+esc(gateState)+'</span></div>'+syllProgress.map(([n,p,status])=>'<div class="syll"><div class="syllRow"><b>'+esc(n)+'</b><span class="pill '+(status==='Complete'?'green':status==='Next'?'blue':'gray')+'">'+esc(status)+'</span></div><div class="progress"><i style="width:'+p+'%"></i></div></div>').join('')+'</section>')+'<section class="card timeline compactInfoCard" style="margin-top:10px"><div class="inlineHead"><div><h3>Solo Syllabus Activity</h3><p class="sub" style="margin:2px 0 0">Completed solo flights grouped by syllabus.</p></div><span class="pill blue">'+soloTotal+' total</span></div><div class="soloBreakdown">'+(soloBreakdown.length?soloBreakdown.map(x=>'<div class="soloRowMini"><b>'+esc(x[0])+'</b><span>'+x[1]+' flights</span></div>').join(''):'<p class="sub">No solo flights recorded yet.</p>')+'</div></section>':'')+
- (tab==='evaluations'?'<section class="card timeline"><div class="inlineHead"><div><h3>Recent Evaluations</h3><p class="sub" style="margin:2px 0 0">Most recent guided evaluations with full context.</p></div></div><div class="recentEvalList">'+(evalRows.length?evalRows.map(r=>'<article class="recentEvalCard"><div class="recentEvalTop"><b>'+esc(r.syllabus||'—')+'</b><span class="grade">'+Number(r.grade||0).toFixed(1)+'</span></div><div class="recentEvalMeta"><span>Date<strong>'+formatCourseDate(r.date)+'</strong></span><span>Instructor<strong>'+esc(r.instructorName||'—')+'</strong></span><span>Guided syllabus<strong>'+esc(r.syllabus||'—')+'</strong></span><span>Grade<strong>'+Number(r.grade||0).toFixed(1)+' / '+evaluationGradingSettings().max.toFixed(1)+'</strong></span></div></article>').join(''):'<p class="sub">No evaluations yet.</p>')+'</div></section>':'')+
+ (tab==='evaluations'?traineeEvaluationHistoryViewHtml(evalRows):'')+
  (tab==='activity'?'<section class="card timeline"><div class="inlineHead"><div><h3>'+(currentCourseMeta.type==='TECHNICIAN'?'Practical experience requirements':'Experience requirements')+'</h3><p class="sub" style="margin:2px 0 0">'+(currentCourseMeta.type==='TECHNICIAN'?'Required practical repetitions for this active training suit.':'Cumulative Full Scale performance against the minimums defined for this course.')+'</p></div><span class="pill blue">'+esc(currentCourseMeta.phase)+'</span></div><div class="requirementsGrid" style="margin-top:12px">'+tracking.map(x=>{const done=Number(totals[x.type]||0),minimum=x.minimum==null?null:Number(x.minimum),pct=minimum==null?0:Math.min(100,Math.round(done/Math.max(1,minimum)*100)),context=x.track==='night'?'Night':x.track==='day'?'Day':'';return '<div class="requirementCard '+(minimum!=null&&done>=minimum?'complete':'')+'"><div class="requirementTitleRow"><span>'+esc(x.label)+'</span>'+(context?'<small class="experienceContext">'+context+'</small>':'')+'</div><strong>'+done+(minimum==null?'':' / '+minimum)+'</strong>'+(minimum==null?'<small>No fixed minimum</small>':'<small>'+Math.max(0,minimum-done)+' remaining</small><div class="progress"><i style="width:'+pct+'%"></i></div>')+'</div>'}).join('')+'</div></section>'+experienceLogHtml(t,tracking)+'<section class="card timeline"><div class="sectionHead"><h2>Experience history</h2><p>'+events.length+' logged records</p></div><div class="eventLog">'+(events.length?events.slice(0,30).map(x=>{const kind=activityKind(x.type);return '<div class="eventRow"><div class="eventIcon">'+(kind==='TAKEOFF'?'↑':kind==='LANDING'?'↓':kind==='TRAINING_HOUR'?'h':'•')+'</div><div><b>'+esc(activityLabel(x.type))+'</b><small>'+esc(formatDateDMY(x.date))+' · '+esc(x.source||'Recorded')+(x.track?' · '+esc(x.track==='night'?'Night':'Day'):'')+(x.note?' · '+esc(x.note):'')+'</small></div><div class="membershipControl"><span class="eventQty">+'+x.quantity+'</span></div></div>'}).join(''):'<p class="sub">No experience has been recorded yet.</p>')+'</div></section>':'')+
  (tab==='emergencies'?'<section class="card timeline"><div class="inlineHead"><div><h3>Emergency Exposure</h3><p class="sub" style="margin:2px 0 0">What this trainee has practiced, what is missing, and how many repetitions were completed.</p></div></div>'+renderTraineeEmergencyProfile(t.id)+'</section>':'')+
  (tab==='safety'?'<section class="card empty"><div class="icon safetyIcon">'+navIconSvg('safety')+'</div><h3>No open safety items</h3><p>Historical safety records remain available in Safety.</p></section>':'')+
@@ -11219,7 +11232,7 @@ if(state.screen==='reports')bindReports();
 if(state.screen==='planned')bindPlanned();
 if(state.screen==='safety')bindSafety();
 if(state.screen==='exams')bindExams();
-if(state.screen==='profile'){bindActivity();
+if(state.screen==='profile'){bindActivity();bindTraineeEvaluationHistory();
   const visiblePlanIds=()=>[...document.querySelectorAll('[data-plan-emergency]')].map(x=>x.dataset.planEmergency);
   const selectedPlanIds=()=>[...document.querySelectorAll('[data-plan-emergency]:checked')].map(x=>x.dataset.planEmergency);
   const mergedPlanIds=()=>{const visible=new Set(visiblePlanIds()),hidden=getTraineeEmergencyPlan(state.selectedTrainee).emergencyIds.filter(id=>!visible.has(id));return [...new Set([...hidden,...selectedPlanIds()])]};
