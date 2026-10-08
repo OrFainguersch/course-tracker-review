@@ -770,9 +770,9 @@ assert(html.includes("function flympusContinuitySnapshotHtml(content)")&&
   html.includes("clone.querySelectorAll?.('.modal.open')")&&
   html.includes("clone.querySelectorAll?.('.multiFilterMenu,.datePickerPanel')"),
   "Continuity snapshots must strip transient dialogs, menus and picker overlays that would otherwise flash on resume");
-assert(html.includes("topHidden:scrollY>64&&")&&html.includes("window.__FLYMPUS_RELOAD_SNAPSHOT__={...snap,scrollY:0,topHidden:false,screen:'home'}")&&
+assert(html.includes("topHidden:scrollY>64&&")&&html.includes("window.__FLYMPUS_RELOAD_SNAPSHOT__={...firstPaintSnap,scrollY:0,topHidden:false,screen:targetScreen}")&&
   html.includes("window.scrollTo?.(0,0)"),
-  "Cold launch must explicitly restore HOME with visible chrome at scroll zero while ordinary saved snapshots may still record live auto-hide state");
+  "First-paint restoration must preserve the requested screen with visible chrome at scroll zero");
 assert(!html.includes("touchChromeStable?false:!!hidden")&&
   html.includes("const flympusTouchPullMode=()=>flympusStandaloneMode();")&&
   html.includes("if(!customPull||top>2)return;")&&html.includes("pullStandaloneGesture=true"),
@@ -792,6 +792,18 @@ assert(html.includes("Viewport-owned mobile chrome · 0758")&&
   "Touch/mobile top chrome must be viewport-owned with a preserved 78px document footprint so its approved transform timing is not distorted by sticky scroll geometry");
 assert(html.includes("snap.localDay===localDay"),
   "A snapshot from a previous local day must never flash before today's plan renders");
+assert(html.includes("sessionStorage.getItem('ct-review-reload-snapshot')")&&
+  html.includes("reloadSnap?.uid===reloadUid")&&html.includes("reloadVerified&&navigator.onLine!==false")&&
+  html.includes("reloadSnap.screen===targetScreen")&&
+  html.includes("reloadSnapAge<=30*60*1000")&&
+  html.includes("const firstPaintSnap=reloadSnapMatches?reloadSnap:(snapMatches?snap:null)")&&
+  html.includes("content.innerHTML=firstPaintSnap.html")&&
+  html.includes("uid:String(window.FLYMPUS_STORAGE_SCOPE?.currentUid?.()||'').trim()"),
+  "A desktop or mobile refresh must paint the exact saved screen only for the same verified active UID");
+assert(html.includes("targetScreen==='home'&&snap")&&
+  html.includes("!new URLSearchParams(location.search).has('pushScreen')")&&
+  html.includes("!reloadSnap.html.includes('flympusBootShell')"),
+  "Cold starts, deep links and loading skeletons must not masquerade as same-screen refresh snapshots");
 assert(html.includes("if(!flympusRealPageReload||!appScreenIds.has(String(initialUiState.screen||'')))initialUiState.screen='home'")&&
   html.includes("if(flympusPushBootScreen&&")&&
   html.includes("targetScreen==='home'&&snap")&&
