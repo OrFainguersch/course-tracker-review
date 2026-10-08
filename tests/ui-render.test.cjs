@@ -874,7 +874,7 @@ assert(html.includes("if(!flympusRealPageReload||!appScreenIds.has(String(initia
   assert.equal(run({plan:fullyComplete}).count,0,'All reasons completed removes the badge');
   assert.equal(run({plan,executedInstructed:1}).count,11,'Executed flights reduce missing cancellations');
   assert.equal(run({}).count,0,'No entered plan and no saved report require no badge');
-  assert.equal(run({savedReports:[{date:'2026-10-08',plannedInstructed:1,plannedSolo:11,cancellations:[]}]}).count,12,
+  assert.equal(run({savedReports:[{date:'2026-10-08',plannedInstructed:1,plannedSolo:11,cancellations:[]}],selectedDate:'2026-10-08'}).count,12,
     'The badge reflects missing reasons even when the plan comes from a saved report');
   assert(html.includes("key==='planned'?String(n):formatAttentionCount(n)"),
     'Plan badges must display 12, not abbreviated 9+');
