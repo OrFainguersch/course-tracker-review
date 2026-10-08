@@ -85,3 +85,11 @@ Any change touching mobile header positioning, bottom-nav auto-hide, pull-to-ref
 - It replaces the previous wordmark completely in the sidebar. Do not revert the source or overlay a secondary/duplicate logo.
 - Keep the image centered horizontally for mobile and desktop, with the original aspect ratio, inside the existing sidebar brand row. It must not affect the fixed-canvas drawer timing, scroll restoration, or safe-area boundary fix.
 - **Approved responsive wordmark width (2026-10-08): 198px**, the midpoint between the older 164px mobile logo and the too-large 232px replacement. Keep centering, `max-width:100%`, `height:auto`, and `object-fit:contain`. Do not reintroduce the 232px oversized presentation without an explicit new request.
+
+## Desktop/mobile visual and behavioral parity (approved 2026-10-08)
+
+- Desktop is not a legacy layout. The top header and bottom dock MUST hide/show together on the same scroll-decision JS, with the approved **0.58s show, 0.64s hide** animations and short input debounce.
+- On screens >=900px, the top bar MUST remain **position:fixed** relative to viewport, with a persistent ~78px normal-flow placeholder in .app. Never restore sticky + negative margin as the desktop implementation. Document scroll geometry stays stable.
+- When the sidebar is temporarily frozen/open, its desktop panel MUST be **flex-direction:column**: centered FLYMPUS wordmark first, full-width vertically stacked COURSE/APP menu second, app role footer at bottom. Do not allow flex-row to place logo and navigation side by side. Keep existing 200/230ms single-canvas motion and saved scroll position.
+- Desktop must use the same app-level language selection/i18n translations, RTL sidebar/right-side mirror and negative push transform, Dark theme palette, and Large Text setting as mobile. Test both languages, both themes, normal and large text when changing the shell; never force LTR/light or small fonts in desktop-specific overrides.
+- Preserve mobile shell geometry and CSS unchanged when implementing desktop parity. Regression tests for desktop-specific chrome and drawer layout are in tests/pull-lifecycle.test.cjs and run in review/production gates.

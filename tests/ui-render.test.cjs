@@ -249,6 +249,7 @@ assert(fs.existsSync(approvedSidebarLogo)&&fs.statSync(approvedSidebarLogo).size
   "The new logo must be bundled locally in the site, not linked to a transient upload");
 assert.equal(fs.readFileSync(approvedSidebarLogo).toString('ascii',0,4),'RIFF',
   "The replacement logo must be a valid local WebP file");
+assert(html.includes('id="flympus-desktop-chrome-drawer-parity"'),"Desktop cross-device shell regression layer must load in the final head");
 const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(match=>match[1]).filter(x=>x.trim());
 assert(scripts.length>=2);const appSource=scripts.at(-1).split('const earlyNavTarget=')[0];vm.runInContext(appSource,context,{filename:"index-inline.js"});
 // Drawer footer is global identity. A person's course-role membership must not
