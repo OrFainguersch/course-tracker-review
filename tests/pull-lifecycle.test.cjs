@@ -126,34 +126,34 @@ test('chrome decision debounce is short and drawer close restores the frozen pag
 test('desktop top chrome uses mobile viewport-owned behavior with stable flow slot',()=>{
   const layer=html.split('<style id="flympus-desktop-chrome-drawer-parity">')[1]?.split('</style>')[0];
   assert(layer,'Cross-device parity layer must exist after the legacy desktop styles');
-  assert.match(layer,/@media\\(min-width:900px\\)/);
-  assert.match(layer,/\\.app\\{padding-top:var\\(--flympus-top-chrome-height,78px\\)!important\\}/);
-  assert.match(layer,/\\.top\\{[\\s\\S]*?position:fixed!important;[\\s\\S]*?top:0!important;/);
-  assert.match(layer,/\\.top\\.topHidden\\{[\\s\\S]*?margin-bottom:0!important;[\\s\\S]*?transform:translate3d\\(0,calc\\(-100% - 2px\\),0\\)!important;/);
-  assert.match(layer,/--flympus-chrome-show-duration,\\.58s/);
-  assert.match(layer,/--flympus-chrome-hide-duration,\\.64s/);
-  assert.match(html,/bottomDockTransitionLockUntil=now\\+150/);
-  assert.match(html,/dock\\?\\.classList\\.toggle\\('dockHidden',next\\);[\\s\\S]*topBar\\?\\.classList\\.toggle\\('topHidden',next\\);/);
+  assert.match(layer,/@media\(min-width:900px\)/);
+  assert.match(layer,/\.app\{padding-top:var\(--flympus-top-chrome-height,78px\)!important\}/);
+  assert.match(layer,/\.top\{[\s\S]*?position:fixed!important;[\s\S]*?top:0!important;/);
+  assert.match(layer,/\.top\.topHidden\{[\s\S]*?margin-bottom:0!important;[\s\S]*?transform:translate3d\(0,calc\(-100% - 2px\),0\)!important;/);
+  assert.match(layer,/--flympus-chrome-show-duration,\.58s/);
+  assert.match(layer,/--flympus-chrome-hide-duration,\.64s/);
+  assert.match(html,/bottomDockTransitionLockUntil=now\+150/);
+  assert.match(html,/dock\?\.classList\.toggle\('dockHidden',next\);[\s\S]*topBar\?\.classList\.toggle\('topHidden',next\);/);
 });
 
 test('desktop frozen sidebar is vertical with centered branding and a full-width menu',()=>{
   const layer=html.split('<style id="flympus-desktop-chrome-drawer-parity">')[1]?.split('</style>')[0];
-  assert.match(layer,/body\\.drawerCanvasFrozen \\.panel,[\\s\\S]*body\\.drawerCanvasFrozen \\.drawer\\.open \\.panel\\{[\\s\\S]*?flex-direction:column!important;/);
-  assert.match(layer,/\\.panel \\.brand\\{[\\s\\S]*?align-self:stretch!important;/);
-  assert.match(layer,/\\.panel #nav\\{[\\s\\S]*?flex-direction:column!important;[\\s\\S]*?width:100%!important;/);
-  assert.match(layer,/\\.panel #nav \\.navBtn\\{[\\s\\S]*?width:100%!important;/);
-  assert.match(html,/\\.panel \\.brand \\.sidebarFlympusWordmark\\{[\\s\\S]*?width:min\\(198px,100%\\)!important;[\\s\\S]*?margin:0 auto!important;/);
+  assert.match(layer,/body\.drawerCanvasFrozen \.panel,[\s\S]*body\.drawerCanvasFrozen \.drawer\.open \.panel\{[\s\S]*?flex-direction:column!important;/);
+  assert.match(layer,/\.panel \.brand\{[\s\S]*?align-self:stretch!important;/);
+  assert.match(layer,/\.panel #nav\{[\s\S]*?flex-direction:column!important;[\s\S]*?width:100%!important;/);
+  assert.match(layer,/\.panel #nav \.navBtn\{[\s\S]*?width:100%!important;/);
+  assert.match(html,/\.panel \.brand \.sidebarFlympusWordmark\{[\s\S]*?width:min\(198px,100%\)!important;[\s\S]*?margin:0 auto!important;/);
   assert.match(html,/--drawer-open-duration:200ms/);
   assert.match(html,/--drawer-close-duration:230ms/);
-  assert.match(html,/const restoreY=Math\\.max\\(0,Number\\(drawerCanvasFreezeY\\|\\|0\\)\\)/);
+  assert.match(html,/const restoreY=Math\.max\(0,Number\(drawerCanvasFreezeY\|\|0\)\)/);
 });
 
 test('desktop respects the shared Hebrew RTL mirror, dark mode, and larger-text preferences',()=>{
   const layer=html.split('<style id="flympus-desktop-chrome-drawer-parity">')[1]?.split('</style>')[0];
-  assert.match(layer,/html\\[data-flympus-language="he"\\] \\.panel #nav \\.navBtn/);
-  assert.match(layer,/html\\.flympusLargeText \\.panel #nav \\.navBtn\\{[\\s\\S]*font-size:15px!important;/);
-  assert.match(html,/html\\[data-flympus-language="he"\\] body\\.drawerCanvasFrozen\\.drawerPushOpen \\.app\\{[\\s\\S]*translate3d\\(calc\\(-1 \\* var\\(--drawer-push-width\\)\\),0,0\\)/);
-  assert.match(html,/html\\[data-flympus-theme="dark"\\] \\.top\\{background:#0d1e2f!important/);
-  assert.match(html,/root\\?\\.setAttribute\\('dir',language==='he'\\?'rtl':'ltr'\\)/);
-  assert.match(html,/root\\?\\.classList\\.toggle\\('flympusLargeText',prefs\\.largerText===true\\)/);
+  assert.match(layer,/html\[data-flympus-language="he"\] \.panel #nav \.navBtn/);
+  assert.match(layer,/html\.flympusLargeText \.panel #nav \.navBtn\{[\s\S]*font-size:15px!important;/);
+  assert.match(html,/html\[data-flympus-language="he"\] body\.drawerCanvasFrozen\.drawerPushOpen \.app\{[\s\S]*translate3d\(calc\(-1 \* var\(--drawer-push-width\)\),0,0\)/);
+  assert.match(html,/html\[data-flympus-theme="dark"\] \.top\{background:#0d1e2f!important/);
+  assert.match(html,/root\?\.setAttribute\('dir',language==='he'\?'rtl':'ltr'\)/);
+  assert.match(html,/root\?\.classList\.toggle\('flympusLargeText',prefs\.largerText===true\)/);
 });
