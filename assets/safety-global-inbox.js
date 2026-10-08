@@ -34,7 +34,7 @@ function create(ctx){
          if(state.uid!==currentUid())return;
          const prior=state.records.get(key)||[],next=rows.map(model.normalize);
          const isManager=c.members?.[state.uid]?.role==='COURSE_MANAGER';
-         if(state.ready){
+         if(state.records.has(key)){
            const added=next.some(e=>!prior.some(p=>p.id===e.id)&&model.notification(e,state.uid)&&e.createdBy!==state.uid);
            const changed=isManager&&next.some(e=>{
              const old=prior.find(p=>p.id===e.id);if(!old)return false;
@@ -88,14 +88,21 @@ function create(ctx){
    document.body.append(overlay);
    overlay.querySelector('[data-safety-close]').onclick=()=>overlay.remove();
    overlay.onclick=x=>{if(x.target===overlay)overlay.remove()};
-   if(model.recipientUids(e).includes(state.uid)&&!model.viewed(e,state.uid)){
-     api().viewed(item.key,e.id).catch(err=>ctx.toast('Could not record Safety view: '+String(err?.message||err),'error'));
-   }
    const ack=overlay.querySelector('[data-safety-confirm]');
+   const needsView=model.recipientUids(e).includes(state.uid)&&!model.viewed(e,state.uid);
+   const viewPromise=needsView?api().viewed(item.key,e.id):Promise.resolve();
+   if(ack&&needsView)ack.disabled=true;
+   viewPromise.then(()=>{if(ack)ack.disabled=false}).catch(err=>{
+     ctx.toast('Could not record Safety view: '+String(err?.message||err),'error');
+     if(ack)ack.disabled=true;
+   });
    if(ack)ack.onclick=async()=>{
      ack.disabled=true;
-     try{await api().acknowledge(item.key,e.id);overlay.remove();ctx.toast('Safety reading acknowledged','success')}
-     catch(err){ctx.toast(String(err?.message||err),'error');ack.disabled=false}
+     try{
+       await viewPromise;
+       await api().acknowledge(item.key,e.id);
+       overlay.remove();ctx.toast('Safety reading acknowledged','success');
+     }catch(err){ctx.toast(String(err?.message||err),'error');ack.disabled=false}
    };
  }
  function render(){
