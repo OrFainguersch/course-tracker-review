@@ -105,7 +105,7 @@ assert(html.includes("function navIconSvg(name)")&&html.includes("class=\"navIco
 assert(html.includes('id="mobileBottomNav"')&&html.includes("function renderMobileBottomNav()"),"Mobile layout must expose the premium bottom navigation");
 assert(html.includes("['roster','roster','Roster'],['planned','planned','Plan'],['home','home','Home'],['record','record','Forms'],['reports','reports','Reports']"),"Mobile bottom navigation must use five top-level tabs with Home exactly centered and Forms grouping the three entry workflows");
 assert(html.includes("const state={screen:'home'"),"A fresh session must default to Home while saved session state can still restore the previous screen");
-assert(html.includes("const nav=[['__label','','COURSE'],['courses','courses','My Courses'],['fleet','fleet','Aircraft Serviceability'],['settings','settings','Course Management'],['__label','','APP'],['preferences','preferences','Settings']]"),"Sidebar retains the approved menu and links to serviceability, without duplicating Reports, Safety or Exams");
+assert(html.includes("const nav=[['__label','','COURSE'],['courses','courses','My Courses'],['settings','settings','Course Management'],['__label','','APP'],['preferences','preferences','Settings']]"),"Sidebar must not duplicate Fleet, which is available from the Home fleet status card and Plan flight board");
 assert(html.includes("n.querySelectorAll('[data-nav]').forEach(b=>{b.onclick=e=>")&&!html.includes("n.querySelectorAll('[data-nav]').forEach(b=>{const pressSound=bindFlympusNavPressSound(b)"),"My Courses and Course Management must remain completely silent; navigation click audio belongs only to the bottom bar");
 assert(html.includes("function normalizeDateValue(v)")&&html.includes("function formatDateDMY(v)")&&html.includes('placeholder="DD/MM/YYYY"'),"All date entry/display must use the deterministic DD/MM/YYYY layer");
 assert(!/<input[^>]+type="date"/i.test(html),"Native locale-dependent date inputs must not remain in the review UI");
@@ -983,14 +983,14 @@ assert(html.includes("if(isDutyTrainee())return {evaluation:0,safety:0,exams:0,r
  const dutyItems=dutyDock[1];
  assert.equal((dutyItems.match(/\['(?:planned|home|fleet)'/g)||[]).length,3,
    'Duty Trainee must have exactly three bottom tabs');
- assert(dutyItems.startsWith("[['planned','planned','Plan'],['home','home','Home'],['fleet','fleet','Maintenance']]"),
+ assert(dutyItems.startsWith("[['planned','planned','Plan'],['home','home','Home'],['fleet','fleet','Fleet']]"),
    'The physical dock order must be Plan (left), Home (middle), Maintenance (right)');
  assert(!dutyItems.includes('preferences')&&!dutyItems.includes('roster')&&!dutyItems.includes('record')&&!dutyItems.includes('reports'),
    'Forbidden and account settings tabs must never be constructed for Duty Trainee');
  assert(html.includes('.mobileBottomNav.dutyDock{')&&html.includes('direction:ltr;')&&html.includes('grid-template-columns:repeat(3,minmax(0,1fr))'),
    'Dock must be three equal columns with physical placement stable in Hebrew RTL');
- assert(html.includes("const visible=isDutyTrainee()?[['__label','','OPERATIONS'],['home','home','Home'],['planned','planned','Plan'],['fleet','fleet','Aircraft Serviceability']]"),
-   'Duty Trainee sidebar must show only the three relevant operational destinations');
+ assert(html.includes("const visible=isDutyTrainee()?[['__label','','OPERATIONS'],['home','home','Home'],['planned','planned','Plan']]"),
+   'Duty Trainee sidebar must not duplicate Fleet, which stays in the bottom dock and Home');
  assert(html.includes("if(isDutyTrainee()&&screen==='my-profile')screen='preferences';")&&
     html.includes("data-go=\"my-profile\""),
    'Personal settings must remain available through the existing account/profile menu');
@@ -1000,3 +1000,9 @@ assert(html.includes("if(isDutyTrainee())return {evaluation:0,safety:0,exams:0,r
  assert(html.includes("fleet:'<path d=\"M12 2.5 9.5 10"),
    'Maintenance must use a recognizable aircraft icon, not the old four-point emblem');
 }
+
+assert(!html.includes("['fleet','fleet','Aircraft Serviceability']"),"Neither standard sidebar nor Duty sidebar should duplicate Fleet");
+assert(html.includes("['planned','planned','Plan'],['home','home','Home'],['fleet','fleet','Fleet']"),"Duty must show Fleet to the right of Home");
+assert(html.includes('data-go="fleet">Open Fleet</button>'),"Duty Home must still provide a direct Fleet entry");
+assert(fs.readFileSync('assets/fleet-views.js','utf8').includes('data-go="fleet"'),
+  "Other roles must retain Fleet access from Home and Plan rather than the sidebar");
