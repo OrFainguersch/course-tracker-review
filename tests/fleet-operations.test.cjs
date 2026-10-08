@@ -411,3 +411,39 @@ test('Daily Flight Plan owns the only editable flight-date selector for both Pla
  context.getFlympusAppPreferences=()=>({language:'he'});
  assert.match(context.dailyFlightPlan(),/תאריך אחד לשיבוצי הטיסות/);
 });
+
+
+test('Plan contract stays coherent: one centered flight day, settings, required fields, theme and execution totals',()=>{
+ const vm=require('node:vm');
+ const lang={value:'en'},context={window:{FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=>lang.value}};
+ vm.runInNewContext(ui,context,{filename:'fleet-views.js'});
+ const screen=context.window.FLYMPUS_FLEET_VIEW.schedule({
+  fleet:add([],'ac1','01'),flights:[],platformId:'shahak',platformLabel:'Shahak',date:'2026-10-08',
+  trainees:[{id:'t1',name:'Trainee'}],instructors:[{id:'i1',name:'Instructor'}],
+  syllabi:['Circuits'],canWrite:true,canConfigureTiming:true});
+ assert.ok(screen.indexOf('fleetTimingSettings')<screen.indexOf('fleetSortieForm'));
+ assert.doesNotMatch(screen,/Daily Flight Board|No scheduled flights for this day/);
+ assert.match(screen,/name="estimatedMinutes"[^>]*required/);
+ assert.match(screen,/fleetTimeFlow/);
+ assert.equal((screen.match(/fleetRequired/g)||[]).length,8);
+ assert.match(screen,/data-go="fleet"/);
+ const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(css,/\.dailyFlightPlan\{max-width:1220px;width:100%;margin:0 auto/);
+ assert.match(css,/\.dailyFlightPlan \.dailyPlanHeader\.dailyPlanDateSpotlight\{max-width:100%;width:100%;margin:0!important/);
+ assert.match(css,/\.dailyFlightPlan \.fleetSchedulePlain>\.fleetTimingSettings,/);
+ assert.match(css,/\.dailyFlightPlan \.fleetSchedulePlain>\.fleetSortieForm,/);
+ assert.match(css,/html\[data-flympus-language="he"\] \.dailyPlanDateSpotlight/);
+ assert.match(css,/html\[data-flympus-theme="dark"\] \.dailyFlightPlan \.dailyPlanHeader\.dailyPlanDateSpotlight/);
+ assert.match(css,/html\.flympusLargeText \.dailyPlanDateSpotlight/);
+ assert.match(css,/@media\(max-width:660px\)/);
+ const report=html.slice(html.indexOf('function plannedVsExecuted(){'),html.indexOf('function bindPlanned(){'));
+ assert.match(report,/pveDateReadOnly/);
+ assert.doesNotMatch(report,/id="pveDate" type="text"/);
+ assert.match(report,/boardLinked\?'readonly aria-readonly="true"/);
+ assert.match(html,/flightBoardPlanStatus\(date\)/);
+ assert.match(html,/FLYMPUS Review · build 0786/);
+ lang.value='he';
+ assert.match(context.window.FLYMPUS_FLEET_VIEW.schedule({
+  fleet:[],flights:[],platformId:'shahak',date:'2026-10-08',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true
+ }),/עריכת ברירות מחדל לתדריך ולתחקיר/);
+});
