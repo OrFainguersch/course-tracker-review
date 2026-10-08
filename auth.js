@@ -34,6 +34,7 @@ let silentAuthLoadingTimer=null;
 let silentAuthLoadingCopy='Starting secure authentication…';
 let signInPromise=null;
 let authStateVersion=0;
+let accountSwitcher=null;
 const VERIFIED_ACTIVE_KEY='flympus-auth-verified-active-v1';
 
 function verifiedActiveRecord(){
@@ -96,6 +97,9 @@ const api=window.FLYMPUS_AUTH={
   signInGoogle:()=>signInProvider('google'),
   signInMicrosoft:()=>signInProvider('microsoft'),
   signOut:()=>signOutCurrentUser(),
+  switchAccount:uid=>accountSwitcher?.select(uid),
+  addAnotherAccount:kind=>accountSwitcher?.add(kind),
+  refreshAccountSwitcher:()=>accountSwitcher?.refresh(),
   openUserManagement:()=>openUserManagement(),
   mountUserManagementPage:host=>mountUserManagementPage(host),
   updateNickname:name=>updateOwnPreferredName(name),
@@ -222,7 +226,15 @@ async function waitForSignedInUser(timeoutMs=4500){
     timer=setTimeout(()=>finish(!!auth.currentUser),Math.max(250,Number(timeoutMs)||4500))
   })
 }
-function showLogin({setupPreview=false,error=''}={}){cancelSilentAuthLoading();api.status=setupPreview?'preview':'signed-out';lockApp();const setup=setupPreview?statusBlock('pending',tr('Authentication preview'),tr('The Google sign-in experience is ready.')):'';const err=error?statusBlock('error',tr('Sign-in failed'),error):'';shell('<h1 class="flympusAuthTitle">'+esc(tr('Sign in to FLYMPUS'))+'</h1><p class="flympusAuthCopy">'+esc(tr('Continue with the Google account assigned to you.'))+'</p>'+providerButtons(setupPreview)+setup+err+'<p class="flympusAuthFine">'+esc(tr('FLYMPUS uses your account only to verify your identity. It does not read your Gmail or Outlook.'))+'</p>');if(!setupPreview)bindProviderButtons()}
+function showLogin({setupPreview=false,error=''}={}){
+  cancelSilentAuthLoading();api.status=setupPreview?'preview':'signed-out';lockApp();
+  const setup=setupPreview?statusBlock('pending',tr('Authentication preview'),tr('The Google sign-in experience is ready.')):'';
+  const err=error?statusBlock('error',tr('Sign-in failed'),error):'';
+  const saved=!setupPreview?accountSwitcher?.loginPickerHtml?.()||'':'';
+  shell('<h1 class="flympusAuthTitle">'+esc(tr('Sign in to FLYMPUS'))+'</h1><p class="flympusAuthCopy">'+esc(tr('Continue with the Google account assigned to you.'))+'</p>'+saved+providerButtons(setupPreview)+setup+err+'<p class="flympusAuthFine">'+esc(tr('FLYMPUS uses your account only to verify your identity. It does not read your Gmail or Outlook.'))+'</p>');
+  if(!setupPreview)bindProviderButtons();
+  void accountSwitcher?.refresh()
+}
 function showPending(user,profile){cancelSilentAuthLoading();clearVerifiedActive();api.status=profile?.status==='blocked'?'blocked':'pending';lockApp();const blocked=profile?.status==='blocked';shell('<p class="flympusAuthEyebrow">'+esc(tr('ACCOUNT ACCESS'))+'</p><h1 class="flympusAuthTitle">'+esc(tr(blocked?'Access unavailable':'Approval required'))+'</h1><p class="flympusAuthCopy">'+esc(tr(blocked?'This FLYMPUS account is currently blocked.':'Your identity is verified. An administrator still needs to approve access to FLYMPUS.'))+'</p>'+statusBlock(blocked?'error':'pending',tr(blocked?'Account blocked':'Pending administrator approval'),tr(blocked?'Contact a FLYMPUS administrator if you believe this is incorrect.':'You do not have access to course data until approval is granted.'))+'<div class="flympusAuthAccount"><b>'+esc(user.displayName||tr('Signed-in user'))+'</b><span>'+esc(user.email||'')+'</span></div><div class="flympusAuthActions"><button class="flympusAuthAction" type="button" data-auth-signout>'+esc(tr('Sign out'))+'</button></div>');document.querySelector('[data-auth-signout]')?.addEventListener('click',signOutCurrentUser)}
 function showFatal(title,copy){cancelSilentAuthLoading();api.status='error';lockApp();shell('<p class="flympusAuthEyebrow">'+esc(tr('AUTHENTICATION'))+'</p><h1 class="flympusAuthTitle">'+esc(tr(title))+'</h1>'+statusBlock('error','FLYMPUS could not complete sign-in',copy)+'<div class="flympusAuthActions"><button class="flympusAuthAction" type="button" data-auth-retry>'+esc(tr('Try again'))+'</button></div>');document.querySelector('[data-auth-retry]')?.addEventListener('click',()=>location.reload())}
 function firebaseConfigReady(){
@@ -285,6 +297,10 @@ async function signInProvider(kind){
   finally{if(signInPromise===attempt)signInPromise=null}
 }
 async function signOutCurrentUser(){
+  const activeUid=String(auth?.currentUser?.uid||'');
+  /* Gmail-style sign-out applies to the active account only; other named
+     Firebase Auth sessions stay available on the signed-out picker. */
+  if(activeUid)await accountSwitcher?.forgetActive(activeUid);
   try{
     if(auth&&authSdk)await authSdk.signOut(auth)
   }catch(err){
@@ -345,6 +361,8 @@ function applyRoleContext(user,profile){
   document.documentElement.setAttribute('data-flympus-app-role',profile.role);
   syncAuthenticatedChrome(user,profile);
   if(canManageUsers(profile))setTimeout(()=>prefetchManagedDirectory().catch(()=>{}),0);
+  /* Only ACTIVE Firestore-verified users may enter the local account picker. */
+  void accountSwitcher?.remember(user,profile).catch(error=>console.warn('Account switcher persistence unavailable',error));
   try{
     document.dispatchEvent(new CustomEvent('flympus:auth-ready',{detail:{
       uid:user.uid,
@@ -366,12 +384,14 @@ function syncAuthenticatedChrome(user,profile){
   const role=document.getElementById('personalProfileRole'),email=document.getElementById('personalProfileEmail'),signOut=document.getElementById('quickSignOut');
   if(role)role.textContent=tr(roleDefinition(profile.role).label);
   if(email)email.textContent=user.email||'';
+  void accountSwitcher?.refresh();
   if(signOut)signOut.onclick=event=>{event?.stopPropagation?.();signOutCurrentUser()};
   syncAuthAdjacentChromeLanguage()
 }
 function removeAuthenticatedChrome(){
   const role=document.getElementById('personalProfileRole'),email=document.getElementById('personalProfileEmail');
-  if(role)role.textContent=tr('Account');if(email)email.textContent=''
+  if(role)role.textContent=tr('Account');if(email)email.textContent='';
+  const list=document.getElementById('accountSwitchList');if(list){list.innerHTML='';list.hidden=true}
 }
 function closeTransientHeaderMenus({animated=false}={}){[['#topCourseDropdown','#topCourseSwitch'],['#topNotificationDropdown','#topNotificationBtn'],['#topPersonalProfileDropdown','#topPersonalProfileBtn']].forEach(([menuSel,buttonSel])=>{const menu=document.querySelector(menuSel),button=document.querySelector(buttonSel);if(!menu||menu.hidden){button?.setAttribute?.('aria-expanded','false');return}const canAnimate=animated&&(menuSel==='#topNotificationDropdown'||menuSel==='#topPersonalProfileDropdown')&&button?.getAttribute?.('aria-expanded')==='true';if(canAnimate){button.click?.();return}menu.hidden=true;button?.setAttribute?.('aria-expanded','false')})}
 function bindBottomNavigationOverlayDismissal(){if(window.__FLYMPUS_BOTTOM_DISMISS_BOUND__)return;window.__FLYMPUS_BOTTOM_DISMISS_BOUND__=true;const dismiss=event=>{if(event.target?.closest?.('#mobileBottomNav,[data-mobile-nav],.mobileBottomHapticSwitch'))closeTransientHeaderMenus()};document.addEventListener('touchstart',dismiss,true);document.addEventListener('pointerdown',dismiss,true);document.addEventListener('click',dismiss,true)}
@@ -751,10 +771,11 @@ async function boot(){
     api.status='booting'
   }else api.status='booting';
   try{
-    const [appModule,authModule,firestoreModule]=await Promise.all([
+    const [appModule,authModule,firestoreModule,accountModule]=await Promise.all([
       import('https://www.gstatic.com/firebasejs/'+SDK_VERSION+'/firebase-app.js'),
       import('https://www.gstatic.com/firebasejs/'+SDK_VERSION+'/firebase-auth.js'),
-      import('https://www.gstatic.com/firebasejs/'+SDK_VERSION+'/firebase-firestore.js')
+      import('https://www.gstatic.com/firebasejs/'+SDK_VERSION+'/firebase-firestore.js'),
+      import('./account-switcher.js?v=20261008-switcher01')
     ]);
     authSdk=authModule;firestoreSdk=firestoreModule;
     firebaseApp=appModule.initializeApp(cfg.firebase);
@@ -772,6 +793,13 @@ async function boot(){
       popupRedirectResolver:authModule.browserPopupRedirectResolver
     });
     db=firestoreModule.getFirestore(firebaseApp);
+    accountSwitcher=accountModule.createAccountSwitcher({
+      authSdk:authModule,appSdk:appModule,config:cfg,
+      getPrimaryAuth:()=>auth,
+      getCurrent:()=>({user:currentUser,profile:currentProfile}),
+      lockApp,showLoading,unlockApp,
+      onFailure:error=>console.warn('Account switcher:',String(error?.message||error))
+    });
     try{
       localStorage.removeItem('firebase:flympus:idp-session');
       localStorage.removeItem('firebase:flympus:idp-return')
