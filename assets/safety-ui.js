@@ -81,10 +81,10 @@ function create(ctx){
     return '<div class="safetyWorkflowRow"><span class="safetyStatusPill '+(status==='IN_PROGRESS'?'in_progress':status==='RESOLVED'?'resolved':'')+'">'+label+'</span><div class="safetyAckSummary">'+summary+'</div><div class="safetyWorkflowActions">'+ack+statusControls+'</div></div>'+audit;
   }
   function banner(){
-    const localCount=local().length;
+    const localCount=local().length,missing=cloud.unmatched?.length?cloud.unmatched:unmatchedEmails;
     return '<div class="safetySharedInfo '+(active()?'shared':'local')+'"><div><b>Automatic Safety · '+(active()?'Connected':'Verifying instructor accounts')+'</b>'+
       '<small>'+(active()?'Every enrolled instructor receives a required reading task.':'A verified Training Manager must synchronize this course roster before submitting shared reports.')+
-      (unmatchedEmails.length?' Unmatched accounts: '+escape(unmatchedEmails.join(', '))+'.':'')+
+      (missing.length?' Unmatched accounts: '+escape(missing.join(', '))+'.':'')+
       (localCount?' '+localCount+' old device-only reports are not shared.':'')+
       '</small></div></div>';
   }
@@ -93,14 +93,14 @@ function create(ctx){
       '<p class="sub">Always enabled for verified instructors. Each new event requires a separate view and reading acknowledgement.</p>'+
       '<p class="sub"><b>Sharing:</b> '+(active()?'Connected':'Waiting for secure roster synchronization')+'</p>'+
       '<p class="sub"><b>Recipient accounts:</b> '+Object.keys(cloud.members||{}).length+'</p>'+
-      (unmatchedEmails.length?'<p class="sub" role="alert"><b>Unmatched emails:</b> '+escape(unmatchedEmails.join(', '))+'</p>':'')+
+      ((cloud.unmatched?.length||unmatchedEmails.length)?'<p class="sub" role="alert"><b>Unmatched emails:</b> '+escape((cloud.unmatched?.length?cloud.unmatched:unmatchedEmails).join(', '))+'</p>':'')+
       '<p class="sub">Instructor accounts are enrolled automatically by Training Managers. Safety reports cannot be silently saved to one device instead of notifying the course.</p></section>';
   }
   async function submit(record){
     if(!active())throw new Error('Secure course Safety is not connected. Ask a Training Manager to verify the instructor accounts; this report has NOT been submitted.');
     if((record.photos||[]).length)throw new Error('Photos are currently device-only and cannot be submitted with shared Safety reports.');
     await api().submit(ctx.courseId(),record);
-    return 'shared';
+    return (cloud.unmatched?.length||unmatchedEmails.length)?'partial':'shared';
   }
   async function enroll(){
     if(!api()?.manager?.())return notify('A Training Manager must enroll course instructors.','error');
