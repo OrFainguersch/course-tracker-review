@@ -853,6 +853,39 @@ document.addEventListener('click',()=>{
   queueMicrotask(syncAccountQuickMenu);
   setTimeout(syncAccountQuickMenu,0);
 },true);
+/* Shared role badge reconciliation across profile, menus and dynamically rendered views.
+   Only explicit badge-like elements with an exact role label are styled;
+   status, safety and evaluation badges are intentionally left untouched. */
+const FLYMPUS_ROLE_LABELS=Object.freeze({
+  'owner':'owner','בעלים':'owner',
+  'administrator':'admin','admin':'admin','מנהל מערכת':'admin',
+  'training manager':'training_manager','מנהל הדרכה':'training_manager',
+  'user':'user','משתמש':'user'
+});
+let roleBadgeScanPending=false;
+function reconcileRoleBadges(){
+  roleBadgeScanPending=false;
+  const selector='[class*="Badge"],[class*="badge"],[class*="Pill"],[class*="pill"],[class*="Tag"],[class*="tag"],.accountQuickMenu .personalProfileIdentity small';
+  for(const el of document.querySelectorAll(selector)){
+    if(el.children.length)continue;
+    const label=String(el.textContent||'').trim().replace(/\\s+/g,' ').toLowerCase();
+    const role=FLYMPUS_ROLE_LABELS[label];
+    if(role&&el.dataset.flympusRoleBadge!==role)el.dataset.flympusRoleBadge=role;
+    else if(!role&&el.hasAttribute('data-flympus-role-badge'))el.removeAttribute('data-flympus-role-badge');
+  }
+}
+function scheduleRoleBadgeScan(){
+  if(roleBadgeScanPending)return;
+  roleBadgeScanPending=true;
+  requestAnimationFrame(reconcileRoleBadges);
+}
+if(document.body){
+  new MutationObserver(scheduleRoleBadgeScan).observe(document.body,{subtree:true,childList:true,characterData:true});
+  scheduleRoleBadgeScan();
+}else document.addEventListener('DOMContentLoaded',()=>{
+  new MutationObserver(scheduleRoleBadgeScan).observe(document.body,{subtree:true,childList:true,characterData:true});
+  scheduleRoleBadgeScan();
+},{once:true});
 bindBottomNavigationOverlayDismissal();
 bindAuthLanguageSync();
 boot();
