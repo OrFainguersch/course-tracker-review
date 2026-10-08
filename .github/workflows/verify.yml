@@ -92,6 +92,36 @@ jobs:
         continue-on-error: true
         run: node --test tests/reports-dashboard.test.cjs
 
+      - name: Read-only production version diagnostic
+        continue-on-error: true
+        if: always()
+        shell: bash
+        run: |
+          node <<'NODE'
+          const base='https://flympus.firebaseapp.com';
+          (async()=>{
+            for(const p of ['/deploy-info.json','/sw.js','/']){
+              try {
+                const url=new URL(p,base);
+                url.searchParams.set('flympusAudit',String(Date.now()));
+                const response=await fetch(url,{headers:{'Cache-Control':'no-cache,no-store'},signal:AbortSignal.timeout(12000)});
+                const body=await response.text();
+                let reported='unavailable';
+                if(p==='/deploy-info.json'&&response.ok){
+                  try{reported='commit '+JSON.parse(body).commit}catch{reported='invalid JSON'}
+                }else if(p==='/sw.js'){
+                  reported=body.match(/FLYMPUS_SW_VERSION\s*=\s*'([^']+)'/)?.[1]||'missing worker marker';
+                }else{
+                  reported=body.match(/FLYMPUS[^\\n]{0,90}build\\s*0?[0-9]{3,4}/i)?.[0]||'HTML length '+body.length;
+                  const match=body.match(/[a-f0-9]{40}/g);
+                  if(match)reported+='; one SHA '+match[0];
+                }
+                console.log(p+' HTTP '+response.status+'; '+reported);
+              }catch(error){console.log(p+' ERROR '+error.message)}
+            }
+          })();
+          NODE
+
       - name: Review verification summary
         if: always()
         shell: bash
