@@ -829,6 +829,30 @@ async function boot(){
     showFatal('Authentication unavailable','Could not load the Firebase authentication service. Check the connection and Firebase setup.')
   }
 }
+/* Account menu identity is the official profile name; nicknames stay for greetings.
+   The menu itself is rendered by the main UI, so reconcile after it opens. */
+function syncAccountQuickMenu(){
+  const menu=document.querySelector('.accountQuickMenu');
+  if(!menu)return;
+  const official=String(currentProfile?.displayName||currentUser?.displayName||'').trim();
+  const identity=menu.querySelector('.personalProfileIdentity');
+  const name=identity?.querySelector('b,strong,.personalProfileName');
+  if(official&&name&&name.textContent!==official)name.textContent=official;
+  const signout=[...menu.querySelectorAll('button,[role="menuitem"],a')].find(el=>{
+    const label=String(el.textContent||'').replace(/\\s+/g,' ').trim();
+    return /Sign out of FLYMPUS|התנתקות מ.?FLYMPUS/i.test(label);
+  });
+  if(signout&&!menu.querySelector('.flympusAccountSignoutDivider')){
+    const divider=document.createElement('div');
+    divider.className='flympusAccountSignoutDivider';
+    divider.setAttribute('aria-hidden','true');
+    signout.before(divider);
+  }
+}
+document.addEventListener('click',()=>{
+  queueMicrotask(syncAccountQuickMenu);
+  setTimeout(syncAccountQuickMenu,0);
+},true);
 bindBottomNavigationOverlayDismissal();
 bindAuthLanguageSync();
 boot();
