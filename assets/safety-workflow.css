@@ -26,3 +26,17 @@ html[data-flympus-theme="dark"] .safetyNotificationItem{background:#1b354a;borde
 html[data-flympus-theme="dark"] .safetyNotificationItem:hover{background:#274760}
 html[data-flympus-theme="dark"] .safetyWorkflowRow{border-color:#3e5568}
 @media(max-width:600px){.safetySharedInfo{align-items:stretch}.safetyWorkflowActions{width:100%}.safetyWorkflowActions button{flex:1}}
+
+.safetyReadAudit{margin:10px 0 2px;border:1px solid #d7e5f0;border-radius:12px;overflow:hidden}
+.safetyReadAudit>summary{cursor:pointer;padding:11px 13px;color:#1c527d;font-weight:750;font-size:12px}
+.safetyAuditTableWrap{overflow-x:auto}
+.safetyReadAudit table{width:100%;border-collapse:collapse;text-align:start;font-size:11px}
+.safetyReadAudit th,.safetyReadAudit td{padding:9px 11px;border-top:1px solid #e4ecf4;text-align:start}
+.safetyReadAudit th{background:#f3f8fc;white-space:nowrap}
+.safetyReadCard{width:min(620px,calc(100vw - 30px));max-height:min(80vh,740px);overflow-y:auto}
+.safetyReadCard .safetyReadDetails{display:grid;gap:6px;margin:14px 0;padding:10px;border:1px solid #dce8f1;border-radius:12px;text-align:start;max-height:42vh;overflow-y:auto}
+.safetyReadDetails b{font-size:12px;color:#174569}
+.safetyReadDetails p{margin:0 0 10px;font-size:12px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+html[data-flympus-theme="dark"] .safetyReadAudit,html[data-flympus-theme="dark"] .safetyReadCard .safetyReadDetails{border-color:#3b5469}
+html[data-flympus-theme="dark"] .safetyReadAudit th{background:#1c364e}
+html[data-flympus-theme="dark"] .safetyReadAudit>summary{color:#acd9ff}

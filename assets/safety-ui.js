@@ -14,29 +14,47 @@ function create(ctx){
   function records(){return active()?cloud.records:local()}
   function reset(){try{cloud.unsubscribe?.()}catch{}cloud={courseId:'',mode:'idle',records:[],members:{},unsubscribe:null,error:'',initialized:false}}
   function refresh(){if(['home','safety'].includes(ctx.screen()))ctx.render();else inbox()}
+  let lastRosterCheck=0,lastRosterKey='',rosterChecking=false,unmatchedEmails=[];
+  async function reconcile(){
+    const key=String(ctx.courseId());
+    if(!api()?.manager?.()||rosterChecking||(lastRosterKey===key&&Date.now()-lastRosterCheck<60000))return;
+    lastRosterKey=key;lastRosterCheck=Date.now();rosterChecking=true;
+    try{
+      const entries=ctx.instructors().filter(p=>p.email).map(p=>({email:p.email,role:ctx.instructorRole?.(p)==='COURSE_MANAGER'?'COURSE_MANAGER':'INSTRUCTOR'}));
+      const preview=await api().rosterPreview(entries);
+      unmatchedEmails=[...preview.missing,...ctx.instructors().filter(p=>!String(p.email||'').trim()).map(p=>(p.name||'Instructor')+' (missing email)')];
+      const existing=await api().course(key),current=existing?.members||{};
+      const desired=[...new Map([...preview.matched,{uid:api().uid(),role:'COURSE_MANAGER'}].map(p=>[p.uid,p])).values()];
+      const changed=!existing||!Array.isArray(existing.memberUids)||Object.keys(current).length!==desired.length||desired.some(p=>current[p.uid]?.role!==p.role)||JSON.stringify(existing.unmatchedEmails||[])!==JSON.stringify(unmatchedEmails);
+      if(changed){
+        await api().enable(key,ctx.courseName(),preview.matched,unmatchedEmails);
+        if(cloud.courseId===key){reset();connect()}
+      }
+    }catch(err){console.warn('Safety auto enrollment',err);unmatchedEmails=['Firebase instructor sync failed: '+String(err?.message||err)]}
+    finally{rosterChecking=false;if(String(ctx.courseId())!==key){lastRosterCheck=0;void reconcile()}}
+  }
   function connect(){
     if(!api()?.ready?.()||ctx.isDuty())return;
+    ctx.startGlobalInbox?.();
+    if(api().manager?.())void reconcile();
     const key=String(ctx.courseId());
     if(cloud.courseId===key&&cloud.mode!=='idle')return;
     reset();cloud.courseId=key;cloud.mode='checking';
+    const session=cloud;
     api().course(key).then(course=>{
-      if(cloud.courseId!==key)return;
+      if(cloud!==session||cloud.courseId!==key)return;
       if(!course||course.unavailable){cloud.mode=course?.unavailable?'unavailable':'local';refresh();return}
-      cloud.mode='shared';cloud.members=course.members||{};
+      cloud.mode='shared';cloud.members=course.members||{};cloud.unmatched=course.unmatchedEmails||[];
       cloud.unsubscribe=api().listen(key,entries=>{
-        if(cloud.courseId!==key)return;
+        if(cloud!==session||cloud.courseId!==key)return;
         const before=JSON.stringify(cloud.records);
         const next=(entries||[]).map(model.normalize);
-        if(cloud.initialized&&next.some(x=>!cloud.records.some(old=>old.id===x.id)&&x.createdBy!==uid()&&model.notification(x,uid()))){
-          notify('New course safety event · acknowledgement required','warning');
-          ctx.notifySound?.();
-        }
         cloud.initialized=true;
         cloud.records=next;
         if(before!==JSON.stringify(cloud.records))refresh();else inbox();
       },err=>{cloud.error=String(err?.message||err);cloud.mode='unavailable';refresh()});
       refresh();
-    }).catch(err=>{if(cloud.courseId!==key)return;cloud.error=String(err?.message||err);cloud.mode='unavailable';refresh()});
+    }).catch(err=>{if(cloud!==session||cloud.courseId!==key)return;cloud.error=String(err?.message||err);cloud.mode='unavailable';refresh()});
   }
   function manager(){
     if(active())return api()?.manager?.()===true||cloud.members[uid()]?.role==='COURSE_MANAGER';
@@ -51,23 +69,35 @@ function create(ctx){
     const summary=active()?'<b>Acknowledged '+counts.acknowledged+' / '+counts.total+'</b><small>'+(unread.length?'Not yet viewed: '+escape(unread.map(p=>recipientName(x,p)).join(', '))+' · ':'')+(seenUnack.length?'Viewed, awaiting acknowledgement: '+escape(seenUnack.map(p=>recipientName(x,p)).join(', ')):'')+(!remaining.length?'All assigned instructors acknowledged':'')+'</small>':'<small>Local-only record · no shared read receipts</small>';
     const ack=active()&&model.recipientUids(x).includes(uid())&&!model.acknowledged(x,uid())?'<button class="btn sky small" type="button" data-safety-ack="'+id+'">Acknowledge reading</button>':'';
     const statusControls=manager()?(status==='OPEN'?'<button class="btn secondary small" type="button" data-safety-status="'+id+'" data-status="IN_PROGRESS">Start handling</button>':'')+(status!=='RESOLVED'?'<button class="btn secondary small" type="button" data-safety-status="'+id+'" data-status="RESOLVED">Resolve event</button>':'<button class="btn secondary small" type="button" data-safety-status="'+id+'" data-status="OPEN">Reopen</button>'):'';
-    return '<div class="safetyWorkflowRow"><span class="safetyStatusPill '+(status==='IN_PROGRESS'?'in_progress':status==='RESOLVED'?'resolved':'')+'">'+label+'</span><div class="safetyAckSummary">'+summary+'</div><div class="safetyWorkflowActions">'+ack+statusControls+'</div></div>';
+    const fmt=v=>{try{return (v?.toDate?.()||new Date(v)).toLocaleString()}catch{return'—'}};
+    const audit=active()&&manager()?'<details class="safetyReadAudit"><summary>Instructor reading audit · '+counts.acknowledged+' / '+counts.total+' acknowledged</summary>'+
+      '<div class="safetyAuditTableWrap"><table><thead><tr><th>Instructor</th><th>Viewed</th><th>Acknowledged</th></tr></thead><tbody>'+
+      model.recipientUids(x).map(person=>'<tr><td>'+escape(recipientName(x,person))+'</td><td>'+(x.seenBy?.[person]?escape(fmt(x.seenBy[person])):'Not viewed')+'</td>'+
+       '<td>'+(x.ackBy?.[person]?escape(fmt(x.ackBy[person])):'Pending')+'</td></tr>').join('')+
+      '</tbody></table></div></details>':'';
+    return '<div class="safetyWorkflowRow"><span class="safetyStatusPill '+(status==='IN_PROGRESS'?'in_progress':status==='RESOLVED'?'resolved':'')+'">'+label+'</span><div class="safetyAckSummary">'+summary+'</div><div class="safetyWorkflowActions">'+ack+statusControls+'</div></div>'+audit;
   }
   function banner(){
-    const mode=cloud.courseId===ctx.courseId()?cloud.mode:'idle',enroll=api()?.manager?.()===true;
-    const count=local().length;
-    if(active())return '<div class="safetySharedInfo shared"><div><b>Shared Safety · Firestore</b><small>Enrolled instructors receive events and acknowledge reading individually. Managers can track progress and resolve events.'+(count?' '+count+' older device-only records have NOT been published.':'')+' Photos are device-only and cannot be added to a shared report.</small></div>'+(enroll?'<button class="btn secondary small" data-safety-enroll type="button">Update recipients</button>':'')+'</div>';
-    return '<div class="safetySharedInfo local"><div><b>Device-only Safety'+(mode==='checking'?' · checking cloud access':'')+'</b><small>Events created here are NOT delivered to other instructors until secure shared Safety is activated.'+(cloud.error?' '+escape(cloud.error):'')+'</small></div>'+(enroll?'<button class="btn secondary small" data-safety-enroll type="button">Enable shared Safety</button>':'')+'</div>';
+    const localCount=local().length,missing=cloud.unmatched?.length?cloud.unmatched:unmatchedEmails;
+    return '<div class="safetySharedInfo '+(active()?'shared':'local')+'"><div><b>Automatic Safety · '+(active()?'Connected':'Verifying instructor accounts')+'</b>'+
+      '<small>'+(active()?'Every enrolled instructor receives a required reading task.':'A verified Training Manager must synchronize this course roster before submitting shared reports.')+
+      (missing.length?' Unmatched accounts: '+escape(missing.join(', '))+'.':'')+
+      (localCount?' '+localCount+' old device-only reports are not shared.':'')+
+      '</small></div></div>';
+  }
+  function settings(){
+    return '<section class="card settingBox"><h3>Safety notifications and acknowledgements</h3>'+
+      '<p class="sub">Always enabled for verified instructors. Each new event requires a separate view and reading acknowledgement.</p>'+
+      '<p class="sub"><b>Sharing:</b> '+(active()?'Connected':'Waiting for secure roster synchronization')+'</p>'+
+      '<p class="sub"><b>Recipient accounts:</b> '+Object.keys(cloud.members||{}).length+'</p>'+
+      ((cloud.unmatched?.length||unmatchedEmails.length)?'<p class="sub" role="alert"><b>Unmatched emails:</b> '+escape((cloud.unmatched?.length?cloud.unmatched:unmatchedEmails).join(', '))+'</p>':'')+
+      '<p class="sub">Instructor accounts are enrolled automatically by Training Managers. Safety reports cannot be silently saved to one device instead of notifying the course.</p></section>';
   }
   async function submit(record){
-    if(pending())throw new Error('Wait for shared Safety access verification before submitting');
-    if(active()){
-      if((record.photos||[]).length)throw new Error('Photos are stored only on this device. Remove photos before submitting a shared safety report.');
-      await api().submit(ctx.courseId(),record);
-      return 'shared';
-    }
-    if(!ctx.saveLocal([record,...local()]))throw new Error('Unable to save the event in device storage.');
-    return 'local';
+    if(!active())throw new Error('Secure course Safety is not connected. Ask a Training Manager to verify the instructor accounts; this report has NOT been submitted.');
+    if((record.photos||[]).length)throw new Error('Photos are currently device-only and cannot be submitted with shared Safety reports.');
+    await api().submit(ctx.courseId(),record);
+    return (cloud.unmatched?.length||unmatchedEmails.length)?'partial':'shared';
   }
   async function enroll(){
     if(!api()?.manager?.())return notify('A Training Manager must enroll course instructors.','error');
@@ -83,23 +113,7 @@ function create(ctx){
       reset();connect();notify('Shared Safety enrollment saved.','success');
     }catch(err){notify(String(err?.message||err),'error')}
   }
-  function inbox(){
-    const menu=document.querySelector('#topNotificationDropdown'),dot=document.querySelector('#topNotificationDot'),empty=menu?.querySelector('.notificationEmpty');
-    if(!menu||!dot)return;
-    let list=menu.querySelector('#safetyNotificationList');
-    if(!list){list=document.createElement('div');list.id='safetyNotificationList';list.className='safetyNotificationList';menu.querySelector('.notificationHead')?.after(list)}
-    const events=active()&&!ctx.isDuty()&&uid()?records().filter(x=>model.notification(x,uid())).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))):[];
-    dot.hidden=!events.length;
-    if(empty)empty.hidden=events.length>0;
-    list.innerHTML=events.slice(0,30).map(x=>'<button type="button" class="safetyNotificationItem '+(model.viewed(x,uid())?'seen':'')+'" data-safety-open="'+escape(x.id)+'"><b>Safety: '+escape(x.title||'Event')+'</b><small>'+escape(ctx.courseName())+' · '+escape(x.severity||'')+'</small><em>'+(model.viewed(x,uid())?'Viewed · acknowledgement still required':'New event · open to read')+'</em></button>').join('');
-    list.querySelectorAll('[data-safety-open]').forEach(b=>b.onclick=async e=>{
-      e.stopPropagation();const id=b.dataset.safetyOpen,event=records().find(x=>x.id===id);
-      if(event&&!model.viewed(event,uid()))try{await api().viewed(ctx.courseId(),id)}catch{notify('Could not record event view','error')}
-      menu.hidden=true;document.querySelector('#topNotificationBtn')?.setAttribute('aria-expanded','false');
-      ctx.openSafety();
-      setTimeout(()=>[...document.querySelectorAll('[data-safety-record-id]')].find(x=>x.dataset.safetyRecordId===id)?.scrollIntoView?.({behavior:'smooth',block:'center'}),90);
-    });
-  }
+  function inbox(){ctx.renderGlobalInbox?.()}
   function bind(){
     document.querySelectorAll('[data-safety-enroll]').forEach(b=>b.onclick=enroll);
     document.querySelectorAll('[data-safety-ack]').forEach(b=>b.onclick=async()=>{
@@ -107,7 +121,7 @@ function create(ctx){
       if(!event||!active()||!model.recipientUids(event).includes(uid())||model.acknowledged(event,uid()))return;
       if(!await ctx.confirm('Confirm that you have read this safety event? Merely viewing it does not acknowledge it.',{title:'Acknowledge safety event',confirmLabel:'Acknowledge'}))return;
       b.disabled=true;
-      try{await api().acknowledge(ctx.courseId(),id);notify('Safety event acknowledged.','success')}
+      try{if(!model.viewed(event,uid()))await api().viewed(ctx.courseId(),id);await api().acknowledge(ctx.courseId(),id);notify('Safety event acknowledged.','success')}
       catch(err){notify(String(err?.message||err),'error');b.disabled=false}
     });
     document.querySelectorAll('[data-safety-status]').forEach(b=>b.onclick=async()=>{
@@ -123,7 +137,7 @@ function create(ctx){
       }catch(err){notify(String(err?.message||err),'error');b.disabled=false}
     });
   }
-  return Object.freeze({records,connect,reset,banner,actions,bind,inbox,submit,isShared:active,isChecking:pending});
+  return Object.freeze({records,connect,reset,banner,settings,actions,bind,inbox,submit,isShared:active,isChecking:pending,reconcile});
 }
 root.FLYMPUS_SAFETY_UI=Object.freeze({create});
 })(window);

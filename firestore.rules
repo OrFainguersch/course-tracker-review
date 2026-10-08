@@ -245,24 +245,33 @@ service cloud.firestore {
       }
 
       allow get: if userManager() || member();
-      allow list: if userManager();
+      allow list: if activeUser()
+        && request.auth.uid in resource.data.memberUids;
       allow create: if userManager()
-        && request.resource.data.keys().hasOnly(['courseId','name','members','updatedAt','updatedBy'])
+        && request.resource.data.keys().hasOnly(['courseId','name','members','memberUids','unmatchedEmails','updatedAt','updatedBy'])
         && request.resource.data.courseId is string
         && request.resource.data.courseId.size() <= 120
         && request.resource.data.name is string
         && request.resource.data.name.size() <= 160
         && request.resource.data.members is map
         && request.resource.data.members.size() <= 100
+        && request.resource.data.memberUids is list
+        && request.resource.data.memberUids.toSet() == request.resource.data.members.keys().toSet()
+        && request.resource.data.unmatchedEmails is list
+        && request.resource.data.unmatchedEmails.size() <= 100
         && request.auth.uid in request.resource.data.members.keys()
         && request.resource.data.members[request.auth.uid].role == 'COURSE_MANAGER'
         && request.resource.data.updatedBy == request.auth.uid
         && request.resource.data.updatedAt == request.time;
       allow update: if userManager()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','members','updatedAt','updatedBy'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','members','memberUids','unmatchedEmails','updatedAt','updatedBy'])
         && request.resource.data.courseId == resource.data.courseId
         && request.resource.data.members is map
         && request.resource.data.members.size() <= 100
+        && request.resource.data.memberUids is list
+        && request.resource.data.memberUids.toSet() == request.resource.data.members.keys().toSet()
+        && request.resource.data.unmatchedEmails is list
+        && request.resource.data.unmatchedEmails.size() <= 100
         && request.auth.uid in request.resource.data.members.keys()
         && request.resource.data.members[request.auth.uid].role == 'COURSE_MANAGER'
         && request.resource.data.updatedBy == request.auth.uid
@@ -300,7 +309,7 @@ service cloud.firestore {
           && request.resource.data.requiredAckUids is list
           && request.resource.data.requiredAckUids.toSet() == memberUids();
         allow update: if ownMark('seenBy')
-          || ownMark('ackBy')
+          || (ownMark('ackBy') && request.auth.uid in resource.data.seenBy.keys())
           || (manager()
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','statusBy','statusAt'])
             && request.resource.data.status in ['OPEN','IN_PROGRESS','RESOLVED']

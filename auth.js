@@ -144,20 +144,23 @@ api.safetyCloud=Object.freeze({
   ready:safetyCloudReady,
   manager:()=>safetyCloudReady()&&canManageUsers(),
   uid:()=>safetyCloudReady()?String(currentUser.uid):'',
-  async rosterPreview(emails){
+  async rosterPreview(instructors){
     if(!safetyCloudReady()||!canManageUsers())throw new Error('A Training Manager or Administrator must enroll instructors for shared Safety.');
     const users=(await firestoreSdk.getDocs(firestoreSdk.collection(db,'users'))).docs.map(s=>s.data());
     const active=users.filter(u=>u.uid&&u.status==='active');
-    const list=[...new Set((emails||[]).map(e=>String(e||'').trim().toLowerCase()).filter(Boolean))];
+    const list=[...new Map((instructors||[]).map(item=>{
+      const email=String(typeof item==='string'?item:item?.email||'').trim().toLowerCase();
+      return [email,{email,role:item?.role==='COURSE_MANAGER'?'COURSE_MANAGER':'INSTRUCTOR'}];
+    }).filter(([email])=>Boolean(email))).values()];
     const matched=[],missing=[];
-    list.forEach(email=>{
-      const user=active.find(u=>String(u.email||'').toLowerCase()===email);
-      if(!user)missing.push(email);
-      else matched.push({uid:String(user.uid),email,name:String(user.displayName||email),role:'INSTRUCTOR'});
+    list.forEach(person=>{
+      const user=active.find(u=>String(u.email||'').toLowerCase()===person.email);
+      if(!user)missing.push(person.email);
+      else matched.push({uid:String(user.uid),email:person.email,name:String(user.displayName||person.email),role:person.role});
     });
     return {matched,missing};
   },
-  async enable(courseId,courseName,members){
+  async enable(courseId,courseName,members,unmatchedEmails=[]){
     if(!safetyCloudReady()||!canManageUsers())throw new Error('Training Manager access is required to enable shared Safety.');
     const me={uid:String(currentUser.uid),email:String(currentUser.email||'').toLowerCase(),name:String(currentProfile?.displayName||currentUser.displayName||'Course manager'),role:'COURSE_MANAGER'};
     const map={};
@@ -167,7 +170,7 @@ api.safetyCloud=Object.freeze({
       map[id]={name:String(p.name||p.email||'Instructor').slice(0,100),email:String(p.email||'').toLowerCase().slice(0,200),role:p.role==='COURSE_MANAGER'?'COURSE_MANAGER':'INSTRUCTOR'};
     });
     await firestoreSdk.setDoc(safetyCloudDocument(courseId),{
-      courseId:String(courseId),name:String(courseName||courseId).slice(0,160),members:map,
+      courseId:String(courseId),name:String(courseName||courseId).slice(0,160),members:map,memberUids:Object.keys(map),unmatchedEmails:[...new Set(unmatchedEmails.map(v=>String(v).slice(0,200)))].slice(0,100),
       updatedAt:firestoreSdk.serverTimestamp(),updatedBy:me.uid
     },{merge:true});
     return {members:map};
@@ -191,6 +194,11 @@ api.safetyCloud=Object.freeze({
         return {...v,id:doc.id,createdAt:v.createdAt?.toDate?.().toISOString?.()||v.createdAt||'',statusAt:v.statusAt?.toDate?.().toISOString?.()||v.statusAt||''};
       })),onError
     );
+  },
+  watchCourses(onCourses,onError){
+    if(!safetyCloudReady())throw new Error('Sign in to load Safety notifications');
+    const q=firestoreSdk.query(firestoreSdk.collection(db,'courseSafety'),firestoreSdk.where('memberUids','array-contains',String(currentUser.uid)));
+    return firestoreSdk.onSnapshot(q,snapshot=>onCourses(snapshot.docs.map(doc=>({...doc.data(),documentId:doc.id,members:doc.data().members||{}}))),onError);
   },
   async submit(courseId,data){
     if(!safetyCloudReady())throw new Error('Sign in before submitting a shared safety event');
