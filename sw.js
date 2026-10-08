@@ -2,7 +2,7 @@
    - Instant PWA cold-start from a versioned same-origin app-shell cache
    - Background revalidation so deployments replace the cached shell safely
    - Web Push delivery and notification navigation */
-const FLYMPUS_SW_VERSION='2026-10-08-plan-0785';
+const FLYMPUS_SW_VERSION='2026-10-08-plan-0786';
 const SHELL_CACHE='flympus-shell-'+FLYMPUS_SW_VERSION;
 const DEFAULT_ICON='./assets/flympus-app-icon.webp';
 const SHELL_URLS=[
@@ -13,7 +13,7 @@ const SHELL_URLS=[
   './account-switcher.js?v=20261008-switcher01',
   './assets/reports-dashboard.js?v=0767',
   './assets/reports-dashboard.css?v=0767',
-  './assets/fleet-operations.css?v=20261008-plan09',
+  './assets/fleet-operations.css?v=20261008-plan10',
   './assets/fleet-model.js?v=20261008-plan07',
   './assets/fleet-views.js?v=20261008-plan08',
   './assets/safety-workflow.css?v=20261008-safety03',
