@@ -329,7 +329,7 @@ async function ensureUserProfile(user){
   const email=canonicalEmail(user.email);let invitation=null;
   try{const snap=await firestoreSdk.getDoc(firestoreSdk.doc(db,'invitations',email));if(snap.exists())invitation=snap.data()}catch(err){console.warn('FLYMPUS invitation lookup failed; continuing as pending',err)}
   const preauthorized=invitation?.status==='active'&&canonicalEmail(invitation?.email)===email;
-  const profile={uid:user.uid,email,displayName:user.displayName||invitation?.displayName||'',preferredName:'',photoURL:user.photoURL||'',providerIds:(user.providerData||[]).map(x=>String(x?.providerId||'')).filter(Boolean),role:preauthorized&&['owner','admin','training_manager','user'].includes(invitation?.role)?invitation.role:'user',status:preauthorized?'active':'pending',createdAt:firestoreSdk.serverTimestamp()};
+  const profile={uid:user.uid,email,displayName:user.displayName||invitation?.displayName||'',preferredName:'',photoURL:user.photoURL||'',providerIds:(user.providerData||[]).map(x=>String(x?.providerId||'')).filter(Boolean),role:preauthorized&&['owner','admin','training_manager','duty_trainee','user'].includes(invitation?.role)?invitation.role:'user',status:preauthorized?'active':'pending',createdAt:firestoreSdk.serverTimestamp()};
   await firestoreSdk.setDoc(ref,profile);return profile
 }
 function normalizeProfile(profile={}){
