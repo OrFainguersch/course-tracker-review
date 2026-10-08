@@ -1,0 +1,13 @@
+/* Compact actionable Home alerts (Light, Dark, Hebrew RTL and mobile). */
+.homeAttentionIssues{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-width:0}
+.homeAttentionIssues .homeIssue{display:inline-flex;align-items:center;gap:6px;max-width:100%;border-radius:8px;border:1px solid #f5d9c3;background:#fff8ef;padding:5px 8px;font-size:10px;line-height:1.45;font-weight:700;color:#925018;overflow-wrap:anywhere}
+.homeAttentionIssues .homeIssue:before{flex:0 0 16px}
+.homeAttentionTable td:nth-child(2){max-width:620px;min-width:180px}
+.homePlanRow.homePlanEmpty .homePlanMain{grid-column:1/-1;min-width:0}
+.homePlanRow.homePlanEmpty .homePlanMain small{max-width:55ch}
+html[data-flympus-theme="dark"] .homeAttentionIssues .homeIssue{color:#ffd1a7;background:#3c3026;border-color:#71513a}
+html.flympusLargeText .homeAttentionIssues .homeIssue{font-size:15px!important}
+@media(max-width:760px){
+ .homeAttentionIssues{display:grid;justify-items:start}
+ .homeAttentionTable td:nth-child(2){min-width:220px;max-width:none}
+}
