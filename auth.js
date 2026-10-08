@@ -111,6 +111,7 @@ const api=window.FLYMPUS_AUTH={
   updatePreferredName:name=>updateOwnPreferredName(name),
   updateOfficialName:name=>updateOwnOfficialName(name),
   updateDisplayName:name=>updateOwnOfficialName(name),
+  updateOwnPhoto:dataUrl=>updateOwnProfilePhoto(dataUrl),
   updateManagedOfficialName:(uid,name)=>updateManagedUserOfficialName(uid,name),
   updateManagedDisplayName:(uid,name)=>updateManagedUserOfficialName(uid,name),
   isAdmin:()=>canManageUsers(),
@@ -622,8 +623,19 @@ async function updateOwnOfficialName(value){
   try{document.dispatchEvent(new CustomEvent('flympus:profile-updated',{detail:{displayName,preferredName:currentProfile.preferredName||''}}))}catch{}
   return true
 }
+async function updateOwnProfilePhoto(value){
+  if(!currentUser?.uid||currentProfile?.status!=='active'||!db||!firestoreSdk)throw new Error('Your account is not verified.');
+  const photoURL=String(value||'');
+  // Cropped in-app profile photos are reduced JPEG data URLs, not arbitrary HTML/URLs.
+  if(photoURL&&(!/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(photoURL)||photoURL.length>300000))throw new Error('Invalid or oversized profile photo.');
+  await firestoreSdk.updateDoc(firestoreSdk.doc(db,'users',currentUser.uid),{photoURL,updatedAt:firestoreSdk.serverTimestamp()});
+  currentProfile={...currentProfile,photoURL};api.profile=currentProfile;
+  syncAuthenticatedChrome(currentUser,currentProfile);
+  return true
+}
 async function updateOwnPreferredName(value){
   const preferredName=normalizeDisplayName(value);
+  if(normalizeAppRole(currentProfile?.role)==='duty_trainee')throw new Error('Duty Trainee cannot edit identity fields.');
   if(!currentUser?.uid||!currentProfile||!db||!firestoreSdk)throw new Error(tr('Could not update preferred name'));
   await firestoreSdk.updateDoc(firestoreSdk.doc(db,'users',currentUser.uid),{preferredName,updatedAt:firestoreSdk.serverTimestamp()});
   currentProfile={...currentProfile,preferredName};api.profile=currentProfile;syncCachedIdentity(currentUser.uid,{preferredName});syncAuthenticatedChrome(currentUser,currentProfile);
