@@ -145,8 +145,16 @@ test('Plan opens on the date-specific Daily Flight Plan with separate Planned vs
  assert.ok(html.includes("case'planned':html=planWorkspace();break"));
  assert.ok(html.includes("if(state.planView==='report')bindPlanned();else bindDailyFlightBoard()"));
  assert.ok(html.includes("b.dataset.planToday==='true'?{planView:'board',planDate:todayIsoDate()"));
- assert.ok(html.includes('data-plan-today="true"'));
- assert.ok(html.includes('homePlanTitleButton'));
+ const homeSource=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
+ assert.match(homeSource, /<h2>Today.*s Plan<\/h2>/);
+ assert.ok(homeSource.includes('<span class="homeDateChip">'));
+ assert.ok(homeSource.includes('<div class="homePlanRow">'));
+ assert.ok(homeSource.includes('<div class="homePlanRow homePlanEmpty">'));
+ assert.ok(!homeSource.includes('data-plan-today="true"'),'Home Today Plan must not navigate to Plan');
+ assert.ok(!homeSource.includes('homePlanTitleButton'),'Home Today Plan title must not be a button');
+ assert.ok(!homeSource.includes('homePlanDateButton'),'Home Today Plan date must not be a button');
+ assert.ok(!homeSource.includes('data-go="reports"'),'Course Pulse no longer offers View Reports');
+ assert.ok(html.includes("case'reports':html=reports();break"),'Reports navigation remains available');
  assert.ok(!html.includes("courseFlightScheduleHtml(date)+\n '<section class=\"card pvePanel\">"));
 });
 test('Scheduled sortie accepts optional planned duration and notes without changing serviceability constraints',()=>{
