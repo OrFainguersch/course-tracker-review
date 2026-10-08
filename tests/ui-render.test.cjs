@@ -115,7 +115,7 @@ assert(!html.includes('${epCurrentSuitSummaryHtml()}\n<div class="twoCol">'),"Ev
 assert(!html.includes("activeSuitOverviewHtml()+\n '<div class=\"twoCol\" style=\"margin-top:14px\">"),"Exams must not render the redundant Active Package overview");
 assert(html.includes("Analytics are scoped to the active course and its resolved training suit.</p>'+activeSuitOverviewHtml()"),"Course Analytics must keep the active Training Suit overview");
 assert(!html.includes('<h3>Filter scope</h3>')&&!html.includes('Filters are applied consistently'),"Course Analytics must hide the Filter scope explainer card");
-assert(html.includes("flightDate:normalizeDateValue(fd.get('date'))")&&html.includes("date=normalizeDateValue($('#pveDate').value)"),"Date forms must normalize DD/MM/YYYY back to ISO for storage and comparisons");
+assert(html.includes("flightDate:normalizeDateValue(fd.get('date'))")&&html.includes("const normalized=normalizeDateValue(e.target.value)")&&html.includes("state.planDate=normalized")&&html.includes("date=state.planDate||todayIsoDate(),soloCount="),"Daily Flight Plan is the sole editable DD/MM/YYYY date; reports reuse the normalized ISO date for storage and comparisons");
 assert(html.includes("function builderStartLabel(startsOn){return startsOn?formatDateDMY(startsOn):''}"),"Course-builder date labels must follow DD/MM/YYYY too");
 assert(html.includes("submitted Evaluations on '+esc(formatDateDMY(date))"),"Planned vs Executed must never expose the internal ISO date to users");
 assert(html.includes("function siteConfirm(")&&!(/\bconfirm\s*\(/.test(html))&&!(/\balert\s*\(/.test(html))&&!(/\bprompt\s*\(/.test(html)),"Native browser dialogs must be replaced by the branded FLYMPUS dialog");
