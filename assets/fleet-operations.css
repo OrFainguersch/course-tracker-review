@@ -276,3 +276,95 @@ html.flympusLargeText .dailyFlightPlan .fleetSorties>.fleetQuiet{font-size:15px!
  .dailyFlightPlan .fleetSortieFormGrid{grid-template-columns:1fr;gap:12px}
  .dailyFlightPlan .fleetSortieFormGrid .field:last-child{grid-column:auto}
 }
+
+
+/* Plan v05: one uncluttered form surface, no empty white board wrapper. */
+.dailyFlightPlan{display:flex;flex-direction:column;align-items:stretch;gap:16px}
+.dailyFlightPlan .dailyPlanHeader{display:flex;align-items:center;justify-content:flex-end;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important;min-height:0}
+.dailyFlightPlan .dailyPlanDateField{width:190px;min-width:160px;flex:0 0 auto}
+.dailyFlightPlan>.fleetSchedulePlain{display:flex;flex-direction:column;gap:18px;width:100%;min-width:0;padding:0!important;border:0!important;box-shadow:none!important;background:transparent!important;margin:0!important}
+.dailyFlightPlan .fleetSchedulePlain .fleetSortieForm{max-width:1220px;width:100%;margin:0 auto;border-radius:17px;border:1px solid #d5e5f1;background:#f8fbff;box-shadow:0 4px 22px rgba(24,72,121,.045);padding:26px 28px}
+.fleetPlanFormHeading{display:flex;align-items:center;justify-content:space-between;margin-bottom:23px}
+.fleetPlanFormHeading h2{font-size:20px;line-height:1.3;color:#0b3159;margin:0 0 6px}
+.fleetPlanFormHeading p{font-size:13px;color:#637d92;margin:0}
+.dailyFlightPlan .fleetSortieFormGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 18px;margin-bottom:0}
+.dailyFlightPlan .fleetSortieFormGrid label{display:block;font-size:13px;line-height:1.45;margin-bottom:8px;color:#173d5a;font-weight:750}
+.dailyFlightPlan .fleetSortieFormGrid .input{min-height:46px;border-radius:11px;background:#fff}
+.dailyFlightPlan .fleetSortieFormGrid [data-plan-notes]{grid-column:1/-1}
+.dailyFlightPlan .fleetSortieFormGrid [data-plan-notes] textarea{min-height:80px}
+.fleetInlineFleet{background:transparent;border:0;color:#176fad;font-size:11px;font-weight:750;text-decoration:none;margin-inline-start:9px;padding:0;cursor:pointer}
+.fleetInlineFleet:hover{text-decoration:underline}
+.fleetRequired{color:#c33636}
+.fleetTimeFlow{margin:23px 0 21px;border:1px solid #dce8f3;border-radius:14px;background:#fff;padding:17px 20px}
+.fleetTimeFlowHeading{display:flex;justify-content:space-between;align-items:baseline;gap:9px;margin-bottom:12px;flex-wrap:wrap}
+.fleetTimeFlowHeading b{font-size:14px;color:#16395a}
+.fleetTimeFlowHeading small{font-size:11px;line-height:1.5;color:#607f9a}
+.fleetTimeFlowTrack{display:flex;gap:3px;height:38px;width:100%;overflow:hidden;border-radius:10px}
+.fleetTimeFlowTrack span{display:flex;min-width:0;align-items:center;justify-content:center;font-size:11px;font-weight:800;line-height:1.3}
+.fleetTimeFlowTrack [data-phase="brief"]{background:#f8ead1;color:#91661f}
+.fleetTimeFlowTrack [data-phase="flight"]{background:#dcecff;color:#155b99}
+.fleetTimeFlowTrack [data-phase="debrief"]{background:#dff3e7;color:#19724a}
+.fleetTimeFlowTimes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:12px}
+.fleetTimeFlowTimes>div{min-width:0;display:grid;gap:5px}
+.fleetTimeFlowTimes span{font-size:11px;font-weight:650;color:#587792}
+.fleetTimeFlowTimes strong{font-size:15px;font-variant-numeric:tabular-nums;color:#123c60;white-space:nowrap}
+.fleetPlanFormActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.fleetPlanFormActions .btn{font-size:13px;min-height:43px;padding:8px 17px}
+.fleetTimingSettings,.fleetBookedFlights{max-width:1220px;width:100%;margin:0 auto}
+.fleetTimingSettings{border:1px solid #dce7ef;border-radius:12px;padding:10px 14px;background:rgba(255,255,255,.48)}
+.fleetTimingSettings summary{cursor:pointer;font-size:12px;color:#376987;font-weight:750;width:max-content;max-width:100%}
+.fleetTimingSettings form{padding:14px 0 5px}
+.fleetTimingSettingsGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:14px}
+.fleetTimingSettingsGrid label{font-size:12px;font-weight:750;display:block;margin-bottom:6px}
+.fleetTimingSettingsGrid .input{width:100%;min-width:0}
+.fleetTimingSettings .sub{font-size:11px;margin:9px 0 0;color:#607c93}
+.fleetBookedFlights{margin-top:2px}
+.fleetBookedHeading{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.fleetBookedHeading h3{font-size:16px;color:#133b5c;margin:0}
+.fleetBookedHeading span{padding:3px 8px;background:#e8f3fc;border-radius:99px;color:#176fa6;font-weight:800;font-size:12px}
+.fleetBookedFlights .fleetSorties{margin:0;gap:11px}
+.fleetBookedFlights .fleetSortie{border-radius:13px;background:#fff;padding:15px 17px}
+.fleetBookedFlights .fleetSortieMain small{font-size:12px;line-height:1.5}
+html[data-flympus-theme="dark"] .dailyFlightPlan .fleetSchedulePlain .fleetSortieForm,
+html[data-flympus-theme="dark"] .fleetBookedFlights .fleetSortie{background:#172d40;border-color:#37546a}
+html[data-flympus-theme="dark"] .fleetPlanFormHeading h2{color:#e7f2fb}
+html[data-flympus-theme="dark"] .fleetPlanFormHeading p,
+html[data-flympus-theme="dark"] .fleetTimeFlowHeading small,
+html[data-flympus-theme="dark"] .fleetTimeFlowTimes span{color:#b5cee0}
+html[data-flympus-theme="dark"] .fleetTimeFlow{background:#1b3549;border-color:#3c5b73}
+html[data-flympus-theme="dark"] .fleetTimeFlowHeading b,
+html[data-flympus-theme="dark"] .fleetTimeFlowTimes strong,
+html[data-flympus-theme="dark"] .fleetBookedHeading h3{color:#e7f2fb}
+html[data-flympus-theme="dark"] .fleetTimeFlowTrack [data-phase="brief"]{background:#604922;color:#ffe9b3}
+html[data-flympus-theme="dark"] .fleetTimeFlowTrack [data-phase="flight"]{background:#20496b;color:#bde4ff}
+html[data-flympus-theme="dark"] .fleetTimeFlowTrack [data-phase="debrief"]{background:#205242;color:#c3f5d4}
+html[data-flympus-theme="dark"] .fleetTimingSettings{background:#172e42;border-color:#3b5770}
+html[data-flympus-theme="dark"] .fleetTimingSettings summary{color:#bbdcf5}
+html[data-flympus-theme="dark"] .fleetBookedHeading span{background:#20476a;color:#c5e6ff}
+html[data-flympus-language="he"] .fleetPlanFormHeading,
+html[data-flympus-language="he"] .fleetTimeFlow,
+html[data-flympus-language="he"] .fleetBookedFlights{text-align:right;direction:rtl}
+html.flympusLargeText .fleetPlanFormHeading p,
+html.flympusLargeText .fleetTimeFlowHeading small,
+html.flympusLargeText .fleetTimeFlowTrack span,
+html.flympusLargeText .fleetTimeFlowTimes span,
+html.flympusLargeText .fleetTimingSettings summary{font-size:15px!important}
+@media(max-width:850px){
+ .dailyFlightPlan .fleetSortieFormGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .fleetTimingSettingsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .fleetTimeFlowTimes{gap:8px}
+}
+@media(max-width:560px){
+ .dailyFlightPlan .dailyPlanDateField{width:100%;flex:auto}
+ .dailyFlightPlan .fleetSchedulePlain .fleetSortieForm{padding:20px 15px}
+ .dailyFlightPlan .fleetSortieFormGrid{grid-template-columns:1fr;gap:14px}
+ .dailyFlightPlan .fleetSortieFormGrid [data-plan-notes]{grid-column:1}
+ .fleetPlanFormHeading{margin-bottom:16px}
+ .fleetPlanFormHeading h2{font-size:18px}
+ .fleetTimeFlow{padding:13px 11px;margin:17px 0}
+ .fleetTimeFlowHeading{display:grid;gap:5px}
+ .fleetTimeFlowTimes{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .fleetTimeFlowTimes strong{font-size:14px}
+ .fleetTimeFlowTrack span{font-size:10px}
+ .fleetTimingSettingsGrid{grid-template-columns:1fr 1fr}
+}
