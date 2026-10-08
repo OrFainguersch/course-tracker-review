@@ -109,23 +109,7 @@ function create(ctx){
       reset();connect();notify('Shared Safety enrollment saved.','success');
     }catch(err){notify(String(err?.message||err),'error')}
   }
-  function inbox(){
-    const menu=document.querySelector('#topNotificationDropdown'),dot=document.querySelector('#topNotificationDot'),empty=menu?.querySelector('.notificationEmpty');
-    if(!menu||!dot)return;
-    let list=menu.querySelector('#safetyNotificationList');
-    if(!list){list=document.createElement('div');list.id='safetyNotificationList';list.className='safetyNotificationList';menu.querySelector('.notificationHead')?.after(list)}
-    const events=active()&&!ctx.isDuty()&&uid()?records().filter(x=>model.notification(x,uid())).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))):[];
-    dot.hidden=!events.length;
-    if(empty)empty.hidden=events.length>0;
-    list.innerHTML=events.slice(0,30).map(x=>'<button type="button" class="safetyNotificationItem '+(model.viewed(x,uid())?'seen':'')+'" data-safety-open="'+escape(x.id)+'"><b>Safety: '+escape(x.title||'Event')+'</b><small>'+escape(ctx.courseName())+' · '+escape(x.severity||'')+'</small><em>'+(model.viewed(x,uid())?'Viewed · acknowledgement still required':'New event · open to read')+'</em></button>').join('');
-    list.querySelectorAll('[data-safety-open]').forEach(b=>b.onclick=async e=>{
-      e.stopPropagation();const id=b.dataset.safetyOpen,event=records().find(x=>x.id===id);
-      if(event&&!model.viewed(event,uid()))try{await api().viewed(ctx.courseId(),id)}catch{notify('Could not record event view','error')}
-      menu.hidden=true;document.querySelector('#topNotificationBtn')?.setAttribute('aria-expanded','false');
-      ctx.openSafety();
-      setTimeout(()=>[...document.querySelectorAll('[data-safety-record-id]')].find(x=>x.dataset.safetyRecordId===id)?.scrollIntoView?.({behavior:'smooth',block:'center'}),90);
-    });
-  }
+  function inbox(){ctx.renderGlobalInbox?.()}
   function bind(){
     document.querySelectorAll('[data-safety-enroll]').forEach(b=>b.onclick=enroll);
     document.querySelectorAll('[data-safety-ack]').forEach(b=>b.onclick=async()=>{
