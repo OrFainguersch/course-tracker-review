@@ -123,6 +123,114 @@ const api=window.FLYMPUS_AUTH={
   refreshSession:()=>refreshCurrentSession()
 };
 
+
+/* A separate, opt-in Firestore safety channel. Course-local browser storage is
+   NOT a trusted membership source. Only global user managers can enroll ACTIVE
+   Firebase UIDs; Firestore rules enforce member and manager permissions. */
+const safetyCloudCourseId=value=>{
+  const raw=String(value||'').trim();
+  if(!raw||raw.length>120)throw new Error('Invalid course identifier');
+  return encodeURIComponent(raw);
+};
+const safetyCloudReady=()=>api.status==='active'&&!!currentUser?.uid&&!!db&&!!firestoreSdk;
+function safetyCloudDocument(courseId){
+  return firestoreSdk.doc(db,'courseSafety',safetyCloudCourseId(courseId));
+}
+function safetyCloudEvent(courseId,id){
+  if(!/^[a-zA-Z0-9_-]{4,100}$/.test(String(id||'')))throw new Error('Invalid safety event identifier');
+  return firestoreSdk.doc(db,'courseSafety',safetyCloudCourseId(courseId),'events',id);
+}
+api.safetyCloud=Object.freeze({
+  ready:safetyCloudReady,
+  manager:()=>safetyCloudReady()&&canManageUsers(),
+  uid:()=>safetyCloudReady()?String(currentUser.uid):'',
+  async rosterPreview(emails){
+    if(!safetyCloudReady()||!canManageUsers())throw new Error('A Training Manager or Administrator must enroll instructors for shared Safety.');
+    const users=(await firestoreSdk.getDocs(firestoreSdk.collection(db,'users'))).docs.map(s=>s.data());
+    const active=users.filter(u=>u.uid&&u.status==='active');
+    const list=[...new Set((emails||[]).map(e=>String(e||'').trim().toLowerCase()).filter(Boolean))];
+    const matched=[],missing=[];
+    list.forEach(email=>{
+      const user=active.find(u=>String(u.email||'').toLowerCase()===email);
+      if(!user)missing.push(email);
+      else matched.push({uid:String(user.uid),email,name:String(user.displayName||email),role:'INSTRUCTOR'});
+    });
+    return {matched,missing};
+  },
+  async enable(courseId,courseName,members){
+    if(!safetyCloudReady()||!canManageUsers())throw new Error('Training Manager access is required to enable shared Safety.');
+    const me={uid:String(currentUser.uid),email:String(currentUser.email||'').toLowerCase(),name:String(currentProfile?.displayName||currentUser.displayName||'Course manager'),role:'COURSE_MANAGER'};
+    const map={};
+    [...(members||[]),me].forEach(p=>{
+      const id=String(p.uid||'');
+      if(!/^[A-Za-z0-9_-]{4,160}$/.test(id))return;
+      map[id]={name:String(p.name||p.email||'Instructor').slice(0,100),email:String(p.email||'').toLowerCase().slice(0,200),role:p.role==='COURSE_MANAGER'?'COURSE_MANAGER':'INSTRUCTOR'};
+    });
+    await firestoreSdk.setDoc(safetyCloudDocument(courseId),{
+      courseId:String(courseId),name:String(courseName||courseId).slice(0,160),members:map,
+      updatedAt:firestoreSdk.serverTimestamp(),updatedBy:me.uid
+    },{merge:true});
+    return {members:map};
+  },
+  async course(courseId){
+    if(!safetyCloudReady())return null;
+    try{
+      const snap=await firestoreSdk.getDoc(safetyCloudDocument(courseId));
+      return snap.exists()?{...snap.data(),members:snap.data()?.members||{}}:null;
+    }catch(err){
+      if(err?.code==='permission-denied')return {unavailable:true};
+      throw err;
+    }
+  },
+  listen(courseId,onRecords,onError){
+    if(!safetyCloudReady())throw new Error('Sign in to load shared Safety');
+    return firestoreSdk.onSnapshot(
+      firestoreSdk.collection(db,'courseSafety',safetyCloudCourseId(courseId),'events'),
+      snap=>onRecords(snap.docs.map(doc=>{
+        const v=doc.data();
+        return {...v,id:doc.id,createdAt:v.createdAt?.toDate?.().toISOString?.()||v.createdAt||'',statusAt:v.statusAt?.toDate?.().toISOString?.()||v.statusAt||''};
+      })),onError
+    );
+  },
+  async submit(courseId,data){
+    if(!safetyCloudReady())throw new Error('Sign in before submitting a shared safety event');
+    const course=await this.course(courseId);
+    const members=course?.members||{};
+    if(!members[currentUser.uid])throw new Error('You are not enrolled in shared course Safety');
+    const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+    const names=Object.fromEntries(Object.entries(members).map(([uid,m])=>[uid,String(m.name||m.email||uid)]));
+    const payload={
+      id,courseId:String(courseId),date:String(data.date||''),traineeId:String(data.traineeId||''),
+      instructorId:String(data.instructorId||''),traineeName:String(data.traineeName||'').slice(0,120),
+      instructorName:String(data.instructorName||'').slice(0,120),title:String(data.title||'').slice(0,250),
+      severity:String(data.severity||''),classification:String(data.classification||''),
+      details:String(data.details||'').slice(0,10000),briefDescription:String(data.briefDescription||'').slice(0,10000),
+      findings:String(data.findings||'').slice(0,10000),lessonsLearned:String(data.lessonsLearned||'').slice(0,10000),
+      photos:[],status:'OPEN',createdBy:currentUser.uid,createdAt:firestoreSdk.serverTimestamp(),
+      requiredAckUids:Object.keys(members),requiredAckNames:names,seenBy:{},ackBy:{}
+    };
+    await firestoreSdk.setDoc(safetyCloudEvent(courseId,id),payload);
+    return id;
+  },
+  async viewed(courseId,id){
+    if(!safetyCloudReady())throw new Error('Authentication required');
+    await firestoreSdk.updateDoc(safetyCloudEvent(courseId,id),
+      new firestoreSdk.FieldPath('seenBy',String(currentUser.uid)),firestoreSdk.serverTimestamp());
+  },
+  async acknowledge(courseId,id){
+    if(!safetyCloudReady())throw new Error('Authentication required');
+    await firestoreSdk.updateDoc(safetyCloudEvent(courseId,id),
+      new firestoreSdk.FieldPath('ackBy',String(currentUser.uid)),firestoreSdk.serverTimestamp());
+  },
+  async setStatus(courseId,id,status){
+    if(!safetyCloudReady())throw new Error('Authentication required');
+    if(!['OPEN','IN_PROGRESS','RESOLVED'].includes(status))throw new Error('Invalid safety event status');
+    await firestoreSdk.updateDoc(safetyCloudEvent(courseId,id),{
+      status,statusBy:String(currentUser.uid),statusAt:firestoreSdk.serverTimestamp()
+    });
+  }
+});
+
 const AUTH_HE_UI=Object.freeze({"Full system control":"שליטה מלאה במערכת","System administration":"ניהול מערכת","Training administration":"ניהול הדרכה","Operational access":"גישה תפעולית","Restricted daily operations":"גישה תפעולית מוגבלת","May appoint: Owner, Administrator, Training Manager, User or Duty Trainee":"רשאי למנות: בעלים, מנהל מערכת, מנהל הדרכה, משתמש או חניך תורן","May appoint: Training Manager, User or Duty Trainee":"רשאי למנות: מנהל הדרכה, משתמש או חניך תורן","May appoint: User or Duty Trainee":"רשאי למנות: משתמש או חניך תורן","Higher than Duty Trainee; cannot appoint Duty Trainees":"בכיר מחניך תורן; אינו רשאי למנות חניכים תורנים","Edit Plan, daily flight boards, solo flights and serviceability":"עריכת התכנון, לוחות הטיסות, גיחות סולו ושמישות כלי טיס","No User Management or course structure, roster or Package editing":"ללא ניהול משתמשים, מבנה קורס, סגל או חבילות הדרכה","Home, Plan, Aircraft Serviceability and personal Settings only":"גישה לבית, תכנון, שמישות כלי טיס והגדרות אישיות בלבד","Edit daily flight boards and Planned vs Executed":"עריכת לוח טיסות יומי ותכנון מול ביצוע","May change own photo; name and role are read-only":"ניתן לשנות תמונה אישית בלבד; שם ותפקיד אינם ניתנים לעריכה","No access to any other application sections or data":"אין גישה למסכים או לנתונים אחרים באפליקציה",
   'FLYMPUS ACCOUNT':'חשבון FLYMPUS','SECURE SIGN IN':'כניסה מאובטחת','ACCOUNT ACCESS':'גישה לחשבון','AUTHENTICATION':'אימות',
   'Opening FLYMPUS':'פותח את FLYMPUS','Checking your account…':'בודק את החשבון שלך…','Starting secure authentication…':'מפעיל אימות מאובטח…','Verifying FLYMPUS access…':'מאמת הרשאת גישה ל־FLYMPUS…',
