@@ -1,189 +1,87 @@
 name: Deploy FLYMPUS to Firebase Hosting
 
-# Production deployment is fail-safe and email-quiet. Verification or
-# infrastructure problems stop the deployment and are written as warnings, but
-# the workflow itself is not allowed to conclude as failed and trigger repeated
-# GitHub failure emails. A deploy is successful only after final production
-# verification passes for the exact main SHA.
+# Expected blockers remain email-quiet. The explicit release summary and
+# deployment-result.json, never the workflow's green icon, describe the release.
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
   group: flympus-firebase-production
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     continue-on-error: true
+    outputs:
+      release_status: ${{ steps.release_result.outputs.status }}
+      actual_commit: ${{ steps.release_result.outputs.actual_commit }}
     permissions:
       contents: read
       id-token: write
     steps:
       - uses: actions/checkout@v4
-
-      - name: Debounce and discard obsolete main revisions
+      - name: Discard obsolete main revisions
         id: freshness
         shell: bash
         run: |
-          echo "current=true" >> "$GITHUB_OUTPUT"
-          if [ "${{ github.event_name }}" = "push" ]; then
-            sleep 45
-            git fetch origin main --quiet
-            latest="$(git rev-parse origin/main)"
-            if [ "$latest" != "$GITHUB_SHA" ]; then
-              echo "::notice::A newer main revision exists. This obsolete run exits successfully without verification or deployment."
-              echo "current=false" >> "$GITHUB_OUTPUT"
-            fi
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::BLOCKED: only main is authorized for production."
+            exit 0
           fi
-
+          git fetch origin main --quiet
+          latest="$(git rev-parse origin/main)"
+          if [ "$latest" = "$GITHUB_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::BLOCKED: a newer main revision exists."
+          fi
       - uses: actions/setup-node@v4
         if: steps.freshness.outputs.current == 'true'
         with:
           node-version: 22
-
-      - name: Production gate · training core
-        id: prod_training_core
+      - name: Complete application regression suite
+        id: regression
         if: steps.freshness.outputs.current == 'true'
         continue-on-error: true
-        run: node tests/training-core.test.cjs
-
-      - name: Production gate · UI render
-        id: prod_ui_render
-        if: steps.freshness.outputs.current == 'true'
+        run: node --test tests/*.test.cjs
+      - name: Verify production data and migration safeguards
+        id: safety_preflight
+        if: steps.regression.outcome == 'success'
         continue-on-error: true
-        run: node tests/ui-render.test.cjs && node --test tests/safety-workflow.test.cjs && node --test tests/fleet-operations.test.cjs && node --test tests/home-operations.test.cjs && node --test tests/trainee-evaluation-history.test.cjs && node --test tests/emergency-notes.test.cjs
-
-      - name: Production gate · evaluation voice
-        id: prod_evaluation_voice
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node tests/evaluation-voice.test.cjs
-
-      - name: Production gate · iOS audio lifecycle
-        id: prod_ios_audio
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node tests/ios-audio-lifecycle.test.cjs
-
-      - name: Production gate · Web Push
-        id: prod_push
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node tests/push-notifications.test.cjs
-
-      - name: Production gate · Firebase reserved routes
-        id: prod_sw_routing
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node --test tests/sw-routing.test.cjs
-
-      - name: Production gate · authentication foundation
-        id: prod_auth_integration
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node tests/auth-integration.test.cjs
-
-      - name: Production gate · authentication lifecycle
-        id: prod_auth_lifecycle
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node --test tests/auth-lifecycle.test.cjs
-
-      - name: Production gate · account switcher session isolation
-        id: prod_account_switcher
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node --test tests/account-switcher.test.cjs
-
-      - name: Production gate · Reports and Analytics
-        id: prod_reports_dashboard
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node --test tests/reports-dashboard.test.cjs
-
-      - name: Production gate · authentication syntax
-        id: prod_auth_syntax
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node --test tests/auth-syntax.test.cjs
-
-      - name: Production gate · deployment email guard
-        id: prod_deployment_guard
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node tests/deployment-email-guard.test.cjs
-
-      - name: Production gate · pull lifecycle
-        id: prod_pull_lifecycle
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node --test tests/pull-lifecycle.test.cjs
-
-      - name: Production gate · theme lifecycle
-        id: prod_theme
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node --test tests/theme-controller.test.cjs
-
-      - name: Production gate · UID storage
-        id: prod_storage
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node tests/storage-scope.test.cjs
-
-      - name: Production gate · Hebrew UI
-        id: prod_hebrew_ui
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node tests/hebrew-ui.test.cjs
-
-      - name: Production gate · Hebrew i18n
-        id: prod_i18n
-        if: steps.freshness.outputs.current == 'true'
-        continue-on-error: true
-        run: node tests/i18n.test.cjs
-
-      - name: Verify application before production deployment
-        id: app_verify
-        if: steps.freshness.outputs.current == 'true' && steps.prod_training_core.outcome == 'success' && steps.prod_ui_render.outcome == 'success' && steps.prod_evaluation_voice.outcome == 'success' && steps.prod_ios_audio.outcome == 'success' && steps.prod_push.outcome == 'success' && steps.prod_sw_routing.outcome == 'success' && steps.prod_auth_integration.outcome == 'success' && steps.prod_auth_lifecycle.outcome == 'success' && steps.prod_auth_syntax.outcome == 'success' && steps.prod_account_switcher.outcome == 'success' && steps.prod_reports_dashboard.outcome == 'success' && steps.prod_deployment_guard.outcome == 'success' && steps.prod_pull_lifecycle.outcome == 'success' && steps.prod_theme.outcome == 'success' && steps.prod_storage.outcome == 'success' && steps.prod_hebrew_ui.outcome == 'success' && steps.prod_i18n.outcome == 'success'
-        run: echo "All production-gate tests passed."
-
+        run: node scripts/production-safety.cjs
       - name: Confirm deployment authorization is configured
         id: deploy_auth_config
-        if: steps.freshness.outputs.current == 'true' && steps.app_verify.outcome == 'success'
+        if: steps.safety_preflight.outputs.ready == 'true'
         env:
           WIF_PROVIDER: ${{ vars.FIREBASE_WIF_PROVIDER }}
           SERVICE_ACCOUNT: ${{ vars.FIREBASE_DEPLOY_SERVICE_ACCOUNT }}
         shell: bash
         run: |
           if [ -z "$WIF_PROVIDER" ] || [ -z "$SERVICE_ACCOUNT" ]; then
-            echo "::warning::Firebase deployment authorization is not configured. Production remains unchanged."
+            echo "::warning::BLOCKED: deployment authorization is not configured. Production was not changed."
             echo "configured=false" >> "$GITHUB_OUTPUT"
           else
             echo "configured=true" >> "$GITHUB_OUTPUT"
           fi
-
       - name: Install pinned Firebase CLI
         id: firebase_cli
         if: steps.deploy_auth_config.outputs.configured == 'true'
         continue-on-error: true
         run: npm install --prefix "$RUNNER_TEMP/firebase-cli" --no-audit --no-fund firebase-tools@15.32.1
-
       - name: Verify pinned CLI ADC and WIF compatibility
         id: cli_compat
         if: steps.firebase_cli.outcome == 'success'
         continue-on-error: true
         run: node scripts/test-firebase-wif.cjs "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools"
-
       - name: Authenticate with short-lived GitHub identity
         id: google_auth
         if: steps.cli_compat.outcome == 'success'
@@ -195,53 +93,55 @@ jobs:
           project_id: flympus
           create_credentials_file: true
           export_environment_variables: true
-
       - name: Verify real ADC access to the Hosting site
         id: adc_verify
         if: steps.google_auth.outcome == 'success'
         continue-on-error: true
         run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" hosting:sites:get flympus --project flympus --non-interactive
-
-      - name: Deploy reviewed Firestore access rules
-        id: rules_deploy
+      - name: Prepare complete committed public bundle
+        id: prepare
         if: steps.adc_verify.outcome == 'success'
         continue-on-error: true
-        run: node scripts/deploy-firestore-rules.cjs "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools"
-
+        run: node scripts/prepare-hosting.cjs
+      - name: Recheck main immediately before production write
+        id: final_freshness
+        if: steps.prepare.outcome == 'success'
+        shell: bash
+        run: |
+          git fetch origin main --quiet
+          if [ "$(git rev-parse origin/main)" = "$GITHUB_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::BLOCKED: main advanced while tests were running."
+          fi
+      # Hosting-only releases deliberately never publish Firestore Rules.
+      # Keep the separate rules script for a separately backed-up/reviewed change.
       - name: Deploy reviewed public bundle to Firebase Hosting
         id: hosting_deploy
-        if: steps.rules_deploy.outcome == 'success'
+        if: github.ref == 'refs/heads/main' && steps.final_freshness.outputs.current == 'true'
         continue-on-error: true
         run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" deploy --only hosting --project flympus --non-interactive
-
       - name: Verify production commit, assets and reserved auth helpers
         id: production_verify
         if: steps.hosting_deploy.outcome == 'success'
         continue-on-error: true
         run: node scripts/verify-hosting.cjs
-
       - name: Production deployment summary
-        if: always() && steps.freshness.outputs.current == 'true'
-        shell: bash
-        run: |
-          if [ "${{ steps.app_verify.outcome }}" != "success" ]; then
-            echo "::warning::Verification did not pass. Production was not changed."
-          elif [ "${{ steps.deploy_auth_config.outputs.configured }}" != "true" ]; then
-            echo "::warning::Deployment credentials are unavailable. Production was not changed."
-          elif [ "${{ steps.firebase_cli.outcome }}" != "success" ]; then
-            echo "::warning::Firebase CLI installation failed. Production was not changed."
-          elif [ "${{ steps.cli_compat.outcome }}" != "success" ]; then
-            echo "::warning::Firebase CLI/WIF compatibility verification failed. Production was not changed."
-          elif [ "${{ steps.google_auth.outcome }}" != "success" ]; then
-            echo "::warning::Firebase authentication failed. Production was not changed."
-          elif [ "${{ steps.adc_verify.outcome }}" != "success" ]; then
-            echo "::warning::Hosting access verification failed. Production was not changed."
-          elif [ "${{ steps.rules_deploy.outcome }}" != "success" ]; then
-            echo "::warning::Firestore Rules deployment failed. Hosting was not changed."
-          elif [ "${{ steps.hosting_deploy.outcome }}" != "success" ]; then
-            echo "::warning::Firebase Hosting deployment failed."
-          elif [ "${{ steps.production_verify.outcome }}" != "success" ]; then
-            echo "::warning::Production verification failed after deployment. Investigate before reporting this revision as deployed."
-          else
-            echo "::notice::Production deployment and final verification completed successfully."
-          fi
+        id: release_result
+        if: always()
+        env:
+          FLYMPUS_CURRENT: ${{ steps.freshness.outputs.current == 'true' && steps.final_freshness.outputs.current != 'false' && 'true' || 'false' }}
+          FLYMPUS_CONFIGURED: ${{ steps.deploy_auth_config.outputs.configured }}
+          FLYMPUS_SAFETY_READY: ${{ steps.safety_preflight.outputs.ready }}
+          FLYMPUS_RELEASE_STEPS: >-
+            {"regression":"${{ steps.regression.outcome }}","safety_preflight":"${{ steps.safety_preflight.outcome }}","firebase_cli":"${{ steps.firebase_cli.outcome }}","cli_compat":"${{ steps.cli_compat.outcome }}","google_auth":"${{ steps.google_auth.outcome }}","adc_verify":"${{ steps.adc_verify.outcome }}","prepare":"${{ steps.prepare.outcome }}","hosting_deploy":"${{ steps.hosting_deploy.outcome }}","production_verify":"${{ steps.production_verify.outcome }}"}
+        run: node scripts/deployment-result.cjs
+      - name: Preserve explicit deployment result
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: firebase-release-result-${{ github.sha }}
+          path: deployment-result.json
+          if-no-files-found: warn

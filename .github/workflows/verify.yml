@@ -1,8 +1,7 @@
 name: Verify FLYMPUS review
 
-# Review verification is intentionally email-quiet. Test failures remain visible
-# as warnings and in the step summary, but the workflow itself must not conclude
-# as failed and trigger repeated GitHub failure emails.
+# Complete regression checks remain email-quiet; inspect the explicit summary
+# and actual test outcome before merging. A green icon alone is not approval.
 on:
   workflow_dispatch:
   pull_request:
@@ -11,6 +10,9 @@ on:
 concurrency:
   group: flympus-verify-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -21,92 +23,36 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
-      - name: Training core tests
-        id: training_core
+      - name: Complete application regression suite
+        id: regression
         continue-on-error: true
-        run: node tests/training-core.test.cjs
-      - name: UI render smoke tests
-        id: ui_render
-        continue-on-error: true
-        run: node tests/ui-render.test.cjs && node --test tests/safety-workflow.test.cjs && node --test tests/fleet-operations.test.cjs && node --test tests/home-operations.test.cjs && node --test tests/trainee-evaluation-history.test.cjs && node --test tests/emergency-notes.test.cjs
-      - name: Evaluation voice input tests
-        id: evaluation_voice
-        continue-on-error: true
-        run: node tests/evaluation-voice.test.cjs
-      - name: iOS audio lifecycle tests
-        id: ios_audio
-        continue-on-error: true
-        run: node tests/ios-audio-lifecycle.test.cjs
-      - name: Web Push integration tests
-        id: push
-        continue-on-error: true
-        run: node tests/push-notifications.test.cjs
-      - name: Firebase reserved route runtime tests
-        id: sw_routing
-        continue-on-error: true
-        run: node --test tests/sw-routing.test.cjs
-      - name: Authentication foundation tests
-        id: auth_integration
-        continue-on-error: true
-        run: node tests/auth-integration.test.cjs
-      - name: Authentication lifecycle regression tests
-        id: auth_lifecycle
-        continue-on-error: true
-        run: node --test tests/auth-lifecycle.test.cjs
-      - name: Account switcher session isolation tests
-        id: account_switcher
-        continue-on-error: true
-        run: node --test tests/account-switcher.test.cjs
-      - name: Authentication syntax test
-        id: auth_syntax
-        continue-on-error: true
-        run: node --test tests/auth-syntax.test.cjs
-      - name: Deployment email guard test
-        id: deployment_guard
-        continue-on-error: true
-        run: node tests/deployment-email-guard.test.cjs
-      - name: Pull lifecycle regression tests
-        id: pull_lifecycle
-        continue-on-error: true
-        run: node --test tests/pull-lifecycle.test.cjs
-      - name: First paint and resume theme tests
-        id: theme
-        continue-on-error: true
-        run: node --test tests/theme-controller.test.cjs
-      - name: UID-scoped storage tests
-        id: storage
-        continue-on-error: true
-        run: node tests/storage-scope.test.cjs
-      - name: Hebrew UI and RTL tests
-        id: hebrew_ui
-        continue-on-error: true
-        run: node tests/hebrew-ui.test.cjs
-      - name: Hebrew i18n integration tests
-        id: i18n
-        continue-on-error: true
-        run: node tests/i18n.test.cjs
-
-      - name: Operational analytics regression tests
-        id: reports_dashboard
-        continue-on-error: true
-        run: node --test tests/reports-dashboard.test.cjs
-
+        run: node --test tests/*.test.cjs
       - name: Review verification summary
         if: always()
+        env:
+          REGRESSION_OUTCOME: ${{ steps.regression.outcome }}
         shell: bash
         run: |
-          failed=0
-          for result in             "${{ steps.training_core.outcome }}"             "${{ steps.ui_render.outcome }}"             "${{ steps.evaluation_voice.outcome }}"             "${{ steps.ios_audio.outcome }}"             "${{ steps.push.outcome }}"             "${{ steps.sw_routing.outcome }}"             "${{ steps.auth_integration.outcome }}"             "${{ steps.auth_lifecycle.outcome }}"             "${{ steps.auth_syntax.outcome }}"             "${{ steps.account_switcher.outcome }}"             "${{ steps.reports_dashboard.outcome }}"             "${{ steps.deployment_guard.outcome }}"             "${{ steps.pull_lifecycle.outcome }}"             "${{ steps.theme.outcome }}"             "${{ steps.storage.outcome }}"             "${{ steps.hebrew_ui.outcome }}"             "${{ steps.i18n.outcome }}"; do
-            if [ "$result" != "success" ]; then failed=1; fi
-          done
-
-          if [ "$failed" -eq 1 ]; then
-            echo "::warning::One or more FLYMPUS review checks did not pass. Inspect the failed step annotations before merging."
-            echo "### ⚠️ Review verification needs attention" >> "$GITHUB_STEP_SUMMARY"
-            echo "One or more review checks did not pass. The workflow remains email-quiet by design; inspect the failed step annotations before merging." >> "$GITHUB_STEP_SUMMARY"
-          else
+          if [ "$REGRESSION_OUTCOME" = "success" ]; then
             echo "::notice::All FLYMPUS review checks passed."
-            echo "### ✅ Review verification passed" >> "$GITHUB_STEP_SUMMARY"
-            echo "All FLYMPUS review checks passed." >> "$GITHUB_STEP_SUMMARY"
+            echo "### Review verification: PASSED" >> "$GITHUB_STEP_SUMMARY"
+            echo "All tests passed for $GITHUB_SHA." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::One or more FLYMPUS review checks did not pass."
+            echo "### Review verification: BLOCKED" >> "$GITHUB_STEP_SUMMARY"
+            echo "Actual regression outcome: $REGRESSION_OUTCOME. Inspect the test log before merging." >> "$GITHUB_STEP_SUMMARY"
           fi
+      - name: Read-only production source and public asset audit
+        id: hosting_audit
+        if: startsWith(github.head_ref, 'fix/firebase-safe-release-')
+        continue-on-error: true
+        env:
+          FLYMPUS_AUDIT_DIRECTORY: ${{ runner.temp }}/flympus-hosting-audit
+        run: node scripts/audit-live-hosting.cjs
+      - name: Preserve public Hosting audit evidence
+        if: steps.hosting_audit.outcome == 'success'
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-public-hosting-audit
+          path: ${{ runner.temp }}/flympus-hosting-audit
