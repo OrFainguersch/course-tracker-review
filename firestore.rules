@@ -227,8 +227,91 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    /* Training/course collections stay fail-closed until they are migrated from
-       local device storage and receive UID/course-membership rules. */
+    /* Shared Safety is an explicitly enrolled, UID-verified exception to the
+       device-local training store. The client cannot grant course access. */
+    match /courseSafety/{courseId} {
+      function member() {
+        return activeUser()
+          && exists(/databases/$(database)/documents/courseSafety/$(courseId))
+          && request.auth.uid in get(/databases/$(database)/documents/courseSafety/$(courseId)).data.members.keys();
+      }
+      function manager() {
+        return userManager()
+          || (member()
+            && get(/databases/$(database)/documents/courseSafety/$(courseId)).data.members[request.auth.uid].role == 'COURSE_MANAGER');
+      }
+      function memberUids() {
+        return get(/databases/$(database)/documents/courseSafety/$(courseId)).data.members.keys().toSet();
+      }
+
+      allow get: if userManager() || member();
+      allow list: if userManager();
+      allow create: if userManager()
+        && request.resource.data.keys().hasOnly(['courseId','name','members','updatedAt','updatedBy'])
+        && request.resource.data.courseId is string
+        && request.resource.data.courseId.size() <= 120
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 160
+        && request.resource.data.members is map
+        && request.resource.data.members.size() <= 100
+        && request.auth.uid in request.resource.data.members.keys()
+        && request.resource.data.members[request.auth.uid].role == 'COURSE_MANAGER'
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+      allow update: if userManager()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','members','updatedAt','updatedBy'])
+        && request.resource.data.courseId == resource.data.courseId
+        && request.resource.data.members is map
+        && request.resource.data.members.size() <= 100
+        && request.auth.uid in request.resource.data.members.keys()
+        && request.resource.data.members[request.auth.uid].role == 'COURSE_MANAGER'
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+
+      match /events/{eventId} {
+        function eventKeys() {
+          return ['id','courseId','date','traineeId','instructorId','traineeName',
+            'instructorName','title','severity','classification','details','briefDescription',
+            'findings','lessonsLearned','photos','status','createdBy','createdAt',
+            'requiredAckUids','requiredAckNames','seenBy','ackBy','statusBy','statusAt'];
+        }
+        function ownMark(field) {
+          return member()
+            && request.auth.uid in resource.data.requiredAckUids
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([field])
+            && request.resource.data[field].diff(resource.data[field]).affectedKeys().hasOnly([request.auth.uid])
+            && !(request.auth.uid in resource.data[field].keys())
+            && request.resource.data[field][request.auth.uid] == request.time;
+        }
+        allow get, list: if member() || userManager();
+        allow create: if member()
+          && request.resource.data.keys().hasOnly(eventKeys())
+          && request.resource.data.id == eventId
+          && request.resource.data.courseId == get(/databases/$(database)/documents/courseSafety/$(courseId)).data.courseId
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.status == 'OPEN'
+          && request.resource.data.title is string
+          && request.resource.data.title.size() > 0
+          && request.resource.data.title.size() <= 250
+          && request.resource.data.seenBy == {}
+          && request.resource.data.ackBy == {}
+          && request.resource.data.requiredAckUids is list
+          && request.resource.data.requiredAckUids.toSet() == memberUids();
+        allow update: if ownMark('seenBy')
+          || ownMark('ackBy')
+          || (manager()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','statusBy','statusAt'])
+            && request.resource.data.status in ['OPEN','IN_PROGRESS','RESOLVED']
+            && request.resource.data.statusBy == request.auth.uid
+            && request.resource.data.statusAt == request.time);
+        allow delete: if false;
+      }
+    }
+
+    /* Other training/course collections remain fail-closed until a separate
+       migration from device storage and complete UID/course rules. */
     match /{document=**} {
       allow read, write: if false;
     }
