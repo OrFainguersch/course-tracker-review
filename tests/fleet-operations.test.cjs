@@ -235,6 +235,6 @@ test('Plan shows one standalone form without old board chrome and displays compu
  assert.match(booked,/08:45/);
  assert.match(booked,/data-flight-edit="scheduled"/);
  assert.match(html,/getPlanTimingDefaults\(\)/);
- assert.match(html,/name="briefingMinutes"/);
- assert.match(html,/fleetTimeFlow/);
+ assert.match(html,/fd\.get\('briefingMinutes'\)/);
+ assert.match(html,/data-flight-clock/);
 });
