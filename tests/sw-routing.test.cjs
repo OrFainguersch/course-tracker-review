@@ -37,13 +37,15 @@ test('Safety dependencies are versioned as part of installed application shell',
     assert.ok(source.includes('assets/'+file),file+' should update with the PWA');
 });
 
-test('Home Safety metric is centered and the current automatic Safety panel is bundled',()=>{
+test('Home Safety metric stays centered and manager tracking replaces status banner',()=>{
   const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
   const safety=fs.readFileSync(path.join(__dirname,'..','assets/safety-ui.js'),'utf8');
   assert.doesNotMatch(html,/data-go="safety" style="text-align:start/);
   assert.match(html,/\.homePulseCard\[data-go="safety"\]\{[^}]*text-align:center/);
-  assert.match(html,/assets\/safety-ui\.js\?v=20261008-safety02/);
-  assert.match(safety,/Automatic Safety/);
+  assert.match(html,/assets\/safety-ui\.js\?v=20261008-safety\d+/);
+  assert.match(safety,/function tracking\(\)/);
+  assert.match(html,/data-safety-view="tracking"/);
+  assert.doesNotMatch(html,/safetyUI\.banner\(\)/);
   assert.doesNotMatch(safety,/Device-only Safety/);
   assert.match(html,/flympus-deploy-commit" content="__FLYMPUS_DEPLOY_COMMIT__"/);
 });
