@@ -75,3 +75,44 @@ test('Fleet and daily board are accessible per course from Home; refresh and the
  assert.ok(html.includes('html[data-flympus-theme="dark"]')||fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8').includes('html[data-flympus-theme="dark"]'));
  assert.ok(fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8').includes('@media(max-width:560px)'));
 });
+
+test('Fleet Home uses real aircraft rows and places the inventory table in the primary Home grid',()=>{
+ const vm=require('node:vm');
+ const context={window:{FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=> 'en'}};
+ vm.runInNewContext(ui,context,{filename:'fleet-views.js'});
+ const V=context.window.FLYMPUS_FLEET_VIEW;
+ const fleet=[...add([],'a01','01'),];
+ const down=add(fleet,'a02','02','UNSERVICEABLE','Hydraulic inspection','2026-10-07');
+ const ctx={fleet:down,platformId:'shahak',platformLabel:'Aerostar',courseLabel:'Training',today:'2026-10-08',canWrite:true};
+ const home=V.home(ctx),detail=V.fleet(ctx),empty=V.home({...ctx,fleet:[]});
+ assert.match(home,/fleetHomeTable/);
+ assert.match(home,/01/);
+ assert.match(home,/02/);
+ assert.match(home,/Hydraulic inspection/);
+ assert.match(home,/Unserviceable/);
+ assert.match(home,/1<\/b> \/ 2/);
+ assert.match(empty,/No aircraft registered/);
+ assert.doesNotMatch(empty,/Hydraulic inspection/);
+ assert.match(detail,/fleetInventoryTable/);
+ assert.match(detail,/data-fleet-add/);
+ assert.match(detail,/id="fleetEditorPanel" hidden/);
+ assert.match(detail,/data-fleet-reason-field/);
+ assert.ok(detail.indexOf('fleetInventoryTable')<detail.indexOf('id="fleetEditorPanel"'));
+ const editing=V.fleet({...ctx,editId:'a02'});
+ assert.match(editing,/id="fleetEditorPanel"/);
+ assert.doesNotMatch(editing,/id="fleetEditorPanel" hidden/);
+ const readonly=V.fleet({...ctx,canWrite:false});
+ assert.doesNotMatch(readonly,/data-fleet-edit=/);
+ assert.doesNotMatch(readonly,/fleetAircraftForm/);
+ assert.ok(html.indexOf("FLYMPUS_FLEET_VIEW?.home?.(currentFleetContext())")>html.indexOf("'<section class=\"homePrimaryGrid\">'"));
+ assert.ok(html.indexOf("FLYMPUS_FLEET_VIEW?.home?.(currentFleetContext())")<html.indexOf("<h2>Course Pulse</h2>"));
+ assert.equal((html.match(/FLYMPUS_FLEET_VIEW\?\.home\?\.\(currentFleetContext\(\)\)/g)||[]).length,1);
+ assert.ok(html.includes("homeTaskStrip")&&html.includes('data-go="evaluation"'));
+ assert.ok(html.includes("holder.hidden=!down"),'Unavailable reason is only shown when relevant');
+});
+test('Serviceability history captures optional signed-in operator without changing old data',()=>{
+ let aircraft=M.upsertAircraft([],{tail:'03',status:'SERVICEABLE',since:'2026-10-08'},'shahak',now,()=> 'a03','Instructor A');
+ assert.equal(aircraft[0].history[0].recordedBy,'Instructor A');
+ aircraft=M.upsertAircraft(aircraft,{id:'a03',tail:'03',status:'UNSERVICEABLE',reason:'Inspection',since:'2026-10-08'},'shahak',now,()=> 'unused','Duty Trainee');
+ assert.deepEqual(aircraft[0].history.map(h=>h.recordedBy),['Instructor A','Duty Trainee']);
+});
