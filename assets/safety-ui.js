@@ -14,14 +14,15 @@ function create(ctx){
   function records(){return active()?cloud.records:local()}
   function reset(){try{cloud.unsubscribe?.()}catch{}cloud={courseId:'',mode:'idle',records:[],members:{},unsubscribe:null,error:'',initialized:false}}
   function refresh(){if(['home','safety'].includes(ctx.screen()))ctx.render();else inbox()}
-  let lastRosterCheck=0,rosterChecking=false,unmatchedEmails=[];
+  let lastRosterCheck=0,lastRosterKey='',rosterChecking=false,unmatchedEmails=[];
   async function reconcile(){
-    if(!api()?.manager?.()||rosterChecking||Date.now()-lastRosterCheck<60000)return;
-    lastRosterCheck=Date.now();rosterChecking=true;
     const key=String(ctx.courseId());
+    if(!api()?.manager?.()||rosterChecking||(lastRosterKey===key&&Date.now()-lastRosterCheck<60000))return;
+    lastRosterKey=key;lastRosterCheck=Date.now();rosterChecking=true;
     try{
       const entries=ctx.instructors().filter(p=>p.email).map(p=>({email:p.email,role:ctx.instructorRole?.(p)==='COURSE_MANAGER'?'COURSE_MANAGER':'INSTRUCTOR'}));
-      const preview=await api().rosterPreview(entries);unmatchedEmails=preview.missing;
+      const preview=await api().rosterPreview(entries);
+      unmatchedEmails=[...preview.missing,...ctx.instructors().filter(p=>!String(p.email||'').trim()).map(p=>(p.name||'Instructor')+' (missing email)')];
       const existing=await api().course(key),current=existing?.members||{};
       const desired=[...new Map([...preview.matched,{uid:api().uid(),role:'COURSE_MANAGER'}].map(p=>[p.uid,p])).values()];
       const changed=!existing||!Array.isArray(existing.memberUids)||Object.keys(current).length!==desired.length||desired.some(p=>current[p.uid]?.role!==p.role);
@@ -30,7 +31,7 @@ function create(ctx){
         if(cloud.courseId===key){reset();connect()}
       }
     }catch(err){console.warn('Safety auto enrollment',err);unmatchedEmails=['Firebase instructor sync failed: '+String(err?.message||err)]}
-    finally{rosterChecking=false}
+    finally{rosterChecking=false;if(String(ctx.courseId())!==key){lastRosterCheck=0;void reconcile()}}
   }
   function connect(){
     if(!api()?.ready?.()||ctx.isDuty())return;
