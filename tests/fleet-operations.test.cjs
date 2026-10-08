@@ -116,3 +116,57 @@ test('Serviceability history captures optional signed-in operator without changi
  aircraft=M.upsertAircraft(aircraft,{id:'a03',tail:'03',status:'UNSERVICEABLE',reason:'Inspection',since:'2026-10-08'},'shahak',now,()=> 'unused','Duty Trainee');
  assert.deepEqual(aircraft[0].history.map(h=>h.recordedBy),['Instructor A','Duty Trainee']);
 });
+
+
+test('Fleet names replace old module headings while Serviceability remains the actual aircraft status',()=>{
+ const vm=require('node:vm');
+ const context={window:{FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=> 'en'}};
+ vm.runInNewContext(ui,context,{filename:'fleet-views.js'});
+ const V=context.window.FLYMPUS_FLEET_VIEW;
+ const ctx={fleet:add([],'aircraft-1','01'),flights:[],platformId:'shahak',platformLabel:'Shahak',courseLabel:'EP',today:'2026-10-08',date:'2026-10-08',trainees:[],instructors:[],syllabi:['Circuits'],canWrite:true};
+ assert.match(V.home(ctx),/<h2>Fleet<\/h2>/);
+ assert.match(V.fleet(ctx),/<h1 class="pageTitle">Fleet<\/h1>/);
+ assert.match(V.fleet(ctx),/Serviceability/);
+ assert.doesNotMatch(V.fleet(ctx),/<h1 class="pageTitle">Aircraft Serviceability<\/h1>/);
+ assert.match(V.schedule(ctx),/data-go="fleet"/);
+ assert.match(html,/<h3>Fleet<\/h3>/);
+ assert.doesNotMatch(html,/<h3>Aircraft Serviceability<\/h3>/);
+ assert.ok(html.includes("flympusAccessDenied('Fleet')"));
+});
+test('Plan opens on the date-specific Daily Flight Plan with separate Planned vs Executed tab',()=>{
+ const page=html.slice(html.indexOf('function dailyFlightPlan(){'),html.indexOf('function globalBackControl(){'));
+ assert.match(page,/Daily Flight Plan/);
+ assert.match(page,/Planned vs Executed/);
+ assert.match(page,/data-plan-view="board"/);
+ assert.match(page,/data-plan-view="report"/);
+ assert.match(page,/id="dailyPlanDate"/);
+ assert.ok(page.includes("courseFlightScheduleHtml(date)"));
+ assert.ok(page.includes("view==='board'?dailyFlightPlan():plannedVsExecuted()"));
+ assert.ok(html.includes("case'planned':html=planWorkspace();break"));
+ assert.ok(html.includes("if(state.planView==='report')bindPlanned();else bindDailyFlightBoard()"));
+ assert.ok(html.includes("b.dataset.planToday==='true'?{planView:'board',planDate:todayIsoDate()"));
+ assert.ok(html.includes('data-plan-today="true"'));
+ assert.ok(html.includes('homePlanTitleButton'));
+ assert.ok(!html.includes("courseFlightScheduleHtml(date)+\n '<section class=\"card pvePanel\">"));
+});
+test('Scheduled sortie accepts optional planned duration and notes without changing serviceability constraints',()=>{
+ const fleet=add([],'ac1','01'),allowed={trainees:['trainee1'],instructors:['ip1']};
+ const flight={date:'2026-10-08',time:'11:30',mode:'INSTRUCTED',aircraftId:'ac1',traineeId:'trainee1',instructorId:'ip1',instructorName:'IP',traineeName:'EP',syllabus:'Circuits',estimatedMinutes:'35',note:'Winds and circuit work'};
+ const result=M.upsertSortie([],flight,fleet,'shahak','2026-10-08',allowed,now,()=> 'sortie1');
+ assert.equal(result[0].estimatedMinutes,35);
+ assert.equal(result[0].note,'Winds and circuit work');
+ const amended=M.upsertSortie(result,{...flight,id:'sortie1',estimatedMinutes:'45',note:'Revised'},fleet,'shahak','2026-10-08',allowed,now);
+ assert.equal(amended[0].estimatedMinutes,45);
+ assert.equal(amended[0].note,'Revised');
+ assert.throws(()=>M.upsertSortie([],{...flight,estimatedMinutes:'721'},fleet,'shahak','2026-10-08',allowed),/duration/);
+ assert.throws(()=>M.upsertSortie([],{...flight,estimatedMinutes:'0'},fleet,'shahak','2026-10-08',allowed),/duration/);
+ assert.throws(()=>M.upsertSortie([],{...flight,aircraftId:'unknown'},fleet,'shahak','2026-10-08',allowed),/serviceable/);
+ assert.ok(html.includes("estimatedMinutes:String(fd.get('estimatedMinutes')||'')"));
+ assert.ok(html.includes("note:String(fd.get('note')||'')"));
+});
+test('Duty trainee can open Plan board, while Fleet and Plan restrictions stay scoped',()=>{
+ assert.ok(html.includes("DUTY_ALLOWED_SCREENS=new Set(['home','planned','fleet','preferences'])"));
+ assert.ok(html.includes("if(!flympusCan('operations.flightBoard.write'))return;"));
+ assert.ok(html.includes("if(!flympusCan('operations.daily.write'))"));
+ assert.ok(html.includes("if(!canViewDutyScreen(screen))"));
+});
