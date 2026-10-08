@@ -52,7 +52,9 @@ test('Flight and criterion deviations compare with other active trainees in the 
  assert.ok(!has(unmatched,'a','flight-grade'));
  assert.ok(!has(unmatched,'a','criterion'));
  const boundary=M.attention(ctx({evaluations:[ev('a','2026-10-08',3.6,'Circuits',{bank:3.6}),ev('b','2026-10-08',4,'Circuits',{bank:4})]}));
- assert.ok(!has(boundary,'a','flight-grade'));assert.ok(!has(boundary,'a','criterion'));
+ assert.ok(has(boundary,'a','flight-grade'));assert.ok(has(boundary,'a','criterion'));
+ const aboveBoundary=M.attention(ctx({evaluations:[ev('a','2026-10-08',3.61,'Circuits',{bank:3.61}),ev('b','2026-10-08',4,'Circuits',{bank:4})]}));
+ assert.ok(!has(aboveBoundary,'a','flight-grade'));assert.ok(!has(aboveBoundary,'a','criterion'));
 });
 test('No flight only after 8 full calendar days, based on latest saved Solo or Evaluation',()=>{
  const last=[ev('a','2026-10-01',4)];
