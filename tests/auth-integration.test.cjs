@@ -174,3 +174,11 @@ assert(css.includes('User Management typography + accessibility alignment · 202
   'User Management must share the readable site type scale and respond to Larger Text');
 assert(auth.includes("'Account':'חשבון'")&&auth.includes("'Could not update preferred name':'לא ניתן לעדכן את הכינוי'"),
   'Dynamic auth/admin translations must cover every currently used direct tr() key');
+
+// Account picker permissions come only from the currently verified default Auth.
+const accounts=fs.readFileSync('account-switcher.js','utf8');
+assert(accounts.includes("appSdk.initializeApp(config.firebase,'flympus-account-'+slot.id)"));
+assert(accounts.includes('authSdk.updateCurrentUser(secondary,user)'),'Each account must retain its own isolated Firebase session');
+assert(accounts.includes('lockApp();')&&accounts.includes('showLoading(')&&accounts.includes('authSdk.updateCurrentUser(primary,user)'),'Switching must lock the old user screen before changing primary Auth');
+assert(auth.includes("import('./account-switcher.js?v=20261008-switcher01')")&&auth.includes('accountModule.createAccountSwitcher({'),'Auth runtime must initialize the isolated switcher');
+assert(html.includes('id="accountAddAnother"')&&html.includes('id="personalProfileEmail"'),'Account menu must show Add account and email under the current name');
