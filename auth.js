@@ -144,16 +144,19 @@ api.safetyCloud=Object.freeze({
   ready:safetyCloudReady,
   manager:()=>safetyCloudReady()&&canManageUsers(),
   uid:()=>safetyCloudReady()?String(currentUser.uid):'',
-  async rosterPreview(emails){
+  async rosterPreview(instructors){
     if(!safetyCloudReady()||!canManageUsers())throw new Error('A Training Manager or Administrator must enroll instructors for shared Safety.');
     const users=(await firestoreSdk.getDocs(firestoreSdk.collection(db,'users'))).docs.map(s=>s.data());
     const active=users.filter(u=>u.uid&&u.status==='active');
-    const list=[...new Set((emails||[]).map(e=>String(e||'').trim().toLowerCase()).filter(Boolean))];
+    const list=[...new Map((instructors||[]).map(item=>{
+      const email=String(typeof item==='string'?item:item?.email||'').trim().toLowerCase();
+      return [email,{email,role:item?.role==='COURSE_MANAGER'?'COURSE_MANAGER':'INSTRUCTOR'}];
+    }).filter(([email])=>Boolean(email))).values()];
     const matched=[],missing=[];
-    list.forEach(email=>{
-      const user=active.find(u=>String(u.email||'').toLowerCase()===email);
-      if(!user)missing.push(email);
-      else matched.push({uid:String(user.uid),email,name:String(user.displayName||email),role:'INSTRUCTOR'});
+    list.forEach(person=>{
+      const user=active.find(u=>String(u.email||'').toLowerCase()===person.email);
+      if(!user)missing.push(person.email);
+      else matched.push({uid:String(user.uid),email:person.email,name:String(user.displayName||person.email),role:person.role});
     });
     return {matched,missing};
   },
