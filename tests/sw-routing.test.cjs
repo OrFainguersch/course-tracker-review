@@ -26,3 +26,13 @@ test('Firebase reserved navigation and iframe helpers bypass all worker handling
     }
   }
 });
+
+test('Explicit FLYMPUS refresh navigations bypass the cached page shell',()=>{
+  assert.match(source,/url\.searchParams\.has\('flympusFresh'\)/);
+  assert.match(source,/const latest=await updateNavigationCache\(request\)/);
+  assert.match(source,/return latest\|\|cached\|\|offlineShell\(\)/);
+});
+test('Safety dependencies are versioned as part of installed application shell',()=>{
+  for(const file of ['safety-ui.js','safety-global-inbox.js','safety-workflow.js','app-update-notice.js'])
+    assert.ok(source.includes('assets/'+file),file+' should update with the PWA');
+});
