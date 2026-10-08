@@ -436,3 +436,31 @@ html[data-flympus-theme="dark"] .pvePlanGrid .pveCountField input[readonly]{back
 html.flympusLargeText .pveBoardLinkedNote{font-size:15px!important}
 html.flympusLargeText .fleetFieldHead .fleetInlineFleet{font-size:15px!important}
 @media(max-width:560px){.fleetFieldHead{align-items:flex-start}.pveBoardLinkedNote{line-height:1.6}}
+
+
+/* Keep briefing/debriefing defaults immediately before the flight-entry card. */
+.dailyFlightPlan .fleetSchedulePlain>.fleetTimingSettings{
+  order:0;
+  margin:0 auto;
+  padding:12px 16px;
+  border-radius:13px;
+  background:rgba(234,244,252,.48);
+}
+.dailyFlightPlan .fleetSchedulePlain>.fleetSortieForm{order:1}
+.dailyFlightPlan .fleetSchedulePlain>.fleetBookedFlights{order:2}
+.dailyFlightPlan .fleetTimingSettings summary{
+  min-height:32px;
+  display:list-item;
+  align-content:center;
+  line-height:1.5;
+}
+html[data-flympus-theme="dark"] .dailyFlightPlan .fleetSchedulePlain>.fleetTimingSettings{
+  background:rgba(24,47,68,.66);
+  border-color:#3b5770;
+}
+html.flympusLargeText .dailyFlightPlan .fleetTimingSettings summary{
+  min-height:44px;
+}
+@media(max-width:560px){
+  .dailyFlightPlan .fleetSchedulePlain>.fleetTimingSettings{padding:12px 14px}
+}
