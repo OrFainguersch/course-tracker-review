@@ -1,0 +1,28 @@
+/* Shared Safety workflow: statuses, acknowledgements, and inbox messages. */
+.safetySharedInfo{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;border:1px solid #d3e3f1;background:#f5f9fe;border-radius:12px;margin:10px 0 15px;color:#264966}
+.safetySharedInfo b{display:block;font-size:13px}
+.safetySharedInfo small{display:block;margin-top:4px;line-height:1.5}
+.safetySharedInfo.local{border-color:#e1d4bd;background:#fff9ef;color:#725124}
+.safetySharedInfo.shared{border-color:#b7ddcc;background:#f0fbf5;color:#225941}
+.safetyWorkflowRow{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:12px;border-top:1px solid #e5edf3;padding-top:12px}
+.safetyStatusPill{display:inline-block;font-size:11px;font-weight:850;padding:5px 9px;border-radius:8px;background:#fff0de;color:#805300}
+.safetyStatusPill.in_progress{background:#e3f3ff;color:#0d638d}
+.safetyStatusPill.resolved{background:#e2f8eb;color:#17693b}
+.safetyAckSummary{display:grid;gap:4px;flex:1 1 200px;min-width:0}
+.safetyAckSummary b{font-size:11px;color:inherit}
+.safetyAckSummary small{font-size:10px;line-height:1.5}
+.safetyWorkflowActions{display:flex;gap:7px;flex-wrap:wrap}
+.safetyWorkflowActions button{white-space:normal}
+.safetyNotificationList{display:grid;max-height:340px;overflow:auto}
+.safetyNotificationItem{border:0;border-bottom:1px solid #e5edf4;background:#fff;text-align:start;padding:11px 14px;display:grid;gap:4px;cursor:pointer;font:inherit;width:100%;color:#153b5b}
+.safetyNotificationItem:hover,.safetyNotificationItem:focus-visible{background:#ecf6ff}
+.safetyNotificationItem b{font-size:12px}
+.safetyNotificationItem small{font-size:10px;color:#637c94}
+.safetyNotificationItem em{font-size:10px;color:#b04d1d;font-style:normal;font-weight:850}
+.safetyNotificationItem.seen em{color:#59788f}
+html[data-flympus-theme="dark"] .safetySharedInfo{background:#19364c;border-color:#38566b;color:#dce9f2}
+html[data-flympus-theme="dark"] .safetySharedInfo.local{background:#382d1e;border-color:#68553e}
+html[data-flympus-theme="dark"] .safetyNotificationItem{background:#1b354a;border-color:#39536c;color:#eef4fa}
+html[data-flympus-theme="dark"] .safetyNotificationItem:hover{background:#274760}
+html[data-flympus-theme="dark"] .safetyWorkflowRow{border-color:#3e5568}
+@media(max-width:600px){.safetySharedInfo{align-items:stretch}.safetyWorkflowActions{width:100%}.safetyWorkflowActions button{flex:1}}
