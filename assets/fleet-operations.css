@@ -373,3 +373,6 @@ html.flympusLargeText .fleetTimingSettings summary{font-size:15px!important}
 /* Override earlier last-child column span for the notes field at every width. */
 .dailyFlightPlan .fleetSortieFormGrid .field[data-plan-notes]:last-child{grid-column:1/-1}
 @media(max-width:560px){.dailyFlightPlan .fleetSortieFormGrid .field[data-plan-notes]:last-child{grid-column:1}}
+
+.fleetPlanScopeNote{font-size:11px;line-height:1.5;color:#648097;margin:14px 0 0}
+html[data-flympus-theme="dark"] .fleetPlanScopeNote{color:#b5cee0}
