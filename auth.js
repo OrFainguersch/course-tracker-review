@@ -167,7 +167,7 @@ api.safetyCloud=Object.freeze({
       map[id]={name:String(p.name||p.email||'Instructor').slice(0,100),email:String(p.email||'').toLowerCase().slice(0,200),role:p.role==='COURSE_MANAGER'?'COURSE_MANAGER':'INSTRUCTOR'};
     });
     await firestoreSdk.setDoc(safetyCloudDocument(courseId),{
-      courseId:String(courseId),name:String(courseName||courseId).slice(0,160),members:map,
+      courseId:String(courseId),name:String(courseName||courseId).slice(0,160),members:map,memberUids:Object.keys(map),
       updatedAt:firestoreSdk.serverTimestamp(),updatedBy:me.uid
     },{merge:true});
     return {members:map};
