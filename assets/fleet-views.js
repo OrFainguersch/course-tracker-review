@@ -69,6 +69,7 @@ function schedule(c){
    return field(label+' · '+(key==='briefingMinutes'?L('Briefing','תדריך'):L('Debriefing','תחקיר')),'<input class="input" type="number" name="'+type+'_'+key+'" required min="0" max="180" step="1" value="'+E(M.configuredTimings(settings,type)[key])+'">');
   }).join('')).join('')+'</div><button class="btn secondary small" type="submit">'+L('Save defaults','שמור ברירות מחדל')+'</button><p class="sub">'+L('Applies to newly scheduled flights. Existing flight times stay unchanged.','חל על שיבוצים חדשים; משכי טיסות שכבר נקבעו לא משתנים.')+'</p></form></details>':'';
  return '<div class="fleetSchedule fleetSchedulePlain" id="fleetFlightBoard">'+
+ defaultsBlock+
  (can?'<form id="fleetSortieForm" class="fleetSortieForm"><div class="fleetPlanFormHeading"><div><h2>'+L(current?'Edit scheduled flight':'Add scheduled flight',current?'עריכת טיסה משובצת':'הוספת טיסה מתוכננת')+'</h2><p>'+L('Plan the complete flight, including briefing and debriefing.','תכנן את כל הטיסה, כולל תדריך ותחקיר.')+'</p></div></div>'+
  '<input type="hidden" name="id" value="'+E(current?.id||'')+'"><div class="fleetSortieFormGrid">'+
  field(requiredLabel(L('Takeoff time','שעת המראה')),'<input class="input" name="time" type="time" required value="'+E(depart)+'">')+
@@ -83,7 +84,7 @@ function schedule(c){
  field(L('Planning notes (optional)','הערות לתכנון (לא חובה)'),'<textarea class="input" name="note" rows="2" maxlength="500" placeholder="'+L('Flight planning notes','הערות לתכנון הטיסה')+'">'+E(current?.note||'')+'</textarea>','data-plan-notes')+
  '</div>'+timelineBlock+'<div class="toolbar fleetPlanFormActions"><button class="btn sky" type="submit" '+(!available.length?'disabled':'')+'>'+L(current?'Save changes':'Add to board',current?'שמור שינויים':'הוסף ללוח')+'</button>'+(current?'<button class="btn secondary" type="button" id="fleetFlightCancel">'+L('Cancel','ביטול')+'</button>':'')+'</div>'+
  (available.length?'':'<p class="fleetConflict">'+L('No serviceable aircraft. Update fleet status first.','אין כלים שמישים. יש לעדכן תחילה את לוח השמישויות.')+'</p>')+'<p class="fleetPlanScopeNote" role="note">'+L('Conflict checks currently cover flights saved on this device only. Shared scheduling across devices is not yet enabled.','בדיקות חפיפה כוללות כעת רק טיסות השמורות במכשיר זה. שיבוץ משותף בין מכשירים עדיין אינו פעיל.')+'</p></form>':'')+
- defaultsBlock+booked+'</div>';
+ booked+'</div>';
 }
 
 root.FLYMPUS_FLEET_VIEW=Object.freeze({home,fleet,schedule});
