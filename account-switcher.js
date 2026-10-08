@@ -46,7 +46,10 @@ export function createAccountSwitcher({authSdk,appSdk,config,getPrimaryAuth,getC
       if(tenant)value.setCustomParameters({tenant});
       return value
     }
-    return new authSdk.GoogleAuthProvider()
+    const google=new authSdk.GoogleAuthProvider();
+    /* Always offer the provider account chooser when adding an account. */
+    google.setCustomParameters?.({prompt:'select_account'});
+    return google
   }
   function accountMarkup(list){
     return list.map(slot=>{
