@@ -8684,6 +8684,8 @@ function saveFleetForm(form){
 function fleetSaveError(){toast('Unable to save. Check device storage; no changes were submitted.','error')}
 function bindFleetServiceability(){
  const form=$('#fleetAircraftForm');
+ const syncReason=()=>{const status=$('#fleetStatus'),reason=$('#fleetReason');if(reason&&status)reason.required=status.value==='UNSERVICEABLE'};
+ if($('#fleetStatus'))$('#fleetStatus').onchange=syncReason;syncReason();
  if(form)form.onsubmit=e=>{
   e.preventDefault();if(!flympusCan('fleet.serviceability.write'))return;
   try{if(!saveFleetForm(form)){fleetSaveError();return}state.fleetEditId=null;toast('Aircraft serviceability saved','success');render()}catch(err){toast(err.message||'Unable to save aircraft','error')}
@@ -8703,6 +8705,7 @@ function bindFleetServiceability(){
  });
 }
 function bindDailyFlightBoard(){
+ if(!flympusCan('operations.flightBoard.write'))return;
  const form=$('#fleetSortieForm'),mode=$('#fleetFlightMode');
  if(mode){const refreshMode=()=>{const instructor=form.querySelector('[name="instructorId"]'),holder=form.querySelector('[data-fleet-instructor-field]'),solo=mode.value==='SOLO';if(holder)holder.hidden=solo;if(instructor)instructor.required=!solo};mode.onchange=refreshMode;refreshMode()}
  if(form)form.onsubmit=e=>{
@@ -11415,6 +11418,7 @@ function bindReports(){
  };
 }
 function bindPlanned(){
+ if(!flympusCan('operations.daily.write')){document.querySelectorAll('.pvePage input,.pvePage select,.pvePage textarea,.pvePage button:not([data-go])').forEach(x=>x.disabled=true);return}
  document.querySelectorAll('[data-plan-required-index]').forEach(btn=>btn.onclick=()=>{const label=String(btn.textContent||''),target=label.startsWith('Cancellation')?document.querySelector('.pveCancellationList'):document.querySelector('.pvePlanGrid');target?.scrollIntoView?.({behavior:'smooth',block:'center'});setTimeout(()=>target?.querySelector?.('input,select')?.focus?.({preventScroll:true}),180)});
  const collectCancellations=()=>[...document.querySelectorAll('.pveCancellationReason')].map(el=>({key:String(el.dataset.cancelKey||''),type:String(el.dataset.cancelType||''),reasonId:String(el.value||''),reasonLabel:String(el.selectedOptions?.[0]?.textContent||'').trim()}));
  const persistPlannedDraft=()=>{
