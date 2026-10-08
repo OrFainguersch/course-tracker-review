@@ -106,14 +106,14 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/reports-dashboard.css?v=0767" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
-<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261008-plan04" />
+<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261008-plan05" />
 <link rel="stylesheet" href="./assets/home-operations.css?v=20261008-home02" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
 <script src="./assets/safety-global-inbox.js?v=20261008-safety02"></script>
 <script src="./assets/safety-ui.js?v=20261008-safety03"></script>
-<script src="./assets/fleet-model.js?v=20261008-fleet04"></script>
-<script src="./assets/fleet-views.js?v=20261008-fleet03"></script>
+<script src="./assets/fleet-model.js?v=20261008-plan05"></script>
+<script src="./assets/fleet-views.js?v=20261008-plan05"></script>
 <script src="./assets/home-operations.js?v=20261008-home02"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
@@ -8734,11 +8734,12 @@ window.FLYMPUS_FLEET_LANGUAGE=()=>getFlympusAppPreferences().language;
 function currentFleetPlatform(){return String(currentCourseMeta.platformId||'unspecified')}
 function getFleetAircraft(){return readCourseArray('ct-review-aircraft-serviceability')}
 function getDailyFlightBoard(){return readCourseArray('ct-review-flight-board')}
+function getPlanTimingDefaults(){return readCourseObject('ct-review-plan-timing-defaults')}
 function persistCourseOperations(base,items){
  try{localStorage.setItem(courseScopedKey(base),JSON.stringify(items));return true}catch{return false}
 }
 function currentFleetContext(extra={}){
- return {fleet:getFleetAircraft(),flights:getDailyFlightBoard(),platformId:currentFleetPlatform(),platformLabel:epPlatformLabel(currentCourseMeta.platformId)||currentCourseMeta.platformId||'—',courseLabel:currentCourseMeta.courseName||currentCourseId,today:todayIsoDate(),canWrite:flympusCan('fleet.serviceability.write'),...extra};
+ return {fleet:getFleetAircraft(),flights:getDailyFlightBoard(),platformId:currentFleetPlatform(),platformLabel:epPlatformLabel(currentCourseMeta.platformId)||currentCourseMeta.platformId||'—',courseLabel:currentCourseMeta.courseName||currentCourseId,today:todayIsoDate(),canWrite:flympusCan('fleet.serviceability.write'),timingDefaults:getPlanTimingDefaults(),canConfigureTiming:flympusCan('fleet.serviceability.write'),...extra};
 }
 function fleetScreen(){return window.FLYMPUS_FLEET_VIEW?.fleet?.(currentFleetContext({editId:state.fleetEditId||null}))||flympusAccessDenied('Fleet')}
 function courseFlightScheduleHtml(date){
@@ -8781,15 +8782,58 @@ function bindFleet(){
 function bindDailyFlightBoard(){
  if(!flympusCan('operations.flightBoard.write'))return;
  const form=$('#fleetSortieForm'),mode=$('#fleetFlightMode');
- if(mode){const refreshMode=()=>{const instructor=form.querySelector('[name="instructorId"]'),holder=form.querySelector('[data-fleet-instructor-field]'),solo=mode.value==='SOLO';if(holder)holder.hidden=solo;if(instructor)instructor.required=!solo};mode.onchange=refreshMode;refreshMode()}
+ const model=window.FLYMPUS_FLEET_MODEL;
+ const refreshTimeline=()=>{
+  if(!form)return;
+  const read=n=>form.querySelector('[name="'+n+'"]')?.value||'';
+  const date=state.planDate||todayIsoDate();
+  const flight=model.flightTimeline({date,time:read('time'),mode:read('mode'),estimatedMinutes:read('estimatedMinutes'),briefingMinutes:read('briefingMinutes'),debriefMinutes:read('debriefMinutes')},getPlanTimingDefaults());
+  form.querySelectorAll('[data-flight-clock]').forEach(el=>{el.textContent=flight?.clock[el.dataset.flightClock]||'—'});
+  for(const [name,value] of [['brief','briefingMinutes'],['flight','estimatedMinutes'],['debrief','debriefMinutes']]){
+   const el=form.querySelector('[data-phase="'+name+'"]');if(el)el.style.flexGrow=String(Math.max(12,Number(read(value))||0));
+  }
+ };
+ if(mode&&form){
+  const refreshMode=(resetTiming=false)=>{
+   const instructor=form.querySelector('[name="instructorId"]'),holder=form.querySelector('[data-fleet-instructor-field]'),solo=mode.value==='SOLO';
+   if(holder)holder.hidden=solo;
+   if(instructor)instructor.required=!solo;
+   if(resetTiming){
+    const defaults=model.configuredTimings(getPlanTimingDefaults(),mode.value);
+    for(const key of ['briefingMinutes','debriefMinutes']){
+     const input=form.querySelector('[name="'+key+'"]');if(input)input.value=defaults[key];
+    }
+   }
+   refreshTimeline();
+  };
+  mode.onchange=()=>refreshMode(true);refreshMode();
+  for(const key of ['time','estimatedMinutes','briefingMinutes','debriefMinutes']){
+   form.querySelector('[name="'+key+'"]')?.addEventListener('input',refreshTimeline);
+  }
+ }
+ const defaultsForm=$('#fleetTimingDefaultsForm');
+ if(defaultsForm)defaultsForm.onsubmit=e=>{
+  e.preventDefault();if(!flympusCan('fleet.serviceability.write'))return;
+  const data=new FormData(defaultsForm),defaults={};
+  for(const type of ['INSTRUCTED','SOLO']){
+   defaults[type]={};
+   for(const key of ['briefingMinutes','debriefMinutes']){
+    const raw=String(data.get(type+'_'+key)||'');
+    if(!/^\d+$/.test(raw)||Number(raw)>180){toast('Timing defaults must be between 0 and 180 minutes.','error');return}
+    defaults[type][key]=Number(raw);
+   }
+  }
+  if(!persistCourseOperations('ct-review-plan-timing-defaults',defaults)){fleetSaveError();return}
+  toast('Planning defaults saved for this course on this device','success');render();
+ };
  if(form)form.onsubmit=e=>{
   e.preventDefault();if(!flympusCan('operations.flightBoard.write'))return;
   const fd=new FormData(form),date=state.planDate||normalizeDateValue($('#pveDate')?.value)||todayIsoDate(),traineeId=String(fd.get('traineeId')||''),instructorId=String(fd.get('instructorId')||''),
     t=courseTrainees().find(x=>x.id===traineeId),i=courseInstructors().find(x=>x.id===instructorId);
-  const input={id:String(fd.get('id')||''),date,time:String(fd.get('time')||''),aircraftId:String(fd.get('aircraftId')||''),mode:String(fd.get('mode')||''),traineeId,traineeName:t?.name||'',instructorId,instructorName:i?.name||'',syllabus:String(fd.get('syllabus')||''),estimatedMinutes:String(fd.get('estimatedMinutes')||''),note:String(fd.get('note')||'')};
+  const input={id:String(fd.get('id')||''),date,time:String(fd.get('time')||''),aircraftId:String(fd.get('aircraftId')||''),mode:String(fd.get('mode')||''),traineeId,traineeName:t?.name||'',instructorId,instructorName:i?.name||'',syllabus:String(fd.get('syllabus')||''),estimatedMinutes:String(fd.get('estimatedMinutes')||''),briefingMinutes:String(fd.get('briefingMinutes')||''),debriefMinutes:String(fd.get('debriefMinutes')||''),note:String(fd.get('note')||'')};
   try{
-    const all=window.FLYMPUS_FLEET_MODEL.upsertSortie(getDailyFlightBoard(),input,getFleetAircraft(),currentFleetPlatform(),date,
-    {trainees:courseTrainees().map(x=>x.id),instructors:courseInstructors().map(x=>x.id)},new Date().toISOString(),()=>window.crypto?.randomUUID?.()||('flight_'+Date.now()+'_'+Math.random().toString(36).slice(2)));
+    const all=model.upsertSortie(getDailyFlightBoard(),input,getFleetAircraft(),currentFleetPlatform(),date,
+    {trainees:courseTrainees().map(x=>x.id),instructors:courseInstructors().map(x=>x.id)},new Date().toISOString(),()=>window.crypto?.randomUUID?.()||('flight_'+Date.now()+'_'+Math.random().toString(36).slice(2)),getPlanTimingDefaults());
     if(!persistCourseOperations('ct-review-flight-board',all)){fleetSaveError();return}
     state.flightBoardEditId=null;toast('Flight board updated','success');render();
   }catch(err){toast(err.message||'Unable to schedule flight','error')}
@@ -10955,13 +10999,11 @@ function plannedAttentionCount(){
 }
 function dailyFlightPlan(){
  const date=state.planDate||todayIsoDate();
- const count=getDailyFlightBoard().filter(x=>x.date===date&&x.platformId===currentFleetPlatform()).length;
  return '<div class="dailyFlightPlan">'+
-  '<div class="dailyPlanHeader"><div><h2>Daily Flight Plan</h2><p class="sub">Schedule flights by time, aircraft, trainee, instructor, syllabus and flight type. Only serviceable aircraft may be assigned.</p></div>'+
-  '<div class="field dailyPlanDateField"><label for="dailyPlanDate">Flight date</label><input class="input dateDmy" id="dailyPlanDate" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" value="'+esc(dateInputValue(date))+'" placeholder="DD/MM/YYYY"></div></div>'+
-  '<div class="dailyPlanSummary"><span>'+count+' scheduled '+(count===1?'flight':'flights')+'</span><span>Instructed &amp; Solo</span></div>'+
+  '<div class="dailyPlanHeader"><div class="field dailyPlanDateField"><label for="dailyPlanDate">Flight date *</label><input class="input dateDmy" id="dailyPlanDate" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" value="'+esc(dateInputValue(date))+'" placeholder="DD/MM/YYYY"></div></div>'+
   courseFlightScheduleHtml(date)+'</div>';
 }
+
 function planWorkspace(){
  const view=state.planView==='report'?'report':'board';
  return '<div class="coursePlanWorkspace">'+
