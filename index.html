@@ -6961,7 +6961,7 @@ function isDutyTrainee(){return window.FLYMPUS_AUTH?.isActive?.()===true&&flympu
 const DUTY_ALLOWED_SCREENS=new Set(['home','planned','fleet','preferences']);
 function canViewDutyScreen(screen){
   return !isDutyTrainee()||(DUTY_ALLOWED_SCREENS.has(screen)&&
-    (screen==='preferences'||isDutyTraineeAssigned()));
+    (['home','preferences'].includes(screen)||isDutyTraineeAssigned()));
 }
 function dutyTraineeHome(){
   const name=String(window.FLYMPUS_AUTH?.profile?.displayName||'Duty Trainee');
