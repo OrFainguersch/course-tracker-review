@@ -966,3 +966,8 @@ assert(html.includes('Sign out of this account'),'Signout explanation must repla
  assert.equal(vm.runInContext('state.screen',context),'preferences','Profile menu must lead into restricted personal Settings');
  Object.assign(context.FLYMPUS_AUTH,previous);
 }
+
+assert(html.includes('.topNotificationBtn[hidden],.topNotificationDropdown[hidden]{display:none!important}'),
+  'Duty Trainee hidden notification controls must override the explicit grid display rules');
+assert(html.includes("if(isDutyTrainee())return {evaluation:0,safety:0,exams:0,record:0,planned:isDutyTraineeAssigned()?plannedAttentionCount():0}"),
+  'Duty Trainee attention badge calculation must not read evaluation, safety or exam drafts');
