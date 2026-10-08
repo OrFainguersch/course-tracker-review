@@ -80,7 +80,7 @@ function schedule(c){
  field(L('Debriefing (min)','תחקיר (דקות)')+' *','<input class="input" name="debriefMinutes" type="number" required min="0" max="180" step="1" value="'+E(debrief)+'">')+
  field(L('Planning notes (optional)','הערות לתכנון (לא חובה)'),'<textarea class="input" name="note" rows="2" maxlength="500" placeholder="'+L('Flight planning notes','הערות לתכנון הטיסה')+'">'+E(current?.note||'')+'</textarea>','data-plan-notes')+
  '</div>'+timelineBlock+'<div class="toolbar fleetPlanFormActions"><button class="btn sky" type="submit" '+(!available.length?'disabled':'')+'>'+L(current?'Save changes':'Add to board',current?'שמור שינויים':'הוסף ללוח')+'</button>'+(current?'<button class="btn secondary" type="button" id="fleetFlightCancel">'+L('Cancel','ביטול')+'</button>':'')+'</div>'+
- (available.length?'':'<p class="fleetConflict">'+L('No serviceable aircraft. Update fleet status first.','אין כלים שמישים. יש לעדכן תחילה את לוח השמישויות.')+'</p>')+'</form>':'')+
+ (available.length?'':'<p class="fleetConflict">'+L('No serviceable aircraft. Update fleet status first.','אין כלים שמישים. יש לעדכן תחילה את לוח השמישויות.')+'</p>')+'<p class="fleetPlanScopeNote" role="note">'+L('Conflict checks currently cover flights saved on this device only. Shared scheduling across devices is not yet enabled.','בדיקות חפיפה כוללות כעת רק טיסות השמורות במכשיר זה. שיבוץ משותף בין מכשירים עדיין אינו פעיל.')+'</p></form>':'')+
  defaultsBlock+booked+'</div>';
 }
 
