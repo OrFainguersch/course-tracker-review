@@ -38,7 +38,15 @@ test('Home open-event action and notification center are wired without treating 
   const page=read('index.html'),ui=read('assets/safety-ui.js');
   assert.match(page,/getSafetyRecords\(\)\.filter\(window\.FLYMPUS_SAFETY_WORKFLOW\.isOpen\)/);
   assert.match(page,/data-go="safety"/);
-  assert.match(page,/safetyUI\.banner\(\)/);
+  assert.doesNotMatch(page,/safetyUI\.banner\(\)/);
+  assert.match(page,/data-safety-view="tracking"/);
+  assert.match(page,/safetyUI\.tracking\(\)/);
+  assert.match(page,/safetyUI\.canTrack\(\)/);
+  assert.match(ui,/function tracking\(\)/);
+  assert.match(ui,/Not viewed/);
+  assert.match(ui,/Viewed · not acknowledged/);
+  assert.match(ui,/Acknowledged/);
+  assert.match(ui,/safetyAuditTableWrap/);
   assert.match(page,/safetyUI\.actions\(x\)/);
   assert.match(page,/safetyUI\.submit\(report\)/);
   assert.match(page,/safetyUI\.inbox\(\)/);
