@@ -5896,7 +5896,7 @@ function applyFlympusAppPreferences(input,{themeSelectionChanged=false}={}){
 }
 applyFlympusAppPreferences();
 
-const FLYMPUS_HE_UI={
+const FLYMPUS_HE_UI={'Detailed analytics':'ניתוח מפורט','Course dashboard':'דשבורד הקורס','Reports & Analytics':'דוחות וניתוחים','REPORTS & ANALYTICS':'דוחות וניתוחים','Reporting period':'תקופת דיווח','Group by':'קיבוץ לפי','Daily, weekly and monthly execution, cancellation reasons and operational trends.':'ביצוע לפי יום, שבוע וחודש, סיבות ביטול ומגמות פעילות.','Trainee rankings, evaluations, solo activity and course completion.':'דירוג חניכים, הערכות, טיסות סולו והשלמת הקורס.',
   'Add another account':'הוסף חשבון נוסף','Other accounts':'חשבונות נוספים','Session expired':'פג תוקף ההתחברות','Sign out of this account':'התנתק מחשבון זה',
   'COURSE':'קורס','APP':'אפליקציה','My Courses':'הקורסים שלי','Course Management':'ניהול קורס','Settings':'הגדרות',
   'Roster':'סגל הקורס','Plan':'תכנון','Home':'בית','Forms':'טפסים','Reports':'דוחות',
@@ -10649,7 +10649,7 @@ function getSettings(){try{return JSON.parse(localStorage.getItem('ct-review-set
 
 function plannedVsExecuted(){
  const reports=getDailyReports(),draftWrap=getActivityDraft('planned'),draft=draftWrap?.data||{},date=state.planDate||draft.date||new Date().toISOString().slice(0,10),saved=reports.find(x=>x.date===date)||{},soloDraft=draft.solo||{};
- const executedInstructed=allEvaluationsForAnalytics().filter(x=>x.date===date).length;
+ const executedInstructed=getEvaluations().filter(x=>(x.flightDate||x.date)===date).length;
  const soloRows=getSoloFlights().filter(x=>x.date===date).sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
  const pi=Number(state.planInstructed??draft.plannedInstructed??saved.plannedInstructed??0),ps=Number(state.planSolo??draft.plannedSolo??saved.plannedSolo??0);
  const total=pi+ps,executedSolo=soloRows.length,executed=executedInstructed+executedSolo,instructedCancelled=Math.max(0,pi-executedInstructed),soloCancelled=Math.max(0,ps-executedSolo),cancelled=instructedCancelled+soloCancelled;
@@ -11226,7 +11226,7 @@ function bindPlanned(){
    const plannedInstructed=Number($('#pvePlannedInstructed').value||0),plannedSolo=Number($('#pvePlannedSolo').value||0),plannedTotal=plannedInstructed+plannedSolo,cancellations=collectCancellations(),missing=[...document.querySelectorAll('.pveCancellationReason')].filter(x=>!x.value);
    if(plannedTotal<=0){toast('Set at least one planned flight before submitting the daily report.','error');document.querySelector('.pvePlanGrid')?.scrollIntoView?.({behavior:'smooth',block:'center'});return}
    if(missing.length){missing.forEach(x=>x.classList.add('fieldInvalidControl'));toast('Select a cancellation reason for every non-executed flight before submitting.','error');missing[0].scrollIntoView?.({behavior:'smooth',block:'center'});missing[0].focus?.();return}
-   const arr=getDailyReports(),date=normalizeDateValue($('#pveDate').value),soloCount=getSoloFlights().filter(x=>x.date===date).length,instructedCount=allEvaluationsForAnalytics().filter(x=>x.date===date).length,obj={date,plannedInstructed,plannedSolo,instructedExecuted:instructedCount,soloExecuted:soloCount,cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),savedAt:new Date().toISOString()},next=arr.some(x=>x.date===date)?arr.map(x=>x.date===date?obj:x):[obj,...arr];
+   const arr=getDailyReports(),date=normalizeDateValue($('#pveDate').value),soloCount=getSoloFlights().filter(x=>x.date===date).length,instructedCount=getEvaluations().filter(x=>(x.flightDate||x.date)===date).length,obj={date,plannedInstructed,plannedSolo,instructedExecuted:instructedCount,soloExecuted:soloCount,cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),savedAt:new Date().toISOString()},next=arr.some(x=>x.date===date)?arr.map(x=>x.date===date?obj:x):[obj,...arr];
    saveDailyReports(next);discardActivityDraft('planned');state.soloEditId=null;delete state.planInstructed;delete state.planSolo;toast('Daily report submitted','success');render()
  };
 }
