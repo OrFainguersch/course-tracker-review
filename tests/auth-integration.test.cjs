@@ -84,7 +84,7 @@ assert(css.includes('.flympusRoleGuideCard.user{border-color:#b7dff1')&&css.incl
 assert(auth.includes("window.FLYMPUS_NAVIGATE('user-management')"),
   'Profile shortcut must navigate to the same User Management screen');
 
-assert(rules.includes("data.role in ['user', 'training_manager', 'admin', 'owner']"),
+assert(rules.includes("data.role in ['user', 'duty_trainee', 'training_manager', 'admin', 'owner']"),
   'Firestore must recognize the complete application-role hierarchy');
 assert(rules.includes("request.resource.data.role == 'user'")&&rules.includes("request.resource.data.status == 'pending'"),
   'Uninvited first sign-in must remain pending USER');
@@ -92,9 +92,9 @@ assert(rules.includes("currentUserRecord().data.role in ['owner', 'admin', 'trai
   'User Management must be available to active OWNER, ADMIN and TRAINING_MANAGER accounts');
 assert(rules.includes('match /system/access')&&rules.includes('ownerBootstrap(uid)')&&rules.includes("uid == systemOwnerUid()"),
   'Firestore must preserve the one-time Owner bootstrap and protect the Primary Owner');
-assert(rules.includes("actorRole == 'owner' && nextRole in ['owner', 'admin', 'training_manager', 'user']")&&rules.includes("actorRole == 'admin' && nextRole in ['training_manager', 'user']")&&rules.includes("actorRole == 'training_manager' && nextRole == 'user'"),
+assert(rules.includes("actorRole == 'owner' && nextRole in ['owner', 'admin', 'training_manager', 'duty_trainee', 'user']")&&rules.includes("actorRole == 'admin' && nextRole in ['training_manager', 'duty_trainee', 'user']")&&rules.includes("actorRole == 'training_manager' && nextRole in ['duty_trainee', 'user']"),
   'Role grants must allow each manager to directly appoint every permitted lower tier');
-assert(rules.includes("actorRole == 'admin' && targetRole in ['training_manager', 'user']")&&rules.includes("actorRole == 'training_manager' && targetRole == 'user'"),
+assert(rules.includes("actorRole == 'admin' && targetRole in ['training_manager', 'duty_trainee', 'user']")&&rules.includes("actorRole == 'training_manager' && targetRole in ['duty_trainee', 'user']"),
   'Administrators and Training Managers may manage only lower account tiers');
 assert(rules.includes('allow read, write: if false;'),'Unmigrated training collections must remain fail-closed');
 assert(rules.includes("data.keys().hasOnly"),'User documents must reject unexpected authority-like fields');
@@ -134,7 +134,7 @@ assert(auth.includes("firestoreSdk.collection(db,'invitations')")&&auth.includes
 assert(auth.includes('data-user-invite-form')&&auth.includes('name="email"')&&auth.includes('name="role"'),'User Management must expose Add User email and application-role controls');
 assert(auth.includes("preauthorized?'active':'pending'"),'A pre-authorized email must become active on first sign-in');
 assert(rules.includes('match /invitations/{email}')&&rules.includes('request.auth.token.email.lower() == email'),'Invitation reads must be bound to the signed-in normalized email');
-assert(rules.includes('invitedUserCreate(request.resource.data)')&&rules.includes("data.role in ['user', 'training_manager', 'admin', 'owner']")&&rules.includes('mayGrantInvitationRole(request.resource.data.role)'),
+assert(rules.includes('invitedUserCreate(request.resource.data)')&&rules.includes("data.role in ['user', 'duty_trainee', 'training_manager', 'admin', 'owner']")&&rules.includes('mayGrantInvitationRole(request.resource.data.role)'),
   'First sign-in may inherit only a role that was validly granted through the hierarchy');
 assert(theme.includes('Single theme authority'),'Theme lifecycle must have one authoritative writer');
 assert(theme.includes("window.addEventListener('pageshow'")&&theme.includes('reassertStableTheme()'),'iOS resume must reassert the committed theme without probing transient state');
