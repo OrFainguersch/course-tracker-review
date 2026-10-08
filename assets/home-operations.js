@@ -59,7 +59,7 @@
    const latestGraded=mine.find(e=>number(e.grade)!=null&&number(e.grade)>0);
    if(latestGraded){
     const peers=peersFor(latestGraded,e=>e.grade),baseline=avg(peers);
-    if(baseline!=null&&baseline>0&&number(latestGraded.grade)<baseline*.9&&
+    if(baseline!=null&&baseline>0&&number(latestGraded.grade)<=baseline*.9&&
        uniqueCount(latestGraded,e=>key(e.syllabus)===key(latestGraded.syllabus)&&number(e.grade)>0)>0){
       issues.push({code:'flight-grade',name:String(latestGraded.syllabus),grade:number(latestGraded.grade),average:baseline});
     }
@@ -76,7 +76,7 @@
     const other=evals.filter(e=>String(e.traineeId)!==id&&key(e.syllabus)===key(slot.syllabus)&&number(e.scores?.[slot.criterion])>0);
     if(!other.length)return;
     const theirAvg=avg(other.map(e=>e.scores[slot.criterion])),mineAvg=avg(slot.values);
-    if(theirAvg!=null&&theirAvg>0&&mineAvg!=null&&mineAvg<theirAvg*.9){
+    if(theirAvg!=null&&theirAvg>0&&mineAvg!=null&&mineAvg<=theirAvg*.9){
       issues.push({code:'criterion',name:slot.name,syllabus:slot.syllabus,grade:mineAvg,average:theirAvg});
     }
    });
