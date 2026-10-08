@@ -1190,3 +1190,14 @@ html.flympusLargeText .accountQuickMenu .personalProfileEmail{font-size:14px}
 html.flympusLargeText .accountSwitcherText small,
 html.flympusLargeText .accountSwitcherLabel,
 html.flympusLargeText .accountSwitcherExpired{font-size:12px}
+
+/* Subtle separation between account-management and sign-out actions. */
+.accountQuickMenu .flympusAccountSignoutDivider{
+  height:1px;
+  margin:8px 10px 10px;
+  background:#dfe9f2;
+  pointer-events:none;
+}
+html[data-flympus-theme="dark"] .accountQuickMenu .flympusAccountSignoutDivider{
+  background:#36526a;
+}
