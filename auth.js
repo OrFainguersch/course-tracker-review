@@ -831,17 +831,36 @@ async function boot(){
 }
 /* Account menu identity is the official profile name; nicknames stay for greetings.
    The menu itself is rendered by the main UI, so reconcile after it opens. */
+/* Account identity uses official profile name; nickname is only for greetings.
+   Synchronize dynamically rendered desktop/sidebar/mobile profile widgets. */
 function syncAccountQuickMenu(){
+  const official=String(currentProfile?.displayName||currentUser?.displayName||'').trim();
+  const nickname=String(currentProfile?.preferredName||'').trim();
+  const email=String(currentUser?.email||currentProfile?.email||'').trim();
+  const initials=official.split(/\\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase();
+  const regions=document.querySelectorAll('.accountQuickMenu,.personalProfileIdentity');
+  for(const region of regions){
+    const identity=region.matches('.personalProfileIdentity')?region:region.querySelector('.personalProfileIdentity');
+    if(!identity)continue;
+    const name=identity.querySelector('.personalProfileName,b,strong');
+    if(name&&official&&name.textContent.trim()!==official)name.textContent=official;
+    // Sidebar profile rows may store their visible name in a separate label.
+    const parent=identity.closest('.accountQuickMenu')||identity.parentElement;
+    const avatar=parent?.querySelector('[class*="Avatar"],[class*="avatar"]');
+    if(avatar&&initials&&!avatar.querySelector('img,svg')&&
+       [nickname[0],official[0],initials,'א'].filter(Boolean).includes(avatar.textContent.trim())){
+      if(avatar.textContent.trim()!==initials)avatar.textContent=initials;
+    }
+    const roleLabel=identity.querySelector('small');
+    const role=normalizeAppRole(currentProfile?.role);
+    if(roleLabel&&roleLabel.textContent.trim().toLowerCase()===roleDefinition(role).label.toLowerCase()){
+      roleLabel.dataset.flympusRoleBadge=role;
+    }
+  }
   const menu=document.querySelector('.accountQuickMenu');
   if(!menu)return;
-  const official=String(currentProfile?.displayName||currentUser?.displayName||'').trim();
-  const identity=menu.querySelector('.personalProfileIdentity');
-  const name=identity?.querySelector('b,strong,.personalProfileName');
-  if(official&&name&&name.textContent!==official)name.textContent=official;
-  const signout=[...menu.querySelectorAll('button,[role="menuitem"],a')].find(el=>{
-    const label=String(el.textContent||'').replace(/\\s+/g,' ').trim();
-    return /Sign out of FLYMPUS|התנתקות מ.?FLYMPUS/i.test(label);
-  });
+  const signout=[...menu.querySelectorAll('button,[role="menuitem"],a')].find(el=>
+    /Sign out of FLYMPUS|התנתקות מ.?FLYMPUS/i.test(String(el.textContent||'').trim()));
   if(signout&&!menu.querySelector('.flympusAccountSignoutDivider')){
     const divider=document.createElement('div');
     divider.className='flympusAccountSignoutDivider';
@@ -849,23 +868,17 @@ function syncAccountQuickMenu(){
     signout.before(divider);
   }
 }
-document.addEventListener('click',()=>{
-  queueMicrotask(syncAccountQuickMenu);
-  setTimeout(syncAccountQuickMenu,0);
-},true);
-/* Shared role badge reconciliation across profile, menus and dynamically rendered views.
-   Only explicit badge-like elements with an exact role label are styled;
-   status, safety and evaluation badges are intentionally left untouched. */
+/* Set colors only on actual role-label badges, never the containing text row. */
 const FLYMPUS_ROLE_LABELS=Object.freeze({
-  'owner':'owner','בעלים':'owner',
-  'administrator':'admin','admin':'admin','מנהל מערכת':'admin',
+  owner:'owner','בעלים':'owner',administrator:'admin',admin:'admin','מנהל מערכת':'admin',
   'training manager':'training_manager','מנהל הדרכה':'training_manager',
-  'user':'user','משתמש':'user'
+  user:'user','משתמש':'user'
 });
 let roleBadgeScanPending=false;
 function reconcileRoleBadges(){
   roleBadgeScanPending=false;
-  const selector='[class*="Badge"],[class*="badge"],[class*="Pill"],[class*="pill"],[class*="Tag"],[class*="tag"],.accountQuickMenu .personalProfileIdentity small';
+  syncAccountQuickMenu();
+  const selector='.flympusUserRoleBadge,.flympusUserMeta i.role,.personalProfileIdentity small,[class*="RoleBadge"],[class*="roleBadge"]';
   for(const el of document.querySelectorAll(selector)){
     if(el.children.length)continue;
     const label=String(el.textContent||'').trim().replace(/\\s+/g,' ').toLowerCase();
@@ -879,13 +892,12 @@ function scheduleRoleBadgeScan(){
   roleBadgeScanPending=true;
   requestAnimationFrame(reconcileRoleBadges);
 }
-if(document.body){
+function observeProfileUi(){
   new MutationObserver(scheduleRoleBadgeScan).observe(document.body,{subtree:true,childList:true,characterData:true});
   scheduleRoleBadgeScan();
-}else document.addEventListener('DOMContentLoaded',()=>{
-  new MutationObserver(scheduleRoleBadgeScan).observe(document.body,{subtree:true,childList:true,characterData:true});
-  scheduleRoleBadgeScan();
-},{once:true});
+}
+if(document.body)observeProfileUi();
+else document.addEventListener('DOMContentLoaded',observeProfileUi,{once:true});
 bindBottomNavigationOverlayDismissal();
 bindAuthLanguageSync();
 boot();
