@@ -891,7 +891,7 @@ test('Plan tabs use shared Course Management-style segmented control',()=>{
  assert.match(html,/data-plan-view="approvals"/);
 });
 
-test('Plan's actual Course Management-sized two stages and separate approvals are responsive',()=>{
+test('Plan two stages match Course Management while approvals remain separate',()=>{
  const css=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
  assert.match(html,/class="coursePlanMenu"><nav class="coursePlanTabs"/);
  assert.match(html,/data-plan-view="board"[^\n]*1 · /);
