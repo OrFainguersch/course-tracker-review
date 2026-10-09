@@ -3,7 +3,7 @@
  'use strict';
  function create(env){
   const M=env.model,E=env.escape,L=(en,he)=>env.language()==='he'?he:en;
-  let identity='',watchIndex=null,watchCourse=null,watching='',courses=[],course=null,fleet=null,days=[],requests=[],error='',renderTimer=null,busy=false,generation=0;
+  let identity='',watchIndex=null,watchCourse=null,watching='',courses=[],course=null,fleet=null,days=[],requests=[],error='',renderTimer=null,busy=false,generation=0,requestSnapshotReady=false,focusedRequest='',notifiedEvents=new Set(),submitSounds=new Set();
   const cloud=()=>env.cloud(),uid=()=>cloud()?.uid?.()||'',current=()=>String(env.courseId()),date=()=>env.date(),member=()=>course?.members?.[uid()],enabled=()=>Boolean(member()&&fleet);
   const day=d=>days.find(x=>x.date===d)||M.emptyDay(d);
   const redraw=()=>{if(renderTimer)return;renderTimer=setTimeout(()=>{renderTimer=null;env.render();},40);};
@@ -24,7 +24,7 @@
    if(!env.writeDrafts(all))throw new Error(L('Unable to save flight fields on the device','לא ניתן לשמור את שדות הטיסה במכשיר'));
   }
   function clearPlanForm(id,d=date()){const all=env.readDrafts(),draft=all[d]?.PLAN;if(draft?.forms){delete draft.forms[id||'new'];env.writeDrafts(all);}}
-  function stop(){generation++;rosterSync={key:'',signature:'',checkedAt:0,busy:false,error:'',missing:[]};if(renderTimer)clearTimeout(renderTimer);renderTimer=null;watchIndex?.();watchCourse?.();watchIndex=watchCourse=null;watching=identity='';courses=[];course=fleet=null;days=[];requests=[];error='';env.sharedCourses([]);}
+  function stop(){generation++;requestSnapshotReady=false;focusedRequest='';notifiedEvents.clear();submitSounds.clear();rosterSync={key:'',signature:'',checkedAt:0,busy:false,error:'',missing:[]};if(renderTimer)clearTimeout(renderTimer);renderTimer=null;watchIndex?.();watchCourse?.();watchIndex=watchCourse=null;watching=identity='';courses=[];course=fleet=null;days=[];requests=[];error='';env.sharedCourses([]);}
   let rosterSync={key:'',signature:'',checkedAt:0,busy:false,error:'',missing:[]};
   async function reconcile(){
    const c=cloud(),key=current(),actor=c?.uid?.(),epoch=generation,session=rosterSync;
@@ -67,17 +67,42 @@
    if(c.manager?.()&&!env.isDuty())void reconcile();
    if(!watchIndex){identity=c.uid();const session=identity,epoch=generation;watchIndex=c.watchCourses(rows=>{if(identity!==session||generation!==epoch)return;courses=rows;env.sharedCourses(rows);redraw();},e=>{if(identity!==session||generation!==epoch)return;error=e.message||'Could not load course approvals';redraw();});}
    const id=current(),enrolled=courses.find(x=>x.courseId===id);
-   if(!enrolled){if(watchCourse){watchCourse();watchCourse=null;}watching='';course=fleet=null;days=[];requests=[];return;}
+   if(!enrolled){if(watchCourse){watchCourse();watchCourse=null;}watching='';course=fleet=null;days=[];requests=[];requestSnapshotReady=false;return;}
    if(watching===id)return;
-   watchCourse?.();course=enrolled;fleet=null;days=[];requests=[];watching=id;error='';
+   watchCourse?.();course=enrolled;fleet=null;days=[];requests=[];watching=id;error='';requestSnapshotReady=false;focusedRequest='';
    const session=identity,epoch=generation,guard=fn=>value=>{if(identity===session&&generation===epoch&&watching===id)fn(value);};
    const callbacks={
     course:v=>{course=v;if(!v?.members?.[identity]){watchCourse?.();watchCourse=null;watching='';fleet=null;days=[];requests=[];}redraw();},
     fleet:v=>{fleet=v;redraw();},days:v=>{days=v;if(env.isDuty())env.preserveLegacyDrafts?.(v);redraw();},
-    requests:v=>{requests=v;for(const r of v){let draft=readDraft(r.kind,r.date);if(r.status==='PENDING'&&!draft){const all=env.readDrafts();all[r.date]={...(all[r.date]||{}),[r.kind]:{value:M.clone(r.payload),baseRevision:r.baseRevision,requestId:r.id}};env.writeDrafts(all);draft=readDraft(r.kind,r.date);}if(r.status==='APPROVED'&&draft?.requestId===r.id){if(r.kind==='PLAN'&&Object.keys(draft.forms||{}).length){const all=env.readDrafts();all[r.date].PLAN={value:M.clone(r.payload),baseRevision:r.baseRevision+1,requestId:'',forms:draft.forms};env.writeDrafts(all);}else clearDraft(r.kind,r.date);env.resolved?.(r);}}redraw();},
+    requests:acceptRequests,
     error:e=>{error=e.message||'Could not load shared operations';redraw();}
    };
    watchCourse=c.listen(id,Object.fromEntries(Object.entries(callbacks).map(([key,fn])=>[key,guard(fn)])));
+  }
+  function acceptRequests(rows){
+   const initial=!requestSnapshotReady;requestSnapshotReady=true;
+   for(const r of rows){
+    const decision=env.isDuty()&&r.submittedBy===uid()&&['APPROVED','RETURNED'].includes(r.status);
+    const reviewable=!env.isDuty()&&r.status==='PENDING'&&r.submittedBy!==uid()&&M.canReview(env.profile(),member());
+    if(!decision&&!reviewable)continue;
+    const eventKey=current()+'|'+r.id+'|'+r.status;
+    if(notifiedEvents.has(eventKey))continue;
+    notifiedEvents.add(eventKey);
+    // Initial snapshots are silent. Remember event IDs to suppress tab/reload repeats.
+    const firstNotice=env.rememberApprovalNotice?.(eventKey);
+    if(!initial&&firstNotice!==false)env.notifyApproval?.({id:r.id,kind:r.kind,date:r.date,status:r.status,courseId:current()});
+   }
+   requests=rows;
+   for(const r of rows){
+    let draft=readDraft(r.kind,r.date);
+    if(r.status==='PENDING'&&!draft){const all=env.readDrafts();all[r.date]={...(all[r.date]||{}),[r.kind]:{value:M.clone(r.payload),baseRevision:r.baseRevision,requestId:r.id}};env.writeDrafts(all);draft=readDraft(r.kind,r.date);}
+    if(r.status==='APPROVED'&&draft?.requestId===r.id){
+     if(r.kind==='PLAN'&&Object.keys(draft.forms||{}).length){const all=env.readDrafts();all[r.date].PLAN={value:M.clone(r.payload),baseRevision:r.baseRevision+1,requestId:'',forms:draft.forms};env.writeDrafts(all);}
+     else clearDraft(r.kind,r.date);
+     env.resolved?.(r);
+    }
+   }
+   redraw();
   }
   function workingFlights(d=date()){
    const official=env.officialFlights();if(!env.isDuty())return official;
@@ -127,7 +152,7 @@
     '<h4>'+L('Cancellations','ביטולים')+'</h4>'+table([L('Flight type','סוג טיסה'),L('Quantity','כמות'),L('Reason','סיבה')],p.cancellations.map(x=>[x.type==='Solo'?L('Solo','סולו'):L('Instructed','מודרכת'),x.quantity,x.reasonLabel]));
   }
   function queueMarkup(){
-   if(env.isDuty())return '<section class="card dutyApprovalInbox"><h2>'+L('My requests','הבקשות שלי')+'</h2>'+(requests.length?requests.slice().sort((a,b)=>String(b.submittedAt).localeCompare(String(a.submittedAt))).slice(0,30).map(r=>'<details class="dutyApprovalRequest"><summary><b>'+kindLabel(r.kind)+'</b><span dir="ltr">'+E(r.date)+'</span><span class="dutyApprovalPill '+r.status.toLowerCase()+'">'+label(r.status)+'</span></summary><div class="dutyApprovalRequestBody">'+(r.reviewNote?'<p class="dutyApprovalCorrection">'+E(r.reviewNote)+'</p>':'')+preview(r)+'</div></details>').join(''):'<p class="sub">'+L('No requests sent yet.','עדיין לא נשלחו בקשות.')+'</p>')+'</section>';
+   if(env.isDuty())return '<section class="card dutyApprovalInbox"><h2>'+L('My requests','הבקשות שלי')+'</h2>'+(requests.length?requests.slice().sort((a,b)=>String(b.submittedAt).localeCompare(String(a.submittedAt))).slice(0,30).map(r=>'<details class="dutyApprovalRequest"'+(r.id===focusedRequest?' open':'')+'><summary><b>'+kindLabel(r.kind)+'</b><span dir="ltr">'+E(r.date)+'</span><span class="dutyApprovalPill '+r.status.toLowerCase()+'">'+label(r.status)+'</span></summary><div class="dutyApprovalRequestBody">'+(r.reviewNote?'<p class="dutyApprovalCorrection">'+E(r.reviewNote)+'</p>':'')+preview(r)+'</div></details>').join(''):'<p class="sub">'+L('No requests sent yet.','עדיין לא נשלחו בקשות.')+'</p>')+'</section>';
    if(!enabled()||!M.canReview(env.profile(),member()))return '<section class="card dutyApprovalInbox"><h2>'+L('Pending approvals','ממתינים לאישור')+'</h2><p class="sub">'+L('Assigned instructors can review requests once account synchronization completes.','מדריכים משויכים יכולים לבדוק בקשות לאחר השלמת סנכרון החשבונות.')+'</p></section>';
    const pendingRows=requests.filter(x=>x.status==='PENDING').sort((a,b)=>String(a.submittedAt).localeCompare(String(b.submittedAt)));
    return '<section class="card dutyApprovalInbox"><div class="formTitle"><h2>'+L('Pending instructor approvals','בקשות שממתינות לאישור מדריך')+'</h2><span class="dutyApprovalCount">'+pendingRows.length+'</span></div>'+(pendingRows.length?pendingRows.map(r=>{
@@ -146,6 +171,7 @@
    await cloud().submit(target,kind,d,normalized,draft.baseRevision,id);
    if(current()!==target||uid()!==actor)return id;
    requests=requests.filter(x=>x.id!==id).concat([{id,kind,date:d,payload:normalized,baseRevision:draft.baseRevision,submittedBy:uid(),submittedAt:new Date().toISOString(),status:'PENDING',submittedName:env.profile()?.displayName||''}]);
+   if(!submitSounds.has(id)){submitSounds.add(id);env.submitSound?.();}
    env.toast(L('Sent for instructor approval. Official data is unchanged.','נשלח לאישור מדריך. הנתונים הרשמיים נשארו כפי שהיו.'),'success');redraw();return id;
   }
   function bind(){
@@ -163,16 +189,28 @@
    root.querySelectorAll('[data-duty-rebase]').forEach(b=>b.onclick=()=>action(async()=>{if(!await env.confirm(L('Keep your entries and request approval against the current official version?','לשמור את ההזנות שלך ולבקש אישור ביחס לגרסה הרשמית הנוכחית?'),{title:L('Update approval base','עדכון בסיס האישור'),confirmLabel:L('Keep entries and continue','שמירת ההזנות והמשך')}))return;const all=env.readDrafts(),draft=all[date()]?.[b.dataset.dutyRebase];if(draft){draft.baseRevision=day(date()).revision;draft.requestId='';if(!env.writeDrafts(all))throw new Error('Could not save the approval draft');}}));
    root.querySelectorAll('[data-duty-approve],[data-duty-return]').forEach(b=>b.onclick=()=>action(async()=>{
     const id=b.dataset.dutyApprove||b.dataset.dutyReturn,note=root.querySelector('[data-duty-note="'+id+'"]')?.value||'';
-    b.disabled=true;await cloud().review(current(),id,b.dataset.dutyApprove?'APPROVED':'RETURNED',note);requests=requests.filter(r=>r.id!==id);env.toast(L(b.dataset.dutyApprove?'Approved and submitted':'Returned for correction',b.dataset.dutyApprove?'אושר ונשמר':'הוחזר לתיקון'),'success');
+    b.disabled=true;await cloud().review(current(),id,b.dataset.dutyApprove?'APPROVED':'RETURNED',note);env.submitSound?.();requests=requests.filter(r=>r.id!==id);env.toast(L(b.dataset.dutyApprove?'Approved and submitted':'Returned for correction',b.dataset.dutyApprove?'אושר ונשמר':'הוחזר לתיקון'),'success');
    }));
    if(env.isDuty()&&(!enabled()||pending('PLAN')))root.querySelectorAll('#fleetSortieForm input,#fleetSortieForm select,#fleetSortieForm textarea,#fleetSortieForm button,[data-flight-edit],[data-flight-delete]').forEach(x=>x.disabled=true);
    if(env.isDuty()&&(!enabled()||pending('REPORT')))root.querySelectorAll('.pvePage input,.pvePage select,.pvePage textarea,.pvePage button').forEach(x=>x.disabled=true);
   }
   function count(){return requests.filter(r=>r.status==='PENDING').length;}
-  function notificationMarkup(){const n=count();return n?'<button type="button" class="dutyApprovalNotification" data-duty-open-inbox><b>'+L(env.isDuty()?'My approval requests':'Pending instructor approvals',env.isDuty()?'הבקשות שלי לאישור':'בקשות שממתינות לאישור מדריך')+' · '+n+'</b><small>'+E(course?.name||'')+'</small></button>':'';}
+  function focusRequest(id){focusedRequest=String(id||'');}
+  function notificationMarkup(){
+   if(env.isDuty()){
+    const decisions=requests.filter(r=>r.submittedBy===uid()&&['APPROVED','RETURNED'].includes(r.status))
+     .slice().sort((a,b)=>String(b.reviewedAt||b.submittedAt||'').localeCompare(String(a.reviewedAt||a.submittedAt||''))).slice(0,5);
+    return decisions.map(r=>'<button type="button" class="dutyApprovalNotification" data-duty-open-inbox="'+E(r.id)+'"><b>'+
+     (r.status==='APPROVED'?L('Approved','אושר'):L('Returned for correction','הוחזר לתיקון'))+' · '+kindLabel(r.kind)+
+     '</b><small>'+E(r.date)+' · '+E(course?.name||'')+'</small></button>').join('');
+   }
+   if(!M.canReview(env.profile(),member()))return '';
+   const n=count();return n?'<button type="button" class="dutyApprovalNotification" data-duty-open-inbox><b>'+
+    L('Pending instructor approvals','בקשות שממתינות לאישור מדריך')+' · '+n+'</b><small>'+E(course?.name||'')+'</small></button>':'';
+  }
   return Object.freeze({connect,stop,enabled,context:()=>course?.context||null,courses:()=>courses,memberRole:(id=current())=>courses.find(x=>x.courseId===id)?.members?.[uid()]?.role||'',fleet:()=>fleet,days:()=>days,day,requests:()=>requests,pending,readDraft,saveDraft,workingFlights,workingSolos,saveWorkingSolos,send,
    publish:(kind,d,value,count)=>cloud().publish(current(),kind,d,value,count),saveFleet:value=>cloud().saveFleet(current(),value,fleet?.revision),syncEvaluations:(d,count)=>enabled()?cloud().evaluationCount(current(),d,count):Promise.resolve(),
-   clearDraft,savePlanForm,clearPlanForm,connectionMarkup,statusMarkup,planAction,queueMarkup,notificationMarkup,count,bind});
+   clearDraft,savePlanForm,clearPlanForm,focusRequest,connectionMarkup,statusMarkup,planAction,queueMarkup,notificationMarkup,count,bind});
  }
  return {create};
 });
