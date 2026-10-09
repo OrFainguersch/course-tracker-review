@@ -732,6 +732,10 @@ html.flympusLargeText .fleetTimeFlowTrack .fleetTimeFlowPhaseText{font-size:15px
 .fleetTimeFlowFallbackPhases span{
  border-radius:7px;padding:4px 8px;font-weight:750;font-size:11px
 }
+
+.fleetTimeFlowFallbackPhases [data-phase="brief"]{background:#f8ead1;color:#91661f}
+.fleetTimeFlowFallbackPhases [data-phase="flight"]{background:#dcecff;color:#155b99}
+.fleetTimeFlowFallbackPhases [data-phase="debrief"]{background:#dff3e7;color:#19724a}
 .fleetTimeFlowFallbackClocks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .fleetTimeFlowFallbackClocks>div{
  display:flex;flex-direction:column;gap:4px;
