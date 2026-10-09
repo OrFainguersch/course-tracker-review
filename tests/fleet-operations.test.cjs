@@ -809,8 +809,8 @@ test('Fleet starts from top, editor does not summon keyboard and Plan tabs suppo
  assert.match(html,/panel\.hidden=false;\s*const reveal=/);
  assert.doesNotMatch(html,/panel\.querySelector\('\[name="tail"\]'\)\?\.focus/);
  assert.match(html,/requestAnimationFrame\(\(\)=>requestAnimationFrame\(reveal\)\)/);
- assert.match(styles,/\.coursePlanWorkspace \.coursePlanMenu>\.coursePlanTabs\{\s*flex:1 1 420px;display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
- assert.match(styles,/\.coursePlanWorkspace \.coursePlanApprovalShortcut \.dutyApprovalTabCount\{\s*position:static/);
+ assert.ok(styles.includes('grid-template-columns:repeat(3,minmax(0,1fr))'));
+ assert.ok(styles.includes('.coursePlanMenu>.coursePlanTabs .dutyApprovalTabCount'));
  assert.match(styles,/html\[data-flympus-theme="dark"\] \.coursePlanWorkspace/);
  assert.match(styles,/html\.flympusLargeText \.coursePlanWorkspace/);
  assert.match(styles,/@media\(max-width:375px\)/);
@@ -877,12 +877,12 @@ test('flight drag UI offers accessible touch grips, reduced motion and localized
  assert.match(html,/dutyOperations\.saveDraft\('PLAN'/);
  assert.match(html,/dutyOperations\.publish\('PLAN'/);
  assert.match(html,/Crew conflict: /);
- assert.ok(html.includes('flight-board-drag.js?v=20261009-stable-plan-layout-0812'));
+ assert.ok(html.includes('flight-board-drag.js?v=20261009-plan-single-row-stable-drag-0815'));
 });
 test('Plan tabs use shared Course Management-style segmented control',()=>{
  const css=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
- assert.match(css,/\.coursePlanWorkspace \.coursePlanMenu>\.coursePlanTabs\{\s*flex:1 1 420px;display:grid/);
- assert.match(css,/padding:4px;border:1px solid #d5e3f0;border-radius:13px/);
+ assert.match(css,/\.coursePlanWorkspace \.coursePlanMenu>\.coursePlanTabs\{\s*display:grid/);
+ assert.ok(css.includes('border:1px solid #d5e3f0;border-radius:13px'));
  assert.match(css,/background:#e9f0f6;color:#234f75/);
  assert.match(css,/\.planRequiredTabCount/);
  assert.match(css,/html\[data-flympus-theme="dark"\]/);
@@ -891,16 +891,16 @@ test('Plan tabs use shared Course Management-style segmented control',()=>{
  assert.match(html,/data-plan-view="approvals"/);
 });
 
-test('Plan two stages match Course Management while approvals remain separate',()=>{
+test('Plan stage numbers and Pending approvals share one Course Management-style bar',()=>{
  const css=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
  assert.match(html,/class="coursePlanMenu"><nav class="coursePlanTabs"/);
  assert.match(html,/data-plan-view="board"[^\n]*1 · /);
  assert.match(html,/data-plan-view="report"[^\n]*2 · /);
- assert.match(html,/class="coursePlanApprovalShortcut /);
+ assert.doesNotMatch(html,/class="coursePlanApprovalShortcut /);
  assert.match(html,/data-plan-view="approvals"/);
- assert.match(css,/min-height:43px;padding:9px 20px/);
- assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
- assert.match(css,/coursePlanApprovalShortcut/);
+ assert.match(css,/min-height:43px;box-sizing:border-box;padding:9px 16px/);
+ assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+ assert.ok(css.includes('.coursePlanMenu>.coursePlanTabs .dutyApprovalTabCount'));
  assert.match(css,/@media\(max-width:600px\)/);
  assert.match(css,/html\[data-flympus-theme="dark"\]/);
  assert.match(css,/html\.flympusLargeText/);
@@ -930,6 +930,19 @@ test('Frozen insertion thresholds prevent drag jitter after DOM swaps and suppor
  assert.match(source,/const next=insertionIndex\(y\+scroll\(\),centers\)/);
  assert.doesNotMatch(source,/others\.find\(item=>\{const rect=item\.getBoundingClientRect/);
  assert.match(source,/animation\.finished\.then\(settle,settle\)/);
- assert.match(source,/if\(cancelled\)\{revert\(oldOrder\);return\}/);
+ assert.match(source,/if\(cancelled\)return;/);
  assert.match(source,/if\(targetIndex!==origin\)void commit\(oldOrder\)/);
+});
+
+test('Touch dragging previews card positions without mutating the board until release',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../assets/flight-board-drag.js'),'utf8');
+ const dragSource=source.slice(source.indexOf('const update=()=>{'),source.indexOf('const autoScroll=()=>{'));
+ const dropSource=source.slice(source.indexOf('const end=ev=>{'),source.indexOf('document.addEventListener(\'pointermove\',move'));
+ assert.doesNotMatch(dragSource,/board\.insertBefore/,'Finger movement should only preview');
+ assert.match(dragSource,/peer\.style\.transform=shift/);
+ assert.match(dropSource,/board\.insertBefore\(row,peers\[targetIndex\]\|\|null\)/);
+ assert.match(dropSource,/if\(!cancelled&&targetIndex!==origin\)/);
+ assert.match(dropSource,/if\(cancelled\)return/);
+ assert.match(source,/peer\.style\.transition=reduced\(\)/);
+ assert.match(source,/const centers=rows\(\)\.filter/);
 });

@@ -107,7 +107,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
 <link rel="stylesheet" href="./assets/fleet-operations.css?v=20261009-stable-plan-layout-0812" />
-<link rel="stylesheet" href="./assets/course-operations.css?v=20261009-stable-plan-layout-0812" />
+<link rel="stylesheet" href="./assets/course-operations.css?v=20261009-plan-single-row-stable-drag-0815" />
 <link rel="stylesheet" href="./assets/home-operations.css?v=20261008-home02" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
@@ -116,7 +116,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/fleet-model.js?v=20261009-flight-drag-tabs-0810"></script>
 <script src="./assets/fleet-timeline-layout.js?v=20261009-connected-leaders-0800"></script>
 <script src="./assets/fleet-views.js?v=20261009-flight-drag-tabs-0810"></script>
-<script src="./assets/flight-board-drag.js?v=20261009-stable-plan-layout-0812"></script>
+<script src="./assets/flight-board-drag.js?v=20261009-plan-single-row-stable-drag-0815"></script>
 <script src="./assets/duty-approval-model.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/operations-cloud.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/course-operations.js?v=20261009-plan-fleet-identity-v1"></script>
@@ -160,7 +160,7 @@ html.flympusColdBoot #flympusAuthRoot{
    still owns notification permission/subscription later; this early call only
    makes the next cold launch independent of mobile network latency. */
 try{
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261009-stable-plan-layout-0812',{scope:'./',updateViaCache:'none'}).catch(()=>{})
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261009-plan-single-row-stable-drag-0815',{scope:'./',updateViaCache:'none'}).catch(()=>{})
 }catch{}
 </script>
 <meta name="flympus-deploy-commit" content="__FLYMPUS_DEPLOY_COMMIT__">
@@ -9516,7 +9516,7 @@ function syncNotificationPreferenceControls(){
   });
 }
 
-const FLYMPUS_PUSH_SW='./sw.js?v=20261009-stable-plan-layout-0812',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
+const FLYMPUS_PUSH_SW='./sw.js?v=20261009-plan-single-row-stable-drag-0815',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
 let flympusPushConfigCache=null,flympusPushConfigPromise=null;
 function getFlympusPushUserEnabled(){
   try{
@@ -11325,8 +11325,8 @@ function planWorkspace(){
    '<div class="coursePlanWorkspaceHead"><div class="eyebrow">'+planUiText('COURSE OPERATIONS','תפעול הקורס')+'</div><h1 class="pageTitle">'+planUiText('Plan','תכנון')+'</h1><p class="sub">'+planUiText('Manage daily flight assignments and compare the plan against actual execution.','ניהול שיבוצי טיסות יומיים והשוואה בין התכנון לביצוע בפועל.')+'</p></div>'+
    '<div class="coursePlanMenu"><nav class="coursePlanTabs" aria-label="'+planUiText('Plan stages','שלבי התכנון')+'">'+
    '<button type="button" data-plan-view="board" class="'+(view==='board'?'active':'')+'" aria-pressed="'+(view==='board')+'">1 · '+planUiText('Daily Flight Plan','תוכנית טיסות יומית')+'</button>'+
-   '<button type="button" data-plan-view="report" class="'+(view==='report'?'active':'')+'" aria-pressed="'+(view==='report')+'">2 · '+planUiText('Planned vs Executed','מתוכנן מול בוצע')+(missingCount?'<span class="planRequiredTabCount" data-plan-missing-count="'+missingCount+'" aria-label="'+esc(planUiText('Missing required items: ','פריטי חובה חסרים: ')+missingCount)+'" title="'+esc(planUiText('Missing requirements','דרישות חסרות'))+'">'+missingCount+'</span>':'')+'</button></nav>'+
-   '<button type="button" data-plan-view="approvals" class="coursePlanApprovalShortcut '+(view==='approvals'?'active':'')+'" aria-pressed="'+(view==='approvals')+'">'+planUiText(isDutyTrainee()?'My requests':'Pending approvals',isDutyTrainee()?'הבקשות שלי':'ממתינים לאישור')+'<span class="dutyApprovalTabCount">'+(dutyOperations?.count()||0)+'</span></button></div>'+
+   '<button type="button" data-plan-view="report" class="'+(view==='report'?'active':'')+'" aria-pressed="'+(view==='report')+'">2 · '+planUiText('Planned vs Executed','מתוכנן מול בוצע')+(missingCount?'<span class="planRequiredTabCount" data-plan-missing-count="'+missingCount+'" aria-label="'+esc(planUiText('Missing required items: ','פריטי חובה חסרים: ')+missingCount)+'" title="'+esc(planUiText('Missing requirements','דרישות חסרות'))+'">'+missingCount+'</span>':'')+'</button>'+
+   '<button type="button" data-plan-view="approvals" class="'+(view==='approvals'?'active':'')+'" aria-pressed="'+(view==='approvals')+'">'+planUiText(isDutyTrainee()?'My requests':'Pending approvals',isDutyTrainee()?'הבקשות שלי':'ממתינים לאישור')+'<span class="dutyApprovalTabCount">'+(dutyOperations?.count()||0)+'</span></button></nav></div>'+
    (dutyOperations?.connectionMarkup()||'')+(view==='board'?dailyFlightPlan():view==='approvals'?(dutyOperations?.queueMarkup()||''):(dutyOperations?.statusMarkup('REPORT')||'')+plannedVsExecuted())+'</div>';
 }
 function bindPlanWorkspace(){

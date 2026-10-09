@@ -68,6 +68,9 @@
     const pointer=event.pointerId,offsetY=event.clientY-startRect.top;
     let y=event.clientY,ended=false,raf=0,scrollRaf=0,velocity=0;
     let targetIndex=origin,committed=false;
+    const peers=rows().filter(item=>item!==row);
+    const boardGap=Number.parseFloat(root.getComputedStyle?.(board)?.rowGap)||11;
+    const displacement=startRect.height+boardGap;
     const clone=row.cloneNode(true);
     clone.classList.add('fleetSortieDragGhost');
     clone.querySelectorAll('button').forEach(button=>{button.disabled=true;button.tabIndex=-1});
@@ -92,9 +95,15 @@
      const next=insertionIndex(y+scroll(),centers);
      if(next===targetIndex)return;
      targetIndex=next;
-     const before=positions(),others=rows().filter(item=>item!==row);
-     board.insertBefore(row,others[targetIndex]||null);
-     animate(before);
+     // Preview with transforms only. NEVER mutate DOM order on pointermove:
+     // Safari scroll anchoring / changing row geometry caused flickering.
+     peers.forEach((peer,index)=>{
+      let shift=0;
+      if(targetIndex>origin&&index>=origin&&index<targetIndex)shift=-displacement;
+      if(targetIndex<origin&&index>=targetIndex&&index<origin)shift=displacement;
+      peer.style.transition=reduced()?'none':'transform 180ms cubic-bezier(.22,.8,.24,1)';
+      peer.style.transform=shift?'translateY('+shift+'px)':'';
+     });
     };
     const autoScroll=()=>{
      const height=root.innerHeight||document.documentElement?.clientHeight||0;
@@ -131,12 +140,19 @@
      document.body.classList.remove('flympusReordering');
      try{lift?.cancel?.()}catch{}
      const cancelled=ev.type==='pointercancel';
+     // Only on release does a preview become a real reorder.
+     const beforeDrop=positions();
+     peers.forEach(peer=>{peer.style.transition='none';peer.style.transform=''});
+     if(!cancelled&&targetIndex!==origin){
+      board.insertBefore(row,peers[targetIndex]||null);
+      animate(beforeDrop);
+     }
      const settle=()=>{
       if(committed)return;
       committed=true;clone.remove();
       row.classList.remove('fleetSortieDragSource');
       dragging=false;
-      if(cancelled){revert(oldOrder);return}
+      if(cancelled)return;
       if(targetIndex!==origin)void commit(oldOrder);
      };
      const last=row.getBoundingClientRect();

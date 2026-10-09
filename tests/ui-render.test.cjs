@@ -171,7 +171,7 @@ const missingTab=mockPlanWorkspace(2),completeTab=mockPlanWorkspace(0);
 assert.match(missingTab,/data-plan-view="report"[^>]*>2 · Planned vs Executed<span class="planRequiredTabCount" data-plan-missing-count="2"[^>]*>2<\/span><\/button>/,"Only step 2 Planned vs Executed should identify missing report requirements");
 assert.doesNotMatch(completeTab,/planRequiredTabCount/,"No misleading subtab badge may remain after report completion");
 const planBadgeCss=fs.readFileSync('assets/course-operations.css','utf8');
-assert.match(planBadgeCss,/\.coursePlanMenu>\.coursePlanTabs \.planRequiredTabCount\{\s*position:absolute;top:3px;right:4px;/,'Required badge must sit in the upper-right, not below step 2 text');
+assert.ok(planBadgeCss.includes('.coursePlanMenu>.coursePlanTabs .planRequiredTabCount{')&&planBadgeCss.includes('position:absolute;top:3px;right:3px;left:auto'),'Required badge must be in the top-right of step 2');
 assert.match(planBadgeCss,/background:#d64545;color:#fff;/,'Plan required badge must be red with white text');
 assert.doesNotMatch(planBadgeCss,/\.planRequiredTabCount\{[^}]*background:#fff0cd/,'No yellow background on Plan badge');
 
