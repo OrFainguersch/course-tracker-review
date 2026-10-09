@@ -229,5 +229,5 @@ test('The live entry point wires immutable approval drafts, preserved legacy ent
   for(const asset of ['duty-approval-model.js','operations-cloud.js','course-operations.js','course-operations.css']){
     const url='./assets/'+asset+'?v=20261009-approval-sounds-0795';assert.ok(html.includes(url));assert.ok(worker.includes(url));
   }
-  assert.match(html,/build 0795/);assert.match(worker,/2026-10-09-approval-sounds-0795/);
+  assert.match(html,/build 0796/);assert.match(worker,/2026-10-09-mobile-timeline-0796/);
 });

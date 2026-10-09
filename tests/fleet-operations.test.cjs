@@ -602,12 +602,27 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261009-approval-sounds-0795'],['assets/fleet-operations.css','20261009-timeline-svg-0790']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261009-approval-sounds-0795'],['assets/fleet-operations.css','20261009-mobile-timeline-0796']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-approval-sounds-0795'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261009-approval-sounds-0795/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-mobile-timeline-0796'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261009-mobile-timeline-0796/g)||[]).length,2);
+});
+test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
+ const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ const marker='/* Mobile calculated timeline: preserve proportional widths without squeezing icons or breaking phase names. */';
+ const mobile=stylesheet.slice(stylesheet.indexOf(marker));
+ assert.ok(stylesheet.includes(marker),'Mobile-only override must exist');
+ assert.match(mobile,/@media\(max-width:600px\)\{/);
+ assert.match(mobile,/\.fleetTimeFlowTrack \.fleetTimeFlowIcon\{display:none!important\}/);
+ assert.match(mobile,/\.fleetTimeFlowTrack>span\{container:timeline-phase \/ inline-size\}/);
+ assert.match(mobile,/text-overflow:ellipsis;white-space:nowrap/);
+ assert.match(mobile,/overflow-wrap:normal;word-break:normal;hyphens:none/);
+ assert.match(mobile,/@container timeline-phase \(max-width:45px\)\{/);
+ assert.match(mobile,/\.fleetTimeFlowPhaseText\{opacity:0\}/);
+ assert.match(stylesheet,/\.fleetTimeFlowIcon\{height:20px;width:20px;flex:0 0 auto;display:block/,'Desktop icons must remain');
+ assert.match(stylesheet,/grid-template-columns:minmax\(0,var\(--phase-brief\)\) minmax\(0,var\(--phase-flight\)\) minmax\(0,var\(--phase-debrief\)\)/,'The times stay proportional');
 });
 test('Planned vs Executed date moves to locale start and remains stacked on mobile',()=>{
  assert.match(html,/class="pveDateRow"/);
