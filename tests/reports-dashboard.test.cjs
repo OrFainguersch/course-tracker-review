@@ -117,3 +117,18 @@ test('Planned vs Executed form uses the same submitted execution sources as dash
  assert(html.includes("const executedInstructed=getEvaluations().filter"));
  assert(html.includes("instructedCount=getEvaluations().filter"));
 });
+
+test('grouped cancellation reasons expand per flight and never exceed unexecuted plan',()=>{
+ const plan={date:'2026-09-24',plannedInstructed:1,plannedSolo:4,cancellations:[
+  {key:'INSTRUCTED_1',type:'Instructed',reasonLabel:'Aircraft issue',quantity:1},
+  {key:'SOLO_1',type:'Solo',reasonLabel:'Weather',quantity:3}
+ ]};
+ const data=R.operations({plans:[plan],evaluations:[],soloFlights:[{date:'2026-09-24',id:'solo1'}],today:'2026-09-25'});
+ const day=data.byDate.find(x=>x.date==='2026-09-24');
+ assert.equal(day.planned,5);
+ assert.equal(day.executed,1);
+ assert.equal(day.cancelled,4);
+ assert.deepEqual(Array.from(day.reasons),['Aircraft issue','Weather','Weather','Weather']);
+ const excessive=R.operations({plans:[{...plan,cancellations:[{reasonLabel:'Weather',quantity:99}]}],soloFlights:[{date:'2026-09-24',id:'solo1'}],today:'2026-09-25'}).byDate[0];
+ assert.equal(excessive.cancelled,4,'Reported grouped reasons cannot exceed the unexecuted flights');
+});
