@@ -33,7 +33,7 @@ test('Evaluation matches only unique instructed flights on same date/trainee/ins
 });
 test('Plan suggestion never clobbers drafts, revisions or manually entered actual minutes',()=>{
  assert.match(html,/<select class="input" name="duration" required>/);
- assert.match(html,/evaluationDurationOptions\(edit\?\.duration\)/);
+ assert.match(html,/evaluationDurationOptions\(edit\?\.duration\?\?autoDraft\?\.data\?\.duration\)/);
  assert.match(html,/ensureEvaluationDurationOption\(evalDurationControl,result\.flight\.estimatedMinutes\)/);
  assert.doesNotMatch(html,/Flight duration \(min\)/);
  assert.match(html,/evalDurationManual=Boolean\(state.editingEval\|\|canRestore\)/);
@@ -42,4 +42,12 @@ test('Plan suggestion never clobbers drafts, revisions or manually entered actua
  assert.match(html,/evaluationFlightMatch\(/);
  const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
  assert.match(css,/\.fleetTimeFlowLegend\{display:none!important\}/);
+});
+
+test('Evaluation minute picker preserves non-preset saved and draft durations',()=>{
+ ctx.getFlympusAppPreferences=()=>({language:'en'});
+ const options=ctx.evaluationDurationOptions('42');
+ assert.match(options,/value="42" selected>42 min/);
+ assert.match(options,/value="10" >10 min/);
+ assert.match(options,/value="40" >40 min/);
 });
