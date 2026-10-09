@@ -15,6 +15,40 @@ function assertValid(layout,width){
   }
  }
 }
+
+const intersects=(a,b,box)=>{
+ const left=box.left-4,right=box.left+box.width+4,top=box.top-4,bottom=box.top+29;
+ if(a.x===b.x)return a.x>left&&a.x<right&&Math.max(Math.min(a.y,b.y),top)<Math.min(Math.max(a.y,b.y),bottom);
+ if(a.y===b.y)return a.y>top&&a.y<bottom&&Math.max(Math.min(a.x,b.x),left)<Math.min(Math.max(a.x,b.x),right);
+ return true;
+};
+test('07:50 and 08:00 keep a continuous visible leader that detours around the nearer clock',()=>{
+ const box={left:1,width:62,top:111};
+ const path=T.routeLeader({x:40,y:100},{x:40,y:171},[box],360,200);
+ assert.ok(path&&path.length>=4,'Route must detour rather than mask or disappear');
+ assert.deepEqual(path[0],{x:40,y:100});
+ assert.deepEqual(path.at(-1),{x:40,y:171});
+ for(let i=1;i<path.length;i++){
+  assert.ok(path[i].x===path[i-1].x||path[i].y===path[i-1].y,'Connected orthogonal path');
+  assert.equal(intersects(path[i-1],path[i],box),false,'No segment crosses 07:50');
+ }
+});
+test('RTL and upper lane use the same connected obstacle-avoiding geometry',()=>{
+ for(const [start,end,box] of [
+  [{x:320,y:100},{x:320,y:171},{left:297,width:62,top:111}],
+  [{x:40,y:100},{x:40,y:10},{left:1,width:62,top:48}]
+ ]){
+  const path=T.routeLeader(start,end,[box],360,200);
+  assert.ok(path&&path.length>=4);
+  assert.deepEqual(path[0],start);
+  assert.deepEqual(path.at(-1),end);
+  for(let i=1;i<path.length;i++)assert.equal(intersects(path[i-1],path[i],box),false);
+ }
+});
+test('Dense labels never return a truncated line: route exists or compact fallback is required',()=>{
+ const blocked=[{left:0,width:360,top:45}];
+ assert.equal(T.routeLeader({x:50,y:50},{x:50,y:130},blocked,360,200),null);
+});
 test('Four clock boundaries and a narrow debrief stay legible using shared upper/lower lanes',()=>{
  const layout=T.planTimeline({
   width:360,
@@ -119,23 +153,19 @@ test('Timeline integration renders all four clock keys, external names only, and
  assert.match(engine,/width:max-content/);
  assert.match(engine,/prefsObserver\.observe/);
 
- // A far-lane leader (08:00) must not paint over a near-lane clock (07:50).
- assert.match(engine,/const leaderMaskId='fleetTimeFlowLeaderMask'/);
- assert.match(engine,/mask\.setAttribute\('maskUnits','userSpaceOnUse'\)/);
- assert.match(engine,/mask\.setAttribute\('maskContentUnits','userSpaceOnUse'\)/);
- assert.match(engine,/for\(const item of result\.placements\)\{\s*const exclusion=/);
- assert.match(engine,/exclusion\.setAttribute\('x',shiftX\+item\.left-3\)/);
- assert.match(engine,/exclusion\.setAttribute\('y',placementY\(item\)-3\)/);
- assert.match(engine,/exclusion\.setAttribute\('fill','black'\)/);
- assert.match(engine,/leaderGroup\.setAttribute\('mask','url\(#'\+leaderMaskId\+'\)'\)/);
- assert.match(engine,/leaderGroup\.append\(path\)/);
+ // All paths are fully connected; no opaque mask may sever their strokes.
+ assert.match(engine,/function routeLeader\(/);
+ assert.match(engine,/const routes=result\.placements\.map\(item=>/);
+ assert.match(engine,/route\.map\(\(p,i\)=>\(i\?'L':'M'\)/);
+ assert.doesNotMatch(engine,/leaderGroup\.setAttribute\('mask'/);
+ assert.match(engine,/if\(routes\.some\(route=>!route\)\)/);
 
  assert.match(engine,/document\.fonts\?\.ready/);
  assert.doesNotMatch(engine,/element\.textContent=phaseLabel\(item\.key\)\s*\+.*min/);
  for(const asset of ['fleet-timeline-layout.js','fleet-views.js','fleet-operations.css']){
-  assert.match(html,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-leader-clear-0799'));
-  assert.match(worker,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-leader-clear-0799'));
+  assert.match(html,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-connected-leaders-0800'));
+  assert.match(worker,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-connected-leaders-0800'));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-leader-clear-0799'/);
- assert.match(html,/build 0799/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-connected-leaders-0800'/);
+ assert.match(html,/build 0800/);
 });
