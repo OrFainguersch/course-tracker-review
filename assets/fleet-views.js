@@ -60,12 +60,12 @@ function schedule(c){
  const requiredLabel=label=>label+' <span class="fleetRequired" aria-hidden="true">*</span>';
  const timeMark=(label,key)=>'<div><span>'+label+'</span><strong data-flight-clock="'+key+'">'+E(timeline?.clock[key]||'—')+'</strong></div>';
  const timelineBlock='<div class="fleetTimeFlow" aria-live="polite" style="--phase-brief:'+Number(briefing)+'fr;--phase-flight:'+Number(duration)+'fr;--phase-debrief:'+Number(debrief)+'fr"><div class="fleetTimeFlowHeading"><b>'+L('Calculated timeline','ציר זמנים מחושב')+'</b><small>'+L('Instructor and trainee are reserved from briefing to the end of debriefing','המדריך והחניך משוריינים מתחילת התדריך ועד לסיום התחקיר')+'</small></div>'+
-  '<div class="fleetTimeFlowTrack"><span data-phase="brief">'+L('Briefing','תדריך')+'</span><span data-phase="flight">'+L('Flight','טיסה')+'</span><span data-phase="debrief">'+L('Debrief','תחקיר')+'</span></div>'+
+  '<div class="fleetTimeFlowTrack"><span data-phase="brief">'+L('Briefing','תדריך')+'</span><span data-phase="flight">'+L('Flight','טיסה')+'</span><span data-phase="debrief">'+L('Debriefing','תחקיר')+'</span></div>'+
   '<div class="fleetTimeFlowTimes">'+timeMark(L('Briefing','תדריך'),'briefing')+timeMark(L('Takeoff','המראה'),'takeoff')+timeMark(L('Landing','נחיתה'),'landing')+'</div></div>';
  const booked=flights.length?'<section class="fleetBookedFlights"><div class="fleetBookedHeading"><h3>'+L('Scheduled flights','טיסות משובצות')+'</h3><span>'+flights.length+'</span></div><div class="fleetSorties">'+flights.map(f=>{
   const issue=M.flightIssues(f,c.fleet,c.platformId),t=M.flightTimeline(f,c.timingDefaults);
   return '<div class="fleetSortie '+(issue?'conflict':'')+'"><div class="fleetSortieMain"><b>'+E(f.time)+'</b><b class="fleetSortieTail">'+E(f.tail)+'</b><div><strong>'+E(f.traineeName||f.traineeId)+'</strong><small>'+E(f.syllabus)+' · '+(f.mode==='SOLO'?L('Solo','סולו'):L('Instructed','מודרכת'))+(f.instructorName?' · '+E(f.instructorName):'')+'</small>'+
-  '<small>'+L('Briefing','תדריך')+': '+E(t?.clock.briefing||'—')+' · '+L('Landing','נחיתה')+': '+E(t?.clock.landing||'—')+' · '+L('End','סיום')+': '+E(t?.clock.debrief||'—')+'</small>'+
+  '<small>'+L('Briefing','תדריך')+': '+E(t?.clock.briefing||'—')+' · '+L('Landing','נחיתה')+': '+E(t?.clock.landing||'—')+' · '+L('Debriefing end','סיום תחקיר')+': '+E(t?.clock.debrief||'—')+'</small>'+
   (f.note?'<small class="fleetSortieNote">'+E(f.note)+'</small>':'')+(issue?'<small class="fleetConflict">'+E(issue)+'</small>':'')+'</div></div>'+
   (can?'<div class="fleetSortieActions"><button class="btn secondary small" type="button" data-flight-edit="'+E(f.id)+'">'+L('Edit','ערוך')+'</button><button class="btn danger small" type="button" data-flight-delete="'+E(f.id)+'">'+L('Remove','הסר')+'</button></div>':'')+'</div>';
  }).join('')+'</div></section>':'';
