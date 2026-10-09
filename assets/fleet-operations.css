@@ -702,8 +702,9 @@ html.flympusLargeText .fleetTimeFlowTrack .fleetTimeFlowPhaseText{font-size:15px
  position:absolute!important;inset:auto;width:auto;height:25px;
  min-width:0;max-width:none;display:flex!important;
  justify-content:center;align-items:center;box-sizing:border-box;
- padding:2px 4px;margin:0!important;border-radius:6px;
- background:#fff;color:#163b60;white-space:nowrap;
+ padding:2px 4px;margin:0!important;
+ background:transparent;border:0;box-shadow:none;
+ color:#163b60;white-space:nowrap;
  transform:none!important;direction:ltr
 }
 .fleetTimeFlowAdaptive .fleetTimeFlowClock::before{display:none!important}
@@ -750,7 +751,7 @@ html.flympusLargeText .fleetTimeFlowTrack .fleetTimeFlowPhaseText{font-size:15px
  border-radius:8px;background:#f5faff;color:#153d5e;
  font-size:12px;line-height:1.5;direction:inherit
 }
-html[data-flympus-theme="dark"] .fleetTimeFlowAdaptive .fleetTimeFlowClock{background:#203b50;color:#e2f0ff}
+html[data-flympus-theme="dark"] .fleetTimeFlowAdaptive .fleetTimeFlowClock{background:transparent;color:#e2f0ff}
 html[data-flympus-theme="dark"] .fleetTimeFlowFloatingLabel{background:#214d3c;color:#d4f6df;border-color:#4d9070}
 html[data-flympus-theme="dark"] .fleetTimeFlowFloatingLabel[data-phase="brief"]{background:#53462c;color:#f9e0ab;border-color:#93794b}
 html[data-flympus-theme="dark"] .fleetTimeFlowFloatingLabel[data-phase="flight"]{background:#244969;color:#d3ebff;border-color:#487aa1}
