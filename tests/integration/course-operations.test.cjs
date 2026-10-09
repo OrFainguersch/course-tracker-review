@@ -43,6 +43,7 @@ test('Manager connects verified accounts without exposing emails or replacing of
  await assertSucceeds(apis.manager.enroll(connected,context,preview,fleet,[{date,plan:payload}]));
  const ref=(...p)=>sdk.doc(dbs.duty,'courseOperations',connected,...p);
  const manifest=(await sdk.getDoc(ref())).data();
+ assert.equal((await apis.manager.course(connected)).members.duty_01.role,'DUTY_TRAINEE');
  assert.equal(manifest.members.duty_01.role,'DUTY_TRAINEE');
  assert.equal(Object.hasOwn(manifest.context.trainees[0],'email'),false);
  const before=(await sdk.getDoc(ref('days',date))).data();

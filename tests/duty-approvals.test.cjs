@@ -125,6 +125,42 @@ test('A green Hosting result cannot claim success if approval rules were skipped
   assert.equal(deploymentResult(base).status,'DEPLOYED');
 });
 
+
+test('Automatic manager enrollment seeds once and roster refresh preserves approved records',async t=>{
+ let roster=Model.clone({...context,instructors:[{id:'i1',name:'Instructor',email:'instructor_01@example.invalid'}]});
+ const saved=new Map(),enrollments=[],seeds=[{date,plan:{flights:[flight]}}];let onCourses=()=>{},courseId='auto_course';
+ const cloud={
+  ready:()=>true,uid:()=> 'manager_01',manager:()=>true,
+  watchCourses(cb){onCourses=cb;cb([...saved.values()]);return ()=>{};},
+  async preview(snapshot){return {matched:[{uid:'manager_01',role:'COURSE_MANAGER',name:'Manager',personId:''},{uid:'instructor_01',role:'INSTRUCTOR',name:'Instructor',personId:'i1'},...(snapshot.trainees.some(p=>p.email)?[{uid:'duty_01',role:'DUTY_TRAINEE',name:'Duty',personId:'t1'}]:[])],missing:[]};},
+  async course(key){return saved.get(key)||null;},
+  async enroll(key,snapshot,preview,_fleet,days){enrollments.push({key,days:Model.clone(days)});const prior=saved.get(key);const next={courseId:key,name:snapshot.courseMeta.courseName,context:{...snapshot,instructors:snapshot.instructors.map(({email,...p})=>p),trainees:snapshot.trainees.map(({email,...p})=>p)},members:Object.fromEntries(preview.matched.map(p=>[p.uid,{role:p.role,personId:p.personId||'',name:p.name}])),approvedDays:prior?.approvedDays||Model.clone(days)};saved.set(key,next);onCourses([...saved.values()]);},
+  listen(key,cb){const row=saved.get(key);cb.course(row);cb.fleet(fleet);cb.days(row.approvedDays);cb.requests([]);return ()=>{};}
+ };
+ const controller=UI.create({model:Model,cloud:()=>cloud,profile:()=>({role:'training_manager',status:'active'}),language:()=> 'en',escape:String,isDuty:()=>false,
+  courseId:()=>courseId,date:()=>date,readDrafts:()=>({}),writeDrafts:()=>true,officialFlights:()=>[],officialSolos:()=>[],render:()=>{},
+  root:()=>null,toast:()=>{},sharedCourses:()=>{},autoEnrollmentAllowed:()=>true,contextSnapshot:()=>Model.clone(roster),
+  fleetSnapshot:()=>Model.clone(fleet),seedDays:()=>Model.clone(seeds)});
+ t.after(()=>controller.stop());
+ const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+ controller.connect();await tick();
+ assert.equal(enrollments.length,1);assert.equal(enrollments[0].days.length,1);
+ assert.doesNotMatch(controller.connectionMarkup(),/Connect course/);
+ controller.connect();await tick();assert.equal(enrollments.length,1);
+ roster.trainees[0].email='duty_01@example.invalid';
+ controller.connect();await tick();
+ assert.equal(enrollments.length,2);assert.deepEqual(enrollments[1].days,[]);
+ assert.deepEqual(saved.get(courseId).approvedDays,seeds);
+ assert.equal(saved.get(courseId).members.duty_01.role,'DUTY_TRAINEE');
+});
+
+test('Disconnected Duty Trainees cannot self-enroll or use a manual Connect course action',async t=>{
+ const f=fixture();t.after(()=>f.controller.stop());f.indexCallback([]);
+ assert.equal(f.controller.enabled(),false);
+ assert.doesNotMatch(f.controller.connectionMarkup(),/Connect course/);
+ await assert.rejects(f.controller.send('PLAN',{flights:[flight]}),/Instructor approvals are not ready/);
+});
+
 test('The live entry point wires immutable approval drafts, preserved legacy entries and updated PWA assets',()=>{
   const html=fs.readFileSync('index.html','utf8'),worker=fs.readFileSync('sw.js','utf8');
   assert.match(html,/isDutyTrainee\(\)\?\[\]:readCourseArray\('ct-review-daily-reports'\)/);
@@ -133,7 +169,7 @@ test('The live entry point wires immutable approval drafts, preserved legacy ent
   assert.match(html,/if\(isDutyTrainee\(\)\)\{await dutyOperations.send\('REPORT'/);
   assert.match(html,/data-plan-view="approvals"/);
   for(const asset of ['duty-approval-model.js','operations-cloud.js','course-operations.js','course-operations.css']){
-    const url='./assets/'+asset+'?v=20261009-duty-approval-0792';assert.ok(html.includes(url));assert.ok(worker.includes(url));
+    const url='./assets/'+asset+'?v=20261009-duty-approval-0793';assert.ok(html.includes(url));assert.ok(worker.includes(url));
   }
-  assert.match(html,/build 0792/);assert.match(worker,/2026-10-09-duty-approval-0792/);
+  assert.match(html,/build 0793/);assert.match(worker,/2026-10-09-duty-approval-0792/);
 });

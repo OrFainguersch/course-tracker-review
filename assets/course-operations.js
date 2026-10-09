@@ -24,10 +24,47 @@
    if(!env.writeDrafts(all))throw new Error(L('Unable to save flight fields on the device','לא ניתן לשמור את שדות הטיסה במכשיר'));
   }
   function clearPlanForm(id,d=date()){const all=env.readDrafts(),draft=all[d]?.PLAN;if(draft?.forms){delete draft.forms[id||'new'];env.writeDrafts(all);}}
-  function stop(){generation++;if(renderTimer)clearTimeout(renderTimer);renderTimer=null;watchIndex?.();watchCourse?.();watchIndex=watchCourse=null;watching=identity='';courses=[];course=fleet=null;days=[];requests=[];error='';env.sharedCourses([]);}
+  function stop(){generation++;rosterSync={key:'',signature:'',checkedAt:0,busy:false,error:'',missing:[]};if(renderTimer)clearTimeout(renderTimer);renderTimer=null;watchIndex?.();watchCourse?.();watchIndex=watchCourse=null;watching=identity='';courses=[];course=fleet=null;days=[];requests=[];error='';env.sharedCourses([]);}
+  let rosterSync={key:'',signature:'',checkedAt:0,busy:false,error:'',missing:[]};
+  async function reconcile(){
+   const c=cloud(),key=current(),actor=c?.uid?.(),epoch=generation,session=rosterSync;
+   if(!c?.ready?.()||!c.manager?.()||env.isDuty()||!env.autoEnrollmentAllowed?.()||!key||!actor||session.busy)return;
+   const context=env.contextSnapshot?.();
+   if(!context?.courseMeta?.courseName||!Array.isArray(context.instructors)||!Array.isArray(context.trainees))return;
+   const signature=JSON.stringify(context),now=Date.now();
+   if(session.key===key&&session.signature===signature&&now-session.checkedAt<60000)return;
+   session.key=key;session.signature=signature;session.checkedAt=now;session.busy=true;
+   const currentSession=()=>rosterSync===session&&generation===epoch&&cloud()===c&&c.uid()===actor&&current()===key&&c.manager?.();
+   try{
+    const preview=await c.preview(context);
+    if(!currentSession())return;
+    const existing=await c.course(key);
+    if(!currentSession())return;
+    const members=Object.fromEntries(preview.matched.map(p=>[p.uid,{role:p.role,personId:p.personId||'',name:p.name}]));
+    const clean={...context,trainees:context.trainees.map(({email,...person})=>person),instructors:context.instructors.map(({email,...person})=>person)};
+    const changed=!existing||existing.name!==context.courseMeta.courseName||
+     JSON.stringify(existing.members)!==JSON.stringify(members)||
+     JSON.stringify(existing.context)!==JSON.stringify(clean);
+    if(changed){
+     // Seed only the initial link: re-enrollment cannot overwrite approved days, fleet or requests.
+     const seeds=existing?[]:env.seedDays();
+     if(seeds.length>200)throw new Error('More than 200 existing operation days require controlled migration; nothing was changed');
+     if(!currentSession())return;
+     await c.enroll(key,context,preview,env.fleetSnapshot(),seeds);
+    }
+    if(currentSession()){session.error='';session.missing=preview.missing||[];if(changed)redraw();}
+   }catch(e){
+    if(currentSession()){session.error=String(e?.message||e);session.checkedAt=Date.now()-45000;redraw();}
+   }finally{
+    session.busy=false;
+    // An asynchronous response must never enroll a course switched away from.
+    if(rosterSync===session&&current()!==key&&c.ready?.()&&c.manager?.())void reconcile();
+   }
+  }
   function connect(){
    const c=cloud();if(!c?.ready?.()){if(identity)stop();return;}
    if(identity&&identity!==c.uid())stop();
+   if(c.manager?.()&&!env.isDuty())void reconcile();
    if(!watchIndex){identity=c.uid();const session=identity,epoch=generation;watchIndex=c.watchCourses(rows=>{if(identity!==session||generation!==epoch)return;courses=rows;env.sharedCourses(rows);redraw();},e=>{if(identity!==session||generation!==epoch)return;error=e.message||'Could not load course approvals';redraw();});}
    const id=current(),enrolled=courses.find(x=>x.courseId===id);
    if(!enrolled){if(watchCourse){watchCourse();watchCourse=null;}watching='';course=fleet=null;days=[];requests=[];return;}
@@ -56,11 +93,13 @@
   const kindLabel=kind=>kind==='PLAN'?L('Daily Flight Plan','תוכנית טיסות יומית'):L('Planned vs Executed','מתוכנן מול בוצע');
   const label=status=>({PENDING:L('Pending instructor approval','ממתין לאישור מדריך'),RETURNED:L('Returned for correction','הוחזר לתיקון'),APPROVED:L('Approved','אושר'),WITHDRAWN:L('Withdrawn','בוטל'),DRAFT:L('Draft','טיוטה')})[status]||status;
   function connectionMarkup(){
-   const manager=cloud()?.manager?.();
-   if(enabled())return '<div class="dutyApprovalConnected"><span>'+L('Instructor approvals connected','מסלול אישורי מדריך מחובר')+'</span>'+(manager?'<button class="btn secondary small" type="button" data-duty-connect>'+L('Update course participants','עדכון משתתפי הקורס')+'</button>':'')+'</div>'+(error?'<p class="dutyApprovalError" role="alert">'+E(L('Shared operations could not refresh. Your draft is preserved.','לא ניתן לרענן את התפעול המשותף. הטיוטה שלך נשמרה.'))+'</p>':'');
-   if(!env.isDuty()&&!manager)return '';
-   return '<section class="card dutyApprovalConnect"><div><h2>'+L('Instructor approval','אישור מדריך')+'</h2><p>'+L('Connect this course so Duty Trainees can send plans and reports to assigned instructors. Fleet remains a direct save.','חיבור הקורס מאפשר לחניכים תורנים לשלוח תכנון ודוחות למדריכים המשויכים. Fleet ממשיך להישמר ישירות.')+'</p></div>'+
-    (manager?'<button class="btn secondary" type="button" data-duty-connect>'+L('Connect course','חיבור הקורס')+'</button>':'<p class="dutyApprovalError">'+L('A Training Manager must connect this course before you can send an approval request.','מנהל הדרכה צריך לחבר את הקורס לפני שניתן לשלוח בקשה לאישור.')+'</p>')+(error?'<p role="alert">'+E(error)+'</p>':'')+'</section>';
+   if(enabled())return '';
+   if(!env.isDuty()&&!rosterSync.error)return '';
+   const description=rosterSync.error
+    ?L('Automatic instructor approvals setup failed. Existing course records were not changed. Check roster accounts.','ההגדרה האוטומטית של אישורי המדריך נכשלה. הנתונים הקיימים בקורס לא שונו. יש לבדוק את חשבונות המשתתפים.')
+    :L('Instructor approvals are being prepared automatically. Ask your Training Manager to verify your account if this persists.','אישורי המדריך מוגדרים באופן אוטומטי. אם ההודעה נשארת, יש לפנות למנהל ההדרכה לבדיקת החשבון.');
+   return '<section class="card dutyApprovalConnect" role="status"><div><h2>'+L('Instructor approvals','אישורי מדריך')+'</h2><p>'+description+'</p>'+
+    (rosterSync.error?'<p class="dutyApprovalError" role="alert">'+E(rosterSync.error)+'</p>':'')+'</div></section>';
   }
   function statusMarkup(kind,d=date()){
    if(!enabled())return '';
@@ -89,7 +128,7 @@
   }
   function queueMarkup(){
    if(env.isDuty())return '<section class="card dutyApprovalInbox"><h2>'+L('My requests','הבקשות שלי')+'</h2>'+(requests.length?requests.slice().sort((a,b)=>String(b.submittedAt).localeCompare(String(a.submittedAt))).slice(0,30).map(r=>'<details class="dutyApprovalRequest"><summary><b>'+kindLabel(r.kind)+'</b><span dir="ltr">'+E(r.date)+'</span><span class="dutyApprovalPill '+r.status.toLowerCase()+'">'+label(r.status)+'</span></summary><div class="dutyApprovalRequestBody">'+(r.reviewNote?'<p class="dutyApprovalCorrection">'+E(r.reviewNote)+'</p>':'')+preview(r)+'</div></details>').join(''):'<p class="sub">'+L('No requests sent yet.','עדיין לא נשלחו בקשות.')+'</p>')+'</section>';
-   if(!enabled()||!M.canReview(env.profile(),member()))return '<section class="card dutyApprovalInbox"><h2>'+L('Pending approvals','ממתינים לאישור')+'</h2><p class="sub">'+L('Assigned instructors can review requests after the course is connected.','מדריכים משויכים יכולים לבדוק בקשות לאחר חיבור הקורס.')+'</p></section>';
+   if(!enabled()||!M.canReview(env.profile(),member()))return '<section class="card dutyApprovalInbox"><h2>'+L('Pending approvals','ממתינים לאישור')+'</h2><p class="sub">'+L('Assigned instructors can review requests once account synchronization completes.','מדריכים משויכים יכולים לבדוק בקשות לאחר השלמת סנכרון החשבונות.')+'</p></section>';
    const pendingRows=requests.filter(x=>x.status==='PENDING').sort((a,b)=>String(a.submittedAt).localeCompare(String(b.submittedAt)));
    return '<section class="card dutyApprovalInbox"><div class="formTitle"><h2>'+L('Pending instructor approvals','בקשות שממתינות לאישור מדריך')+'</h2><span class="dutyApprovalCount">'+pendingRows.length+'</span></div>'+(pendingRows.length?pendingRows.map(r=>{
     const stale=r.baseRevision!==day(r.date).revision;
@@ -98,7 +137,7 @@
   }
   async function action(fn){if(busy)return;busy=true;try{await fn();}catch(e){env.toast(env.translateError?.(e.message)||e.message,'error');}finally{busy=false;redraw();}}
   async function send(kind,value){
-   if(!enabled())throw new Error(L('Connect this course before sending an approval request','יש לחבר את הקורס לפני שליחת בקשה לאישור'));
+   if(!enabled())throw new Error(L('Instructor approvals are not ready. Ask your Training Manager to verify your roster account','אישורי המדריך עדיין אינם זמינים. יש לפנות למנהל ההדרכה לבדיקת חשבונך ברשימת המשתתפים'));
    if(pending(kind))throw new Error(L('This request is already waiting for approval','הבקשה כבר ממתינה לאישור'));
    const d=date(),target=current(),actor=uid();let normalized;
    try{normalized=M.payload(kind,value,course.context,fleet,day(d),d);}catch(error){saveDraft(kind,value,d);throw error;}
@@ -117,12 +156,6 @@
     if(saved)for(const [name,value] of Object.entries(saved)){const field=form.elements.namedItem(name);if(field)field.value=value;}
     if(!form.dataset.dutyDraftBound){form.dataset.dutyDraftBound='true';const preserve=()=>{try{savePlanForm(Object.fromEntries(new FormData(form).entries()));}catch(error){env.toast(error.message,'error');}};form.addEventListener('input',preserve);form.addEventListener('change',preserve);}
    }
-   root.querySelectorAll('[data-duty-connect]').forEach(button=>button.onclick=()=>action(async()=>{
-    button.disabled=true;const context=env.contextSnapshot(),preview=await cloud().preview(context);
-    const message=L('Connect this course with the following accounts?','לחבר את הקורס לחשבונות הבאים?')+'\n'+preview.matched.map(p=>p.name+' · '+(p.role==='DUTY_TRAINEE'?L('Duty Trainee','חניך תורן'):L('Instructor','מדריך'))).join('\n')+(preview.missing.length?'\n'+L('Not connected (missing active account): ','לא יחוברו (אין חשבון פעיל): ')+preview.missing.join(', '):'');
-    if(!await env.confirm(message,{title:L('Connect instructor approvals','חיבור אישורי מדריך'),confirmLabel:L('Connect course','חיבור הקורס')}))return;
-    await cloud().enroll(current(),context,preview,env.fleetSnapshot(),env.seedDays());env.toast(L('Course connected for instructor approval','הקורס חובר למסלול אישור מדריך'),'success');
-   }));
    root.querySelectorAll('[data-duty-send-plan]').forEach(b=>b.onclick=()=>action(()=>send('PLAN',{flights:workingFlights().filter(x=>x.date===date())})));
    root.querySelectorAll('#dutyCourseSelect').forEach(select=>select.onchange=()=>env.switchCourse?.(select.value));
    root.querySelectorAll('[data-duty-withdraw]').forEach(b=>b.onclick=()=>action(async()=>{if(!await env.confirm(L('Withdraw this request so you can edit and send it again?','לבטל את הבקשה כדי לערוך ולשלוח מחדש?'),{title:L('Withdraw request?','לבטל בקשה?'),confirmLabel:L('Withdraw and edit','ביטול ועריכה')}))return;await cloud().withdraw(current(),b.dataset.dutyWithdraw);requests=requests.map(r=>r.id===b.dataset.dutyWithdraw?{...r,status:'WITHDRAWN'}:r);}));

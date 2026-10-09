@@ -19,6 +19,7 @@
   const result={
    ready,uid,
    manager:()=>ready()&&['owner','admin','training_manager'].includes(env.profile()?.role),
+   async course(courseId){need();if(!this.manager())throw new Error('Training Manager access is required');return data(await env.sdk().getDoc(doc(courseId)));},
    async preview(context){
     need();if(!this.manager())throw new Error('A Training Manager must connect this course');
     const users=(await env.sdk().getDocs(env.sdk().collection(env.db(),'users'))).docs.map(s=>s.data()).filter(u=>u.status==='active');
@@ -27,7 +28,7 @@
      const email=String(p.email||'').trim().toLowerCase();if(!email)continue;
      const u=users.find(u=>String(u.email||'').toLowerCase()===email);
      if(!u){missing.push(email);continue;}
-     if(kind==='DUTY_TRAINEE'&&u.role!=='duty_trainee')continue;
+     if(kind==='DUTY_TRAINEE'&&u.role!=='duty_trainee'){missing.push(email);continue;}
      if(kind==='INSTRUCTOR'&&u.role==='duty_trainee'){missing.push(email);continue;}
      matched.push({uid:u.uid,personId:p.id,role:kind==='INSTRUCTOR'&&p.role==='COURSE_MANAGER'?'COURSE_MANAGER':kind,name:String(u.displayName||p.name||email).slice(0,120)});
     }

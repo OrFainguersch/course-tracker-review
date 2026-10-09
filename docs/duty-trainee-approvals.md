@@ -29,8 +29,10 @@ requests. Membership is set by a global account manager, using exact roster
 email matches to active accounts. Course participant context exposes names and
 stable roster IDs, without publishing roster email addresses to trainees.
 
-An authorized manager uses Connect course, reviews the account list and then
-connects the course. Existing manager-owned course records form the initial
+As in shared Safety, a verified Training Manager automatically enrolls opened
+courses and reconciles the roster with active Firebase accounts. There is no
+manual Connect course action on the day plan. Incorrect or unmatched accounts
+must be resolved in Course Roster and User Management. Existing manager-owned course records form the initial
 shared baseline; reconnecting updates participants without replacing fleet or
 approved days. Existing device records remain intact. Existing trainee entries
 are preserved as approval drafts, once per date/type. Pending data is never
@@ -55,3 +57,11 @@ step was skipped.
 The backup includes the previous ruleset name and exact source for recovery;
 the stable reference branch preserves the previous application. Deployment
 does not perform a bulk data migration or delete historical records.
+
+## Automatic enrollment (Build 0793)
+
+An authorized manager provisions known courses on opening them and synchronizes
+changes to participant emails and roles. Duty Trainees cannot self-enroll.
+Only the initial link seeds previously stored fleet and official days. Later
+roster syncs leave shared fleet, approved days and pending requests untouched;
+failures never authorize a local Submit or discard drafts.
