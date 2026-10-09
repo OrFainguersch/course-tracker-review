@@ -65,3 +65,12 @@ changes to participant emails and roles. Duty Trainees cannot self-enroll.
 Only the initial link seeds previously stored fleet and official days. Later
 roster syncs leave shared fleet, approved days and pending requests untouched;
 failures never authorize a local Submit or discard drafts.
+
+## Bidirectional in-app alerts (Build 0795)
+
+- After a confirmed Firestore approval-request submission, the Duty Trainee hears the existing Form submission sound.
+- An assigned instructor hears the existing Notification sound when a newly pending request arrives while the app is visible.
+- Following APPROVED or RETURNED, the originating trainee hears the existing Notification sound while the app is visible, and can open the matching My requests entry from the notification bell.
+- Instructor reviews play the existing Form submission sound only after a successful Firestore review transaction.
+- First Firestore snapshots are silent; opaque event IDs are remembered per account to avoid replay after reload or cross-tab synchronization. No sound is emitted after a failed operation.
+- Background/closed-app remote Web Push is unavailable while the delivery server is unconfigured (push-config.json currently disables it).

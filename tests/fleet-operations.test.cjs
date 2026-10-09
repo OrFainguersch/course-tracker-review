@@ -475,7 +475,7 @@ test('Plan contract stays coherent: full-width flight day, settings, required fi
  assert.doesNotMatch(report,/id="pveDate" type="text"/);
  assert.match(report,/boardLinked\?'readonly aria-readonly="true"/);
  assert.match(html,/flightBoardPlanStatus\(date\)/);
- assert.match(html,/FLYMPUS Review · build 0794/);
+ assert.match(html,/FLYMPUS Review · build 0795/);
  lang.value='he';
  assert.match(context.window.FLYMPUS_FLEET_VIEW.schedule({
   fleet:[],flights:[],platformId:'shahak',date:'2026-10-08',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true
@@ -602,12 +602,12 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261009-solo-actual-duration-0794'],['assets/fleet-operations.css','20261009-timeline-svg-0790']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261009-approval-sounds-0795'],['assets/fleet-operations.css','20261009-timeline-svg-0790']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-solo-actual-duration-0794'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261009-solo-actual-duration-0794/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-approval-sounds-0795'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261009-approval-sounds-0795/g)||[]).length,2);
 });
 test('Planned vs Executed date moves to locale start and remains stacked on mobile',()=>{
  assert.match(html,/class="pveDateRow"/);

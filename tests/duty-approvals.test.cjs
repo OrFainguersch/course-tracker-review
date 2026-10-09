@@ -14,12 +14,12 @@ const report={date,plannedInstructed:0,plannedSolo:1,instructedExecuted:0,cancel
 
 function fixture(){
   let uid='duty_01',drafts={},callbacks,indexCallback,idCounter=0,offline=false;
-  const sends=[],fleetWrites=[],resolved=[];
+  const sends=[],fleetWrites=[],resolved=[],sounds=[],alerts=[];
   const course={courseId:'course_01',name:'Course',context,members:{duty_01:{role:'DUTY_TRAINEE',name:'Duty Trainee'}}};
   const cloud={ready:()=>true,uid:()=>uid,manager:()=>false,watchCourses(cb){indexCallback=cb;cb([course]);return ()=>{};},listen(id,cb){callbacks=cb;cb.course(course);cb.fleet(fleet);cb.days([]);cb.requests([]);return ()=>{};},async submit(...args){sends.push(args);if(offline)throw new Error('Network disconnected');return args[5];},async saveFleet(...args){fleetWrites.push(args);}};
-  const controller=UI.create({model:Model,cloud:()=>cloud,profile:()=>({status:'active',role:'duty_trainee'}),language:()=> 'en',escape:v=>String(v),isDuty:()=>true,courseId:()=>course.courseId,date:()=>date,readDrafts:()=>Model.clone(drafts),writeDrafts:value=>{drafts=Model.clone(value);return true;},officialFlights:()=>[],officialSolos:()=>[],render:()=>{},root:()=>null,toast:()=>{},sharedCourses:()=>{},resolved:r=>resolved.push(r),id:()=> 'stable_id_'+(++idCounter)});
+  const controller=UI.create({model:Model,cloud:()=>cloud,profile:()=>({status:'active',role:'duty_trainee'}),language:()=> 'en',escape:v=>String(v),isDuty:()=>true,courseId:()=>course.courseId,date:()=>date,readDrafts:()=>Model.clone(drafts),writeDrafts:value=>{drafts=Model.clone(value);return true;},officialFlights:()=>[],officialSolos:()=>[],render:()=>{},root:()=>null,toast:()=>{},sharedCourses:()=>{},submitSound:()=>sounds.push('submit'),notifyApproval:e=>alerts.push(e),rememberApprovalNotice:()=>true,resolved:r=>resolved.push(r),id:()=> 'stable_id_'+(++idCounter)});
   controller.connect();
-  return {controller,sends,fleetWrites,resolved,get callbacks(){return callbacks;},get indexCallback(){return indexCallback;},setOffline:value=>{offline=value;},switchUid:value=>{uid=value;}};
+  return {controller,sends,fleetWrites,resolved,sounds,alerts,get callbacks(){return callbacks;},get indexCallback(){return indexCallback;},setOffline:value=>{offline=value;},switchUid:value=>{uid=value;}};
 }
 
 test('Pending plans and solo drafts never enter official counts or experience',async t=>{
@@ -161,6 +161,64 @@ test('Disconnected Duty Trainees cannot self-enroll or use a manual Connect cour
  await assert.rejects(f.controller.send('PLAN',{flights:[flight]}),/Instructor approvals are not ready/);
 });
 
+
+test('Duty Trainee confirmation sound fires only after a successful approval request write',async t=>{
+ const f=fixture();t.after(()=>f.controller.stop());
+ f.setOffline(true);await assert.rejects(f.controller.send('PLAN',{flights:[flight]}),/Network disconnected/);
+ assert.equal(f.sounds.length,0);
+ f.setOffline(false);const id=await f.controller.send('PLAN',{flights:[flight]});
+ assert.equal(f.sounds.length,1);
+ assert.equal(f.controller.pending('PLAN').id,id);
+ await assert.rejects(f.controller.send('PLAN',{flights:[flight]}),/already waiting/);
+ assert.equal(f.sounds.length,1);
+});
+
+test('Trainee decisions trigger Notification exactly once and are linked in the bell',async t=>{
+ const f=fixture();t.after(()=>f.controller.stop());
+ const id=await f.controller.send('REPORT',report);
+ const returned={id,kind:'REPORT',date,payload:report,submittedBy:'duty_01',baseRevision:0,status:'RETURNED',reviewedAt:'2026-10-09T15:20:00Z',reviewNote:'Adjust duration'};
+ f.callbacks.requests([returned]);
+ assert.deepEqual(f.alerts.map(x=>x.status),['RETURNED']);
+ f.callbacks.requests([returned]);
+ assert.equal(f.alerts.length,1);
+ assert.match(f.controller.notificationMarkup(),/Returned for correction/);
+ assert.match(f.controller.notificationMarkup(),new RegExp(id));
+ f.controller.focusRequest(id);
+ assert.match(f.controller.queueMarkup(),/dutyApprovalRequest" open/);
+ f.callbacks.requests([{...returned,status:'APPROVED',reviewedAt:'2026-10-09T15:30:00Z'}]);
+ assert.deepEqual(f.alerts.map(x=>x.status),['RETURNED','APPROVED']);
+ assert.match(f.controller.notificationMarkup(),/Approved/);
+});
+
+test('Instructor initial snapshot is silent, new pending request sounds once, and access filtering remains intact',async t=>{
+ let cb, index, uid='instructor_01',alerts=[],sounds=[],accepted=[];
+ const info={courseId:'course_alerts',name:'Course alerts',context,members:{[uid]:{role:'INSTRUCTOR',personId:'i1',name:'Instructor'}}};
+ const cloud={ready:()=>true,uid:()=>uid,manager:()=>false,watchCourses(fn){index=fn;fn([info]);return ()=>{};},
+  listen(_id,fn){cb=fn;fn.course(info);fn.fleet(fleet);fn.days([]);fn.requests([]);return ()=>{};},
+  async review(...args){accepted.push(args);return 'APPROVED';}};
+ const button={dataset:{dutyApprove:'req_a'},disabled:false},root={querySelectorAll(selector){return selector==='[data-duty-approve],[data-duty-return]'?[button]:[];},querySelector(){return {value:''}}};
+ const ui=UI.create({model:Model,cloud:()=>cloud,profile:()=>({status:'active',role:'instructor'}),language:()=> 'en',escape:String,isDuty:()=>false,courseId:()=>info.courseId,date:()=>date,
+  readDrafts:()=>({}),writeDrafts:()=>true,officialFlights:()=>[],officialSolos:()=>[],root:()=>root,render:()=>{},toast:()=>{},sharedCourses:()=>{},
+  submitSound:()=>sounds.push('confirmed'),notifyApproval:e=>alerts.push(e),rememberApprovalNotice:()=>true});
+ t.after(()=>ui.stop());ui.connect();
+ const req={id:'req_a',kind:'PLAN',date,submittedBy:'duty_01',submittedAt:'2026-10-09T15:10:00Z',status:'PENDING',baseRevision:0,payload:{flights:[flight]}};
+ cb.requests([req]);cb.requests([req]);assert.equal(alerts.length,1);assert.equal(alerts[0].status,'PENDING');
+ assert.match(ui.notificationMarkup(),/Pending instructor approvals/);
+ ui.bind();button.onclick();await new Promise(resolve=>setTimeout(resolve,0));
+ assert.equal(accepted.length,1);assert.equal(sounds.length,1);
+});
+
+test('Audio and foreground notification hook respects existing settings and only uses approved Firebase transitions',()=>{
+ const code=fs.readFileSync('index.html','utf8');
+ assert.match(code,/submitSound:playFlympusFormSubmitSound/);
+ assert.match(code,/notifyApproval:announceDutyApproval/);
+ assert.match(code,/rememberApprovalNotice:rememberDutyApprovalNotice/);
+ assert.match(code,/if\(document.visibilityState!=='visible'\)return/);
+ assert.match(code,/playFlympusNotificationSound\(\)/);
+ assert.match(code,/dutyOperations\.focusRequest\(button\.dataset\.dutyOpenInbox/);
+ assert.match(code,/if\(!dutyRestricted\)safetyUI\.inbox\(\);/);
+});
+
 test('The live entry point wires immutable approval drafts, preserved legacy entries and updated PWA assets',()=>{
   const html=fs.readFileSync('index.html','utf8'),worker=fs.readFileSync('sw.js','utf8');
   assert.match(html,/isDutyTrainee\(\)\?\[\]:readCourseArray\('ct-review-daily-reports'\)/);
@@ -169,7 +227,7 @@ test('The live entry point wires immutable approval drafts, preserved legacy ent
   assert.match(html,/if\(isDutyTrainee\(\)\)\{await dutyOperations.send\('REPORT'/);
   assert.match(html,/data-plan-view="approvals"/);
   for(const asset of ['duty-approval-model.js','operations-cloud.js','course-operations.js','course-operations.css']){
-    const url='./assets/'+asset+'?v=20261009-solo-actual-duration-0794';assert.ok(html.includes(url));assert.ok(worker.includes(url));
+    const url='./assets/'+asset+'?v=20261009-approval-sounds-0795';assert.ok(html.includes(url));assert.ok(worker.includes(url));
   }
-  assert.match(html,/build 0794/);assert.match(worker,/2026-10-09-solo-actual-duration-0794/);
+  assert.match(html,/build 0795/);assert.match(worker,/2026-10-09-approval-sounds-0795/);
 });

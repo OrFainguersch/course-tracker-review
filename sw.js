@@ -2,27 +2,27 @@
    - Instant PWA cold-start from a versioned same-origin app-shell cache
    - Background revalidation so deployments replace the cached shell safely
    - Web Push delivery and notification navigation */
-const FLYMPUS_SW_VERSION='2026-10-09-solo-actual-duration-0794';
+const FLYMPUS_SW_VERSION='2026-10-09-approval-sounds-0795';
 const SHELL_CACHE='flympus-shell-'+FLYMPUS_SW_VERSION;
 const DEFAULT_ICON='./assets/flympus-app-icon.webp';
 const SHELL_URLS=[
   './',
   './index.html',
   './auth.css?v=20261008-switcher01',
-  './auth.js?v=20261009-solo-actual-duration-0794',
+  './auth.js?v=20261009-approval-sounds-0795',
   './account-switcher.js?v=20261008-switcher01',
   './assets/reports-dashboard.js?v=0767',
   './assets/reports-dashboard.css?v=0767',
   './assets/fleet-operations.css?v=20261009-timeline-svg-0790',
-  './assets/fleet-model.js?v=20261009-solo-actual-duration-0794',
-  './assets/duty-approval-model.js?v=20261009-solo-actual-duration-0794',
-  './assets/operations-cloud.js?v=20261009-solo-actual-duration-0794',
-  './assets/course-operations.js?v=20261009-solo-actual-duration-0794',
-  './assets/course-operations.css?v=20261009-solo-actual-duration-0794',
-  './assets/fleet-views.js?v=20261009-solo-actual-duration-0794',
+  './assets/fleet-model.js?v=20261009-approval-sounds-0795',
+  './assets/duty-approval-model.js?v=20261009-approval-sounds-0795',
+  './assets/operations-cloud.js?v=20261009-approval-sounds-0795',
+  './assets/course-operations.js?v=20261009-approval-sounds-0795',
+  './assets/course-operations.css?v=20261009-approval-sounds-0795',
+  './assets/fleet-views.js?v=20261009-approval-sounds-0795',
   './assets/safety-workflow.css?v=20261008-safety03',
   './assets/safety-workflow.js?v=20261008-safety01',
-  './assets/safety-global-inbox.js?v=20261009-solo-actual-duration-0794',
+  './assets/safety-global-inbox.js?v=20261009-approval-sounds-0795',
   './assets/safety-ui.js?v=20261008-safety03',
   './assets/app-update-notice.js?v=20261008-update01',
   './firebase-config.js?v=20261004-auth2',
