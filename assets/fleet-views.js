@@ -60,8 +60,8 @@ function schedule(c){
  const requiredLabel=label=>label+' <span class="fleetRequired" aria-hidden="true">*</span>';
  const iconSvg=content=>'<svg class="fleetTimeFlowIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+content+'</svg>';
  const iconBrief=iconSvg('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>');
- const iconFlight='<span class="fleetTimeFlowIcon fleetTimeFlowFlightIcon" aria-hidden="true">✈</span>';
- const iconDebrief=iconSvg('<path d="M8 4.5h8"/><path d="M9 3h6v3H9z"/><rect x="5" y="5.5" width="14" height="15" rx="2"/><path d="M8 10h8M8 13.5h8M8 17h6"/>');
+ const iconFlight=iconSvg('<path d="M17.5 21v-8.2l3.7-2.2a1.1 1.1 0 0 0 .5-.95v-1.2a.8.8 0 0 0-1.1-.74l-3.1 1.25V4.4a2.5 2.5 0 0 0-5 0v4.56L9.4 7.71a.8.8 0 0 0-1.1.74v1.2a1.1 1.1 0 0 0 .5.95l3.7 2.2V21l-2.2 1.1h9.4z" transform="translate(-3.5 -1) scale(.92)"/>');
+ const iconDebrief=iconSvg('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="m9 13 2.2 2.2L16 10.5"/>');
  const phase=(key,label,icon)=>'<span data-phase="'+key+'"><span class="fleetTimeFlowPhaseLabel">'+icon+'<span class="fleetTimeFlowPhaseText">'+label+'</span></span></span>';
  const timeMark=(key,label,part)=>'<div class="fleetTimeFlowClock fleetTimeFlowClock'+part+'" role="group" aria-label="'+E(label)+'"><span class="fleetTimeFlowClockA11y">'+E(label)+'</span><strong dir="ltr" data-flight-clock="'+key+'">'+E(timeline?.clock[key]||'—')+'</strong></div>';
  const timelineBlock='<div class="fleetTimeFlow" aria-live="polite" style="--phase-brief:'+Math.max(0,Number(briefing))+'fr;--phase-flight:'+Math.max(0,Number(duration))+'fr;--phase-debrief:'+Math.max(0,Number(debrief))+'fr"><div class="fleetTimeFlowHeading"><b>'+L('Calculated timeline','ציר זמנים מחושב')+'</b><small>'+L('Instructor and trainee are reserved from briefing to the end of debriefing','המדריך והחניך משוריינים מתחילת התדריך ועד לסיום התחקיר')+'</small></div>'+
