@@ -589,14 +589,14 @@ html.flympusLargeText .fleetTimingModeHeader strong{font-size:18px}
 .fleetTimeFlowTrack>span+span{border-inline-start:3px solid #fff}
 .fleetTimeFlowTrack .fleetTimeFlowPhaseLabel{
   display:inline-flex;align-items:center;justify-content:center;gap:7px;
-  min-width:0;max-width:100%;font-size:inherit!important;
+  min-width:0;max-width:100%;padding:0;font-size:inherit!important;
   font-weight:800;line-height:1.2;
 }
 .fleetTimeFlowTrack .fleetTimeFlowPhaseText{
-  display:inline-block;min-width:0;max-width:100%;font-size:inherit!important;
+  display:inline-block;min-width:0;max-width:100%;padding:0;font-size:inherit!important;
   overflow-wrap:anywhere;hyphens:manual;
 }
-.fleetTimeFlowIcon{height:17px;width:17px;flex:none;display:block;stroke:currentColor}
+.fleetTimeFlowIcon{height:20px;width:20px;flex:0 0 auto;display:block;fill:none;stroke:currentColor}
 .fleetTimeFlowBoundaryTimes{margin-top:0;height:40px;overflow:visible}
 .fleetTimeFlowClock{position:relative;grid-row:1;min-width:0;width:0;height:36px;justify-self:end}
 .fleetTimeFlowClock::before{
@@ -633,8 +633,8 @@ html.flympusLargeText .fleetTimeFlowTrack .fleetTimeFlowPhaseText{font-size:15px
 @media(max-width:600px){
  .fleetTimeFlowTrack{height:47px}
  .fleetTimeFlowTrack>span{padding-inline:2px}
- .fleetTimeFlowIcon{display:none!important}
- .fleetTimeFlowTrack .fleetTimeFlowPhaseLabel{gap:0}
+ .fleetTimeFlowIcon{height:18px;width:18px}
+ .fleetTimeFlowTrack .fleetTimeFlowPhaseLabel{gap:4px}
  .fleetTimeFlowTrack>span,
  .fleetTimeFlowTrack .fleetTimeFlowPhaseLabel,
  .fleetTimeFlowTrack .fleetTimeFlowPhaseText{font-size:clamp(9px,2.7vw,11px)!important;line-height:1.25}
@@ -649,17 +649,4 @@ html.flympusLargeText .fleetTimeFlowTrack .fleetTimeFlowPhaseText{font-size:15px
  .fleetTimeFlowTrack .fleetTimeFlowPhaseText{font-size:9px!important}
  .fleetTimeFlowClock strong{font-size:10px}
  html.flympusLargeText .fleetTimeFlowClock strong{font-size:12px!important}
-}
-
-/* Use the same airplane silhouette as instructor roster metrics, but outlined in the timeline. */
-.fleetTimeFlowFlightIcon{
- display:inline-flex;align-items:center;justify-content:center;
- width:22px;height:22px;flex:none;
- font-family:Arial,"Segoe UI Symbol",sans-serif;
- font-size:25px;line-height:1;font-weight:400;
- color:inherit;
- -webkit-text-fill-color:transparent;
- -webkit-text-stroke:1.35px currentColor;
- paint-order:stroke fill;
- transform:none;
 }

@@ -444,7 +444,7 @@ test('Plan contract stays coherent: full-width flight day, settings, required fi
  assert.doesNotMatch(report,/id="pveDate" type="text"/);
  assert.match(report,/boardLinked\?'readonly aria-readonly="true"/);
  assert.match(html,/flightBoardPlanStatus\(date\)/);
- assert.match(html,/FLYMPUS Review · build 0789/);
+ assert.match(html,/FLYMPUS Review · build 0790/);
  lang.value='he';
  assert.match(context.window.FLYMPUS_FLEET_VIEW.schedule({
   fleet:[],flights:[],platformId:'shahak',date:'2026-10-08',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true
@@ -535,21 +535,49 @@ test('Plan timeline option 1 shows all four chronological boundaries at correct 
  const stylesheet=require('node:fs').readFileSync(require('node:path').join(__dirname,'../assets/fleet-operations.css'),'utf8');
  assert.match(stylesheet,/\.fleetTimeFlowTrack,\s*\.fleetTimeFlowBoundaryTimes\s*\{[\s\S]*?grid-template-columns:minmax\(0,var\(--phase-brief\)\) minmax\(0,var\(--phase-flight\)\) minmax\(0,var\(--phase-debrief\)\)/);
  assert.match(stylesheet,/html\[data-flympus-language="he"\] \.fleetTimeFlowClock strong/);
- assert.match(stylesheet,/@media\(max-width:600px\)\{[\s\S]*?\.fleetTimeFlowIcon\{display:none!important\}/);
+ assert.match(stylesheet,/@media\(max-width:600px\)\{[\s\S]*?\.fleetTimeFlowIcon\{height:18px;width:18px\}/);
+ assert.doesNotMatch(stylesheet,/\.fleetTimeFlow(?:Flight)?Icon\s*\{[^}]*display\s*:\s*none/);
  assert.match(stylesheet,/html\[data-flympus-theme="dark"\] \.fleetTimeFlowClock strong/);
  assert.match(stylesheet,/html\.flympusLargeText \.fleetTimeFlowClock strong/);
 });
 
 test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
- assert.ok(ui.includes('fleetTimeFlowFlightIcon'));
- assert.ok(ui.includes('const iconDebrief=iconSvg('));
- assert.ok(ui.includes('m9 13 2.2 2.2L16 10.5'));
+ const vm=require('node:vm');
+ const sandbox={window:{FLYMPUS_FLEET_MODEL:M}};
+ vm.runInNewContext(ui,sandbox);
+ const rendered=sandbox.window.FLYMPUS_FLEET_VIEW.schedule({fleet:[],flights:[],platformId:'shahak',date:'2026-10-09',trainees:[],instructors:[],syllabi:[],canWrite:true});
+ const timeline=rendered.match(/<div class="fleetTimeFlowTrack">([\s\S]*?)<div class="fleetTimeFlowBoundaryTimes">/)[1];
+ const icons=[...timeline.matchAll(/<svg\b([^>]+)>([\s\S]*?)<\/svg>/g)];
+ assert.equal(icons.length,3,'Each timeline phase renders a real SVG');
+ for(const [,attributes,body] of icons){
+  assert.match(attributes,/width="20" height="20" viewBox="0 0 24 24"/);
+  assert.match(attributes,/fill="none" stroke="currentColor" stroke-width="1.6"/);
+  assert.match(attributes,/aria-hidden="true" focusable="false"/);
+  assert.doesNotMatch(body,/fill="(?!none)/);
+ }
+ assert.match(icons[1][1],/class="fleetTimeFlowIcon fleetTimeFlowFlightIcon"/);
+ assert.match(icons[1][2],/^<path d="[^"<>]+Z"\/>$/,'Flight is one closed hollow contour');
+ assert.doesNotMatch(icons[1][2],/transform=/,'The reference plane keeps its right-facing orientation');
+ assert.doesNotMatch(timeline,/✈|&#(?:9992|x2708);|<span[^>]*fleetTimeFlowFlightIcon/);
+ assert.match(icons[2][2],/<rect\b/);
+ assert.match(icons[2][2],/m9 13 2.2 2.2L16 10.5/,'Debrief keeps the checked clipboard');
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
- assert.ok(stylesheet.includes('.fleetTimeFlowFlightIcon{'));
- assert.ok(stylesheet.includes('-webkit-text-fill-color:transparent'));
- assert.ok(stylesheet.includes('-webkit-text-stroke:1.35px currentColor'));
- assert.ok(html.includes('.fleetTimeFlowFlightIcon{height:22px!important;width:22px!important'));
- assert.ok(!html.includes('.fleetTimeFlowFlightIcon{display:none!important}'));
+ assert.match(stylesheet,/\.fleetTimeFlowIcon\{height:20px;width:20px;flex:0 0 auto;display:block;fill:none;stroke:currentColor\}/);
+ assert.doesNotMatch(stylesheet,/-webkit-text-(?:stroke|fill-color)/);
+ assert.doesNotMatch(html,/\.fleetTimeFlow(?:Flight)?Icon\s*\{/,'No embedded HTML rule overrides the icon stylesheet');
+ assert.doesNotMatch(stylesheet,/\.fleetTimeFlow(?:Flight)?Icon\s*\{[^}]*(?:!important|font-family|font-size|transform)/);
+ assert.match(stylesheet,/\.fleetTimeFlowTrack>span\+span\{border-inline-start:3px solid #fff\}/,'Approved inter-phase gaps stay intact');
+ for(const [phase,background,color] of [['brief','#f8ead1','#91661f'],['flight','#dcecff','#155b99'],['debrief','#dff3e7','#19724a']]){
+  assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
+ }
+ const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
+ const version='20261009-timeline-svg-0790';
+ for(const asset of ['assets/fleet-views.js','assets/fleet-operations.css']){
+  assert.ok(html.includes('./'+asset+'?v='+version));
+  assert.ok(worker.includes('./'+asset+'?v='+version));
+ }
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-timeline-svg-0790'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261009-timeline-svg-0790/g)||[]).length,2);
 });
 test('Planned vs Executed date moves to locale start and remains stacked on mobile',()=>{
  assert.match(html,/class="pveDateRow"/);

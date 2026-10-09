@@ -58,10 +58,12 @@ function schedule(c){
  const select=(name,items,value,required=true)=>'<select class="input" name="'+name+'" '+(required?'required':'')+'><option value="" disabled '+(!value?'selected':'')+'>'+L('Select','בחר')+'</option>'+items.map(x=>O(x.id,x.name||x.tail,value)).join('')+'</select>';
  const field=(label,inner,extra='',action='')=>'<div class="field" '+extra+'><div class="fleetFieldHead"><label>'+label+'</label>'+action+'</div>'+inner+'</div>';
  const requiredLabel=label=>label+' <span class="fleetRequired" aria-hidden="true">*</span>';
- const iconSvg=content=>'<svg class="fleetTimeFlowIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+content+'</svg>';
+ const iconSvg=(content,extraClass='')=>'<svg class="fleetTimeFlowIcon'+(extraClass?' '+extraClass:'')+'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+content+'</svg>';
  const iconBrief=iconSvg('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>');
- const iconFlight='<span class="fleetTimeFlowIcon fleetTimeFlowFlightIcon" aria-hidden="true">✈</span>';
- const iconDebrief=iconSvg('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="m9 13 2.2 2.2L16 10.5"/>');
+ // Right-facing swept wings and split tail follow the instructor-card reference.
+ // A closed, unfilled contour keeps the fuselage hollow at small icon sizes.
+ const iconFlight=iconSvg('<path d="M21.5 10.5C22.65 10.5 23 11.15 23 12S22.65 13.5 21.5 13.5H14L8.4 22H6.4L10.2 13.5H4L2.2 15.5H1L2.1 12L1 8.5H2.2L4 10.5H10.2L6.4 2H8.4L14 10.5Z"/>','fleetTimeFlowFlightIcon');
+ const iconDebrief=iconSvg('<rect x="4" y="4" width="16" height="17" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="m9 13 2.2 2.2L16 10.5"/>');
  const phase=(key,label,icon)=>'<span data-phase="'+key+'"><span class="fleetTimeFlowPhaseLabel">'+icon+'<span class="fleetTimeFlowPhaseText">'+label+'</span></span></span>';
  const timeMark=(key,label,part)=>'<div class="fleetTimeFlowClock fleetTimeFlowClock'+part+'" role="group" aria-label="'+E(label)+'"><span class="fleetTimeFlowClockA11y">'+E(label)+'</span><strong dir="ltr" data-flight-clock="'+key+'">'+E(timeline?.clock[key]||'—')+'</strong></div>';
  const timelineBlock='<div class="fleetTimeFlow" aria-live="polite" style="--phase-brief:'+Math.max(0,Number(briefing))+'fr;--phase-flight:'+Math.max(0,Number(duration))+'fr;--phase-debrief:'+Math.max(0,Number(debrief))+'fr"><div class="fleetTimeFlowHeading"><b>'+L('Calculated timeline','ציר זמנים מחושב')+'</b><small>'+L('Instructor and trainee are reserved from briefing to the end of debriefing','המדריך והחניך משוריינים מתחילת התדריך ועד לסיום התחקיר')+'</small></div>'+
