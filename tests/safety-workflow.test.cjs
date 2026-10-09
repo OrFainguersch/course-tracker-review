@@ -67,7 +67,8 @@ test('Always-on Safety is enrolled and requires personal viewing before acknowle
   assert.match(auth,/memberUids:Object.keys\(map\)/);
   assert.match(app,/async function reconcile\(\)/);
   assert.match(app,/function settings\(\)/);
-  assert.match(page,/safetyUI.settings\(\)/);
+  assert.doesNotMatch(page,/safetyUI\.settings\(\)/,'Course Management should not render the Safety acknowledgement status card');
+  assert.match(page,/if\(tab==='overrides'&&canManageCourse\)\{\s*html\+=courseOverridesHtml\(\);/);
   assert.match(page,/startGlobalInbox/);
   assert.match(feed,/Safety event: instructor reading status updated/);
   assert.match(feed,/acknowledge\(item.key,e.id\)/);

@@ -11007,7 +11007,7 @@ function settings(){
   let html='<h1 class="pageTitle">Course Management</h1><p class="sub">Create and manage courses, tailor a selected course, and maintain reusable training Packages and course architecture.</p>';
   html+='<div class="scrollTabs">'+(canCreate?'<button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">1 · Create course</button>':'')+(canManageCourse?'<button class="seg '+(tab==='overrides'?'active':'')+'" data-settings-tab="overrides">'+(canCreate?'2 · ':'')+'Tailor course</button>':'')+(canGlobalPackages?'<button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">Advanced</button>':'')+'</div>';
   if(tab==='overrides'&&canManageCourse){
-    html+=safetyUI.settings()+courseOverridesHtml();
+    html+=courseOverridesHtml();
   }
 
   if(tab==='builder'&&canCreate){
