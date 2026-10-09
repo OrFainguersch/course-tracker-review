@@ -126,9 +126,21 @@
   const flights=(Array.isArray(rows)?rows:[]).filter(x=>x?.date===date&&String(x?.platformId||'')===String(platform));
   return {total:flights.length,instructed:flights.filter(x=>x.mode==='INSTRUCTED').length,solo:flights.filter(x=>x.mode==='SOLO').length};
  }
+ /* The duration of a Solo execution defaults to its planned flight's minutes. */
+ function plannedSoloDuration(rows,date,traineeId='',syllabus='',position=0,fallback=30,platform=''){
+  const valid=(Array.isArray(rows)?rows:[]).filter(f=>f?.date===date&&f.mode==='SOLO'
+   &&(!platform||!f.platformId||String(f.platformId)===String(platform))
+   &&Number.isInteger(Number(f.estimatedMinutes))&&Number(f.estimatedMinutes)>=1&&Number(f.estimatedMinutes)<=720);
+  const matching=valid.filter(f=>(!traineeId||String(f.traineeId)===String(traineeId))
+   &&(!syllabus||String(f.syllabus)===String(syllabus)));
+  const n=Math.max(0,Math.floor(Number(position)||0)),planned=matching[Math.min(n,matching.length-1)];
+  if(planned)return Number(planned.estimatedMinutes);
+  const safe=Number(fallback);
+  return Number.isInteger(safe)&&safe>=1&&safe<=720?safe:TIMING_DEFAULTS.SOLO.estimatedMinutes;
+ }
  function flightIssues(flight,aircraft,platform){
   const match=active(aircraft,platform).find(x=>x.id===flight.aircraftId);
   return !match?'Aircraft removed from the active fleet':match.status!==AVAILABLE?'Aircraft unserviceable: '+clean(match.reason,200):'';
  }
- return Object.freeze({AVAILABLE,UNAVAILABLE,dateValid,clockValid,active,count,validAircraft,upsertAircraft,archiveAircraft,checkedSortie,upsertSortie,flightIssues,flightTimeline,TIMING_DEFAULTS,configuredTimings,plannedFlightCounts});
+ return Object.freeze({AVAILABLE,UNAVAILABLE,dateValid,clockValid,active,count,validAircraft,upsertAircraft,archiveAircraft,checkedSortie,upsertSortie,flightIssues,flightTimeline,TIMING_DEFAULTS,configuredTimings,plannedFlightCounts,plannedSoloDuration});
 });

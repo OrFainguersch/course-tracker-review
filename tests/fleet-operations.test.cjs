@@ -157,6 +157,37 @@ test('Plan opens on the date-specific Daily Flight Plan with separate Planned vs
  assert.ok(html.includes("case'reports':html=reports();break"),'Reports navigation remains available');
  assert.ok(!html.includes("courseFlightScheduleHtml(date)+\n '<section class=\"card pvePanel\">"));
 });
+
+test('Solo actual duration defaults to the matching planned flight, not other users or instructed flights',()=>{
+ const flights=[
+  {date:'2026-10-09',platformId:'shahak',mode:'INSTRUCTED',traineeId:'t1',syllabus:'Solo A',estimatedMinutes:80},
+  {date:'2026-10-09',platformId:'shahak',mode:'SOLO',traineeId:'t1',syllabus:'Solo A',estimatedMinutes:25},
+  {date:'2026-10-09',platformId:'shahak',mode:'SOLO',traineeId:'t2',syllabus:'Solo B',estimatedMinutes:35},
+  {date:'2026-10-09',platformId:'shahak',mode:'SOLO',traineeId:'t1',syllabus:'Solo A',estimatedMinutes:40},
+  {date:'2026-10-10',platformId:'shahak',mode:'SOLO',traineeId:'t1',syllabus:'Solo A',estimatedMinutes:60}
+ ];
+ assert.equal(M.plannedSoloDuration(flights,'2026-10-09','t1','Solo A',0,30,'shahak'),25);
+ assert.equal(M.plannedSoloDuration(flights,'2026-10-09','t1','Solo A',1,30,'shahak'),40);
+ assert.equal(M.plannedSoloDuration(flights,'2026-10-09','t2','Solo B',0,30,'shahak'),35);
+ assert.equal(M.plannedSoloDuration(flights,'2026-10-09','','',0,30,'shahak'),25);
+ assert.equal(M.plannedSoloDuration(flights,'2026-10-09','t3','Solo X',0,45,'shahak'),45);
+ assert.equal(M.plannedSoloDuration(flights,'2026-10-11','t1','Solo A',0,20,'shahak'),20);
+ assert.equal(M.plannedSoloDuration(flights,'2026-10-09','t1','Solo A',0,30,'another'),30);
+});
+test('Solo execution UI has actual-duration dropdown, preserved manual choice and four main desktop controls',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ assert.match(html,/plannedSoloMinutes\(d\.traineeId/);
+ assert.match(html,/evaluationDurationOptions\(chosenMinutes\)/);
+ assert.match(html,/name="minutes" required/);
+ assert.match(html,/name="quantity" aria-label/);
+ assert.match(html,/name="durationOverridden"/);
+ assert.match(html,/const actualMinutes=Number\(fd\.get\('minutes'\)\)/);
+ assert.match(html,/minutes:actualMinutes,createdAt/);
+ assert.match(html,/data-edit-minutes required/);
+ assert.match(html,/\.pveSoloPrimary\{display:grid;grid-template-columns:minmax\(0,1\.3fr\)/);
+ assert.match(html,/@media\(max-width:370px\)\{\.pveSoloPrimary\{grid-template-columns:1fr\}/);
+});
+
 test('Scheduled sortie requires planned duration and preserves notes without changing serviceability constraints',()=>{
  const fleet=add([],'ac1','01'),allowed={trainees:['trainee1'],instructors:['ip1']};
  const flight={date:'2026-10-08',time:'11:30',mode:'INSTRUCTED',aircraftId:'ac1',traineeId:'trainee1',instructorId:'ip1',instructorName:'IP',traineeName:'EP',syllabus:'Circuits',estimatedMinutes:'35',note:'Winds and circuit work'};
@@ -444,7 +475,7 @@ test('Plan contract stays coherent: full-width flight day, settings, required fi
  assert.doesNotMatch(report,/id="pveDate" type="text"/);
  assert.match(report,/boardLinked\?'readonly aria-readonly="true"/);
  assert.match(html,/flightBoardPlanStatus\(date\)/);
- assert.match(html,/FLYMPUS Review · build 0793/);
+ assert.match(html,/FLYMPUS Review · build 0794/);
  lang.value='he';
  assert.match(context.window.FLYMPUS_FLEET_VIEW.schedule({
   fleet:[],flights:[],platformId:'shahak',date:'2026-10-08',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true
@@ -571,12 +602,12 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261009-duty-approval-0793'],['assets/fleet-operations.css','20261009-timeline-svg-0790']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261009-solo-actual-duration-0794'],['assets/fleet-operations.css','20261009-timeline-svg-0790']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-duty-approval-0793'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261009-duty-approval-0793/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-solo-actual-duration-0794'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261009-solo-actual-duration-0794/g)||[]).length,2);
 });
 test('Planned vs Executed date moves to locale start and remains stacked on mobile',()=>{
  assert.match(html,/class="pveDateRow"/);
