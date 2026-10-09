@@ -32,7 +32,10 @@ test('Evaluation matches only unique instructed flights on same date/trainee/ins
  assert.equal(ctx.evaluationFlightMatch(params).status,'none');
 });
 test('Plan suggestion never clobbers drafts, revisions or manually entered actual minutes',()=>{
- assert.match(html,/name="duration" type="number" required min="1" max="720"/);
+ assert.match(html,/<select class="input" name="duration" required>/);
+ assert.match(html,/evaluationDurationOptions\(edit\?\.duration\)/);
+ assert.match(html,/ensureEvaluationDurationOption\(evalDurationControl,result\.flight\.estimatedMinutes\)/);
+ assert.doesNotMatch(html,/Flight duration \(min\)/);
  assert.match(html,/evalDurationManual=Boolean\(state.editingEval\|\|canRestore\)/);
  assert.match(html,/if\(evalDurationManual\|\|!evalDurationControl\)return/);
  assert.match(html,/evalDurationControl\?\.addEventListener\('input'/);

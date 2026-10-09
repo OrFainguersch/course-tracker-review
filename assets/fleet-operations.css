@@ -551,3 +551,19 @@ html.flympusLargeText .fleetFlightDurations legend{font-size:16px}
  html.flympusLargeText .fleetTimeFlowTimes span{font-size:13px!important}
  html.flympusLargeText .fleetTimeFlowTimes strong{font-size:14px!important}
 }
+
+/* Clear, subtle mode separation for course timing defaults. */
+.fleetTimingSettings .fleetTimingSettingsGrid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.fleetTimingModeGroup{min-width:0;padding:15px 16px 17px;border:1px solid #d6e3ee;border-inline-start:4px solid #b79a60;border-radius:12px;background:rgba(255,255,255,.55)}
+.fleetTimingModeSOLO{border-inline-start-color:#4485b7;background:rgba(225,237,249,.36)}
+.fleetTimingModeHeader{display:flex;align-items:center;gap:14px;margin-bottom:14px;color:#1f4264}
+.fleetTimingModeHeader strong{font-size:14px;font-weight:800;white-space:nowrap}
+.fleetTimingModeHeader::after{content:"";height:1px;flex:1;min-width:10px;background:#cadbe8}
+.fleetTimingModeFields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.fleetTimingModeFields .field{min-width:0}
+html[data-flympus-theme="dark"] .fleetTimingModeGroup{background:rgba(39,65,85,.65);border-color:#456077;border-inline-start-color:#bd9e68}
+html[data-flympus-theme="dark"] .fleetTimingModeSOLO{background:rgba(26,60,92,.45);border-inline-start-color:#70b5e0}
+html[data-flympus-theme="dark"] .fleetTimingModeHeader{color:#dceefa}
+html[data-flympus-theme="dark"] .fleetTimingModeHeader::after{background:#476276}
+html.flympusLargeText .fleetTimingModeHeader strong{font-size:18px}
+@media(max-width:600px){.fleetTimingModeGroup{padding:13px 12px 15px}.fleetTimingModeFields{grid-template-columns:minmax(0,1fr);gap:11px}.fleetTimingModeHeader{margin-bottom:11px}}
