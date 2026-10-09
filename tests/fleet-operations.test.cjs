@@ -759,7 +759,8 @@ test('Fleet editor supports localized Tail number, Cancel, dark/RTL and Large Te
  assert.match(css,/html\.flympusLargeText \.fleetEditor \.fleetEditorActions/);
  assert.match(css,/scroll-margin-block-end:calc\(116px/);
  assert.match(ui,/visualViewport\?\.addEventListener\?\.\('resize'/);
- assert.match(html,/panel\.scrollIntoView\?\.\(\{behavior:'auto',block:'start'\}\)/);
+ assert.match(html,/panel\.scrollIntoView\?\.\(\{behavior:reduced\?'auto':'smooth',block:'start'\}\)/);
+ assert.doesNotMatch(html,/panel\.querySelector\('\[name="tail"\]'\)\?\.focus/);
 });
 test('Fleet focus guard adjusts to keyboard viewport and stops after blur',()=>{
  const vm=require('node:vm'),listeners={},vvEvents={},calls=[];
@@ -777,4 +778,40 @@ test('Fleet focus guard adjusts to keyboard viewport and stops after blur',()=>{
  calls.length=0;
  vvEvents.resize();
  assert.equal(calls.length,0);
+});
+
+test('platform and tail display consistently, without changing stored aircraft identity',()=>{
+ const vm=require('node:vm'),lang={value:'en'};
+ const win={FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=>lang.value};
+ vm.runInNewContext(ui,{window:win},{filename:'fleet-views.js'});
+ const V=win.FLYMPUS_FLEET_VIEW;
+ const plane=add([],'aircraft-a01','01');
+ const sortie={id:'sortie1',date:'2026-10-09',platformId:'shahak',time:'09:00',aircraftId:'aircraft-a01',tail:'01',
+  traineeId:'trainee1',traineeName:'Trainee One',instructorId:'coach1',instructorName:'Coach One',
+  syllabus:'Circuits',mode:'INSTRUCTED',estimatedMinutes:30,briefingMinutes:20,debriefMinutes:15};
+ const ctx={fleet:plane,flights:[sortie],platformId:'shahak',platformLabel:'Shahak',
+  courseLabel:'EP Course',today:'2026-10-09',date:'2026-10-09',canWrite:true,
+  trainees:[{id:'trainee1',name:'Trainee One'}],instructors:[{id:'coach1',name:'Coach One'}],syllabi:['Circuits']};
+ assert.match(V.home(ctx),/fleetHomeTail">Shahak 01<\/td>/);
+ assert.match(V.fleet(ctx),/fleetInventoryTail">Shahak 01<\/td>/);
+ assert.doesNotMatch(V.fleet(ctx),/fleetInventoryCount/);
+ assert.match(V.schedule(ctx),/<option value="aircraft-a01"[^>]*>Shahak 01<\/option>/);
+ assert.match(V.schedule(ctx),/fleetSortieTail">Shahak 01<\/b>/);
+ assert.equal(plane[0].tail,'01','Display must not change stored tail number');
+ assert.doesNotMatch(V.home({...ctx,fleet:[{...plane[0],tail:'Shahak 01'}]}),/Shahak Shahak/);
+ lang.value='he';
+ assert.match(V.fleet(ctx),/Shahak 01/);
+ assert.match(V.schedule(ctx),/Shahak 01/);
+});
+test('Fleet starts from top, editor does not summon keyboard and Plan tabs support responsive themes',()=>{
+ const styles=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
+ assert.match(html,/\['fleet','profile','instructor','my-profile','preferences'/);
+ assert.match(html,/panel\.hidden=false;\s*const reveal=/);
+ assert.doesNotMatch(html,/panel\.querySelector\('\[name="tail"\]'\)\?\.focus/);
+ assert.match(html,/requestAnimationFrame\(\(\)=>requestAnimationFrame\(reveal\)\)/);
+ assert.match(styles,/\.coursePlanWorkspace>\.coursePlanTabs\{\s*display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+ assert.match(styles,/\.coursePlanWorkspace>\.coursePlanTabs \.dutyApprovalTabCount\{\s*position:absolute/);
+ assert.match(styles,/html\[data-flympus-theme="dark"\] \.coursePlanWorkspace/);
+ assert.match(styles,/html\.flympusLargeText \.coursePlanWorkspace/);
+ assert.match(styles,/@media\(max-width:375px\)/);
 });

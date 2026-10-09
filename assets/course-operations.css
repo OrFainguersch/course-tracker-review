@@ -28,3 +28,54 @@ html.flympusLargeText .dutyApprovalStatus b,html.flympusLargeText .dutyApprovalR
 .coursePlanTabs button[data-plan-view="report"] .planRequiredTabCount{position:absolute;top:3px;right:4px;left:auto;display:grid;place-items:center;box-sizing:border-box;min-width:17px;height:17px;margin:0;padding:0 4px;border:1.5px solid #fff;border-radius:999px;background:#d64545;color:#fff;font-size:9px;font-weight:900;line-height:1;white-space:nowrap;box-shadow:0 2px 6px rgba(116,28,28,.2);pointer-events:none;z-index:1}
 html[data-flympus-theme="dark"] .coursePlanTabs .planRequiredTabCount{background:#d64545;color:#fff;border-color:#1c3448}
 html.flympusLargeText .coursePlanTabs .planRequiredTabCount{font-size:11px;min-width:20px;height:20px}
+
+/* Three individually framed Plan views: counts never offset the centered labels. */
+.coursePlanWorkspace>.coursePlanTabs{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ align-items:stretch;gap:9px;width:min(100%,900px);max-width:100%;
+ padding:0;border:0;border-radius:0;background:transparent;overflow:visible;
+}
+.coursePlanWorkspace>.coursePlanTabs>button{
+ position:relative;display:flex;align-items:center;justify-content:center;
+ min-width:0;min-height:72px;box-sizing:border-box;
+ padding:14px 23px;border:1px solid #cddfeb;border-radius:14px;
+ background:#e7f1f9;color:#385d7b;text-align:center;
+ font-size:13px;font-weight:850;line-height:1.35;
+ white-space:normal;overflow-wrap:anywhere;box-shadow:0 1px 3px rgba(17,58,92,.05);
+}
+.coursePlanWorkspace>.coursePlanTabs>button.active{
+ border-color:#a8cce8;background:#fff;color:#0669bb;
+ box-shadow:0 3px 13px rgba(18,63,101,.11);
+}
+.coursePlanWorkspace>.coursePlanTabs .dutyApprovalTabCount{
+ position:absolute;top:7px;right:7px;left:auto;display:grid;place-items:center;
+ margin:0;min-width:20px;min-height:20px;padding:1px 5px;
+ border-radius:999px;font-size:11px;line-height:1.1;
+}
+.coursePlanWorkspace>.coursePlanTabs>button[data-plan-view="report"] .planRequiredTabCount{
+ top:5px;right:5px;left:auto;
+}
+html[data-flympus-theme="dark"] .coursePlanWorkspace>.coursePlanTabs{background:transparent;border:0}
+html[data-flympus-theme="dark"] .coursePlanWorkspace>.coursePlanTabs>button{
+ background:#1d364c;border-color:#42617a;color:#c3d8e9;
+ box-shadow:0 1px 3px rgba(0,0,0,.12);
+}
+html[data-flympus-theme="dark"] .coursePlanWorkspace>.coursePlanTabs>button.active{
+ background:#2c506b;border-color:#6588a4;color:#fff;
+}
+html[data-flympus-theme="dark"] .coursePlanWorkspace>.coursePlanTabs .dutyApprovalTabCount{
+ background:#35546b;color:#e6f1fc;
+}
+html.flympusLargeText .coursePlanWorkspace>.coursePlanTabs>button{
+ min-height:88px;font-size:15px!important;line-height:1.4;
+}
+@media(max-width:600px){
+ .coursePlanWorkspace>.coursePlanTabs{gap:7px;width:100%}
+ .coursePlanWorkspace>.coursePlanTabs>button{
+  min-height:78px;padding:13px 19px;font-size:12px;line-height:1.3;
+ }
+}
+@media(max-width:375px){
+ .coursePlanWorkspace>.coursePlanTabs{gap:5px}
+ .coursePlanWorkspace>.coursePlanTabs>button{padding:12px 17px;font-size:11px}
+}

@@ -106,8 +106,8 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/reports-dashboard.css?v=0767" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
-<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261009-fleet-editor-0804" />
-<link rel="stylesheet" href="./assets/course-operations.css?v=20261009-plan-badge-0803" />
+<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261009-plan-fleet-identity-v1" />
+<link rel="stylesheet" href="./assets/course-operations.css?v=20261009-plan-fleet-identity-v1" />
 <link rel="stylesheet" href="./assets/home-operations.css?v=20261008-home02" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
@@ -115,10 +115,10 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/safety-ui.js?v=20261008-safety03"></script>
 <script src="./assets/fleet-model.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/fleet-timeline-layout.js?v=20261009-connected-leaders-0800"></script>
-<script src="./assets/fleet-views.js?v=20261009-fleet-editor-0804"></script>
+<script src="./assets/fleet-views.js?v=20261009-plan-fleet-identity-v1"></script>
 <script src="./assets/duty-approval-model.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/operations-cloud.js?v=20261009-approval-sounds-0795"></script>
-<script src="./assets/course-operations.js?v=20261009-plan-badge-0803"></script>
+<script src="./assets/course-operations.js?v=20261009-plan-fleet-identity-v1"></script>
 <script src="./assets/home-operations.js?v=20261008-home02"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
@@ -159,7 +159,7 @@ html.flympusColdBoot #flympusAuthRoot{
    still owns notification permission/subscription later; this early call only
    makes the next cold launch independent of mobile network latency. */
 try{
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261009-fleet-editor-0804',{scope:'./',updateViaCache:'none'}).catch(()=>{})
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261009-plan-fleet-identity-v1',{scope:'./',updateViaCache:'none'}).catch(()=>{})
 }catch{}
 </script>
 <meta name="flympus-deploy-commit" content="__FLYMPUS_DEPLOY_COMMIT__">
@@ -8700,7 +8700,7 @@ function go(screen,extra={},options={}){
     }
   }
   if(target==='home')appNavHistory=[];
-  const startAtTop=target!==previous&&['profile','instructor','my-profile','preferences','settings','user-management'].includes(target);
+  const startAtTop=target!==previous&&['fleet','profile','instructor','my-profile','preferences','settings','user-management'].includes(target);
   if(startAtTop&&!options.focusNotificationSettings)forcePageTop();
   Object.assign(state,extra,{screen:target});saveAppNavHistory();setDrawerOpen(false);render({fastNavigation:!!options.fastNavigation});
   if(startAtTop&&!options.focusNotificationSettings)forcePageTop();
@@ -8903,7 +8903,18 @@ function fleetSaveError(){toast('Unable to save. Check device storage; no change
 function bindFleet(){
  const form=$('#fleetAircraftForm');
  const syncReason=()=>{const status=$('#fleetStatus'),reason=$('#fleetReason'),holder=document.querySelector('[data-fleet-reason-field]');if(!reason||!status)return;const down=status.value==='UNSERVICEABLE';reason.required=down;if(holder)holder.hidden=!down};
- const showEditor=()=>{const panel=$('#fleetEditorPanel');if(!panel)return;panel.hidden=false;panel.scrollIntoView?.({behavior:'auto',block:'start'});panel.querySelector('[name="tail"]')?.focus?.({preventScroll:true})};
+ const showEditor=()=>{
+  const panel=$('#fleetEditorPanel');if(!panel)return;
+  panel.hidden=false;
+  const reveal=()=>{
+   if(!panel.isConnected)return;
+   bottomDockProgrammaticRestoreUntil=Math.max(Number(bottomDockProgrammaticRestoreUntil||0),(performance.now?.()||Date.now())+850);
+   const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+   panel.scrollIntoView?.({behavior:reduced?'auto':'smooth',block:'start'});
+  };
+  if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>requestAnimationFrame(reveal));
+  else reveal();
+ };
  if($('#fleetStatus'))$('#fleetStatus').onchange=syncReason;syncReason();
  document.querySelectorAll('[data-fleet-add]').forEach(b=>b.onclick=()=>{if(!flympusCan('fleet.serviceability.write'))return;if(state.fleetEditId){state.fleetEditId=null;render()}showEditor()});
  if(form)form.onsubmit=async e=>{
@@ -9479,7 +9490,7 @@ function syncNotificationPreferenceControls(){
   });
 }
 
-const FLYMPUS_PUSH_SW='./sw.js?v=20261009-fleet-editor-0804',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
+const FLYMPUS_PUSH_SW='./sw.js?v=20261009-plan-fleet-identity-v1',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
 let flympusPushConfigCache=null,flympusPushConfigPromise=null;
 function getFlympusPushUserEnabled(){
   try{
