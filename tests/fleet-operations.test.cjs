@@ -444,7 +444,7 @@ test('Plan contract stays coherent: full-width flight day, settings, required fi
  assert.doesNotMatch(report,/id="pveDate" type="text"/);
  assert.match(report,/boardLinked\?'readonly aria-readonly="true"/);
  assert.match(html,/flightBoardPlanStatus\(date\)/);
- assert.match(html,/FLYMPUS Review · build 0790/);
+ assert.match(html,/FLYMPUS Review · build 0791/);
  lang.value='he';
  assert.match(context.window.FLYMPUS_FLEET_VIEW.schedule({
   fleet:[],flights:[],platformId:'shahak',date:'2026-10-08',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true
@@ -576,8 +576,8 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-timeline-svg-0790'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261009-timeline-svg-0790/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-sidebar-logo-0791'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261009-sidebar-logo-0791/g)||[]).length,2);
 });
 test('Planned vs Executed date moves to locale start and remains stacked on mobile',()=>{
  assert.match(html,/class="pveDateRow"/);
