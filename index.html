@@ -11718,9 +11718,9 @@ function bindReports(){
 function bindPlanned(){
  if(!flympusCan('operations.daily.write')){document.querySelectorAll('.pvePage input,.pvePage select,.pvePage textarea,.pvePage button:not([data-go])').forEach(x=>x.disabled=true);return}
  document.querySelectorAll('[data-plan-required-index]').forEach(btn=>btn.onclick=()=>{const label=String(btn.textContent||''),target=label.startsWith('Cancellation')?document.querySelector('.pveCancellationList'):document.querySelector('.pvePlanGrid');target?.scrollIntoView?.({behavior:'smooth',block:'center'});setTimeout(()=>target?.querySelector?.('input,select')?.focus?.({preventScroll:true}),180)});
- const collectCancellations=()=>[...document.querySelectorAll('.pveCancellationReason')].map(el=>({key:String(el.dataset.cancelKey||''),type:String(el.dataset.cancelType||''),reasonId:String(el.value||''),reasonLabel:String(el.selectedOptions?.[0]?.textContent||'').trim()}));
+ const collectCancellations=()=>[...document.querySelectorAll('.pveCancellationReason')].map(el=>({key:String(el.dataset.cancelKey||''),type:String(el.dataset.cancelType||''),reasonId:String(el.value||''),reasonLabel:el.value?String(el.selectedOptions?.[0]?.textContent||'').trim():'',quantity:Math.max(1,Math.floor(Number(el.closest('[data-cancel-row]')?.querySelector('[data-cancel-qty]')?.value)||1))}));
  const persistPlannedDraft=()=>{
-   const solo=$('#soloExecutionForm'),prior=getActivityDraft('planned')?.data||{},cancellations=collectCancellations(),date=state.planDate||todayIsoDate(),board=flightBoardPlanStatus(date),data={date,plannedInstructed:board.linked?board.instructed:Number($('#pvePlannedInstructed')?.value||0),plannedSolo:board.linked?board.solo:Number($('#pvePlannedSolo')?.value||0),cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),solo:solo?serializeFormDraft(solo):(prior.solo||{})};
+   const prior=getActivityDraft('planned')?.data||{},cancellations=collectCancellations(),date=state.planDate||todayIsoDate(),board=flightBoardPlanStatus(date),soloEntries=[...document.querySelectorAll('.pveSoloEntryForm')].map(form=>serializeFormDraft(form)),data={date,plannedInstructed:board.linked?board.instructed:Number($('#pvePlannedInstructed')?.value||0),plannedSolo:board.linked?board.solo:Number($('#pvePlannedSolo')?.value||0),cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),soloEntries,dismissedSoloSlots:Math.max(0,Math.floor(Number(prior.dismissedSoloSlots)||0)),solo:prior.solo||{}};
    // The Plan badge recomputes from live required items; never persist a stale count.
    saveActivityDraft('planned',data);if($('#plannedDraftBadge'))$('#plannedDraftBadge').textContent=draftSavedLabel('planned');syncAttentionBadges();return data
  };
@@ -11734,11 +11734,53 @@ function bindPlanned(){
  };
 
  ['pvePlannedInstructed','pvePlannedSolo'].forEach(id=>{if($('#'+id))$('#'+id).onchange=refreshPlan});
- document.querySelectorAll('.pveCancellationReason').forEach(el=>el.onchange=()=>{persistPlannedDraft();render()});
- const soloForm=$('#soloExecutionForm');if(soloForm){soloForm.addEventListener('input',persistPlannedDraft);soloForm.addEventListener('change',persistPlannedDraft);soloForm.onsubmit=e=>{
-   e.preventDefault();const fd=new FormData(e.currentTarget),traineeId=String(fd.get('traineeId')),trainee=allTrainees().find(t=>t.id===traineeId),id='solo_'+Date.now(),takeoffs=Math.max(0,Math.floor(Number(fd.get('takeoffs'))||0)),landings=Math.max(0,Math.floor(Number(fd.get('landings'))||0)),minutes=Math.max(0,Math.floor(Number(fd.get('minutes'))||0)),flight={id,date:state.planDate||normalizeDateValue($('#pveDate')?.value)||todayIsoDate(),traineeId,traineeName:trainee?.name||'Trainee',syllabus:String(fd.get('syllabus')||''),takeoffs,landings,minutes,createdAt:new Date().toISOString()};
-   const solos=getSoloFlights();solos.push(flight);saveSoloFlights(solos);syncSoloEvents(flight);const d=persistPlannedDraft();d.solo={};saveActivityDraft('planned',d);toast('Solo flight recorded');render();
- }}
+ const changedCancellation=()=>{
+   const gap=plannedCompleteness(),maxByType={Instructed:gap.instructedCancelled,Solo:gap.soloCancelled};
+   const items=[...document.querySelectorAll('[data-cancel-row]')];
+   for(const type of ['Instructed','Solo']){
+     let left=maxByType[type];
+     for(const row of items.filter(x=>x.querySelector('.pveCancellationReason')?.dataset.cancelType===type)){
+       const input=row.querySelector('[data-cancel-qty]');
+       const count=Math.min(left,Math.max(1,Math.floor(Number(input?.value)||1)));
+       if(input)input.value=String(count||1);
+       left=Math.max(0,left-count);
+     }
+   }
+   persistPlannedDraft();render();
+ };
+ document.querySelectorAll('.pveCancellationReason,[data-cancel-qty]').forEach(el=>el.onchange=changedCancellation);
+ document.querySelectorAll('.pveSoloEntryForm').forEach(form=>{
+   form.addEventListener('input',persistPlannedDraft);
+   form.addEventListener('change',persistPlannedDraft);
+   form.onsubmit=e=>{
+     e.preventDefault();
+     const fd=new FormData(form),date=state.planDate||todayIsoDate(),plan=plannedCompleteness(),solos=getSoloFlights(),used=solos.filter(x=>x.date===date).length,remaining=Math.max(0,plan.ps-used),quantity=Number(fd.get('quantity'));
+     if(!Number.isInteger(quantity)||quantity<1||quantity>remaining){toast(planUiText('Solo quantity exceeds remaining planned flights. Update the plan first.','כמות טיסות הסולו חורגת מהתכנון. יש לעדכן תחילה את התכנון.'),'error');return}
+     const traineeId=String(fd.get('traineeId')||''),syllabus=String(fd.get('syllabus')||''),trainee=allTrainees().find(t=>String(t.id)===traineeId);
+     if(!trainee||!syllabus){toast(planUiText('Select trainee and syllabus.','בחר חניך וסילבוס.'),'error');return}
+     const count=name=>Math.max(0,Math.floor(Number(fd.get(name))||0));
+     const batchId='solo_batch_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),stamp=new Date().toISOString();
+     for(let n=0;n<quantity;n++){
+       const flight={id:batchId+'_'+n,batchId,date,traineeId,traineeName:trainee.name,syllabus,takeoffs:count('takeoffs'),landings:count('landings'),minutes:count('minutes'),createdAt:stamp};
+       solos.push(flight);syncSoloEvents(flight);
+     }
+     saveSoloFlights(solos);
+     const data=persistPlannedDraft(),index=Number(form.dataset.soloSlot);
+     data.soloEntries=(data.soloEntries||[]).filter((_,n)=>n!==index);
+     saveActivityDraft('planned',data);
+     toast(planUiText(quantity+' solo flight(s) recorded',quantity+' טיסות סולו תועדו'));render();
+   };
+ });
+ document.querySelectorAll('[data-solo-skip]').forEach(btn=>btn.onclick=()=>{
+   const form=btn.closest('.pveSoloEntryForm'),data=persistPlannedDraft(),index=Number(form?.dataset.soloSlot||0);
+   data.soloEntries=(data.soloEntries||[]).filter((_,n)=>n!==index);
+   data.dismissedSoloSlots=Math.max(0,Math.floor(Number(data.dismissedSoloSlots)||0))+1;
+   saveActivityDraft('planned',data);render();
+ });
+ const restore=$('[data-solo-restore]');if(restore)restore.onclick=()=>{
+   const data=persistPlannedDraft();data.dismissedSoloSlots=Math.max(0,(Number(data.dismissedSoloSlots)||0)-1);
+   saveActivityDraft('planned',data);render();
+ };
  document.querySelectorAll('[data-solo-edit]').forEach(btn=>btn.onclick=()=>{state.soloEditId=btn.dataset.soloEdit;render()});
  document.querySelectorAll('[data-solo-done]').forEach(btn=>btn.onclick=()=>{
    const id=btn.dataset.soloDone,row=btn.closest('[data-solo-row]'),solos=getSoloFlights(),old=solos.find(x=>x.id===id);if(!row||!old)return;
@@ -11746,10 +11788,21 @@ function bindPlanned(){
    const updated={...old,traineeId,traineeName:trainee?.name||old.traineeName,syllabus,takeoffs:num('[data-edit-takeoffs]',old.takeoffs),landings:num('[data-edit-landings]',old.landings),minutes:num('[data-edit-minutes]',old.minutes),updatedAt:new Date().toISOString()};
    saveSoloFlights(solos.map(x=>x.id===id?updated:x));syncSoloEvents(updated);state.soloEditId=null;toast('Solo flight updated');render()
  });
+ document.querySelectorAll('[data-solo-delete-batch]').forEach(btn=>btn.onclick=async()=>{
+   const key=btn.dataset.soloDeleteBatch,items=getSoloFlights().filter(x=>String(x.batchId||x.id)===key);
+   if(!items.length)return;
+   const confirmed=await siteConfirm(planUiText('Remove all solo flights recorded in this row?','להסיר את כל טיסות הסולו שתועדו בשורה זו?'),{title:planUiText('Remove solo flights?','להסיר טיסות סולו?'),confirmLabel:planUiText('Remove','הסר'),tone:'danger'});
+   if(!confirmed)return;
+   const ids=new Set(items.map(x=>x.id));
+   saveSoloFlights(getSoloFlights().filter(x=>!ids.has(x.id)));
+   saveActivityEvents(getActivityEvents().filter(x=>!ids.has(x.sourceId)));
+   toast(planUiText('Solo records removed','רישומי הסולו הוסרו'));render();
+ });
  document.querySelectorAll('[data-solo-delete]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.soloDelete;saveSoloFlights(getSoloFlights().filter(x=>x.id!==id));saveActivityEvents(getActivityEvents().filter(x=>x.sourceId!==id));if(state.soloEditId===id)state.soloEditId=null;toast('Solo flight and linked activity removed');render()});
  if($('#discardPlannedDraft'))$('#discardPlannedDraft').onclick=async()=>{if(await siteConfirm('The auto-saved Planned vs Executed draft will be discarded. Recorded solo flights will not be deleted.',{title:'Discard draft?',confirmLabel:'Discard',tone:'danger'})){discardActivityDraft('planned');state.soloEditId=null;delete state.planInstructed;delete state.planSolo;toast('Planned vs Executed draft discarded');render()}};
  if($('#pveSave'))$('#pveSave').onclick=()=>{
    const planDate=state.planDate||todayIsoDate(),board=flightBoardPlanStatus(planDate),plannedInstructed=board.linked?board.instructed:Number($('#pvePlannedInstructed').value||0),plannedSolo=board.linked?board.solo:Number($('#pvePlannedSolo').value||0),plannedTotal=plannedInstructed+plannedSolo,cancellations=collectCancellations(),missing=[...document.querySelectorAll('.pveCancellationReason')].filter(x=>!x.value);
+   if(getSoloFlights().filter(x=>x.date===planDate).length>plannedSolo){toast(planUiText('Recorded solo flights exceed the plan. Adjust the plan before submission.','מספר טיסות הסולו שבוצעו חורג מהתכנון. יש לעדכן את התכנון לפני שליחה.'),'error');return}
    if(plannedTotal<=0){toast('Set at least one planned flight before submitting the daily report.','error');document.querySelector('.pvePlanGrid')?.scrollIntoView?.({behavior:'smooth',block:'center'});return}
    if(missing.length){missing.forEach(x=>x.classList.add('fieldInvalidControl'));toast('Select a cancellation reason for every non-executed flight before submitting.','error');missing[0].scrollIntoView?.({behavior:'smooth',block:'center'});missing[0].focus?.();return}
    const arr=getDailyReports(),date=state.planDate||todayIsoDate(),soloCount=getSoloFlights().filter(x=>x.date===date).length,instructedCount=getEvaluations().filter(x=>(x.flightDate||x.date)===date).length,obj={date,plannedInstructed,plannedSolo,instructedExecuted:instructedCount,soloExecuted:soloCount,cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),savedAt:new Date().toISOString()},next=arr.some(x=>x.date===date)?arr.map(x=>x.date===date?obj:x):[obj,...arr];
