@@ -526,7 +526,7 @@ test('Plan timeline option 1 shows all four chronological boundaries at correct 
  assert.match(english,/fleetTimeFlowClockTakeoff[^>]*>[\s\S]*?data-flight-clock="takeoff">08:00/);
  assert.match(english,/fleetTimeFlowClockLanding[^>]*>[\s\S]*?data-flight-clock="landing">08:30/);
  assert.match(english,/fleetTimeFlowClockEnd[^>]*>[\s\S]*?data-flight-clock="debrief">08:45/);
- assert.equal((english.match(/class="fleetTimeFlowIcon"/g)||[]).length,3);
+ assert.equal((english.match(/class="fleetTimeFlowIcon(?: fleetTimeFlowFlightIcon)?"/g)||[]).length,3);
  assert.match(english,/--phase-brief:20fr;--phase-flight:30fr;--phase-debrief:15fr/);
  language='he';const hebrew=render();
  assert.match(hebrew,/data-phase="brief"[^>]*>[\s\S]*?תדריך/);
@@ -587,7 +587,7 @@ test('Planned Solo UI automatically opens exact unexecuted slots, groups batches
  };
  const run=()=>vm.runInNewContext(program+'\nplannedVsExecuted()',scope);
  let out=run();
- assert.equal((out.match(/class="pveSoloEntryForm"/g)||[]).length,4,'Four planned solos should open four entry forms');
+ assert.equal((out.match(/data-solo-slot=/g)||[]).length,4,'Four planned solos should open four pending entry forms');
  assert.equal((out.match(/data-solo-skip=/g)||[]).length,4,'Every pending solo can be removed');
  assert.doesNotMatch(out,/>Add solo flight<\/button>/);
  assert.match(out,/name="quantity" type="number" inputmode="numeric" min="1" max="4"/);
@@ -600,10 +600,13 @@ test('Planned Solo UI automatically opens exact unexecuted slots, groups batches
  solo=[{id:'a',batchId:'batch',date:'2026-10-09',traineeName:'Test Trainee',syllabus:'Solo circuits'},
        {id:'b',batchId:'batch',date:'2026-10-09',traineeName:'Test Trainee',syllabus:'Solo circuits'}];
  out=run();
- assert.equal((out.match(/class="pveSoloEntryForm"/g)||[]).length,2);
- assert.match(out,/SOLO × 2/);
+ assert.equal((out.match(/data-solo-slot=/g)||[]).length,2);
+ assert.equal((out.match(/data-solo-batch="batch"/g)||[]).length,1,'Saved solos stay in the same editable list');
+ assert.match(out,/Solo × 2/);
+ assert.doesNotMatch(out,/pveRecordedList/);
+ assert.doesNotMatch(out,/>Record<\/button>/);
  language='he';out=run();
- assert.match(out,/שורות סולו מתוכננות|טיסות סולו שבוצעו/);
+ assert.match(out,/ביצוע טיסות סולו/);
 });
 test('planned solo recording never writes beyond the plan and every grouped flight carries counters',()=>{
  const a=html.indexOf("document.querySelectorAll('.pveSoloEntryForm').forEach(form=>");
@@ -611,10 +614,29 @@ test('planned solo recording never writes beyond the plan and every grouped flig
  const source=html.slice(a,b);
  assert.ok(a>=0&&b>a);
  assert.match(source,/quantity>remaining/);
- assert.match(source,/const batchId='solo_batch_'/);
- assert.match(source,/for\(let n=0;n<quantity;n\+\+\)/);
- assert.match(source,/syncSoloEvents\(flight\)/);
- assert.match(source,/saveSoloFlights\(solos\)/);
+ assert.match(source,/batchId=key\|\|'solo_batch_'/);
+ assert.match(source,/for\(let i=0;i<quantity;i\+\+\)/);
+ assert.match(source,/updated\.forEach\(syncSoloEvents\)/);
+ assert.match(source,/saveSoloFlights\(next\)/);
  assert.match(source,/data\.dismissedSoloSlots=/);
  assert.match(html,/getSoloFlights\(\)\.filter\(x=>x\.date===planDate\)\.length>plannedSolo/);
+});
+
+test('Unified Solo forms have no Record button and safely autosave edits with a stable batch id',()=>{
+ const a=html.indexOf('const soloSlot=(index,group=null)=>',html.indexOf('function plannedVsExecuted(){'));
+ const b=html.indexOf('return \'<div class="pvePage">',a);
+ const template=html.slice(a,b);
+ assert.match(template,/pveSoloEntrySaved/);
+ assert.match(template,/data-solo-batch/);
+ assert.match(template,/data-solo-slot/);
+ assert.doesNotMatch(template,/pveRecordSolo|pveSoloEntryActions|type="submit"/);
+ const binder=html.slice(html.indexOf("document.querySelectorAll('.pveSoloEntryForm').forEach(form=>"),html.indexOf("document.querySelectorAll('[data-solo-skip]')"));
+ assert.match(binder,/form\.addEventListener\('change'/);
+ assert.match(binder,/if\(!trainee\|\|!syllabus\)/);
+ assert.match(binder,/oldCount/);
+ assert.match(binder,/quantity>remaining/);
+ assert.match(binder,/saveSoloFlights\(next\)/);
+ assert.match(binder,/updated\.forEach\(syncSoloEvents\)/);
+ assert.match(binder,/render\(\)/);
+ assert.match(html,/soloEntries=\[\.\.\.document\.querySelectorAll\('\.pveSoloEntryForm\[data-solo-slot\]'\)/);
 });
