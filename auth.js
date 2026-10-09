@@ -81,7 +81,7 @@ const APP_ROLE_DEFINITIONS=Object.freeze({
   }),
   duty_trainee:Object.freeze({
     label:'Duty Trainee',
-    description:'Restricted to Home, Plan, Fleet and personal Settings. Can edit assigned-course flight boards, Planned vs Executed, solo flights and serviceability. All other sections are off limits; own photo only, not official identity.',
+    description:'Restricted to Home, Plan, Fleet and personal Settings. Assigned-course plans, reports and solo flights require instructor approval before updating official data. Fleet serviceability saves directly. Own photo only, not official identity.',
     capabilities:Object.freeze(['operations.daily.write','operations.flightBoard.write','operations.solo.write','fleet.serviceability.write'])
   }),
   user:Object.freeze({
@@ -122,6 +122,15 @@ const api=window.FLYMPUS_AUTH={
   roleDefinition:role=>roleDefinition(role),
   refreshSession:()=>refreshCurrentSession()
 };
+
+api.operationsCloud=window.FLYMPUS_OPERATIONS_CLOUD?.create({
+  model:window.FLYMPUS_DUTY_APPROVAL_MODEL,
+  active:()=>api.status==='active',
+  user:()=>currentUser,
+  profile:()=>currentProfile,
+  db:()=>db,
+  sdk:()=>firestoreSdk
+});
 
 
 /* A separate, opt-in Firestore safety channel. Course-local browser storage is

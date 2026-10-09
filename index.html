@@ -101,19 +101,23 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js" crossorigin />
-<link rel="modulepreload" href="./auth.js?v=20261008-switcher01" />
+<link rel="modulepreload" href="./auth.js?v=20261009-duty-approval-0792" />
 <script src="./firebase-config.js?v=20261004-auth2"></script>
 <link rel="stylesheet" href="./assets/reports-dashboard.css?v=0767" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
 <link rel="stylesheet" href="./assets/fleet-operations.css?v=20261009-timeline-svg-0790" />
+<link rel="stylesheet" href="./assets/course-operations.css?v=20261009-duty-approval-0792" />
 <link rel="stylesheet" href="./assets/home-operations.css?v=20261008-home02" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
-<script src="./assets/safety-global-inbox.js?v=20261008-safety02"></script>
+<script src="./assets/safety-global-inbox.js?v=20261009-duty-approval-0792"></script>
 <script src="./assets/safety-ui.js?v=20261008-safety03"></script>
 <script src="./assets/fleet-model.js?v=20261009-plan-duration12"></script>
-<script src="./assets/fleet-views.js?v=20261009-timeline-svg-0790"></script>
+<script src="./assets/fleet-views.js?v=20261009-duty-approval-0792"></script>
+<script src="./assets/duty-approval-model.js?v=20261009-duty-approval-0792"></script>
+<script src="./assets/operations-cloud.js?v=20261009-duty-approval-0792"></script>
+<script src="./assets/course-operations.js?v=20261009-duty-approval-0792"></script>
 <script src="./assets/home-operations.js?v=20261008-home02"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
@@ -154,7 +158,7 @@ html.flympusColdBoot #flympusAuthRoot{
    still owns notification permission/subscription later; this early call only
    makes the next cold launch independent of mobile network latency. */
 try{
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261009-sidebar-logo-0791',{scope:'./',updateViaCache:'none'}).catch(()=>{})
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261009-duty-approval-0792',{scope:'./',updateViaCache:'none'}).catch(()=>{})
 }catch{}
 </script>
 <meta name="flympus-deploy-commit" content="__FLYMPUS_DEPLOY_COMMIT__">
@@ -5738,7 +5742,7 @@ body:not(.drawerCanvasFrozen) .mobileBottomNav{
 <body>
 <div id="flympusAuthRoot" class="flympusAuthInitial" role="dialog" aria-modal="true" aria-label="FLYMPUS sign in"><div class="flympusAuthShell"><section class="flympusAuthCard"><div class="flympusAuthCardBody"><div class="flympusAuthMiniBrand" aria-hidden="true"><img src="./assets/flympus-app-icon.webp" alt=""></div><h1 class="flympusAuthTitle">Sign in to FLYMPUS</h1><p class="flympusAuthCopy">Continue with the Google account assigned to you.</p><div class="flympusAuthProviders"><button class="flympusAuthProvider" type="button" disabled><span class="flympusAuthProviderMark" aria-hidden="true">G</span><span class="flympusAuthProviderLabel">Continue with Google</span></button></div><p class="flympusAuthFine">FLYMPUS uses your account only to verify your identity. It does not read your Gmail or Outlook.</p></div></section></div></div>
 <script>(()=>{const r=document.getElementById('flympusAuthRoot');if(!r)return;const he=document.documentElement.getAttribute('data-flympus-language')==='he',returning=document.documentElement.classList.contains('flympusAuthReturning')||document.documentElement.classList.contains('flympusAuthResuming');if(he)r.dir='rtl';if(returning){r.hidden=true;return}if(he){r.querySelector('.flympusAuthTitle').textContent='כניסה ל־FLYMPUS';r.querySelector('.flympusAuthCopy').textContent='התחבר עם חשבון Google שהוקצה לך.';r.querySelector('.flympusAuthProviderLabel').textContent='המשך עם Google';r.querySelector('.flympusAuthFine').textContent='FLYMPUS משתמש בחשבון רק לצורך זיהוי. אין לו גישה ל־Gmail או ל־Outlook שלך.'}})()</script>
-<div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><div class="menuBtnWrap"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button></div><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><div class="notificationCenterFooter"><button class="notificationSettingsLink" id="notificationSettingsLink" type="button">Notification settings</button></div></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Account menu" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown accountQuickMenu" id="topPersonalProfileDropdown" role="dialog" aria-label="Account menu" hidden><button class="personalProfileHead accountProfileShortcut" id="quickMyProfile" type="button" aria-label="Open My Profile"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><span class="personalProfileEmail" id="personalProfileEmail" dir="auto"></span><small id="personalProfileRole">Account</small></div><span class="accountProfileChevron" aria-hidden="true">›</span></button><div id="accountSwitchList" class="accountSwitcherList" hidden></div><div class="personalProfileBody accountQuickActions"><button class="accountQuickAction accountAddAnother" id="accountAddAnother" type="button"><span class="accountQuickIcon accountAddIcon" aria-hidden="true">+</span><span><b>Add another account</b></span></button><div class="accountAddProviders" id="accountAddProviders" hidden><button type="button" data-account-add-provider="google">Continue with Google</button></div><p id="accountSwitcherMessage" class="accountSwitcherMessage" role="status" hidden></p><button class="accountQuickAction accountQuickSignOut" type="button" id="quickSignOut"><span class="accountQuickIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M10 5H5v14h5"></path><path d="M14 8l4 4-4 4M18 12H9"></path></svg></span><span><b>Sign out of FLYMPUS</b><small>Sign out of this account</small></span></button><input id="personalPhotoInput" type="file" accept="image/*" hidden></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-uploaded-0762.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><button class="drawerFooter drawerProfileShortcut" id="drawerProfileShortcut" type="button" data-go="my-profile" aria-label="Open My Profile"><div class="avatar"><span data-current-user-avatar>OF</span></div><div class="drawerProfileCopy"><b id="drawerProfileName">Or Fainguersch</b><span class="drawerProfileEmail" id="drawerProfileEmail" dir="auto"></span><small id="drawerProfileRole">Account</small></div><span class="drawerProfileArrow" aria-hidden="true">›</span></button></aside></div><main id="content"><div class="flympusBootShell" aria-hidden="true"><div class="flympusBootHero"><i></i><b></b><span></span><span></span><span></span></div><div class="flympusBootCard"><b></b><i></i><i></i><i></i><i></i></div></div></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0791 · Sidebar logo alignment</div><div class="toast" id="toast"></div></div>
+<div class="app"><div class="flympusPullBackdrop" id="flympusPullBackdrop" aria-hidden="true"></div><div class="flympusStandaloneRefreshIndicator" id="flympusStandaloneRefreshIndicator" aria-hidden="true"><span></span></div><header class="top"><div class="menuBtnWrap"><button class="menuBtn" id="menuBtn" type="button" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false">☰</button></div><div class="topBrand"><div class="topBrandCopy"><b>Course Tracker</b><span>Training Operations</span></div></div><div class="topHeaderSpacer" aria-hidden="true"></div><div class="topNotificationWrap"><button class="topNotificationBtn" id="topNotificationBtn" type="button" aria-label="Notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="topNotificationDropdown"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="topNotificationDot" id="topNotificationDot" hidden></span></button><div class="topNotificationDropdown" id="topNotificationDropdown" role="dialog" aria-label="Notifications" hidden><div class="notificationHead"><b>Notifications</b><span>Personal</span></div><div class="notificationEmpty"><div class="notificationEmptyIcon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><b>No new notifications</b><p>Your personal updates, assignments and items that need your attention will appear here across all courses.</p></div><div class="notificationCenterFooter"><button class="notificationSettingsLink" id="notificationSettingsLink" type="button">Notification settings</button></div></div></div><div class="topPersonalProfileWrap"><button class="avatar personalAvatarButton" id="topPersonalProfileBtn" type="button" aria-label="Account menu" aria-haspopup="dialog" aria-expanded="false" aria-controls="topPersonalProfileDropdown"><span data-current-user-avatar>OF</span></button><div class="topPersonalProfileDropdown accountQuickMenu" id="topPersonalProfileDropdown" role="dialog" aria-label="Account menu" hidden><button class="personalProfileHead accountProfileShortcut" id="quickMyProfile" type="button" aria-label="Open My Profile"><div class="personalProfilePreview" id="personalProfilePreview"><span data-current-user-avatar>OF</span></div><div class="personalProfileIdentity"><b id="personalProfileName">Or Fainguersch</b><span class="personalProfileEmail" id="personalProfileEmail" dir="auto"></span><small id="personalProfileRole">Account</small></div><span class="accountProfileChevron" aria-hidden="true">›</span></button><div id="accountSwitchList" class="accountSwitcherList" hidden></div><div class="personalProfileBody accountQuickActions"><button class="accountQuickAction accountAddAnother" id="accountAddAnother" type="button"><span class="accountQuickIcon accountAddIcon" aria-hidden="true">+</span><span><b>Add another account</b></span></button><div class="accountAddProviders" id="accountAddProviders" hidden><button type="button" data-account-add-provider="google">Continue with Google</button></div><p id="accountSwitcherMessage" class="accountSwitcherMessage" role="status" hidden></p><button class="accountQuickAction accountQuickSignOut" type="button" id="quickSignOut"><span class="accountQuickIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M10 5H5v14h5"></path><path d="M14 8l4 4-4 4M18 12H9"></path></svg></span><span><b>Sign out of FLYMPUS</b><small>Sign out of this account</small></span></button><input id="personalPhotoInput" type="file" accept="image/*" hidden></div></div></div></header><div class="personalCropModal" id="personalCropModal" role="dialog" aria-modal="true" aria-label="Adjust profile photo" hidden><div class="personalCropCard"><div class="personalCropHead"><div><h3 id="personalCropTitle">Adjust profile photo</h3><p id="personalCropSubtitle">Drag with one finger · pinch with two fingers to zoom.</p></div><button class="personalCropClose" id="personalCropClose" type="button" aria-label="Close photo editor">×</button></div><div class="personalCropStage"><div class="personalCropViewport" id="personalCropViewport"><img id="personalCropImage" alt=""></div><p class="personalCropHint" id="personalCropHint">Drag to reposition · pinch to zoom · only the circle will be used.</p></div><div class="personalCropControls"><div class="personalCropToolRow"><button class="personalCropReset" id="personalCropReset" type="button">Reset position</button><label class="personalCropReplace" for="personalCropReplaceInput">Choose another photo<input id="personalCropReplaceInput" type="file" accept="image/*" style="display:none"></label></div><div class="personalCropActions"><button class="btn secondary" id="personalCropCancel" type="button">Cancel</button><button class="btn sky" id="personalCropApply" type="button">Use photo</button></div></div></div></div><div class="drawer" id="drawer"><div class="backdrop" id="backdrop"></div><aside class="panel"><div class="brand"><img class="sidebarFlympusWordmark" src="./assets/flympus-sidebar-uploaded-0762.webp" alt="FLYMPUS — Train. Track. Progress."></div><div id="nav"></div><button class="drawerFooter drawerProfileShortcut" id="drawerProfileShortcut" type="button" data-go="my-profile" aria-label="Open My Profile"><div class="avatar"><span data-current-user-avatar>OF</span></div><div class="drawerProfileCopy"><b id="drawerProfileName">Or Fainguersch</b><span class="drawerProfileEmail" id="drawerProfileEmail" dir="auto"></span><small id="drawerProfileRole">Account</small></div><span class="drawerProfileArrow" aria-hidden="true">›</span></button></aside></div><main id="content"><div class="flympusBootShell" aria-hidden="true"><div class="flympusBootHero"><i></i><b></b><span></span><span></span><span></span></div><div class="flympusBootCard"><b></b><i></i><i></i><i></i><i></i></div></div></main><nav class="mobileBottomNav" id="mobileBottomNav" aria-label="Primary mobile navigation"></nav><div class="reviewBanner">FLYMPUS Review · build 0792 · Duty Trainee instructor approval</div><div class="toast" id="toast"></div></div>
 <script>
 (()=>{try{
   /* Keep course context visible without turning the global header into a
@@ -5987,6 +5991,8 @@ body:not(.drawerCanvasFrozen) .mobileBottomNav{
 <script src="./assets/ep-lessons-night.js?v=0684"></script>
 <script>
 const course={name:'Aerostar EP Course',code:'AEP-26'};
+let dutyOperations=null;
+let sharedOperationCourses=[];
 const currentUserId='i1';
 window.FLYMPUS_SAFETY_COURSE=()=>String(currentCourseId);
 window.FLYMPUS_SAFETY_TOAST=(msg,tone)=>toast(msg,tone);
@@ -7001,6 +7007,7 @@ saveAppNavHistory();
 function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,safetyView:state.safetyView,evaluationView:state.evaluationView,examsView:state.examsView,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace,packageWorkspace:state.packageWorkspace,packageFocusId:state.packageFocusId,packageEditId:state.packageEditId,emergencyProfileFilter:state.emergencyProfileFilter,builderType:state.builderType,builderPhase:state.builderPhase,builderPlatform:state.builderPlatform,builderTraining:state.builderTraining,builderProgram:state.builderProgram,builderDay:state.builderDay,builderCountry:state.builderCountry,builderName:state.builderName,builderNameManual:state.builderNameManual,builderCode:state.builderCode,builderCodeManual:state.builderCodeManual,builderStartsOn:state.builderStartsOn,libraryProfession:state.libraryProfession,packageCategoryFilter:state.packageCategoryFilter,myCoursesStatus:state.myCoursesStatus,myCoursesSector:state.myCoursesSector,myCoursesPhase:state.myCoursesPhase,myCoursesPlatform:state.myCoursesPlatform,myCoursesCountry:state.myCoursesCountry,myCoursesTraining:state.myCoursesTraining,myCoursesRole:state.myCoursesRole,myCoursesFiltersOpen:state.myCoursesFiltersOpen,rosterStatuses:state.rosterStatuses,rosterRoles:state.rosterRoles,rosterDateFrom:state.rosterDateFrom,rosterDateTo:state.rosterDateTo,reportTrainees:state.reportTrainees,reportInstructors:state.reportInstructors,reportSyllabi:state.reportSyllabi,reportDateFrom:state.reportDateFrom,reportDateTo:state.reportDateTo,reportTab:state.reportTab,reportGranularity:state.reportGranularity,planDate:state.planDate,planView:state.planView,myCoursesStatuses:state.myCoursesStatuses,myCoursesSectors:state.myCoursesSectors,myCoursesPhases:state.myCoursesPhases,myCoursesPlatforms:state.myCoursesPlatforms,myCoursesTrainings:state.myCoursesTrainings,myCoursesCountries:state.myCoursesCountries,myCoursesRoles:state.myCoursesRoles,myCoursesDateFrom:state.myCoursesDateFrom,myCoursesDateTo:state.myCoursesDateTo,packageNameFilters:state.packageNameFilters,packagePhaseFilters:state.packagePhaseFilters,packagePlatformFilters:state.packagePlatformFilters,packageCategoryFilters:state.packageCategoryFilters,packageContextFilters:state.packageContextFilters}))}catch{}}
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function currentUserCourseRole(){
+  const sharedRole=dutyOperations?.memberRole?.();if(['INSTRUCTOR','COURSE_MANAGER'].includes(sharedRole))return sharedRole;
   try{
     const email=String(window.FLYMPUS_AUTH?.profile?.email||window.FLYMPUS_AUTH?.currentUser?.email||'').trim().toLowerCase();
     if(!email)return'INSTRUCTOR';
@@ -7010,6 +7017,7 @@ function currentUserCourseRole(){
   }catch{return'INSTRUCTOR'}
 }
 function isDutyTraineeAssigned(courseKey=currentCourseId){
+ if(window.FLYMPUS_AUTH?.role?.()==='duty_trainee'&&window.FLYMPUS_AUTH?.isActive?.()===true&&dutyOperations?.memberRole?.(String(courseKey))==='DUTY_TRAINEE')return true;
  if(window.FLYMPUS_AUTH?.role?.()!=='duty_trainee'||window.FLYMPUS_AUTH?.isActive?.()!==true)return false;
  const email=String(window.FLYMPUS_AUTH?.profile?.email||window.FLYMPUS_AUTH?.currentUser?.email||'').trim().toLowerCase();
  if(!email)return false;
@@ -7037,8 +7045,8 @@ function dutyTraineeHome(){
   if(!isDutyTraineeAssigned())return '<div class="appSettingsHead"><div class="eyebrow">DUTY OPERATIONS</div><h1 class="pageTitle">Home</h1></div><section class="card settingBox"><h2>Course access not assigned</h2><p class="sub">Ask a Training Manager to assign you to the correct course. No course data is available.</p><button class="btn secondary" data-go="preferences">Personal Settings</button></section>';
   const label=String(currentCourseMeta.courseName||'Assigned course');
   return '<div class="appSettingsHead"><div class="eyebrow">DUTY OPERATIONS</div><h1 class="pageTitle">Home</h1><p class="sub">Daily operational tasks for your assigned course.</p></div>'+
-    '<section class="card settingBox"><h2>'+esc(label)+'</h2><p class="sub">Welcome, '+esc(name)+'. Your access is limited to daily operations.</p></section>'+
-    '<div class="grid twoCol"><section class="card settingBox"><h3>Plan</h3><p class="sub">Daily flight board, Planned vs Executed and solo records.</p><button class="btn sky" type="button" data-go="planned">Open Plan</button></section>'+
+    '<section class="card settingBox">'+(sharedOperationCourses.length>1?'<label>'+planUiText('Assigned course','קורס משויך')+'<select class="input" id="dutyCourseSelect">'+sharedOperationCourses.map(c=>'<option value="'+esc(c.courseId)+'" '+(c.courseId===currentCourseId?'selected':'')+'>'+esc(c.name)+'</option>').join('')+'</select></label>':'')+'<h2>'+esc(label)+'</h2><p class="sub">Welcome, '+esc(name)+'. Your access is limited to daily operations.</p></section>'+
+    '<div class="grid twoCol"><section class="card settingBox"><h3>Plan</h3><p class="sub">Draft daily plans and execution reports, then send them for instructor approval.</p><button class="btn sky" type="button" data-go="planned">Open Plan</button></section>'+
     '<section class="card settingBox"><h3>Fleet</h3><p class="sub">Update the aircraft status for your assigned course.</p><button class="btn sky" type="button" data-go="fleet">Open Fleet</button></section></div>';
 }
 function dutyTraineeSettingsScreen(){
@@ -7363,7 +7371,7 @@ function siteEditDecision(message,{title='Unsaved changes'}={}){
  })
 }
 
-function getEvaluations(){return readCourseArray('ct-review-evals')}function setEvaluations(x){writeCourseArray('ct-review-evals',x)}
+function getEvaluations(){return readCourseArray('ct-review-evals')}function setEvaluations(x){if(isDutyTrainee())throw new Error('Instructor approval is required');const prior=getEvaluations();writeCourseArray('ct-review-evals',x);if(dutyOperations?.enabled()){const dates=[...new Set(prior.concat(x).map(e=>e.flightDate||e.date))].filter(window.FLYMPUS_DUTY_APPROVAL_MODEL.dateValid);for(const date of dates)dutyOperations.syncEvaluations(date,x.filter(e=>(e.flightDate||e.date)===date).length).catch(err=>toast('Evaluation saved on this device. Shared count needs retry: '+err.message,'error'));}}
 const nav=[['__label','','COURSE'],['courses','courses','My Courses'],['settings','settings','Course Management'],['__label','','APP'],['preferences','preferences','Settings']];
 function navIconSvg(name){
   const paths={
@@ -8737,8 +8745,8 @@ t3:{current:'Basic Emergencies B',completed:4,minimum:4,presence:'WITH INSTRUCTO
 t4:{current:'Circuits',completed:2,minimum:4,presence:'WITH INSTRUCTOR',reviewRequired:false,next:'Basic Emergencies A',optional:[]}
 };
 
-function getDailyReports(){return readCourseArray('ct-review-daily-reports')}
-function saveDailyReports(v){writeCourseArray('ct-review-daily-reports',v)}
+function getDailyReports(){const local=isDutyTrainee()?[]:readCourseArray('ct-review-daily-reports');return dutyOperations?.enabled()?window.FLYMPUS_DUTY_APPROVAL_MODEL.mergeReports(local,dutyOperations.days()):local;}
+function saveDailyReports(v){if(isDutyTrainee())throw new Error('Instructor approval is required');writeCourseArray('ct-review-daily-reports',v)}
 function allEvaluationsForAnalytics(){
  const defs=cfgGet().emergencies;const saved=getEvaluations().map(e=>({date:e.flightDate,traineeId:e.traineeId,instructorId:e.instructorId,syllabus:e.syllabus,grade:Number(e.grade)||0,emergencies:e.emergencyCounts?Object.entries(e.emergencyCounts).flatMap(([id,n])=>Array.from({length:Number(n)||0},()=>cfgItem(defs,id)?.name)).filter(Boolean):(e.emergencies||[]).flatMap((n,i)=>Array.from({length:Number(n)||0},()=>emergencies[i])).filter(Boolean)}));
  return [...courseMockEvalHistory(),...saved];
@@ -8750,7 +8758,7 @@ function mean(values){const v=values.filter(x=>Number.isFinite(Number(x))).map(N
 function getSafetyRecords(){return safetyUI.records()}
 function saveSafetyRecords(v){try{localStorage.setItem(courseScopedKey('ct-review-safety'),JSON.stringify(Array.isArray(v)?v:[]));return true}catch{return false}}
 const safetyGlobal=window.FLYMPUS_GLOBAL_SAFETY.create({
-  escape:esc,toast,notifySound:playFlympusNotificationSound,isDuty:isDutyTrainee
+  escape:esc,toast,notifySound:playFlympusNotificationSound,isDuty:isDutyTrainee,afterRender:renderDutyApprovalNotification
 });
 const safetyUI=window.FLYMPUS_SAFETY_UI.create({
   readLocal:()=>readCourseArray('ct-review-safety'),saveLocal:saveSafetyRecords,
@@ -8780,21 +8788,65 @@ function safetySeverityGuideHtml(){
 }
 /* Aircraft and flights belong to the active course. Flight board is per date and platform.
    The current review storage is local/UID-scoped, not a shared server database. */
+function getPlanWorkingFlights(date=state.planDate||todayIsoDate()){return dutyOperations?.workingFlights(date)||getDailyFlightBoard()}
+function getPlanWorkingSoloFlights(){return dutyOperations?.workingSolos()||getSoloFlights()}
+function savePlanWorkingSoloFlights(rows){if(isDutyTrainee()||dutyOperations?.enabled()){if(!dutyOperations)throw new Error('Instructor approval is required');dutyOperations.saveWorkingSolos(rows)}else saveSoloFlights(rows)}
+function getPlanExecutedInstructed(date){return isDutyTrainee()&&dutyOperations?.enabled()?dutyOperations.day(date).evaluationCount:getEvaluations().filter(x=>(x.flightDate||x.date)===date).length}
+async function saveFleetOperations(base,value){if(!dutyOperations?.enabled())return persistCourseOperations(base,value);const fleet=dutyOperations.fleet();await dutyOperations.saveFleet({aircraft:base==='ct-review-aircraft-serviceability'?value:fleet.aircraft,timingDefaults:base==='ct-review-plan-timing-defaults'?value:fleet.timingDefaults});return true}
+function preserveDutyLegacyDrafts(days){
+ if(!isDutyTrainee())return;
+ const all=readCourseObject('ct-review-duty-operation-drafts'),flights=readCourseArray('ct-review-flight-board'),reports=readCourseArray('ct-review-daily-reports'),solos=readCourseArray('ct-review-solo-flights'),marks=all.__legacyPreserved||{};let changed=false;
+ const dates=[...new Set(flights.concat(reports,solos).map(x=>x.date))].filter(window.FLYMPUS_DUTY_APPROVAL_MODEL.dateValid);
+ for(const date of dates){const day=days.find(d=>d.date===date)||{revision:0},localFlights=flights.filter(x=>x.date===date),report=reports.find(x=>x.date===date),localSolos=solos.filter(x=>x.date===date),bucket=all[date]||{},mark=marks[date]||{};
+  if(localFlights.length&&!mark.PLAN){if(!bucket.PLAN&&!window.FLYMPUS_DUTY_APPROVAL_MODEL.same({flights:localFlights},day.plan))bucket.PLAN={value:{flights:localFlights},baseRevision:day.revision,requestId:'',origin:'preserved-local'};mark.PLAN=true;changed=true;}
+  if((report||localSolos.length)&&!mark.REPORT){if(!bucket.REPORT)bucket.REPORT={value:{...report,solos:localSolos},baseRevision:day.revision,requestId:'',origin:'preserved-local'};mark.REPORT=true;changed=true;}
+  if(Object.keys(bucket).length)all[date]=bucket;marks[date]=mark;
+ }
+ if(changed){all.__legacyPreserved=marks;if(!persistCourseOperations('ct-review-duty-operation-drafts',all))toast('Existing entries remain on this device; could not create an approval draft','error');}
+}
+function renderDutyApprovalNotification(){
+ if(isDutyTrainee()||!dutyOperations)return;
+ const panel=$('#topNotificationDropdown');if(!panel)return;
+ let list=panel.querySelector('#dutyApprovalNotificationList');if(!list){list=document.createElement('div');list.id='dutyApprovalNotificationList';panel.querySelector('.notificationHead')?.after(list)}
+ list.innerHTML=dutyOperations.notificationMarkup();
+ if(dutyOperations.count()){const dot=$('#topNotificationDot');if(dot)dot.hidden=false;const empty=panel.querySelector('.notificationEmpty');if(empty)empty.hidden=true;}
+ list.querySelectorAll('[data-duty-open-inbox]').forEach(button=>button.onclick=()=>{panel.hidden=true;state.planView='approvals';go('planned')});
+}
+function operationContextSnapshot(){
+ const people=(rows,type)=>rows.filter(p=>courseMembershipFor(p.id,type,{status:p.status||'Active'}).status!=='Inactive').map(p=>({id:p.id,name:p.name,email:String(p.email||''),status:'Active',...(type==='INSTRUCTOR'?{role:courseMembershipFor(p.id,type,{role:p.role||'INSTRUCTOR'}).role}:{} )}));
+ const defs=evaluationSyllabusDefs().map(x=>({id:String(x.id||x.name),name:x.name,mode:x.mode||'INSTRUCTED'}));
+ return JSON.parse(JSON.stringify({courseMeta:{...currentCourseMeta,courseCode:currentCourseId},trainees:people(courseTrainees(),'TRAINEE'),instructors:people(courseInstructors(),'INSTRUCTOR'),syllabi:defs.map(x=>x.name),soloSyllabi:defs.filter(x=>x.mode==='SOLO').map(x=>x.name),syllabusDefs:defs,counters:currentCourseTrackingCounters(),cancellationReasons:cfgGet().cancellationReasons||[]}));
+}
+function operationSeedDays(){
+ const flights=readCourseArray('ct-review-flight-board'),reports=readCourseArray('ct-review-daily-reports'),solos=readCourseArray('ct-review-solo-flights'),managed=readCourseArray('ct-review-flight-board-managed-dates');
+ const dates=[...new Set([...flights.map(x=>x.date),...reports.map(x=>x.date),...solos.map(x=>x.date),...managed])].filter(window.FLYMPUS_DUTY_APPROVAL_MODEL.dateValid);
+ return dates.map(date=>{const old=reports.find(x=>x.date===date),evaluationCount=getEvaluations().filter(x=>(x.flightDate||x.date)===date).length;return {date,evaluationCount,plan:managed.includes(date)||flights.some(x=>x.date===date)?{flights:flights.filter(x=>x.date===date)}:null,report:old?{date,plannedInstructed:Number(old.plannedInstructed)||0,plannedSolo:Number(old.plannedSolo)||0,instructedExecuted:Number(old.instructedExecuted)||0,soloExecuted:solos.filter(x=>x.date===date).length,cancellations:old.cancellations||[],reason:old.reason||'',solos:solos.filter(x=>x.date===date)}:null};});
+}
+dutyOperations=window.FLYMPUS_COURSE_OPERATIONS?.create({
+ model:window.FLYMPUS_DUTY_APPROVAL_MODEL,cloud:()=>window.FLYMPUS_AUTH?.operationsCloud,profile:()=>window.FLYMPUS_AUTH?.profile,
+ escape:esc,language:()=>getFlympusAppPreferences().language,isDuty:isDutyTrainee,courseId:()=>currentCourseId,date:()=>state.planDate||todayIsoDate(),
+ preserveLegacyDrafts:preserveDutyLegacyDrafts,switchCourse:key=>switchCourseByKey(key,{screen:'home'}),readDrafts:()=>readCourseObject('ct-review-duty-operation-drafts'),writeDrafts:value=>persistCourseOperations('ct-review-duty-operation-drafts',value),officialFlights:getDailyFlightBoard,officialSolos:getSoloFlights,
+ render:()=>render(),root:()=>$('#content'),toast,confirm:siteConfirm,contextSnapshot:operationContextSnapshot,
+ fleetSnapshot:()=>({aircraft:getFleetAircraft().filter(x=>x.platformId===currentFleetPlatform()),timingDefaults:getPlanTimingDefaults()}),seedDays:operationSeedDays,
+ resolved:r=>{if(r.kind==='REPORT')discardActivityDraft('planned')},id:()=>window.crypto?.randomUUID?.()||Date.now()+'_'+Math.random().toString(36).slice(2),
+ sharedCourses:rows=>{sharedOperationCourses=rows;if(isDutyTrainee()&&rows.length){const row=rows.find(x=>x.courseId===currentCourseId)||rows[0];currentCourseId=row.courseId;Object.assign(currentCourseMeta,row.context.courseMeta,{courseCode:row.courseId})}}
+});
 window.FLYMPUS_FLEET_LANGUAGE=()=>getFlympusAppPreferences().language;
 function currentFleetPlatform(){return String(currentCourseMeta.platformId||'unspecified')}
-function getFleetAircraft(){return readCourseArray('ct-review-aircraft-serviceability')}
-function getDailyFlightBoard(){return readCourseArray('ct-review-flight-board')}
+function getFleetAircraft(){return dutyOperations?.enabled()?window.FLYMPUS_DUTY_APPROVAL_MODEL.clone(dutyOperations.fleet().aircraft):readCourseArray('ct-review-aircraft-serviceability')}
+function getDailyFlightBoard(){const local=isDutyTrainee()?[]:readCourseArray('ct-review-flight-board');return dutyOperations?.enabled()?window.FLYMPUS_DUTY_APPROVAL_MODEL.mergeFlights(local,dutyOperations.days()):local;}
 function flightBoardPlanStatus(date){
  const flights=getDailyFlightBoard(),totals=window.FLYMPUS_FLEET_MODEL.plannedFlightCounts(flights,date,currentFleetPlatform());
- const managed=readCourseArray('ct-review-flight-board-managed-dates').includes(date);
+ const managed=Boolean(dutyOperations?.enabled()&&dutyOperations.day(date).plan)||readCourseArray('ct-review-flight-board-managed-dates').includes(date);
  return {...totals,linked:managed||totals.total>0};
 }
 function markFlightBoardPlanManaged(date){
  const dates=readCourseArray('ct-review-flight-board-managed-dates');
  return dates.includes(date)||persistCourseOperations('ct-review-flight-board-managed-dates',[...dates,date]);
 }
-function getPlanTimingDefaults(){return readCourseObject('ct-review-plan-timing-defaults')}
+function getPlanTimingDefaults(){return dutyOperations?.enabled()?dutyOperations.fleet().timingDefaults:readCourseObject('ct-review-plan-timing-defaults')}
 function persistCourseOperations(base,items){
+ if(isDutyTrainee()&&['ct-review-flight-board','ct-review-flight-board-managed-dates'].includes(base))throw new Error('Instructor approval is required');
  try{localStorage.setItem(courseScopedKey(base),JSON.stringify(items));return true}catch{return false}
 }
 function currentFleetContext(extra={}){
@@ -8803,15 +8855,15 @@ function currentFleetContext(extra={}){
 function fleetScreen(){return window.FLYMPUS_FLEET_VIEW?.fleet?.(currentFleetContext({editId:state.fleetEditId||null}))||flympusAccessDenied('Fleet')}
 function courseFlightScheduleHtml(date){
  if(!window.FLYMPUS_FLEET_VIEW)return '';
- return window.FLYMPUS_FLEET_VIEW.schedule(currentFleetContext({date,editId:state.flightBoardEditId||null,canWrite:flympusCan('operations.flightBoard.write'),
+ return window.FLYMPUS_FLEET_VIEW.schedule(currentFleetContext({date,flights:getPlanWorkingFlights(date),draftMode:isDutyTrainee(),sharedMode:dutyOperations?.enabled(),editId:state.flightBoardEditId||null,canWrite:flympusCan('operations.flightBoard.write'),
   trainees:courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active').map(x=>({id:x.id,name:x.name})),
   instructors:courseInstructors().map(x=>({id:x.id,name:x.name})),syllabi:evaluationSyllabusNames()}));
 }
-function saveFleetForm(form){
+async function saveFleetForm(form){
  const fd=new FormData(form);
  const input={id:String(fd.get('id')||''),tail:String(fd.get('tail')||''),status:String(fd.get('status')||''),reason:String(fd.get('reason')||''),since:normalizeDateValue(fd.get('since'))};
  const model=window.FLYMPUS_FLEET_MODEL,now=new Date().toISOString(),idFactory=()=>window.crypto?.randomUUID?.()||('ac_'+Date.now()+'_'+Math.random().toString(36).slice(2));
- return persistCourseOperations('ct-review-aircraft-serviceability',model.upsertAircraft(getFleetAircraft(),input,currentFleetPlatform(),now,idFactory,String(window.FLYMPUS_AUTH?.profile?.displayName||window.FLYMPUS_AUTH?.currentUser?.displayName||window.FLYMPUS_AUTH?.currentUser?.email||'').trim()));
+ return await saveFleetOperations('ct-review-aircraft-serviceability',model.upsertAircraft(getFleetAircraft(),input,currentFleetPlatform(),now,idFactory,String(window.FLYMPUS_AUTH?.profile?.displayName||window.FLYMPUS_AUTH?.currentUser?.displayName||window.FLYMPUS_AUTH?.currentUser?.email||'').trim()));
 }
 function fleetSaveError(){toast('Unable to save. Check device storage; no changes were submitted.','error')}
 function bindFleet(){
@@ -8820,9 +8872,9 @@ function bindFleet(){
  const showEditor=()=>{const panel=$('#fleetEditorPanel');if(!panel)return;panel.hidden=false;panel.scrollIntoView?.({behavior:'smooth',block:'start'});panel.querySelector('[name="tail"]')?.focus?.({preventScroll:true})};
  if($('#fleetStatus'))$('#fleetStatus').onchange=syncReason;syncReason();
  document.querySelectorAll('[data-fleet-add]').forEach(b=>b.onclick=()=>{if(!flympusCan('fleet.serviceability.write'))return;if(state.fleetEditId){state.fleetEditId=null;render()}showEditor()});
- if(form)form.onsubmit=e=>{
+ if(form)form.onsubmit=async e=>{
   e.preventDefault();if(!flympusCan('fleet.serviceability.write'))return;
-  try{if(!saveFleetForm(form)){fleetSaveError();return}state.fleetEditId=null;toast('Fleet status saved','success');render()}catch(err){toast(err.message||'Unable to save aircraft','error')}
+  try{if(!await saveFleetForm(form)){fleetSaveError();return}state.fleetEditId=null;toast('Fleet status saved','success');render()}catch(err){toast(err.message||'Unable to save aircraft','error')}
  };
  document.querySelectorAll('[data-fleet-edit]').forEach(b=>b.onclick=()=>{if(!flympusCan('fleet.serviceability.write'))return;state.fleetEditId=b.dataset.fleetEdit;render();showEditor()});
  if($('#fleetCancelEdit'))$('#fleetCancelEdit').onclick=()=>{state.fleetEditId=null;render()};
@@ -8832,7 +8884,7 @@ function bindFleet(){
   if(!item||!(await siteConfirm('Remove aircraft '+item.tail+' from the active fleet? Historical flight assignments and serviceability changes will be retained.',{title:'Remove aircraft?',confirmLabel:'Remove',tone:'warning'})))return;
   try{
    const next=window.FLYMPUS_FLEET_MODEL.archiveAircraft(getFleetAircraft(),item.id,currentFleetPlatform());
-   if(!persistCourseOperations('ct-review-aircraft-serviceability',next)){fleetSaveError();return}
+   if(!await saveFleetOperations('ct-review-aircraft-serviceability',next)){fleetSaveError();return}
    if(state.fleetEditId===item.id)state.fleetEditId=null;
    toast('Aircraft removed from active fleet');render();
   }catch(err){toast(err.message||'Unable to remove aircraft','error')}
@@ -8912,7 +8964,7 @@ function bindDailyFlightBoard(){
   }
  }
  const defaultsForm=$('#fleetTimingDefaultsForm');
- if(defaultsForm)defaultsForm.onsubmit=e=>{
+ if(defaultsForm)defaultsForm.onsubmit=async e=>{
   e.preventDefault();if(!flympusCan('fleet.serviceability.write'))return;
   const data=new FormData(defaultsForm),defaults={};
   for(const type of ['INSTRUCTED','SOLO']){
@@ -8923,18 +8975,20 @@ function bindDailyFlightBoard(){
     defaults[type][key]=Number(raw);
    }
   }
-  if(!persistCourseOperations('ct-review-plan-timing-defaults',defaults)){fleetSaveError();return}
+  try{if(!await saveFleetOperations('ct-review-plan-timing-defaults',defaults)){fleetSaveError();return}}catch(err){toast(err.message,'error');return}
   toast(planUiText('Planning defaults saved for this course on this device','ברירות המחדל לתכנון נשמרו לקורס במכשיר זה'),'success');render();
  };
- if(form)form.onsubmit=e=>{
+ if(form)form.onsubmit=async e=>{
   e.preventDefault();if(!flympusCan('operations.flightBoard.write'))return;
   const fd=new FormData(form),date=state.planDate||normalizeDateValue($('#pveDate')?.value)||todayIsoDate(),traineeId=String(fd.get('traineeId')||''),instructorId=String(fd.get('instructorId')||''),
     t=courseTrainees().find(x=>x.id===traineeId),i=courseInstructors().find(x=>x.id===instructorId);
   const input={id:String(fd.get('id')||''),date,time:String(fd.get('time')||''),aircraftId:String(fd.get('aircraftId')||''),mode:String(fd.get('mode')||''),traineeId,traineeName:t?.name||'',instructorId,instructorName:i?.name||'',syllabus:String(fd.get('syllabus')||''),estimatedMinutes:String(fd.get('estimatedMinutes')||''),briefingMinutes:String(fd.get('briefingMinutes')||''),debriefMinutes:String(fd.get('debriefMinutes')||''),note:String(fd.get('note')||'')};
   try{
-    const all=model.upsertSortie(getDailyFlightBoard(),input,getFleetAircraft(),currentFleetPlatform(),date,
+    const all=model.upsertSortie(getPlanWorkingFlights(date),input,getFleetAircraft(),currentFleetPlatform(),date,
     {trainees:courseTrainees().map(x=>x.id),instructors:courseInstructors().map(x=>x.id)},new Date().toISOString(),()=>window.crypto?.randomUUID?.()||('flight_'+Date.now()+'_'+Math.random().toString(36).slice(2)),getPlanTimingDefaults());
-    if(!markFlightBoardPlanManaged(date)||!persistCourseOperations('ct-review-flight-board',all)){fleetSaveError();return}
+    if(isDutyTrainee()){dutyOperations.saveDraft('PLAN',{flights:all.filter(x=>x.date===date)},date);dutyOperations.clearPlanForm(input.id,date)}
+    else if(dutyOperations?.enabled()){await dutyOperations.publish('PLAN',date,{flights:all.filter(x=>x.date===date)})}
+    else if(!markFlightBoardPlanManaged(date)||!persistCourseOperations('ct-review-flight-board',all)){fleetSaveError();return}
     state.flightBoardEditId=null;toast(planUiText('Flight board updated','שיבוץ הטיסה נשמר בהצלחה'),'success');render();
   }catch(err){toast(planScheduleError(err),'error')}
  };
@@ -8942,9 +8996,10 @@ function bindDailyFlightBoard(){
  if($('#fleetFlightCancel'))$('#fleetFlightCancel').onclick=()=>{state.flightBoardEditId=null;render()};
  document.querySelectorAll('[data-flight-delete]').forEach(b=>b.onclick=async()=>{
   if(!flympusCan('operations.flightBoard.write'))return;
-  const id=b.dataset.flightDelete,record=getDailyFlightBoard().find(x=>x.id===id&&x.platformId===currentFleetPlatform());
+  const id=b.dataset.flightDelete,record=getPlanWorkingFlights(state.planDate||todayIsoDate()).find(x=>x.id===id&&x.platformId===currentFleetPlatform());
   if(!record||!(await siteConfirm('Remove this scheduled flight? Submitted evaluations and solo flights are not affected.',{title:'Remove flight?',confirmLabel:'Remove',tone:'warning'})))return;
-  if(!markFlightBoardPlanManaged(record.date)||!persistCourseOperations('ct-review-flight-board',getDailyFlightBoard().filter(x=>x.id!==id))){fleetSaveError();return}
+  const next=getPlanWorkingFlights(record.date).filter(x=>x.id!==id);
+  try{if(isDutyTrainee())dutyOperations.saveDraft('PLAN',{flights:next.filter(x=>x.date===record.date)},record.date);else if(dutyOperations?.enabled())await dutyOperations.publish('PLAN',record.date,{flights:next.filter(x=>x.date===record.date)});else if(!markFlightBoardPlanManaged(record.date)||!persistCourseOperations('ct-review-flight-board',next)){fleetSaveError();return}}catch(err){toast(err.message,'error');return}
   state.flightBoardEditId=null;toast('Scheduled flight removed');render();
  });
 }
@@ -9311,8 +9366,8 @@ function updateCourseMembershipForCourse(courseKey,personId,type,patch){
   root[courseKey]=course;saveCourseMembershipState(root);
 }
 function updateCourseMembership(personId,type,patch){updateCourseMembershipForCourse(currentCourseId,personId,type,patch)}
-function getActivityEvents(){return readCourseArray('ct-review-activity-events')}
-function saveActivityEvents(v){writeCourseArray('ct-review-activity-events',v)}
+function getActivityEvents(){const local=isDutyTrainee()?[]:readCourseArray('ct-review-activity-events');if(!dutyOperations?.enabled())return local;const dates=new Set(dutyOperations.days().filter(d=>d.report).map(d=>d.date));return local.filter(e=>!(e.source==='Solo flight'&&dates.has(e.date))).concat(window.FLYMPUS_DUTY_APPROVAL_MODEL.soloEvents(dutyOperations.days().flatMap(d=>d.report?.solos||[])));}
+function saveActivityEvents(v){if(isDutyTrainee())throw new Error('Instructor approval is required');writeCourseArray('ct-review-activity-events',v)}
 function activityTotalsFor(traineeId){
   const out={TAKEOFF:0,LANDING:0,TOUCH_AND_GO:0,TRAINING_HOUR:0,TECH_ACTIVITY:0};
   getActivityEvents().filter(x=>x.traineeId===traineeId).forEach(x=>{
@@ -9327,8 +9382,8 @@ function activityTotalsFor(traineeId){
 function activityCounter(type){return currentCourseTrackingCounters().find(x=>x.type===type)||null}
 function activityKind(type){return activityCounter(type)?.kind||type}
 function activityLabel(type){return activityCounter(type)?.label||({TAKEOFF:'Takeoff',LANDING:'Full-stop landing',TOUCH_AND_GO:'Touch & Go',TRAINING_HOUR:'Training hour',TECH_ACTIVITY:'Technician activity'})[type]||type}
-function getSoloFlights(){return readCourseArray('ct-review-solo-flights')}
-function saveSoloFlights(v){writeCourseArray('ct-review-solo-flights',v)}
+function getSoloFlights(){const local=isDutyTrainee()?[]:readCourseArray('ct-review-solo-flights');return dutyOperations?.enabled()?window.FLYMPUS_DUTY_APPROVAL_MODEL.mergeSolos(local,dutyOperations.days()):local;}
+function saveSoloFlights(v){if(isDutyTrainee())throw new Error('Instructor approval is required');writeCourseArray('ct-review-solo-flights',v)}
 
 function getPersonOverrides(){return safeObjectStorage('ct-review-person-overrides')}
 function savePersonOverrides(v){try{localStorage.setItem('ct-review-person-overrides',JSON.stringify(v));return true}catch(err){toast('Could not save this photo or profile change on this device.','error');return false}}
@@ -9388,7 +9443,7 @@ function syncNotificationPreferenceControls(){
   });
 }
 
-const FLYMPUS_PUSH_SW='./sw.js?v=20261009-sidebar-logo-0791',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
+const FLYMPUS_PUSH_SW='./sw.js?v=20261009-duty-approval-0792',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
 let flympusPushConfigCache=null,flympusPushConfigPromise=null;
 function getFlympusPushUserEnabled(){
   try{
@@ -9618,8 +9673,8 @@ function coursePersonIsAssignedTo(p,type,courseKey){
   return isDefaultReviewCourse(courseKey);
 }
 function coursePersonIsAssigned(p,type){return coursePersonIsAssignedTo(p,type,currentCourseId)}
-function courseTrainees(){return allTrainees().filter(p=>coursePersonIsAssigned(p,'TRAINEE'))}
-function courseInstructors(){return allInstructors().filter(p=>coursePersonIsAssigned(p,'INSTRUCTOR'))}
+function courseTrainees(){const shared=dutyOperations?.enabled()&&dutyOperations.context();return shared&&(isDutyTrainee()||window.FLYMPUS_AUTH?.can?.('roster.manage')!==true)?shared.trainees:allTrainees().filter(p=>coursePersonIsAssigned(p,'TRAINEE'))}
+function courseInstructors(){const shared=dutyOperations?.enabled()&&dutyOperations.context();return shared&&(isDutyTrainee()||window.FLYMPUS_AUTH?.can?.('roster.manage')!==true)?shared.instructors:allInstructors().filter(p=>coursePersonIsAssigned(p,'INSTRUCTOR'))}
 function personInitials(p){return String(p.name||'?').split(/\s+/).filter(Boolean).map(x=>x[0]).join('').slice(0,2).toUpperCase()}
 function personAvatar(p,editable=false){
   const content=p.photoData?'<img class="personPhoto" src="'+p.photoData+'" alt="">':esc(personInitials(p));
@@ -9789,7 +9844,7 @@ function builderAccumulationHtml(phase){
   return '<div class="accumulationCard"><div class="inlineHead"><div><h3>Accumulation requirements · '+esc(phase.name)+'</h3><p>This section appears only because this phase tracks accumulated events. Set the required minimums for this specific course.</p></div><span class="pill blue">Phase-specific</span></div><div class="accumulationInputs">'+counters.map(x=>'<div class="field"><label>Required '+esc(x.label)+'</label><input class="input" name="activityReq_'+x.type+'" type="number" min="0" step="'+(x.type==='TRAINING_HOUR'?'0.1':'1')+'" placeholder="Not set" value="'+(x.minimum==null?'':x.minimum)+'"></div>').join('')+'</div></div>';
 }
 function currentCoursePhase(){const c=cfgGet();return c.phases.find(x=>x.type===currentCourseMeta.type&&x.name===currentCourseMeta.phase)||null}
-function currentCourseTrackingCounters(){const suit=epCurrentProgram?.();if(suit)return (suit.experienceCounters||[]).map(x=>({type:x.id,label:x.name,minimum:x.minimum,unit:x.unit||'count',group:x.group||'',track:x.track||'',kind:x.kind||x.eventKind||'',source:x.source||null}));return enabledPhaseCounters(currentCoursePhase()).map(x=>({...x,kind:x.type,track:''}))}
+function currentCourseTrackingCounters(){if(isDutyTrainee()&&dutyOperations?.enabled())return dutyOperations.context().counters;const suit=epCurrentProgram?.();if(suit)return (suit.experienceCounters||[]).map(x=>({type:x.id,label:x.name,minimum:x.minimum,unit:x.unit||'count',group:x.group||'',track:x.track||'',kind:x.kind||x.eventKind||'',source:x.source||null}));return enabledPhaseCounters(currentCoursePhase()).map(x=>({...x,kind:x.type,track:''}))}
 function experienceLogHtml(t,tracking){
   const technician=currentCourseMeta.type==='TECHNICIAN',title=technician?'Record practical task':'Add external / historical experience',hint=technician?'Choose the exact maintenance task completed by this trainee.':'Full Scale EP takeoffs and full-stop landings are added automatically from Evaluation. Use this form only for external, historical or authorized correction records.';
   const groups=[...new Set(tracking.map(x=>x.group).filter(Boolean))];
@@ -10164,6 +10219,7 @@ function activeSuitOverviewHtml(){
   '</section>';
 }
 function evaluationSyllabusDefs(){
+  if(isDutyTrainee()&&dutyOperations?.enabled())return dutyOperations.context().syllabusDefs;
   const p=epCurrentProgram();
   if(p?.syllabi?.length)return p.syllabi;
   return cfgGet().syllabi.filter(x=>x.courseType===currentCourseMeta.type).map(x=>({id:x.id,name:x.name,minimum:x.minimum,mode:x.instructorPresence==='WITHOUT INSTRUCTOR'?'SOLO':'INSTRUCTED'}));
@@ -11048,15 +11104,20 @@ function renderTopCourseSwitcher(){
 function defaultCourseRecord(){return {id:'course_default',name:'Aerostar EP Course',code:'AEP-26',summary:'EP · RC Model · RC Model · New Training · Day · Israel',startsOn:'2026-09-01',lifecycleStatus:'IN_PROGRESS',selection:{courseType:'EP',phaseId:'ep_rc',platformId:'rc_model',trainingKind:'new',programId:'ep_rc_new',dayNight:'day',country:'israel'},platformId:'rc_model',programId:'ep_rc_new',builtIn:true}}
 function allCourses(){
   const saved=getDraftCourses(),keys=new Set(saved.map(courseKey));
-  return keys.has('AEP-26')?saved:[defaultCourseRecord(),...saved];
+  const local=keys.has('AEP-26')?saved:[defaultCourseRecord(),...saved];
+  const shared=sharedOperationCourses.map(c=>({id:'shared_'+c.courseId,code:c.courseId,name:c.name,sharedOperationMeta:c.context.courseMeta,startsOn:c.context.courseMeta.startsOn||'',lifecycleStatus:'IN_PROGRESS'}));
+  if(isDutyTrainee())return shared.length?shared:local;
+  return [...local,...shared.filter(c=>!local.some(x=>courseKey(x)===c.code))];
 }
 function courseByKey(key){return allCourses().find(x=>courseKey(x)===String(key||''))||null}
 function courseRuntimeMeta(record){
+  if(record?.sharedOperationMeta)return {...record.sharedOperationMeta,courseCode:record.code};
   if(!record)return {type:'',phase:'',platformId:'',trainingKind:'',dayNight:'',country:'',programId:'',courseName:'Course',courseCode:'',startsOn:''};
   const cc=cfgGet(),stored=record.selection||{},type=stored.courseType||record.type||'EP',programId=record.programId||stored.programId||'',p=packageFor(type,programId,courseKey(record)),phaseId=p?.phaseId||stored.phaseId||'',trainingId=p?.trainingKind||stored.trainingKind||'',dayId=p?.dayNight||stored.dayNight||'',platformId=p?.platformId!==undefined?p.platformId:(record.platformId||stored.platformId||''),ph=cfgItem(cc.phases,phaseId),tk=cfgItem(cc.trainingKinds,trainingId),dn=cfgItem(cc.dayNight,dayId),co=cfgItem(cc.countries,stored.country);
   return {type,phase:ph?.name||record.phase||phaseId||'',platformId,trainingKind:tk?.name||record.trainingKind||trainingId||'',dayNight:dn?.name||(type==='EP'&&p?packageConfigurationLabel(type,p):'')||record.dayNight||dayId||'',country:co?.name||record.country||stored.country||'',programId,courseName:record.name||record.courseName||'Course',courseCode:courseKey(record),startsOn:record.startsOn||''};
 }
 function instructorCourseRole(courseKeyValue,instructorId){
+  const shared=dutyOperations?.memberRole?.(String(courseKeyValue));if(instructorId===currentUserId&&['INSTRUCTOR','COURSE_MANAGER'].includes(shared))return shared;
   const instructor=allInstructors().find(x=>x.id===instructorId);if(!instructor)return null;
   if(!coursePersonIsAssignedTo(instructor,'INSTRUCTOR',courseKeyValue))return null;
   return courseMembershipForCourse(instructorId,'INSTRUCTOR',courseKeyValue,{role:isDefaultReviewCourse(courseKeyValue)?(instructor.role||'INSTRUCTOR'):'INSTRUCTOR'}).role||'INSTRUCTOR';
@@ -11128,14 +11189,14 @@ function getSettings(){try{return JSON.parse(localStorage.getItem('ct-review-set
 /* One source of truth for the daily plan's missing required entries.
    Used both by the plan's Required panel and the navigation badge. */
 function plannedCompleteness(){
- const reports=getDailyReports(),draftWrap=getActivityDraft('planned'),rawDraft=draftWrap?.data||{},date=state.planDate||rawDraft.date||new Date().toISOString().slice(0,10),draft=rawDraft.date&&rawDraft.date!==date?{}:rawDraft,saved=reports.find(x=>x.date===date)||{};
- const executedInstructed=getEvaluations().filter(x=>(x.flightDate||x.date)===date).length;
- const soloRows=getSoloFlights().filter(x=>x.date===date).sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
+ const reports=getDailyReports(),draftWrap=getActivityDraft('planned'),date=state.planDate||draftWrap?.data?.date||new Date().toISOString().slice(0,10),operationDraft=dutyOperations?.readDraft('REPORT',date)?.value||{},localDraft=draftWrap?.data||{},rawDraft=dutyOperations?.pending('REPORT',date)?.payload||(localDraft.date===date?{...operationDraft,...localDraft}:Object.keys(operationDraft).length?operationDraft:localDraft),draft=rawDraft.date&&rawDraft.date!==date?{}:rawDraft,saved=reports.find(x=>x.date===date)||{};
+ const executedInstructed=getPlanExecutedInstructed(date);
+ const soloRows=getPlanWorkingSoloFlights().filter(x=>x.date===date).sort((a,b)=>String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
  const boardPlan=flightBoardPlanStatus(date);
  const pi=boardPlan.linked?boardPlan.instructed:Number(state.planInstructed??draft.plannedInstructed??saved.plannedInstructed??0);
  const ps=boardPlan.linked?boardPlan.solo:Number(state.planSolo??draft.plannedSolo??saved.plannedSolo??0);
  const total=pi+ps,hasPlan=total>0,instructedCancelled=Math.max(0,pi-executedInstructed),soloCancelled=Math.max(0,ps-soloRows.length);
- const reasonCatalog=cfgGet().cancellationReasons||[],stored=Array.isArray(draft.cancellations)?draft.cancellations:Array.isArray(saved.cancellations)?saved.cancellations:[],legacyReason=String(draft.reason||saved.reason||'').trim();
+ const reasonCatalog=dutyOperations?.enabled()?dutyOperations.context().cancellationReasons:(cfgGet().cancellationReasons||[]),stored=Array.isArray(draft.cancellations)?draft.cancellations:Array.isArray(saved.cancellations)?saved.cancellations:[],legacyReason=String(draft.reason||saved.reason||'').trim();
  const cancellationRows=[],available={Instructed:instructedCancelled,Solo:soloCancelled};
  for(const type of ['Instructed','Solo']){
    const group=[];
@@ -11171,18 +11232,18 @@ function dailyFlightPlan(){
  return '<div class="dailyFlightPlan">'+
   '<div class="dailyPlanHeader dailyPlanDateSpotlight"><div class="dailyPlanDateIntro"><span>'+planUiText('FLIGHT DAY','יום טיסות')+'</span><p>'+planUiText('One date for all scheduled flights and their Planned vs Executed report.','תאריך אחד לשיבוצי הטיסות ולדוח מתוכנן מול בוצע.')+'</p></div>'+
   '<div class="field dailyPlanDateField"><label for="dailyPlanDate">'+planUiText('Flight date','תאריך טיסה')+' <span class="fleetRequired" aria-hidden="true">*</span></label><input class="input dateDmy" id="dailyPlanDate" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" value="'+esc(dateInputValue(date))+'" placeholder="DD/MM/YYYY"></div></div>'+
-  courseFlightScheduleHtml(date)+'</div>';
+  (dutyOperations?.statusMarkup('PLAN',date)||'')+courseFlightScheduleHtml(date)+(dutyOperations?.planAction()||'')+'</div>';
 }
 
 function planWorkspace(){
- const view=state.planView==='report'?'report':'board';
+ const view=['report','approvals'].includes(state.planView)?state.planView:'board';
  return '<div class="coursePlanWorkspace">'+
    '<div class="coursePlanWorkspaceHead"><div class="eyebrow">'+planUiText('COURSE OPERATIONS','תפעול הקורס')+'</div><h1 class="pageTitle">'+planUiText('Plan','תכנון')+'</h1><p class="sub">'+planUiText('Manage daily flight assignments and compare the plan against actual execution.','ניהול שיבוצי טיסות יומיים והשוואה בין התכנון לביצוע בפועל.')+'</p></div>'+
-   '<nav class="coursePlanTabs" aria-label="'+planUiText('Plan views','תצוגות תכנון')+'"><button type="button" data-plan-view="board" class="'+(view==='board'?'active':'')+'" aria-pressed="'+(view==='board')+'">'+planUiText('Daily Flight Plan','תוכנית טיסות יומית')+'</button><button type="button" data-plan-view="report" class="'+(view==='report'?'active':'')+'" aria-pressed="'+(view==='report')+'">'+planUiText('Planned vs Executed','מתוכנן מול בוצע')+'</button></nav>'+
-   (view==='board'?dailyFlightPlan():plannedVsExecuted())+'</div>';
+   '<nav class="coursePlanTabs" aria-label="'+planUiText('Plan views','תצוגות תכנון')+'"><button type="button" data-plan-view="board" class="'+(view==='board'?'active':'')+'" aria-pressed="'+(view==='board')+'">'+planUiText('Daily Flight Plan','תוכנית טיסות יומית')+'</button><button type="button" data-plan-view="report" class="'+(view==='report'?'active':'')+'" aria-pressed="'+(view==='report')+'">'+planUiText('Planned vs Executed','מתוכנן מול בוצע')+'</button><button type="button" data-plan-view="approvals" class="'+(view==='approvals'?'active':'')+'" aria-pressed="'+(view==='approvals')+'">'+planUiText(isDutyTrainee()?'My requests':'Pending approvals',isDutyTrainee()?'הבקשות שלי':'ממתינים לאישור')+'<span class="dutyApprovalTabCount">'+(dutyOperations?.count()||0)+'</span></button></nav>'+
+   (dutyOperations?.connectionMarkup()||'')+(view==='board'?dailyFlightPlan():view==='approvals'?(dutyOperations?.queueMarkup()||''):(dutyOperations?.statusMarkup('REPORT')||'')+plannedVsExecuted())+'</div>';
 }
 function bindPlanWorkspace(){
- document.querySelectorAll('[data-plan-view]').forEach(b=>b.onclick=()=>{const next=b.dataset.planView;if(!['board','report'].includes(next)||state.planView===next)return;state.planView=next;state.flightBoardEditId=null;saveUiState();render();forcePageTop()});
+ document.querySelectorAll('[data-plan-view]').forEach(b=>b.onclick=()=>{const next=b.dataset.planView;if(!['board','report','approvals'].includes(next)||state.planView===next)return;state.planView=next;state.flightBoardEditId=null;saveUiState();render();forcePageTop()});
  const date=$('#dailyPlanDate');
  if(date)date.onchange=e=>{const normalized=normalizeDateValue(e.target.value);if(!normalized){toast(planUiText('Enter a valid flight date','יש להזין תאריך טיסה תקין'),'error');return}if(state.planDate!==normalized){delete state.planInstructed;delete state.planSolo}state.planDate=normalized;state.flightBoardEditId=null;state.soloEditId=null;saveUiState();render()};
 }
@@ -11235,7 +11296,7 @@ function plannedVsExecuted(){
  (cancelled?'<div class="pveCancellationList">'+cancellationRows.map(cancellationSelect).join('')+'</div>':'<div class="pveClearState '+(hasPlan?'ok':'neutral')+'"><b>'+(hasPlan?'No cancellations to classify':'Set the plan first')+'</b><p>'+(hasPlan?'Planned flights have been met by type. Extra executions do not hide a cancellation in another flight type.':'Enter the planned instructed and solo flights above to start the daily comparison.')+'</p></div>')+
  (cancelled&&!reasonCatalog.length?'<div class="pveReasonConfigWarning"><b>No cancellation reasons are configured.</b><p>Add them under Course Management → Advanced → Cancellation reasons.</p></div>':'')+
  '</div></section>'+
- '<section class="card recordActionIsland"><div class="toolbar recordFormActions pveRecordActions"><button class="btn sky" id="pveSave" type="button">Submit daily report</button><button class="btn secondary discardDraft" id="discardPlannedDraft" type="button">Discard draft</button></div></section>'+
+ '<section class="card recordActionIsland"><div class="toolbar recordFormActions pveRecordActions"><button class="btn sky" id="pveSave" type="button">'+planUiText(isDutyTrainee()?'Send report for approval':'Submit daily report',isDutyTrainee()?'שליחת דוח לאישור':'הגשת דוח יומי')+'</button><button class="btn secondary discardDraft" id="discardPlannedDraft" type="button">Discard draft</button></div></section>'+
  '</div>';
 }
 function globalBackControl(){
@@ -11499,6 +11560,7 @@ function mountPersonEditModal(){
   document.body.style.overflow='hidden';
 }
 function render(options={}){
+  dutyOperations?.connect();
   cleanupMountedPersonEditModal();
   const dutyRestricted=isDutyTrainee();
   if(!dutyRestricted)safetyUI.connect();
@@ -11529,17 +11591,18 @@ function render(options={}){
   }
 
   if(fast){
-    setTimeout(()=>{saveUiState();renderTopCourseSwitcher();renderPersonalIdentity();syncNotificationPreferenceControls();applyFlympusLanguage(document.body);bind()},0);
+    setTimeout(()=>{saveUiState();renderTopCourseSwitcher();renderPersonalIdentity();syncNotificationPreferenceControls();applyFlympusLanguage(document.body);bind();dutyOperations?.bind()},0);
   }else{
     applyFlympusLanguage(document.body);
     bind();
+    dutyOperations?.bind();
     prewarmFlympusBottomScreens();
   }
-  if(!dutyRestricted)safetyUI.inbox();
+  if(!dutyRestricted){safetyUI.inbox();renderDutyApprovalNotification()}
 }
 
 document.addEventListener('flympus:auth-ready',()=>{try{render()}catch{}});
-document.addEventListener('flympus:auth-signed-out',()=>safetyGlobal.stop());
+document.addEventListener('flympus:auth-signed-out',()=>{dutyOperations?.stop();safetyGlobal.stop()});
 function renderPreservingManagementView(update){
   const root=$('#content'),docEl=document.documentElement,body=document.body,scrollTop=Number(window.scrollY||docEl?.scrollTop||body?.scrollTop||0),openStates=root?[...root.querySelectorAll('details')].map(x=>!!x.open):[];
   const anchorSelector='.card,.packageRules,.advancedStepLabel,.personCard,.rosterControls,.trainingStatusStack',anchorNodes=root?[...root.querySelectorAll(anchorSelector)]:[],viewportTop=Math.max(72,Math.min(Number(window.innerHeight||800)-40,96));
@@ -11580,7 +11643,7 @@ function bindGlobalFormUx(){
     form.addEventListener('submit',e=>{if(showFormInvalid(form)){e.preventDefault();e.stopImmediatePropagation()}},true)
   });
 }
-function bind(){bindGlobalFormUx();bindDmyDateInputs();bindMultiFilters();renderPersonalIdentity();syncAttentionBadges();bindGlobalBackGesture();mountPersonEditModal();if($('#appBackBtn'))$('#appBackBtn').onclick=()=>goBack();const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop'),drawerPanel=drawer?.querySelector?.('.panel'),menuHaptic=ensureFlympusMenuHapticOverlay(menuBtn);const toggleDrawerFromMenu=e=>{e?.preventDefault?.();e?.stopPropagation?.();closeAllMultiFilters(false);const opening=!drawer?.classList?.contains('open');if(opening)triggerFlympusPortableHaptic(8);setDrawerOpen(opening)};if(menuBtn&&drawer)menuBtn.onclick=toggleDrawerFromMenu;if(menuHaptic&&drawer){menuHaptic.ontouchstart=e=>{e?.stopPropagation?.();if(drawer.classList.contains('open'))return;closeAllMultiFilters(false);triggerFlympusPortableHaptic(8);setDrawerOpen(true)};menuHaptic.onclick=e=>{e?.stopPropagation?.()}};if(backdrop&&drawer)backdrop.onclick=()=>setDrawerOpen(false);if(drawer){let drawerSwipeStartX=0,drawerSwipeStartY=0,drawerSwipeTracking=false,drawerSwipeClaimed=false;const drawerCloseSwipeIsRight=()=>getFlympusAppPreferences().language==='he';drawer.ontouchstart=e=>{if(!drawer.classList.contains('open'))return;const t=e.touches?.[0];if(!t)return;drawerSwipeStartX=t.clientX;drawerSwipeStartY=t.clientY;drawerSwipeTracking=true;drawerSwipeClaimed=false};drawer.ontouchmove=e=>{if(!drawerSwipeTracking)return;const t=e.touches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY,correctDirection=drawerCloseSwipeIsRight()?dx>12:dx<-12;if(correctDirection&&Math.abs(dx)>Math.abs(dy)*1.2){drawerSwipeClaimed=true;e.preventDefault?.()}};drawer.ontouchend=e=>{if(!drawerSwipeTracking)return;drawerSwipeTracking=false;const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY,farEnough=drawerCloseSwipeIsRight()?dx>=58:dx<=-58;if(drawerSwipeClaimed&&farEnough&&Math.abs(dy)<=70)setDrawerOpen(false);drawerSwipeClaimed=false};drawer.ontouchcancel=()=>{drawerSwipeTracking=false;drawerSwipeClaimed=false}};const mobileBottom=$('#mobileBottomNav');if(mobileBottom){mobileBottom.ontouchend=e=>{if(!e.target?.closest?.('.mobileBottomIconButton,.mobileBottomHapticSwitch'))e.preventDefault?.()};mobileBottom.ongesturestart=e=>e.preventDefault?.();mobileBottom.ongesturechange=e=>e.preventDefault?.();mobileBottom.ongestureend=e=>e.preventDefault?.()}document.querySelectorAll('[data-mobile-nav]').forEach(b=>{const activate=e=>{const now=performance.now?.()||Date.now();b.__flympusImmediateNavAt=now;const target=b.dataset.mobileNav,currentRoot=bottomNavRootForScreen(state.screen);if(state.screen===target){scrollActiveBottomNavTop(target);return}if(state.screen===currentRoot)rememberBottomNavScroll();bottomDockNavigationTransition=true;
+function bind(){dutyOperations?.bind();bindGlobalFormUx();bindDmyDateInputs();bindMultiFilters();renderPersonalIdentity();syncAttentionBadges();bindGlobalBackGesture();mountPersonEditModal();if($('#appBackBtn'))$('#appBackBtn').onclick=()=>goBack();const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop'),drawerPanel=drawer?.querySelector?.('.panel'),menuHaptic=ensureFlympusMenuHapticOverlay(menuBtn);const toggleDrawerFromMenu=e=>{e?.preventDefault?.();e?.stopPropagation?.();closeAllMultiFilters(false);const opening=!drawer?.classList?.contains('open');if(opening)triggerFlympusPortableHaptic(8);setDrawerOpen(opening)};if(menuBtn&&drawer)menuBtn.onclick=toggleDrawerFromMenu;if(menuHaptic&&drawer){menuHaptic.ontouchstart=e=>{e?.stopPropagation?.();if(drawer.classList.contains('open'))return;closeAllMultiFilters(false);triggerFlympusPortableHaptic(8);setDrawerOpen(true)};menuHaptic.onclick=e=>{e?.stopPropagation?.()}};if(backdrop&&drawer)backdrop.onclick=()=>setDrawerOpen(false);if(drawer){let drawerSwipeStartX=0,drawerSwipeStartY=0,drawerSwipeTracking=false,drawerSwipeClaimed=false;const drawerCloseSwipeIsRight=()=>getFlympusAppPreferences().language==='he';drawer.ontouchstart=e=>{if(!drawer.classList.contains('open'))return;const t=e.touches?.[0];if(!t)return;drawerSwipeStartX=t.clientX;drawerSwipeStartY=t.clientY;drawerSwipeTracking=true;drawerSwipeClaimed=false};drawer.ontouchmove=e=>{if(!drawerSwipeTracking)return;const t=e.touches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY,correctDirection=drawerCloseSwipeIsRight()?dx>12:dx<-12;if(correctDirection&&Math.abs(dx)>Math.abs(dy)*1.2){drawerSwipeClaimed=true;e.preventDefault?.()}};drawer.ontouchend=e=>{if(!drawerSwipeTracking)return;drawerSwipeTracking=false;const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY,farEnough=drawerCloseSwipeIsRight()?dx>=58:dx<=-58;if(drawerSwipeClaimed&&farEnough&&Math.abs(dy)<=70)setDrawerOpen(false);drawerSwipeClaimed=false};drawer.ontouchcancel=()=>{drawerSwipeTracking=false;drawerSwipeClaimed=false}};const mobileBottom=$('#mobileBottomNav');if(mobileBottom){mobileBottom.ontouchend=e=>{if(!e.target?.closest?.('.mobileBottomIconButton,.mobileBottomHapticSwitch'))e.preventDefault?.()};mobileBottom.ongesturestart=e=>e.preventDefault?.();mobileBottom.ongesturechange=e=>e.preventDefault?.();mobileBottom.ongestureend=e=>e.preventDefault?.()}document.querySelectorAll('[data-mobile-nav]').forEach(b=>{const activate=e=>{const now=performance.now?.()||Date.now();b.__flympusImmediateNavAt=now;const target=b.dataset.mobileNav,currentRoot=bottomNavRootForScreen(state.screen);if(state.screen===target){scrollActiveBottomNavTop(target);return}if(state.screen===currentRoot)rememberBottomNavScroll();bottomDockNavigationTransition=true;
   /* Visual response is immediate. Do not wait for the full page render before
      moving the gold state/halo to the pressed destination. */
   $('#mobileBottomNav')?.querySelectorAll?.('[data-mobile-nav]')?.forEach?.(btn=>{
@@ -11645,7 +11708,7 @@ if(state.screen==='settings')bindSettings();
 if(state.screen==='preferences')bindAppPreferences();
 if(state.screen==='user-management')window.FLYMPUS_AUTH?.mountUserManagementPage?.($('#flympusUserManagementPageRoot'));
 if(state.screen==='reports')bindReports();
-if(state.screen==='planned'){bindPlanWorkspace();if(state.planView==='report')bindPlanned();else bindDailyFlightBoard()}
+if(state.screen==='planned'){bindPlanWorkspace();if(state.planView==='report')bindPlanned();else if(state.planView!=='approvals')bindDailyFlightBoard()}
 if(state.screen==='fleet')bindFleet();
 if(state.screen==='safety')bindSafety();
 if(state.screen==='exams')bindExams();
@@ -11743,16 +11806,18 @@ function bindReports(){
  };
 }
 function bindPlanned(){
+ if(isDutyTrainee()&&(!dutyOperations?.enabled()||dutyOperations.pending('REPORT'))){dutyOperations?.bind();return}
  if(!flympusCan('operations.daily.write')){document.querySelectorAll('.pvePage input,.pvePage select,.pvePage textarea,.pvePage button:not([data-go])').forEach(x=>x.disabled=true);return}
  document.querySelectorAll('[data-plan-required-index]').forEach(btn=>btn.onclick=()=>{const label=String(btn.textContent||''),target=label.startsWith('Cancellation')?document.querySelector('.pveCancellationList'):document.querySelector('.pvePlanGrid');target?.scrollIntoView?.({behavior:'smooth',block:'center'});setTimeout(()=>target?.querySelector?.('input,select')?.focus?.({preventScroll:true}),180)});
  const collectCancellations=()=>[...document.querySelectorAll('.pveCancellationReason')].map(el=>({key:String(el.dataset.cancelKey||''),type:String(el.dataset.cancelType||''),reasonId:String(el.value||''),reasonLabel:el.value?String(el.selectedOptions?.[0]?.textContent||'').trim():'',quantity:Math.max(1,Math.floor(Number(el.closest('[data-cancel-row]')?.querySelector('[data-cancel-qty]')?.value)||1))}));
  const persistPlannedDraft=()=>{
    const prior=getActivityDraft('planned')?.data||{},cancellations=collectCancellations(),date=state.planDate||todayIsoDate(),board=flightBoardPlanStatus(date),soloEntries=[...document.querySelectorAll('.pveSoloEntryForm[data-solo-slot]')].map(form=>serializeFormDraft(form)),data={date,plannedInstructed:board.linked?board.instructed:Number($('#pvePlannedInstructed')?.value||0),plannedSolo:board.linked?board.solo:Number($('#pvePlannedSolo')?.value||0),cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),soloEntries,dismissedSoloSlots:Math.max(0,Math.floor(Number(prior.dismissedSoloSlots)||0)),solo:prior.solo||{}};
    // The Plan badge recomputes from live required items; never persist a stale count.
-   saveActivityDraft('planned',data);if($('#plannedDraftBadge'))$('#plannedDraftBadge').textContent=draftSavedLabel('planned');syncAttentionBadges();return data
+   saveActivityDraft('planned',data);if(isDutyTrainee()&&dutyOperations?.enabled())dutyOperations.saveDraft('REPORT',{...data,solos:getPlanWorkingSoloFlights().filter(x=>x.date===date)},date);if($('#plannedDraftBadge'))$('#plannedDraftBadge').textContent=draftSavedLabel('planned');syncAttentionBadges();return data
  };
  const refreshPlan=()=>{if(flightBoardPlanStatus(state.planDate||todayIsoDate()).linked)return;state.planInstructed=Number($('#pvePlannedInstructed')?.value||0);state.planSolo=Number($('#pvePlannedSolo')?.value||0);persistPlannedDraft();render()};
  const syncSoloEvents=flight=>{
+   if(isDutyTrainee()||dutyOperations?.enabled())return;
    let events=getActivityEvents().filter(x=>x.sourceId!==flight.id),stamp=new Date().toISOString();
    if(Number(flight.takeoffs)>0)events.unshift({id:'evt_'+Date.now()+'_to',traineeId:flight.traineeId,date:flight.date,type:'TAKEOFF',quantity:Number(flight.takeoffs),source:'Solo flight',sourceId:flight.id,note:flight.syllabus,createdAt:stamp});
    if(Number(flight.landings)>0)events.unshift({id:'evt_'+Date.now()+'_ld',traineeId:flight.traineeId,date:flight.date,type:'LANDING',quantity:Number(flight.landings),source:'Solo flight',sourceId:flight.id,note:flight.syllabus,createdAt:stamp});
@@ -11779,7 +11844,7 @@ function bindPlanned(){
  document.querySelectorAll('.pveSoloEntryForm').forEach(form=>{
    form.addEventListener('input',()=>{if(form.hasAttribute('data-solo-slot'))persistPlannedDraft()});
    form.addEventListener('change',()=>{
-     const fd=new FormData(form),date=state.planDate||todayIsoDate(),plan=plannedCompleteness(),solos=getSoloFlights();
+     const fd=new FormData(form),date=state.planDate||todayIsoDate(),plan=plannedCompleteness(),solos=getPlanWorkingSoloFlights();
      const key=form.dataset.soloBatch||'',recorded=key?solos.filter(x=>String(x.batchId||x.id)===key):[],oldCount=recorded.length;
      const used=solos.filter(x=>x.date===date).length,remaining=Math.max(0,plan.ps-used+oldCount);
      const quantity=Number(fd.get('quantity'));
@@ -11787,7 +11852,7 @@ function bindPlanned(){
        const quantityField=form.querySelector('[name="quantity"]');if(quantityField)quantityField.value=String(oldCount||1);
        toast(planUiText('Solo flights cannot exceed the planned quantity. Change the plan first.','מספר טיסות הסולו אינו יכול לחרוג מהמתוכנן. יש לשנות תחילה את התכנון.'),'error');return;
      }
-     const traineeId=String(fd.get('traineeId')||''),syllabus=String(fd.get('syllabus')||''),trainee=allTrainees().find(x=>String(x.id)===traineeId);
+     const traineeId=String(fd.get('traineeId')||''),syllabus=String(fd.get('syllabus')||''),trainee=courseTrainees().find(x=>String(x.id)===traineeId);
      if(!trainee||!syllabus){if(!key)persistPlannedDraft();return}
      const count=name=>Math.max(0,Math.floor(Number(fd.get(name))||0)),stamp=new Date().toISOString(),batchId=key||'solo_batch_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
      const updated=[];
@@ -11798,8 +11863,8 @@ function bindPlanned(){
      }
      const removedIds=new Set(recorded.slice(quantity).map(x=>x.id));
      const next=solos.filter(x=>!recorded.includes(x)&&!removedIds.has(x.id)).concat(updated);
-     saveSoloFlights(next);
-     if(removedIds.size)saveActivityEvents(getActivityEvents().filter(x=>!removedIds.has(x.sourceId)));
+     savePlanWorkingSoloFlights(next);
+     if(removedIds.size&&!isDutyTrainee()&&!dutyOperations?.enabled())saveActivityEvents(getActivityEvents().filter(x=>!removedIds.has(x.sourceId)));
      updated.forEach(syncSoloEvents);
      const data=persistPlannedDraft();
      if(!key){
@@ -11813,7 +11878,7 @@ function bindPlanned(){
  document.querySelectorAll('[data-solo-skip]').forEach(btn=>btn.onclick=()=>{
    const form=btn.closest('.pveSoloEntryForm'),data=persistPlannedDraft(),index=Number(form?.dataset.soloSlot||0);
    data.soloEntries=(data.soloEntries||[]).filter((_,i)=>i!==index);
-   const capacity=Math.max(0,plannedCompleteness().ps-getSoloFlights().filter(x=>x.date===(state.planDate||todayIsoDate())).length-Number(data.dismissedSoloSlots||0));
+   const capacity=Math.max(0,plannedCompleteness().ps-getPlanWorkingSoloFlights().filter(x=>x.date===(state.planDate||todayIsoDate())).length-Number(data.dismissedSoloSlots||0));
    const requested=Math.max(1,Math.floor(Number(form?.querySelector('[name="quantity"]')?.value)||1));
    data.dismissedSoloSlots=Math.max(0,Number(data.dismissedSoloSlots||0))+Math.min(capacity,requested);
    saveActivityDraft('planned',data);render();
@@ -11824,33 +11889,38 @@ function bindPlanned(){
  };
  document.querySelectorAll('[data-solo-edit]').forEach(btn=>btn.onclick=()=>{state.soloEditId=btn.dataset.soloEdit;render()});
  document.querySelectorAll('[data-solo-done]').forEach(btn=>btn.onclick=()=>{
-   const id=btn.dataset.soloDone,row=btn.closest('[data-solo-row]'),solos=getSoloFlights(),old=solos.find(x=>x.id===id);if(!row||!old)return;
-   const traineeId=String(row.querySelector('[data-edit-trainee]')?.value||old.traineeId),trainee=allTrainees().find(t=>t.id===traineeId),syllabus=String(row.querySelector('[data-edit-syllabus]')?.value||old.syllabus),num=(selector,fallback)=>Math.max(0,Math.floor(Number(row.querySelector(selector)?.value??fallback)||0));
+   const id=btn.dataset.soloDone,row=btn.closest('[data-solo-row]'),solos=getPlanWorkingSoloFlights(),old=solos.find(x=>x.id===id);if(!row||!old)return;
+   const traineeId=String(row.querySelector('[data-edit-trainee]')?.value||old.traineeId),trainee=courseTrainees().find(t=>t.id===traineeId),syllabus=String(row.querySelector('[data-edit-syllabus]')?.value||old.syllabus),num=(selector,fallback)=>Math.max(0,Math.floor(Number(row.querySelector(selector)?.value??fallback)||0));
    const updated={...old,traineeId,traineeName:trainee?.name||old.traineeName,syllabus,takeoffs:num('[data-edit-takeoffs]',old.takeoffs),landings:num('[data-edit-landings]',old.landings),minutes:num('[data-edit-minutes]',old.minutes),updatedAt:new Date().toISOString()};
-   saveSoloFlights(solos.map(x=>x.id===id?updated:x));syncSoloEvents(updated);state.soloEditId=null;toast('Solo flight updated');render()
+   savePlanWorkingSoloFlights(solos.map(x=>x.id===id?updated:x));syncSoloEvents(updated);state.soloEditId=null;toast('Solo flight updated');render()
  });
  document.querySelectorAll('[data-solo-delete-batch]').forEach(btn=>btn.onclick=async()=>{
-   const key=btn.dataset.soloDeleteBatch,items=getSoloFlights().filter(x=>String(x.batchId||x.id)===key);
+   const key=btn.dataset.soloDeleteBatch,items=getPlanWorkingSoloFlights().filter(x=>String(x.batchId||x.id)===key);
    if(!items.length)return;
    const confirmed=await siteConfirm(planUiText('Remove all solo flights recorded in this row?','להסיר את כל טיסות הסולו שתועדו בשורה זו?'),{title:planUiText('Remove solo flights?','להסיר טיסות סולו?'),confirmLabel:planUiText('Remove','הסר'),tone:'danger'});
    if(!confirmed)return;
    const ids=new Set(items.map(x=>x.id));
-   saveSoloFlights(getSoloFlights().filter(x=>!ids.has(x.id)));
-   saveActivityEvents(getActivityEvents().filter(x=>!ids.has(x.sourceId)));
-   const data=persistPlannedDraft(),date=state.planDate||todayIsoDate(),planned=plannedCompleteness().ps,remaining=Math.max(0,planned-getSoloFlights().filter(x=>x.date===date).length-Number(data.dismissedSoloSlots||0));
+   savePlanWorkingSoloFlights(getPlanWorkingSoloFlights().filter(x=>!ids.has(x.id)));
+   if(!isDutyTrainee()&&!dutyOperations?.enabled())saveActivityEvents(getActivityEvents().filter(x=>!ids.has(x.sourceId)));
+   const data=persistPlannedDraft(),date=state.planDate||todayIsoDate(),planned=plannedCompleteness().ps,remaining=Math.max(0,planned-getPlanWorkingSoloFlights().filter(x=>x.date===date).length-Number(data.dismissedSoloSlots||0));
    data.dismissedSoloSlots=Math.max(0,Number(data.dismissedSoloSlots||0))+Math.min(remaining,ids.size);
    saveActivityDraft('planned',data);
    toast(planUiText('Solo flights marked as not executed','טיסות הסולו סומנו כלא בוצעו'));render();
  });
- document.querySelectorAll('[data-solo-delete]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.soloDelete;saveSoloFlights(getSoloFlights().filter(x=>x.id!==id));saveActivityEvents(getActivityEvents().filter(x=>x.sourceId!==id));if(state.soloEditId===id)state.soloEditId=null;toast('Solo flight and linked activity removed');render()});
+ document.querySelectorAll('[data-solo-delete]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.soloDelete;savePlanWorkingSoloFlights(getPlanWorkingSoloFlights().filter(x=>x.id!==id));if(!isDutyTrainee()&&!dutyOperations?.enabled())saveActivityEvents(getActivityEvents().filter(x=>x.sourceId!==id));if(state.soloEditId===id)state.soloEditId=null;toast('Solo flight and linked activity removed');render()});
  if($('#discardPlannedDraft'))$('#discardPlannedDraft').onclick=async()=>{if(await siteConfirm('The auto-saved Planned vs Executed draft will be discarded. Recorded solo flights will not be deleted.',{title:'Discard draft?',confirmLabel:'Discard',tone:'danger'})){discardActivityDraft('planned');state.soloEditId=null;delete state.planInstructed;delete state.planSolo;toast('Planned vs Executed draft discarded');render()}};
- if($('#pveSave'))$('#pveSave').onclick=()=>{
+ if($('#pveSave'))$('#pveSave').onclick=async()=>{
    const planDate=state.planDate||todayIsoDate(),board=flightBoardPlanStatus(planDate),plannedInstructed=board.linked?board.instructed:Number($('#pvePlannedInstructed').value||0),plannedSolo=board.linked?board.solo:Number($('#pvePlannedSolo').value||0),plannedTotal=plannedInstructed+plannedSolo,cancellations=collectCancellations(),missing=[...document.querySelectorAll('.pveCancellationReason')].filter(x=>!x.value);
-   if(getSoloFlights().filter(x=>x.date===planDate).length>plannedSolo){toast(planUiText('Recorded solo flights exceed the plan. Adjust the plan before submission.','מספר טיסות הסולו שבוצעו חורג מהתכנון. יש לעדכן את התכנון לפני שליחה.'),'error');return}
+   if(getPlanWorkingSoloFlights().filter(x=>x.date===planDate).length>plannedSolo){toast(planUiText('Recorded solo flights exceed the plan. Adjust the plan before submission.','מספר טיסות הסולו שבוצעו חורג מהתכנון. יש לעדכן את התכנון לפני שליחה.'),'error');return}
    if(plannedTotal<=0){toast('Set at least one planned flight before submitting the daily report.','error');document.querySelector('.pvePlanGrid')?.scrollIntoView?.({behavior:'smooth',block:'center'});return}
    if(missing.length){missing.forEach(x=>x.classList.add('fieldInvalidControl'));toast('Select a cancellation reason for every non-executed flight before submitting.','error');missing[0].scrollIntoView?.({behavior:'smooth',block:'center'});missing[0].focus?.();return}
-   const arr=getDailyReports(),date=state.planDate||todayIsoDate(),soloCount=getSoloFlights().filter(x=>x.date===date).length,instructedCount=getEvaluations().filter(x=>(x.flightDate||x.date)===date).length,obj={date,plannedInstructed,plannedSolo,instructedExecuted:instructedCount,soloExecuted:soloCount,cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),savedAt:new Date().toISOString()},next=arr.some(x=>x.date===date)?arr.map(x=>x.date===date?obj:x):[obj,...arr];
-   saveDailyReports(next);discardActivityDraft('planned');state.soloEditId=null;delete state.planInstructed;delete state.planSolo;toast('Daily report submitted','success');render()
+   const arr=getDailyReports(),date=state.planDate||todayIsoDate(),soloCount=getPlanWorkingSoloFlights().filter(x=>x.date===date).length,instructedCount=getPlanExecutedInstructed(date),obj={date,plannedInstructed,plannedSolo,instructedExecuted:instructedCount,soloExecuted:soloCount,cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),savedAt:new Date().toISOString()},next=arr.some(x=>x.date===date)?arr.map(x=>x.date===date?obj:x):[obj,...arr];
+   try{
+    if(isDutyTrainee()){await dutyOperations.send('REPORT',{...obj,solos:getPlanWorkingSoloFlights().filter(x=>x.date===date)});return}
+    if(dutyOperations?.enabled())await dutyOperations.publish('REPORT',date,{...obj,solos:getPlanWorkingSoloFlights().filter(x=>x.date===date)},instructedCount);
+    else saveDailyReports(next);
+   }catch(err){toast(err.message||'Could not submit the report','error');return}
+   dutyOperations?.clearDraft('REPORT',date);discardActivityDraft('planned');state.soloEditId=null;delete state.planInstructed;delete state.planSolo;toast('Daily report submitted','success');render()
  };
 }
 function bindSafety(){
@@ -12589,6 +12659,6 @@ if(state.screen==='home')saveFlympusReloadSnapshot();
   }
 })();
 </script>
-<script type="module" src="./auth.js?v=20261008-switcher01"></script>
+<script type="module" src="./auth.js?v=20261009-duty-approval-0792"></script>
 </body>
 </html>

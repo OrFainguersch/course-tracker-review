@@ -1,0 +1,25 @@
+.dutyApprovalConnect{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px;margin:16px 0}
+.dutyApprovalConnected{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;margin:12px 0;color:var(--flympus-ink)}
+.coursePlanTabs{flex-wrap:wrap}.coursePlanTabs button{min-width:0;white-space:normal}
+.dutyApprovalConnect h2,.dutyApprovalConnect p{margin:0}.dutyApprovalConnect p{margin-top:6px;color:var(--muted,#61758a);font-size:12px;line-height:1.5}
+.dutyApprovalStatus{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;margin:14px 0;border:1px solid #d3deea;border-radius:14px;background:#f2f6fb}
+.dutyApprovalStatus b{font-size:13px}.dutyApprovalStatus p{font-size:12px;margin:4px 0;color:#526b83;line-height:1.5}
+.dutyApprovalStatus.pending{background:#fff7e6;border-color:#e4cc98}.dutyApprovalStatus.approved{background:#edf8f0;border-color:#b6d8c0}.dutyApprovalStatus.returned,.dutyApprovalCorrection{background:#fff3e8;border-color:#e4c19f}
+.dutyApprovalCorrection{padding:10px;border-radius:9px;color:#845220!important;font-size:12px}
+.dutyApprovalInbox{padding:18px;margin:16px 0}.dutyApprovalCount,.dutyApprovalPill{font-size:11px;line-height:1.4;padding:4px 9px;border-radius:999px;white-space:normal;background:#e5edf5;color:#244c71;font-weight:800}
+.dutyApprovalPill.pending{background:#fff0cd;color:#845c13}.dutyApprovalPill.approved{background:#dff3e7;color:#19724a}.dutyApprovalPill.returned{background:#fce8d5;color:#925723}
+.dutyApprovalRequest{border:1px solid #d5e1ed;border-radius:14px;margin:12px 0;overflow:hidden;min-width:0}
+.dutyApprovalRequest summary{padding:14px;cursor:pointer;display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12px}.dutyApprovalRequest summary b{font-size:13px}.dutyApprovalRequest[open] summary{background:#f4f7fa;border-bottom:1px solid #d5e1ed}
+.dutyApprovalRequestBody{padding:16px;min-width:0}.dutyApprovalTableWrap{overflow-x:auto;max-width:100%;margin:12px 0}.dutyApprovalTable{width:100%;border-collapse:collapse;font-size:12px}.dutyApprovalTable th,.dutyApprovalTable td{text-align:start;padding:9px 7px;border-bottom:1px solid #dde6ef;overflow-wrap:anywhere}.dutyApprovalTable th{color:#61758a}
+.dutyApprovalSummary{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}.dutyApprovalNote{display:block;font-size:12px;font-weight:800;margin:16px 0}.dutyApprovalNote textarea{margin-top:7px;min-height:75px;resize:vertical}
+.dutyApprovalError{color:#a13c32;font-size:12px;line-height:1.5}.dutyApprovalNotification{display:block;width:100%;text-align:start;padding:12px;border:0;border-bottom:1px solid #d5e1ed;background:#fff7e6;color:#76501a;border-radius:10px;cursor:pointer}.dutyApprovalNotification small{display:block;margin-top:4px}
+.coursePlanTabs .dutyApprovalTabCount{margin-inline-start:6px;min-width:18px;display:inline-block;text-align:center;border-radius:20px;padding:1px 5px;background:#e8edf3;color:#173d63;font-size:11px}
+html[data-flympus-theme="dark"] .dutyApprovalConnect p,html[data-flympus-theme="dark"] .dutyApprovalTable th{color:#9bb0c7}
+html[data-flympus-theme="dark"] .dutyApprovalStatus,html[data-flympus-theme="dark"] .dutyApprovalRequest[open] summary{background:#162c43;border-color:#344b63;color:#e2edf8}
+html[data-flympus-theme="dark"] .dutyApprovalStatus p{color:#a8bbce}html[data-flympus-theme="dark"] .dutyApprovalStatus.pending,html[data-flympus-theme="dark"] .dutyApprovalNotification{background:#3c321d;color:#f2d495;border-color:#74613a}
+html[data-flympus-theme="dark"] .dutyApprovalStatus.approved{background:#17382c;border-color:#38634e}html[data-flympus-theme="dark"] .dutyApprovalCorrection{background:#3b2b1e;color:#eec198!important}html[data-flympus-theme="dark"] .dutyApprovalRequest,html[data-flympus-theme="dark"] .dutyApprovalTable td,html[data-flympus-theme="dark"] .dutyApprovalTable th{border-color:#344b63}
+html.flympusLargeText .dutyApprovalStatus b,html.flympusLargeText .dutyApprovalRequest summary b{font-size:16px}html.flympusLargeText .dutyApprovalStatus p,html.flympusLargeText .dutyApprovalTable,html.flympusLargeText .dutyApprovalNote{font-size:14px}
+@media(max-width:640px){
+ .dutyApprovalConnect,.dutyApprovalStatus{flex-direction:column;align-items:stretch;gap:10px}.dutyApprovalRequestBody{padding:12px}.dutyApprovalInbox{padding:14px}.dutyApprovalRequest summary{gap:7px}
+ .dutyApprovalTable thead{display:none}.dutyApprovalTable,.dutyApprovalTable tbody,.dutyApprovalTable tr,.dutyApprovalTable td{display:block;width:100%;box-sizing:border-box}.dutyApprovalTable tr{margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #cad8e6}.dutyApprovalTable td{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border:0}.dutyApprovalTable td::before{content:attr(data-label);font-weight:800;flex:0 0 42%;color:#657a91}.dutyApprovalRequestBody .toolbar{flex-direction:column;align-items:stretch}
+}

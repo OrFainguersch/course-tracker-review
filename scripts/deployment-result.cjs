@@ -1,12 +1,14 @@
 const fs=require('node:fs');
 
-function deploymentResult({steps={},current,configured,safetyReady,intendedCommit,actualCommit}){
+function deploymentResult({steps={},current,configured,safetyReady,intendedCommit,actualCommit,courseOperationsRequired=false}){
+  const approvalGates=['permission_tests','rules_backup','rules_backup_artifact','live_permission_tests','rules_deploy','rules_verify'];
   const result=(status,reason)=>({status,reason,intendedCommit,actualCommit:actualCommit||'UNKNOWN'});
   // Any attempted write takes precedence over preflight failures/cancellation.
   if(steps.hosting_deploy==='failure'||steps.hosting_deploy==='cancelled')
     return result('FAILED','Hosting deployment did not complete; inspect the live release before rollback');
   if(steps.hosting_deploy==='success'){
     const gates=['regression','safety_preflight','firebase_cli','cli_compat','google_auth','adc_verify','prepare'];
+    if(courseOperationsRequired)gates.push(...approvalGates);
     if(current!=='true'||configured!=='true'||safetyReady!=='true'||gates.some(name=>steps[name]!=='success'))
       return result('FAILED','Hosting changed without every required release gate passing');
     if(steps.production_verify!=='success'||!actualCommit||actualCommit!==intendedCommit)
@@ -20,6 +22,9 @@ function deploymentResult({steps={},current,configured,safetyReady,intendedCommi
   if(configured!=='true')return result('BLOCKED','Deployment authorization is not configured');
   for(const name of ['firebase_cli','cli_compat','google_auth','adc_verify','prepare']){
     if(steps[name]!=='success')return result('FAILED',`Infrastructure/build step did not pass: ${name}; Hosting was not attempted`);
+  }
+  if(courseOperationsRequired){
+    for(const name of approvalGates)if(steps[name]!=='success')return result('BLOCKED',`Course operations release did not pass: ${name}; no application release is claimed`);
   }
   return result('BLOCKED','Hosting deployment was skipped; no release success is claimed');
 }
@@ -35,7 +40,7 @@ async function report(){
   let steps={};
   try{steps=JSON.parse(process.env.FLYMPUS_RELEASE_STEPS||'{}')}catch{}
   const result=deploymentResult({steps,current:process.env.FLYMPUS_CURRENT,configured:process.env.FLYMPUS_CONFIGURED,
-    safetyReady:process.env.FLYMPUS_SAFETY_READY,intendedCommit:process.env.GITHUB_SHA,actualCommit});
+    safetyReady:process.env.FLYMPUS_SAFETY_READY,intendedCommit:process.env.GITHUB_SHA,actualCommit,courseOperationsRequired:process.env.FLYMPUS_COURSE_OPERATIONS_REQUIRED==='true'});
   fs.writeFileSync('deployment-result.json',JSON.stringify({...result,steps},null,2)+'\n');
   if(process.env.GITHUB_OUTPUT)fs.appendFileSync(process.env.GITHUB_OUTPUT,`status=${result.status}\nactual_commit=${result.actualCommit}\n`);
   const summary=`### Firebase production: ${result.status}\n\n${result.reason}\n\n`+

@@ -137,6 +137,7 @@ function create(ctx){
      if(item)show(item);
      panel.hidden=true;document.querySelector('#topNotificationBtn')?.setAttribute('aria-expanded','false');
    });
+   ctx.afterRender?.();
  }
  return Object.freeze({start,stop,render,items,when,markSeen});
 }

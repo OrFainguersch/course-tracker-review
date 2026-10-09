@@ -114,8 +114,9 @@ test('future planned sorties remain upcoming and never become cancellation or ov
 test('Planned vs Executed form uses the same submitted execution sources as dashboard',()=>{
  assert(!html.includes('const executedInstructed=allEvaluationsForAnalytics().filter'));
  assert(!html.includes('instructedCount=allEvaluationsForAnalytics().filter'));
- assert(html.includes("const executedInstructed=getEvaluations().filter"));
- assert(html.includes("instructedCount=getEvaluations().filter"));
+ assert(html.includes("const executedInstructed=getPlanExecutedInstructed(date)"));
+ assert(html.includes("getEvaluations().filter(x=>(x.flightDate||x.date)===date).length"),'Instructor execution still comes from submitted evaluations');
+ assert(html.includes("instructedCount=getPlanExecutedInstructed(date)"));
 });
 
 test('grouped cancellation reasons expand per flight and never exceed unexecuted plan',()=>{

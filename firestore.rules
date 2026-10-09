@@ -319,6 +319,142 @@ service cloud.firestore {
       }
     }
 
+    /* BEGIN FLYMPUS COURSE OPERATIONS */
+    /* Additive shared channel. Local training data is never migrated implicitly. */
+    match /courseOperations/{courseId} {
+      function opsCourse() { return get(/databases/$(database)/documents/courseOperations/$(courseId)).data; }
+      function opsMember() {
+        return activeUser() && exists(/databases/$(database)/documents/courseOperations/$(courseId))
+          && request.auth.uid in opsCourse().members.keys();
+      }
+      function opsReviewer() {
+        return opsMember() && currentUserRecord().data.role != 'duty_trainee'
+          && opsCourse().members[request.auth.uid].role in ['INSTRUCTOR', 'COURSE_MANAGER'];
+      }
+      function opsAfterReviewer() {
+        let course = getAfter(/databases/$(database)/documents/courseOperations/$(courseId)).data;
+        return activeUser() && currentUserRecord().data.role != 'duty_trainee'
+          && request.auth.uid in course.members.keys()
+          && course.members[request.auth.uid].role in ['INSTRUCTOR', 'COURSE_MANAGER'];
+      }
+      function opsManager() {
+        return userManager() && (administrator()
+          || !exists(/databases/$(database)/documents/courseOperations/$(courseId))
+          || (opsMember() && opsCourse().members[request.auth.uid].role == 'COURSE_MANAGER'));
+      }
+      function opsRevision(date) {
+        return exists(/databases/$(database)/documents/courseOperations/$(courseId)/days/$(date))
+          ? get(/databases/$(database)/documents/courseOperations/$(courseId)/days/$(date)).data.revision : 0;
+      }
+      function opsDate(date) { return date is string && date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$'); }
+      function opsPlan(p) { return p is map && p.keys().hasOnly(['flights']) && p.flights is list && p.flights.size() <= 100; }
+      function opsReport(p) {
+        return p is map && p.keys().hasOnly(['date','plannedInstructed','plannedSolo','instructedExecuted','soloExecuted','cancellations','reason','solos'])
+          && opsDate(p.date) && p.plannedInstructed is int && p.plannedInstructed >= 0 && p.plannedInstructed <= 100
+          && p.plannedSolo is int && p.plannedSolo >= 0 && p.plannedSolo <= 500
+          && p.plannedInstructed + p.plannedSolo > 0
+          && p.instructedExecuted is int && p.instructedExecuted >= 0 && p.instructedExecuted <= 10000
+          && p.solos is list && p.solos.size() <= 500 && p.soloExecuted == p.solos.size() && p.soloExecuted <= p.plannedSolo
+          && p.cancellations is list && p.cancellations.size() <= 600 && p.reason is string && p.reason.size() <= 10000;
+      }
+      function opsPayload(kind,p) { return (kind == 'PLAN' && opsPlan(p)) || (kind == 'REPORT' && opsReport(p)); }
+      function opsCourseShape(v) {
+        return v.keys().hasOnly(['courseId','name','context','members','memberUids','updatedBy','updatedAt'])
+          && v.courseId is string && v.courseId.size() > 0 && v.courseId.size() <= 120
+          && v.name is string && v.name.size() <= 160 && v.context is map
+          && v.context.keys().hasOnly(['courseMeta','trainees','instructors','syllabi','soloSyllabi','syllabusDefs','counters','cancellationReasons'])
+          && v.context.courseMeta is map && v.context.trainees is list && v.context.trainees.size() <= 100
+          && v.context.instructors is list && v.context.instructors.size() <= 100
+          && v.context.syllabi is list && v.context.soloSyllabi is list && v.context.syllabusDefs is list
+          && v.context.counters is list && v.context.cancellationReasons is list
+          && v.members is map && v.members.size() <= 200 && v.memberUids is list
+          && v.memberUids.toSet() == v.members.keys().toSet()
+          && request.auth.uid in v.members.keys() && v.members[request.auth.uid].role == 'COURSE_MANAGER'
+          && v.updatedBy == request.auth.uid && v.updatedAt == request.time;
+      }
+      allow get: if opsMember() || opsManager();
+      allow list: if activeUser() && request.auth.uid in resource.data.memberUids;
+      allow create: if opsManager() && opsCourseShape(request.resource.data);
+      allow update: if opsManager() && opsCourseShape(request.resource.data)
+        && request.resource.data.courseId == resource.data.courseId;
+      allow delete: if false;
+
+      match /fleet/{fleetId} {
+        function fleetShape(v) {
+          let c = getAfter(/databases/$(database)/documents/courseOperations/$(courseId)).data;
+          return fleetId == 'current' && v.keys().hasOnly(['platformId','aircraft','timingDefaults','revision','updatedBy','updatedAt'])
+            && v.platformId == c.context.courseMeta.platformId && v.aircraft is list && v.aircraft.size() <= 100
+            && v.timingDefaults is map && v.revision is int
+            && v.updatedBy == request.auth.uid && v.updatedAt == request.time;
+        }
+        allow read: if opsMember();
+        allow create: if opsAfterReviewer() && fleetShape(request.resource.data) && request.resource.data.revision == 0;
+        allow update: if opsMember() && fleetShape(request.resource.data)
+          && request.resource.data.revision == resource.data.revision + 1;
+        allow delete: if false;
+      }
+      match /days/{date} {
+        function dayShape(v) {
+          return v.keys().hasOnly(['date','revision','plan','report','evaluationCount','sourceRequestId','updatedBy','updatedAt'])
+            && opsDate(date) && v.date == date && v.revision is int && v.revision > 0
+            && (v.plan == null || opsPlan(v.plan)) && (v.report == null || (opsReport(v.report) && v.report.date == date))
+            && v.evaluationCount is int && v.evaluationCount >= 0 && v.evaluationCount <= 10000
+            && v.sourceRequestId is string && v.sourceRequestId.size() <= 100
+            && v.updatedBy == request.auth.uid && v.updatedAt == request.time;
+        }
+        function approvedRequest(v) {
+          let r = getAfter(/databases/$(database)/documents/courseOperations/$(courseId)/requests/$(v.sourceRequestId)).data;
+          let existed = exists(/databases/$(database)/documents/courseOperations/$(courseId)/days/$(date));
+          return r.status == 'APPROVED' && r.date == date && r.courseId == opsCourse().courseId
+            && r.reviewedBy == request.auth.uid && r.submittedBy != request.auth.uid
+            && r.baseRevision == opsRevision(date) && v.revision == r.baseRevision + 1
+            && ((r.kind == 'PLAN' && v.plan == r.payload && (!existed || v.report == resource.data.report))
+              || (r.kind == 'REPORT' && v.report == r.payload && (!existed || v.plan == resource.data.plan)))
+            && (!existed || v.evaluationCount == resource.data.evaluationCount);
+        }
+        allow read: if opsMember();
+        allow create: if opsAfterReviewer() && dayShape(request.resource.data) && request.resource.data.revision == 1
+          && (request.resource.data.sourceRequestId == '' || approvedRequest(request.resource.data));
+        allow update: if opsReviewer() && dayShape(request.resource.data)
+          && request.resource.data.revision == resource.data.revision + 1
+          && (request.resource.data.sourceRequestId == '' || approvedRequest(request.resource.data));
+        allow delete: if false;
+      }
+      match /requests/{requestId} {
+        function requestShape(v) {
+          return v.keys().hasOnly(['id','courseId','kind','date','payload','baseRevision','status','submittedBy','submittedName','submittedAt','reviewedBy','reviewedAt','reviewNote'])
+            && v.id == requestId && requestId.matches('^[a-zA-Z0-9_-]{8,100}$')
+            && v.courseId == opsCourse().courseId && opsDate(v.date) && opsPayload(v.kind,v.payload)
+            && (v.kind != 'REPORT' || v.payload.date == v.date)
+            && v.baseRevision is int && v.baseRevision >= 0
+            && v.submittedName is string && v.submittedName.size() <= 120
+            && v.reviewNote is string && v.reviewNote.size() <= 2000;
+        }
+        function atomicApproval(v) {
+          let d = getAfter(/databases/$(database)/documents/courseOperations/$(courseId)/days/$(v.date)).data;
+          return v.baseRevision == opsRevision(v.date) && d.sourceRequestId == requestId
+            && d.updatedBy == request.auth.uid && d.updatedAt == request.time && d.revision == v.baseRevision + 1
+            && ((v.kind == 'PLAN' && d.plan == v.payload) || (v.kind == 'REPORT' && d.report == v.payload));
+        }
+        allow read: if opsMember() && (opsReviewer() || resource == null || resource.data.submittedBy == request.auth.uid);
+        allow create: if opsMember() && currentUserRecord().data.role == 'duty_trainee'
+          && opsCourse().members[request.auth.uid].role == 'DUTY_TRAINEE'
+          && requestShape(request.resource.data) && request.resource.data.status == 'PENDING'
+          && request.resource.data.baseRevision == opsRevision(request.resource.data.date)
+          && request.resource.data.submittedBy == request.auth.uid && request.resource.data.submittedAt == request.time
+          && request.resource.data.reviewedBy == '' && request.resource.data.reviewedAt == null && request.resource.data.reviewNote == '';
+        allow update: if opsMember() && requestShape(request.resource.data) && resource.data.status == 'PENDING'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewedBy','reviewedAt','reviewNote'])
+          && request.resource.data.reviewedBy == request.auth.uid && request.resource.data.reviewedAt == request.time
+          && ((request.resource.data.status == 'WITHDRAWN' && resource.data.submittedBy == request.auth.uid && request.resource.data.reviewNote == '')
+            || (opsReviewer() && resource.data.submittedBy != request.auth.uid
+              && ((request.resource.data.status == 'RETURNED' && request.resource.data.reviewNote.size() > 0)
+                || (request.resource.data.status == 'APPROVED' && atomicApproval(request.resource.data)))));
+        allow delete: if false;
+      }
+    }
+    /* END FLYMPUS COURSE OPERATIONS */
+
     /* Other training/course collections remain fail-closed until a separate
        migration from device storage and complete UID/course rules. */
     match /{document=**} {

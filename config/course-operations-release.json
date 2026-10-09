@@ -1,0 +1,13 @@
+{
+  "project": "flympus",
+  "namespace": "courseOperations",
+  "enabled": true,
+  "additiveOnly": true,
+  "preserveExistingData": true,
+  "authorization": {
+    "date": "2026-10-09",
+    "instruction": "Implement Duty Trainee instructor approvals, exempt Fleet, test permissions and security, commit and deploy to Firebase Hosting.",
+    "referenceBranch": "reference/build-0791-before-duty-approvals",
+    "referenceCommit": "80aaa507ef7e1a8c58fdcf2dbe1df542223a9f70"
+  }
+}

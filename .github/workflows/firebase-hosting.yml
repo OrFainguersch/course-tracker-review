@@ -57,10 +57,12 @@ jobs:
         id: safety_preflight
         if: steps.regression.outcome == 'success'
         continue-on-error: true
-        run: node scripts/production-safety.cjs
+        run: |
+          node scripts/production-safety.cjs
+          node scripts/course-operations-release.cjs preflight
       - name: Confirm deployment authorization is configured
         id: deploy_auth_config
-        if: steps.safety_preflight.outputs.ready == 'true'
+        if: steps.safety_preflight.outcome == 'success' && steps.safety_preflight.outputs.ready == 'true'
         env:
           WIF_PROVIDER: ${{ vars.FIREBASE_WIF_PROVIDER }}
           SERVICE_ACCOUNT: ${{ vars.FIREBASE_DEPLOY_SERVICE_ACCOUNT }}
@@ -76,7 +78,22 @@ jobs:
         id: firebase_cli
         if: steps.deploy_auth_config.outputs.configured == 'true'
         continue-on-error: true
-        run: npm install --prefix "$RUNNER_TEMP/firebase-cli" --no-audit --no-fund firebase-tools@15.32.1
+        run: npm install --prefix "$RUNNER_TEMP/firebase-cli" --no-audit --no-fund firebase-tools@15.32.1 firebase@12.6.0 @firebase/rules-unit-testing@5.0.0
+      - name: Set up Java for isolated permission tests
+        id: java
+        if: steps.firebase_cli.outcome == 'success'
+        continue-on-error: true
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Test Duty Trainee permissions and atomic approvals
+        id: permission_tests
+        if: steps.java.outcome == 'success'
+        continue-on-error: true
+        env:
+          FLYMPUS_TEST_DEPS: ${{ runner.temp }}/firebase-cli
+        run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" emulators:exec --only firestore --project demo-flympus-approvals --config firebase.approval-tests.json 'node --test tests/integration/course-operations.test.cjs'
       - name: Verify pinned CLI ADC and WIF compatibility
         id: cli_compat
         if: steps.firebase_cli.outcome == 'success'
@@ -84,7 +101,7 @@ jobs:
         run: node scripts/test-firebase-wif.cjs "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools"
       - name: Authenticate with short-lived GitHub identity
         id: google_auth
-        if: steps.cli_compat.outcome == 'success'
+        if: steps.cli_compat.outcome == 'success' && steps.permission_tests.outcome == 'success'
         continue-on-error: true
         uses: google-github-actions/auth@v3
         with:
@@ -115,11 +132,44 @@ jobs:
             echo "current=false" >> "$GITHUB_OUTPUT"
             echo "::warning::BLOCKED: main advanced while tests were running."
           fi
-      # Hosting-only releases deliberately never publish Firestore Rules.
-      # Keep the separate rules script for a separately backed-up/reviewed change.
+      - name: Back up active Firestore rules and prepare additive candidate
+        id: rules_backup
+        if: steps.final_freshness.outputs.current == 'true'
+        continue-on-error: true
+        run: node scripts/course-operations-release.cjs backup "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools" "$RUNNER_TEMP/course-operations-release"
+      - name: Preserve active rules before any production rules write
+        id: rules_backup_artifact
+        if: steps.rules_backup.outcome == 'success'
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: firestore-rules-before-${{ github.sha }}
+          path: ${{ runner.temp }}/course-operations-release/
+          if-no-files-found: error
+      - name: Test permissions against merged active production rules
+        id: live_permission_tests
+        if: steps.rules_backup_artifact.outcome == 'success'
+        continue-on-error: true
+        env:
+          FLYMPUS_TEST_DEPS: ${{ runner.temp }}/firebase-cli
+          FLYMPUS_RULES_PATH: ${{ runner.temp }}/course-operations-release/firestore.rules
+        run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" emulators:exec --only firestore --project demo-flympus-approvals --config "$RUNNER_TEMP/course-operations-release/firebase.json" 'node --test tests/integration/course-operations.test.cjs'
+      - name: Publish reviewed additive course operations rules
+        id: rules_deploy
+        if: steps.live_permission_tests.outcome == 'success'
+        continue-on-error: true
+        run: |
+          git fetch origin main --quiet
+          test "$(git rev-parse origin/main)" = "$GITHUB_SHA"
+          node scripts/course-operations-release.cjs deploy "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools" "$RUNNER_TEMP/course-operations-release"
+      - name: Verify active course operations rules
+        id: rules_verify
+        if: steps.rules_deploy.outcome == 'success'
+        continue-on-error: true
+        run: node scripts/course-operations-release.cjs verify "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools" "$RUNNER_TEMP/course-operations-release"
       - name: Deploy reviewed public bundle to Firebase Hosting
         id: hosting_deploy
-        if: github.ref == 'refs/heads/main' && steps.final_freshness.outputs.current == 'true'
+        if: github.ref == 'refs/heads/main' && steps.final_freshness.outputs.current == 'true' && steps.rules_verify.outcome == 'success'
         continue-on-error: true
         run: node "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" deploy --only hosting --project flympus --non-interactive
       - name: Verify production commit, assets and reserved auth helpers
@@ -131,11 +181,12 @@ jobs:
         id: release_result
         if: always()
         env:
+          FLYMPUS_COURSE_OPERATIONS_REQUIRED: 'true'
           FLYMPUS_CURRENT: ${{ steps.freshness.outputs.current == 'true' && steps.final_freshness.outputs.current != 'false' && 'true' || 'false' }}
           FLYMPUS_CONFIGURED: ${{ steps.deploy_auth_config.outputs.configured }}
           FLYMPUS_SAFETY_READY: ${{ steps.safety_preflight.outputs.ready }}
           FLYMPUS_RELEASE_STEPS: >-
-            {"regression":"${{ steps.regression.outcome }}","safety_preflight":"${{ steps.safety_preflight.outcome }}","firebase_cli":"${{ steps.firebase_cli.outcome }}","cli_compat":"${{ steps.cli_compat.outcome }}","google_auth":"${{ steps.google_auth.outcome }}","adc_verify":"${{ steps.adc_verify.outcome }}","prepare":"${{ steps.prepare.outcome }}","hosting_deploy":"${{ steps.hosting_deploy.outcome }}","production_verify":"${{ steps.production_verify.outcome }}"}
+            {"permission_tests":"${{ steps.permission_tests.outcome }}","rules_backup":"${{ steps.rules_backup.outcome }}","rules_backup_artifact":"${{ steps.rules_backup_artifact.outcome }}","live_permission_tests":"${{ steps.live_permission_tests.outcome }}","rules_deploy":"${{ steps.rules_deploy.outcome }}","rules_verify":"${{ steps.rules_verify.outcome }}","regression":"${{ steps.regression.outcome }}","safety_preflight":"${{ steps.safety_preflight.outcome }}","firebase_cli":"${{ steps.firebase_cli.outcome }}","cli_compat":"${{ steps.cli_compat.outcome }}","google_auth":"${{ steps.google_auth.outcome }}","adc_verify":"${{ steps.adc_verify.outcome }}","prepare":"${{ steps.prepare.outcome }}","hosting_deploy":"${{ steps.hosting_deploy.outcome }}","production_verify":"${{ steps.production_verify.outcome }}"}
         run: node scripts/deployment-result.cjs
       - name: Preserve explicit deployment result
         if: always()
@@ -144,4 +195,12 @@ jobs:
         with:
           name: firebase-release-result-${{ github.sha }}
           path: deployment-result.json
+          if-no-files-found: warn
+      - name: Preserve verified rules release evidence
+        if: always() && steps.rules_backup.outcome == 'success'
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: firestore-rules-release-${{ github.sha }}
+          path: ${{ runner.temp }}/course-operations-release/
           if-no-files-found: warn

@@ -122,7 +122,7 @@ assert(html.includes("function builderStartLabel(startsOn){return startsOn?forma
 assert(html.includes("submitted Evaluations on '+esc(formatDateDMY(date))"),"Planned vs Executed must never expose the internal ISO date to users");
 assert(html.includes("function siteConfirm(")&&!(/\bconfirm\s*\(/.test(html))&&!(/\balert\s*\(/.test(html))&&!(/\bprompt\s*\(/.test(html)),"Native browser dialogs must be replaced by the branded FLYMPUS dialog");
 assert(html.includes("function showFormInvalid(")&&html.includes("form.noValidate=true")&&html.includes("submitCopy=/submit/i.test"),"Forms must provide branded validation feedback using Save/Submit-aware copy instead of silent or Safari-native validation");
-assert(html.includes('class="card recordActionIsland"')&&html.includes('class="toolbar recordFormActions pveRecordActions"')&&html.includes('id="pveSave" type="button">Submit daily report</button><button class="btn secondary discardDraft" id="discardPlannedDraft"'),"Plan must keep Submit/Discard in a dedicated action island while matching the Forms workflow button pattern");
+assert(html.includes('class="card recordActionIsland"')&&html.includes('class="toolbar recordFormActions pveRecordActions"')&&html.includes('id="pveSave" type="button">')&&html.includes("isDutyTrainee()?'Send report for approval':'Submit daily report'")&&html.includes('class="btn secondary discardDraft" id="discardPlannedDraft"'),"Plan must keep Submit/Discard in a dedicated action island while matching the Forms workflow button pattern");
 assert(!html.includes("Daily report incomplete")&&!html.includes("Ready to save")&&html.includes('id="plannedDraftBadge"')&&html.includes("draftSavedLabel('planned'):'Auto-save ready'"),"Plan must replace the old Draft pill with the same auto-save status used by the other forms");
 assert(html.includes("function activityDraftMeaningful(name,data)")&&html.includes("if(name==='planned')")&&html.includes("if(name==='safety')")&&html.includes("if(name==='exams')")&&html.includes("if(name==='evaluation')"),"Draft attention must be based on meaningful user input rather than prefilled defaults such as the date");
 assert(html.includes("function requiredCompletionPanelShell(prefix)")&&html.includes("function bindRequiredCompletionPanel(form,prefix)")&&html.includes("function staticRequiredCompletionPanel(prefix,items)"),"Fillable Forms workflows must share one branded required-before-submission system");
@@ -861,6 +861,7 @@ assert(html.includes("if(!flympusRealPageReload||!appScreenIds.has(String(initia
     const records=Array.from({length:executedInstructed},(_,i)=>({date,id:'evaluation-'+i}));
     const solos=Array.from({length:executedSolo},(_,i)=>({date,id:'solo-'+i}));
     const scope={
+      dutyOperations:null,todayIsoDate:()=>date,getPlanExecutedInstructed:d=>records.filter(x=>x.date===d).length,getPlanWorkingSoloFlights:()=>solos,
       getDailyReports:()=>savedReports,getActivityDraft:()=>draft,
       flightBoardPlanStatus:()=>({linked:false,instructed:0,solo:0}),
       getEvaluations:()=>records,getSoloFlights:()=>solos,

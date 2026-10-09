@@ -141,9 +141,9 @@ test('Plan opens on the date-specific Daily Flight Plan with separate Planned vs
  assert.match(page,/data-plan-view="report"/);
  assert.match(page,/id="dailyPlanDate"/);
  assert.ok(page.includes("courseFlightScheduleHtml(date)"));
- assert.ok(page.includes("view==='board'?dailyFlightPlan():plannedVsExecuted()"));
+ assert.ok(page.includes("view==='board'?dailyFlightPlan():view==='approvals'"));
  assert.ok(html.includes("case'planned':html=planWorkspace();break"));
- assert.ok(html.includes("if(state.planView==='report')bindPlanned();else bindDailyFlightBoard()"));
+ assert.ok(html.includes("if(state.planView==='report')bindPlanned();else if(state.planView!=='approvals')bindDailyFlightBoard()"));
  assert.ok(html.includes("b.dataset.planToday==='true'?{planView:'board',planDate:todayIsoDate()"));
  const homeSource=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
  assert.match(homeSource, /<h2>Today.*s Plan<\/h2>/);
@@ -287,7 +287,7 @@ test('Daily board flight counts automatically feed Planned vs Executed for the r
  assert.deepEqual(M.plannedFlightCounts(board,'2026-10-08','shahak'),{total:3,instructed:2,solo:1});
  assert.deepEqual(M.plannedFlightCounts(board,'2026-10-09','shahak'),{total:1,instructed:0,solo:1});
  assert.deepEqual(M.plannedFlightCounts(board,'2026-10-08','aerostar'),{total:1,instructed:0,solo:1});
- const env={window:{FLYMPUS_FLEET_MODEL:M},getDailyFlightBoard:()=>board,currentFleetPlatform:()=> 'shahak',
+ const env={dutyOperations:null,window:{FLYMPUS_FLEET_MODEL:M},getDailyFlightBoard:()=>board,currentFleetPlatform:()=> 'shahak',
   readCourseArray:()=>[],persistCourseOperations:()=>true};
  const helper=html.slice(html.indexOf('function flightBoardPlanStatus('),html.indexOf('function getPlanTimingDefaults(){'));
  const vm=require('node:vm');
@@ -308,7 +308,7 @@ test('Planned vs Executed uses booked counts over old manual values without cros
  const vm=require('node:vm');
  const source=html.slice(html.indexOf('function plannedCompleteness(){'),html.indexOf('function plannedAttentionCount(){'));
  const day='2026-10-08',other='2026-10-09';
- const base={state:{planDate:day,planInstructed:9,planSolo:8},
+ const base={dutyOperations:null,getPlanExecutedInstructed:()=>0,getPlanWorkingSoloFlights:()=>[],state:{planDate:day,planInstructed:9,planSolo:8},
   getDailyReports:()=>[{date:day,plannedInstructed:7,plannedSolo:6}],
   getActivityDraft:()=>({data:{date:other,plannedInstructed:88,plannedSolo:77}}),
   getEvaluations:()=>[],getSoloFlights:()=>[],cfgGet:()=>({cancellationReasons:[]}),
@@ -380,7 +380,7 @@ test('Daily Flight Plan owns the only editable flight-date selector for both Pla
  const vm=require('node:vm');
  const source=html.slice(html.indexOf('function planUiText('),html.indexOf('function planWorkspace(){'));
  const context={
-  state:{planDate:'2026-10-08'},todayIsoDate:()=> '2026-10-09',
+  dutyOperations:null,state:{planDate:'2026-10-08'},todayIsoDate:()=> '2026-10-09',
   getFlympusAppPreferences:()=>({language:'en'}),
   esc:x=>String(x),dateInputValue:date=>date.slice(8)+'/'+date.slice(5,7)+'/'+date.slice(0,4),
   courseFlightScheduleHtml:date=>'<aside data-board-date="'+date+'"></aside>'
@@ -444,7 +444,7 @@ test('Plan contract stays coherent: full-width flight day, settings, required fi
  assert.doesNotMatch(report,/id="pveDate" type="text"/);
  assert.match(report,/boardLinked\?'readonly aria-readonly="true"/);
  assert.match(html,/flightBoardPlanStatus\(date\)/);
- assert.match(html,/FLYMPUS Review · build 0791/);
+ assert.match(html,/FLYMPUS Review · build 0792/);
  lang.value='he';
  assert.match(context.window.FLYMPUS_FLEET_VIEW.schedule({
   fleet:[],flights:[],platformId:'shahak',date:'2026-10-08',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true
@@ -571,13 +571,12 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- const version='20261009-timeline-svg-0790';
- for(const asset of ['assets/fleet-views.js','assets/fleet-operations.css']){
+ for(const [asset,version] of [['assets/fleet-views.js','20261009-duty-approval-0792'],['assets/fleet-operations.css','20261009-timeline-svg-0790']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-sidebar-logo-0791'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261009-sidebar-logo-0791/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-duty-approval-0792'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261009-duty-approval-0792/g)||[]).length,2);
 });
 test('Planned vs Executed date moves to locale start and remains stacked on mobile',()=>{
  assert.match(html,/class="pveDateRow"/);
@@ -605,6 +604,7 @@ test('Planned Solo UI automatically opens exact unexecuted slots, groups batches
  const config={cancellationReasons:[{id:'weather',name:'Weather'}]};
  let solo=[],saved=null,language='en';
  const scope={
+   dutyOperations:null,isDutyTrainee:()=>false,getPlanExecutedInstructed:()=>0,getPlanWorkingSoloFlights:()=>solo,
    state:{planDate:'2026-10-09'},getDailyReports:()=>[],
    getActivityDraft:()=>({data:{date:'2026-10-09',plannedInstructed:0,plannedSolo:4,cancellations:saved||[]}}),
    getSoloFlights:()=>solo,getEvaluations:()=>[],flightBoardPlanStatus:()=>({linked:false,instructed:0,solo:0}),
@@ -648,9 +648,9 @@ test('planned solo recording never writes beyond the plan and every grouped flig
  assert.match(source,/batchId=key\|\|'solo_batch_'/);
  assert.match(source,/for\(let i=0;i<quantity;i\+\+\)/);
  assert.match(source,/updated\.forEach\(syncSoloEvents\)/);
- assert.match(source,/saveSoloFlights\(next\)/);
+ assert.match(source,/savePlanWorkingSoloFlights\(next\)/);
  assert.match(source,/data\.dismissedSoloSlots=/);
- assert.match(html,/getSoloFlights\(\)\.filter\(x=>x\.date===planDate\)\.length>plannedSolo/);
+ assert.match(html,/getPlanWorkingSoloFlights\(\)\.filter\(x=>x\.date===planDate\)\.length>plannedSolo/);
 });
 
 test('Unified Solo forms have no Record button and safely autosave edits with a stable batch id',()=>{
@@ -666,7 +666,7 @@ test('Unified Solo forms have no Record button and safely autosave edits with a 
  assert.match(binder,/if\(!trainee\|\|!syllabus\)/);
  assert.match(binder,/oldCount/);
  assert.match(binder,/quantity>remaining/);
- assert.match(binder,/saveSoloFlights\(next\)/);
+ assert.match(binder,/savePlanWorkingSoloFlights\(next\)/);
  assert.match(binder,/updated\.forEach\(syncSoloEvents\)/);
  assert.match(binder,/render\(\)/);
  assert.match(html,/soloEntries=\[\.\.\.document\.querySelectorAll\('\.pveSoloEntryForm\[data-solo-slot\]'\)/);
@@ -677,7 +677,7 @@ test('Removing an already recorded Solo group marks all removed flights as unexe
  const end=html.indexOf("document.querySelectorAll('[data-solo-delete]')",start);
  assert.ok(start>0&&end>start);
  const handler=html.slice(start,end);
- assert.match(handler,/saveSoloFlights\(getSoloFlights\(\)\.filter/);
+ assert.match(handler,/savePlanWorkingSoloFlights\(getPlanWorkingSoloFlights\(\)\.filter/);
  assert.match(handler,/saveActivityEvents\(getActivityEvents\(\)\.filter/);
  assert.match(handler,/data\.dismissedSoloSlots=/);
  assert.match(handler,/saveActivityDraft\('planned',data\)/);

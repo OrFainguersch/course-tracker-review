@@ -12,6 +12,14 @@ This repository treats production deployment stability as a hard project rule.
 
 These rules exist specifically to prevent repeated GitHub Actions failure emails from transient edits.
 
+## Duty Trainee approvals (authorized 2026-10-09)
+
+- Duty Trainee plans, daily reports, solo executions and cancellations remain drafts or immutable approval requests until an assigned instructor approves them. Pending data never feeds official reports or experience counters. Fleet stays a direct save.
+- A new courseOperations namespace shares verified Firebase UID memberships, fleet, approved days and requests. Do not trust browser storage as authorization; prevent self-approval, duplicate approval and stale revision overwrites on the server.
+- Preserve existing UID-scoped records and drafts. Do not clear a draft until its matching request is approved or the user explicitly chooses to reload the approved version.
+- Reference before this feature: reference/build-0791-before-duty-approvals at 80aaa507ef7e1a8c58fdcf2dbe1df542223a9f70.
+- This feature separately authorizes an additive rules release. Back up active production rules to a GitHub artifact, merge only the reviewed courseOperations block, test the merged live source against the emulator and verify the active ruleset before Hosting. Never replace unrelated production permissions or mark the old Hosting-only data safeguards as verified.
+
 ## Navigation audio invariant
 
 - Bottom-navigation sound must respond to the **first trusted physical press** after cold launch, reload, focus/resume, and ordinary navigation on both mobile and desktop layouts.
