@@ -5,7 +5,6 @@ const PHASE_KEYS=['brief','flight','debrief'];
 const CLOCK_KEYS=['briefing','takeoff','landing','debrief'];
 const GAP=6;
 const ROW=31;
-let maskSerial=0;
 const clamp=(n,low,high)=>Math.min(Math.max(n,low),high);
 
 /* Pure and deterministic: candidates share the same four rows, so phase names
@@ -38,6 +37,90 @@ function planTimeline({width,phases,clocks}){
  const bottomRows=occupied[1].length?2:occupied[0].length?1:0;
  return {compact:false,placements,externalKeys,topRows,bottomRows};
 }
+
+/* Rectilinear visibility-graph routing. A leader must reach its own label,
+   not disappear behind an adjacent label. All obstacles include 4px clearance.
+   Coordinates are physical (LTR or RTL already resolved by the caller). */
+function routeLeader(start,end,labels,width,height){
+ const safeX=x=>clamp(x,1,Math.max(1,width-1));
+ const safeY=y=>clamp(y,0,Math.max(0,height));
+ const s={x:safeX(start.x),y:safeY(start.y)};
+ const t={x:safeX(end.x),y:safeY(end.y)};
+ const obstacles=labels.map(o=>({
+  left:safeX(o.left-4),right:safeX(o.left+o.width+4),
+  top:safeY(o.top-4),bottom:safeY(o.top+29)
+ })).filter(o=>o.left<o.right&&o.top<o.bottom);
+ const xs=[s.x,t.x,1,Math.max(1,width-1)];
+ const ys=[s.y,t.y];
+ for(const o of obstacles){xs.push(o.left,o.right);ys.push(o.top,o.bottom)}
+ const uniq=a=>[...new Set(a)].sort((a,b)=>a-b);
+ const xx=uniq(xs),yy=uniq(ys),nx=xx.length,ny=yy.length;
+ const valid=(x,y)=>obstacles.every(o=>!(x>o.left&&x<o.right&&y>o.top&&y<o.bottom));
+ const clear=(a,z)=>{
+  if(a.x===z.x)return obstacles.every(o=>!(a.x>o.left&&a.x<o.right&&Math.max(Math.min(a.y,z.y),o.top)<Math.min(Math.max(a.y,z.y),o.bottom)));
+  return obstacles.every(o=>!(a.y>o.top&&a.y<o.bottom&&Math.max(Math.min(a.x,z.x),o.left)<Math.min(Math.max(a.x,z.x),o.right)));
+ };
+ if(!valid(s.x,s.y)||!valid(t.x,t.y))return null;
+ const points=[],neighbors=[];
+ for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){
+  const p={x:xx[i],y:yy[j]};points.push(p);
+  neighbors.push(valid(p.x,p.y)?[]:null);
+ }
+ for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){
+  const id=j*nx+i;if(!neighbors[id])continue;
+  for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1]]){
+   const a=i+di,z=j+dj;
+   if(a<0||a>=nx||z<0||z>=ny)continue;
+   const next=z*nx+a;
+   if(neighbors[next]&&clear(points[id],points[next]))
+    neighbors[id].push({next,dir:di?0:1,dist:Math.abs(di?xx[a]-xx[i]:yy[z]-yy[j])});
+  }
+ }
+ const si=yy.indexOf(s.y)*nx+xx.indexOf(s.x);
+ const ti=yy.indexOf(t.y)*nx+xx.indexOf(t.x);
+ const size=points.length*3,dist=Array(size).fill(Infinity),prev=Array(size).fill(-1);
+ const heap=[];
+ const push=(id,cost)=>{
+  heap.push({id,cost});let i=heap.length-1;
+  while(i){const p=(i-1)>>1;if(heap[p].cost<=cost)break;heap[i]=heap[p];i=p}
+  heap[i]={id,cost};
+ };
+ const pop=()=>{
+  const out=heap[0],last=heap.pop();
+  if(heap.length){let i=0;while(i*2+1<heap.length){
+   let child=i*2+1;if(child+1<heap.length&&heap[child+1].cost<heap[child].cost)child++;
+   if(last.cost<=heap[child].cost)break;heap[i]=heap[child];i=child
+  }heap[i]=last}
+  return out;
+ };
+ const source=si*3+2;dist[source]=0;push(source,0);
+ let destination=-1;
+ while(heap.length){
+  const {id,cost}=pop();if(cost>dist[id])continue;
+  const at=Math.floor(id/3),lastDir=id%3;
+  if(at===ti){destination=id;break}
+  for(const edge of neighbors[at]||[]){
+   const next=edge.next*3+edge.dir;
+   const penalty=lastDir!==2&&lastDir!==edge.dir?13:0;
+   const candidate=cost+edge.dist+penalty;
+   if(candidate+1e-7<dist[next]){
+    dist[next]=candidate;prev[next]=id;push(next,candidate);
+   }
+  }
+ }
+ if(destination<0)return null;
+ const reversed=[];
+ for(let id=destination;id>=0;id=prev[id])reversed.push(points[Math.floor(id/3)]);
+ const path=reversed.reverse().filter((p,i,a)=>i===0||p.x!==a[i-1].x||p.y!==a[i-1].y);
+ // Remove intermediate points on the same straight line.
+ for(let i=1;i<path.length-1;){
+  if((path[i-1].x===path[i].x&&path[i].x===path[i+1].x)||
+     (path[i-1].y===path[i].y&&path[i].y===path[i+1].y))path.splice(i,1);
+  else i++;
+ }
+ return path;
+}
+
 function attach(flow,form){
  if(!flow||!form||!root.document)return ()=>{};
  if(attach.active)attach.active.dispose();
@@ -60,7 +143,6 @@ function attach(flow,form){
  const phaseEls=PHASE_KEYS.map(key=>track.querySelector('[data-phase="'+key+'"]'));
  const clockEls=CLOCK_KEYS.map(key=>clockArea.querySelector('[data-flight-clock="'+key+'"]')?.closest('.fleetTimeFlowClock'));
  let scheduled=false,observer=null,prefsObserver=null,selected='',disposed=false;
- const leaderMaskId='fleetTimeFlowLeaderMask'+(++maskSerial);
  const phaseLabel=key=>phaseEls[PHASE_KEYS.indexOf(key)]?.querySelector('.fleetTimeFlowPhaseText')?.textContent||key;
  const measureBadge=label=>{
   const sample=root.document.createElement('span');
@@ -137,43 +219,49 @@ function attach(flow,form){
   const barBottom=barY+track.offsetHeight;
   leaderArea.setAttribute('viewBox','0 0 '+Math.ceil(bodyRect.width)+' '+Math.ceil(body.offsetHeight));
   leaderArea.setAttribute('preserveAspectRatio','none');
-  // The labels are transparent, so a lower-lane leader can otherwise run
-  // straight through the digits of a nearer clock (e.g. 08:00 over 07:50).
-  // Clip ALL leader strokes around ALL measured text/badge bounds, independent
-  // of which lanes the collision solver selects or which direction is active.
-  const svgNS='http://www.w3.org/2000/svg';
-  const defs=root.document.createElementNS(svgNS,'defs');
-  const mask=root.document.createElementNS(svgNS,'mask');
-  mask.setAttribute('id',leaderMaskId);
-  mask.setAttribute('maskUnits','userSpaceOnUse');
-  mask.setAttribute('maskContentUnits','userSpaceOnUse');
-  const background=root.document.createElementNS(svgNS,'rect');
-  background.setAttribute('x','0');background.setAttribute('y','0');
-  background.setAttribute('width',Math.ceil(bodyRect.width));
-  background.setAttribute('height',Math.ceil(body.offsetHeight));
-  background.setAttribute('fill','white');
-  mask.append(background);
   const placementY=item=>{
-   const top=item.lane>=2;
-   const depth=top?item.lane-2:item.lane;
+   const top=item.lane>=2,depth=top?item.lane-2:item.lane;
    return top?topPad-(depth+1)*ROW:barBottom+10+depth*ROW;
   };
-  for(const item of result.placements){
-   const exclusion=root.document.createElementNS(svgNS,'rect');
-   exclusion.setAttribute('x',shiftX+item.left-3);
-   exclusion.setAttribute('y',placementY(item)-3);
-   exclusion.setAttribute('width',item.width+6);
-   exclusion.setAttribute('height','31');
-   exclusion.setAttribute('fill','black');
-   mask.append(exclusion);
+  const obstacles=result.placements.map(item=>({
+   key:item.kind+':'+item.key,left:shiftX+item.left,
+   width:item.width,top:placementY(item)
+  }));
+  const routes=result.placements.map(item=>{
+   const top=item.lane>=2,y=placementY(item);
+   const anchorX=shiftX+item.x;
+   const targetX=shiftX+item.left+item.width/2;
+   return routeLeader(
+    {x:anchorX,y:top?barY:barBottom},
+    {x:targetX,y:top?y+25:y-2},
+    obstacles.filter(o=>o.key!==item.kind+':'+item.key),
+    bodyRect.width,body.offsetHeight);
+  });
+  if(routes.some(route=>!route)){
+   // Never display a severed or overlapping leader if geometry is impossible.
+   flow.classList.add('fleetTimeFlowIsCompact');
+   fallback.replaceChildren();
+   const names=root.document.createElement('div');names.className='fleetTimeFlowFallbackPhases';
+   for(const key of PHASE_KEYS){
+    const chip=root.document.createElement('span');chip.dataset.phase=key;
+    chip.textContent=phaseLabel(key);names.append(chip);
+   }
+   const values=root.document.createElement('div');values.className='fleetTimeFlowFallbackClocks';
+   for(let i=0;i<CLOCK_KEYS.length;i++){
+    const cell=root.document.createElement('div');
+    const label=root.document.createElement('small');
+    label.textContent=clockEls[i].getAttribute('aria-label')||CLOCK_KEYS[i];
+    const value=root.document.createElement('strong');value.dir='ltr';
+    value.textContent=clockEls[i].querySelector('strong').textContent;
+    cell.append(label,value);values.append(cell);
+   }
+   fallback.append(names,values);fallback.hidden=false;
+   return;
   }
-  defs.append(mask);
-  const leaderGroup=root.document.createElementNS(svgNS,'g');
-  leaderGroup.setAttribute('mask','url(#'+leaderMaskId+')');
-  leaderArea.append(defs,leaderGroup);
-  for(const item of result.placements){
+  for(let index=0;index<result.placements.length;index++){
+   const item=result.placements[index];
+   const route=routes[index];
    const top=item.lane>=2;
-   const depth=top?item.lane-2:item.lane;
    const y=placementY(item);
    let element;
    if(item.kind==='clock'){
@@ -193,15 +281,12 @@ function attach(flow,form){
     element.style.width=item.width+'px';
     labelArea.append(element);
    }
-   const anchorX=shiftX+item.x;
-   const targetX=shiftX+item.left+item.width/2;
-   const startY=top?barY:barBottom;
-   const endY=top?y+25:y-2;
    const path=root.document.createElementNS('http://www.w3.org/2000/svg','path');
-   path.setAttribute('d','M'+anchorX+' '+startY+' L'+anchorX+' '+(startY+(endY-startY)*0.55)+' L'+targetX+' '+endY);
+   path.setAttribute('d',route.map((p,i)=>(i?'L':'M')+p.x+' '+p.y).join(' '));
    path.setAttribute('class',item.kind==='phase'?'fleetTimeFlowPhaseLeader':'fleetTimeFlowClockLeader');
-   leaderGroup.append(path);
+   leaderArea.append(path);
   }
+
  };
  const queue=()=>{
   if(disposed||scheduled)return;
@@ -258,7 +343,7 @@ function attach(flow,form){
  queue();
  return queue;
 }
-const api={planTimeline,attach};
+const api={planTimeline,routeLeader,attach};
 root.FLYMPUS_FLEET_TIMELINE_LAYOUT=api;
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
