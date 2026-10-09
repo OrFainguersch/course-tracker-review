@@ -540,20 +540,13 @@ test('Plan timeline option 1 shows all four chronological boundaries at correct 
  assert.match(stylesheet,/html\.flympusLargeText \.fleetTimeFlowClock strong/);
 });
 
-test('Plan Flight and Debriefing graphics reuse Fleet airplane and Exams lined document, without checkmark',()=>{
- const nav=html.slice(html.indexOf('function navIconSvg(name){'),html.indexOf('function bottomNavIconSvg('));
- const fleet=nav.match(/fleet:'([^']+)'/),exams=nav.match(/exams:'([^']+)'/);
- assert.ok(fleet&&exams);
- assert.match(ui,/const iconFlight=iconSvg\('<path d="M17\.8 19\.2 16 11/);
- assert.match(ui,/const iconDebrief=iconSvg\('[\s\S]*?M8\.5 10\.5h7M8\.5 14h7M8\.5 17\.5h5/);
- assert.match(exams[1],/M9.5 11h5.5M9.5 14h5.5M9.5 17h3.5/);
- assert.doesNotMatch(exams[1],/m9 13 2 2 4-4/);
- const vm=require('node:vm'),ctx={window:{FLYMPUS_FLEET_MODEL:M}};
- vm.runInNewContext(ui,ctx);
- const out=ctx.window.FLYMPUS_FLEET_VIEW.schedule({fleet:[],flights:[],platformId:'aerostar',date:'2026-10-09',trainees:[],instructors:[],syllabi:[],canWrite:true});
- assert.equal((out.match(/class="fleetTimeFlowIcon"/g)||[]).length,3);
- assert.match(out,/data-phase="flight"/);
- assert.match(out,/data-phase="debrief"/);
+test('Plan uses the same filled aircraft glyph as roster and Evaluation-style lined form icon',()=>{
+ assert.match(ui,/const iconFlight='<span class="fleetTimeFlowIcon fleetTimeFlowFlightIcon" aria-hidden="true">✈<\/span>'/);
+ assert.match(ui,/const iconDebrief=iconSvg\('<path d="M8 4\.5h8"/);
+ assert.match(ui,/M8 10h8M8 13\.5h8M8 17h6/);
+ assert.doesNotMatch(ui,/const iconDebrief=iconSvg\('[^']*m8\.5 13 2\.2/);
+ assert.match(html,/\.fleetTimeFlowFlightIcon\{height:auto!important/);
+ assert.match(html,/@media\(max-width:600px\)\{\.fleetTimeFlowFlightIcon\{display:none!important\}\}/);
 });
 test('Planned vs Executed date moves to locale start and remains stacked on mobile',()=>{
  assert.match(html,/class="pveDateRow"/);

@@ -113,7 +113,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/safety-global-inbox.js?v=20261008-safety02"></script>
 <script src="./assets/safety-ui.js?v=20261008-safety03"></script>
 <script src="./assets/fleet-model.js?v=20261009-plan-duration12"></script>
-<script src="./assets/fleet-views.js?v=20261009-solo-batch-icons18"></script>
+<script src="./assets/fleet-views.js?v=20261009-plane-glyph-unified-solo19"></script>
 <script src="./assets/home-operations.js?v=20261008-home02"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
@@ -1256,6 +1256,14 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 /* ===== Planned vs Executed · purpose-first responsive layout ===== */
 .pvePage{display:grid;gap:12px;min-width:0}.pvePageHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;min-width:0}.pvePageHead .pageTitle{margin-top:3px}.pvePageHead .sub{max-width:700px;margin-bottom:0}.pveDayState{flex:0 0 auto;margin-top:5px;padding:6px 10px;border-radius:999px;background:#eef3f8;color:#64748b;font-size:10px;font-weight:900}.pveDayState.draft{background:#fff4d8;color:#8a5a00}.pveDayState.saved{background:#e7f8ef;color:#087453}
 .pveOverview{padding:16px;min-width:0}.pveOverview>.formTitle{margin-bottom:10px}
+/* Consistent FLYMPUS plane glyph and Evaluation-style document icon. */
+.fleetTimeFlowFlightIcon{height:auto!important;width:18px!important;display:inline-flex;align-items:center;justify-content:center;font-size:21px;line-height:1;stroke:none;font-family:inherit;font-weight:800}
+@media(max-width:600px){.fleetTimeFlowFlightIcon{display:none!important}}
+.pveSoloEntrySaved{border-color:#b9dccd;background:rgba(235,250,243,.76)}
+.pveSoloSavedBadge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 7px;background:#e2f6eb;color:#087453;font-size:10px;font-weight:850}
+html[data-flympus-theme="dark"] .pveSoloEntrySaved{background:rgba(31,74,65,.45);border-color:#478473}
+html[data-flympus-theme="dark"] .pveSoloSavedBadge{background:#214e3e;color:#a8e7c8}
+html.flympusLargeText .pveSoloSavedBadge{font-size:14px}
 /* Automatically generated planned Solo execution slots and grouped cancellation reasons. */
 .pveSoloEntryList{display:grid;gap:10px}
 .pveSoloEntryForm{min-width:0;padding:12px;border:1px solid #cfdfef;border-radius:13px;background:rgba(255,255,255,.78)}
@@ -11201,16 +11209,13 @@ function plannedVsExecuted(){
    const hasCurrent=row.reasonId&&!reasonCatalog.some(x=>x.id===row.reasonId),legacy=hasCurrent?'<option value="'+esc(row.reasonId)+'" selected>'+esc(row.reasonLabel||'Previous reason')+'</option>':'',bound=row.type==='Solo'?soloCancelled:instructedCancelled;
    return '<div class="pveCancellationRow" data-cancel-row><div class="pveCancellationMeta"><span>'+(index+1)+'</span><div><b>'+planUiText('Cancellation','ביטול')+'</b><small>'+esc(row.type)+' · '+planUiText('not executed','לא בוצעה')+'</small></div></div><select class="pveCancellationReason" data-cancel-key="'+esc(row.key)+'" data-cancel-type="'+esc(row.type)+'" required><option value="">'+planUiText('Select cancellation reason','בחר סיבת ביטול')+'</option>'+reasonCatalog.map(r=>'<option value="'+esc(r.id)+'" '+(r.id===row.reasonId?'selected':'')+'>'+esc(r.name)+'</option>').join('')+legacy+'</select><label class="pveCancelQtyField">'+planUiText('Count','כמות')+'<input class="input pveCancellationQuantity" data-cancel-qty type="number" inputmode="numeric" min="1" max="'+bound+'" step="1" value="'+row.quantity+'"></label></div>';
  };
- const soloSlot=index=>{
-   const d=soloEntryDrafts[index]||{},remaining=ps-soloRows.length;
+ const soloSlot=(index,group=null)=>{
+   const saved=Boolean(group),d=saved?group.rows[0]:(soloEntryDrafts[index]||{}),quantity=saved?group.rows.length:Math.max(1,Math.floor(Number(d.quantity)||1)),maxFlights=Math.max(1,ps-soloRows.length+(saved?group.rows.length:0));
    const select=(name,entries,value,prompt)=>'<select class="input" name="'+name+'" required><option value="" disabled '+(!value?'selected':'')+'>'+prompt+'</option>'+entries.map(([id,label])=>'<option value="'+esc(id)+'" '+(String(id)===String(value)?'selected':'')+'>'+esc(label)+'</option>').join('')+'</select>';
    const metrics=(tracks('TAKEOFF')||tracks('LANDING')||tracks('TRAINING_HOUR'))?'<div class="pveSoloCounters">'+(tracks('TAKEOFF')?'<label class="field">'+planUiText('Takeoffs per flight','המראות לכל טיסה')+'<input class="input" name="takeoffs" type="number" min="0" step="1" value="'+esc(d.takeoffs??1)+'"></label>':'')+(tracks('LANDING')?'<label class="field">'+planUiText('Landings per flight','נחיתות לכל טיסה')+'<input class="input" name="landings" type="number" min="0" step="1" value="'+esc(d.landings??1)+'"></label>':'')+(tracks('TRAINING_HOUR')?'<label class="field">'+planUiText('Minutes per flight','דקות לכל טיסה')+'<input class="input" name="minutes" type="number" min="0" step="1" value="'+esc(d.minutes??20)+'"></label>':'')+'</div>':'';
-   return '<form class="pveSoloEntryForm" data-solo-slot="'+index+'"><div class="pveSoloEntryHead"><b>'+planUiText('Solo','סולו')+' '+(soloRows.length+index+1)+'</b><label class="pveSoloQuantity">'+planUiText('Flights','טיסות')+'<input class="input" name="quantity" type="number" inputmode="numeric" min="1" max="'+remaining+'" step="1" value="'+esc(d.quantity??1)+'"></label><button type="button" class="pveSoloSkip" data-solo-skip="'+index+'" aria-label="'+planUiText('Remove unexecuted solo row','הסר שורת סולו שלא בוצעה')+'" title="'+planUiText('Not executed','לא בוצעה')+'">×</button></div><div class="pveSoloPrimary"><div class="field"><label>'+planUiText('Trainee','חניך')+'</label>'+select('traineeId',allT.map(t=>[t.id,t.name]),d.traineeId,planUiText('Select trainee','בחר חניך'))+'</div><div class="field"><label>'+planUiText('Solo syllabus','סילבוס סולו')+'</label>'+select('syllabus',soloSyllabusNames.map(x=>[x,x]),d.syllabus,planUiText('Select syllabus','בחר סילבוס'))+'</div></div>'+metrics+'<div class="pveSoloEntryActions"><button class="btn secondary small pveRecordSolo" type="submit">'+planUiText('Record','תעד')+'</button></div></form>';
- };
- const batchRow=group=>{
-   if(group.rows.length===1)return editSolo(group.rows[0]);
-   const row=group.rows[0];
-   return '<div class="pveSoloRow pveSoloBatchRow" data-solo-batch="'+esc(group.key)+'"><div class="pveSoloIdentity"><span class="pveSoloTag">SOLO × '+group.rows.length+'</span><div><b>'+esc(row.traineeName)+'</b><span>'+esc(row.syllabus)+'</span><small>'+planUiText('Each flight','לכל טיסה')+': '+Number(row.takeoffs||0)+' '+planUiText('takeoffs','המראות')+' · '+Number(row.landings||0)+' '+planUiText('landings','נחיתות')+' · '+Number(row.minutes||0)+' min</small></div></div><div class="pveSoloActions"><button class="btn danger small pveRowAction" type="button" data-solo-delete-batch="'+esc(group.key)+'" aria-label="'+planUiText('Remove recorded solo group','הסר קבוצת סולו שתועדה')+'">×</button></div></div>';
+   const stateBadge=saved?'<span class="pveSoloSavedBadge">'+planUiText('Saved','נשמר')+'</span>':'';
+   const action=saved?'data-solo-delete-batch="'+esc(group.key)+'"':'data-solo-skip="'+index+'"';
+   return '<form class="pveSoloEntryForm '+(saved?'pveSoloEntrySaved':'')+'" '+(saved?'data-solo-batch="'+esc(group.key)+'"':'data-solo-slot="'+index+'"')+'><div class="pveSoloEntryHead"><b>'+planUiText('Solo','סולו')+' '+(saved?'× '+quantity:soloRows.length+index+1)+'</b>'+stateBadge+'<label class="pveSoloQuantity">'+planUiText('Flights','טיסות')+'<input class="input" name="quantity" aria-label="'+planUiText('Executed flight count','כמות טיסות שבוצעו')+'" type="number" inputmode="numeric" min="1" max="'+maxFlights+'" step="1" value="'+quantity+'"></label><button type="button" class="pveSoloSkip" '+action+' aria-label="'+planUiText(saved?'Remove recorded solo flights':'Remove unexecuted solo row',saved?'הסר טיסות סולו שתועדו':'הסר שורת סולו שלא בוצעה')+'" title="'+planUiText('Remove','הסר')+'">×</button></div><div class="pveSoloPrimary"><div class="field"><label>'+planUiText('Trainee','חניך')+'</label>'+select('traineeId',allT.map(t=>[t.id,t.name]),d.traineeId,planUiText('Select trainee','בחר חניך'))+'</div><div class="field"><label>'+planUiText('Solo syllabus','סילבוס סולו')+'</label>'+select('syllabus',soloSyllabusNames.map(x=>[x,x]),d.syllabus,planUiText('Select syllabus','בחר סילבוס'))+'</div></div>'+metrics+'</form>';
  };
  return '<div class="pvePage">'+
  '<div class="pvePageHead"><div><div class="eyebrow">DAILY OPERATIONS</div><h1 class="pageTitle">Planned vs Executed</h1><p class="sub">Set the daily plan, record actual solo execution, and classify every cancellation for later tracking.</p></div></div>'+
@@ -11220,12 +11225,11 @@ function plannedVsExecuted(){
  '<section class="card pvePanel"><div class="pvePanelHead"><span class="pveSectionNo">1</span><div><h2>Plan</h2><p>Enter the number of instructed and solo flights intended for this date.</p>'+(boardLinked?'<p class="pveBoardLinkedNote">'+planUiText('Counts come from scheduled flights on this device. Add, edit or remove flights in Daily Flight Plan to update them.','הספירה מחושבת אוטומטית מהטיסות המשובצות במכשיר זה. הוספה, עריכה או הסרה של שיבוצים בתוכנית הטיסות היומית יעדכנו אותה.')+'</p>':'')+'</div></div><div class="pvePanelBody"><div class="pvePlanGrid"><label class="pveCountField" for="pvePlannedInstructed"><span>Instructed</span><small>Planned flights</small><input class="input" id="pvePlannedInstructed" type="number" min="0" step="1" required '+(boardLinked?'readonly aria-readonly="true" title="'+planUiText('Managed by Daily Flight Plan','מנוהל דרך תוכנית טיסות יומית')+'"':'')+' value="'+pi+'"></label><label class="pveCountField" for="pvePlannedSolo"><span>Solo</span><small>Planned flights</small><input class="input" id="pvePlannedSolo" type="number" min="0" step="1" required '+(boardLinked?'readonly aria-readonly="true" title="'+planUiText('Managed by Daily Flight Plan','מנוהל דרך תוכנית טיסות יומית')+'"':'')+' value="'+ps+'"></label></div></div></section>'+
  '<section class="card pvePanel"><div class="pvePanelHead"><span class="pveSectionNo">2</span><div><h2>Execution</h2><p>'+planUiText('Instructed is automatic. Solo entry rows follow the plan.','טיסות מודרכות נספרות אוטומטית. שורות הסולו נפתחות לפי התכנון.')+'</p></div></div><div class="pvePanelBody">'+
  '<div class="pveExecutionOverview"><div><span>Instructed</span><strong>'+executedInstructed+'</strong><small>From submitted Evaluations on '+esc(formatDateDMY(date))+'.</small></div><div><span>Solo</span><strong>'+executedSolo+'</strong><small>Recorded for this date</small></div></div>'+
- (soloEntryOpen?'<div class="pveSoloBlock"><div class="pveBlockTitle"><div><h3>'+planUiText('Executed solo flights','טיסות סולו שבוצעו')+'</h3><p>'+planUiText('Complete planned solo rows or combine matching flights using quantity. Removing a row leaves a cancellation gap.','יש להשלים את שורות הסולו המתוכננות, או לקבץ טיסות זהות לפי כמות. הסרת שורה משאירה פער לסיווג ביטול.')+'</p></div><span class="pveRecordedBadge">'+executedSolo+' / '+ps+' '+planUiText('recorded','בוצעו')+'</span></div>'+
- '<div class="pveSoloEntryList">'+Array.from({length:availableSoloSlots},(_,i)=>soloSlot(i)).join('')+'</div>'+
+ (soloEntryOpen?'<div class="pveSoloBlock"><div class="pveBlockTitle"><div><h3>'+planUiText('Solo flight execution','ביצוע טיסות סולו')+'</h3><p>'+planUiText('Enter trainee and syllabus to save automatically. Change the quantity for matching flights; use × for flights not performed.','בחר חניך וסילבוס לשמירה אוטומטית. ניתן לשנות כמות לטיסות זהות ולהשתמש ב־× לטיסות שלא בוצעו.')+'</p></div><span class="pveRecordedBadge">'+executedSolo+' / '+ps+' '+planUiText('completed','בוצעו')+'</span></div>'+
+ '<div class="pveSoloEntryList">'+soloGroups.map((group,i)=>soloSlot(i,group)).join('')+Array.from({length:availableSoloSlots},(_,i)=>soloSlot(i)).join('')+'</div>'+
  (dismissedSoloSlots?'<button class="btn secondary small pveRestoreSolo" data-solo-restore type="button">'+planUiText('Restore removed row','שחזר שורה שהוסרה')+' ('+dismissedSoloSlots+')</button>':'')+
  (executedSolo>ps?'<p class="fleetConflict" role="alert">'+planUiText('Recorded solos exceed the plan. Increase the plan or remove excess records.','כמות הסולואים שבוצעו גבוהה מהתכנון. יש להגדיל תכנון או להסיר רישומים עודפים.')+'</p>':'')+
  '</div>':'<div class="pveSoloLocked"><span>SOLO ENTRY LOCKED</span><b>No solo flight is planned for this date.</b><p>Set Planned Solo to 1 or more in the Plan section before recording a new solo execution.</p></div>')+
- (soloRows.length?'<div class="pveRecordedList"><div class="pveListHead"><h3>'+planUiText('Recorded solo flights','טיסות סולו שתועדו')+'</h3><span>'+executedSolo+' '+planUiText('total','בסך הכול')+'</span></div>'+soloGroups.map(batchRow).join('')+'</div>':'')+
  '</div></section>'+
  '<section class="card pvePanel"><div class="pvePanelHead"><span class="pveSectionNo">3</span><div><h2>Cancellation reasons</h2><p>Each row represents one planned flight that was not executed and is stored separately for reporting.</p></div><span class="pveVarianceChip '+(cancelled?'short':'match')+'">'+(cancelled?(cancelled+' cancelled'):'None')+'</span></div><div class="pvePanelBody">'+
  (cancelled?'<div class="pveCancellationList">'+cancellationRows.map(cancellationSelect).join('')+'</div>':'<div class="pveClearState '+(hasPlan?'ok':'neutral')+'"><b>'+(hasPlan?'No cancellations to classify':'Set the plan first')+'</b><p>'+(hasPlan?'Planned flights have been met by type. Extra executions do not hide a cancellation in another flight type.':'Enter the planned instructed and solo flights above to start the daily comparison.')+'</p></div>')+
@@ -11743,7 +11747,7 @@ function bindPlanned(){
  document.querySelectorAll('[data-plan-required-index]').forEach(btn=>btn.onclick=()=>{const label=String(btn.textContent||''),target=label.startsWith('Cancellation')?document.querySelector('.pveCancellationList'):document.querySelector('.pvePlanGrid');target?.scrollIntoView?.({behavior:'smooth',block:'center'});setTimeout(()=>target?.querySelector?.('input,select')?.focus?.({preventScroll:true}),180)});
  const collectCancellations=()=>[...document.querySelectorAll('.pveCancellationReason')].map(el=>({key:String(el.dataset.cancelKey||''),type:String(el.dataset.cancelType||''),reasonId:String(el.value||''),reasonLabel:el.value?String(el.selectedOptions?.[0]?.textContent||'').trim():'',quantity:Math.max(1,Math.floor(Number(el.closest('[data-cancel-row]')?.querySelector('[data-cancel-qty]')?.value)||1))}));
  const persistPlannedDraft=()=>{
-   const prior=getActivityDraft('planned')?.data||{},cancellations=collectCancellations(),date=state.planDate||todayIsoDate(),board=flightBoardPlanStatus(date),soloEntries=[...document.querySelectorAll('.pveSoloEntryForm')].map(form=>serializeFormDraft(form)),data={date,plannedInstructed:board.linked?board.instructed:Number($('#pvePlannedInstructed')?.value||0),plannedSolo:board.linked?board.solo:Number($('#pvePlannedSolo')?.value||0),cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),soloEntries,dismissedSoloSlots:Math.max(0,Math.floor(Number(prior.dismissedSoloSlots)||0)),solo:prior.solo||{}};
+   const prior=getActivityDraft('planned')?.data||{},cancellations=collectCancellations(),date=state.planDate||todayIsoDate(),board=flightBoardPlanStatus(date),soloEntries=[...document.querySelectorAll('.pveSoloEntryForm[data-solo-slot]')].map(form=>serializeFormDraft(form)),data={date,plannedInstructed:board.linked?board.instructed:Number($('#pvePlannedInstructed')?.value||0),plannedSolo:board.linked?board.solo:Number($('#pvePlannedSolo')?.value||0),cancellations,reason:cancellations.map(x=>x.reasonLabel).filter(Boolean).join(' · '),soloEntries,dismissedSoloSlots:Math.max(0,Math.floor(Number(prior.dismissedSoloSlots)||0)),solo:prior.solo||{}};
    // The Plan badge recomputes from live required items; never persist a stale count.
    saveActivityDraft('planned',data);if($('#plannedDraftBadge'))$('#plannedDraftBadge').textContent=draftSavedLabel('planned');syncAttentionBadges();return data
  };
@@ -11773,31 +11777,45 @@ function bindPlanned(){
  };
  document.querySelectorAll('.pveCancellationReason,[data-cancel-qty]').forEach(el=>el.onchange=changedCancellation);
  document.querySelectorAll('.pveSoloEntryForm').forEach(form=>{
-   form.addEventListener('input',persistPlannedDraft);
-   form.addEventListener('change',persistPlannedDraft);
-   form.onsubmit=e=>{
-     e.preventDefault();
-     const fd=new FormData(form),date=state.planDate||todayIsoDate(),plan=plannedCompleteness(),solos=getSoloFlights(),used=solos.filter(x=>x.date===date).length,remaining=Math.max(0,plan.ps-used),quantity=Number(fd.get('quantity'));
-     if(!Number.isInteger(quantity)||quantity<1||quantity>remaining){toast(planUiText('Solo quantity exceeds remaining planned flights. Update the plan first.','כמות טיסות הסולו חורגת מהתכנון. יש לעדכן תחילה את התכנון.'),'error');return}
-     const traineeId=String(fd.get('traineeId')||''),syllabus=String(fd.get('syllabus')||''),trainee=allTrainees().find(t=>String(t.id)===traineeId);
-     if(!trainee||!syllabus){toast(planUiText('Select trainee and syllabus.','בחר חניך וסילבוס.'),'error');return}
-     const count=name=>Math.max(0,Math.floor(Number(fd.get(name))||0));
-     const batchId='solo_batch_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),stamp=new Date().toISOString();
-     for(let n=0;n<quantity;n++){
-       const flight={id:batchId+'_'+n,batchId,date,traineeId,traineeName:trainee.name,syllabus,takeoffs:count('takeoffs'),landings:count('landings'),minutes:count('minutes'),createdAt:stamp};
-       solos.push(flight);syncSoloEvents(flight);
+   form.addEventListener('input',()=>{if(form.hasAttribute('data-solo-slot'))persistPlannedDraft()});
+   form.addEventListener('change',()=>{
+     const fd=new FormData(form),date=state.planDate||todayIsoDate(),plan=plannedCompleteness(),solos=getSoloFlights();
+     const key=form.dataset.soloBatch||'',recorded=key?solos.filter(x=>String(x.batchId||x.id)===key):[],oldCount=recorded.length;
+     const used=solos.filter(x=>x.date===date).length,remaining=Math.max(0,plan.ps-used+oldCount);
+     const quantity=Number(fd.get('quantity'));
+     if(!Number.isInteger(quantity)||quantity<1||quantity>remaining){
+       const quantityField=form.querySelector('[name="quantity"]');if(quantityField)quantityField.value=String(oldCount||1);
+       toast(planUiText('Solo flights cannot exceed the planned quantity. Change the plan first.','מספר טיסות הסולו אינו יכול לחרוג מהמתוכנן. יש לשנות תחילה את התכנון.'),'error');return;
      }
-     saveSoloFlights(solos);
-     const data=persistPlannedDraft(),index=Number(form.dataset.soloSlot);
-     data.soloEntries=(data.soloEntries||[]).filter((_,n)=>n!==index);
-     saveActivityDraft('planned',data);
-     toast(planUiText(quantity+' solo flight(s) recorded',quantity+' טיסות סולו תועדו'));render();
-   };
+     const traineeId=String(fd.get('traineeId')||''),syllabus=String(fd.get('syllabus')||''),trainee=allTrainees().find(x=>String(x.id)===traineeId);
+     if(!trainee||!syllabus){if(!key)persistPlannedDraft();return}
+     const count=name=>Math.max(0,Math.floor(Number(fd.get(name))||0)),stamp=new Date().toISOString(),batchId=key||'solo_batch_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+     const updated=[];
+     for(let i=0;i<quantity;i++){
+       const old=recorded[i]||{};
+       const flight={...old,id:old.id||batchId+'_'+i,batchId,date,traineeId,traineeName:trainee.name,syllabus,takeoffs:count('takeoffs'),landings:count('landings'),minutes:count('minutes'),createdAt:old.createdAt||stamp,updatedAt:stamp};
+       updated.push(flight);
+     }
+     const removedIds=new Set(recorded.slice(quantity).map(x=>x.id));
+     const next=solos.filter(x=>!recorded.includes(x)&&!removedIds.has(x.id)).concat(updated);
+     saveSoloFlights(next);
+     if(removedIds.size)saveActivityEvents(getActivityEvents().filter(x=>!removedIds.has(x.sourceId)));
+     updated.forEach(syncSoloEvents);
+     const data=persistPlannedDraft();
+     if(!key){
+       const index=Number(form.dataset.soloSlot)||0;
+       data.soloEntries=(data.soloEntries||[]).filter((_,i)=>i!==index).slice(0,Math.max(0,plan.ps-next.filter(x=>x.date===date).length-Number(data.dismissedSoloSlots||0)));
+       saveActivityDraft('planned',data);
+     }
+     render();
+   });
  });
  document.querySelectorAll('[data-solo-skip]').forEach(btn=>btn.onclick=()=>{
    const form=btn.closest('.pveSoloEntryForm'),data=persistPlannedDraft(),index=Number(form?.dataset.soloSlot||0);
-   data.soloEntries=(data.soloEntries||[]).filter((_,n)=>n!==index);
-   data.dismissedSoloSlots=Math.max(0,Math.floor(Number(data.dismissedSoloSlots)||0))+1;
+   data.soloEntries=(data.soloEntries||[]).filter((_,i)=>i!==index);
+   const capacity=Math.max(0,plannedCompleteness().ps-getSoloFlights().filter(x=>x.date===(state.planDate||todayIsoDate())).length-Number(data.dismissedSoloSlots||0));
+   const requested=Math.max(1,Math.floor(Number(form?.querySelector('[name="quantity"]')?.value)||1));
+   data.dismissedSoloSlots=Math.max(0,Number(data.dismissedSoloSlots||0))+Math.min(capacity,requested);
    saveActivityDraft('planned',data);render();
  });
  const restore=$('[data-solo-restore]');if(restore)restore.onclick=()=>{
