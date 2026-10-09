@@ -604,12 +604,12 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261009-flight-drag-tabs-0810'],['assets/fleet-operations.css','20261009-stable-plan-layout-0812']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261009-flight-drag-tabs-0810'],['assets/fleet-operations.css','20261009-flight-drag-stability-0816']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-plan-single-row-stable-drag-0815'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261009-plan-single-row-stable-drag-0815/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-flight-drag-stability-0816'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261009-flight-drag-stability-0816/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
@@ -877,7 +877,7 @@ test('flight drag UI offers accessible touch grips, reduced motion and localized
  assert.match(html,/dutyOperations\.saveDraft\('PLAN'/);
  assert.match(html,/dutyOperations\.publish\('PLAN'/);
  assert.match(html,/Crew conflict: /);
- assert.ok(html.includes('flight-board-drag.js?v=20261009-plan-single-row-stable-drag-0815'));
+ assert.ok(html.includes('flight-board-drag.js?v=20261009-flight-drag-stability-0816'));
 });
 test('Plan tabs use shared Course Management-style segmented control',()=>{
  const css=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
@@ -926,23 +926,78 @@ test('Frozen insertion thresholds prevent drag jitter after DOM swaps and suppor
  assert.equal(calc(760,stops),3);
  for(let i=0;i<100;i++)assert.equal(calc(550,stops),2,'No oscillation after animated row shifts');
  assert.equal(calc(480+70,stops),2,'Scroll offset must be considered in document coordinates');
- assert.match(source,/const centers=rows\(\)\.filter\(item=>item!==row\)\.map/);
+ assert.match(source,/const centers=peers\.map/);
  assert.match(source,/const next=insertionIndex\(y\+scroll\(\),centers\)/);
  assert.doesNotMatch(source,/others\.find\(item=>\{const rect=item\.getBoundingClientRect/);
  assert.match(source,/animation\.finished\.then\(settle,settle\)/);
- assert.match(source,/if\(cancelled\)return;/);
- assert.match(source,/if\(targetIndex!==origin\)void commit\(oldOrder\)/);
+ assert.match(source,/if\(ev\.type==='pointercancel'\|\|targetIndex===origin\)\{clean\(\);return\}/);
+ assert.match(source,/void commit\(desired\)\.finally\(clean\)/);
 });
 
-test('Touch dragging previews card positions without mutating the board until release',()=>{
+test('Drag uses an in-board ghost and never swaps live rows before persistence',()=>{
  const source=fs.readFileSync(path.join(__dirname,'../assets/flight-board-drag.js'),'utf8');
- const dragSource=source.slice(source.indexOf('const update=()=>{'),source.indexOf('const autoScroll=()=>{'));
- const dropSource=source.slice(source.indexOf('const end=ev=>{'),source.indexOf('document.addEventListener(\'pointermove\',move'));
- assert.doesNotMatch(dragSource,/board\.insertBefore/,'Finger movement should only preview');
- assert.match(dragSource,/peer\.style\.transform=shift/);
- assert.match(dropSource,/board\.insertBefore\(row,peers\[targetIndex\]\|\|null\)/);
- assert.match(dropSource,/if\(!cancelled&&targetIndex!==origin\)/);
- assert.match(dropSource,/if\(cancelled\)return/);
- assert.match(source,/peer\.style\.transition=reduced\(\)/);
- assert.match(source,/const centers=rows\(\)\.filter/);
+ const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.doesNotMatch(source,/board\.insertBefore\(/,'No ghost/live-row mismatch while async Plan persists');
+ assert.match(source,/board\.appendChild\(clone\)/,'Ghost must inherit the original board CSS context');
+ assert.doesNotMatch(source,/document\.body\.appendChild\(clone\)/);
+ assert.match(source,/if\(!active&&Math\.abs\(y-startY\)<8\)return/,'Tapping the handle must not create a ghost');
+ assert.match(source,/const desired=movedIds\(original,origin,targetIndex\)/);
+ assert.match(source,/void commit\(desired\)\.finally\(clean\)/);
+ assert.match(source,/items\.length<=3/,'No iPhone edge autoscroll for short lists');
+ assert.match(css,/\.fleetBookedFlights \.fleetSortieDragGhost \.fleetSortieTail\{/);
+ assert.match(css,/white-space:nowrap!important/);
+});
+
+test('Touch gesture preserves real row identities through the save and never ghosts on a tap',async()=>{
+ const vm=require('node:vm'),code=fs.readFileSync(path.join(__dirname,'../assets/flight-board-drag.js'),'utf8');
+ const events={},saved=[];
+ const classes=()=>({add(){},remove(){}});
+ let board,appends=0,reorders=0;
+ const create=(id,top)=>{
+  const row={dataset:{flightId:id},style:{},classList:classes(),parentElement:null,
+   getBoundingClientRect:()=>({top,left:10,width:300,height:96,bottom:top+96}),
+   cloneNode:()=>({dataset:{flightId:id},style:{},classList:classes(),parentElement:null,
+    removeAttribute(key){if(key==='data-flight-id')delete this.dataset.flightId},
+    querySelectorAll:()=>[],remove(){board.children=board.children.filter(x=>x!==this)},
+    animate:()=>({finished:Promise.resolve()})})};
+  const handle={listeners:{},addEventListener(type,fn){this.listeners[type]=fn},
+   closest:()=>row,setPointerCapture(){},releasePointerCapture(){},
+   setAttribute(){},removeAttribute(){}};
+  return {row,handle};
+ };
+ const a=create('flight-a',100),b=create('flight-b',210);
+ board={children:[a.row,b.row],classList:classes(),
+  querySelectorAll(query){return query==='.fleetSortieDragHandle'?[a.handle,b.handle]:
+   this.children.filter(x=>x.dataset?.flightId)},
+  appendChild(item){appends++;item.parentElement=this;this.children.push(item);return item},
+  insertBefore(){reorders++;throw Error('Live card moved before persistence')},
+  getBoundingClientRect:()=>({top:100,bottom:310})};
+ a.row.parentElement=b.row.parentElement=board;
+ const doc={body:{classList:classes()},documentElement:{scrollTop:0,clientHeight:900},
+  addEventListener(type,fn){events[type]=fn},
+  removeEventListener(type,fn){if(events[type]===fn)delete events[type]}};
+ const win={scrollY:0,innerHeight:900,matchMedia:()=>({matches:true}),
+  getComputedStyle:()=>({rowGap:'11px'}),
+  requestAnimationFrame:fn=>{fn();return 1},
+  cancelAnimationFrame(){},scrollBy(){},setTimeout:fn=>{fn();return 1}};
+ vm.runInNewContext(code,{window:win,document:doc},{filename:'flight-board-drag.js'});
+ win.FLYMPUS_FLIGHT_DRAG.attach(board,{onDrop:async ids=>{saved.push([...ids])}});
+ const pointer=(y)=>({pointerId:7,clientY:y,isPrimary:true,pointerType:'touch',
+  preventDefault(){},stopPropagation(){}});
+ a.handle.listeners.pointerdown(pointer(135));
+ events.pointerup(pointer(135));
+ assert.equal(appends,0,'A tap must never create a ghost or wrap a badge');
+ assert.equal(saved.length,0);
+ a.handle.listeners.pointerdown(pointer(135));
+ events.pointermove(pointer(284));
+ assert.equal(appends,1,'One scoped ghost appears only after meaningful movement');
+ assert.deepEqual(board.children.filter(x=>x.dataset?.flightId).map(x=>x.dataset.flightId),['flight-a','flight-b']);
+ assert.equal(reorders,0,'Live cards must not swap until validated rerender');
+ assert.equal(saved.length,0);
+ events.pointerup(pointer(284));
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(saved,[['flight-b','flight-a']],'The real flight identities are passed to persistence once');
+ assert.equal(reorders,0);
+ assert.deepEqual(board.children.filter(x=>x.dataset?.flightId).map(x=>x.dataset.flightId),['flight-a','flight-b'],
+  'The renderer, not the gesture, owns the final DOM replacement');
 });

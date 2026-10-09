@@ -892,3 +892,23 @@ html.flympusLargeText .fleetSortieDragHandle{width:44px;height:50px;flex-basis:4
 html.flympusLargeText .fleetSortieDragGhost:has(.fleetSortieDragHandle){
  grid-template-columns:44px minmax(0,1fr);
 }
+
+/* Ghost cards inherit the SAME board layout, font and non-wrapping tail badge.
+   Drag clones must remain children of .fleetSorties, not document.body. */
+.fleetBookedFlights .fleetSortieDragGhost{
+ box-sizing:border-box;
+ contain:style;
+}
+.fleetBookedFlights .fleetSortieDragGhost .fleetSortieTail{
+ display:inline-flex!important;
+ flex:0 0 auto!important;
+ width:max-content!important;
+ min-width:max-content!important;
+ max-width:none!important;
+ white-space:nowrap!important;
+ overflow-wrap:normal!important;
+ word-break:keep-all!important;
+ hyphens:none!important;
+}
+.fleetBookedFlights .fleetSorties:has(.fleetSortieDragSource){overflow-anchor:none}
+.fleetBookedFlights .fleetSortieDragSource{overflow-anchor:none}
