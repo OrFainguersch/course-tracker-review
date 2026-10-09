@@ -444,7 +444,7 @@ test('Plan contract stays coherent: full-width flight day, settings, required fi
  assert.doesNotMatch(report,/id="pveDate" type="text"/);
  assert.match(report,/boardLinked\?'readonly aria-readonly="true"/);
  assert.match(html,/flightBoardPlanStatus\(date\)/);
- assert.match(html,/FLYMPUS Review · build 0788/);
+ assert.match(html,/FLYMPUS Review · build 0789/);
  lang.value='he';
  assert.match(context.window.FLYMPUS_FLEET_VIEW.schedule({
   fleet:[],flights:[],platformId:'shahak',date:'2026-10-08',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true
@@ -547,7 +547,9 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
  assert.ok(stylesheet.includes('.fleetTimeFlowFlightIcon{'));
  assert.ok(stylesheet.includes('-webkit-text-fill-color:transparent'));
- assert.ok(stylesheet.includes('-webkit-text-stroke:.85px currentColor'));
+ assert.ok(stylesheet.includes('-webkit-text-stroke:1.35px currentColor'));
+ assert.ok(html.includes('.fleetTimeFlowFlightIcon{height:22px!important;width:22px!important'));
+ assert.ok(!html.includes('.fleetTimeFlowFlightIcon{display:none!important}'));
 });
 test('Planned vs Executed date moves to locale start and remains stacked on mobile',()=>{
  assert.match(html,/class="pveDateRow"/);
