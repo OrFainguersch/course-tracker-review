@@ -53,5 +53,5 @@ test('Firebase Hosting generates a unique worker version for each commit',()=>{
   const prepare=fs.readFileSync(path.join(__dirname,'..','scripts/prepare-hosting.cjs'),'utf8');
   assert.match(prepare,/commit\.slice\(0,16\)/);
   assert.match(prepare,/workerSource\.replace\(workerPattern/);
-  assert.match(prepare,/htmlSource\.replaceAll\(deployToken,commit\)/);
+  assert.match(prepare,/stampReleaseHtml\(htmlSource,commit,build\)/);
 });

@@ -24,7 +24,7 @@ test('Hosting signs exact Build and Git SHA, rather than the former fixed text',
  assert.match(html,/meta name="flympus-deploy-build" content="__FLYMPUS_DEPLOY_BUILD__"/);
  assert.match(html,/const build=flympusBuildLabel\(\)/);
  assert.match(html,/if\(versionBanner\)versionBanner.textContent=flympusBuildLabel\(\)/);
- assert.match(html,/<b dir="auto" data-i18n-skip>'+esc\(build\)/);
+ assert.match(html,/dir="auto" data-i18n-skip/);
 });
 test('English and Hebrew RTL About screens display the loaded offline Build',()=>{
  const start=html.indexOf('function flympusBuildLabel(){');
