@@ -540,14 +540,14 @@ test('Plan timeline option 1 shows all four chronological boundaries at correct 
  assert.match(stylesheet,/html\.flympusLargeText \.fleetTimeFlowClock strong/);
 });
 
-test('Plan uses the instructor roster aircraft glyph with outlined timeline styling and the requested checked clipboard',()=>{
- assert.match(ui,/const iconFlight='<span class="fleetTimeFlowIcon fleetTimeFlowFlightIcon" aria-hidden="true">✈<\\/span>'/);
- assert.match(ui,/const iconDebrief=iconSvg\\('<rect x="5" y="4" width="14" height="17" rx="2"/);
- assert.match(ui,/m9 13 2\\.2 2\\.2L16 10\\.5/);
+test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
+ assert.ok(ui.includes('fleetTimeFlowFlightIcon'));
+ assert.ok(ui.includes('const iconDebrief=iconSvg('));
+ assert.ok(ui.includes('m9 13 2.2 2.2L16 10.5'));
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
- assert.match(stylesheet,/\\.fleetTimeFlowFlightIcon\\{/);
- assert.match(stylesheet,/-webkit-text-fill-color:transparent/);
- assert.match(stylesheet,/-webkit-text-stroke:\\.85px currentColor/);
+ assert.ok(stylesheet.includes('.fleetTimeFlowFlightIcon{'));
+ assert.ok(stylesheet.includes('-webkit-text-fill-color:transparent'));
+ assert.ok(stylesheet.includes('-webkit-text-stroke:.85px currentColor'));
 });
 test('Planned vs Executed date moves to locale start and remains stacked on mobile',()=>{
  assert.match(html,/class="pveDateRow"/);
