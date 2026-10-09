@@ -475,7 +475,7 @@ test('Plan contract stays coherent: full-width flight day, settings, required fi
  assert.doesNotMatch(report,/id="pveDate" type="text"/);
  assert.match(report,/boardLinked\?'readonly aria-readonly="true"/);
  assert.match(html,/flightBoardPlanStatus\(date\)/);
- assert.match(html,/FLYMPUS Review · build 0796/);
+ assert.match(html,/FLYMPUS Review · build 0797/);
  lang.value='he';
  assert.match(context.window.FLYMPUS_FLEET_VIEW.schedule({
   fleet:[],flights:[],platformId:'shahak',date:'2026-10-08',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true
@@ -602,12 +602,12 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261009-approval-sounds-0795'],['assets/fleet-operations.css','20261009-mobile-timeline-0796']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261009-adaptive-timeline-0797'],['assets/fleet-operations.css','20261009-adaptive-timeline-0797']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-mobile-timeline-0796'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261009-mobile-timeline-0796/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-adaptive-timeline-0797'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261009-adaptive-timeline-0797/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
