@@ -803,6 +803,15 @@ html.flympusLargeText .fleetEditor .fleetSectionHead h2{font-size:22px!important
 .fleetBookedFlights .fleetSortie{
  align-items:center;
 }
+/* Pressed feedback scales the pixels only: no row reflow or badge wrapping. */
+.fleetBookedFlights .fleetSortie:has(.fleetSortieDragHandle){
+ transform-origin:center center;
+ transition:transform 140ms cubic-bezier(.22,.8,.24,1),box-shadow 140ms ease-out;
+}
+.fleetBookedFlights .fleetSortiePressing{
+ position:relative;z-index:1;transform:scale(1.018);
+ box-shadow:0 9px 26px rgba(11,49,83,.18);
+}
 .fleetSortieDragHandle{
  display:grid;place-items:center;flex:0 0 37px;
  width:37px;height:45px;border:1px solid #d8e6f1;border-radius:11px;
@@ -814,7 +823,8 @@ html.flympusLargeText .fleetEditor .fleetSectionHead h2{font-size:22px!important
 .fleetSortieDragHandle:focus-visible{
  outline:3px solid #70aaed;outline-offset:2px;
 }
-.fleetSortieDragSource{opacity:.27;transition:opacity 120ms}
+/* The real source must not show stale tail/crew values through the clone. */
+.fleetSortieDragSource{visibility:hidden!important;opacity:0!important;transition:none!important}
 .fleetSortieDragGhost{
  display:flex;align-items:center;flex-wrap:wrap;gap:9px;
  border:1px solid #9cbbd4!important;border-radius:13px!important;
@@ -822,7 +832,8 @@ html.flympusLargeText .fleetEditor .fleetSectionHead h2{font-size:22px!important
  box-shadow:0 15px 40px rgba(11,49,83,.22)!important;
  opacity:.98;overflow:hidden;will-change:top,transform;
 }
-.fleetDragSaving{opacity:.78;pointer-events:none}
+/* No whole-board opacity flash while persistence and rerender resolve. */
+.fleetDragSaving{pointer-events:none}
 html[data-flympus-theme="dark"] .fleetSortieDragHandle{
  background:#26465c;border-color:#466882;color:#c7d8e8;
 }
@@ -912,3 +923,8 @@ html.flympusLargeText .fleetSortieDragGhost:has(.fleetSortieDragHandle){
 }
 .fleetBookedFlights .fleetSorties:has(.fleetSortieDragSource){overflow-anchor:none}
 .fleetBookedFlights .fleetSortieDragSource{overflow-anchor:none}
+
+@media(prefers-reduced-motion:reduce){
+ .fleetBookedFlights .fleetSortie:has(.fleetSortieDragHandle){transition:none}
+ .fleetBookedFlights .fleetSortiePressing{transform:none;outline:2px solid #70aaed;outline-offset:1px}
+}

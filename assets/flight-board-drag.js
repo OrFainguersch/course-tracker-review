@@ -61,6 +61,8 @@
     const offsetY=startY-sourceBox.top;
     let y=startY,targetIndex=origin,active=false,ended=false,clone=null;
     let paintFrame=0,autoFrame=0,velocity=0;
+    // Give immediate, layout-neutral feedback even before the 8px drag threshold.
+    source.classList.add('fleetSortiePressing');
     try{handle.setPointerCapture?.(pointer)}catch{}
     // Neither a tap nor an incidental scroll creates a ghost or changes
     // a platform badge. Only a deliberate >7px drag starts the animation.
@@ -68,6 +70,7 @@
      if(active)return;
      active=true;
      clone=source.cloneNode(true);
+     clone.classList.remove('fleetSortiePressing');
      clone.classList.add('fleetSortieDragGhost');
      clone.removeAttribute('data-flight-id');clone.removeAttribute('id');
      clone.querySelectorAll('button').forEach(button=>{button.disabled=true;button.tabIndex=-1});
@@ -79,10 +82,14 @@
      // Keep the ghost inside the original board. Appending to body made
      // .fleetBookedFlights selectors inapplicable and broke Shahak-02.
      board.appendChild(clone);
+     source.classList.remove('fleetSortiePressing');
      source.classList.add('fleetSortieDragSource');
      handle.setAttribute('aria-grabbed','true');
      document.body.classList.add('flympusReordering');
-     clone.style.transform='scale(1.012)';
+     clone.style.transform='scale(1.02)';
+     if(!reduced())clone.animate?.([
+      {transform:'scale(1.008)'},{transform:'scale(1.02)'}
+     ],{duration:135,easing:'cubic-bezier(.22,.8,.24,1)'});
     };
     const preview=()=>{
      if(ended||!active)return;
@@ -129,6 +136,7 @@
      peers.forEach(peer=>{peer.style.transform='';peer.style.transition=''});
      clone?.remove();
      source.classList.remove('fleetSortieDragSource');
+     source.classList.remove('fleetSortiePressing');
      handle.removeAttribute('aria-grabbed');
      document.body.classList.remove('flympusReordering');
      dragging=false;
@@ -142,7 +150,7 @@
      document.removeEventListener('pointerup',end);
      document.removeEventListener('pointercancel',end);
      try{handle.releasePointerCapture?.(pointer)}catch{}
-     if(!active){dragging=false;return}
+     if(!active){source.classList.remove('fleetSortiePressing');dragging=false;return}
      if(ev.type==='pointercancel'||targetIndex===origin){clean();return}
      const desired=movedIds(original,origin,targetIndex);
      // Destination coordinates come from the initial stationary slots.
@@ -155,7 +163,7 @@
      };
      if(reduced()){settle();return}
      const animation=clone.animate?.([
-      {top:clone.style.top,transform:'scale(1.012)'},
+      {top:clone.style.top,transform:'scale(1.02)'},
       {top:top+'px',transform:'scale(1)'}
      ],{duration:165,easing:'cubic-bezier(.22,.8,.24,1)',fill:'forwards'});
      if(animation?.finished)animation.finished.then(settle,settle);

@@ -608,7 +608,7 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-flight-drag-stability-0816'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-flight-drag-press-flash-0817'/);
  assert.equal((html.match(/\.\/sw\.js\?v=20261009-flight-drag-stability-0816/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
@@ -1000,4 +1000,19 @@ test('Touch gesture preserves real row identities through the save and never gho
  assert.equal(reorders,0);
  assert.deepEqual(board.children.filter(x=>x.dataset?.flightId).map(x=>x.dataset.flightId),['flight-a','flight-b'],
   'The renderer, not the gesture, owns the final DOM replacement');
+});
+
+
+test('Plan flight drag offers press lift without exposing stale identity or global saving flash',()=>{
+ const drag=fs.readFileSync(path.join(__dirname,'../assets/flight-board-drag.js'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(drag,/source\\.classList\\.add\\('fleetSortiePressing'\\)/);
+ assert.match(drag,/source\\.classList\\.remove\\('fleetSortiePressing'\\)/);
+ assert.match(drag,/clone\\.classList\\.remove\\('fleetSortiePressing'\\)/);
+ assert.match(drag,/clone\\.style\\.transform='scale\\(1\\.02\\)'/);
+ assert.match(css,/\\.fleetBookedFlights \\.fleetSortiePressing\\{/);
+ assert.match(css,/transform:scale\\(1\\.018\\)/);
+ assert.match(css,/\\.fleetSortieDragSource\\{visibility:hidden!important/);
+ assert.match(css,/\\.fleetDragSaving\\{pointer-events:none\\}/);
+ assert.doesNotMatch(css,/\\.fleetDragSaving\\{opacity:/);
 });
