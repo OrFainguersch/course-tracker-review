@@ -587,7 +587,7 @@ test('Planned Solo UI automatically opens exact unexecuted slots, groups batches
    cfgGet:()=>config,courseTrainees:()=>[{id:'t1',name:'Test Trainee',status:'Active'}],
    courseMembershipFor:()=>({status:'Active'}),alphaByName:items=>items,currentCourseTrackingCounters:()=>[],
    evaluationSyllabusDefs:()=>[{name:'Solo circuits',mode:'SOLO'}],
-   planUiText:(en,he)=>language==='he'?he:en,
+   getFlympusAppPreferences:()=>({language}),
    staticRequiredCompletionPanel:()=>'',esc:value=>String(value||''),
    formatDateDMY:()=> '09/10/2026',dateInputValue:()=> '09/10/2026',
    draftSavedLabel:()=> 'Auto-save ready'
