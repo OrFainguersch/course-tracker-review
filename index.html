@@ -113,7 +113,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/safety-global-inbox.js?v=20261008-safety02"></script>
 <script src="./assets/safety-ui.js?v=20261008-safety03"></script>
 <script src="./assets/fleet-model.js?v=20261009-plan-duration12"></script>
-<script src="./assets/fleet-views.js?v=20261009-mode-split13"></script>
+<script src="./assets/fleet-views.js?v=20261009-plan-terms14"></script>
 <script src="./assets/home-operations.js?v=20261008-home02"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
@@ -8878,7 +8878,7 @@ function bindDailyFlightBoard(){
    defaults[type]={};
    for(const key of ['briefingMinutes','estimatedMinutes','debriefMinutes']){
     const raw=String(data.get(type+'_'+key)||'');
-    if(!/^\d+$/.test(raw)||Number(raw)<(key==='estimatedMinutes'?1:0)||Number(raw)>(key==='estimatedMinutes'?720:180)){toast(planUiText('Briefing/debriefing: 0–180 min. Flight time: 1–720 min.','תדריך ותחקיר: 0–180 דקות. זמן טיסה: 1–720 דקות.'),'error');return}
+    if(!/^\d+$/.test(raw)||Number(raw)<(key==='estimatedMinutes'?1:0)||Number(raw)>(key==='estimatedMinutes'?720:180)){toast(planUiText('Briefing / Debriefing: 0–180 min. Flight duration: 1–720 min.','תדריך ותחקיר: 0–180 דקות. זמן טיסה: 1–720 דקות.'),'error');return}
     defaults[type][key]=Number(raw);
    }
   }

@@ -489,3 +489,23 @@ test('Course timing presets divide instructed and solo settings with visible sec
  assert.match(stylesheet,/\.fleetTimingModeFields\{display:grid/);
  assert.match(stylesheet,/\.fleetTimingModeSOLO\{border-inline-start-color/);
 });
+
+test('Plan consistently uses full Briefing / Flight / Debriefing terminology',()=>{
+ const vm=require('node:vm');
+ let language='en';
+ const ctx={window:{FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=>language},document:{documentElement:{dataset:{}}}};
+ vm.runInNewContext(ui,ctx);
+ const props={fleet:[],flights:[],platformId:'shahak',date:'2026-10-09',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true};
+ const english=ctx.window.FLYMPUS_FLEET_VIEW.schedule(props);
+ assert.match(english,/data-phase="brief">Briefing<\/span>/);
+ assert.match(english,/data-phase="flight">Flight<\/span>/);
+ assert.match(english,/data-phase="debrief">Debriefing<\/span>/);
+ assert.doesNotMatch(english,/data-phase="debrief">Debrief<\/span>/);
+ assert.match(english,/name="INSTRUCTED_debriefMinutes"/);
+ assert.match(english,/name="SOLO_debriefMinutes"/);
+ language='he';
+ const hebrew=ctx.window.FLYMPUS_FLEET_VIEW.schedule(props);
+ assert.match(hebrew,/data-phase="debrief">תחקיר<\/span>/);
+ const app=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
+ assert.match(app,/Briefing \/ Debriefing: 0–180 min\. Flight duration: 1–720 min\./);
+});
