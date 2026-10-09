@@ -11837,7 +11837,10 @@ function bindPlanned(){
    const ids=new Set(items.map(x=>x.id));
    saveSoloFlights(getSoloFlights().filter(x=>!ids.has(x.id)));
    saveActivityEvents(getActivityEvents().filter(x=>!ids.has(x.sourceId)));
-   toast(planUiText('Solo records removed','רישומי הסולו הוסרו'));render();
+   const data=persistPlannedDraft(),date=state.planDate||todayIsoDate(),planned=plannedCompleteness().ps,remaining=Math.max(0,planned-getSoloFlights().filter(x=>x.date===date).length-Number(data.dismissedSoloSlots||0));
+   data.dismissedSoloSlots=Math.max(0,Number(data.dismissedSoloSlots||0))+Math.min(remaining,ids.size);
+   saveActivityDraft('planned',data);
+   toast(planUiText('Solo flights marked as not executed','טיסות הסולו סומנו כלא בוצעו'));render();
  });
  document.querySelectorAll('[data-solo-delete]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.soloDelete;saveSoloFlights(getSoloFlights().filter(x=>x.id!==id));saveActivityEvents(getActivityEvents().filter(x=>x.sourceId!==id));if(state.soloEditId===id)state.soloEditId=null;toast('Solo flight and linked activity removed');render()});
  if($('#discardPlannedDraft'))$('#discardPlannedDraft').onclick=async()=>{if(await siteConfirm('The auto-saved Planned vs Executed draft will be discarded. Recorded solo flights will not be deleted.',{title:'Discard draft?',confirmLabel:'Discard',tone:'danger'})){discardActivityDraft('planned');state.soloEditId=null;delete state.planInstructed;delete state.planSolo;toast('Planned vs Executed draft discarded');render()}};

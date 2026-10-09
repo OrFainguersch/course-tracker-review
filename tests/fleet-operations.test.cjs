@@ -640,3 +640,16 @@ test('Unified Solo forms have no Record button and safely autosave edits with a 
  assert.match(binder,/render\(\)/);
  assert.match(html,/soloEntries=\[\.\.\.document\.querySelectorAll\('\.pveSoloEntryForm\[data-solo-slot\]'\)/);
 });
+
+test('Removing an already recorded Solo group marks all removed flights as unexecuted instead of recreating empty slots',()=>{
+ const start=html.indexOf("document.querySelectorAll('[data-solo-delete-batch]')");
+ const end=html.indexOf("document.querySelectorAll('[data-solo-delete]')",start);
+ assert.ok(start>0&&end>start);
+ const handler=html.slice(start,end);
+ assert.match(handler,/saveSoloFlights\(getSoloFlights\(\)\.filter/);
+ assert.match(handler,/saveActivityEvents\(getActivityEvents\(\)\.filter/);
+ assert.match(handler,/data\.dismissedSoloSlots=/);
+ assert.match(handler,/saveActivityDraft\('planned',data\)/);
+ assert.match(handler,/ids\.size/);
+ assert.match(html,/data-solo-restore/);
+});
