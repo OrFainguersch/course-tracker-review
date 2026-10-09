@@ -118,12 +118,24 @@ test('Timeline integration renders all four clock keys, external names only, and
  assert.match(engine,/const measureBadge=label=>/);
  assert.match(engine,/width:max-content/);
  assert.match(engine,/prefsObserver\.observe/);
+
+ // A far-lane leader (08:00) must not paint over a near-lane clock (07:50).
+ assert.match(engine,/const leaderMaskId='fleetTimeFlowLeaderMask'/);
+ assert.match(engine,/mask\.setAttribute\('maskUnits','userSpaceOnUse'\)/);
+ assert.match(engine,/mask\.setAttribute\('maskContentUnits','userSpaceOnUse'\)/);
+ assert.match(engine,/for\(const item of result\.placements\)\{\s*const exclusion=/);
+ assert.match(engine,/exclusion\.setAttribute\('x',shiftX\+item\.left-3\)/);
+ assert.match(engine,/exclusion\.setAttribute\('y',placementY\(item\)-3\)/);
+ assert.match(engine,/exclusion\.setAttribute\('fill','black'\)/);
+ assert.match(engine,/leaderGroup\.setAttribute\('mask','url\(#'\+leaderMaskId\+'\)'\)/);
+ assert.match(engine,/leaderGroup\.append\(path\)/);
+
  assert.match(engine,/document\.fonts\?\.ready/);
  assert.doesNotMatch(engine,/element\.textContent=phaseLabel\(item\.key\)\s*\+.*min/);
  for(const asset of ['fleet-timeline-layout.js','fleet-views.js','fleet-operations.css']){
-  assert.match(html,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-clock-text-0798'));
-  assert.match(worker,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-clock-text-0798'));
+  assert.match(html,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-leader-clear-0799'));
+  assert.match(worker,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-leader-clear-0799'));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-clock-text-0798'/);
- assert.match(html,/build 0798/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-leader-clear-0799'/);
+ assert.match(html,/build 0799/);
 });
