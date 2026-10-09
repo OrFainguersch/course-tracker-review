@@ -128,7 +128,7 @@ test('grouped cancellation reasons expand per flight and never exceed unexecuted
  assert.equal(day.planned,5);
  assert.equal(day.executed,1);
  assert.equal(day.cancelled,4);
- assert.deepEqual(day.reasons,['Aircraft issue','Weather','Weather','Weather']);
+ assert.deepEqual(Array.from(day.reasons),['Aircraft issue','Weather','Weather','Weather']);
  const excessive=R.operations({plans:[{...plan,cancellations:[{reasonLabel:'Weather',quantity:99}]}],soloFlights:[{date:'2026-09-24',id:'solo1'}],today:'2026-09-25'}).byDate[0];
  assert.equal(excessive.cancelled,4,'Reported grouped reasons cannot exceed the unexecuted flights');
 });
