@@ -567,3 +567,86 @@ html[data-flympus-theme="dark"] .fleetTimingModeHeader{color:#dceefa}
 html[data-flympus-theme="dark"] .fleetTimingModeHeader::after{background:#476276}
 html.flympusLargeText .fleetTimingModeHeader strong{font-size:18px}
 @media(max-width:600px){.fleetTimingModeGroup{padding:13px 12px 15px}.fleetTimingModeFields{grid-template-columns:minmax(0,1fr);gap:11px}.fleetTimingModeHeader{margin-bottom:11px}}
+
+
+/* Option 1: proportional, mirrored, four-boundary timeline. Shared grid fractions
+   make each clock tick land on the actual change of phase, not at its midpoint. */
+.fleetTimeFlowTrack,
+.fleetTimeFlowBoundaryTimes{
+  display:grid!important;
+  grid-template-columns:minmax(0,var(--phase-brief)) minmax(0,var(--phase-flight)) minmax(0,var(--phase-debrief))!important;
+  column-gap:0!important;
+  width:100%;
+  min-width:0;
+  direction:inherit;
+}
+.fleetTimeFlowTrack{height:43px;overflow:hidden;border-radius:12px}
+.fleetTimeFlowTrack>span{
+  display:flex;justify-content:center;align-items:center;min-width:0;
+  padding:5px 4px;box-sizing:border-box;
+  text-align:center;overflow:hidden;
+}
+.fleetTimeFlowTrack>span+span{border-inline-start:3px solid #fff}
+.fleetTimeFlowTrack .fleetTimeFlowPhaseLabel{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-width:0;max-width:100%;font-size:inherit!important;
+  font-weight:800;line-height:1.2;
+}
+.fleetTimeFlowTrack .fleetTimeFlowPhaseText{
+  display:inline-block;min-width:0;max-width:100%;font-size:inherit!important;
+  overflow-wrap:anywhere;hyphens:manual;
+}
+.fleetTimeFlowIcon{height:17px;width:17px;flex:none;display:block;stroke:currentColor}
+.fleetTimeFlowBoundaryTimes{margin-top:0;height:40px;overflow:visible}
+.fleetTimeFlowClock{position:relative;grid-row:1;min-width:0;width:0;height:36px;justify-self:end}
+.fleetTimeFlowClock::before{
+ content:"";position:absolute;inset-inline-start:-1px;top:3px;
+ width:2px;height:10px;border-radius:2px;background:#3d668d;
+}
+.fleetTimeFlowClock strong{
+ position:absolute;top:16px;left:0;right:auto;transform:translateX(-50%);
+ color:#13395d;font-size:12px;font-weight:800;line-height:1.3;
+ white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+.fleetTimeFlowClockStart{grid-column:1;justify-self:start}
+.fleetTimeFlowClockStart strong{left:0;right:auto;transform:none}
+.fleetTimeFlowClockTakeoff{grid-column:1;justify-self:end}
+.fleetTimeFlowClockLanding{grid-column:2;justify-self:end}
+.fleetTimeFlowClockEnd{grid-column:3;justify-self:end}
+.fleetTimeFlowClockEnd strong{left:auto;right:0;transform:none}
+.fleetTimeFlowClockA11y{
+ position:absolute!important;width:1px!important;height:1px!important;
+ padding:0!important;margin:-1px!important;overflow:hidden!important;
+ clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+}
+html[data-flympus-language="he"] .fleetTimeFlowClock strong{
+ direction:ltr;unicode-bidi:isolate;left:auto;right:0;transform:translateX(50%);
+}
+html[data-flympus-language="he"] .fleetTimeFlowClockStart strong{left:auto;right:0;transform:none}
+html[data-flympus-language="he"] .fleetTimeFlowClockEnd strong{left:0;right:auto;transform:none}
+html[data-flympus-theme="dark"] .fleetTimeFlowTrack>span+span{border-inline-start-color:#1b3549}
+html[data-flympus-theme="dark"] .fleetTimeFlowClock::before{background:#a4c5e4}
+html[data-flympus-theme="dark"] .fleetTimeFlowClock strong{color:#e2f0ff}
+html.flympusLargeText .fleetTimeFlowClock strong{font-size:15px!important}
+html.flympusLargeText .fleetTimeFlowTrack .fleetTimeFlowPhaseLabel,
+html.flympusLargeText .fleetTimeFlowTrack .fleetTimeFlowPhaseText{font-size:15px!important}
+@media(max-width:600px){
+ .fleetTimeFlowTrack{height:47px}
+ .fleetTimeFlowTrack>span{padding-inline:2px}
+ .fleetTimeFlowIcon{display:none!important}
+ .fleetTimeFlowTrack .fleetTimeFlowPhaseLabel{gap:0}
+ .fleetTimeFlowTrack>span,
+ .fleetTimeFlowTrack .fleetTimeFlowPhaseLabel,
+ .fleetTimeFlowTrack .fleetTimeFlowPhaseText{font-size:clamp(9px,2.7vw,11px)!important;line-height:1.25}
+ .fleetTimeFlowBoundaryTimes{height:37px}
+ .fleetTimeFlowClock strong{font-size:11px}
+ html.flympusLargeText .fleetTimeFlowTrack>span,
+ html.flympusLargeText .fleetTimeFlowTrack .fleetTimeFlowPhaseLabel,
+ html.flympusLargeText .fleetTimeFlowTrack .fleetTimeFlowPhaseText{font-size:13px!important}
+ html.flympusLargeText .fleetTimeFlowClock strong{font-size:13px!important}
+}
+@media(max-width:365px){
+ .fleetTimeFlowTrack .fleetTimeFlowPhaseText{font-size:9px!important}
+ .fleetTimeFlowClock strong{font-size:10px}
+ html.flympusLargeText .fleetTimeFlowClock strong{font-size:12px!important}
+}
