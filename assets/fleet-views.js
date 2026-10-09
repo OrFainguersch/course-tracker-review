@@ -60,7 +60,7 @@ function schedule(c){
  const requiredLabel=label=>label+' <span class="fleetRequired" aria-hidden="true">*</span>';
  const iconSvg=content=>'<svg class="fleetTimeFlowIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+content+'</svg>';
  const iconBrief=iconSvg('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>');
- const iconFlight=iconSvg('<path d="M12 2c-1.2 0-1.5 1.4-1.5 3v5L4 14v3l6.5-2v4l-2 1v2l3.5-1 3.5 1v-2l-2-1v-4l6.5 2v-3l-6.5-4V5c0-1.6-.3-3-1.5-3Z"/>');
+ const iconFlight='<span class="fleetTimeFlowIcon fleetTimeFlowFlightIcon" aria-hidden="true">✈</span>';
  const iconDebrief=iconSvg('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="m9 13 2.2 2.2L16 10.5"/>');
  const phase=(key,label,icon)=>'<span data-phase="'+key+'"><span class="fleetTimeFlowPhaseLabel">'+icon+'<span class="fleetTimeFlowPhaseText">'+label+'</span></span></span>';
  const timeMark=(key,label,part)=>'<div class="fleetTimeFlowClock fleetTimeFlowClock'+part+'" role="group" aria-label="'+E(label)+'"><span class="fleetTimeFlowClockA11y">'+E(label)+'</span><strong dir="ltr" data-flight-clock="'+key+'">'+E(timeline?.clock[key]||'—')+'</strong></div>';
