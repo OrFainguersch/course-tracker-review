@@ -75,7 +75,7 @@ function operations({plans=[],evaluations=[],soloFlights=[],from='',to='',granul
     const gap=p?Math.max(0,planned-executed):0;
     const reasons=[];
     // A recorded cancellation may not outnumber the unfinished planned sorties.
-    (p?.cancellations||[]).forEach(item=>{if(item?.reasonLabel||item?.reasonId||item?.reason)reasons.push(String(item.reasonLabel||item.reason||item.reasonId).trim())});
+    (p?.cancellations||[]).forEach(item=>{if(item?.reasonLabel||item?.reasonId||item?.reason){const label=String(item.reasonLabel||item.reason||item.reasonId).trim(),quantity=Math.max(1,Math.floor(Number(item.quantity)||1));for(let i=0;i<quantity&&reasons.length<gap;i++)reasons.push(label)}});
     if(!reasons.length&&p?.reason)reasons.push(String(p.reason).trim());
     const cancellations=reasons.slice(0,gap),cancelled=cancellations.length;
     const openGap=gap-cancelled,isFuture=date>reportToday;

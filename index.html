@@ -113,7 +113,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/safety-global-inbox.js?v=20261008-safety02"></script>
 <script src="./assets/safety-ui.js?v=20261008-safety03"></script>
 <script src="./assets/fleet-model.js?v=20261009-plan-duration12"></script>
-<script src="./assets/fleet-views.js?v=20261009-plan-nav-icons17"></script>
+<script src="./assets/fleet-views.js?v=20261009-solo-batch-icons18"></script>
 <script src="./assets/home-operations.js?v=20261008-home02"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
@@ -1255,7 +1255,30 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 <style>
 /* ===== Planned vs Executed · purpose-first responsive layout ===== */
 .pvePage{display:grid;gap:12px;min-width:0}.pvePageHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;min-width:0}.pvePageHead .pageTitle{margin-top:3px}.pvePageHead .sub{max-width:700px;margin-bottom:0}.pveDayState{flex:0 0 auto;margin-top:5px;padding:6px 10px;border-radius:999px;background:#eef3f8;color:#64748b;font-size:10px;font-weight:900}.pveDayState.draft{background:#fff4d8;color:#8a5a00}.pveDayState.saved{background:#e7f8ef;color:#087453}
-.pveOverview{padding:16px;min-width:0}.pveOverview>.formTitle{margin-bottom:10px}/* Planned vs Executed: flight date at the logical start (English left, Hebrew right). */
+.pveOverview{padding:16px;min-width:0}.pveOverview>.formTitle{margin-bottom:10px}
+/* Automatically generated planned Solo execution slots and grouped cancellation reasons. */
+.pveSoloEntryList{display:grid;gap:10px}
+.pveSoloEntryForm{min-width:0;padding:12px;border:1px solid #cfdfef;border-radius:13px;background:rgba(255,255,255,.78)}
+.pveSoloEntryHead{display:flex;align-items:center;gap:10px;min-width:0;margin-bottom:10px}
+.pveSoloEntryHead>b{color:#173c61;flex:1;font-size:13px}
+.pveSoloQuantity,.pveCancelQtyField{display:flex;align-items:center;gap:7px;color:#55748d;font-size:11px;font-weight:800}
+.pveSoloQuantity .input,.pveCancelQtyField .input{width:65px;min-width:58px;min-height:34px;padding:5px 7px;text-align:center;font-size:15px}
+.pveSoloSkip{border:1px solid #d8a6a2;border-radius:8px;color:#b03c32;background:transparent;min-width:34px;min-height:34px;font-size:23px;cursor:pointer}
+.pveSoloEntryActions{display:flex;justify-content:flex-end;margin-top:10px}
+.pveRestoreSolo{margin-top:12px}
+.pveCancellationRow{grid-template-columns:minmax(120px,.7fr) minmax(160px,1.15fr) minmax(90px,.36fr)}
+html[data-flympus-theme="dark"] .pveSoloEntryForm{background:rgba(24,50,70,.87);border-color:#46647d}
+html[data-flympus-theme="dark"] .pveSoloEntryHead>b{color:#e5f3ff}
+html[data-flympus-theme="dark"] .pveSoloQuantity,html[data-flympus-theme="dark"] .pveCancelQtyField{color:#bfdaef}
+html.flympusLargeText .pveSoloQuantity,html.flympusLargeText .pveCancelQtyField{font-size:15px}
+@media(max-width:640px){
+ .pveSoloEntryForm{padding:11px}
+ .pveCancellationRow{grid-template-columns:minmax(0,1fr) auto;gap:8px}
+ .pveCancellationRow .pveCancellationMeta{grid-column:1/-1}
+ .pveCancellationRow .pveCancellationReason{min-width:0}
+ .pveSoloQuantity .input,.pveCancelQtyField .input{width:60px}
+}
+/* Planned vs Executed: flight date at the logical start (English left, Hebrew right). */
 .coursePlanWorkspace .pveDateRow{direction:ltr;grid-template-columns:minmax(170px,220px) minmax(0,1fr);align-items:end}
 .coursePlanWorkspace .pveDateRow>.pveDateReadOnly{grid-column:1;grid-row:1;justify-self:start;align-items:flex-start;text-align:start;max-width:100%}
 .coursePlanWorkspace .pveDateRow>div:first-child{grid-column:2;grid-row:1;align-self:end;min-width:0}
