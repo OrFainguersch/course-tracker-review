@@ -671,3 +671,89 @@ html.flympusLargeText .fleetTimeFlowTrack .fleetTimeFlowPhaseText{font-size:15px
 @container timeline-phase (max-width:45px){
   .fleetTimeFlowPhaseText{opacity:0}
 }
+
+
+/* Build 0797: unified, measured placement of stage labels and timeline clocks.
+   CSS overrides apply only after the read-only layout engine has measured DOM. */
+.fleetTimeFlowBody{position:relative;width:100%;min-width:0;box-sizing:border-box}
+.fleetTimeFlowLeaders,.fleetTimeFlowFloatingLabels{
+ position:absolute;inset:0;width:100%;height:100%;pointer-events:none
+}
+.fleetTimeFlowLeaders{z-index:1;overflow:visible}
+.fleetTimeFlowLeaders path{
+ fill:none;stroke:#7191ae;stroke-width:1.35;
+ stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke
+}
+.fleetTimeFlowLeaders .fleetTimeFlowPhaseLeader{stroke:#3a9a73}
+.fleetTimeFlowFloatingLabels{z-index:4}
+.fleetTimeFlowAdaptive .fleetTimeFlowTrack{position:relative;z-index:2}
+.fleetTimeFlowAdaptive .fleetTimeFlowTrack [data-phase]{cursor:pointer}
+.fleetTimeFlowAdaptive .fleetTimeFlowTrack [data-phase]:focus-visible{
+ outline:2px solid #1d75ae;outline-offset:-3px
+}
+.fleetTimeFlowAdaptive .fleetTimeFlowTrack>span.fleetTimeFlowPhaseExternal .fleetTimeFlowPhaseLabel{opacity:0!important}
+.fleetTimeFlowAdaptive .fleetTimeFlowTrack>span:not(.fleetTimeFlowPhaseExternal) .fleetTimeFlowPhaseText{opacity:1!important}
+.fleetTimeFlowAdaptive .fleetTimeFlowBoundaryTimes{
+ position:absolute!important;inset:0!important;margin:0!important;
+ width:100%;height:100%!important;display:block!important;
+ pointer-events:none;z-index:3;overflow:visible
+}
+.fleetTimeFlowAdaptive .fleetTimeFlowClock{
+ position:absolute!important;inset:auto;width:auto;height:25px;
+ min-width:0;max-width:none;display:flex!important;
+ justify-content:center;align-items:center;box-sizing:border-box;
+ padding:2px 4px;margin:0!important;border-radius:6px;
+ background:#fff;color:#163b60;white-space:nowrap;
+ transform:none!important;direction:ltr
+}
+.fleetTimeFlowAdaptive .fleetTimeFlowClock::before{display:none!important}
+.fleetTimeFlowAdaptive .fleetTimeFlowClock strong{
+ position:static!important;inset:auto!important;left:auto!important;
+ right:auto!important;top:auto!important;
+ display:block;transform:none!important;text-align:center;
+ direction:ltr;unicode-bidi:isolate;line-height:20px;
+ font-variant-numeric:tabular-nums
+}
+.fleetTimeFlowFloatingLabel{
+ position:absolute;display:flex;align-items:center;justify-content:center;
+ height:25px;box-sizing:border-box;padding:2px 5px;
+ border:1px solid #abcfbe;border-radius:7px;
+ background:#e6f4ec;color:#186443;
+ font-size:11px;font-weight:800;line-height:1.2;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ cursor:pointer;pointer-events:auto
+}
+.fleetTimeFlowFloatingLabel[data-phase="brief"]{color:#91661f;background:#fbf2e2;border-color:#e8d5a9}
+.fleetTimeFlowFloatingLabel[data-phase="flight"]{color:#155b99;background:#eaf3ff;border-color:#a8c9e6}
+.fleetTimeFlowFloatingLabel:focus-visible{outline:2px solid #226da0;outline-offset:2px}
+.fleetTimeFlowFallback[hidden],.fleetTimeFlowDetails[hidden]{display:none!important}
+.fleetTimeFlowFallback{margin-top:10px}
+.fleetTimeFlowFallbackPhases{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px}
+.fleetTimeFlowFallbackPhases span{
+ border-radius:7px;padding:4px 8px;font-weight:750;font-size:11px
+}
+.fleetTimeFlowFallbackClocks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.fleetTimeFlowFallbackClocks>div{
+ display:flex;flex-direction:column;gap:4px;
+ border:1px solid #e1eaf2;border-radius:9px;padding:8px;min-width:0
+}
+.fleetTimeFlowFallbackClocks small{font-size:11px;color:#587792}
+.fleetTimeFlowFallbackClocks strong{font-size:13px;color:#163b60;direction:ltr;unicode-bidi:isolate}
+.fleetTimeFlowIsCompact .fleetTimeFlowBoundaryTimes{display:none!important}
+.fleetTimeFlowIsCompact .fleetTimeFlowTrack .fleetTimeFlowPhaseLabel{opacity:0!important}
+.fleetTimeFlowDetails{
+ margin-top:9px;padding:8px 10px;border:1px solid #c8daeb;
+ border-radius:8px;background:#f5faff;color:#153d5e;
+ font-size:12px;line-height:1.5;direction:inherit
+}
+html[data-flympus-theme="dark"] .fleetTimeFlowAdaptive .fleetTimeFlowClock{background:#203b50;color:#e2f0ff}
+html[data-flympus-theme="dark"] .fleetTimeFlowFloatingLabel{background:#214d3c;color:#d4f6df;border-color:#4d9070}
+html[data-flympus-theme="dark"] .fleetTimeFlowFloatingLabel[data-phase="brief"]{background:#53462c;color:#f9e0ab;border-color:#93794b}
+html[data-flympus-theme="dark"] .fleetTimeFlowFloatingLabel[data-phase="flight"]{background:#244969;color:#d3ebff;border-color:#487aa1}
+html[data-flympus-theme="dark"] .fleetTimeFlowDetails{background:#1d374b;color:#e2f0ff;border-color:#42627b}
+html[data-flympus-theme="dark"] .fleetTimeFlowFallbackClocks>div{border-color:#49677d}
+html[data-flympus-theme="dark"] .fleetTimeFlowFallbackClocks strong{color:#e2f0ff}
+html[data-flympus-theme="dark"] .fleetTimeFlowFallbackClocks small{color:#bad2e8}
+html.flympusLargeText .fleetTimeFlowFloatingLabel,
+html.flympusLargeText .fleetTimeFlowFallbackPhases span{font-size:14px}
+html.flympusLargeText .fleetTimeFlowDetails{font-size:15px}
