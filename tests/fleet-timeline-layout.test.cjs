@@ -163,9 +163,9 @@ test('Timeline integration renders all four clock keys, external names only, and
  assert.match(engine,/document\.fonts\?\.ready/);
  assert.doesNotMatch(engine,/element\.textContent=phaseLabel\(item\.key\)\s*\+.*min/);
  for(const asset of ['fleet-timeline-layout.js','fleet-views.js','fleet-operations.css']){
-  assert.match(html,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-leader-clear-0799'));
-  assert.match(worker,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-leader-clear-0799'));
+  assert.match(html,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-connected-leaders-0800'));
+  assert.match(worker,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-connected-leaders-0800'));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-leader-clear-0799'/);
- assert.match(html,/build 0799/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-connected-leaders-0800'/);
+ assert.match(html,/build 0800/);
 });
