@@ -66,7 +66,7 @@ function schedule(c){
  const defaultsBlock=c.canConfigureTiming?'<details class="fleetTimingSettings"><summary>'+L('Edit course timing defaults','עריכת ברירות מחדל לזמני הטיסה')+'</summary><form id="fleetTimingDefaultsForm"><div class="fleetTimingSettingsGrid">'+
   ['INSTRUCTED','SOLO'].map(type=>['briefingMinutes','estimatedMinutes','debriefMinutes'].map(key=>{
    const label=type==='INSTRUCTED'?L('Instructed','מודרכת'):L('Solo','סולו');
-   return field(label+' · '+(key==='briefingMinutes'?L('Briefing (min)','תדריך (דקות)'):key==='estimatedMinutes'?L('Airborne time (min)','זמן באוויר (דקות)'):L('Debriefing (min)','תחקיר (דקות)')),'<input class="input" type="number" name="'+type+'_'+key+'" required min="'+(key==='estimatedMinutes'?1:0)+'" max="'+(key==='estimatedMinutes'?720:180)+'" step="1" value="'+E(M.configuredTimings(settings,type)[key])+'">');
+   return field(label+' · '+(key==='briefingMinutes'?L('Briefing (min)','תדריך (דקות)'):key==='estimatedMinutes'?L('Flight time (min)','זמן טיסה (דקות)'):L('Debriefing (min)','תחקיר (דקות)')),'<input class="input" type="number" name="'+type+'_'+key+'" required min="'+(key==='estimatedMinutes'?1:0)+'" max="'+(key==='estimatedMinutes'?720:180)+'" step="1" value="'+E(M.configuredTimings(settings,type)[key])+'">');
   }).join('')).join('')+'</div><button class="btn secondary small" type="submit">'+L('Save defaults','שמור ברירות מחדל')+'</button><p class="sub">'+L('Applies to newly scheduled flights. Existing flight times stay unchanged.','חל על שיבוצים חדשים; משכי טיסות שכבר נקבעו לא משתנים.')+'</p></form></details>':'';
  return '<div class="fleetSchedule fleetSchedulePlain" id="fleetFlightBoard">'+
  defaultsBlock+
@@ -80,7 +80,7 @@ function schedule(c){
  field(L('Syllabus','סילבוס'),select('syllabus',c.syllabi.map(s=>({id:s,name:s})),current?.syllabus||''))+
  '<fieldset class="fleetFlightDurations"><legend>'+L('Flight timing · all durations in minutes','זמני הטיסה · כל המשכים בדקות')+'</legend><div class="fleetFlightDurationsGrid">'+
  field(L('Briefing (min)','תדריך (דקות)'),'<input class="input" name="briefingMinutes" type="number" required min="0" max="180" step="1" value="'+E(briefing)+'">')+
- field(L('Airborne time (min)','זמן באוויר (דקות)'),'<input class="input" name="estimatedMinutes" type="number" required min="1" max="720" step="1" value="'+E(duration)+'">')+
+ field(L('Flight time (min)','זמן טיסה (דקות)'),'<input class="input" name="estimatedMinutes" type="number" required min="1" max="720" step="1" value="'+E(duration)+'">')+
  field(L('Debriefing (min)','תחקיר (דקות)'),'<input class="input" name="debriefMinutes" type="number" required min="0" max="180" step="1" value="'+E(debrief)+'">')+
  '</div></fieldset>'+
  field(L('Planning notes (optional)','הערות לתכנון (לא חובה)'),'<textarea class="input" name="note" rows="2" maxlength="500" placeholder="'+L('Flight planning notes','הערות לתכנון הטיסה')+'">'+E(current?.note||'')+'</textarea>','data-plan-notes')+

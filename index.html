@@ -8863,7 +8863,7 @@ function bindDailyFlightBoard(){
    defaults[type]={};
    for(const key of ['briefingMinutes','estimatedMinutes','debriefMinutes']){
     const raw=String(data.get(type+'_'+key)||'');
-    if(!/^\d+$/.test(raw)||Number(raw)<(key==='estimatedMinutes'?1:0)||Number(raw)>(key==='estimatedMinutes'?720:180)){toast(planUiText('Briefing/debriefing: 0–180 min. Airborne time: 1–720 min.','תדריך ותחקיר: 0–180 דקות. זמן באוויר: 1–720 דקות.'),'error');return}
+    if(!/^\d+$/.test(raw)||Number(raw)<(key==='estimatedMinutes'?1:0)||Number(raw)>(key==='estimatedMinutes'?720:180)){toast(planUiText('Briefing/debriefing: 0–180 min. Flight time: 1–720 min.','תדריך ותחקיר: 0–180 דקות. זמן טיסה: 1–720 דקות.'),'error');return}
     defaults[type][key]=Number(raw);
    }
   }
@@ -9127,15 +9127,49 @@ function bindEvaluationVoiceInput(form,hooks={}){
   if(window.MutationObserver){const observer=new MutationObserver(()=>{if(!document.body.contains(block)){try{recognizer?.abort()}catch{}observer.disconnect()}});observer.observe(document.body,{childList:true,subtree:true})}
   if(transcript.value.trim())parse()
 }
-function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.find(x=>x.id===state.editingEval):null,autoDraft=getActivityDraft('evaluation'),allT=courseTrainees(),activeT=alphaByName(allT.filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active')),tracking=currentCourseTrackingCounters(),tracks=type=>tracking.some(x=>x.type===type),prefillTrainee=edit?.traineeId||state.evaluationTraineeId||'',evalCriteria=evaluationCriteriaDefs(),grading=evaluationGradingSettings(),gradeOptions=evaluationGradeOptions(),view=edit?'new':(state.evaluationView||'new'),tabs='<div class="safetyViewTabs"><button type="button" class="'+(view==='new'?'active':'')+'" data-evaluation-view="new">New evaluation</button><button type="button" class="'+(view==='history'?'active':'')+'" data-evaluation-view="history">History <span>'+list.length+'</span></button></div>',head='<div class="recordChildHead"><h1 class="pageTitle">Evaluation</h1><p class="sub">Record, review and revise flight evaluations with weighted criteria and emergency practice.</p></div>'+tabs;if(view==='history')return head+evaluationHistoryViewHtml(list);return head+`<section class="card formCard recordSingleForm"><div class="formTitle"><h2>${edit?`Edit evaluation · revision ${edit.revision}`:'New evaluation'}</h2><span class="autoDraftNote" id="draftBadge">${autoDraft?draftSavedLabel('evaluation'):'Auto-save ready'}</span></div>
+/* Evaluation defaults use verified account identity and a unique course-scoped sortie.
+   Names are never treated as identifiers; ambiguous plans are not auto-selected. */
+function evaluationInstructorForAccount(){
+ const auth=window.FLYMPUS_AUTH;
+ if(!auth?.profile&&!auth?.currentUser)return '';
+ if(auth?.isActive&&auth.isActive()!==true)return '';
+ const uid=String(auth?.currentUser?.uid||auth?.profile?.uid||'').trim();
+ const email=String(auth?.profile?.email||auth?.currentUser?.email||'').trim().toLowerCase();
+ const members=courseInstructors();
+ if(uid){
+  const uidMatches=members.filter(x=>[x.uid,x.userUid,x.authUid,x.firebaseUid].some(v=>v&&String(v).trim()===uid));
+  if(uidMatches.length===1)return String(uidMatches[0].id);
+  if(uidMatches.length>1)return '';
+ }
+ if(email){
+  const emailMatches=members.filter(x=>String(x.email||'').trim().toLowerCase()===email);
+  if(emailMatches.length===1)return String(emailMatches[0].id);
+ }
+ return '';
+}
+function evaluationFlightMatch({date,traineeId,instructorId,syllabus}={}){
+ const str=x=>String(x??'').trim();
+ const syllabusKey=x=>str(x).toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'');
+ const day=str(date),trainee=str(traineeId),instructor=str(instructorId),lesson=syllabusKey(syllabus);
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!trainee||!instructor||!lesson)return {status:'none'};
+ const matches=getDailyFlightBoard().filter(f=>{
+  const mins=Number(f?.estimatedMinutes);
+  return str(f?.date)===day&&str(f?.mode).toUpperCase()==='INSTRUCTED'&&
+   str(f?.traineeId)===trainee&&str(f?.instructorId)===instructor&&
+   syllabusKey(f?.syllabus)===lesson&&Number.isInteger(mins)&&mins>=1&&mins<=720;
+ });
+ if(matches.length===1)return {status:'matched',flight:matches[0]};
+ return {status:matches.length>1?'ambiguous':'none',count:matches.length};
+}
+function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.find(x=>x.id===state.editingEval):null,autoDraft=getActivityDraft('evaluation'),allT=courseTrainees(),activeT=alphaByName(allT.filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active')),tracking=currentCourseTrackingCounters(),tracks=type=>tracking.some(x=>x.type===type),prefillTrainee=edit?.traineeId||state.evaluationTraineeId||'',prefillInstructor=edit?.instructorId||evaluationInstructorForAccount(),evalCriteria=evaluationCriteriaDefs(),grading=evaluationGradingSettings(),gradeOptions=evaluationGradeOptions(),view=edit?'new':(state.evaluationView||'new'),tabs='<div class="safetyViewTabs"><button type="button" class="'+(view==='new'?'active':'')+'" data-evaluation-view="new">New evaluation</button><button type="button" class="'+(view==='history'?'active':'')+'" data-evaluation-view="history">History <span>'+list.length+'</span></button></div>',head='<div class="recordChildHead"><h1 class="pageTitle">Evaluation</h1><p class="sub">Record, review and revise flight evaluations with weighted criteria and emergency practice.</p></div>'+tabs;if(view==='history')return head+evaluationHistoryViewHtml(list);return head+`<section class="card formCard recordSingleForm"><div class="formTitle"><h2>${edit?`Edit evaluation · revision ${edit.revision}`:'New evaluation'}</h2><span class="autoDraftNote" id="draftBadge">${autoDraft?draftSavedLabel('evaluation'):'Auto-save ready'}</span></div>
 <form id="evalForm">
 <div class="evalMissingPanel formCompletionPanel" id="evalMissingPanel" hidden><div class="evalMissingHead"><span class="evalMissingIcon">!</span><div><b id="evalMissingTitle">Required before submission</b><span>Complete the required fields below before submitting this evaluation.</span></div></div><div class="evalMissingChips" id="evalMissingChips"></div></div>
 <div class="fields">
 <div class="field" style="grid-column:1/-1"><label>Date</label><input class="input dateDmy" name="date" type="text" inputmode="numeric" autocomplete="off" maxlength="10" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" required value="${esc(dateInputValue(edit?.flightDate||todayIsoDate()))}" placeholder="DD/MM/YYYY"></div>
 <div class="field"><label>Trainee</label><select name="trainee" required ${edit?'disabled':''}><option value="" ${prefillTrainee?'':'selected'} disabled>Select trainee</option>${activeT.map(t=>`<option value="${t.id}" ${prefillTrainee===t.id?'selected':''}>${t.name}</option>`).join('')}</select></div>
-<div class="field"><label>Instructor</label><select name="instructor" required><option value="" ${edit?'':'selected'} disabled>Select instructor</option>${alphaByName(courseInstructors()).map(i=>`<option value="${i.id}" ${edit?.instructorId===i.id?'selected':''}>${i.name}</option>`).join('')}</select></div>
+<div class="field"><label>Instructor</label><select name="instructor" required><option value="" ${prefillInstructor?'':'selected'} disabled>Select instructor</option>${alphaByName(courseInstructors()).map(i=>`<option value="${i.id}" ${prefillInstructor===i.id?'selected':''}>${i.name}</option>`).join('')}</select></div>
 <div class="field"><label>Syllabus</label><select name="syllabus" id="evalSyllabusSelect" required ${edit?'disabled':''}><option value="" ${edit?'':'selected'} disabled>Select syllabus</option>${evaluationSyllabusNames().map(sy=>`<option ${edit?.syllabus===sy?'selected':''}>${sy}</option>`).join('')}</select></div>
-<div class="field"><label>Duration</label><select name="duration" required><option value="" ${edit?'':'selected'} disabled>—</option>${[15,20,25,30,40].map(v=>`<option value="${v}" ${edit&&Number(edit.duration)===v?'selected':''}>${v} min</option>`).join('')}</select></div>
+<div class="field"><label>${getFlympusAppPreferences().language==='he'?'זמן טיסה (דקות)':'Flight time (min)'}</label><input class="input" name="duration" type="number" required min="1" max="720" step="1" inputmode="numeric" value="${edit?esc(edit.duration):''}"><small id="evalDurationHint" class="sub" aria-live="polite"></small></div>
 </div>
 ${evaluationVoiceInputHtml()}
 ${evaluationExperienceCaptureHtml(edit)}
@@ -11726,7 +11760,7 @@ function bindEval(){document.querySelectorAll('[data-evaluation-view]').forEach(
 const scoreEls=[...f.querySelectorAll('select[name^="score_"]')];const recalc=()=>{let complete=true,total=0;evalCriteria.forEach(c=>{const el=f.querySelector('[name="score_'+c.id+'"]'),v=Number(el?.value||0);if(!v)complete=false;total+=v*c.weight});$('#suggestedGrade').textContent=complete?(Math.round(total*10)/10).toFixed(1):'—'};scoreEls.forEach(x=>x.onchange=recalc);f.querySelectorAll('input,select,textarea').forEach(x=>x.onchange=()=>$('#draftBadge')?.classList.remove('hidden'));
 const renumberEmphases=()=>{[...f.querySelectorAll('.emphasisEditRow')].forEach((row,i)=>{const n=row.querySelector('.emphasisNo');if(n)n.textContent=i+1})};
 const markDraftSaved=()=>{if($('#draftBadge'))$('#draftBadge').textContent=draftSavedLabel('evaluation')};const persistDraft=()=>{saveActivityDraft('evaluation',serializeFormDraft(f));markDraftSaved()};
-const missingFriendlyLabel=el=>{const name=String(el?.name||'');if(name==='duration')return 'Flight duration';if(name==='progressionDecision')return 'Syllabus progression decision';let label=controlFriendlyLabel(el).replace(/\s*\([^)]*%\)\s*/g,' ').replace(/\s+/g,' ').trim();if(name.startsWith('score_')&&!/score$/i.test(label))label+=' score';return label||'Required field'};
+const missingFriendlyLabel=el=>{const name=String(el?.name||'');if(name==='duration')return 'Flight time';if(name==='progressionDecision')return 'Syllabus progression decision';let label=controlFriendlyLabel(el).replace(/\s*\([^)]*%\)\s*/g,' ').replace(/\s+/g,' ').trim();if(name.startsWith('score_')&&!/score$/i.test(label))label+=' score';return label||'Required field'};
 const updateMissingPanel=()=>{const panel=$('#evalMissingPanel'),title=$('#evalMissingTitle'),chips=$('#evalMissingChips');if(!panel||!title||!chips)return;const seen=new Set(),items=[];[...f.elements].filter(el=>el?.willValidate&&el.validity&&!el.validity.valid).forEach(el=>{const key=el.name||el.id||missingFriendlyLabel(el);if(seen.has(key))return;seen.add(key);items.push({key,label:missingFriendlyLabel(el)})});panel.hidden=!requiredStarted||!items.length;title.textContent=items.length?'Required before submission · '+items.length+' missing':'Required before submission';chips.innerHTML=items.map(x=>'<button type="button" data-missing-field="'+esc(x.key)+'">'+esc(x.label)+'</button>').join('')};
 const markRequiredStarted=()=>{requiredStarted=true;updateMissingPanel()};
 const bindProgressionDecisionInputs=()=>{f.querySelectorAll('input[name="progressionDecision"]').forEach(x=>x.addEventListener('change',()=>{updateMissingPanel();persistDraft()}))};
@@ -11734,6 +11768,35 @@ const syncProgressionReview=()=>{const mount=$('#syllabusDecisionMount'),trainee
 f.addEventListener('input',markRequiredStarted);f.addEventListener('change',markRequiredStarted);f.addEventListener('invalid',markRequiredStarted,true);if($('#evalMissingPanel'))$('#evalMissingPanel').addEventListener('click',e=>{const chip=e.target.closest?.('[data-missing-field]');if(!chip)return;const key=chip.dataset.missingField,control=[...f.elements].find(x=>(x.name||x.id)===key&&x.validity&&!x.validity.valid)||[...f.elements].find(x=>(x.name||x.id)===key);control?.scrollIntoView?.({behavior:'smooth',block:'center'});setTimeout(()=>control?.focus?.({preventScroll:true}),180)});
 const bindEmphasisRows=()=>{f.querySelectorAll('[data-remove-emphasis]').forEach(btn=>btn.onclick=()=>{const rows=[...f.querySelectorAll('.emphasisEditRow')];if(rows.length<=1){const input=rows[0]?.querySelector('input[name="emphasisItem"]');if(input)input.value='';persistDraft();return}btn.closest('.emphasisEditRow')?.remove();renumberEmphases();persistDraft()})};
 if($('#addEmphasis'))$('#addEmphasis').onclick=()=>{const box=$('#emphasisEditor'),row=document.createElement('div');row.className='emphasisEditRow';row.innerHTML='<span class="emphasisNo"></span><input class="input" name="emphasisItem" placeholder="Next-flight emphasis"><button type="button" class="emphasisRemove" data-remove-emphasis aria-label="Remove">×</button>';box.appendChild(row);renumberEmphases();bindEmphasisRows();row.querySelector('input')?.focus();persistDraft()};bindEmphasisRows();bindAutoDraft(f,'evaluation',markDraftSaved);
+const evalDurationControl=f.elements.namedItem('duration'),evalDurationHint=$('#evalDurationHint');
+let evalDurationManual=Boolean(state.editingEval||canRestore);
+const syncEvalFlightDuration=()=>{
+ if(evalDurationManual||!evalDurationControl)return;
+ const result=evaluationFlightMatch({
+  date:normalizeDateValue(f.elements.namedItem('date')?.value),
+  traineeId:f.elements.namedItem('trainee')?.value,
+  instructorId:f.elements.namedItem('instructor')?.value,
+  syllabus:f.elements.namedItem('syllabus')?.value
+ });
+ if(result.status==='matched'){
+  evalDurationControl.value=String(result.flight.estimatedMinutes);
+  if(evalDurationHint)evalDurationHint.textContent=getFlympusAppPreferences().language==='he'?'לפי הטיסה התואמת ב־Plan · ניתן לשינוי':'Suggested from matching Plan flight · editable';
+ }else{
+  evalDurationControl.value='';
+  if(evalDurationHint)evalDurationHint.textContent=result.status==='ambiguous'?(getFlympusAppPreferences().language==='he'?'נמצאו מספר טיסות תואמות · יש להזין זמן טיסה':'Several matching flights · enter flight time'):'';
+ }
+};
+if(!state.editingEval&&!canRestore){
+ for(const name of ['trainee','instructor','syllabus','date'])
+  f.elements.namedItem(name)?.addEventListener('change',syncEvalFlightDuration);
+ f.elements.namedItem('date')?.addEventListener('input',syncEvalFlightDuration);
+ evalDurationControl?.addEventListener('input',()=>{
+  evalDurationManual=true;
+  if(evalDurationHint)evalDurationHint.textContent=getFlympusAppPreferences().language==='he'?'זמן הטיסה ניתן לעריכה לפי הביצוע בפועל':'Enter actual flight time when it differs from Plan';
+ });
+ syncEvalFlightDuration();
+}
+
 const updateEmergencyUi=()=>{f.querySelectorAll('[data-emergency-note-area]').forEach(area=>{const entry=area.closest('[data-emergency-practice-entry]'),counter=entry?.querySelector('.emergencyCountInput'),editor=area.querySelector('[data-emergency-note-editor]'),toggle=area.querySelector('[data-emergency-note-toggle]');area.hidden=!(Number(counter?.value||0)>0);if(!area.hidden&&editor?.querySelector('textarea')?.value.trim()){editor.hidden=false;if(toggle)toggle.hidden=true}});const inputs=[...f.querySelectorAll('.emergencyCountInput')],total=inputs.reduce((a,x)=>a+(Number(x.value)||0),0);if($('#emergencySelectedBadge'))$('#emergencySelectedBadge').textContent=total+' recorded now';f.querySelectorAll('[data-plan-count]').forEach(el=>{const input=inputs.find(x=>x.dataset.emergencyId===el.dataset.planCount);el.textContent=String(Number(input?.value||0))});const byGroup={};inputs.forEach(x=>byGroup[x.dataset.emergencyCategory]=(byGroup[x.dataset.emergencyCategory]||0)+(Number(x.value)||0));f.querySelectorAll('[data-group-total]').forEach(el=>el.textContent=(byGroup[el.dataset.groupTotal]||0)+' now')};
 const updateEmergencyHistory=traineeId=>{const history=traineeEmergencyHistory(traineeId,state.editingEval);f.querySelectorAll('[data-history-id]').forEach(el=>{const n=Number(history[el.dataset.historyId]||0);el.textContent=n?'Previously: '+n:'Not practiced yet';el.classList.toggle('has',n>0);el.classList.toggle('none',!n)});const defs=evaluationEmergencyDefs(),byCat={},doneCat={},totalCat={};defs.forEach(x=>{const cat=x.category||'General / Operational',n=Number(history[x.id]||0);byCat[cat]=(byCat[cat]||0)+n;totalCat[cat]=(totalCat[cat]||0)+1;if(n>0)doneCat[cat]=(doneCat[cat]||0)+1});f.querySelectorAll('[data-group-past]').forEach(el=>el.textContent=(byCat[el.dataset.groupPast]||0)+' past');f.querySelectorAll('.emergencyGroup').forEach(g=>{const cat=g.dataset.emergencyGroup,small=g.querySelector('.emergencyGroupSummary small'),bar=g.querySelector('.emergencyGroupProgress i'),done=doneCat[cat]||0,total=totalCat[cat]||0,reps=byCat[cat]||0;if(small)small.textContent=done+' of '+total+' practiced previously · '+reps+' total occurrence'+(reps===1?'':'s');if(bar)bar.style.width=Math.round(done/Math.max(1,total)*100)+'%'})};
 f.querySelectorAll('[data-emergency-note-toggle]').forEach(btn=>btn.onclick=()=>{const editor=btn.closest('[data-emergency-note-area]')?.querySelector('[data-emergency-note-editor]');if(editor){editor.hidden=false;btn.hidden=true;editor.querySelector('textarea')?.focus()}});

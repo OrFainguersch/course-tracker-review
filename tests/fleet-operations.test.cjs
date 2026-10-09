@@ -467,6 +467,6 @@ test('Flight planning renders briefing, airborne time and debriefing with per-mo
  const block=out.slice(out.indexOf('<fieldset class="fleetFlightDurations"'),out.indexOf('</fieldset>'));
  assert(block.indexOf('name="briefingMinutes"')<block.indexOf('name="estimatedMinutes"')&&block.indexOf('name="estimatedMinutes"')<block.indexOf('name="debriefMinutes"'));
  assert.match(block,/name="estimatedMinutes"[^>]*value="42"/);
- assert.match(block,/Airborne time \(min\)/);
+ assert.match(block,/Flight time \(min\)/);
  assert.doesNotMatch(out,/Planned duration/);
 });

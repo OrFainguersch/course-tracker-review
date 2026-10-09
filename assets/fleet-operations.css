@@ -509,3 +509,17 @@ html.flympusLargeText .dailyPlanDateSpotlight .dailyPlanDateField .input{font-si
 .fleetFlightDurationsGrid,.fleetTimingSettingsGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 html.flympusLargeText .fleetFlightDurations legend{font-size:16px}
 @media(max-width:600px){.fleetFlightDurationsGrid,.fleetTimingSettingsGrid{grid-template-columns:1fr}.fleetFlightDurations{padding:12px}}
+
+/* Mobile/dark/RTL parity: phase names stay in the time bar, without legend. */
+.fleetTimeFlowLegend{display:none!important}
+.fleetTimeFlowTrack span{text-align:center;white-space:normal;padding-inline:3px;overflow-wrap:normal}
+@media(max-width:560px){
+ .fleetTimeFlowTrack{height:46px;gap:3px}
+ .fleetTimeFlowTrack span{font-size:11px!important;line-height:1.25;padding-inline:2px}
+ .fleetTimeFlowTimes{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
+ .fleetTimeFlowTimes>div{text-align:center;justify-items:center;gap:3px}
+ .fleetTimeFlowTimes>div:last-child{grid-column:1/-1;display:flex;justify-content:center;align-items:baseline;gap:8px;margin-top:5px}
+ .fleetTimeFlowTimes strong{font-size:14px}
+ html.flympusLargeText .fleetTimeFlowTrack span{font-size:15px!important}
+ html.flympusLargeText .fleetTimeFlowTimes span{font-size:14px!important}
+}
