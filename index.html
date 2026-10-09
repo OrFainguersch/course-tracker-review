@@ -11105,17 +11105,28 @@ function plannedCompleteness(){
  const ps=boardPlan.linked?boardPlan.solo:Number(state.planSolo??draft.plannedSolo??saved.plannedSolo??0);
  const total=pi+ps,hasPlan=total>0,instructedCancelled=Math.max(0,pi-executedInstructed),soloCancelled=Math.max(0,ps-soloRows.length);
  const reasonCatalog=cfgGet().cancellationReasons||[],stored=Array.isArray(draft.cancellations)?draft.cancellations:Array.isArray(saved.cancellations)?saved.cancellations:[],legacyReason=String(draft.reason||saved.reason||'').trim();
- const specs=[...Array.from({length:instructedCancelled},(_,i)=>({key:'INSTRUCTED_'+(i+1),type:'Instructed'})),...Array.from({length:soloCancelled},(_,i)=>({key:'SOLO_'+(i+1),type:'Solo'}))],used=new Set();
- const cancellationRows=specs.map((spec,index)=>{
-   let foundIndex=stored.findIndex((x,j)=>!used.has(j)&&x?.key===spec.key);
-   if(foundIndex<0)foundIndex=stored.findIndex((x,j)=>!used.has(j)&&String(x?.type||'').toLowerCase()===spec.type.toLowerCase());
-   if(foundIndex<0&&stored[index]&&!used.has(index))foundIndex=index;
-   if(foundIndex>=0)used.add(foundIndex);
-   const old=foundIndex>=0?stored[foundIndex]:{},legacyMatch=index===0&&legacyReason?reasonCatalog.find(x=>x.name===legacyReason):null;
-   return {...spec,reasonId:String(old?.reasonId||legacyMatch?.id||''),reasonLabel:String(old?.reasonLabel||old?.reason||legacyMatch?.name||(index===0?legacyReason:''))};
- });
- const ready=hasPlan&&cancellationRows.every(x=>x.reasonId||(!reasonCatalog.length&&x.reasonLabel));
- const planMissing=!hasPlan?[{label:'Planned flights'}]:cancellationRows.map((x,i)=>x.reasonId||(!reasonCatalog.length&&x.reasonLabel)?null:{label:'Cancellation reason '+(i+1)}).filter(Boolean);
+ const cancellationRows=[],available={Instructed:instructedCancelled,Solo:soloCancelled};
+ for(const type of ['Instructed','Solo']){
+   const group=[];
+   const previous=stored.filter(x=>String(x?.type||x?.key?.split('_')[0]||'').toLowerCase()===type.toLowerCase());
+   for(const old of previous){
+     if(!available[type])break;
+     const quantity=Math.min(available[type],Math.max(1,Math.floor(Number(old.quantity)||1)));
+     available[type]-=quantity;
+     const reasonId=String(old.reasonId||''),reasonLabel=String(old.reasonLabel||old.reason||reasonCatalog.find(r=>r.id===reasonId)?.name||'');
+     const prior=reasonId&&group.find(x=>x.reasonId===reasonId);
+     if(prior)prior.quantity+=quantity;
+     else group.push({key:String(old.key||type.toUpperCase()+'_'+(group.length+1)),type,reasonId,reasonLabel,quantity});
+   }
+   cancellationRows.push(...group);
+   for(let i=0;i<available[type];i++)cancellationRows.push({key:type.toUpperCase()+'_pending_'+(i+1),type,reasonId:'',reasonLabel:'',quantity:1});
+ }
+ if(!stored.length&&legacyReason&&cancellationRows.length){
+   const first=cancellationRows[0],match=reasonCatalog.find(r=>r.name===legacyReason);
+   first.reasonLabel=legacyReason;first.reasonId=String(match?.id||'');
+ }
+ const planMissing=cancellationRows.flatMap((r,i)=>(r.reasonId||(!reasonCatalog.length&&r.reasonLabel))?[]:Array.from({length:r.quantity},(_,n)=>({label:'Cancellation reason '+(i+1)+(r.quantity>1?' / '+(n+1):'')})));
+ const ready=hasPlan&&!planMissing.length;
  const planStarted=!!(draftWrap&&(!rawDraft.date||rawDraft.date===date))||Boolean(saved.date)||hasPlan;
  return {draftWrap,draft,date,saved,soloRows,pi,ps,boardLinked:boardPlan.linked,executedInstructed,instructedCancelled,soloCancelled,reasonCatalog,cancellationRows,hasPlan,ready,planMissing,planStarted}
 }
