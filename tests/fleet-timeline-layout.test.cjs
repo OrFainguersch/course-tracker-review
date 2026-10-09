@@ -166,6 +166,6 @@ test('Timeline integration renders all four clock keys, external names only, and
   assert.match(html,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-connected-leaders-0800'));
   assert.match(worker,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-connected-leaders-0800'));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-connected-leaders-0800'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-plan-badge-0803'/);
  assert.match(html,/build 0800/);
 });
