@@ -263,7 +263,7 @@ test('Plan UI reads language preference, keeps RTL dates visible, and scales for
  const styles=require('node:fs').readFileSync(require('node:path').join(__dirname,'../assets/fleet-operations.css'),'utf8');
  assert.doesNotMatch(styles,/\.dailyPlanHeader>div:first-child\{display:none\}/);
  assert.match(styles,/\.dailyFlightPlan \.dailyPlanHeader \.dailyPlanDateField\{display:block!important/);
- assert.match(styles,/html\[data-flympus-language="he"\] \.fleetTimeFlowTimes strong/);
+ assert.match(styles,/html\[data-flympus-language="he"\] \.fleetTimeFlowClock strong/);
  assert.match(styles,/html\[data-flympus-theme="dark"\] \.dailyFlightPlan/);
  assert.match(styles,/html\.flympusLargeText \.fleetPlanFormHeading h2/);
  assert.match(styles,/@media\(max-width:480px\)/);
@@ -508,4 +508,34 @@ test('Plan consistently uses full Briefing / Flight / Debriefing terminology',()
  assert.match(hebrew,/data-phase="debrief">תחקיר<\/span>/);
  const app=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
  assert.match(app,/Briefing \/ Debriefing: 0–180 min\. Flight duration: 1–720 min\./);
+});
+
+test('Plan timeline option 1 shows all four chronological boundaries at correct phase edges in both languages',()=>{
+ const vm=require('node:vm');
+ let language='en';
+ const sandbox={window:{FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=>language}};
+ vm.runInNewContext(ui,sandbox);
+ const settings={fleet:[],flights:[],platformId:'shahak',date:'2026-10-09',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true};
+ const render=()=>sandbox.window.FLYMPUS_FLEET_VIEW.schedule(settings);
+ const english=render();
+ for(const [phase,word] of [['brief','Briefing'],['flight','Flight'],['debrief','Debriefing']]){
+  assert.match(english,new RegExp('data-phase="'+phase+'"[^>]*>[\s\S]*?'+word));
+ }
+ assert.equal((english.match(/class="fleetTimeFlowClock fleetTimeFlowClock/g)||[]).length,4);
+ assert.match(english,/fleetTimeFlowClockStart[^>]*>[\s\S]*?data-flight-clock="briefing">07:40/);
+ assert.match(english,/fleetTimeFlowClockTakeoff[^>]*>[\s\S]*?data-flight-clock="takeoff">08:00/);
+ assert.match(english,/fleetTimeFlowClockLanding[^>]*>[\s\S]*?data-flight-clock="landing">08:30/);
+ assert.match(english,/fleetTimeFlowClockEnd[^>]*>[\s\S]*?data-flight-clock="debrief">08:45/);
+ assert.equal((english.match(/class="fleetTimeFlowIcon"/g)||[]).length,3);
+ assert.match(english,/--phase-brief:20fr;--phase-flight:30fr;--phase-debrief:15fr/);
+ language='he';const hebrew=render();
+ assert.match(hebrew,/data-phase="brief"[^>]*>[\s\S]*?תדריך/);
+ assert.match(hebrew,/data-phase="debrief"[^>]*>[\s\S]*?תחקיר/);
+ for(const clock of ['07:40','08:00','08:30','08:45'])assert.match(hebrew,new RegExp(clock));
+ const stylesheet=require('node:fs').readFileSync(require('node:path').join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(stylesheet,/\.fleetTimeFlowTrack,\s*\.fleetTimeFlowBoundaryTimes\s*\{[\s\S]*?grid-template-columns:minmax\(0,var\(--phase-brief\)\) minmax\(0,var\(--phase-flight\)\) minmax\(0,var\(--phase-debrief\)\)/);
+ assert.match(stylesheet,/html\[data-flympus-language="he"\] \.fleetTimeFlowClock strong/);
+ assert.match(stylesheet,/@media\(max-width:600px\)\{[\s\S]*?\.fleetTimeFlowIcon\{display:none!important\}/);
+ assert.match(stylesheet,/html\[data-flympus-theme="dark"\] \.fleetTimeFlowClock strong/);
+ assert.match(stylesheet,/html\.flympusLargeText \.fleetTimeFlowClock strong/);
 });
