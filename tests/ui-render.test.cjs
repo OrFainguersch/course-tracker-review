@@ -160,6 +160,16 @@ assert(html.includes("function traineeDraftNeedsAttention")&&html.includes("draf
 assert(html.includes("id==='planned'?'planned':''")&&html.includes("planned=plannedAttentionCount()")&&
   html.includes("function plannedCompleteness()")&&html.includes("plan.planMissing.length"),
   "Plan must show exactly the same missing requirements as its Required panel");
+assert(html.includes("b.closest?.('.coursePlanWorkspace')")&&html.includes("options.fromPlan"),"Opening Fleet from the Plan workspace must keep Plan as its return screen");
+assert(html.includes('class="planRequiredTabCount"')&&fs.readFileSync('assets/course-operations.css','utf8').includes('.coursePlanTabs .planRequiredTabCount'),"Plan subtab attention must be visible and styled on mobile and desktop");
+const planWorkspaceSource=html.slice(html.indexOf('function planWorkspace(){'),html.indexOf('function bindPlanWorkspace(){'));
+const mockPlanWorkspace=missing=>vm.runInNewContext(planWorkspaceSource+'planWorkspace()',{
+ state:{planView:'board'},plannedAttentionCount:()=>missing,planUiText:en=>en,esc:x=>String(x),
+ dutyOperations:{count:()=>0,connectionMarkup:()=>''},isDutyTrainee:()=>false,dailyFlightPlan:()=>'<div>daily</div>'
+});
+const missingTab=mockPlanWorkspace(2),completeTab=mockPlanWorkspace(0);
+assert.match(missingTab,/data-plan-view="report"[^>]*>Planned vs Executed<span class="planRequiredTabCount" data-plan-missing-count="2"[^>]*>2<\/span><\/button>/,"Only Planned vs Executed should identify missing report requirements");
+assert.doesNotMatch(completeTab,/planRequiredTabCount/,"No misleading subtab badge may remain after report completion");
 
 assert(html.includes("safety:'<path d=\"M12 3.5 19 6v5.3c0 4.5-2.7 7.7-7 9.2-4.3-1.5-7-4.7-7-9.2V6l7-2.5Z\"></path><path d=\"M12 8.2v5.1\"></path><path d=\"M12 16.4h.01\"></path>'")&&html.includes("homeQuickIcon safety")+html.includes("homePulseIcon safety")+html.includes("icon safetyIcon"),"Safety must use the shield-with-exclamation icon consistently across relevant surfaces");
 assert(html.includes(".recordHubCard.eval{border-top:3px solid var(--record-eval)}")&&html.includes(".recordHubCard.safety{border-top:3px solid var(--record-safety)}")&&html.includes(".recordHubCard.exam{border-top:3px solid var(--record-exam)}"),"Forms hub cards must keep the Evaluation, Safety and Exam color identity used by trainee record actions");
@@ -304,6 +314,15 @@ vm.runInContext("goBack()",context);
 assert.equal(vm.runInContext("state.screen",context),"record","Back from Evaluation must return to Forms");
 vm.runInContext("goBack()",context);
 assert.equal(vm.runInContext("state.screen",context),"home","Back from Forms must then return to Home");
+vm.runInContext("go('planned',{planView:'report'});go('fleet',{}, {fromPlan:true})",context);
+assert.equal(vm.runInContext("appNavHistory.join(',')",context),"home,planned","Fleet opened inside Plan must keep Plan as the immediate back destination");
+vm.runInContext("goBack()",context);
+assert.equal(vm.runInContext("state.screen",context),"planned","Back from Fleet opened inside Plan must return to Plan");
+assert.equal(vm.runInContext("state.planView",context),"report","Back from Fleet must preserve the previously selected Plan subtab");
+vm.runInContext("goBack();go('planned');go('fleet')",context);
+assert.equal(vm.runInContext("appNavHistory.join(',')",context),"home","Independent Fleet navigation must remain top-level");
+vm.runInContext("goBack()",context);
+assert.equal(vm.runInContext("state.screen",context),"home","Back from independent Fleet must return Home");
 vm.runInContext("bind()",context);
 elements.get("#menuBtn").onclick?.({preventDefault(){},stopPropagation(){}});
 assert.equal(elements.get("#drawer").classList.contains("open"),true,"Hamburger must open the sidebar drawer");
