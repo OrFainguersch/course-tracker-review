@@ -163,10 +163,10 @@ test('Timeline integration renders all four clock keys, external names only, and
  assert.match(engine,/document\.fonts\?\.ready/);
  assert.doesNotMatch(engine,/element\.textContent=phaseLabel\(item\.key\)\s*\+.*min/);
  for(const asset of ['fleet-timeline-layout.js','fleet-views.js','fleet-operations.css']){
-  const version=asset==='fleet-timeline-layout.js'?'20261009-connected-leaders-0800':'20261009-flight-drag-tabs-0810';
+  const version=asset==='fleet-timeline-layout.js'?'20261009-connected-leaders-0800':asset==='fleet-views.js'?'20261009-flight-drag-tabs-0810':'20261009-stable-plan-layout-0812';
   assert.match(html,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v='+version));
   assert.match(worker,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-flight-drag-tabs-0810'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-stable-plan-layout-0812'/);
  assert.match(html,/flympus-deploy-build" content="__FLYMPUS_DEPLOY_BUILD__"/);
 });

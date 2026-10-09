@@ -604,12 +604,12 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261009-flight-drag-tabs-0810'],['assets/fleet-operations.css','20261009-flight-drag-tabs-0810']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261009-flight-drag-tabs-0810'],['assets/fleet-operations.css','20261009-stable-plan-layout-0812']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-flight-drag-tabs-0810'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261009-flight-drag-tabs-0810/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-stable-plan-layout-0812'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261009-stable-plan-layout-0812/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
@@ -809,8 +809,8 @@ test('Fleet starts from top, editor does not summon keyboard and Plan tabs suppo
  assert.match(html,/panel\.hidden=false;\s*const reveal=/);
  assert.doesNotMatch(html,/panel\.querySelector\('\[name="tail"\]'\)\?\.focus/);
  assert.match(html,/requestAnimationFrame\(\(\)=>requestAnimationFrame\(reveal\)\)/);
- assert.match(styles,/\.coursePlanWorkspace>\.coursePlanTabs\{\s*display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
- assert.match(styles,/\.coursePlanWorkspace>\.coursePlanTabs \.dutyApprovalTabCount\{\s*position:absolute/);
+ assert.match(styles,/\.coursePlanWorkspace \.coursePlanMenu>\.coursePlanTabs\{\s*flex:1 1 420px;display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ assert.match(styles,/\.coursePlanWorkspace \.coursePlanApprovalShortcut \.dutyApprovalTabCount\{\s*position:static/);
  assert.match(styles,/html\[data-flympus-theme="dark"\] \.coursePlanWorkspace/);
  assert.match(styles,/html\.flympusLargeText \.coursePlanWorkspace/);
  assert.match(styles,/@media\(max-width:375px\)/);
@@ -877,16 +877,59 @@ test('flight drag UI offers accessible touch grips, reduced motion and localized
  assert.match(html,/dutyOperations\.saveDraft\('PLAN'/);
  assert.match(html,/dutyOperations\.publish\('PLAN'/);
  assert.match(html,/Crew conflict: /);
- assert.match(html,/flight-board-drag\.js\?v=20261009-flight-drag-tabs-0810/);
+ assert.match(html,/flight-board-drag\\.js\\?v=20261009-stable-plan-layout-0812/);
 });
 test('Plan tabs use shared Course Management-style segmented control',()=>{
  const css=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
- assert.match(css,/\.coursePlanWorkspace>\.coursePlanTabs\{\s*display:grid/);
- assert.match(css,/padding:5px;border:1px solid #d5e3f0;border-radius:16px/);
+ assert.match(css,/\.coursePlanWorkspace \.coursePlanMenu>\.coursePlanTabs\{\s*flex:1 1 420px;display:grid/);
+ assert.match(css,/padding:4px;border:1px solid #d5e3f0;border-radius:13px/);
  assert.match(css,/background:#e9f0f6;color:#234f75/);
  assert.match(css,/\.planRequiredTabCount/);
  assert.match(css,/html\[data-flympus-theme="dark"\]/);
  assert.match(css,/html\.flympusLargeText/);
  assert.match(html,/data-plan-view="board"/);
  assert.match(html,/data-plan-view="approvals"/);
+});
+
+test('Plan's actual Course Management-sized two stages and separate approvals are responsive',()=>{
+ const css=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
+ assert.match(html,/class="coursePlanMenu"><nav class="coursePlanTabs"/);
+ assert.match(html,/data-plan-view="board"[^\n]*1 · /);
+ assert.match(html,/data-plan-view="report"[^\n]*2 · /);
+ assert.match(html,/class="coursePlanApprovalShortcut /);
+ assert.match(html,/data-plan-view="approvals"/);
+ assert.match(css,/min-height:43px;padding:9px 20px/);
+ assert.match(css,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ assert.match(css,/coursePlanApprovalShortcut/);
+ assert.match(css,/@media\(max-width:600px\)/);
+ assert.match(css,/html\[data-flympus-theme="dark"\]/);
+ assert.match(css,/html\.flympusLargeText/);
+});
+test('Platform-tail badge stays on one line by reallocating width instead of shrinking the font',()=>{
+ const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(css,/\.fleetBookedFlights \.fleetSortieTail\{/);
+ assert.match(css,/white-space:nowrap;overflow-wrap:normal;word-break:normal;hyphens:none/);
+ assert.match(css,/flex:0 0 auto;width:max-content;max-width:none/);
+ assert.match(css,/\.fleetBookedFlights \.fleetSortieMain>div\{flex:1 1 0;min-width:0\}/);
+ assert.match(css,/\.fleetBookedFlights \.fleetSortieMain\{gap:7px/);
+ assert.match(css,/html\.flympusLargeText \.fleetSortieDragGhost/);
+});
+test('Frozen insertion thresholds prevent drag jitter after DOM swaps and support auto-scroll',()=>{
+ const vm=require('node:vm'),source=fs.readFileSync(path.join(__dirname,'../assets/flight-board-drag.js'),'utf8');
+ const sandbox={window:{}};
+ vm.runInNewContext(source,sandbox,{filename:'flight-board-drag.js'});
+ const calc=sandbox.window.FLYMPUS_FLIGHT_DRAG.insertionIndex;
+ const stops=[400,535,700];
+ assert.equal(calc(350,stops),0);
+ assert.equal(calc(520,stops),1);
+ assert.equal(calc(630,stops),2);
+ assert.equal(calc(760,stops),3);
+ for(let i=0;i<100;i++)assert.equal(calc(550,stops),2,'No oscillation after animated row shifts');
+ assert.equal(calc(480+70,stops),2,'Scroll offset must be considered in document coordinates');
+ assert.match(source,/const centers=rows\(\)\.filter\(item=>item!==row\)\.map/);
+ assert.match(source,/const next=insertionIndex\(y\+scroll\(\),centers\)/);
+ assert.doesNotMatch(source,/others\.find\(item=>\{const rect=item\.getBoundingClientRect/);
+ assert.match(source,/animation\.finished\.then\(settle,settle\)/);
+ assert.match(source,/if\(cancelled\)\{revert\(oldOrder\);return\}/);
+ assert.match(source,/if\(targetIndex!==origin\)void commit\(oldOrder\)/);
 });

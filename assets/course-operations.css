@@ -29,53 +29,83 @@ html.flympusLargeText .dutyApprovalStatus b,html.flympusLargeText .dutyApprovalR
 html[data-flympus-theme="dark"] .coursePlanTabs .planRequiredTabCount{background:#d64545;color:#fff;border-color:#1c3448}
 html.flympusLargeText .coursePlanTabs .planRequiredTabCount{font-size:11px;min-width:20px;height:20px}
 
-/* Plan adopts the unified segmented Course Management navigation. */
-.coursePlanWorkspace>.coursePlanTabs{
- display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
- align-items:stretch;gap:4px;width:100%;max-width:100%;
- padding:5px;border:1px solid #d5e3f0;border-radius:16px;
- background:#fff;box-shadow:none;overflow:visible;box-sizing:border-box;
+/* Course Management-aligned Plan stages, with approvals as a separate action. */
+.coursePlanWorkspace .coursePlanMenu{
+ display:flex;align-items:stretch;flex-wrap:wrap;gap:9px;
+ max-width:100%;width:100%;
 }
-.coursePlanWorkspace>.coursePlanTabs>button{
+.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs{
+ flex:1 1 420px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ align-items:stretch;gap:4px;min-width:0;max-width:100%;width:auto;
+ padding:4px;border:1px solid #d5e3f0;border-radius:13px;
+ background:#fff;box-shadow:none;box-sizing:border-box;overflow:visible;
+}
+.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs>button{
  position:relative;display:flex;align-items:center;justify-content:center;
- min-width:0;min-height:61px;box-sizing:border-box;padding:12px 22px;
- border:0;border-radius:12px;background:transparent;color:#64748b;
- text-align:center;font-size:13px;font-weight:800;line-height:1.32;
- white-space:normal;overflow-wrap:anywhere;box-shadow:none;
+ min-width:0;min-height:43px;padding:9px 20px;box-sizing:border-box;
+ border:0;border-radius:9px;background:transparent;box-shadow:none;
+ color:#64748b;font-size:12px;font-weight:800;line-height:1.35;
+ text-align:center;white-space:normal;overflow-wrap:normal;
 }
-.coursePlanWorkspace>.coursePlanTabs>button.active{
- background:#e9f0f6;color:#234f75;border:0;box-shadow:none;
+.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs>button.active{
+ color:#234f75;background:#e9f0f6;border:0;box-shadow:none;
 }
-.coursePlanWorkspace>.coursePlanTabs .dutyApprovalTabCount{
- position:absolute;top:5px;right:6px;left:auto;display:grid;place-items:center;
- margin:0;min-width:19px;min-height:19px;padding:1px 5px;border-radius:999px;
- font-size:11px;line-height:1.1;
+.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs .planRequiredTabCount{
+ position:absolute;top:3px;right:4px;left:auto;margin:0;
 }
-.coursePlanWorkspace>.coursePlanTabs>button[data-plan-view="report"] .planRequiredTabCount{
- top:4px;right:4px;left:auto;
+.coursePlanWorkspace .coursePlanApprovalShortcut{
+ display:flex;align-items:center;justify-content:center;gap:10px;
+ flex:0 0 auto;min-height:53px;max-width:100%;
+ padding:9px 15px;border:1px solid #d5e3f0;border-radius:13px;
+ background:#fff;color:#4c6680;font-size:12px;font-weight:800;
+ box-shadow:none;cursor:pointer;line-height:1.35;
 }
-html[data-flympus-theme="dark"] .coursePlanWorkspace>.coursePlanTabs{
- background:#142b40;border:1px solid #405b73;
+.coursePlanWorkspace .coursePlanApprovalShortcut.active{
+ background:#e9f0f6;color:#234f75;
 }
-html[data-flympus-theme="dark"] .coursePlanWorkspace>.coursePlanTabs>button{
- background:transparent;color:#b9cce0;border:0;box-shadow:none;
+.coursePlanWorkspace .coursePlanApprovalShortcut .dutyApprovalTabCount{
+ position:static;display:grid;place-items:center;margin:0;
+ min-width:21px;min-height:21px;padding:2px 6px;
+ border-radius:999px;background:#e9f0f6;color:#264966;font-size:11px;line-height:1;
 }
-html[data-flympus-theme="dark"] .coursePlanWorkspace>.coursePlanTabs>button.active{
- background:#2c465f;color:#ecf5fc;border:0;box-shadow:none;
+.coursePlanWorkspace .coursePlanApprovalShortcut.active .dutyApprovalTabCount{
+ background:#d4e6f4;
 }
-html[data-flympus-theme="dark"] .coursePlanWorkspace>.coursePlanTabs .dutyApprovalTabCount{
+.coursePlanWorkspace .coursePlanMenu [data-plan-view]:focus-visible{
+ outline:3px solid #66aaf0;outline-offset:2px;
+}
+html[data-flympus-theme="dark"] .coursePlanWorkspace .coursePlanMenu>.coursePlanTabs,
+html[data-flympus-theme="dark"] .coursePlanWorkspace .coursePlanApprovalShortcut{
+ background:#142b40;border-color:#405b73;color:#c5d6e6;
+}
+html[data-flympus-theme="dark"] .coursePlanWorkspace .coursePlanMenu>.coursePlanTabs>button{
+ background:transparent;color:#bacdde;box-shadow:none;
+}
+html[data-flympus-theme="dark"] .coursePlanWorkspace .coursePlanMenu>.coursePlanTabs>button.active,
+html[data-flympus-theme="dark"] .coursePlanWorkspace .coursePlanApprovalShortcut.active{
+ background:#2c465f;color:#ecf5fc;
+}
+html[data-flympus-theme="dark"] .coursePlanWorkspace .coursePlanApprovalShortcut .dutyApprovalTabCount{
  background:#35546b;color:#e6f1fc;
 }
-html.flympusLargeText .coursePlanWorkspace>.coursePlanTabs>button{
- min-height:80px;font-size:15px!important;line-height:1.4;
+html.flympusLargeText .coursePlanWorkspace .coursePlanMenu>.coursePlanTabs>button,
+html.flympusLargeText .coursePlanWorkspace .coursePlanApprovalShortcut{
+ font-size:15px!important;min-height:55px;line-height:1.4;
 }
 @media(max-width:600px){
- .coursePlanWorkspace>.coursePlanTabs{gap:3px}
- .coursePlanWorkspace>.coursePlanTabs>button{
-  min-height:69px;padding:13px 18px;font-size:12px;line-height:1.3;
+ .coursePlanWorkspace .coursePlanMenu{gap:8px}
+ .coursePlanWorkspace .coursePlanMenu>.coursePlanTabs{
+  flex:1 1 100%;width:100%;gap:3px;
+ }
+ .coursePlanWorkspace .coursePlanMenu>.coursePlanTabs>button{
+  min-height:50px;padding:9px 24px;font-size:12px;
+ }
+ .coursePlanWorkspace .coursePlanApprovalShortcut{
+  min-height:41px;margin-inline-start:auto;padding:8px 13px;
  }
 }
 @media(max-width:375px){
- .coursePlanWorkspace>.coursePlanTabs{gap:2px;padding:4px}
- .coursePlanWorkspace>.coursePlanTabs>button{padding:12px 16px;font-size:11px}
+ .coursePlanWorkspace .coursePlanMenu>.coursePlanTabs>button{
+  padding:9px 18px;font-size:11px;
+ }
 }

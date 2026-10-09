@@ -853,3 +853,42 @@ html.flympusLargeText .fleetSortieDragHandle{width:44px;height:50px;flex-basis:4
  .fleetSortieDragSource{transition:none}
  .fleetSortieDragGhost{will-change:auto}
 }
+
+/* Keep platform-tail together without changing existing type size or weight. */
+.fleetBookedFlights .fleetSortieMain{gap:7px;min-width:0;flex:1 1 auto}
+.fleetBookedFlights .fleetSortieMain>b:first-child{
+ flex:0 0 auto;white-space:nowrap;
+}
+.fleetBookedFlights .fleetSortieTail{
+ display:inline-flex;align-items:center;justify-content:center;
+ flex:0 0 auto;width:max-content;max-width:none;
+ white-space:nowrap;overflow-wrap:normal;word-break:normal;hyphens:none;
+ padding-inline:8px;
+}
+.fleetBookedFlights .fleetSortieMain>div{flex:1 1 0;min-width:0}
+.fleetBookedFlights .fleetSortie:has(.fleetSortieDragHandle){column-gap:7px}
+.fleetSortieDragGhost:has(.fleetSortieDragHandle){
+ display:grid;grid-template-columns:37px minmax(0,1fr);gap:9px;
+}
+.fleetSortieDragGhost:has(.fleetSortieDragHandle)>.fleetSortieActions{
+ grid-column:1/-1;
+}
+@media(max-width:560px){
+ .fleetBookedFlights .fleetSortie:has(.fleetSortieDragHandle){
+  grid-template-columns:37px minmax(0,1fr);
+  gap:9px 7px;padding:13px 10px;
+ }
+ .fleetBookedFlights .fleetSortieMain{gap:6px}
+ .fleetBookedFlights .fleetSortieTail{padding-inline:7px}
+ .fleetBookedFlights .fleetSortieMain>div{overflow-wrap:anywhere}
+}
+@media(max-width:375px){
+ .fleetBookedFlights .fleetSortie:has(.fleetSortieDragHandle){
+  padding:11px 8px;gap:7px 5px;
+ }
+ .fleetBookedFlights .fleetSortieMain{gap:4px}
+ .fleetBookedFlights .fleetSortieTail{padding-inline:5px}
+}
+html.flympusLargeText .fleetSortieDragGhost:has(.fleetSortieDragHandle){
+ grid-template-columns:44px minmax(0,1fr);
+}
