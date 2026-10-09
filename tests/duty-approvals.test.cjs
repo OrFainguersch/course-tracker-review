@@ -230,8 +230,8 @@ test('The live entry point wires immutable approval drafts, preserved legacy ent
   assert.match(html,/if\(isDutyTrainee\(\)\)\{await dutyOperations.send\('REPORT'/);
   assert.match(html,/data-plan-view="approvals"/);
   for(const asset of ['duty-approval-model.js','operations-cloud.js','course-operations.js','course-operations.css']){
-    const version=asset.startsWith('course-operations.')?'20261009-plan-badge-0803':'20261009-approval-sounds-0795';
+    const version=asset.startsWith('course-operations.')?'20261009-plan-fleet-identity-v1':'20261009-approval-sounds-0795';
     const url='./assets/'+asset+'?v='+version;assert.ok(html.includes(url));assert.ok(worker.includes(url));
   }
-  assert.match(html,/flympus-deploy-build" content="__FLYMPUS_DEPLOY_BUILD__"/);assert.match(worker,/2026-10-09-fleet-editor-0804/);
+  assert.match(html,/flympus-deploy-build" content="__FLYMPUS_DEPLOY_BUILD__"/);assert.match(worker,/2026-10-09-plan-fleet-identity-v1/);
 });

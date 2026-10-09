@@ -604,12 +604,12 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261009-fleet-editor-0804'],['assets/fleet-operations.css','20261009-fleet-editor-0804']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261009-plan-fleet-identity-v1'],['assets/fleet-operations.css','20261009-plan-fleet-identity-v1']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-fleet-editor-0804'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261009-fleet-editor-0804/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-plan-fleet-identity-v1'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261009-plan-fleet-identity-v1/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
