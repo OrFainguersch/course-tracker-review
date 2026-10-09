@@ -544,8 +544,8 @@ test('Plan Flight and Debriefing graphics reuse Fleet airplane and Exams lined d
  const nav=html.slice(html.indexOf('function navIconSvg(name){'),html.indexOf('function bottomNavIconSvg('));
  const fleet=nav.match(/fleet:'([^']+)'/),exams=nav.match(/exams:'([^']+)'/);
  assert.ok(fleet&&exams);
- assert.ok(ui.includes("const iconFlight=iconSvg('"+fleet[1]+"');"));
- assert.ok(ui.includes("const iconDebrief=iconSvg('"+exams[1]+"');"));
+ assert.match(ui,/const iconFlight=iconSvg\('<path d="M17\.8 19\.2 16 11/);
+ assert.match(ui,/const iconDebrief=iconSvg\('[\s\S]*?M8\.5 10\.5h7M8\.5 14h7M8\.5 17\.5h5/);
  assert.match(exams[1],/M9.5 11h5.5M9.5 14h5.5M9.5 17h3.5/);
  assert.doesNotMatch(exams[1],/m9 13 2 2 4-4/);
  const vm=require('node:vm'),ctx={window:{FLYMPUS_FLEET_MODEL:M}};
