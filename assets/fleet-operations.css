@@ -762,3 +762,36 @@ html[data-flympus-theme="dark"] .fleetTimeFlowFallbackClocks small{color:#bad2e8
 html.flympusLargeText .fleetTimeFlowFloatingLabel,
 html.flympusLargeText .fleetTimeFlowFallbackPhases span{font-size:14px}
 html.flympusLargeText .fleetTimeFlowDetails{font-size:15px}
+
+/* Fleet editor: consistent padding, keyboard clearance and single mobile card frame. */
+.fleetPage>.fleetEditor.card{
+ box-sizing:border-box;width:100%;max-width:800px;
+ padding:clamp(18px,2.4vw,24px)!important;
+ scroll-margin-block-start:calc(88px + env(safe-area-inset-top,0px));
+}
+.fleetEditor .fleetSectionHead{align-items:flex-start;flex-wrap:wrap;min-width:0}
+.fleetEditor .fleetSectionHead h2{min-width:0;overflow-wrap:anywhere}
+.fleetEditor #fleetAircraftForm .input{box-sizing:border-box;max-width:100%;font-size:max(16px,1em)}
+.fleetEditor #fleetAircraftForm :is(input,select,textarea){
+ scroll-margin-block-start:24px;
+ scroll-margin-block-end:calc(116px + env(safe-area-inset-bottom,0px));
+}
+.fleetEditor .fleetEditorActions{display:flex;align-items:stretch;flex-wrap:wrap;gap:10px;margin-block:14px 0;direction:inherit}
+.fleetEditorActions .btn{min-width:132px;min-height:44px;white-space:normal;overflow-wrap:anywhere}
+html.flympusLargeText .fleetEditorActions .btn{font-size:15px!important}
+html.flympusLargeText .fleetEditor .fleetSectionHead h2{font-size:22px!important}
+@media(max-width:680px){
+ .fleetInventory>.fleetTableWrap{border:0;border-radius:0;background:transparent;overflow:visible}
+ .fleetInventory>.fleetTableWrap>.fleetInventoryTable tbody{padding:0}
+ .fleetPage>.fleetEditor.card{padding:18px!important}
+ .fleetEditor .fleetFormGrid{grid-template-columns:minmax(0,1fr)}
+ .fleetEditor .fleetEditorActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .fleetEditorActions .btn{width:100%;min-width:0}
+ .fleetPage:has(.fleetEditor:not([hidden])){padding-block-end:calc(115px + env(safe-area-inset-bottom,0px))}
+}
+@media(max-width:380px){
+ .fleetEditor .fleetEditorActions{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:680px){
+ html.flympusLargeText .fleetEditor .fleetEditorActions{grid-template-columns:minmax(0,1fr)}
+}

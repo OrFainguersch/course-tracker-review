@@ -606,8 +606,8 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-plan-badge-0803'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261009-plan-badge-0803/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-fleet-editor-0804'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261009-fleet-editor-0804/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
@@ -731,4 +731,48 @@ test('Removing an already recorded Solo group marks all removed flights as unexe
  assert.match(handler,/saveActivityDraft\('planned',data\)/);
  assert.match(handler,/ids\.size/);
  assert.match(html,/data-solo-restore/);
+});
+
+
+test('Fleet editor supports localized Tail number, Cancel, dark/RTL and Large Text styling',()=>{
+ const vm=require('node:vm'),lang={value:'en'},win={FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=>lang.value};
+ vm.runInNewContext(ui,{window:win},{filename:'fleet-views.js'});
+ const ctx={fleet:add([],'a01','01'),platformId:'shahak',platformLabel:'Shahak',courseLabel:'Training',today:'2026-10-09',editId:'a01',canWrite:true};
+ const en=win.FLYMPUS_FLEET_VIEW.fleet(ctx);
+ assert.match(en,/Tail number/);
+ assert.doesNotMatch(en,/Aircraft number/);
+ assert.match(en,/class="toolbar fleetEditorActions"/);
+ assert.match(en,/id="fleetCancelEdit">Cancel<\/button>/);
+ assert.ok(en.indexOf('id="fleetCancelEdit"')>en.indexOf('id="fleetAircraftForm"'));
+ assert.match(en,/data-label="Tail number"/);
+ lang.value='he';
+ const he=win.FLYMPUS_FLEET_VIEW.fleet(ctx);
+ assert.match(he,/מספר זנב \(מס״ז\)/);
+ assert.match(he,/id="fleetCancelEdit">ביטול<\/button>/);
+ assert.match(he,/data-label="מספר זנב"/);
+ const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(css,/\.fleetPage>\.fleetEditor\.card\{/);
+ assert.match(css,/\.fleetInventory>\.fleetTableWrap\{border:0/);
+ assert.match(css,/\.fleetEditorActions\{display:grid/);
+ assert.match(css,/html\.flympusLargeText \.fleetEditor \.fleetEditorActions/);
+ assert.match(css,/scroll-margin-block-end:calc\(116px/);
+ assert.match(ui,/visualViewport\?\.addEventListener\?\.\('resize'/);
+ assert.match(html,/panel\.scrollIntoView\?\.\(\{behavior:'auto',block:'start'\}\)/);
+});
+test('Fleet focus guard adjusts to keyboard viewport and stops after blur',()=>{
+ const vm=require('node:vm'),listeners={},vvEvents={},calls=[];
+ const doc={documentElement:{clientHeight:700},addEventListener:(name,fn)=>{listeners[name]=fn}};
+ const vv={offsetTop:0,height:370,addEventListener:(name,fn)=>{vvEvents[name]=fn}};
+ const win={FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=> 'en',document:doc,visualViewport:vv,innerHeight:700,
+  setTimeout:fn=>{fn();return 1},clearTimeout:()=>{},scrollBy:opts=>calls.push(opts)};
+ vm.runInNewContext(ui,{window:win});
+ const field={isConnected:true,matches:()=>true,closest:()=>({}),getBoundingClientRect:()=>({top:310,bottom:420})};
+ listeners.focusin({target:field});
+ assert.ok(calls.length>0);
+ assert.ok(calls[0].top>0);
+ vvEvents.resize();
+ listeners.focusout({target:field});
+ calls.length=0;
+ vvEvents.resize();
+ assert.equal(calls.length,0);
 });

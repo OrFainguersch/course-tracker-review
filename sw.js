@@ -2,7 +2,7 @@
    - Instant PWA cold-start from a versioned same-origin app-shell cache
    - Background revalidation so deployments replace the cached shell safely
    - Web Push delivery and notification navigation */
-const FLYMPUS_SW_VERSION='2026-10-09-plan-badge-0803';
+const FLYMPUS_SW_VERSION='2026-10-09-fleet-editor-0804';
 const SHELL_CACHE='flympus-shell-'+FLYMPUS_SW_VERSION;
 const DEFAULT_ICON='./assets/flympus-app-icon.webp';
 const SHELL_URLS=[
@@ -13,14 +13,14 @@ const SHELL_URLS=[
   './account-switcher.js?v=20261008-switcher01',
   './assets/reports-dashboard.js?v=0767',
   './assets/reports-dashboard.css?v=0767',
-  './assets/fleet-operations.css?v=20261009-connected-leaders-0800',
+  './assets/fleet-operations.css?v=20261009-fleet-editor-0804',
   './assets/fleet-model.js?v=20261009-approval-sounds-0795',
   './assets/duty-approval-model.js?v=20261009-approval-sounds-0795',
   './assets/operations-cloud.js?v=20261009-approval-sounds-0795',
   './assets/course-operations.js?v=20261009-plan-badge-0803',
   './assets/course-operations.css?v=20261009-plan-badge-0803',
   './assets/fleet-timeline-layout.js?v=20261009-connected-leaders-0800',
-  './assets/fleet-views.js?v=20261009-connected-leaders-0800',
+  './assets/fleet-views.js?v=20261009-fleet-editor-0804',
   './assets/safety-workflow.css?v=20261008-safety03',
   './assets/safety-workflow.js?v=20261008-safety01',
   './assets/safety-global-inbox.js?v=20261009-approval-sounds-0795',
