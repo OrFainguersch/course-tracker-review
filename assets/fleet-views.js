@@ -71,10 +71,11 @@ function schedule(c){
  }).join('')+'</div></section>':'';
  const settings=c.timingDefaults||M.TIMING_DEFAULTS;
  const defaultsBlock=c.canConfigureTiming?'<details class="fleetTimingSettings"><summary>'+L('Edit course timing defaults','עריכת ברירות מחדל לזמני הטיסה')+'</summary><form id="fleetTimingDefaultsForm"><div class="fleetTimingSettingsGrid">'+
-  ['INSTRUCTED','SOLO'].map(type=>['briefingMinutes','estimatedMinutes','debriefMinutes'].map(key=>{
-   const label=type==='INSTRUCTED'?L('Instructed','מודרכת'):L('Solo','סולו');
-   return field(label+' · '+(key==='briefingMinutes'?L('Briefing','תדריך'):key==='estimatedMinutes'?L('Flight duration','משך טיסה'):L('Debriefing','תחקיר')),minuteSelect(type+'_'+key,M.configuredTimings(settings,type)[key]));
-  }).join('')).join('')+'</div><button class="btn secondary small" type="submit">'+L('Save defaults','שמור ברירות מחדל')+'</button><p class="sub">'+L('Applies to newly scheduled flights. Existing flight times stay unchanged.','חל על שיבוצים חדשים; משכי טיסות שכבר נקבעו לא משתנים.')+'</p></form></details>':'';
+  ['INSTRUCTED','SOLO'].map(type=>'<section class="fleetTimingModeGroup fleetTimingMode'+type+'"><div class="fleetTimingModeHeader"><strong>'+L(type==='INSTRUCTED'?'Instructed flights':'Solo flights',type==='INSTRUCTED'?'טיסות מודרכות':'טיסות סולו')+'</strong></div><div class="fleetTimingModeFields">'+
+   ['briefingMinutes','estimatedMinutes','debriefMinutes'].map(key=>
+    field(key==='briefingMinutes'?L('Briefing','תדריך'):key==='estimatedMinutes'?L('Flight duration','משך טיסה'):L('Debriefing','תחקיר'),minuteSelect(type+'_'+key,M.configuredTimings(settings,type)[key]))
+   ).join('')+'</div></section>').join('')+
+ '</div><button class="btn secondary small" type="submit">'+L('Save defaults','שמור ברירות מחדל')+'</button><p class="sub">'+L('Applies to newly scheduled flights. Existing flight times stay unchanged.','חל על שיבוצים חדשים; משכי טיסות שכבר נקבעו לא משתנים.')+'</p></form></details>':'';
  return '<div class="fleetSchedule fleetSchedulePlain" id="fleetFlightBoard">'+
  defaultsBlock+
  (can?'<form id="fleetSortieForm" class="fleetSortieForm"><div class="fleetPlanFormHeading"><div><h2>'+L(current?'Edit scheduled flight':'Add scheduled flight',current?'עריכת טיסה משובצת':'הוספת טיסה מתוכננת')+'</h2><p>'+L('Plan the complete flight, including briefing and debriefing.','תכנן את כל הטיסה, כולל תדריך ותחקיר.')+'</p></div></div>'+

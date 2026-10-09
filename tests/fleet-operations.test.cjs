@@ -475,3 +475,16 @@ test('Flight planning renders briefing, flight duration and debriefing with per-
  assert.match(out,/--phase-brief:20fr;--phase-flight:42fr;--phase-debrief:15fr/);
  assert.doesNotMatch(out,/Planned duration/);
 });
+
+test('Course timing presets divide instructed and solo settings with visible section rules',()=>{
+ const vm=require('node:vm');
+ const ctx={window:{FLYMPUS_FLEET_MODEL:M},document:{documentElement:{dataset:{}}}};
+ vm.runInNewContext(ui,ctx);
+ const out=ctx.window.FLYMPUS_FLEET_VIEW.schedule({fleet:[],flights:[],platformId:'shahak',date:'2026-10-09',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true});
+ assert.ok(out.indexOf('fleetTimingModeINSTRUCTED')>0);
+ assert.ok(out.indexOf('fleetTimingModeSOLO')>out.indexOf('fleetTimingModeINSTRUCTED'));
+ assert.match(out,/Instructed flights/);assert.match(out,/Solo flights/);
+ assert.equal((out.match(/class="fleetTimingModeFields"/g)||[]).length,2);
+ assert.match(css,/\.fleetTimingModeFields\{display:grid/);
+ assert.match(css,/\.fleetTimingModeSOLO\{border-inline-start-color/);
+});

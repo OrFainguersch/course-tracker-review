@@ -106,14 +106,14 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/reports-dashboard.css?v=0767" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
-<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261009-plan-duration12" />
+<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261009-mode-split13" />
 <link rel="stylesheet" href="./assets/home-operations.css?v=20261008-home02" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
 <script src="./assets/safety-global-inbox.js?v=20261008-safety02"></script>
 <script src="./assets/safety-ui.js?v=20261008-safety03"></script>
 <script src="./assets/fleet-model.js?v=20261009-plan-duration12"></script>
-<script src="./assets/fleet-views.js?v=20261009-plan-duration12"></script>
+<script src="./assets/fleet-views.js?v=20261009-mode-split13"></script>
 <script src="./assets/home-operations.js?v=20261008-home02"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
@@ -9176,6 +9176,27 @@ function evaluationFlightMatch({date,traineeId,instructorId,syllabus}={}){
  if(matches.length===1)return {status:'matched',flight:matches[0]};
  return {status:matches.length>1?'ambiguous':'none',count:matches.length};
 }
+/* The evaluation picker stays native on iOS. Non-preset saved and planned durations remain selectable. */
+function evaluationDurationOptions(current){
+ const values=[10,15,20,25,30,35,40],v=Number(current);
+ if(String(current??'')!==''&&Number.isInteger(v)&&v>=1&&v<=720&&!values.includes(v))values.push(v);
+ values.sort((a,b)=>a-b);
+ const unit=getFlympusAppPreferences().language==='he'?'דקות':'min';
+ return values.map(n=>'<option value="'+n+'" '+(String(current??'')===String(n)?'selected':'')+'>'+n+' '+unit+'</option>').join('');
+}
+function ensureEvaluationDurationOption(select,minutes){
+ if(!select)return;
+ const v=Number(minutes);
+ if(!Number.isInteger(v)||v<1||v>720){select.value='';return;}
+ const key=String(v);
+ if(!Array.from(select.options).some(x=>x.value===key)){
+  const option=document.createElement('option');
+  option.value=key;
+  option.textContent=key+' '+(getFlympusAppPreferences().language==='he'?'דקות':'min');
+  select.add(option);
+ }
+ select.value=key;
+}
 function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.find(x=>x.id===state.editingEval):null,autoDraft=getActivityDraft('evaluation'),allT=courseTrainees(),activeT=alphaByName(allT.filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active')),tracking=currentCourseTrackingCounters(),tracks=type=>tracking.some(x=>x.type===type),prefillTrainee=edit?.traineeId||state.evaluationTraineeId||'',prefillInstructor=edit?.instructorId||evaluationInstructorForAccount(),evalCriteria=evaluationCriteriaDefs(),grading=evaluationGradingSettings(),gradeOptions=evaluationGradeOptions(),view=edit?'new':(state.evaluationView||'new'),tabs='<div class="safetyViewTabs"><button type="button" class="'+(view==='new'?'active':'')+'" data-evaluation-view="new">New evaluation</button><button type="button" class="'+(view==='history'?'active':'')+'" data-evaluation-view="history">History <span>'+list.length+'</span></button></div>',head='<div class="recordChildHead"><h1 class="pageTitle">Evaluation</h1><p class="sub">Record, review and revise flight evaluations with weighted criteria and emergency practice.</p></div>'+tabs;if(view==='history')return head+evaluationHistoryViewHtml(list);return head+`<section class="card formCard recordSingleForm"><div class="formTitle"><h2>${edit?`Edit evaluation · revision ${edit.revision}`:'New evaluation'}</h2><span class="autoDraftNote" id="draftBadge">${autoDraft?draftSavedLabel('evaluation'):'Auto-save ready'}</span></div>
 <form id="evalForm">
 <div class="evalMissingPanel formCompletionPanel" id="evalMissingPanel" hidden><div class="evalMissingHead"><span class="evalMissingIcon">!</span><div><b id="evalMissingTitle">Required before submission</b><span>Complete the required fields below before submitting this evaluation.</span></div></div><div class="evalMissingChips" id="evalMissingChips"></div></div>
@@ -9184,7 +9205,7 @@ function evaluation(){const list=getEvaluations(),edit=state.editingEval?list.fi
 <div class="field"><label>Trainee</label><select name="trainee" required ${edit?'disabled':''}><option value="" ${prefillTrainee?'':'selected'} disabled>Select trainee</option>${activeT.map(t=>`<option value="${t.id}" ${prefillTrainee===t.id?'selected':''}>${t.name}</option>`).join('')}</select></div>
 <div class="field"><label>Instructor</label><select name="instructor" required><option value="" ${prefillInstructor?'':'selected'} disabled>Select instructor</option>${alphaByName(courseInstructors()).map(i=>`<option value="${i.id}" ${prefillInstructor===i.id?'selected':''}>${i.name}</option>`).join('')}</select></div>
 <div class="field"><label>Syllabus</label><select name="syllabus" id="evalSyllabusSelect" required ${edit?'disabled':''}><option value="" ${edit?'':'selected'} disabled>Select syllabus</option>${evaluationSyllabusNames().map(sy=>`<option ${edit?.syllabus===sy?'selected':''}>${sy}</option>`).join('')}</select></div>
-<div class="field"><label>${getFlympusAppPreferences().language==='he'?'משך טיסה (דקות)':'Flight duration (min)'}</label><input class="input" name="duration" type="number" required min="1" max="720" step="1" inputmode="numeric" value="${edit?esc(edit.duration):''}"><small id="evalDurationHint" class="sub" aria-live="polite"></small></div>
+<div class="field"><label>${getFlympusAppPreferences().language==='he'?'משך טיסה':'Flight duration'}</label><select class="input" name="duration" required><option value="" disabled ${edit?'':'selected'}>${getFlympusAppPreferences().language==='he'?'בחר משך טיסה':'Select duration'}</option>${evaluationDurationOptions(edit?.duration)}</select><small id="evalDurationHint" class="sub" aria-live="polite"></small></div>
 </div>
 ${evaluationVoiceInputHtml()}
 ${evaluationExperienceCaptureHtml(edit)}
@@ -11794,7 +11815,7 @@ const syncEvalFlightDuration=()=>{
   syllabus:f.elements.namedItem('syllabus')?.value
  });
  if(result.status==='matched'){
-  evalDurationControl.value=String(result.flight.estimatedMinutes);
+  ensureEvaluationDurationOption(evalDurationControl,result.flight.estimatedMinutes);
   if(evalDurationHint)evalDurationHint.textContent=getFlympusAppPreferences().language==='he'?'לפי הטיסה התואמת ב־Plan · ניתן לשינוי':'Suggested from matching Plan flight · editable';
  }else{
   evalDurationControl.value='';
@@ -11805,10 +11826,12 @@ if(!state.editingEval&&!canRestore){
  for(const name of ['trainee','instructor','syllabus','date'])
   f.elements.namedItem(name)?.addEventListener('change',syncEvalFlightDuration);
  f.elements.namedItem('date')?.addEventListener('input',syncEvalFlightDuration);
- evalDurationControl?.addEventListener('input',()=>{
+ const markEvalDurationManual=()=>{
   evalDurationManual=true;
-  if(evalDurationHint)evalDurationHint.textContent=getFlympusAppPreferences().language==='he'?'זמן הטיסה ניתן לעריכה לפי הביצוע בפועל':'Enter actual flight time when it differs from Plan';
- });
+  if(evalDurationHint)evalDurationHint.textContent=getFlympusAppPreferences().language==='he'?'משך הטיסה ניתן לעריכה לפי הביצוע בפועל':'Enter actual flight duration when it differs from Plan';
+ };
+ evalDurationControl?.addEventListener('input',markEvalDurationManual);
+ evalDurationControl?.addEventListener('change',markEvalDurationManual);
  syncEvalFlightDuration();
 }
 
