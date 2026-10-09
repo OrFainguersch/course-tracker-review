@@ -2,17 +2,24 @@ const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
 const {execFileSync}=require('node:child_process');
+const {stampReleaseHtml}=require('./release-build.cjs');
 const BASE='https://flympus.firebaseapp.com/';
 const digest=value=>crypto.createHash('sha256').update(value).digest('hex');
-function sourceBytes(commit,filename,read){
+function sourceBytes(commit,filename,read,build){
   let value=read(commit,filename);
-  if(filename==='index.html')value=Buffer.from(value.toString('utf8').replaceAll('__FLYMPUS_DEPLOY_COMMIT__',commit));
+  if(filename==='index.html'){
+    const source=value.toString('utf8');
+    value=Buffer.from(source.includes('__FLYMPUS_DEPLOY_BUILD__')
+      ? stampReleaseHtml(source,commit,build)
+      : source.replaceAll('__FLYMPUS_DEPLOY_COMMIT__',commit));
+  }
   if(filename==='sw.js')value=Buffer.from(value.toString('utf8').replace(/const FLYMPUS_SW_VERSION='[^']+';/,
     "const FLYMPUS_SW_VERSION='"+commit.slice(0,16)+"';"));
   return value;
 }
 function validateManifest(value){
-  if(!/^[a-f0-9]{40}$/.test(value?.commit||'')||!value?.files||Array.isArray(value.files)||!Object.keys(value.files).length)
+  if(!/^[a-f0-9]{40}$/.test(value?.commit||'')||!value?.files||Array.isArray(value.files)||!Object.keys(value.files).length||
+      (value.build!==undefined&&(typeof value.build!=='string'||!/^\d{4,}$/.test(value.build))))
     throw new Error('Invalid live deployment manifest');
   for(const [filename,hash] of Object.entries(value.files))
     if(!/^[A-Za-z0-9][A-Za-z0-9_./-]*$/.test(filename)||filename.split('/').includes('..')||filename.startsWith('__/')||
@@ -35,7 +42,7 @@ async function main(){
   const entries=Object.entries(manifest.files);let checked=0;
   for(let index=0;index<entries.length;index+=4){
     await Promise.all(entries.slice(index,index+4).map(async([filename,hash])=>{
-      if(digest(sourceBytes(manifest.commit,filename,read))!==hash)throw new Error('Live manifest differs from Git source: '+filename);
+      if(digest(sourceBytes(manifest.commit,filename,read,manifest.build))!==hash)throw new Error('Live manifest differs from Git source: '+filename);
       const actual=await get(filename);
       if(digest(actual)!==hash)throw new Error('Live asset differs from verified manifest: '+filename);
       const output=path.join(destination,'public',filename);fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,actual);checked++;
@@ -46,12 +53,12 @@ async function main(){
     if(/id="flympusAuthRoot"|Course Tracker Training Operations/.test(helper))throw new Error('Reserved Firebase helper was replaced by app HTML');
   }
   const after=validateManifest(JSON.parse(await get('deploy-info.json')));
-  if(after.commit!==manifest.commit||JSON.stringify(after.files)!==JSON.stringify(manifest.files))
+  if(after.commit!==manifest.commit||after.build!==manifest.build||JSON.stringify(after.files)!==JSON.stringify(manifest.files))
     throw new Error('Hosting changed during the audit; rerun for one consistent release');
   fs.writeFileSync(path.join(destination,'deploy-info.json'),manifestBytes);
   const html=fs.readFileSync(path.join(destination,'public','index.html'),'utf8');
   const result={status:'VERIFIED_PUBLIC_HOSTING',commit:manifest.commit,publicFilesChecked:checked,
-    build:html.match(/FLYMPUS Review · build (\d+)/)?.[1]||null,
+    build:manifest.build||html.match(/FLYMPUS Review · build (\d+)/)?.[1]||null,
     reservedAuthRoutesChecked:true,allManifestFilesMatchGitSource:true,
     cloudDataBackedUp:false,personalDeviceDataChecked:false,hostingRollbackVersionVerified:false};
   fs.writeFileSync(path.join(destination,'audit-result.json'),JSON.stringify(result,null,2)+'\n');

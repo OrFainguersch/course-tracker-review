@@ -27,6 +27,10 @@ async function main(){
   assert.doesNotMatch(html,/Site Not Found/,'Hosting has not been deployed');
   const deployed=await deployedInfo();
   assert.equal(deployed.commit,expected.commit,'Production commit differs from the reviewed bundle');
+  assert.equal(deployed.build,expected.build,'Production build differs from the reviewed bundle');
+  assert.ok(/^\d{4,}$/.test(expected.build),'Release must include a numeric Build');
+  assert.ok(html.includes('<meta name="flympus-deploy-commit" content="'+expected.commit+'">'),'Live HTML commit stamp differs');
+  assert.ok(html.includes('<meta name="flympus-deploy-build" content="'+expected.build+'">'),'Live HTML Build stamp differs');
   for(const [filename,digest] of Object.entries(expected.files)){
     const response=await get(filename);
     const actual=crypto.createHash('sha256').update(Buffer.from(await response.arrayBuffer())).digest('hex');

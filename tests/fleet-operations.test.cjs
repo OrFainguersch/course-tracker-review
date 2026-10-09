@@ -475,7 +475,9 @@ test('Plan contract stays coherent: full-width flight day, settings, required fi
  assert.doesNotMatch(report,/id="pveDate" type="text"/);
  assert.match(report,/boardLinked\?'readonly aria-readonly="true"/);
  assert.match(html,/flightBoardPlanStatus\(date\)/);
- assert.match(html,/FLYMPUS Review · build 0800/);
+ assert.match(html,/<meta name="flympus-deploy-build" content="__FLYMPUS_DEPLOY_BUILD__">/);
+  assert.match(html,/function flympusBuildLabel\(\)/);
+  assert.doesNotMatch(html,/FLYMPUS Review · build 0800/);
  lang.value='he';
  assert.match(context.window.FLYMPUS_FLEET_VIEW.schedule({
   fleet:[],flights:[],platformId:'shahak',date:'2026-10-08',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true

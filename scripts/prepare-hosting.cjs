@@ -2,6 +2,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
 const {execFileSync}=require('node:child_process');
+const {buildFromWorkflowRun,stampReleaseHtml}=require('./release-build.cjs');
 const root=path.resolve(__dirname,'..');
 const output=path.join(root,'dist');
 // A release manifest must never attribute uncommitted source to a clean SHA.
@@ -21,6 +22,7 @@ for(const file of publicFiles)fs.copyFileSync(path.join(root,file),path.join(out
 fs.cpSync(path.join(root,'assets'),path.join(output,'assets'),{recursive:true});
 const commit=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
 if(!/^[a-f0-9]{40}$/.test(commit))throw new Error('Invalid Git commit for deployment');
+const build=buildFromWorkflowRun(process.env.GITHUB_RUN_NUMBER);
 /* Stamp every Firebase deployment with its actual commit. A constant source
    worker version made iOS continue serving an older Safety interface. */
 const workerPath=path.join(output,'sw.js');
@@ -31,9 +33,7 @@ fs.writeFileSync(workerPath,workerSource.replace(workerPattern,
   "const FLYMPUS_SW_VERSION='"+commit.slice(0,16)+"';"));
 const htmlPath=path.join(output,'index.html');
 const htmlSource=fs.readFileSync(htmlPath,'utf8');
-const deployToken='__FLYMPUS_DEPLOY_COMMIT__';
-if(!htmlSource.includes(deployToken))throw new Error('Missing HTML release token');
-fs.writeFileSync(htmlPath,htmlSource.replaceAll(deployToken,commit));
+fs.writeFileSync(htmlPath,stampReleaseHtml(htmlSource,commit,build));
 const files={};
 function record(directory){
   for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
@@ -43,5 +43,5 @@ function record(directory){
   }
 }
 record(output);
-fs.writeFileSync(path.join(output,'deploy-info.json'),JSON.stringify({commit,files},null,2)+'\n');
-console.log(`Prepared ${Object.keys(files).length} public files from ${commit}`);
+fs.writeFileSync(path.join(output,'deploy-info.json'),JSON.stringify({commit,build,files},null,2)+'\n');
+console.log(`Prepared Build ${build}: ${Object.keys(files).length} public files from ${commit}`);
