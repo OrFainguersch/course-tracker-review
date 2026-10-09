@@ -185,8 +185,8 @@ test('Flight planning timeline reserves briefing and debriefing across midnight'
  assert.deepEqual(t.clock,{briefing:'23:30',takeoff:'23:50',landing:'00:20 (+1d)',debrief:'00:35 (+1d)'});
  assert.equal(t.debriefEnd-t.briefingStart,65);
  assert.equal(M.flightTimeline({...flight,estimatedMinutes:0}),null);
- assert.deepEqual(M.configuredTimings(null,'INSTRUCTED'),{briefingMinutes:20,debriefMinutes:15});
- assert.deepEqual(M.configuredTimings({SOLO:{briefingMinutes:5,debriefMinutes:12}},'SOLO'),{briefingMinutes:5,debriefMinutes:12});
+ assert.deepEqual(M.configuredTimings(null,'INSTRUCTED'),{briefingMinutes:20,estimatedMinutes:30,debriefMinutes:15});
+ assert.deepEqual(M.configuredTimings({SOLO:{briefingMinutes:5,debriefMinutes:12}},'SOLO'),{briefingMinutes:5,estimatedMinutes:30,debriefMinutes:12});
 });
 test('Aircraft, trainee, and instructor cannot be assigned within occupied time windows',()=>{
  const planes=[add([],'ac1','01')[0],add([],'ac2','02')[0]];
@@ -366,7 +366,7 @@ test('Course timing defaults appear directly before scheduled flight form in all
  assert.equal((english.match(/id="fleetSortieForm"/g)||[]).length,1);
  language.value='he';
  const hebrew=scope.window.FLYMPUS_FLEET_VIEW.schedule(ctx);
- assert.ok(hebrew.indexOf('עריכת ברירות מחדל לתדריך ולתחקיר')<hebrew.indexOf('הוספת טיסה מתוכננת'));
+ assert.ok(hebrew.indexOf('עריכת ברירות מחדל לזמני הטיסה')<hebrew.indexOf('הוספת טיסה מתוכננת'));
  const css=require('node:fs').readFileSync(require('node:path').join(__dirname,'../assets/fleet-operations.css'),'utf8');
  assert.match(css,/\.fleetSchedulePlain>\.fleetTimingSettings[\s\S]*?order:0/);
  assert.match(css,/\.fleetSchedulePlain>\.fleetSortieForm\{order:1\}/);
@@ -444,9 +444,29 @@ test('Plan contract stays coherent: full-width flight day, settings, required fi
  assert.doesNotMatch(report,/id="pveDate" type="text"/);
  assert.match(report,/boardLinked\?'readonly aria-readonly="true"/);
  assert.match(html,/flightBoardPlanStatus\(date\)/);
- assert.match(html,/FLYMPUS Review · build 0786/);
+ assert.match(html,/FLYMPUS Review · build 0787/);
  lang.value='he';
  assert.match(context.window.FLYMPUS_FLEET_VIEW.schedule({
   fleet:[],flights:[],platformId:'shahak',date:'2026-10-08',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true
- }),/עריכת ברירות מחדל לתדריך ולתחקיר/);
+ }),/עריכת ברירות מחדל לזמני הטיסה/);
+});
+
+test('Airborne defaults support custom durations and reject invalid values without altering saved flights',()=>{
+ assert.equal(M.configuredTimings({SOLO:{estimatedMinutes:45}},'SOLO').estimatedMinutes,45);
+ for(const value of [0,721,'bad'])assert.equal(M.configuredTimings({SOLO:{estimatedMinutes:value}},'SOLO').estimatedMinutes,30);
+ const saved={date:'2026-10-09',time:'08:00',mode:'SOLO',estimatedMinutes:25,briefingMinutes:10,debriefMinutes:10};
+ assert.equal(M.flightTimeline(saved,{SOLO:{estimatedMinutes:60}}).estimatedMinutes,25);
+});
+
+test('Flight planning renders briefing, airborne time and debriefing with per-mode minute defaults',()=>{
+ const vm=require('node:vm');const context={window:{FLYMPUS_FLEET_MODEL:M},document:{documentElement:{dataset:{}}}};
+ vm.runInNewContext(ui,context);
+ const out=context.window.FLYMPUS_FLEET_VIEW.schedule({fleet:[],flights:[],platformId:'shahak',date:'2026-10-09',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true,timingDefaults:{INSTRUCTED:{estimatedMinutes:42}}});
+ const defaults=out.slice(out.indexOf('id="fleetTimingDefaultsForm"'),out.indexOf('id="fleetSortieForm"'));
+ for(const mode of ['INSTRUCTED','SOLO'])assert(defaults.indexOf(mode+'_briefingMinutes')<defaults.indexOf(mode+'_estimatedMinutes')&&defaults.indexOf(mode+'_estimatedMinutes')<defaults.indexOf(mode+'_debriefMinutes'));
+ const block=out.slice(out.indexOf('<fieldset class="fleetFlightDurations"'),out.indexOf('</fieldset>'));
+ assert(block.indexOf('name="briefingMinutes"')<block.indexOf('name="estimatedMinutes"')&&block.indexOf('name="estimatedMinutes"')<block.indexOf('name="debriefMinutes"'));
+ assert.match(block,/name="estimatedMinutes"[^>]*value="42"/);
+ assert.match(block,/Airborne time \(min\)/);
+ assert.doesNotMatch(out,/Planned duration/);
 });

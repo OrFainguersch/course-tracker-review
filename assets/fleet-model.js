@@ -40,13 +40,13 @@
  /* Planning uses wall-clock minutes on an absolute UTC day axis, which also
     handles briefings before midnight or flights crossing into the next day. */
  const TIMING_DEFAULTS=Object.freeze({
-  INSTRUCTED:Object.freeze({briefingMinutes:20,debriefMinutes:15}),
-  SOLO:Object.freeze({briefingMinutes:10,debriefMinutes:10})
+  INSTRUCTED:Object.freeze({briefingMinutes:20,estimatedMinutes:30,debriefMinutes:15}),
+  SOLO:Object.freeze({briefingMinutes:10,estimatedMinutes:30,debriefMinutes:10})
  });
  const configuredTimings=(settings,mode)=>{
   const base=TIMING_DEFAULTS[mode]||TIMING_DEFAULTS.INSTRUCTED,custom=settings?.[mode]||{};
-  const value=(key)=>Number.isInteger(Number(custom[key]))&&String(custom[key]??'')!==''&&Number(custom[key])>=0&&Number(custom[key])<=180?Number(custom[key]):base[key];
-  return {briefingMinutes:value('briefingMinutes'),debriefMinutes:value('debriefMinutes')};
+  const value=(key)=>Number.isInteger(Number(custom[key]))&&String(custom[key]??'')!==''&&Number(custom[key])>=(key==='estimatedMinutes'?1:0)&&Number(custom[key])<=(key==='estimatedMinutes'?720:180)?Number(custom[key]):base[key];
+  return {briefingMinutes:value('briefingMinutes'),estimatedMinutes:value('estimatedMinutes'),debriefMinutes:value('debriefMinutes')};
  };
  const scheduleMinute=(date,time)=>Date.parse(date+'T00:00:00Z')/60000+Number(time.slice(0,2))*60+Number(time.slice(3,5));
  const positiveInteger=(value,key,max,min=0)=>{

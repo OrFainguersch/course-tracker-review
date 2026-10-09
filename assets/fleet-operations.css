@@ -498,3 +498,14 @@ html.flympusLargeText .dailyPlanDateSpotlight .dailyPlanDateField .input{font-si
   .dailyPlanDateIntro p{font-size:12px}
   .coursePlanWorkspace .pveDateReadOnly .pveChangePlanDate{font-size:12px}
 }
+
+/* Size native Safari time/date controls inside the field's border box. */
+.fleetSortieFormGrid,.fleetSortieFormGrid .field,.fleetTimingSettingsGrid .field{min-width:0}
+.fleetSortieForm .input,.fleetTimingSettings .input{box-sizing:border-box;display:block;width:100%;min-width:0;max-width:100%}
+.fleetSortieForm input[type="time"]{appearance:none;-webkit-appearance:none}
+.fleetSortieForm input[type="time"]::-webkit-date-and-time-value{min-width:0;text-align:start}
+.fleetFlightDurations{grid-column:1/-1;min-width:0;max-width:100%;margin:0;padding:14px;border:1px solid var(--line,#d3e2ef);border-radius:14px}
+.fleetFlightDurations legend{padding:0 6px;font-size:13px;font-weight:700;overflow-wrap:anywhere;color:inherit}
+.fleetFlightDurationsGrid,.fleetTimingSettingsGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+html.flympusLargeText .fleetFlightDurations legend{font-size:16px}
+@media(max-width:600px){.fleetFlightDurationsGrid,.fleetTimingSettingsGrid{grid-template-columns:1fr}.fleetFlightDurations{padding:12px}}

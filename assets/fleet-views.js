@@ -45,7 +45,7 @@ function schedule(c){
  const current=flights.find(x=>x.id===c.editId),can=c.canWrite;
  const mode=current?.mode||'INSTRUCTED',timing=M.configuredTimings(c.timingDefaults,mode);
  const briefing=current?.briefingMinutes??timing.briefingMinutes,debrief=current?.debriefMinutes??timing.debriefMinutes;
- const duration=current?.estimatedMinutes??30,depart=current?.time||'08:00';
+ const duration=current?.estimatedMinutes??timing.estimatedMinutes,depart=current?.time||'08:00';
  const timeline=M.flightTimeline({date:c.date,time:depart,mode,estimatedMinutes:duration,briefingMinutes:briefing,debriefMinutes:debrief},c.timingDefaults);
  const select=(name,items,value,required=true)=>'<select class="input" name="'+name+'" '+(required?'required':'')+'><option value="" disabled '+(!value?'selected':'')+'>'+L('Select','בחר')+'</option>'+items.map(x=>O(x.id,x.name||x.tail,value)).join('')+'</select>';
  const field=(label,inner,extra='',action='')=>'<div class="field" '+extra+'><div class="fleetFieldHead"><label>'+label+'</label>'+action+'</div>'+inner+'</div>';
@@ -63,24 +63,26 @@ function schedule(c){
   (can?'<div class="fleetSortieActions"><button class="btn secondary small" type="button" data-flight-edit="'+E(f.id)+'">'+L('Edit','ערוך')+'</button><button class="btn danger small" type="button" data-flight-delete="'+E(f.id)+'">'+L('Remove','הסר')+'</button></div>':'')+'</div>';
  }).join('')+'</div></section>':'';
  const settings=c.timingDefaults||M.TIMING_DEFAULTS;
- const defaultsBlock=c.canConfigureTiming?'<details class="fleetTimingSettings"><summary>'+L('Edit course timing defaults','עריכת ברירות מחדל לתדריך ולתחקיר')+'</summary><form id="fleetTimingDefaultsForm"><div class="fleetTimingSettingsGrid">'+
-  ['INSTRUCTED','SOLO'].map(type=>['briefingMinutes','debriefMinutes'].map(key=>{
+ const defaultsBlock=c.canConfigureTiming?'<details class="fleetTimingSettings"><summary>'+L('Edit course timing defaults','עריכת ברירות מחדל לזמני הטיסה')+'</summary><form id="fleetTimingDefaultsForm"><div class="fleetTimingSettingsGrid">'+
+  ['INSTRUCTED','SOLO'].map(type=>['briefingMinutes','estimatedMinutes','debriefMinutes'].map(key=>{
    const label=type==='INSTRUCTED'?L('Instructed','מודרכת'):L('Solo','סולו');
-   return field(label+' · '+(key==='briefingMinutes'?L('Briefing','תדריך'):L('Debriefing','תחקיר')),'<input class="input" type="number" name="'+type+'_'+key+'" required min="0" max="180" step="1" value="'+E(M.configuredTimings(settings,type)[key])+'">');
+   return field(label+' · '+(key==='briefingMinutes'?L('Briefing (min)','תדריך (דקות)'):key==='estimatedMinutes'?L('Airborne time (min)','זמן באוויר (דקות)'):L('Debriefing (min)','תחקיר (דקות)')),'<input class="input" type="number" name="'+type+'_'+key+'" required min="'+(key==='estimatedMinutes'?1:0)+'" max="'+(key==='estimatedMinutes'?720:180)+'" step="1" value="'+E(M.configuredTimings(settings,type)[key])+'">');
   }).join('')).join('')+'</div><button class="btn secondary small" type="submit">'+L('Save defaults','שמור ברירות מחדל')+'</button><p class="sub">'+L('Applies to newly scheduled flights. Existing flight times stay unchanged.','חל על שיבוצים חדשים; משכי טיסות שכבר נקבעו לא משתנים.')+'</p></form></details>':'';
  return '<div class="fleetSchedule fleetSchedulePlain" id="fleetFlightBoard">'+
  defaultsBlock+
  (can?'<form id="fleetSortieForm" class="fleetSortieForm"><div class="fleetPlanFormHeading"><div><h2>'+L(current?'Edit scheduled flight':'Add scheduled flight',current?'עריכת טיסה משובצת':'הוספת טיסה מתוכננת')+'</h2><p>'+L('Plan the complete flight, including briefing and debriefing.','תכנן את כל הטיסה, כולל תדריך ותחקיר.')+'</p></div></div>'+
  '<input type="hidden" name="id" value="'+E(current?.id||'')+'"><div class="fleetSortieFormGrid">'+
  field(L('Takeoff time','שעת המראה'),'<input class="input" name="time" type="time" required value="'+E(depart)+'">')+
- field(L('Planned duration (min)','משך טיסה מתוכנן (דקות)'),'<input class="input" name="estimatedMinutes" type="number" required min="1" max="720" step="1" value="'+E(duration)+'">')+
  field(L('Aircraft','כלי טיס'),select('aircraftId',available.map(x=>({id:x.id,name:x.tail})),current?.aircraftId||''),'','<button class="fleetInlineFleet" type="button" data-go="fleet">'+L('Open Fleet','פתח צי כלי טיס')+' ↗</button>')+
  field(L('Flight type','סוג טיסה'),'<select class="input" name="mode" id="fleetFlightMode">'+O('INSTRUCTED',L('Instructed','מודרכת'),mode)+O('SOLO',L('Solo','סולו'),mode)+'</select>')+
  field(L('Trainee','חניך'),select('traineeId',c.trainees,current?.traineeId||''))+
  '<div class="field" data-fleet-instructor-field><div class="fleetFieldHead"><label>'+requiredLabel(L('Instructor','מדריך'))+'</label></div>'+select('instructorId',c.instructors,current?.instructorId||'',false)+'</div>'+
  field(L('Syllabus','סילבוס'),select('syllabus',c.syllabi.map(s=>({id:s,name:s})),current?.syllabus||''))+
+ '<fieldset class="fleetFlightDurations"><legend>'+L('Flight timing · all durations in minutes','זמני הטיסה · כל המשכים בדקות')+'</legend><div class="fleetFlightDurationsGrid">'+
  field(L('Briefing (min)','תדריך (דקות)'),'<input class="input" name="briefingMinutes" type="number" required min="0" max="180" step="1" value="'+E(briefing)+'">')+
+ field(L('Airborne time (min)','זמן באוויר (דקות)'),'<input class="input" name="estimatedMinutes" type="number" required min="1" max="720" step="1" value="'+E(duration)+'">')+
  field(L('Debriefing (min)','תחקיר (דקות)'),'<input class="input" name="debriefMinutes" type="number" required min="0" max="180" step="1" value="'+E(debrief)+'">')+
+ '</div></fieldset>'+
  field(L('Planning notes (optional)','הערות לתכנון (לא חובה)'),'<textarea class="input" name="note" rows="2" maxlength="500" placeholder="'+L('Flight planning notes','הערות לתכנון הטיסה')+'">'+E(current?.note||'')+'</textarea>','data-plan-notes')+
  '</div>'+timelineBlock+'<div class="toolbar fleetPlanFormActions"><button class="btn sky" type="submit" '+(!available.length?'disabled':'')+'>'+L(current?'Save changes':'Add to board',current?'שמור שינויים':'הוסף ללוח')+'</button>'+(current?'<button class="btn secondary" type="button" id="fleetFlightCancel">'+L('Cancel','ביטול')+'</button>':'')+'</div>'+
  (available.length?'':'<p class="fleetConflict">'+L('No serviceable aircraft. Update fleet status first.','אין כלים שמישים. יש לעדכן תחילה את לוח השמישויות.')+'</p>')+'<p class="fleetPlanScopeNote" role="note">'+L('Conflict checks currently cover flights saved on this device only. Shared scheduling across devices is not yet enabled.','בדיקות חפיפה כוללות כעת רק טיסות השמורות במכשיר זה. שיבוץ משותף בין מכשירים עדיין אינו פעיל.')+'</p></form>':'')+
