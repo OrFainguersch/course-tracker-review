@@ -1006,13 +1006,13 @@ test('Touch gesture preserves real row identities through the save and never gho
 test('Plan flight drag offers press lift without exposing stale identity or global saving flash',()=>{
  const drag=fs.readFileSync(path.join(__dirname,'../assets/flight-board-drag.js'),'utf8');
  const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
- assert.match(drag,/source\\.classList\\.add\\('fleetSortiePressing'\\)/);
- assert.match(drag,/source\\.classList\\.remove\\('fleetSortiePressing'\\)/);
- assert.match(drag,/clone\\.classList\\.remove\\('fleetSortiePressing'\\)/);
- assert.match(drag,/clone\\.style\\.transform='scale\\(1\\.02\\)'/);
- assert.match(css,/\\.fleetBookedFlights \\.fleetSortiePressing\\{/);
- assert.match(css,/transform:scale\\(1\\.018\\)/);
- assert.match(css,/\\.fleetSortieDragSource\\{visibility:hidden!important/);
- assert.match(css,/\\.fleetDragSaving\\{pointer-events:none\\}/);
- assert.doesNotMatch(css,/\\.fleetDragSaving\\{opacity:/);
+ assert.match(drag,/source\.classList\.add\('fleetSortiePressing'\)/);
+ assert.match(drag,/source\.classList\.remove\('fleetSortiePressing'\)/);
+ assert.match(drag,/clone\.classList\.remove\('fleetSortiePressing'\)/);
+ assert.match(drag,/clone\.style\.transform='scale\(1\.02\)'/);
+ assert.match(css,/\.fleetBookedFlights \.fleetSortiePressing\{/);
+ assert.match(css,/transform:scale\(1\.018\)/);
+ assert.match(css,/\.fleetSortieDragSource\{visibility:hidden!important/);
+ assert.match(css,/\.fleetDragSaving\{pointer-events:none\}/);
+ assert.doesNotMatch(css,/\.fleetDragSaving\{opacity:/);
 });
