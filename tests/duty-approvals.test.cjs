@@ -155,7 +155,7 @@ test('Automatic manager enrollment seeds once and roster refresh preserves appro
 });
 
 test('Disconnected Duty Trainees cannot self-enroll or use a manual Connect course action',async t=>{
- const f=fixture();t.after(()=>f.controller.stop());f.indexCallback([]);
+ const f=fixture();t.after(()=>f.controller.stop());f.indexCallback([]);f.controller.connect();
  assert.equal(f.controller.enabled(),false);
  assert.doesNotMatch(f.controller.connectionMarkup(),/Connect course/);
  await assert.rejects(f.controller.send('PLAN',{flights:[flight]}),/Instructor approvals are not ready/);
@@ -171,5 +171,5 @@ test('The live entry point wires immutable approval drafts, preserved legacy ent
   for(const asset of ['duty-approval-model.js','operations-cloud.js','course-operations.js','course-operations.css']){
     const url='./assets/'+asset+'?v=20261009-duty-approval-0793';assert.ok(html.includes(url));assert.ok(worker.includes(url));
   }
-  assert.match(html,/build 0793/);assert.match(worker,/2026-10-09-duty-approval-0792/);
+  assert.match(html,/build 0793/);assert.match(worker,/2026-10-09-duty-approval-0793/);
 });
