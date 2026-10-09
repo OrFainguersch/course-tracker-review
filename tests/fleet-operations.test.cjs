@@ -572,3 +572,56 @@ test('Planned vs Executed date moves to locale start and remains stacked on mobi
  assert.match(planCSS,/html\[data-flympus-theme="dark"\] \.pveDateReadOnly strong/);
  assert.match(planCSS,/html\.flympusLargeText \.coursePlanWorkspace \.pveDateReadOnly strong/);
 });
+
+test('Planned Solo UI automatically opens exact unexecuted slots, groups batches and mirrors labels',()=>{
+ const vm=require('node:vm');
+ const start=html.indexOf('function plannedCompleteness(){'),end=html.indexOf('function globalBackControl(){',start);
+ assert.ok(start>=0&&end>start);
+ const program=html.slice(start,end);
+ const config={cancellationReasons:[{id:'weather',name:'Weather'}]};
+ let solo=[],saved=null,language='en';
+ const scope={
+   state:{planDate:'2026-10-09'},getDailyReports:()=>[],
+   getActivityDraft:()=>({data:{date:'2026-10-09',plannedInstructed:0,plannedSolo:4,cancellations:saved||[]}}),
+   getSoloFlights:()=>solo,getEvaluations:()=>[],flightBoardPlanStatus:()=>({linked:false,instructed:0,solo:0}),
+   cfgGet:()=>config,courseTrainees:()=>[{id:'t1',name:'Test Trainee',status:'Active'}],
+   courseMembershipFor:()=>({status:'Active'}),alphaByName:items=>items,currentCourseTrackingCounters:()=>[],
+   evaluationSyllabusDefs:()=>[{name:'Solo circuits',mode:'SOLO'}],
+   planUiText:(en,he)=>language==='he'?he:en,
+   staticRequiredCompletionPanel:()=>'',esc:value=>String(value||''),
+   formatDateDMY:()=> '09/10/2026',dateInputValue:()=> '09/10/2026',
+   draftSavedLabel:()=> 'Auto-save ready'
+ };
+ const run=()=>vm.runInNewContext(program+'\nplannedVsExecuted()',scope);
+ let out=run();
+ assert.equal((out.match(/class="pveSoloEntryForm"/g)||[]).length,4,'Four planned solos should open four entry forms');
+ assert.equal((out.match(/data-solo-skip=/g)||[]).length,4,'Every pending solo can be removed');
+ assert.doesNotMatch(out,/>Add solo flight<\/button>/);
+ assert.match(out,/name="quantity" type="number" inputmode="numeric" min="1" max="4"/);
+ assert.equal((out.match(/class="pveCancellationQuantity"/g)||[]).length,0,'Counter exists with combined class and data attribute');
+ assert.match(out,/pveCancellationQuantity/);
+ saved=[{key:'SOLO_1',type:'Solo',reasonId:'weather',reasonLabel:'Weather',quantity:2}];
+ out=run();
+ assert.match(out,/data-cancel-qty[^>]*value="2"/);
+ assert.equal((out.match(/class="pveCancellationRow"/g)||[]).length,3,'Grouped reason covers two slots, two remain unclassified');
+ solo=[{id:'a',batchId:'batch',date:'2026-10-09',traineeName:'Test Trainee',syllabus:'Solo circuits'},
+       {id:'b',batchId:'batch',date:'2026-10-09',traineeName:'Test Trainee',syllabus:'Solo circuits'}];
+ out=run();
+ assert.equal((out.match(/class="pveSoloEntryForm"/g)||[]).length,2);
+ assert.match(out,/SOLO × 2/);
+ language='he';out=run();
+ assert.match(out,/שורות סולו מתוכננות|טיסות סולו שבוצעו/);
+});
+test('planned solo recording never writes beyond the plan and every grouped flight carries counters',()=>{
+ const a=html.indexOf("document.querySelectorAll('.pveSoloEntryForm').forEach(form=>");
+ const b=html.indexOf("document.querySelectorAll('[data-solo-edit]')",a);
+ const source=html.slice(a,b);
+ assert.ok(a>=0&&b>a);
+ assert.match(source,/quantity>remaining/);
+ assert.match(source,/const batchId='solo_batch_'/);
+ assert.match(source,/for\(let n=0;n<quantity;n\+\+\)/);
+ assert.match(source,/syncSoloEvents\(flight\)/);
+ assert.match(source,/saveSoloFlights\(solos\)/);
+ assert.match(source,/data\.dismissedSoloSlots=/);
+ assert.match(html,/getSoloFlights\(\)\.filter\(x=>x\.date===planDate\)\.length>plannedSolo/);
+});
