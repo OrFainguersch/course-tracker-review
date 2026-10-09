@@ -598,7 +598,7 @@ html.flympusLargeText .fleetTimingModeHeader strong{font-size:18px}
 }
 .fleetTimeFlowIcon{height:17px;width:17px;flex:none;display:block;stroke:currentColor}
 .fleetTimeFlowBoundaryTimes{margin-top:0;height:40px;overflow:visible}
-.fleetTimeFlowClock{position:relative;min-width:0;width:0;height:36px;justify-self:end}
+.fleetTimeFlowClock{position:relative;grid-row:1;min-width:0;width:0;height:36px;justify-self:end}
 .fleetTimeFlowClock::before{
  content:"";position:absolute;inset-inline-start:-1px;top:3px;
  width:2px;height:10px;border-radius:2px;background:#3d668d;
