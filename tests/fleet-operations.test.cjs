@@ -590,7 +590,7 @@ test('Planned Solo UI automatically opens exact unexecuted slots, groups batches
  assert.equal((out.match(/data-solo-slot=/g)||[]).length,4,'Four planned solos should open four pending entry forms');
  assert.equal((out.match(/data-solo-skip=/g)||[]).length,4,'Every pending solo can be removed');
  assert.doesNotMatch(out,/>Add solo flight<\/button>/);
- assert.match(out,/name="quantity" type="number" inputmode="numeric" min="1" max="4"/);
+ assert.match(out,/name="quantity" aria-label="Executed flight count" type="number" inputmode="numeric" min="1" max="4"/);
  assert.equal((out.match(/class="pveCancellationQuantity"/g)||[]).length,0,'Counter exists with combined class and data attribute');
  assert.match(out,/pveCancellationQuantity/);
  saved=[{key:'SOLO_1',type:'Solo',reasonId:'weather',reasonLabel:'Weather',quantity:2}];
