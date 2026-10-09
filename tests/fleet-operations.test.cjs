@@ -485,6 +485,7 @@ test('Course timing presets divide instructed and solo settings with visible sec
  assert.ok(out.indexOf('fleetTimingModeSOLO')>out.indexOf('fleetTimingModeINSTRUCTED'));
  assert.match(out,/Instructed flights/);assert.match(out,/Solo flights/);
  assert.equal((out.match(/class="fleetTimingModeFields"/g)||[]).length,2);
- assert.match(css,/\.fleetTimingModeFields\{display:grid/);
- assert.match(css,/\.fleetTimingModeSOLO\{border-inline-start-color/);
+ const stylesheet=require('node:fs').readFileSync(require('node:path').join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(stylesheet,/\.fleetTimingModeFields\{display:grid/);
+ assert.match(stylesheet,/\.fleetTimingModeSOLO\{border-inline-start-color/);
 });
