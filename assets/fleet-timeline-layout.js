@@ -240,6 +240,7 @@ function attach(flow,form){
   if(routes.some(route=>!route)){
    // Never display a severed or overlapping leader if geometry is impossible.
    flow.classList.add('fleetTimeFlowIsCompact');
+   body.style.paddingTop='0px';body.style.paddingBottom='0px';
    fallback.replaceChildren();
    const names=root.document.createElement('div');names.className='fleetTimeFlowFallbackPhases';
    for(const key of PHASE_KEYS){
