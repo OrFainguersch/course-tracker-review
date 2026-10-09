@@ -539,3 +539,36 @@ test('Plan timeline option 1 shows all four chronological boundaries at correct 
  assert.match(stylesheet,/html\[data-flympus-theme="dark"\] \.fleetTimeFlowClock strong/);
  assert.match(stylesheet,/html\.flympusLargeText \.fleetTimeFlowClock strong/);
 });
+
+test('Plan Flight and Debriefing graphics reuse Fleet airplane and Exams lined document, without checkmark',()=>{
+ const nav=html.slice(html.indexOf('function navIconSvg(name){'),html.indexOf('function bottomNavIconSvg('));
+ const fleet=nav.match(/fleet:'([^']+)'/),exams=nav.match(/exams:'([^']+)'/);
+ assert.ok(fleet&&exams);
+ assert.ok(ui.includes("const iconFlight=iconSvg('"+fleet[1]+"');"));
+ assert.ok(ui.includes("const iconDebrief=iconSvg('"+exams[1]+"');"));
+ assert.match(exams[1],/M9.5 11h5.5M9.5 14h5.5M9.5 17h3.5/);
+ assert.doesNotMatch(exams[1],/m9 13 2 2 4-4/);
+ const vm=require('node:vm'),ctx={window:{FLYMPUS_FLEET_MODEL:M}};
+ vm.runInNewContext(ui,ctx);
+ const out=ctx.window.FLYMPUS_FLEET_VIEW.schedule({fleet:[],flights:[],platformId:'aerostar',date:'2026-10-09',trainees:[],instructors:[],syllabi:[],canWrite:true});
+ assert.equal((out.match(/class="fleetTimeFlowIcon"/g)||[]).length,3);
+ assert.match(out,/data-phase="flight"/);
+ assert.match(out,/data-phase="debrief"/);
+});
+test('Planned vs Executed date moves to locale start and remains stacked on mobile',()=>{
+ assert.match(html,/class="pveDateRow"/);
+ assert.match(html,/class="pveDateControl pveDateReadOnly"/);
+ assert.match(html,/data-plan-view="board"/);
+ const from=html.indexOf('/* Planned vs Executed: flight date at the logical start');
+ const to=html.indexOf('.pveDateRow{display:grid;',from);
+ assert.ok(from>0&&to>from);
+ const css=html.slice(from,to);
+ assert.match(css,/\.coursePlanWorkspace \.pveDateRow\{direction:ltr;grid-template-columns:minmax\(170px,220px\) minmax\(0,1fr\)/);
+ assert.match(css,/\.pveDateRow>\.pveDateReadOnly\{grid-column:1;grid-row:1/);
+ assert.match(css,/\.pveDateRow>div:first-child\{grid-column:2;grid-row:1/);
+ assert.match(css,/html\[data-flympus-language="he"\] \.coursePlanWorkspace \.pveDateRow\{direction:rtl\}/);
+ assert.match(css,/@media\(max-width:640px\)\{[\s\S]*?\.pveDateRow>div:first-child\{grid-column:1;grid-row:2\}/);
+ const planCSS=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(planCSS,/html\[data-flympus-theme="dark"\] \.pveDateReadOnly strong/);
+ assert.match(planCSS,/html\.flympusLargeText \.coursePlanWorkspace \.pveDateReadOnly strong/);
+});

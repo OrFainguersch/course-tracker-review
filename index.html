@@ -113,7 +113,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/safety-global-inbox.js?v=20261008-safety02"></script>
 <script src="./assets/safety-ui.js?v=20261008-safety03"></script>
 <script src="./assets/fleet-model.js?v=20261009-plan-duration12"></script>
-<script src="./assets/fleet-views.js?v=20261009-timeline-option1-15"></script>
+<script src="./assets/fleet-views.js?v=20261009-plan-nav-icons17"></script>
 <script src="./assets/home-operations.js?v=20261008-home02"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
@@ -1255,7 +1255,17 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 <style>
 /* ===== Planned vs Executed · purpose-first responsive layout ===== */
 .pvePage{display:grid;gap:12px;min-width:0}.pvePageHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;min-width:0}.pvePageHead .pageTitle{margin-top:3px}.pvePageHead .sub{max-width:700px;margin-bottom:0}.pveDayState{flex:0 0 auto;margin-top:5px;padding:6px 10px;border-radius:999px;background:#eef3f8;color:#64748b;font-size:10px;font-weight:900}.pveDayState.draft{background:#fff4d8;color:#8a5a00}.pveDayState.saved{background:#e7f8ef;color:#087453}
-.pveOverview{padding:16px;min-width:0}.pveOverview>.formTitle{margin-bottom:10px}.pveDateRow{display:grid;grid-template-columns:minmax(0,1fr) minmax(156px,190px);gap:18px;align-items:end}.pveDateRow h2{margin:0;color:#0b315b;font-size:17px}.pveDateRow p{margin:4px 0 0;color:#6e8197;font-size:11px;line-height:1.45}.pveDateControl{min-width:0}.pveDateControl label{display:block;margin:0 0 6px;color:#52677f;font-size:10px;font-weight:850}.pveDateControl .input{width:100%!important}
+.pveOverview{padding:16px;min-width:0}.pveOverview>.formTitle{margin-bottom:10px}/* Planned vs Executed: flight date at the logical start (English left, Hebrew right). */
+.coursePlanWorkspace .pveDateRow{direction:ltr;grid-template-columns:minmax(170px,220px) minmax(0,1fr);align-items:end}
+.coursePlanWorkspace .pveDateRow>.pveDateReadOnly{grid-column:1;grid-row:1;justify-self:start;align-items:flex-start;text-align:start;max-width:100%}
+.coursePlanWorkspace .pveDateRow>div:first-child{grid-column:2;grid-row:1;align-self:end;min-width:0}
+html[data-flympus-language="he"] .coursePlanWorkspace .pveDateRow{direction:rtl}
+@media(max-width:640px){
+ .coursePlanWorkspace .pveDateRow{grid-template-columns:minmax(0,1fr)}
+ .coursePlanWorkspace .pveDateRow>.pveDateReadOnly{grid-column:1;grid-row:1;justify-self:stretch}
+ .coursePlanWorkspace .pveDateRow>div:first-child{grid-column:1;grid-row:2}
+}
+.pveDateRow{display:grid;grid-template-columns:minmax(0,1fr) minmax(156px,190px);gap:18px;align-items:end}.pveDateRow h2{margin:0;color:#0b315b;font-size:17px}.pveDateRow p{margin:4px 0 0;color:#6e8197;font-size:11px;line-height:1.45}.pveDateControl{min-width:0}.pveDateControl label{display:block;margin:0 0 6px;color:#52677f;font-size:10px;font-weight:850}.pveDateControl .input{width:100%!important}
 .pveSummary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:14px}.pveMetric{min-width:0;padding:13px 14px;border:1px solid #e1eaf3;border-radius:15px;background:#f9fbfd}.pveMetric span{display:block;color:#667c94;font-size:9.5px;font-weight:850;text-transform:uppercase;letter-spacing:.05em}.pveMetric strong{display:block;margin:3px 0 1px;color:#0b315b;font-size:25px;line-height:1;font-weight:950}.pveMetric small{display:block;color:#74869a;font-size:9.5px;line-height:1.25}.pveMetric.short{background:#fff4f4;border-color:#efc2c2}.pveMetric.short strong{color:#b42318}.pveMetric.match{background:#f1fbf6;border-color:#c8e9d8}.pveMetric.match strong{color:#087453}
 .pvePanel{overflow:hidden;min-width:0}.pvePanelHead{display:flex;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid #e8eff6;background:#f7fafe;min-width:0}.pvePanelHead>div{min-width:0;flex:1}.pvePanelHead h2{margin:0;color:#0b315b;font-size:15px}.pvePanelHead p{margin:2px 0 0;color:#71849a;font-size:10px;line-height:1.35}.pveSectionNo{width:27px;height:27px;flex:0 0 27px;border-radius:9px;display:grid;place-items:center;background:#e4f1ff;color:#1269b9;font-size:10px;font-weight:950}.pvePanelBody{padding:15px;min-width:0}
 .pvePlanGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.pveCountField{display:grid;grid-template-columns:minmax(0,1fr) 76px;grid-template-rows:auto auto;column-gap:10px;align-items:center;padding:12px;border:1px solid #dce7f2;border-radius:15px;background:#fbfdff;min-width:0}.pveCountField>span{grid-column:1;grid-row:1;color:#213a55;font-size:12px;font-weight:900}.pveCountField>small{grid-column:1;grid-row:2;color:#78899c;font-size:9.5px}.pveCountField>.input{grid-column:2;grid-row:1/3;padding:9px 8px;text-align:center;font-size:18px;font-weight:900;color:#0b315b}
