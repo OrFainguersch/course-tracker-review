@@ -106,16 +106,17 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/reports-dashboard.css?v=0767" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
-<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261009-plan-fleet-identity-v1" />
-<link rel="stylesheet" href="./assets/course-operations.css?v=20261009-plan-fleet-identity-v1" />
+<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261009-flight-drag-tabs-0810" />
+<link rel="stylesheet" href="./assets/course-operations.css?v=20261009-flight-drag-tabs-0810" />
 <link rel="stylesheet" href="./assets/home-operations.css?v=20261008-home02" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
 <script src="./assets/safety-global-inbox.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/safety-ui.js?v=20261008-safety03"></script>
-<script src="./assets/fleet-model.js?v=20261009-approval-sounds-0795"></script>
+<script src="./assets/fleet-model.js?v=20261009-flight-drag-tabs-0810"></script>
 <script src="./assets/fleet-timeline-layout.js?v=20261009-connected-leaders-0800"></script>
-<script src="./assets/fleet-views.js?v=20261009-plan-fleet-identity-v1"></script>
+<script src="./assets/fleet-views.js?v=20261009-flight-drag-tabs-0810"></script>
+<script src="./assets/flight-board-drag.js?v=20261009-flight-drag-tabs-0810"></script>
 <script src="./assets/duty-approval-model.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/operations-cloud.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/course-operations.js?v=20261009-plan-fleet-identity-v1"></script>
@@ -159,7 +160,7 @@ html.flympusColdBoot #flympusAuthRoot{
    still owns notification permission/subscription later; this early call only
    makes the next cold launch independent of mobile network latency. */
 try{
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261009-plan-fleet-identity-v1',{scope:'./',updateViaCache:'none'}).catch(()=>{})
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261009-flight-drag-tabs-0810',{scope:'./',updateViaCache:'none'}).catch(()=>{})
 }catch{}
 </script>
 <meta name="flympus-deploy-commit" content="__FLYMPUS_DEPLOY_COMMIT__">
@@ -8961,6 +8962,14 @@ function planScheduleError(err){
   'The selected aircraft is not serviceable. Choose a serviceable aircraft.':'כלי הטיס שנבחר אינו שמיש. יש לבחור כלי שמיש.',
   'Scheduled flight not found.':'לא נמצא שיבוץ הטיסה לעריכה.'
  };
+ let conflict;
+ if((conflict=english.match(/^Crew conflict: (Trainee|Instructor) (.+) has overlapping briefing, flight or debriefing time\.$/)))
+  return (conflict[1]==='Trainee'?'החניך ':'המדריך ')+conflict[2]+' משובץ במקביל לתדריך, טיסה או תחקיר. השינוי לא נשמר.';
+ if(english.startsWith('Aircraft conflict:'))return 'חפיפה בשיבוץ כלי הטיס. השינוי לא נשמר.';
+ if(english.startsWith('Flight time conflict:'))return 'חפיפה בזמני ההמראה או הנחיתה בלוח הטיסות. השינוי לא נשמר.';
+ if(english.startsWith('The flight board changed.'))return 'תכנון הטיסות השתנה. יש לטעון אותו מחדש לפני שינוי הסדר.';
+ if(english.startsWith('One of the scheduled flights has an invalid')||english.startsWith('A related scheduled flight has invalid'))
+  return 'אחד השיבוצים כולל זמנים לא תקינים. יש לתקן אותו לפני שינוי הסדר.';
  return known[english]||english;
 }
 function bindDailyFlightBoard(){
@@ -8968,6 +8977,23 @@ function bindDailyFlightBoard(){
  const updateTimelineLayout=window.FLYMPUS_FLEET_TIMELINE_LAYOUT?.attach?.(form?.querySelector('.fleetTimeFlow'),form);
  if(!flympusCan('operations.flightBoard.write'))return;
  const model=window.FLYMPUS_FLEET_MODEL;
+ // Reordering cards assigns flights to existing departure slots and runs
+ // full conflict validation before any official or draft write.
+ window.FLYMPUS_FLIGHT_DRAG?.attach?.(document.querySelector('[data-flight-sorties]'),{
+  onDrop:async orderedIds=>{
+   if(!flympusCan('operations.flightBoard.write'))throw Error(planUiText('Flight planning permission required','נדרשת הרשאה לתכנון טיסות'));
+   const date=state.planDate||todayIsoDate(),platform=currentFleetPlatform(),original=getPlanWorkingFlights(date);
+   const proposed=model.reorderSorties(original,orderedIds,platform,date,getPlanTimingDefaults());
+   if(proposed===original){render();return}
+   if(isDutyTrainee())dutyOperations.saveDraft('PLAN',{flights:proposed.filter(x=>x.date===date)},date);
+   else if(dutyOperations?.enabled())await dutyOperations.publish('PLAN',date,{flights:proposed.filter(x=>x.date===date)});
+   else if(!markFlightBoardPlanManaged(date)||!persistCourseOperations('ct-review-flight-board',proposed))
+    throw Error(planUiText('Unable to save flight times','לא ניתן לשמור את זמני הטיסות'));
+   toast(planUiText('Flight departure slots updated','שעות ההמראה עודכנו בהצלחה'),'success');
+   state.flightBoardEditId=null;render();
+  },
+  onError:err=>{toast(planScheduleError(err),'error');render()}
+ });
  const refreshTimeline=()=>{
   if(!form)return;
   const read=n=>form.querySelector('[name="'+n+'"]')?.value||'';
@@ -9490,7 +9516,7 @@ function syncNotificationPreferenceControls(){
   });
 }
 
-const FLYMPUS_PUSH_SW='./sw.js?v=20261009-plan-fleet-identity-v1',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
+const FLYMPUS_PUSH_SW='./sw.js?v=20261009-flight-drag-tabs-0810',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
 let flympusPushConfigCache=null,flympusPushConfigPromise=null;
 function getFlympusPushUserEnabled(){
   try{

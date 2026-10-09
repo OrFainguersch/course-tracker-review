@@ -122,6 +122,49 @@
   const record={...valid,id,createdAt:old?.createdAt||now,updatedAt:now};
   return old?list.map(x=>x===old?record:x):[...list,record];
  }
+
+ /* Dragging a flight between rows exchanges takeoff slots, not immutable IDs,
+    crews, duration or evaluation records. Validate the COMPLETE resulting
+    schedule before allowing the caller to save or publish a new revision. */
+ function reorderSorties(rows,orderedIds,platform,date,settings=null,now=new Date().toISOString()){
+  const list=Array.isArray(rows)?rows:[],scope=String(platform);
+  if(!dateValid(date))throw Error('Invalid flight date for reordering.');
+  const selected=list.filter(x=>x?.date===date&&String(x?.platformId)===scope)
+   .sort((a,b)=>String(a.time).localeCompare(String(b.time))||String(a.id).localeCompare(String(b.id)));
+  const ids=Array.isArray(orderedIds)?orderedIds.map(String):[];
+  if(selected.length<2||ids.length!==selected.length||new Set(ids).size!==ids.length
+   ||ids.some(id=>!selected.some(x=>String(x.id)===id)))
+   throw Error('The flight board changed. Reload it before rearranging.');
+  const slots=selected.map(x=>x.time),timeForId=new Map(ids.map((id,i)=>[id,slots[i]]));
+  const changed=new Set(selected.filter(x=>timeForId.get(String(x.id))!==x.time).map(x=>String(x.id)));
+  if(!changed.size)return list;
+  const result=list.map(x=>changed.has(String(x.id))&&x.date===date&&String(x.platformId)===scope
+   ?{...x,time:timeForId.get(String(x.id)),updatedAt:now}:x);
+  for(const a of result.filter(x=>changed.has(String(x.id))&&x.date===date&&String(x.platformId)===scope)){
+   const ta=flightTimeline(a,settings);
+   if(!ta)throw Error('One of the scheduled flights has an invalid duration or time.');
+   const peopleA=[String(a.traineeId||''),String(a.instructorId||'')].filter(Boolean);
+   for(const b of result){
+    if(b===a||!dateValid(b.date)||!clockValid(b.time))continue;
+    if(Math.abs(Date.parse(b.date+'T00:00:00Z')-Date.parse(date+'T00:00:00Z'))>172800000)continue;
+    const samePlatform=String(b.platformId)===scope;
+    const common=[String(b.traineeId||''),String(b.instructorId||'')].filter(Boolean).find(id=>peopleA.includes(id));
+    if(!samePlatform&&!common)continue;
+    const tb=flightTimeline(b,settings);
+    if(!tb)throw Error('A related scheduled flight has invalid times. Correct it before rearranging.');
+    if(samePlatform&&a.aircraftId===b.aircraftId&&overlapping(ta.takeoff,ta.landing,tb.takeoff,tb.landing))
+     throw Error('Aircraft conflict: '+clean(a.tail||a.aircraftId,48)+' is already flying at the requested time.');
+    if(samePlatform&&overlapping(ta.takeoff,ta.landing,tb.takeoff,tb.landing))
+     throw Error('Flight time conflict: another aircraft is already scheduled at the requested time.');
+    if(common&&overlapping(ta.briefingStart,ta.debriefEnd,tb.briefingStart,tb.debriefEnd)){
+     const trainee=common===String(a.traineeId||'');
+     throw Error('Crew conflict: '+(trainee?'Trainee ':'Instructor ')+clean(trainee?a.traineeName||common:a.instructorName||common,200)
+      +' has overlapping briefing, flight or debriefing time.');
+    }
+   }
+  }
+  return result;
+ }
  function plannedFlightCounts(rows,date,platform){
   const flights=(Array.isArray(rows)?rows:[]).filter(x=>x?.date===date&&String(x?.platformId||'')===String(platform));
   return {total:flights.length,instructed:flights.filter(x=>x.mode==='INSTRUCTED').length,solo:flights.filter(x=>x.mode==='SOLO').length};
@@ -142,5 +185,5 @@
   const match=active(aircraft,platform).find(x=>x.id===flight.aircraftId);
   return !match?'Aircraft removed from the active fleet':match.status!==AVAILABLE?'Aircraft unserviceable: '+clean(match.reason,200):'';
  }
- return Object.freeze({AVAILABLE,UNAVAILABLE,dateValid,clockValid,active,count,validAircraft,upsertAircraft,archiveAircraft,checkedSortie,upsertSortie,flightIssues,flightTimeline,TIMING_DEFAULTS,configuredTimings,plannedFlightCounts,plannedSoloDuration});
+ return Object.freeze({AVAILABLE,UNAVAILABLE,dateValid,clockValid,active,count,validAircraft,upsertAircraft,archiveAircraft,checkedSortie,upsertSortie,reorderSorties,flightIssues,flightTimeline,TIMING_DEFAULTS,configuredTimings,plannedFlightCounts,plannedSoloDuration});
 });

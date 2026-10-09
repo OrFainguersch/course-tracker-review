@@ -604,12 +604,12 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261009-plan-fleet-identity-v1'],['assets/fleet-operations.css','20261009-plan-fleet-identity-v1']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261009-flight-drag-tabs-0810'],['assets/fleet-operations.css','20261009-flight-drag-tabs-0810']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-plan-fleet-identity-v1'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261009-plan-fleet-identity-v1/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-flight-drag-tabs-0810'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261009-flight-drag-tabs-0810/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
@@ -792,16 +792,16 @@ test('platform and tail display consistently, without changing stored aircraft i
  const ctx={fleet:plane,flights:[sortie],platformId:'shahak',platformLabel:'Shahak',
   courseLabel:'EP Course',today:'2026-10-09',date:'2026-10-09',canWrite:true,
   trainees:[{id:'trainee1',name:'Trainee One'}],instructors:[{id:'coach1',name:'Coach One'}],syllabi:['Circuits']};
- assert.match(V.home(ctx),/fleetHomeTail">Shahak 01<\/td>/);
- assert.match(V.fleet(ctx),/fleetInventoryTail">Shahak 01<\/td>/);
+ assert.match(V.home(ctx),/fleetHomeTail">Shahak-01<\/td>/);
+ assert.match(V.fleet(ctx),/fleetInventoryTail">Shahak-01<\/td>/);
  assert.doesNotMatch(V.fleet(ctx),/fleetInventoryCount/);
- assert.match(V.schedule(ctx),/<option value="aircraft-a01"[^>]*>Shahak 01<\/option>/);
- assert.match(V.schedule(ctx),/fleetSortieTail">Shahak 01<\/b>/);
+ assert.match(V.schedule(ctx),/<option value="aircraft-a01"[^>]*>Shahak-01<\/option>/);
+ assert.match(V.schedule(ctx),/fleetSortieTail">Shahak-01<\/b>/);
  assert.equal(plane[0].tail,'01','Display must not change stored tail number');
- assert.doesNotMatch(V.home({...ctx,fleet:[{...plane[0],tail:'Shahak 01'}]}),/Shahak Shahak/);
+ assert.doesNotMatch(V.home({...ctx,fleet:[{...plane[0],tail:'Shahak-01'}]}),/Shahak Shahak/);
  lang.value='he';
- assert.match(V.fleet(ctx),/Shahak 01/);
- assert.match(V.schedule(ctx),/Shahak 01/);
+ assert.match(V.fleet(ctx),/Shahak-01/);
+ assert.match(V.schedule(ctx),/Shahak-01/);
 });
 test('Fleet starts from top, editor does not summon keyboard and Plan tabs support responsive themes',()=>{
  const styles=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
@@ -814,4 +814,79 @@ test('Fleet starts from top, editor does not summon keyboard and Plan tabs suppo
  assert.match(styles,/html\[data-flympus-theme="dark"\] \.coursePlanWorkspace/);
  assert.match(styles,/html\.flympusLargeText \.coursePlanWorkspace/);
  assert.match(styles,/@media\(max-width:375px\)/);
+});
+
+test('moving flight cards exchanges real takeoff slots, keeps IDs and crews, and never mutates input',()=>{
+ const date='2026-10-09';
+ const flight=(id,time,changes={})=>({id,date,platformId:'shahak',time,aircraftId:'plane-'+id,
+  tail:id,traineeId:'t-'+id,traineeName:'Trainee '+id,instructorId:'i-'+id,
+  instructorName:'Coach '+id,syllabus:'Circuits',mode:'INSTRUCTED',briefingMinutes:10,
+  estimatedMinutes:20,debriefMinutes:10,...changes});
+ const flights=[flight('a','08:00'),flight('b','10:00'),flight('c','12:00')];
+ const reordered=M.reorderSorties(flights,['b','a','c'],'shahak',date,null,'2026-10-09T19:00:00Z');
+ assert.deepEqual(reordered.map(f=>f.time),['10:00','08:00','12:00']);
+ assert.deepEqual(reordered.map(f=>f.id),['a','b','c']);
+ assert.equal(reordered[0].traineeId,'t-a');assert.equal(reordered[1].instructorId,'i-b');
+ assert.deepEqual(flights.map(f=>f.time),['08:00','10:00','12:00']);
+ assert.equal(reordered[0].updatedAt,'2026-10-09T19:00:00Z');
+ assert.equal(reordered[2],flights[2],'Untouched sorties remain identical');
+ assert.equal(M.reorderSorties(flights,['a','b','c'],'shahak',date),flights,'No-op must not publish a revision');
+ assert.throws(()=>M.reorderSorties(flights,['a','a','c'],'shahak',date),/changed/);
+ assert.throws(()=>M.reorderSorties(flights,['a','b','foreign'],'shahak',date),/changed/);
+});
+test('reslot conflicts reject simultaneous flights and shared crews across entire briefing/debrief windows',()=>{
+ const date='2026-10-09',make=(id,time,rest={})=>({
+  id,date,platformId:'shahak',time,aircraftId:'plane-'+id,tail:id,
+  traineeId:'trainee-'+id,traineeName:'Trainee '+id,instructorId:'ip-'+id,instructorName:'Coach '+id,
+  mode:'INSTRUCTED',estimatedMinutes:20,briefingMinutes:10,debriefMinutes:10,...rest
+ });
+ // Actual flight intervals never overlap, but the moving instructor's debrief
+ // overlaps the next flight's briefing after the 08:00/09:00 exchange.
+ const first=make('a','08:00',{instructorId:'same-ip',instructorName:'Shared Coach',debriefMinutes:30});
+ const second=make('b','09:00');
+ const third=make('c','09:45',{instructorId:'same-ip',instructorName:'Shared Coach'});
+ const crew=[first,second,third];
+ assert.throws(()=>M.reorderSorties(crew,['b','a','c'],'shahak',date),/Crew conflict: Instructor Shared Coach/);
+ assert.deepEqual(crew.map(x=>x.time),['08:00','09:00','09:45'],'Rejected drag cannot modify source');
+ const withAircraft=[make('a','08:00',{estimatedMinutes:60}),make('b','10:00',{estimatedMinutes:10}),make('c','10:30')];
+ assert.throws(()=>M.reorderSorties(withAircraft,['b','a','c'],'shahak',date),/Flight time conflict/);
+ // A cross-platform shared trainee is also checked even though the platform differs.
+ const other=make('x','09:30',{platformId:'aerostar',traineeId:'trainee-a',traineeName:'Trainee a',briefingMinutes:30});
+ assert.throws(()=>M.reorderSorties([make('a','08:00'),make('b','09:00'),other],['b','a'],'shahak',date),/Crew conflict: Trainee/);
+});
+test('flight drag UI offers accessible touch grips, reduced motion and localized overlap errors',()=>{
+ const drag=fs.readFileSync(path.join(__dirname,'../assets/flight-board-drag.js'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ const vm=require('node:vm'),sandbox={window:{}};
+ vm.runInNewContext(drag,sandbox,{filename:'flight-board-drag.js'});
+ assert.equal(typeof sandbox.window.FLYMPUS_FLIGHT_DRAG.attach,'function');
+ assert.match(ui,/data-flight-sorties/);
+ assert.match(ui,/data-flight-id/);
+ assert.match(ui,/data-flight-drag aria-label=/);
+ assert.match(ui,/fleetSortieDragHelp/);
+ assert.match(drag,/addEventListener\('pointerdown'/);
+ assert.match(drag,/addEventListener\('pointermove'/);
+ assert.match(drag,/pointercancel/);
+ assert.match(drag,/ArrowUp/);
+ assert.match(drag,/prefers-reduced-motion: reduce/);
+ assert.match(css,/touch-action:none/);
+ assert.match(css,/fleetSortieDragGhost/);
+ assert.match(css,/html\[data-flympus-theme="dark"\] \.fleetSortieDrag/);
+ assert.match(css,/html\.flympusLargeText \.fleetSortieDrag/);
+ assert.match(html,/model\.reorderSorties\(original,orderedIds,platform,date,getPlanTimingDefaults\(\)\)/);
+ assert.match(html,/dutyOperations\.saveDraft\('PLAN'/);
+ assert.match(html,/dutyOperations\.publish\('PLAN'/);
+ assert.match(html,/Crew conflict: /);
+ assert.match(html,/flight-board-drag\.js\?v=20261009-flight-drag-tabs-0810/);
+});
+test('Plan tabs use shared Course Management-style segmented control',()=>{
+ const css=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
+ assert.match(css,/\.coursePlanWorkspace>\.coursePlanTabs\{\s*display:grid/);
+ assert.match(css,/padding:5px;border:1px solid #d5e3f0;border-radius:16px/);
+ assert.match(css,/background:#e9f0f6;color:#234f75/);
+ assert.match(css,/\.planRequiredTabCount/);
+ assert.match(css,/html\[data-flympus-theme="dark"\]/);
+ assert.match(css,/html\.flympusLargeText/);
+ assert.match(html,/data-plan-view="board"/);
+ assert.match(html,/data-plan-view="approvals"/);
 });
