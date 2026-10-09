@@ -197,7 +197,7 @@ test('Aircraft, trainee, and instructor cannot be assigned within occupied time 
  assert.throws(()=>attempt({time:'08:20',traineeId:'t2',instructorId:'i2'}),/Aircraft .* already booked/);
  assert.throws(()=>attempt({time:'08:35',aircraftId:'ac2',traineeId:'t2'}),/Instructor .* briefing, flight or debriefing/);
  assert.throws(()=>attempt({time:'08:40',aircraftId:'ac2',instructorId:'i2'}),/Trainee .* briefing, flight or debriefing/);
- assert.equal(attempt({time:'08:20',aircraftId:'ac2',traineeId:'t2',instructorId:'i2'}).length,2);
+ assert.throws(()=>attempt({time:'08:20',aircraftId:'ac2',traineeId:'t2',instructorId:'i2'}),/Another aircraft .* already has a flight/);
  assert.equal(attempt({time:'09:05',aircraftId:'ac2',traineeId:'t2'}).length,2);
  assert.equal(attempt({id:'one',time:'08:10'}).length,1);
  assert.throws(()=>attempt({estimatedMinutes:''}),/duration/);
@@ -252,7 +252,7 @@ test('Plan UI reads language preference, keeps RTL dates visible, and scales for
  assert.match(he,/ציר זמנים מחושב/);
  assert.match(he,/תדריך/);
  assert.match(he,/תחקיר/);
- assert.match(he,/fleetTimeFlowLegend/);
+ assert.doesNotMatch(he,/fleetTimeFlowLegend/);
  assert.match(he,/עריכת ברירות מחדל/);
  language='en';
  const en=context.window.FLYMPUS_FLEET_VIEW.schedule(ctx);
@@ -458,7 +458,7 @@ test('Airborne defaults support custom durations and reject invalid values witho
  assert.equal(M.flightTimeline(saved,{SOLO:{estimatedMinutes:60}}).estimatedMinutes,25);
 });
 
-test('Flight planning renders briefing, airborne time and debriefing with per-mode minute defaults',()=>{
+test('Flight planning renders briefing, flight duration and debriefing with per-mode minute dropdowns',()=>{
  const vm=require('node:vm');const context={window:{FLYMPUS_FLEET_MODEL:M},document:{documentElement:{dataset:{}}}};
  vm.runInNewContext(ui,context);
  const out=context.window.FLYMPUS_FLEET_VIEW.schedule({fleet:[],flights:[],platformId:'shahak',date:'2026-10-09',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true,timingDefaults:{INSTRUCTED:{estimatedMinutes:42}}});
@@ -466,7 +466,12 @@ test('Flight planning renders briefing, airborne time and debriefing with per-mo
  for(const mode of ['INSTRUCTED','SOLO'])assert(defaults.indexOf(mode+'_briefingMinutes')<defaults.indexOf(mode+'_estimatedMinutes')&&defaults.indexOf(mode+'_estimatedMinutes')<defaults.indexOf(mode+'_debriefMinutes'));
  const block=out.slice(out.indexOf('<fieldset class="fleetFlightDurations"'),out.indexOf('</fieldset>'));
  assert(block.indexOf('name="briefingMinutes"')<block.indexOf('name="estimatedMinutes"')&&block.indexOf('name="estimatedMinutes"')<block.indexOf('name="debriefMinutes"'));
- assert.match(block,/name="estimatedMinutes"[^>]*value="42"/);
- assert.match(block,/Flight time \(min\)/);
+ assert.match(block,/name="estimatedMinutes"[^>]*required[^>]*><option[\s\S]*?value="42" selected/);
+ assert.match(block,/Flight duration/);
+ assert.match(block,/value="10"[^>]*>10 min/);
+ assert.match(block,/value="35"[^>]*>35 min/);
+ assert.doesNotMatch(block,/Flight duration \(min\)|type="number"/);
+ assert.doesNotMatch(out,/Available again|fleetTimeFlowLegend/);
+ assert.match(out,/--phase-brief:20fr;--phase-flight:42fr;--phase-debrief:15fr/);
  assert.doesNotMatch(out,/Planned duration/);
 });

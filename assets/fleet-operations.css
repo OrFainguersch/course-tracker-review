@@ -523,3 +523,31 @@ html.flympusLargeText .fleetFlightDurations legend{font-size:16px}
  html.flympusLargeText .fleetTimeFlowTrack span{font-size:15px!important}
  html.flympusLargeText .fleetTimeFlowTimes span{font-size:14px!important}
 }
+
+
+/* Responsive proportional Plan timeline: phase names and clocks share aligned columns. */
+.fleetTimeFlowTrack,.fleetTimeFlowTimes{
+ display:grid!important;
+ grid-template-columns:minmax(62px,var(--phase-brief)) minmax(62px,var(--phase-flight)) minmax(62px,var(--phase-debrief))!important;
+ gap:3px;
+}
+.fleetTimeFlowTrack{height:45px}
+.fleetTimeFlowTrack>span{display:flex;align-items:center;justify-content:center;min-width:0;max-width:100%;padding:4px 2px;box-sizing:border-box;text-align:center;white-space:normal;overflow-wrap:anywhere}
+.fleetTimeFlowLegend{display:none!important}
+.fleetTimeFlowTimes>div,.fleetTimeFlowTimes>div:last-child{
+ grid-column:auto!important;display:grid!important;align-items:start;justify-content:stretch;justify-items:stretch;
+ margin:0!important;min-width:0;gap:3px;text-align:center
+}
+.fleetTimeFlowTimes span{font-size:clamp(9px,1vw + 6px,11px);line-height:1.35;overflow-wrap:anywhere}
+.fleetTimeFlowTimes strong{font-size:clamp(12px,1.4vw + 7px,15px);line-height:1.3}
+@media(max-width:560px){
+ .fleetTimeFlow{padding:13px 10px}
+ .fleetTimeFlowTrack{height:54px;gap:3px}
+ .fleetTimeFlowTrack>span{font-size:clamp(9px,2.7vw,11px)!important;line-height:1.2}
+ .fleetTimeFlowTimes{gap:3px;margin-top:8px}
+ .fleetTimeFlowTimes span{font-size:10px}
+ .fleetTimeFlowTimes strong{font-size:12px}
+ html.flympusLargeText .fleetTimeFlowTrack>span{font-size:13px!important}
+ html.flympusLargeText .fleetTimeFlowTimes span{font-size:13px!important}
+ html.flympusLargeText .fleetTimeFlowTimes strong{font-size:14px!important}
+}

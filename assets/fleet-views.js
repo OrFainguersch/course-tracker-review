@@ -5,6 +5,14 @@ const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const L=(en,he)=>root.FLYMPUS_FLEET_LANGUAGE?.()==='he'?he:en;
 const F=d=>/^\d{4}-\d\d-\d\d$/.test(String(d||''))?d.slice(8)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'—';
 const O=(value,label,selected)=>'<option value="'+E(value)+'" '+(String(value)===String(selected)?'selected':'')+'>'+E(label)+'</option>';
+const MINUTE_PRESETS=Object.freeze([10,15,20,25,30,35,40]);
+const minuteOptions=value=>{
+ const current=Number(value),values=[...MINUTE_PRESETS];
+ if(String(value??'')!==''&&Number.isInteger(current)&&current>=0&&current<=720&&!values.includes(current))values.push(current);
+ values.sort((a,b)=>a-b);
+ return values.map(n=>O(n,L(n+' min',n+' דקות')+(MINUTE_PRESETS.includes(n)?'':L(' (existing)',' (ערך קיים)')),value)).join('');
+};
+const minuteSelect=(name,value)=>'<select class="input" name="'+E(name)+'" required>'+minuteOptions(value)+'</select>';
 const status=s=>s===M.AVAILABLE?L('Serviceable','שמיש'):L('Unserviceable','לא שמיש');
 const statusBadge=s=>'<span class="fleetStatusBadge '+(s===M.AVAILABLE?'ready':'down')+'"><i aria-hidden="true"></i>'+status(s)+'</span>';
 const metrics=(rows,platform)=>{
@@ -51,10 +59,9 @@ function schedule(c){
  const field=(label,inner,extra='',action='')=>'<div class="field" '+extra+'><div class="fleetFieldHead"><label>'+label+'</label>'+action+'</div>'+inner+'</div>';
  const requiredLabel=label=>label+' <span class="fleetRequired" aria-hidden="true">*</span>';
  const timeMark=(label,key)=>'<div><span>'+label+'</span><strong data-flight-clock="'+key+'">'+E(timeline?.clock[key]||'—')+'</strong></div>';
- const timelineBlock='<div class="fleetTimeFlow" aria-live="polite"><div class="fleetTimeFlowHeading"><b>'+L('Calculated timeline','ציר זמנים מחושב')+'</b><small>'+L('Instructor and trainee are reserved from briefing to the end of debriefing','המדריך והחניך משוריינים מתחילת התדריך ועד לסיום התחקיר')+'</small></div>'+
-  '<div class="fleetTimeFlowTrack"><span data-phase="brief" style="flex:'+briefing+'">'+L('Briefing','תדריך')+'</span><span data-phase="flight" style="flex:'+duration+'">'+L('Flight','טיסה')+'</span><span data-phase="debrief" style="flex:'+debrief+'">'+L('Debrief','תחקיר')+'</span></div>'+
-  '<div class="fleetTimeFlowLegend"><span data-phase="brief"><i aria-hidden="true"></i>'+L('Briefing','תדריך')+'</span><span data-phase="flight"><i aria-hidden="true"></i>'+L('Flight','טיסה')+'</span><span data-phase="debrief"><i aria-hidden="true"></i>'+L('Debrief','תחקיר')+'</span></div>'+
-  '<div class="fleetTimeFlowTimes">'+timeMark(L('Briefing','תדריך'),'briefing')+timeMark(L('Takeoff','המראה'),'takeoff')+timeMark(L('Landing','נחיתה'),'landing')+timeMark(L('Available again','זמין שוב'),'debrief')+'</div></div>';
+ const timelineBlock='<div class="fleetTimeFlow" aria-live="polite" style="--phase-brief:'+Number(briefing)+'fr;--phase-flight:'+Number(duration)+'fr;--phase-debrief:'+Number(debrief)+'fr"><div class="fleetTimeFlowHeading"><b>'+L('Calculated timeline','ציר זמנים מחושב')+'</b><small>'+L('Instructor and trainee are reserved from briefing to the end of debriefing','המדריך והחניך משוריינים מתחילת התדריך ועד לסיום התחקיר')+'</small></div>'+
+  '<div class="fleetTimeFlowTrack"><span data-phase="brief">'+L('Briefing','תדריך')+'</span><span data-phase="flight">'+L('Flight','טיסה')+'</span><span data-phase="debrief">'+L('Debrief','תחקיר')+'</span></div>'+
+  '<div class="fleetTimeFlowTimes">'+timeMark(L('Briefing','תדריך'),'briefing')+timeMark(L('Takeoff','המראה'),'takeoff')+timeMark(L('Landing','נחיתה'),'landing')+'</div></div>';
  const booked=flights.length?'<section class="fleetBookedFlights"><div class="fleetBookedHeading"><h3>'+L('Scheduled flights','טיסות משובצות')+'</h3><span>'+flights.length+'</span></div><div class="fleetSorties">'+flights.map(f=>{
   const issue=M.flightIssues(f,c.fleet,c.platformId),t=M.flightTimeline(f,c.timingDefaults);
   return '<div class="fleetSortie '+(issue?'conflict':'')+'"><div class="fleetSortieMain"><b>'+E(f.time)+'</b><b class="fleetSortieTail">'+E(f.tail)+'</b><div><strong>'+E(f.traineeName||f.traineeId)+'</strong><small>'+E(f.syllabus)+' · '+(f.mode==='SOLO'?L('Solo','סולו'):L('Instructed','מודרכת'))+(f.instructorName?' · '+E(f.instructorName):'')+'</small>'+
@@ -66,7 +73,7 @@ function schedule(c){
  const defaultsBlock=c.canConfigureTiming?'<details class="fleetTimingSettings"><summary>'+L('Edit course timing defaults','עריכת ברירות מחדל לזמני הטיסה')+'</summary><form id="fleetTimingDefaultsForm"><div class="fleetTimingSettingsGrid">'+
   ['INSTRUCTED','SOLO'].map(type=>['briefingMinutes','estimatedMinutes','debriefMinutes'].map(key=>{
    const label=type==='INSTRUCTED'?L('Instructed','מודרכת'):L('Solo','סולו');
-   return field(label+' · '+(key==='briefingMinutes'?L('Briefing (min)','תדריך (דקות)'):key==='estimatedMinutes'?L('Flight time (min)','זמן טיסה (דקות)'):L('Debriefing (min)','תחקיר (דקות)')),'<input class="input" type="number" name="'+type+'_'+key+'" required min="'+(key==='estimatedMinutes'?1:0)+'" max="'+(key==='estimatedMinutes'?720:180)+'" step="1" value="'+E(M.configuredTimings(settings,type)[key])+'">');
+   return field(label+' · '+(key==='briefingMinutes'?L('Briefing','תדריך'):key==='estimatedMinutes'?L('Flight duration','משך טיסה'):L('Debriefing','תחקיר')),minuteSelect(type+'_'+key,M.configuredTimings(settings,type)[key]));
   }).join('')).join('')+'</div><button class="btn secondary small" type="submit">'+L('Save defaults','שמור ברירות מחדל')+'</button><p class="sub">'+L('Applies to newly scheduled flights. Existing flight times stay unchanged.','חל על שיבוצים חדשים; משכי טיסות שכבר נקבעו לא משתנים.')+'</p></form></details>':'';
  return '<div class="fleetSchedule fleetSchedulePlain" id="fleetFlightBoard">'+
  defaultsBlock+
@@ -78,10 +85,10 @@ function schedule(c){
  field(L('Trainee','חניך'),select('traineeId',c.trainees,current?.traineeId||''))+
  '<div class="field" data-fleet-instructor-field><div class="fleetFieldHead"><label>'+requiredLabel(L('Instructor','מדריך'))+'</label></div>'+select('instructorId',c.instructors,current?.instructorId||'',false)+'</div>'+
  field(L('Syllabus','סילבוס'),select('syllabus',c.syllabi.map(s=>({id:s,name:s})),current?.syllabus||''))+
- '<fieldset class="fleetFlightDurations"><legend>'+L('Flight timing · all durations in minutes','זמני הטיסה · כל המשכים בדקות')+'</legend><div class="fleetFlightDurationsGrid">'+
- field(L('Briefing (min)','תדריך (דקות)'),'<input class="input" name="briefingMinutes" type="number" required min="0" max="180" step="1" value="'+E(briefing)+'">')+
- field(L('Flight time (min)','זמן טיסה (דקות)'),'<input class="input" name="estimatedMinutes" type="number" required min="1" max="720" step="1" value="'+E(duration)+'">')+
- field(L('Debriefing (min)','תחקיר (דקות)'),'<input class="input" name="debriefMinutes" type="number" required min="0" max="180" step="1" value="'+E(debrief)+'">')+
+ '<fieldset class="fleetFlightDurations"><legend>'+L('Flight timing','זמני הטיסה')+'</legend><div class="fleetFlightDurationsGrid">'+
+ field(L('Briefing','תדריך'),minuteSelect('briefingMinutes',briefing))+
+ field(L('Flight duration','משך טיסה'),minuteSelect('estimatedMinutes',duration))+
+ field(L('Debriefing','תחקיר'),minuteSelect('debriefMinutes',debrief))+
  '</div></fieldset>'+
  field(L('Planning notes (optional)','הערות לתכנון (לא חובה)'),'<textarea class="input" name="note" rows="2" maxlength="500" placeholder="'+L('Flight planning notes','הערות לתכנון הטיסה')+'">'+E(current?.note||'')+'</textarea>','data-plan-notes')+
  '</div>'+timelineBlock+'<div class="toolbar fleetPlanFormActions"><button class="btn sky" type="submit" '+(!available.length?'disabled':'')+'>'+L(current?'Save changes':'Add to board',current?'שמור שינויים':'הוסף ללוח')+'</button>'+(current?'<button class="btn secondary" type="button" id="fleetFlightCancel">'+L('Cancel','ביטול')+'</button>':'')+'</div>'+

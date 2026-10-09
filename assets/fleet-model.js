@@ -100,10 +100,11 @@
   const people=new Set([valid.traineeId,...(valid.instructorId?[valid.instructorId]:[])]);
   for(const previous of list){
    if(previous.id===id)continue;
-   const onSameAircraft=String(previous.aircraftId||'')===valid.aircraftId&&String(previous.platformId||'')===String(platform);
+   const onSamePlatform=String(previous.platformId||'')===String(platform);
+   const onSameAircraft=String(previous.aircraftId||'')===valid.aircraftId&&onSamePlatform;
    const previousPeople=[String(previous.traineeId||''),String(previous.instructorId||'')].filter(Boolean);
    const common=previousPeople.find(person=>people.has(person));
-   if(!onSameAircraft&&!common)continue;
+   if(!onSamePlatform&&!common)continue;
    if(!dateValid(previous.date)||!clockValid(previous.time))continue;
    const delta=Math.abs(Date.parse(previous.date+'T00:00:00Z')-Date.parse(date+'T00:00:00Z'))/86400000;
    if(delta>2)continue; // Maximum flight + briefing + debriefing is less than 1 day.
@@ -111,6 +112,8 @@
    if(!prior)throw Error('Existing flight on '+previous.date+' at '+previous.time+' has no valid duration. Update it before scheduling the same instructor, trainee or aircraft.');
    if(onSameAircraft&&overlapping(incoming.takeoff,incoming.landing,prior.takeoff,prior.landing))
     throw Error('Aircraft '+valid.tail+' is already booked '+prior.clock.takeoff+'–'+prior.clock.landing+'. Choose a non-overlapping flight time.');
+   if(onSamePlatform&&overlapping(incoming.takeoff,incoming.landing,prior.takeoff,prior.landing))
+    throw Error('Another aircraft '+clean(previous.tail||previous.aircraftId,48)+' already has a flight '+prior.clock.takeoff+'–'+prior.clock.landing+'. Choose a non-overlapping flight time.');
    if(common&&overlapping(incoming.briefingStart,incoming.debriefEnd,prior.briefingStart,prior.debriefEnd)){
     const who=common===valid.traineeId?'Trainee '+(valid.traineeName||common):'Instructor '+(valid.instructorName||common);
     throw Error(who+' is already occupied by briefing, flight or debriefing for the '+previous.time+' flight. Available after '+prior.clock.debrief+'.');
