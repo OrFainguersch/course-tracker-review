@@ -103,6 +103,17 @@ test('Timeline integration renders all four clock keys, external names only, and
  assert.match(css,/\.fleetTimeFlowAdaptive \.fleetTimeFlowBoundaryTimes/);
  assert.match(css,/\.fleetTimeFlowFloatingLabel/);
  assert.match(css,/\.fleetTimeFlowIsCompact/);
+
+ // The formerly opaque clock background covered the 08:50 leader line.
+ const clockCss=css.split('.fleetTimeFlowAdaptive .fleetTimeFlowClock{')[1]?.split('}')[0];
+ assert.ok(clockCss,'Adaptive clock styles exist');
+ assert.match(clockCss,/background:transparent/);
+ assert.match(clockCss,/border:0;box-shadow:none/);
+ assert.doesNotMatch(clockCss,/background:\s*(?:#fff|white|#[0-9a-f]{3,8})/i);
+ assert.match(css,/html\[data-flympus-theme="dark"\] \.fleetTimeFlowAdaptive \.fleetTimeFlowClock\{background:transparent;color:#e2f0ff\}/);
+ assert.match(css,/\.fleetTimeFlowLeaders path\{/);
+ assert.match(css,/\.fleetTimeFlowAdaptive \.fleetTimeFlowClock strong\{/);
+
  assert.match(engine,/element\.textContent=phaseLabel\(item\.key\)/);
  assert.match(engine,/const measureBadge=label=>/);
  assert.match(engine,/width:max-content/);
@@ -110,9 +121,9 @@ test('Timeline integration renders all four clock keys, external names only, and
  assert.match(engine,/document\.fonts\?\.ready/);
  assert.doesNotMatch(engine,/element\.textContent=phaseLabel\(item\.key\)\s*\+.*min/);
  for(const asset of ['fleet-timeline-layout.js','fleet-views.js','fleet-operations.css']){
-  assert.match(html,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-adaptive-timeline-0797'));
-  assert.match(worker,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-adaptive-timeline-0797'));
+  assert.match(html,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-clock-text-0798'));
+  assert.match(worker,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-clock-text-0798'));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-adaptive-timeline-0797'/);
- assert.match(html,/build 0797/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-clock-text-0798'/);
+ assert.match(html,/build 0798/);
 });
