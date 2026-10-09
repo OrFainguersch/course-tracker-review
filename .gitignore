@@ -2,3 +2,5 @@ dist/
 .firebase/
 firebase-debug.log
 gha-creds-*.json
+deployment-result.json
+hosting-audit/

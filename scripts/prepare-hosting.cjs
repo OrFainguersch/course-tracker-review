@@ -4,6 +4,11 @@ const crypto=require('node:crypto');
 const {execFileSync}=require('node:child_process');
 const root=path.resolve(__dirname,'..');
 const output=path.join(root,'dist');
+// A release manifest must never attribute uncommitted source to a clean SHA.
+const changes=execFileSync('git',['status','--porcelain','--untracked-files=normal'],{cwd:root,encoding:'utf8'}).trim();
+if(changes)throw new Error('Hosting bundle requires a complete committed, clean source checkout');
+const head=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
+if(process.env.GITHUB_SHA&&process.env.GITHUB_SHA!==head)throw new Error('Checkout differs from approved CI commit');
 execFileSync(process.execPath,[path.join(__dirname,'sync-theme-bootstrap.cjs'),'--check'],{cwd:root,stdio:'inherit'});
 const publicFiles=['index.html','auth.js','auth.css','account-switcher.js','firebase-config.js','storage-scope.js',
   'theme-controller.js','sw.js','manifest.webmanifest','push-config.json'];
