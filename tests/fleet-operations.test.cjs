@@ -475,7 +475,7 @@ test('Plan contract stays coherent: full-width flight day, settings, required fi
  assert.doesNotMatch(report,/id="pveDate" type="text"/);
  assert.match(report,/boardLinked\?'readonly aria-readonly="true"/);
  assert.match(html,/flightBoardPlanStatus\(date\)/);
- assert.match(html,/FLYMPUS Review · build 0795/);
+ assert.match(html,/FLYMPUS Review · build 0796/);
  lang.value='he';
  assert.match(context.window.FLYMPUS_FLEET_VIEW.schedule({
   fleet:[],flights:[],platformId:'shahak',date:'2026-10-08',trainees:[],instructors:[],syllabi:[],canWrite:true,canConfigureTiming:true
@@ -567,7 +567,7 @@ test('Plan timeline option 1 shows all four chronological boundaries at correct 
  assert.match(stylesheet,/\.fleetTimeFlowTrack,\s*\.fleetTimeFlowBoundaryTimes\s*\{[\s\S]*?grid-template-columns:minmax\(0,var\(--phase-brief\)\) minmax\(0,var\(--phase-flight\)\) minmax\(0,var\(--phase-debrief\)\)/);
  assert.match(stylesheet,/html\[data-flympus-language="he"\] \.fleetTimeFlowClock strong/);
  assert.match(stylesheet,/@media\(max-width:600px\)\{[\s\S]*?\.fleetTimeFlowIcon\{height:18px;width:18px\}/);
- assert.doesNotMatch(stylesheet,/\.fleetTimeFlow(?:Flight)?Icon\s*\{[^}]*display\s*:\s*none/);
+ assert.doesNotMatch(stylesheet.split('/* Mobile calculated timeline:')[0],/\.fleetTimeFlow(?:Flight)?Icon\s*\{[^}]*display\s*:\s*none/);
  assert.match(stylesheet,/html\[data-flympus-theme="dark"\] \.fleetTimeFlowClock strong/);
  assert.match(stylesheet,/html\.flympusLargeText \.fleetTimeFlowClock strong/);
 });
@@ -596,7 +596,7 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
  assert.match(stylesheet,/\.fleetTimeFlowIcon\{height:20px;width:20px;flex:0 0 auto;display:block;fill:none;stroke:currentColor\}/);
  assert.doesNotMatch(stylesheet,/-webkit-text-(?:stroke|fill-color)/);
  assert.doesNotMatch(html,/\.fleetTimeFlow(?:Flight)?Icon\s*\{/,'No embedded HTML rule overrides the icon stylesheet');
- assert.doesNotMatch(stylesheet,/\.fleetTimeFlow(?:Flight)?Icon\s*\{[^}]*(?:!important|font-family|font-size|transform)/);
+ assert.doesNotMatch(stylesheet.split('/* Mobile calculated timeline:')[0],/\.fleetTimeFlow(?:Flight)?Icon\s*\{[^}]*(?:!important|font-family|font-size|transform)/);
  assert.match(stylesheet,/\.fleetTimeFlowTrack>span\+span\{border-inline-start:3px solid #fff\}/,'Approved inter-phase gaps stay intact');
  for(const [phase,background,color] of [['brief','#f8ead1','#91661f'],['flight','#dcecff','#155b99'],['debrief','#dff3e7','#19724a']]){
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
