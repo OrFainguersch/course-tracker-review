@@ -104,6 +104,10 @@ test('Timeline integration renders all four clock keys, external names only, and
  assert.match(css,/\.fleetTimeFlowFloatingLabel/);
  assert.match(css,/\.fleetTimeFlowIsCompact/);
  assert.match(engine,/element\.textContent=phaseLabel\(item\.key\)/);
+ assert.match(engine,/const measureBadge=label=>/);
+ assert.match(engine,/width:max-content/);
+ assert.match(engine,/prefsObserver\.observe/);
+ assert.match(engine,/document\.fonts\?\.ready/);
  assert.doesNotMatch(engine,/element\.textContent=phaseLabel\(item\.key\)\s*\+.*min/);
  for(const asset of ['fleet-timeline-layout.js','fleet-views.js','fleet-operations.css']){
   assert.match(html,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v=20261009-adaptive-timeline-0797'));
