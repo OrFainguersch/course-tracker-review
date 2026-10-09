@@ -1,3 +1,11 @@
+## Authorized Hosting-only continuation — 2026-10-09
+
+The user explicitly requested full code as text-file backups and continuation when a system cannot be backed up. Complete source snapshots for main e372d52, previous Hosting ef3f427 and candidate 237a414, plus a full-history Git bundle encoded as text, were created and byte-verified. The prepared-source text checksum is c431c2ce1f6134525ec095a086bbffea705c417c5c8559e7f2f8f1e6d35bd514. These files are attached in the conversation. They do not contain production records or personal-device data.
+
+This authorization permits a Hosting-only release with all regression, committed-source, current-main and exact-live-verification gates intact. It does not authorize Firestore/Auth/Storage data writes, Rules publication, billing, redirects, cache deletion or old-site retirement. cloudBackup.verified and localData.safeguardsVerified remain false; the release exception is recorded separately and cannot be reported as complete data protection.
+
+Firebase Console sign-in is now verified. Actual plan is Spark. Hosting history exposes Rollback for previous display hash 0b0127; current hash is 2e4c86. Full version-to-Git mapping remains incomplete. Cloud Shell and Google Cloud export display Site Unavailable. Preserve GitHub Pages, existing device storage and the missing-only migration procedure below. The older preflight narrative below records the stricter default; this explicit user authorization governs this Hosting-only release.
+
 # FLYMPUS safe production unification
 
 Status: **BLOCKED BEFORE PRODUCTION DEPLOYMENT**. This document and the proposed

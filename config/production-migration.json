@@ -1,11 +1,30 @@
 {
   "schema": 1,
   "projectId": "flympus",
-  "cloudBackup": {"verified": false, "evidenceReference": ""},
-  "localData": {"safeguardsVerified": false, "oldOriginRetained": true, "evidenceReference": ""},
+  "cloudBackup": {
+    "verified": false,
+    "evidenceReference": ""
+  },
+  "localData": {
+    "safeguardsVerified": false,
+    "oldOriginRetained": true,
+    "evidenceReference": ""
+  },
   "hostingRollback": {
     "verified": false,
     "releaseVersion": "",
     "commit": "ef3f427dae3d585708b223b4f08aa41ae78c0441"
+  },
+  "authorizedHostingOnly": {
+    "enabled": true,
+    "scope": "hosting-only",
+    "approvalReference": "User instruction 2026-10-09 07:32 Asia/Jerusalem: provide full code text files as backup, then continue the requested change and migration. Scope is Hosting only, with old origin retained.",
+    "applicationSourceCommit": "237a414971ba05397f08fd85891fb05fad1b8ae0",
+    "sourceBackupReference": "FLYMPUS_Release_Prepared_Full_Code.txt (attached in conversation 2026-10-09)",
+    "sourceBackupSha256": "c431c2ce1f6134525ec095a086bbffea705c417c5c8559e7f2f8f1e6d35bd514",
+    "previousSourceBackupReference": "FLYMPUS_Firebase_Previous_Full_Code.txt; commit ef3f427dae3d585708b223b4f08aa41ae78c0441",
+    "cloudDataWrites": false,
+    "rulesWrites": false,
+    "redirectOldOrigin": false
   }
 }

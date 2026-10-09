@@ -37,5 +37,19 @@ test('Missing evidence and incomplete recovery verification keep production lock
   assert.equal(inspectSafety(record).ready,true);
   for(const key of ['cloudBackup','localData','hostingRollback'])assert.equal(inspectSafety({...record,[key]:{}}).ready,false);
   assert.equal(inspectSafety({...record,projectId:'another-project'}).ready,false);
-  assert.equal(inspectSafety(require('../config/production-migration.json')).ready,false);
+  assert.equal(inspectSafety({...require('../config/production-migration.json'),authorizedHostingOnly:undefined}).ready,false);
+});
+
+test('Explicit code-backup authorization allows only Hosting while recording unverified data backups',()=>{
+ const record=require('../config/production-migration.json');
+ const result=inspectSafety(record);assert.equal(result.ready,true);assert.equal(result.mode,'authorized-hosting-only');assert.equal(result.limitations.length,3);
+ assert.equal(record.cloudBackup.verified,false);assert.equal(record.localData.safeguardsVerified,false);
+ for(const key of ['approvalReference','sourceBackupReference','previousSourceBackupReference','sourceBackupSha256','applicationSourceCommit','scope']){
+   assert.equal(inspectSafety({...record,authorizedHostingOnly:{...record.authorizedHostingOnly,[key]:''}}).ready,false);
+ }
+ for(const key of ['cloudDataWrites','rulesWrites','redirectOldOrigin']){
+   assert.equal(inspectSafety({...record,authorizedHostingOnly:{...record.authorizedHostingOnly,[key]:true}}).ready,false);
+ }
+ assert.equal(inspectSafety({...record,localData:{...record.localData,oldOriginRetained:false}}).ready,false);
+ assert.equal(inspectSafety({...record,projectId:'wrong-project'}).ready,false);
 });
