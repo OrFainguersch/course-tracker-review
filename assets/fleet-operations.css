@@ -650,3 +650,24 @@ html.flympusLargeText .fleetTimeFlowTrack .fleetTimeFlowPhaseText{font-size:15px
  .fleetTimeFlowClock strong{font-size:10px}
  html.flympusLargeText .fleetTimeFlowClock strong{font-size:12px!important}
 }
+
+/* Mobile calculated timeline: preserve proportional widths without squeezing icons or breaking phase names. */
+@media(max-width:600px){
+  /* Desktop retains the three pictograms; mobile uses labels only. */
+  .fleetTimeFlowTrack .fleetTimeFlowIcon{display:none!important}
+  .fleetTimeFlowTrack>span{container:timeline-phase / inline-size}
+  .fleetTimeFlowTrack .fleetTimeFlowPhaseLabel{
+    width:100%;max-width:100%;min-width:0;gap:0;overflow:hidden;
+  }
+  .fleetTimeFlowTrack .fleetTimeFlowPhaseText{
+    display:block;width:100%;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    overflow-wrap:normal;word-break:normal;hyphens:none;
+  }
+}
+/* When a phase lasts only a few minutes, leave its colored slice intact,
+   but avoid illegible partial letters. Its existing text stays available
+   to assistive technology because opacity does not remove DOM content. */
+@container timeline-phase (max-width:45px){
+  .fleetTimeFlowPhaseText{opacity:0}
+}
