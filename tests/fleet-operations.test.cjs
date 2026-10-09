@@ -568,6 +568,7 @@ test('Planned vs Executed date moves to locale start and remains stacked on mobi
  assert.match(css,/\.pveDateRow>div:first-child\{grid-column:2;grid-row:1/);
  assert.match(css,/html\[data-flympus-language="he"\] \.coursePlanWorkspace \.pveDateRow\{direction:rtl\}/);
  assert.match(css,/@media\(max-width:640px\)\{[\s\S]*?\.pveDateRow>div:first-child\{grid-column:1;grid-row:2\}/);
- assert.match(html,/html\[data-flympus-theme="dark"\] \.pveDateReadOnly strong/);
- assert.match(html,/html\.flympusLargeText \.coursePlanWorkspace \.pveDateReadOnly strong/);
+ const planCSS=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(planCSS,/html\[data-flympus-theme="dark"\] \.pveDateReadOnly strong/);
+ assert.match(planCSS,/html\.flympusLargeText \.coursePlanWorkspace \.pveDateReadOnly strong/);
 });
