@@ -233,5 +233,5 @@ test('The live entry point wires immutable approval drafts, preserved legacy ent
     const version=asset.startsWith('course-operations.')?'20261009-plan-badge-0803':'20261009-approval-sounds-0795';
     const url='./assets/'+asset+'?v='+version;assert.ok(html.includes(url));assert.ok(worker.includes(url));
   }
-  assert.match(html,/build 0800/);assert.match(worker,/2026-10-09-plan-badge-0803/);
+  assert.match(html,/build 0800/);assert.match(worker,/2026-10-09-fleet-editor-0804/);
 });

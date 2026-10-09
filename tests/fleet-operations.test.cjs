@@ -602,7 +602,7 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261009-connected-leaders-0800'],['assets/fleet-operations.css','20261009-connected-leaders-0800']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261009-fleet-editor-0804'],['assets/fleet-operations.css','20261009-fleet-editor-0804']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
