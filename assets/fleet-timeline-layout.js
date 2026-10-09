@@ -98,7 +98,6 @@ function attach(flow,form){
   const result=planTimeline({width,phases,clocks});
   flow.classList.add('fleetTimeFlowAdaptive');
   flow.classList.toggle('fleetTimeFlowIsCompact',result.compact);
-  result.externalKeys.forEach(()=>{});
   phaseEls.forEach((el,i)=>el.classList.toggle('fleetTimeFlowPhaseExternal',result.compact||result.externalKeys.includes(PHASE_KEYS[i])));
   labelArea.replaceChildren();
   leaderArea.replaceChildren();
