@@ -128,7 +128,7 @@
   }
   function statusMarkup(kind,d=date()){
    if(!enabled())return '';
-   if(!env.isDuty())return day(d)[kind==='PLAN'?'plan':'report']?'<div class="dutyApprovalStatus approved"><b>'+label('APPROVED')+'</b><span>'+L('This is the current official version.','זו הגרסה הרשמית הנוכחית.')+'</span></div>':'';
+   if(!env.isDuty())return kind!=='PLAN'&&day(d).report?'<div class="dutyApprovalStatus approved"><b>'+label('APPROVED')+'</b><span>'+L('This is the current official version.','זו הגרסה הרשמית הנוכחית.')+'</span></div>':'';
    const request=pending(kind,d)||latest(kind,d),draft=readDraft(kind,d),status=pending(kind,d)?'PENDING':draft?'DRAFT':request?.status||'DRAFT';
    return '<section class="dutyApprovalStatus '+status.toLowerCase()+'" role="status"><div><b>'+label(status)+'</b><p>'+L('Pending changes do not update reports, flight counts or experience.','שינויים שממתינים לאישור אינם מעדכנים דוחות, מוני טיסות או ניסיון.')+'</p>'+(request?.status==='RETURNED'?'<p class="dutyApprovalCorrection"><strong>'+L('Instructor note: ','הערת המדריך: ')+'</strong>'+E(request.reviewNote)+'</p>':'')+'</div>'+
     (status==='PENDING'?'<button type="button" class="btn secondary small" data-duty-withdraw="'+E(request.id)+'">'+L('Withdraw and edit','ביטול הבקשה ועריכה')+'</button>':(draft&&draft.baseRevision!==day(d).revision?'<button type="button" class="btn secondary small" data-duty-rebase="'+kind+'">'+L('Update approval base · keep my entries','עדכון בסיס האישור ושמירת ההזנות שלי')+'</button>':'')+'<button type="button" class="btn secondary small" data-duty-reload="'+kind+'">'+L('Reload approved version','טעינת הגרסה המאושרת')+'</button>')+'</section>';

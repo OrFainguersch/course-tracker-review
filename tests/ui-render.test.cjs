@@ -170,6 +170,10 @@ const mockPlanWorkspace=missing=>vm.runInNewContext(planWorkspaceSource+'planWor
 const missingTab=mockPlanWorkspace(2),completeTab=mockPlanWorkspace(0);
 assert.match(missingTab,/data-plan-view="report"[^>]*>Planned vs Executed<span class="planRequiredTabCount" data-plan-missing-count="2"[^>]*>2<\/span><\/button>/,"Only Planned vs Executed should identify missing report requirements");
 assert.doesNotMatch(completeTab,/planRequiredTabCount/,"No misleading subtab badge may remain after report completion");
+const planBadgeCss=fs.readFileSync('assets/course-operations.css','utf8');
+assert.match(planBadgeCss,/button\[data-plan-view="report"\] \.planRequiredTabCount\{position:absolute;top:3px;right:4px;/,'Required badge must sit in the upper-right, not below tab text');
+assert.match(planBadgeCss,/background:#d64545;color:#fff;/,'Plan required badge must be red with white text');
+assert.doesNotMatch(planBadgeCss,/\.planRequiredTabCount\{[^}]*background:#fff0cd/,'No yellow background on Plan badge');
 
 assert(html.includes("safety:'<path d=\"M12 3.5 19 6v5.3c0 4.5-2.7 7.7-7 9.2-4.3-1.5-7-4.7-7-9.2V6l7-2.5Z\"></path><path d=\"M12 8.2v5.1\"></path><path d=\"M12 16.4h.01\"></path>'")&&html.includes("homeQuickIcon safety")+html.includes("homePulseIcon safety")+html.includes("icon safetyIcon"),"Safety must use the shield-with-exclamation icon consistently across relevant surfaces");
 assert(html.includes(".recordHubCard.eval{border-top:3px solid var(--record-eval)}")&&html.includes(".recordHubCard.safety{border-top:3px solid var(--record-safety)}")&&html.includes(".recordHubCard.exam{border-top:3px solid var(--record-exam)}"),"Forms hub cards must keep the Evaluation, Safety and Exam color identity used by trainee record actions");

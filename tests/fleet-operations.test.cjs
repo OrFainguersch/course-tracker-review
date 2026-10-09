@@ -606,8 +606,8 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-connected-leaders-0800'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261009-connected-leaders-0800/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-plan-badge-0803'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261009-plan-badge-0803/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
