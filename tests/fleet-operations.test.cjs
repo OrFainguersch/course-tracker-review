@@ -519,7 +519,7 @@ test('Plan timeline option 1 shows all four chronological boundaries at correct 
  const render=()=>sandbox.window.FLYMPUS_FLEET_VIEW.schedule(settings);
  const english=render();
  for(const [phase,word] of [['brief','Briefing'],['flight','Flight'],['debrief','Debriefing']]){
-  assert.match(english,new RegExp('data-phase="'+phase+'"[^>]*>[\s\S]*?'+word));
+  assert.match(english,new RegExp('data-phase="'+phase+'"[^>]*>.*?'+word));
  }
  assert.equal((english.match(/class="fleetTimeFlowClock fleetTimeFlowClock/g)||[]).length,4);
  assert.match(english,/fleetTimeFlowClockStart[^>]*>[\s\S]*?data-flight-clock="briefing">07:40/);
