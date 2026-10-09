@@ -636,6 +636,8 @@ test('Planned Solo UI automatically opens exact unexecuted slots, groups batches
  let solo=[],saved=null,language='en';
  const scope={
    dutyOperations:null,isDutyTrainee:()=>false,getPlanExecutedInstructed:()=>0,getPlanWorkingSoloFlights:()=>solo,
+   getPlanWorkingFlights:()=>[],getPlanTimingDefaults:()=>({}),currentFleetPlatform:()=> 'shahak',
+   window:{FLYMPUS_FLEET_MODEL:M},evaluationDurationOptions:minutes=>'<option value="'+minutes+'" selected>'+minutes+' min</option>',
    state:{planDate:'2026-10-09'},getDailyReports:()=>[],
    getActivityDraft:()=>({data:{date:'2026-10-09',plannedInstructed:0,plannedSolo:4,cancellations:saved||[]}}),
    getSoloFlights:()=>solo,getEvaluations:()=>[],flightBoardPlanStatus:()=>({linked:false,instructed:0,solo:0}),
