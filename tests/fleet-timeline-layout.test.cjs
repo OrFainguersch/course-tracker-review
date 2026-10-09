@@ -46,7 +46,7 @@ test('RTL and upper lane use the same connected obstacle-avoiding geometry',()=>
  }
 });
 test('Dense labels never return a truncated line: route exists or compact fallback is required',()=>{
- const blocked=[{left:0,width:360,top:70}];
+ const blocked=[{left:0,width:360,top:45}];
  assert.equal(T.routeLeader({x:50,y:50},{x:50,y:130},blocked,360,200),null);
 });
 test('Four clock boundaries and a narrow debrief stay legible using shared upper/lower lanes',()=>{
