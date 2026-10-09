@@ -58,8 +58,18 @@ function attach(flow,form){
  };
  const phaseEls=PHASE_KEYS.map(key=>track.querySelector('[data-phase="'+key+'"]'));
  const clockEls=CLOCK_KEYS.map(key=>clockArea.querySelector('[data-flight-clock="'+key+'"]')?.closest('.fleetTimeFlowClock'));
- let scheduled=false,observer=null,selected='',disposed=false;
+ let scheduled=false,observer=null,prefsObserver=null,selected='',disposed=false;
  const phaseLabel=key=>phaseEls[PHASE_KEYS.indexOf(key)]?.querySelector('.fleetTimeFlowPhaseText')?.textContent||key;
+ const measureBadge=label=>{
+  const sample=root.document.createElement('span');
+  sample.className='fleetTimeFlowFloatingLabel';
+  sample.textContent=label;
+  sample.style.cssText='position:absolute;visibility:hidden;left:0;top:0;width:max-content;pointer-events:none';
+  labelArea.append(sample);
+  const width=Math.ceil(sample.getBoundingClientRect().width+2);
+  sample.remove();
+  return width;
+ };
  const draw=()=>{
   scheduled=false;
   if(disposed||!flow.isConnected){return}
@@ -78,7 +88,7 @@ function attach(flow,form){
    const piece=segments[i];
    return {key:PHASE_KEYS[i],width:piece.width,center:physicalX((piece.left+piece.right)/2),
     labelWidth:measure(labelEl,label,iconVisible?33:9),
-    outsideWidth:measure(labelEl,label,23)};
+    outsideWidth:measureBadge(label)};
   });
   const clocks=clockEls.map((el,i)=>{
    const strong=el.querySelector('strong');
@@ -196,9 +206,16 @@ function attach(flow,form){
   observer=new root.ResizeObserver(queue);
   observer.observe(track);
  }
+ // Large-text and language preference changes can occur without a window resize.
+ if(typeof root.MutationObserver==='function'){
+  prefsObserver=new root.MutationObserver(queue);
+  prefsObserver.observe(root.document.documentElement,{attributes:true,
+   attributeFilter:['class','data-flympus-language','data-flympus-theme']});
+ }
+ root.document.fonts?.ready?.then(queue).catch(()=>{});
  const dispose=()=>{
   if(disposed)return;
-  disposed=true;observer?.disconnect();
+  disposed=true;observer?.disconnect();prefsObserver?.disconnect();
   root.removeEventListener('resize',queue);
   flow.removeEventListener('click',onClick);flow.removeEventListener('keydown',onKey);
  };
