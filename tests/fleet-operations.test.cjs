@@ -877,7 +877,7 @@ test('flight drag UI offers accessible touch grips, reduced motion and localized
  assert.match(html,/dutyOperations\.saveDraft\('PLAN'/);
  assert.match(html,/dutyOperations\.publish\('PLAN'/);
  assert.match(html,/Crew conflict: /);
- assert.match(html,/flight-board-drag\\.js\\?v=20261009-stable-plan-layout-0812/);
+ assert.ok(html.includes('flight-board-drag.js?v=20261009-stable-plan-layout-0812'));
 });
 test('Plan tabs use shared Course Management-style segmented control',()=>{
  const css=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
