@@ -5,6 +5,7 @@ const PHASE_KEYS=['brief','flight','debrief'];
 const CLOCK_KEYS=['briefing','takeoff','landing','debrief'];
 const GAP=6;
 const ROW=31;
+let maskSerial=0;
 const clamp=(n,low,high)=>Math.min(Math.max(n,low),high);
 
 /* Pure and deterministic: candidates share the same four rows, so phase names
@@ -59,6 +60,7 @@ function attach(flow,form){
  const phaseEls=PHASE_KEYS.map(key=>track.querySelector('[data-phase="'+key+'"]'));
  const clockEls=CLOCK_KEYS.map(key=>clockArea.querySelector('[data-flight-clock="'+key+'"]')?.closest('.fleetTimeFlowClock'));
  let scheduled=false,observer=null,prefsObserver=null,selected='',disposed=false;
+ const leaderMaskId='fleetTimeFlowLeaderMask'+(++maskSerial);
  const phaseLabel=key=>phaseEls[PHASE_KEYS.indexOf(key)]?.querySelector('.fleetTimeFlowPhaseText')?.textContent||key;
  const measureBadge=label=>{
   const sample=root.document.createElement('span');
@@ -135,10 +137,44 @@ function attach(flow,form){
   const barBottom=barY+track.offsetHeight;
   leaderArea.setAttribute('viewBox','0 0 '+Math.ceil(bodyRect.width)+' '+Math.ceil(body.offsetHeight));
   leaderArea.setAttribute('preserveAspectRatio','none');
+  // The labels are transparent, so a lower-lane leader can otherwise run
+  // straight through the digits of a nearer clock (e.g. 08:00 over 07:50).
+  // Clip ALL leader strokes around ALL measured text/badge bounds, independent
+  // of which lanes the collision solver selects or which direction is active.
+  const svgNS='http://www.w3.org/2000/svg';
+  const defs=root.document.createElementNS(svgNS,'defs');
+  const mask=root.document.createElementNS(svgNS,'mask');
+  mask.setAttribute('id',leaderMaskId);
+  mask.setAttribute('maskUnits','userSpaceOnUse');
+  mask.setAttribute('maskContentUnits','userSpaceOnUse');
+  const background=root.document.createElementNS(svgNS,'rect');
+  background.setAttribute('x','0');background.setAttribute('y','0');
+  background.setAttribute('width',Math.ceil(bodyRect.width));
+  background.setAttribute('height',Math.ceil(body.offsetHeight));
+  background.setAttribute('fill','white');
+  mask.append(background);
+  const placementY=item=>{
+   const top=item.lane>=2;
+   const depth=top?item.lane-2:item.lane;
+   return top?topPad-(depth+1)*ROW:barBottom+10+depth*ROW;
+  };
+  for(const item of result.placements){
+   const exclusion=root.document.createElementNS(svgNS,'rect');
+   exclusion.setAttribute('x',shiftX+item.left-3);
+   exclusion.setAttribute('y',placementY(item)-3);
+   exclusion.setAttribute('width',item.width+6);
+   exclusion.setAttribute('height','31');
+   exclusion.setAttribute('fill','black');
+   mask.append(exclusion);
+  }
+  defs.append(mask);
+  const leaderGroup=root.document.createElementNS(svgNS,'g');
+  leaderGroup.setAttribute('mask','url(#'+leaderMaskId+')');
+  leaderArea.append(defs,leaderGroup);
   for(const item of result.placements){
    const top=item.lane>=2;
    const depth=top?item.lane-2:item.lane;
-   const y=top?topPad-(depth+1)*ROW:barBottom+10+depth*ROW;
+   const y=placementY(item);
    let element;
    if(item.kind==='clock'){
     element=clockEls[CLOCK_KEYS.indexOf(item.key)];
@@ -164,7 +200,7 @@ function attach(flow,form){
    const path=root.document.createElementNS('http://www.w3.org/2000/svg','path');
    path.setAttribute('d','M'+anchorX+' '+startY+' L'+anchorX+' '+(startY+(endY-startY)*0.55)+' L'+targetX+' '+endY);
    path.setAttribute('class',item.kind==='phase'?'fleetTimeFlowPhaseLeader':'fleetTimeFlowClockLeader');
-   leaderArea.append(path);
+   leaderGroup.append(path);
   }
  };
  const queue=()=>{
