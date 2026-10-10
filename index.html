@@ -9244,15 +9244,17 @@ function homePlanFlightRow(flight,hebrew){
   (window.FLYMPUS_FLEET_MODEL.flightIssues(flight,getFleetAircraft(),currentFleetPlatform())?
     '<span class="homeTag homePlanFlightIssue">'+esc(hebrew?'לא זמין':'Unavailable')+'</span>':'')+'</span>';
  const phase=(kind,time,icon,label)=>'<span class="homePlanFlightPhase">'+
-  '<span class="homePlanFlightPhaseClock"><time dir="ltr">'+esc(time)+'</time><span class="homePlanFlightPhaseIcon" aria-hidden="true">'+icon+'</span></span>'+
-  '<span class="homePlanFlightPhaseName">'+esc(label)+'</span></span>';
+  '<span class="homePlanFlightPhaseClock"><time dir="ltr">'+esc(time)+'</time>'+
+   '<span class="homePlanFlightPhaseIcon" aria-hidden="true">'+icon+'</span>'+
+   '<span class="homePlanFlightPhaseName">'+esc(label)+'</span></span></span>';
  const briefingIcon='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="8" cy="7" r="3"/><circle cx="17" cy="8" r="2.5"/><path d="M2 20v-2.2a5.8 5.8 0 0 1 11.6 0V20H2Zm12.7-6.7a5 5 0 0 1 7.3 4.4V20h-6.5v-2.2a8 8 0 0 0-.8-4.5Z"/></svg>';
  const debriefIcon='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4.5" y="4" width="15" height="18" rx="2.5"/><rect x="9" y="2" width="6" height="5" rx="1.5"/><path d="m8.8 14.1 2.2 2.3 4.6-4.7" fill="none" stroke="#e8f3fb" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
  const reveal=(part,markup)=>'<div class="homePlanFlightReveal homePlanFlight'+part+'" aria-hidden="'+(!expanded)+'"'+(expanded?'':' inert')+'><div class="homePlanFlightRevealInner">'+markup+'</div></div>';
  return '<div class="homePlanFlight'+(expanded?' is-expanded':'')+'">'+
   reveal('Briefing',phase('briefing',briefing,briefingIcon,hebrew?'תדריך':'Briefing'))+
   '<button class="homePlanFlightToggle" type="button" data-home-flight-toggle="'+esc(key)+'" aria-expanded="'+(expanded?'true':'false')+'" aria-label="'+esc((expanded?(hebrew?'מזער':'Collapse'):(hebrew?'הצג לוח זמנים':'Expand schedule'))+' '+name)+'">'+
-   '<span class="homePlanFlightClock"><span class="homePlanFlightPlane" aria-hidden="true">✈</span><time dir="ltr">'+esc(flight.time||'—')+'</time></span>'+
+   '<span class="homePlanFlightClock"><span class="homePlanFlightPlane" aria-hidden="true">✈</span><time dir="ltr">'+esc(flight.time||'—')+'</time>'+
+    '<span class="homePlanFlightStepName">'+esc(hebrew?'טיסה':'Flight')+'</span></span>'+
    '<span class="homePlanFlightPeople">'+homeFlightPerson(name,'student')+(isSolo||!flight.instructorName?'':homeFlightPerson(flight.instructorName,'teacher'))+
     '<span class="homePlanFlightSyllabus">'+esc(flight.syllabus||'—')+' · '+esc(homeFlightAircraftName(flight))+'</span></span>'+
    badges+'<span class="homePlanFlightChevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 9 7 7 7-7"/></svg></span>'+
