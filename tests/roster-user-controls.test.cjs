@@ -23,8 +23,8 @@ test('Roster swipe is mobile-only and uses the established course membership per
  assert.match(css,/right:0;top:0;bottom:0/);
  assert.match(css,/rosterSwipeOpen/);
  for(const filename of ['roster-swipe-actions.js','roster-swipe-actions.css']){
-  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-visual-swipe-polish-0828'));
-  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-visual-swipe-polish-0828'));
+  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-roster-swipe-stability-0829'));
+  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-roster-swipe-stability-0829'));
  }
 });
 test('Swipe module creates neither tray nor handlers without a touch screen and roster authority',()=>{
@@ -66,7 +66,54 @@ test('mobile roster swipe action reveal follows the finger before settling gentl
  const js=read('assets/roster-swipe-actions.js'),css=read('assets/roster-swipe-actions.css');
  assert.match(js,/--roster-swipe-reveal/);
  assert.match(js,/getBoundingClientRect/);
- assert.match(css,/\.34s cubic-bezier\(\.2,\.76,\.18,1\)/);
+ assert.match(css,/\.30s cubic-bezier\(\.22,\.72,\.2,1\)/);
  assert.match(css,/rosterSwipeMoving \.rosterSwipeActionTray\{opacity:var\(--roster-swipe-reveal,0\)/);
  assert.match(css,/prefers-reduced-motion:reduce/);
+});
+
+test('mobile Course Roster swipe wraps each person card into a single moving grid',()=>{
+ const js=read('assets/roster-swipe-actions.js'),css=read('assets/roster-swipe-actions.css');
+ assert.match(js,/content\.className='rosterSwipeContent'/);
+ assert.match(js,/while\(row\.firstChild\)content\.appendChild\(row\.firstChild\)/);
+ assert.match(js,/querySelector\('\.rosterSwipeContent'\)\?\.getBoundingClientRect/);
+ assert.match(css,/\.personCard\.rosterSwipeRow\.traineeRosterCard/);
+ assert.match(css,/rosterSwipeContent\{/);
+ assert.match(css,/grid-template-columns:auto minmax\(0,1fr\) auto/);
+ assert.match(css,/\.rosterSwipeMoving \.rosterSwipeContent\{transition:none!important\}/);
+ assert.doesNotMatch(css,/> :not\(\.rosterSwipeActionTray\)/);
+ assert.match(css,/\.rosterSwipeContent\{display:contents!important;transform:none!important\}/);
+});
+test('authorised touch attach preserves original roster nodes in one wrapper',()=>{
+ const source=read('assets/roster-swipe-actions.js');
+ const doc={documentElement:{dataset:{flympusLanguage:'en'}},addEventListener(){}};
+ class FakeNode{
+  constructor(tag='div'){this.tag=tag;this.children=[];this.parentNode=null;this.ownerDocument=doc;this.dataset={};this.attrs={};this.listeners={};
+   const names=new Set();this.classList={contains:x=>names.has(x),add:x=>names.add(x),remove:x=>names.delete(x),toggle:(x,on)=>on?names.add(x):names.delete(x)};
+   this.style={setProperty(){},removeProperty(){}}}
+  get firstChild(){return this.children[0]||null}
+  appendChild(child){if(child.parentNode)child.parentNode.children=child.parentNode.children.filter(x=>x!==child);
+   this.children.push(child);child.parentNode=this;return child}
+  append(...children){children.forEach(child=>this.appendChild(child))}
+  setAttribute(k,v){this.attrs[k]=v}
+  addEventListener(k,fn){this.listeners[k]=fn}
+  querySelector(){return null}
+ }
+ doc.createElement=tag=>new FakeNode(tag);
+ const row=new FakeNode('article');row.dataset.instructor='inst1';row.classList.add('instructorRosterCard');
+ const original=[new FakeNode('avatar'),new FakeNode('personInfo'),new FakeNode('rosterActions')];
+ original.forEach(x=>row.appendChild(x));
+ const host={querySelectorAll:()=>[row]};
+ const sandbox={window:{matchMedia:()=>({matches:true}),document:doc}};
+ vm.runInNewContext(source,sandbox);
+ sandbox.window.FLYMPUS_ROSTER_SWIPE.attach(host,true);
+ assert.equal(row.children.length,2);
+ const content=row.children[0],actions=row.children[1];
+ assert.equal(content.className,'rosterSwipeContent');
+ assert.deepEqual(content.children,original);
+ assert.equal(actions.className,'rosterSwipeActionTray');
+ assert.equal(actions.children.length,2);
+ assert.equal(actions.children[0].dataset.personEdit,'INSTRUCTOR:inst1');
+ assert.equal(actions.children[1].dataset.rosterRemove,'INSTRUCTOR:inst1');
+ sandbox.window.FLYMPUS_ROSTER_SWIPE.attach(host,true);
+ assert.equal(row.children.length,2,'repeated binding must not wrap twice');
 });
