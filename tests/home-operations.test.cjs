@@ -238,10 +238,12 @@ test('Today Plan phase rail keeps a responsive gutter from names and syllabus',(
  assert.match(css,/homePlanRowTimeline\{direction:rtl!important/);
 });
 
-test('Home takeoff airplane matches the completed flights pulse glyph',()=>{
+test('Home takeoff airplane remains recognizable while Reports uses a filled plane icon',()=>{
  const html=fs.readFileSync('index.html','utf8'),css=fs.readFileSync('assets/home-operations.css','utf8');
  assert.match(html,/takeoff:'✈'/);
- assert.match(html,/homePulseIcon">✈<\/div>/);
+ const dashboard=html.slice(html.indexOf('function reportCoursePulseCards(model)'),html.indexOf('function reports(){'));
+ assert.match(dashboard,/insightPulseGlyph/);
+ assert.match(dashboard,/M21\.6 14\.1/);
  assert.match(css,/\.homePlanMoment-takeoff \.homePlanMomentIcon\{font-family:inherit;font-size:15px/);
 });
 

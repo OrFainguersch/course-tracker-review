@@ -177,13 +177,13 @@ test('Course dashboard flight KPI totals recorded activity for selected range, i
 });
 
 test('Course report KPI glyphs are four filled blue vectors with one shared visual weight',()=>{
- const html=read('index.html');
+ const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
  const section=html.slice(html.indexOf('function reportCoursePulseCards(model)'),html.indexOf('function reports(){'));
  assert.equal((section.match(/<svg class="insightPulseGlyph"/g)||[]).length,4);
  assert.equal((section.match(/<div class="homePulseIcon">/g)||[]).length,4);
  assert.doesNotMatch(section,/♙|◔|✈|★|background:#f7f0df|color:#8a6a22/);
  assert.match(section,/M3 15\.5/);
- const css=read('assets/reports-dashboard.css');
+ const css=fs.readFileSync(path.join(root,'assets/reports-dashboard.css'),'utf8');
  assert.match(css,/\.insightPulseGrid \.homePulseIcon\{width:42px;height:42px;background:#eef6ff;color:#087cf0\}/);
  assert.match(css,/\.insightPulseGlyph\{display:block;width:23px;height:23px;fill:currentColor;stroke:none!important\}/);
 });
