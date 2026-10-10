@@ -812,6 +812,13 @@ html.flympusLargeText .fleetEditor .fleetSectionHead h2{font-size:22px!important
  position:relative;z-index:1;transform:scale(1.018);
  box-shadow:0 9px 26px rgba(11,49,83,.18);
 }
+/* Suppress the iOS long-press text-selection loupe, not the intentional lift. */
+.fleetBookedFlights .fleetSorties,
+.fleetBookedFlights .fleetSortie,
+.fleetBookedFlights .fleetSortie *{
+ -webkit-user-select:none!important;user-select:none!important;
+ -webkit-touch-callout:none!important;
+}
 .fleetSortieDragHandle{
  display:grid;place-items:center;flex:0 0 37px;
  width:37px;height:45px;border:1px solid #d8e6f1;border-radius:11px;
@@ -824,7 +831,8 @@ html.flympusLargeText .fleetEditor .fleetSectionHead h2{font-size:22px!important
  outline:3px solid #70aaed;outline-offset:2px;
 }
 /* The real source must not show stale tail/crew values through the clone. */
-.fleetSortieDragSource{visibility:hidden!important;opacity:0!important;transition:none!important}
+/* Keep the captured iOS pointer attached while making the source invisible. */
+.fleetSortieDragSource{opacity:0!important;transition:none!important}
 .fleetSortieDragGhost{
  display:flex;align-items:center;flex-wrap:wrap;gap:9px;
  border:1px solid #9cbbd4!important;border-radius:13px!important;

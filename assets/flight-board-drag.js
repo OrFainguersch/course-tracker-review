@@ -21,6 +21,8 @@
   if(rows().length<2)return;
   const reduced=()=>root.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
   const labels=()=>rows().map(item=>item.dataset.flightId);
+  // The board consists of read-only flight cards; never start native text selection.
+  board.addEventListener?.('selectstart',event=>{if(event.cancelable)event.preventDefault()});
   let busy=false,dragging=false;
   const commit=async next=>{
    // Do not insert live rows into the DOM: old timestamps and crews would
@@ -32,6 +34,10 @@
    finally{board.classList.remove('fleetDragSaving');busy=false}
   };
   board.querySelectorAll('.fleetSortieDragHandle').forEach(handle=>{
+   // iOS fires its native text loupe on a long touch unless touchstart is
+   // cancelled before the browser begins selection, even with touch-action:none.
+   handle.addEventListener('touchstart',event=>{if(event.cancelable)event.preventDefault()},{passive:false});
+   handle.addEventListener('contextmenu',event=>{if(event.cancelable)event.preventDefault()});
    handle.addEventListener('keydown',event=>{
     if(!['ArrowUp','ArrowDown'].includes(event.key)||busy||dragging)return;
     const source=handle.closest('.fleetSortie'),order=labels(),index=order.indexOf(source?.dataset.flightId);

@@ -604,12 +604,12 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261009-flight-drag-tabs-0810'],['assets/fleet-operations.css','20261009-flight-drag-stability-0816']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261009-flight-drag-tabs-0810'],['assets/fleet-operations.css','20261010-flight-ios-loupe-0818']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-09-flight-drag-press-flash-0817'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261009-flight-drag-stability-0816/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-flight-ios-loupe-0818'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-ios-loupe-0818/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
@@ -877,7 +877,7 @@ test('flight drag UI offers accessible touch grips, reduced motion and localized
  assert.match(html,/dutyOperations\.saveDraft\('PLAN'/);
  assert.match(html,/dutyOperations\.publish\('PLAN'/);
  assert.match(html,/Crew conflict: /);
- assert.ok(html.includes('flight-board-drag.js?v=20261009-flight-drag-stability-0816'));
+ assert.ok(html.includes('flight-board-drag.js?v=20261010-flight-ios-loupe-0818'));
 });
 test('Plan tabs use shared Course Management-style segmented control',()=>{
  const css=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
@@ -1012,7 +1012,26 @@ test('Plan flight drag offers press lift without exposing stale identity or glob
  assert.match(drag,/clone\.style\.transform='scale\(1\.02\)'/);
  assert.match(css,/\.fleetBookedFlights \.fleetSortiePressing\{/);
  assert.match(css,/transform:scale\(1\.018\)/);
- assert.match(css,/\.fleetSortieDragSource\{visibility:hidden!important/);
+ assert.match(css,/\.fleetSortieDragSource\{opacity:0!important/);
  assert.match(css,/\.fleetDragSaving\{pointer-events:none\}/);
  assert.doesNotMatch(css,/\.fleetDragSaving\{opacity:/);
+});
+
+
+test('iOS flight drag blocks native text loupe and keeps open flight edit during reslot',()=>{
+ const drag=fs.readFileSync(path.join(__dirname,'../assets/flight-board-drag.js'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ const start=html.indexOf('window.FLYMPUS_FLIGHT_DRAG?.attach?.(');
+ const end=html.indexOf('const refreshTimeline=',start);
+ assert.ok(start>0&&end>start,'Flight drag callbacks are present');
+ const callback=html.slice(start,end);
+ assert.match(drag,/handle\.addEventListener\('touchstart'/);
+ assert.match(drag,/handle\.addEventListener\('contextmenu'/);
+ assert.match(drag,/board\.addEventListener\?\.\('selectstart'/);
+ assert.match(css,/-webkit-touch-callout:none!important/);
+ assert.match(css,/-webkit-user-select:none!important/);
+ assert.match(css,/\.fleetSortieDragSource\{opacity:0!important/);
+ assert.doesNotMatch(callback,/state\.flightBoardEditId=null/,'Reordering must not close Edit');
+ assert.match(callback,/Retain the currently edited flight by its stable ID/);
+ assert.doesNotMatch(callback,/onError:err=>\{[^}]*render\(\)/,'A rejected drop should not reset the editor');
 });
