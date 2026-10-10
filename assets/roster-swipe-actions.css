@@ -1,49 +1,53 @@
-/* One stable grid surface is animated for each Roster card. Safari no longer
-   interpolates avatar/name/action columns as separate layers on swipe close. */
-@media (hover:none) and (pointer:coarse){
- .people .personCard.rosterSwipeRow{position:relative!important;overflow:hidden!important;isolation:isolate}
+/* Roster gestures: a fixed-height horizontal rail, with opaque contextual
+   action panels uncovered by the card. No opacity fades, blur, or vertical motion. */
+@media (max-width:759px) and (hover:none) and (pointer:coarse){
+ .people .personCard.rosterSwipeRow{position:relative!important;overflow:hidden!important;isolation:isolate;align-items:stretch!important}
  .people .personCard.rosterSwipeRow.traineeRosterCard,
  .people .personCard.rosterSwipeRow.instructorRosterCard{grid-template-columns:minmax(0,1fr)!important;gap:0!important}
  .people .personCard.rosterSwipeRow .rosterSwipeContent{
   grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr) auto;
-  gap:14px;align-items:center;min-width:0;width:100%;box-sizing:border-box;
-  position:relative;z-index:2;border-radius:inherit;background:inherit;
+  gap:10px;align-items:center;align-self:stretch;min-width:0;width:100%;height:100%;
+  box-sizing:border-box;position:relative;z-index:2;border-radius:inherit;
+  background:inherit;
   transform:translate3d(var(--roster-swipe-offset,0px),0,0);
   transition:transform .30s cubic-bezier(.22,.72,.2,1);will-change:transform
  }
  .people .personCard.rosterSwipeRow.rosterSwipeMoving .rosterSwipeContent{transition:none!important}
+ .people .personCard.rosterSwipeRow > .rosterSwipeFixedRank{
+  position:absolute!important;top:0!important;right:0!important;z-index:4;
+  transform:translate3d(var(--roster-swipe-offset,0px),0,0);
+  transition:transform .30s cubic-bezier(.22,.72,.2,1);will-change:transform;
+ }
+ .people .personCard.rosterSwipeRow.rosterSwipeMoving > .rosterSwipeFixedRank{transition:none!important}
+ html[data-flympus-language="he"] .people .personCard.rosterSwipeRow > .rosterSwipeFixedRank{
+  right:auto!important;left:0!important
+ }
  .people .personCard .rosterSwipeActionTray{
-  position:absolute;right:0;top:0;bottom:0;z-index:1;width:146px;
-  display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:7px 5px;
-  box-sizing:border-box;opacity:0;visibility:hidden;pointer-events:none;
-  transform:translate3d(8px,0,0);
-  transition:opacity .24s ease,transform .30s cubic-bezier(.22,.72,.2,1),visibility .30s
+  position:absolute;right:0;left:auto;top:0;bottom:0;z-index:1;width:146px;
+  display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:6px 5px;
+  box-sizing:border-box;opacity:1;visibility:visible;
+  pointer-events:none;transform:none!important;filter:none!important;transition:none!important
  }
- .people .personCard.rosterSwipeOpen .rosterSwipeActionTray{
-  opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(0,0,0)
- }
- .people .personCard.rosterSwipeMoving .rosterSwipeActionTray{
-  opacity:var(--roster-swipe-reveal,0);visibility:visible;pointer-events:none;
-  transform:translate3d(calc(8px * (1 - var(--roster-swipe-reveal,0))),0,0);transition:none
- }
+ html[data-flympus-language="he"] .people .personCard .rosterSwipeActionTray{right:auto;left:0}
+ .people .personCard.rosterSwipeOpen .rosterSwipeActionTray{pointer-events:auto}
  .people .personCard .rosterSwipeActionTray button{
-  border-radius:10px;border:0;font-size:12px;font-weight:850;cursor:pointer;padding:4px;color:#fff;min-width:0
+  border-radius:11px;border:0;font-size:12px;font-weight:850;cursor:pointer;padding:4px;
+  color:#fff;min-width:0;filter:none!important;box-shadow:none
  }
- .people .personCard .rosterSwipeEdit{background:#1d6fae}
- .people .personCard .rosterSwipeRemove{background:#c43b51}
+ .people .personCard .rosterSwipeEdit{background:#256da7}
+ .people .personCard .rosterSwipeRemove{background:#ba3550}
  html[data-flympus-theme="dark"] .people .personCard .rosterSwipeEdit{background:#246fa8}
  html[data-flympus-theme="dark"] .people .personCard .rosterSwipeRemove{background:#a52642}
  html.flympusLargeText .people .personCard .rosterSwipeActionTray button{font-size:14px}
 }
-@media (hover:none) and (pointer:coarse) and (max-width:759px){
- .people .personCard.rosterSwipeRow .rosterSwipeContent{gap:10px}
-}
-@media (hover:hover) and (pointer:fine){
+@media (hover:hover) and (pointer:fine), (min-width:760px){
  .people .personCard.rosterSwipeRow .rosterSwipeContent{display:contents!important;transform:none!important}
+ .people .personCard.rosterSwipeRow > .rosterSwipeFixedRank{transform:none!important}
  .rosterSwipeActionTray{display:none!important}
 }
 @media(prefers-reduced-motion:reduce){
- .people .personCard.rosterSwipeRow .rosterSwipeContent,.rosterSwipeActionTray{transition:none!important}
+ .people .personCard.rosterSwipeRow .rosterSwipeContent,
+ .people .personCard.rosterSwipeRow > .rosterSwipeFixedRank{transition:none!important}
 }
 /* The Plan has no swipe delete: remove the hidden red layer and make all visible edges uniform. */
 .fleetBookedFlights .fleetSortie:not(.conflict){border-color:#dce7f0!important;background:#fff!important}
