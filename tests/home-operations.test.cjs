@@ -125,7 +125,7 @@ test('Home renders real briefing, flight and debrief start clocks in circular le
  assert.doesNotMatch(snippet,/clock\.debrief\b/);
  assert.match(snippet,/homePlanMomentIcon/);
  const page=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
- assert.match(snippet,/homePlanRow homePlanRowTimeline/);
+ assert.match(snippet,/homePlanFlightPhase/);
  assert.match(page,/homePlanFlightRow\(x,homeHebrew\)/);
  assert.match(snippet,/flight\.traineeName/);
  assert.match(snippet,/flight\.syllabus/);
