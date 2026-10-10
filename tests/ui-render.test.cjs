@@ -673,7 +673,7 @@ assert.doesNotMatch(packagesHtml,/packageEditing/,"Focused Package is view mode 
 vm.runInContext("state.advancedArchitectureEditing=true;render()",context);
 const editingPackageHtml=elements.get("#content").innerHTML;
 assert.match(editingPackageHtml,/packageEditing/);
-assert.doesNotMatch(editingPackageHtml,/Done editing|Save Package|Save & Done/,"Advanced must use the single sticky Save changes action");
+assert.doesNotMatch(editingPackageHtml,/Save Package|Save & Done/,"Advanced must retain a single Save changes action while Done editing exits the mode");
 assert.match(editingPackageHtml,/Delete Package/);
 assert.doesNotMatch(editingPackageHtml,/Restore original Package defaults|data-reset-global-package/,"Package edit mode must not expose a destructive bulk restore-to-defaults action");
 assert.match(editingPackageHtml,/data-delete-package="ui_custom_package"/,"Delete Package must appear while Advanced Edit is active");
