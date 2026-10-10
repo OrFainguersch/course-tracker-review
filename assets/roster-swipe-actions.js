@@ -3,18 +3,19 @@
 'use strict';
 const attached=new WeakSet(),WIDTH=146,THRESHOLD=52;
 let openRow=null;
-function close(row){
+/* Snap naturally from the exact touch displacement without a zero-offset flash. */
+function settle(row,shouldOpen){
  if(!row)return;
- row.classList.remove('rosterSwipeOpen','rosterSwipeMoving');
- row.style.removeProperty('--roster-swipe-offset');
- if(openRow===row)openRow=null;
-}
-function open(row){
- if(openRow&&openRow!==row)close(openRow);
+ if(shouldOpen&&openRow&&openRow!==row)settle(openRow,false);
+ if(row.classList.contains('rosterSwipeMoving'))row.querySelector('.personInfo')?.getBoundingClientRect?.();
+ row.classList.toggle('rosterSwipeOpen',shouldOpen);
  row.classList.remove('rosterSwipeMoving');
- row.style.removeProperty('--roster-swipe-offset');
- row.classList.add('rosterSwipeOpen');openRow=row;
+ row.style.setProperty('--roster-swipe-offset',(shouldOpen?-WIDTH:0)+'px');
+ row.style.setProperty('--roster-swipe-reveal',shouldOpen?'1':'0');
+ if(shouldOpen)openRow=row;else if(openRow===row)openRow=null;
 }
+const close=row=>settle(row,false);
+const open=row=>settle(row,true);
 function touchDevice(){try{return root.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches===true}catch{return false}}
 function attach(host,canManage){
  if(!touchDevice()||!canManage||!host)return;
@@ -45,7 +46,9 @@ function attach(host,canManage){
    if(!claimed)return;
    if(event.cancelable)event.preventDefault();
    row.classList.add('rosterSwipeMoving');
-   row.style.setProperty('--roster-swipe-offset',Math.max(-WIDTH,Math.min(0,(start.open?-WIDTH:0)+dx))+'px');
+   const offset=Math.max(-WIDTH,Math.min(0,(start.open?-WIDTH:0)+dx));
+   row.style.setProperty('--roster-swipe-offset',offset+'px');
+   row.style.setProperty('--roster-swipe-reveal',String(Math.abs(offset)/WIDTH));
   },{passive:false});
   row.addEventListener('touchend',event=>{
    if(!start)return;
@@ -56,7 +59,7 @@ function attach(host,canManage){
   row.addEventListener('touchcancel',()=>{start=null;claimed=false;close(row)});
   row.addEventListener('click',event=>{
    if(event.target?.closest?.('.rosterSwipeActionTray'))return;
-   if(Date.now()<blockUntil||row.classList.contains('rosterSwipeOpen')){event.preventDefault();event.stopImmediatePropagation()}
+   if(Date.now()<blockUntil||row.classList.contains('rosterSwipeOpen')){event.preventDefault();event.stopImmediatePropagation();if(Date.now()>=blockUntil)close(row)}
   },true);
   row.addEventListener('keydown',event=>{if(event.key==='Escape')close(row)});
  });
