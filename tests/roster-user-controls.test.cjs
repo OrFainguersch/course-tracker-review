@@ -200,3 +200,11 @@ test('Trainee rail paints full-card geometry and reveals actions without a secon
  assert.match(css,/\.rosterSwipeRow\.instructorRosterCard\{grid-template-columns:minmax\(0,1fr\)!important/);
  assert.match(css,/\.rosterSwipeActionTray\{[\s\S]*?clip-path:inset\(0 0 0 100%\)/);
 });
+
+test('Instructor swipe inherits trainee occlusion and keeps Remove right of Edit',()=>{
+ const css=read('assets/roster-swipe-actions.css');
+ assert.ok(css.includes('.personCard.instructorRosterCard.rosterSwipeRow{padding:0!important'));
+ assert.ok(css.includes('visibility:hidden;direction:ltr!important'));
+ const js=read('assets/roster-swipe-actions.js');
+ assert.ok(js.includes("||(!shouldOpen&&row.classList.contains('rosterSwipeMoving'))"));
+});

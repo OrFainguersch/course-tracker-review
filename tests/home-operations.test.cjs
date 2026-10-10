@@ -315,3 +315,12 @@ test('Home flight toggle cannot show iOS dark tap highlight and leaves crew alig
  assert.match(html,/View all my courses/);
  assert.match(html,/הצג את כל הקורסים שלי/);
 });
+
+test('Home accordion measures exact rail heights instead of reflowing grid tracks',()=>{
+ const page=fs.readFileSync('index.html','utf8');
+ const css=fs.readFileSync('assets/home-operations.css','utf8');
+ assert.ok(page.includes('const fromHeights=reveals.map(part=>part.getBoundingClientRect().height)'));
+ assert.ok(page.includes("part.style.height=target+'px'"));
+ assert.ok(css.includes('.homePlanList,.homeDashboard .homePlanFlight{overflow-anchor:none}'));
+ assert.ok(css.includes('transition:height .38s cubic-bezier'));
+});

@@ -128,3 +128,8 @@ html.flympusLargeText .insightRoot .insightPulseGrid .homePulseNote{font-size:13
 @media print{
  .insightRoot .insightPulseGrid .homePulseCard{break-inside:avoid;box-shadow:none}
 }
+
+/* Restore the right-facing Flights Completed icon. */
+.insightRoot .insightPulseGrid .homePulseCard:nth-child(3) .insightPulseGlyph{
+ transform:rotate(90deg);transform-origin:50% 50%
+}

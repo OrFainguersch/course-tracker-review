@@ -73,6 +73,17 @@
   border-radius:11px;border:0;font-size:12px;font-weight:850;cursor:pointer;padding:4px;
   color:#fff;min-width:0;filter:none!important;box-shadow:none
  }
+ /* Match the approved trainee-card reveal for instructors: one opaque rail,
+    no competing clip animation, Edit left and Remove right in both languages. */
+ .people .personCard.instructorRosterCard.rosterSwipeRow{padding:0!important;transform:none!important;transition:none!important}
+ .people .personCard.instructorRosterCard.rosterSwipeRow .rosterSwipeContent{padding:11px;min-height:108px}
+ .people .personCard.rosterSwipeRow.personCardOpen:active{transform:none!important;transition-property:border-color,box-shadow,background-color!important}
+ .people .personCard.rosterSwipeRow .rosterSwipeActionTray{
+  clip-path:none!important;transition:none!important;visibility:hidden;direction:ltr!important
+ }
+ .people .personCard.rosterSwipeRow.rosterSwipeMoving .rosterSwipeActionTray,
+ .people .personCard.rosterSwipeRow.rosterSwipeOpen .rosterSwipeActionTray,
+ .people .personCard.rosterSwipeRow.rosterSwipeSettling .rosterSwipeActionTray{visibility:visible}
  .people .personCard .rosterSwipeEdit{background:#256da7}
  .people .personCard .rosterSwipeRemove{background:#ba3550}
  html[data-flympus-theme="dark"] .people .personCard .rosterSwipeEdit{background:#246fa8}
