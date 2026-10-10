@@ -1111,7 +1111,7 @@ test('Plan reorder patches only keyed time fields without remounting cards or an
 test('Scheduled flights emphasize instructor without changing slot field updates',()=>{
  const view=fs.readFileSync(path.join(__dirname,'../assets/fleet-views.js'),'utf8');
  const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
- assert.match(view,/fleetSortiePerson-teacher/);
+ assert.match(view,/fleetSortiePerson-'\+role/);
  assert.match(view,/crewLine\('teacher',f\.instructorName\)/);
  assert.match(view,/data-flight-slot-details/);
  assert.match(css,/\.fleetBookedFlights \.fleetSortiePerson-teacher\{font-size:12px;font-weight:850/);

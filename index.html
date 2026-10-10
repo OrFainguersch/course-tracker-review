@@ -9001,9 +9001,16 @@ function patchPlanFlightCards(date,flights,{previewed=false,animateReorder=true}
  const before=animateReorder&&!previewed?
   new Map(existing.map(row=>[row.dataset.flightId,row.getBoundingClientRect().top])):null;
  const ghost=board.querySelector('.fleetSortieDragGhost');
+ const updateSlotDetail=(destination,next)=>{
+   const old=[...destination.querySelectorAll('[data-flight-slot-clock]')];
+   const future=[...next.querySelectorAll('[data-flight-slot-clock]')];
+   if(old.length===3&&future.length===old.length){
+    old.forEach((item,i)=>{item.textContent=future[i].textContent});
+   }else destination.textContent=next.textContent;
+ };
  for(const x of updates){
   x.time.textContent=x.nextTime.textContent;
-  x.details.textContent=x.nextDetails.textContent;
+  updateSlotDetail(x.details,x.nextDetails);
   if(x.grip&&x.nextGrip)x.grip.setAttribute('aria-label',x.nextGrip.getAttribute('aria-label')||'');
   x.row.style.transition='none';
   x.row.style.transform='';
@@ -9012,7 +9019,7 @@ function patchPlanFlightCards(date,flights,{previewed=false,animateReorder=true}
    const ghostTime=ghost.querySelector('[data-flight-slot-time]');
    const ghostDetails=ghost.querySelector('[data-flight-slot-details]');
    if(ghostTime)ghostTime.textContent=x.nextTime.textContent;
-   if(ghostDetails)ghostDetails.textContent=x.nextDetails.textContent;
+   if(ghostDetails)updateSlotDetail(ghostDetails,x.nextDetails);
   }
  }
  if(before)for(const x of updates){
@@ -9179,6 +9186,12 @@ function getExamRecords(){return readCourseArray('ct-review-exams')}
 function saveExamRecords(v){writeCourseArray('ct-review-exams',v)}
 function currentActivityCounts(){return {evaluation:getEvaluations().length,safety:courseMockSafetyEvents().length+getSafetyRecords().length,exams:courseMockExamAttempts().length+getExamRecords().length,planned:getDailyReports().length,roster:courseTrainees().length+courseInstructors().length}}
 /* Today Plan uses the Plan model's real briefing/takeoff/landing clocks. */
+/* Identity pictograms are presentation only; IDs and name fields are untouched. */
+function homeFlightPerson(name,role){
+ const pictogram=role==='teacher'?"<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M9 3h13v11h-7v-2h5V5H9v2H7V3h2Zm3 3h6v2h-6V6Zm-3.5 4a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7ZM2 22v-1a5.5 5.5 0 0 1 11 0v1H2Zm12-5 3-3 1.4 1.4-3 3L14 17Z\"/></svg>":"<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m12 3 11 5-11 5L1 8l11-5Zm-6 9.2V16c3.6 2.6 8.4 2.6 12 0v-3.8l-6 2.8-6-2.8ZM21 10v6h-2v-6h2Z\"/></svg>";
+ return '<span class="homePlanPerson homePlanPerson-'+role+'"><span class="homePlanPersonIcon" aria-hidden="true">'+pictogram+'</span>'+
+  (role==='student'?'<b>':'<span class="homePlanInstructor">')+esc(name)+(role==='student'?'</b>':'</span>')+'</span>';
+}
 function homeFlightMoments(flight,hebrew){
  const timeline=window.FLYMPUS_FLEET_MODEL?.flightTimeline?.(flight,getPlanTimingDefaults());
  const clock=timeline?.clock||{};
@@ -9199,7 +9212,7 @@ function homeFlightMoments(flight,hebrew){
   '<span class="homePlanTimelineRail" aria-hidden="true"><span class="homePlanTimelinePassed"></span><span class="homePlanTimelineNow"'+(pos.active&&pos.percent<99.9?'':' hidden')+'></span></span>'+
   moments.map(m=>'<span class="homePlanMoment homePlanMoment-'+m.type+'" aria-label="'+esc(m.label+' '+m.time)+'" title="'+esc(m.label)+'">'+
    '<time class="homePlanMomentTime" dir="ltr">'+esc(m.time)+'</time>'+
-   '<span class="homePlanMomentIcon" aria-hidden="true">'+icons[m.type]+'</span></span>').join('')+
+   '<span class="homePlanMomentIcon" aria-hidden="true">'+icons[m.type]+'</span><span class="homePlanMomentLabel">'+esc(hebrew?m.type==='briefing'?'תדריך':m.type==='takeoff'?'טיסה':'תחקיר':m.type==='briefing'?'Briefing':m.type==='takeoff'?'Flight':'Debriefing')+'</span></span>').join('')+
  '</div>';
 }
 /* Match Fleet's platform prefix formatting without modifying the saved tail. */
@@ -9324,7 +9337,7 @@ function home(){
      '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Today\'s Plan</h2><p>Scheduled flights and activities for today</p></div></div><span class="homeDateChip">▣ '+esc(todayLabel)+'</span></div></div>'+
        '<div class="homePlanList">'+(function(){const flights=getDailyFlightBoard().filter(x=>x.date===todayIsoDate()&&x.platformId===currentFleetPlatform()).sort((a,b)=>String(a.time).localeCompare(String(b.time)));return flights.length?flights.map(x=>
   '<div class="homePlanRow homePlanRowTimeline">'+homeFlightMoments(x,homeHebrew)+
-  '<div class="homePlanBody"><span class="homePlanMain"><b>'+esc(x.traineeName||'Trainee')+'</b><small>'+esc(x.syllabus)+' · '+esc(homeFlightAircraftName(x))+(x.instructorName?' · <span class="homePlanInstructor">'+esc(x.instructorName)+'</span>':'')+'</small><span class="homePlanLiveStatus" hidden></span></span>'+
+  '<div class="homePlanBody"><span class="homePlanMain">'+homeFlightPerson(x.traineeName||'Trainee','student')+'<small>'+esc(x.syllabus)+' · '+esc(homeFlightAircraftName(x))+'</small>'+(x.mode!=='SOLO'&&x.instructorName?homeFlightPerson(x.instructorName,'teacher'):'')+'<span class="homePlanLiveStatus" hidden></span></span>'+
   '<span class="homePlanTags"><span class="homeTag '+(x.mode==='SOLO'?'solo':'instructed')+'">'+esc(x.mode==='SOLO'?'Solo':'Instructed')+'</span>'+(window.FLYMPUS_FLEET_MODEL.flightIssues(x,getFleetAircraft(),currentFleetPlatform())?'<span class="homeTag" style="color:#b42318">Unavailable</span>':'')+'</span></div></div>').join(''):'<div class="homePlanRow homePlanEmpty"><span class="homePlanMain"><b>No flights scheduled yet</b><small>Scheduled flights will appear here when added in Plan.</small></span></div>'})()+
        '</div>'+
      '</div>'+
