@@ -367,7 +367,7 @@ html.flympusLargeText .homeDashboard .homePlanFlightSyllabus{font-size:13px}
  display:grid;min-height:41px;
 }
 .homeDashboard .homePlanFlight::before{
- content:"";position:absolute;left:calc(14px + var(--home-phase-time) + var(--home-phase-gap) + var(--home-phase-icon) / 2);
+ content:"";position:absolute;left:calc(14px + var(--home-phase-time) + var(--home-phase-gap) + 13.5px);
  top:28px;bottom:27px;width:2px;border-radius:3px;background:#b9d6e8;
  opacity:0;pointer-events:none;z-index:0;
  transition:opacity .17s ease;
@@ -382,7 +382,7 @@ html[data-flympus-language="he"] .homeDashboard .homePlanFlightPhaseClock{
  direction:rtl;flex-direction:initial;
 }
 html[data-flympus-language="he"] .homeDashboard .homePlanFlight::before{
- left:auto;right:calc(14px + var(--home-phase-time) + var(--home-phase-gap) + var(--home-phase-icon) / 2);
+ left:auto;right:calc(14px + var(--home-phase-time) + var(--home-phase-gap) + 13.5px);
 }
 html[data-flympus-theme="dark"] .homeDashboard .homePlanFlight::before{background:#4b7598}
 html[data-flympus-theme="dark"] .homeDashboard .homePlanFlightStepName{color:#99cefa}
@@ -399,10 +399,10 @@ html[data-flympus-theme="dark"] .homeDashboard .homePlanFlightStepName{color:#99
  .homeDashboard .homePlanFlightPhaseName,
  .homeDashboard .homePlanFlightStepName{font-size:10px}
  .homeDashboard .homePlanFlight::before{
-  left:calc(9px + var(--home-phase-time) + var(--home-phase-gap) + var(--home-phase-icon) / 2);
+  left:calc(9px + var(--home-phase-time) + var(--home-phase-gap) + 12px);
  }
  html[data-flympus-language="he"] .homeDashboard .homePlanFlight::before{
-  left:auto;right:calc(9px + var(--home-phase-time) + var(--home-phase-gap) + var(--home-phase-icon) / 2);
+  left:auto;right:calc(9px + var(--home-phase-time) + var(--home-phase-gap) + 12px);
  }
 }
 @media(max-width:360px){
@@ -411,10 +411,10 @@ html[data-flympus-theme="dark"] .homeDashboard .homePlanFlightStepName{color:#99
   grid-template-columns:var(--home-phase-track) minmax(0,1fr) auto 17px;gap:4px
  }
  .homeDashboard .homePlanFlight::before{
-  left:calc(7px + var(--home-phase-time) + var(--home-phase-gap) + var(--home-phase-icon) / 2)
+  left:calc(7px + var(--home-phase-time) + var(--home-phase-gap) + 12px)
  }
  html[data-flympus-language="he"] .homeDashboard .homePlanFlight::before{
-  left:auto;right:calc(7px + var(--home-phase-time) + var(--home-phase-gap) + var(--home-phase-icon) / 2)
+  left:auto;right:calc(7px + var(--home-phase-time) + var(--home-phase-gap) + 12px)
  }
 }
 @media(prefers-reduced-motion:reduce){
