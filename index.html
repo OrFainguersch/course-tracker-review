@@ -1298,7 +1298,7 @@ html[data-flympus-theme="dark"] :is(.rosterControls>.scrollTabs,.courseManagemen
 html[data-flympus-theme="dark"] :is(.rosterControls>.scrollTabs,.courseManagementTabs,.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs,.insightRoot .insightTabNav)>button:is(.active,[aria-current="page"]){background:#36566f!important;color:#fff!important}
 /* All multi-filter panels have the same reset position as Reporting period. */
 .unifiedFilterHeader{flex-wrap:wrap;min-height:35px}
-.filterResetTop{margin-inline-start:auto!important;white-space:nowrap!important;min-width:0!important;min-height:35px!important;padding:7px 12px!important;font-size:11px!important;border-radius:11px!important;justify-self:end}
+.filterResetTop{margin-inline-start:auto!important;white-space:nowrap!important;min-width:0!important;min-height:40px!important;padding:8px 12px!important;font-size:11px!important;border-radius:11px!important;justify-self:end}
 .unifiedFilterHeader>.filterResetTop{grid-column:auto!important;width:auto!important;flex:0 0 auto}
 :is(.myCoursesFilters,.packageFiltersCollapsible){position:relative}
 :is(.myCoursesFilters,.packageFiltersCollapsible)>.myCoursesFilterSummary{padding-inline-end:144px!important}
@@ -12419,7 +12419,7 @@ function bindReports(){
  [['reportTrainee','reportTrainees'],['reportInstructor','reportInstructors'],['reportSyllabus','reportSyllabi']].forEach(([id,key])=>{if($('#'+id))$('#'+id).addEventListener('filterapply',e=>{state[key]=e.detail?.values||[];saveUiState();render()})});
  if($('#reportDateFrom'))$('#reportDateFrom').onchange=e=>{state.reportDateFrom=normalizeDateValue(e.target.value)||'';saveUiState();render()};
  if($('#reportDateTo'))$('#reportDateTo').onchange=e=>{state.reportDateTo=normalizeDateValue(e.target.value)||'';saveUiState();render()};
- if($('#reportsReset'))$('#reportsReset').onclick=()=>{state.reportTrainees=[];state.reportInstructors=[];state.reportSyllabi=[];state.reportDateFrom='';state.reportDateTo='';saveUiState();render()};
+ if($('#reportsReset'))$('#reportsReset').onclick=()=>{state.reportTrainees=[];state.reportInstructors=[];state.reportSyllabi=[];state.reportDateFrom='';state.reportDateTo='';state.reportGranularity='week';saveUiState();render()};
  if($('#reportsPrint'))$('#reportsPrint').onclick=()=>window.print();
  if($('#reportsCsv'))$('#reportsCsv').onclick=()=>{
    const tab=['operations','dashboard','details'].includes(state.reportTab)?state.reportTab:'dashboard';
