@@ -114,3 +114,30 @@ test('Home has only a full-width recent flight card, no grades/upcoming, and Dut
  assert.ok(!duty.includes('homePulseGrid'));
  assert.ok(html.includes('assets/home-operations.js?v=20261008-home02'));
 });
+
+test('Home renders real briefing, flight and debrief start clocks in circular left rail',()=>{
+ const snippet=html.slice(html.indexOf('function homeFlightMoments('),html.indexOf('function home(){'));
+ assert.match(snippet,/FLYMPUS_FLEET_MODEL\?\.flightTimeline\?\.\(flight,getPlanTimingDefaults\(\)\)/);
+ assert.match(snippet,/clock\.briefing/);
+ assert.match(snippet,/clock\.takeoff/);
+ assert.match(snippet,/clock\.landing/);
+ assert.doesNotMatch(snippet,/clock\.debrief\b/);
+ assert.match(snippet,/homePlanMomentIcon/);
+ const page=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
+ assert.match(page,/homePlanRow homePlanRowTimeline/);
+ assert.match(page,/homeFlightMoments\(x,homeHebrew\)/);
+ assert.match(page,/x\.traineeName/);
+ assert.match(page,/x\.syllabus/);
+ assert.match(page,/x\.instructorName/);
+ const css=fs.readFileSync('assets/home-operations.css','utf8');
+ assert.match(css,/\.homePlanRow\.homePlanRowTimeline\{/);
+ assert.match(css,/direction:ltr!important/);
+});
+test('Debrief starts at the planned landing, not the debrief end',()=>{
+ const fleet=require('../assets/fleet-model.js');
+ const clock=fleet.flightTimeline({date:'2026-10-10',time:'08:00',estimatedMinutes:30,briefingMinutes:20,debriefMinutes:15,mode:'INSTRUCTED'},fleet.TIMING_DEFAULTS).clock;
+ assert.equal(clock.briefing,'07:40');
+ assert.equal(clock.takeoff,'08:00');
+ assert.equal(clock.landing,'08:30');
+ assert.equal(clock.debrief,'08:45');
+});
