@@ -1257,6 +1257,15 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 .dateCalendarNative{position:absolute!important;inset:0!important;z-index:4!important;width:100%!important;height:100%!important;min-width:0!important;margin:0!important;padding:0!important;border:0!important;opacity:0!important;cursor:pointer!important;-webkit-appearance:auto!important;appearance:auto!important}
 </style>
 <style>
+
+/* 0845: same page title/Manage placement as Course Roster. */
+.courseManagementTopbar{align-items:flex-start}
+.courseManagementTopbar>div:first-child{flex:1;min-width:0}
+.courseManagementTopbar>.btn{flex:0 0 auto;min-height:40px;white-space:nowrap}
+.courseManagementTopbar .courseManagementDone{border-radius:12px;padding:10px 14px}
+.advancedManageHeader{margin-top:12px}
+.advancedManageHeading{width:100%}
+@media(max-width:420px){.courseManagementTopbar{gap:8px}.courseManagementTopbar>.btn{min-width:0;padding:9px 11px}}
 /* ===== Tailor course syllabus: no provenance/status column ===== */
 .courseSyllabusTable .packageSyllabusHeader,
 .courseSyllabusTable .packageSyllabusRow{
@@ -6176,7 +6185,7 @@ const FLYMPUS_HE_UI={'Home, Plan and Fleet':'בית, תכנון וצי כלי ט
   'Course analytics':'ניתוחי קורס','Analytics are scoped to the active course and its resolved training suit.':'הניתוחים מתייחסים לקורס הפעיל ולחליפת ההכשרה שנפתרה עבורו.',
   'Export CSV':'ייצא CSV','Print / PDF':'הדפסה / PDF','Emergency exposure':'חשיפה למצבי חירום','Syllabus activity':'פעילות לפי סילבוס',
   'Evaluation activity by trainee':'פעילות הערכה לפי חניך','Safety severity':'חומרת אירועי בטיחות','Monthly activity':'פעילות חודשית',
-  'Create course':'צור קורס','Tailor course':'התאמת קורס','Advanced':'מתקדם','Edit advanced setup':'עריכת ההגדרות המתקדמות','Manage advanced setup':'ניהול ההגדרות המתקדמות','Editing':'בעריכה','Editing advanced setup':'עריכת ההגדרות המתקדמות','Save or discard changes to sectors, architecture and Packages when you are finished.':'בסיום, שמור או בטל שינויים בסקטורים, בארכיטקטורה ובחבילות.','NEW COURSE':'קורס חדש','Course details':'פרטי הקורס',
+  'Create course':'צור קורס','Tailor course':'התאמת קורס','Advanced':'מתקדם','Edit advanced setup':'עריכת ההגדרות המתקדמות','Save changes to continue editing; Done editing above saves and exits.':'שמור שינויים כדי להמשיך לערוך; סיום עריכה למעלה שומר ויוצא.','Manage advanced setup':'ניהול ההגדרות המתקדמות','Editing':'בעריכה','Editing advanced setup':'עריכת ההגדרות המתקדמות','Save changes to continue editing; Done editing above saves and exits.':'בסיום, שמור או בטל שינויים בסקטורים, בארכיטקטורה ובחבילות.','NEW COURSE':'קורס חדש','Course details':'פרטי הקורס',
   'Country / customer context':'מדינה / הקשר לקוח','Training Package':'חבילת הכשרה','Course identity':'זהות הקורס','Course name':'שם הקורס',
   'Select Package':'בחר חבילה','Define sectors':'הגדרת סקטורים','Select sector to edit':'בחר סקטור לעריכה','Architecture':'ארכיטקטורה',
   'Packages':'חבילות','Phases':'שלבים','Platforms':'פלטפורמות','Training types':'סוגי הכשרה','Qualifications':'הסמכות',
@@ -6647,9 +6656,10 @@ Object.assign(FLYMPUS_HE_UI,{
   "THIS COURSE": "קורס זה",
   "Edit course": "ערוך קורס",
   "Edit selected course": "ערוך את הקורס הנבחר",
+  "Save changes to continue editing; Done editing above saves and exits.": "שמור שינויים כדי להמשיך לערוך; סיום עריכה למעלה שומר ויוצא.",
   "✎ Edit selected course": "✎ ערוך את הקורס הנבחר",
   "Editing selected course": "עריכת הקורס הנבחר",
-  "Save or discard changes to this course when you are finished.": "בסיום, שמור או בטל את השינויים בקורס זה.",
+  "Save changes to continue editing; Done editing above saves and exits.": "בסיום, שמור או בטל את השינויים בקורס זה.",
   "Finish editing before selecting another course": "סיים לערוך לפני בחירת קורס אחר",
   "Finish editing before selecting another course.": "סיים לערוך לפני בחירת קורס אחר.",
   "COURSE-SPECIFIC PACKAGE": "חבילה ייחודית לקורס",
@@ -10906,8 +10916,8 @@ function courseOverridesHtml(){
   const emergencyAdd=addBox('emergencies','Add emergency requirement',field('Emergency name','<input class="input" data-add-field="name" placeholder="New emergency">',true)+field('Category','<select data-add-field="category">'+emergencyCategoryNames().map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('')+'</select>'));
 
   const customCount=Object.values(o.custom||{}).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0),editing=state.courseTailorEditing===true;
-  const modeAction='<div class="courseTailorModeActions">'+(editing?'<button class="btn sky courseTailorTopDone" type="button" id="courseTailorDoneTop">✓ Done editing</button>':'<button class="btn sky" type="button" id="courseTailorEdit" aria-label="Edit selected course">✎ Edit selected course</button>')+'</div>';
-  return '<form id="courseOverridesForm" class="card settingBox courseTailorAligned '+(editing?'courseTailorEditing':'')+'" style="margin-top:14px"><div class="inlineHead courseTailorHead"><div><div class="eyebrow">COURSE-SPECIFIC PACKAGE</div><h3>Tailor course · '+esc(p.name)+'</h3><p class="sub">Same editor structure as Packages. Changes here apply only to this course.</p></div>'+modeAction+'</div>'+picker+
+  // Selected-course edit control is in the standard top title row.
+  return '<form id="courseOverridesForm" class="card settingBox courseTailorAligned '+(editing?'courseTailorEditing':'')+'" style="margin-top:14px"><div class="inlineHead courseTailorHead"><div><div class="eyebrow">COURSE-SPECIFIC PACKAGE</div><h3>Tailor course · '+esc(p.name)+'</h3><p class="sub">Same editor structure as Packages. Changes here apply only to this course.</p></div></div>'+picker+
     '<fieldset class="courseTailorEditFieldset" '+(editing?'':'disabled')+'>'+lifecycleEditor+'<details class="packageRules"><summary><b>Package settings for this course</b><span>Course-only path/name override</span></summary><div class="packageEditorList"><article class="packageEditorItem"><div class="fields"><label class="field"><span class="fieldLabel">Package name in this course</span><input class="input" name="course_package_name" value="'+esc(o.program?.name||p.name)+'"></label></div><div class="packagePathBox"><b>Course-specific package path</b>'+packagePathControls(currentCourseMeta.type,p,'course_')+'</div></article></div></details>'+
     '<details class="packageRules syllabiRules courseSyllabiRules" '+(courseSyllabusFlow?'open':'')+'><summary><b>Syllabi / practical tasks (<span data-course-active-syllabus-count>'+activeSyllabi.length+'</span>)</b><span><span data-course-excluded-syllabus-count>'+excludedSyllabi.length+'</span> excluded · Drag ☰ to reorder</span></summary><p class="syllabusMinimumHint">Minimum 0 = Optional / non-blocking.</p><div class="packageSyllabusSection">'+(syllabi.length?'<div class="packageSyllabusTable courseSyllabusTable"><div class="packageSyllabusHeader"><span>Use</span><span>Order / Move</span><span>Series / Syllabus</span><span>Minimum</span><span>Instructor Presence</span></div>'+syllabusRows+'</div>':'<div class="packageRuleEmpty"><b>No syllabi / practical tasks configured</b><span>No syllabi or practical tasks are currently configured for this course.</span></div>')+'<div class="packageSyllabusFooter"><span><b data-course-syllabus-minimum-total>'+syllabusMinimumTotal+'</b> total planned minimum</span><small>Only included syllabi are numbered.</small></div><details class="excludedSyllabiBox" '+(excludedSyllabi.length?'':'hidden')+'><summary><b>Excluded syllabi (<span data-course-excluded-syllabus-count>'+excludedSyllabi.length+'</span>)</b><span>Restore any item to this course</span></summary><div class="excludedSyllabusList">'+excludedRows+'</div></details>'+syllabusAdd+'</div></details>'+
     '<details class="packageRules"><summary><b>Assessment criteria ('+criteriaActive.length+')</b><span>'+(orderedCriteria.length-criteriaActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+gradingSettings+table('criteria',['Use','Order / Move','Assessment criterion','Weight (%)','Status'],criterionItems,'48px 92px minmax(250px,1.6fr) 120px minmax(140px,.7fr)')+criterionAdd+'</details>'+
@@ -10915,7 +10925,7 @@ function courseOverridesHtml(){
     '<details class="packageRules"><summary><b>Experience requirements ('+counterActive.length+')</b><span>'+(orderedCounters.length-counterActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('counters',['Use','Order / Move','Requirement','Minimum','Unit','Status'],counterItems,'48px 92px minmax(220px,1.4fr) 100px 110px minmax(130px,.7fr)')+counterAdd+'</details>'+
     '<details class="packageRules"><summary><b>Exams ('+examActive.length+')</b><span>'+(orderedExams.length-examActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('exams',['Use','Order / Move','Exam','Pass grade','Status'],examItems,'48px 92px minmax(260px,1.6fr) 120px minmax(140px,.7fr)')+examAdd+'</details>'+
     '<details class="packageRules"><summary><b>Progression gates ('+gateActive.length+')</b><span>'+(orderedGates.length-gateActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+table('progression',['Use','Order / Move','Progression requirement','Status'],gateItems,'48px 92px minmax(320px,1.8fr) minmax(140px,.7fr)')+gateAdd+'</details></fieldset>'+
-    (editing?'<div class="advancedArchitectureActions editDecisionBar courseTailorActions"><div class="advancedDecisionCopy"><b>Editing selected course</b><small>Save or discard changes to this course when you are finished.</small></div><div class="advancedDecisionButtons"><button class="btn secondary discardChanges editDecisionBtn" type="button" id="courseTailorDiscardChanges">Discard changes</button><button class="btn sky editDecisionBtn" type="submit">Save changes</button></div></div>':'')+'</form>';
+    (editing?'<div class="advancedArchitectureActions editDecisionBar courseTailorActions"><div class="advancedDecisionCopy"><b>Editing selected course</b><small>Save changes to continue editing; Done editing above saves and exits.</small></div><div class="advancedDecisionButtons"><button class="btn secondary discardChanges editDecisionBtn" type="button" id="courseTailorDiscardChanges">Discard changes</button><button class="btn sky editDecisionBtn" type="submit">Save changes</button></div></div>':'')+'</form>';
 }
 function epSyllabusDefinition(name){
   const p=epCurrentProgram();if(!p||!name)return null;
@@ -11265,7 +11275,8 @@ function settings(){
   const epPlatforms=window.FLYMPUS_TRAINING?.platformsFor(type,phase)||[];
   const builderPrograms=window.FLYMPUS_TRAINING?.programsFor({courseType:type,phaseId:phase,platformId:platform,trainingKind:training,country})||[];
   const sel={courseType:type,phaseId:phase,platformId:platform,trainingKind:training,programId,dayNight:time,country};
-  let html='<h1 class="pageTitle">Course Management</h1><p class="sub">Create and manage courses, tailor a selected course, and maintain reusable training Packages and course architecture.</p>';
+  const managementAction=tab==='catalog'&&canGlobalPackages?(state.advancedArchitectureEditing?'<button type="button" class="btn sky courseManagementDone" id="advancedArchitectureDone">✓ Done editing</button>':'<button type="button" class="btn edit" id="advancedArchitectureEdit" aria-label="Manage advanced setup">✎ Manage</button>'):tab==='overrides'&&canManageCourse?(state.courseTailorEditing?'<button type="button" class="btn sky courseManagementDone" id="courseTailorDoneTop">✓ Done editing</button>':'<button type="button" class="btn edit" id="courseTailorEdit" aria-label="Edit selected course">✎ Edit</button>'):'';
+   let html='<div class="rosterTopbar courseManagementTopbar"><div><h1 class="pageTitle">Course Management</h1><p class="sub">Create and manage courses, tailor a selected course, and maintain reusable training Packages and course architecture.</p></div>'+managementAction+'</div>';
   html+='<div class="scrollTabs">'+(canCreate?'<button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">1 · Create course</button>':'')+(canManageCourse?'<button class="seg '+(tab==='overrides'?'active':'')+'" data-settings-tab="overrides">'+(canCreate?'2 · ':'')+'Tailor course</button>':'')+(canGlobalPackages?'<button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">Advanced</button>':'')+'</div>';
   if(tab==='overrides'&&canManageCourse){
     html+=courseOverridesHtml();
@@ -11286,7 +11297,7 @@ function settings(){
 
   if(tab==='catalog'&&canGlobalPackages){
     const validScope=c.courseTypes.some(x=>x.id===state.typeWorkspace),scope=validScope?state.typeWorkspace:(c.courseTypes[0]?.id||''),scopeName=cfgItem(c.courseTypes,scope)?.name||scope,advancedEditing=!!state.advancedArchitectureEditing;
-    html+='<div class="advancedManageHeader"><div class="advancedManageHeading"><h2>Advanced setup</h2><p>'+(advancedEditing?'Editing reusable architecture and Packages. Switch sector below at any time.':'Review sectors, architecture and Packages before editing.')+'</p></div>'+(advancedEditing?'<button type="button" class="btn sky advancedDoneEditing" id="advancedArchitectureDone">✓ Done editing</button>':'<button type="button" class="btn sky advancedEditStart" id="advancedArchitectureEdit" aria-label="Manage advanced setup">✎ Manage</button>')+'</div>';
+    html+='<div class="advancedManageHeader"><div class="advancedManageHeading"><h2>Advanced setup</h2><p>'+(advancedEditing?'Editing reusable architecture and Packages. Switch sector below at any time.':'Review sectors, architecture and Packages before editing.')+'</p></div></div>';
     html+='<section class="advancedSequence" style="margin-top:14px"><div class="advancedStepLabel advancedStepEditEntry"><span>1</span><div><b>Define sectors</b><small>Add, rename or remove sectors first.</small></div></div><fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'>'+cfgCatalogCard('Sectors','courseTypes',c.courseTypes)+'</fieldset></section>';
     html+='<section class="card settingBox advancedSectorPicker"><div class="advancedStepLabel"><span>2</span><div><b>Select sector to edit</b><small>'+(advancedEditing?'Switch sectors freely; edits remain in this session until Save or Discard.':'Everything below is scoped to this sector.')+'</small></div></div><div class="field" style="margin-top:12px"><label>Sector</label><select id="typeWorkspace" >'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></section>';
     html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><div class="advancedStepLabel scopedArchitectureLabel"><span>3</span><div><b>'+(advancedEditing?'Edit architecture':'Architecture')+'</b><small>Phases, platforms, training types and qualifications belong to the selected sector.</small></div></div>';
@@ -11301,7 +11312,7 @@ function settings(){
     html+=cfgEmergencyCategoriesCard(c);
     html+='</div></div></fieldset>';
     html+='<section class="advancedPackagesFinal"><div class="advancedStepLabel"><span>4</span><div><b>Packages</b><small>Final step · create and manage reusable Packages.</small></div></div>'+sectorPackageAssignmentCard(scope)+advancedPackagesHtml(scope)+'</section>';
-    if(advancedEditing)html+='<div class="advancedArchitectureActions editDecisionBar"><div class="advancedDecisionCopy"><b>Editing advanced setup</b><small>Save or discard changes to sectors, architecture and Packages when you are finished.</small></div><div class="advancedDecisionButtons"><button class="btn secondary discardChanges editDecisionBtn" type="button" id="cfgDiscardCatalogs">Discard changes</button><button class="btn sky editDecisionBtn" type="button" id="cfgSaveCatalogs">Save changes</button></div></div>';
+    if(advancedEditing)html+='<div class="advancedArchitectureActions editDecisionBar"><div class="advancedDecisionCopy"><b>Editing advanced setup</b><small>Save changes to continue editing; Done editing above saves and exits.</small></div><div class="advancedDecisionButtons"><button class="btn secondary discardChanges editDecisionBtn" type="button" id="cfgDiscardCatalogs">Discard changes</button><button class="btn sky editDecisionBtn" type="button" id="cfgSaveCatalogs">Save changes</button></div></div>';
   }
 
   if(tab==='profiles'){
@@ -12564,7 +12575,7 @@ function bindSettings(){
     m.exams.forEach(x=>{const v=fd.get('exam_pass_'+x.id),name=String(fd.get('exam_name_'+x.id)||x.name).trim()||x.name;overrides.exams[x.id]={applicable:fd.has('exam_app_'+x.id),name,order:Number(fd.get('exam_order_'+x.id)||x.order||999),pass:v===''?null:Number(v)}});
     m.progression.forEach(x=>{const k=progressionEditableKey(x),patch={applicable:fd.has('gate_'+x.id),order:Number(fd.get('gate_order_'+x.id)||x.order||999)};if(k){const value=String(fd.get('gate_text_'+x.id)||'').trim();if(value)patch[k]=value}overrides.progression[x.id]=patch});
     m.emergencies.forEach(x=>{const name=String(fd.get('course_emergency_name_'+x.id)||x.name).trim()||x.name;overrides.emergencies[x.id]={name,order:Number(fd.get('course_emergency_order_'+x.id)||x.order||999),category:String(fd.get('course_emergency_category_'+x.id)||x.category||defaultEmergencyCategory(name))}});
-    window.FLYMPUS_TRAINING.saveOverrides(currentCourseMeta.courseCode||currentCourseId,overrides);saveCourseLifecycleOverride(currentCourseId,String(fd.get('course_lifecycle')||'AUTO'));const rec=courseByKey(currentCourseId);if(rec){Object.assign(currentCourseMeta,courseRuntimeMeta(rec));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta))}const exitAfterSave=true;courseTailorExitAfterSave=false;state.courseAddFlow=null;courseTailorSessionDirty=false;if(exitAfterSave){courseTailorEditSnapshot=null;state.courseTailorEditing=false}else{state.courseTailorEditing=true;refreshCourseTailorEditBaseline()}toast('Changes saved');renderPreservingManagementView();
+    window.FLYMPUS_TRAINING.saveOverrides(currentCourseMeta.courseCode||currentCourseId,overrides);saveCourseLifecycleOverride(currentCourseId,String(fd.get('course_lifecycle')||'AUTO'));const rec=courseByKey(currentCourseId);if(rec){Object.assign(currentCourseMeta,courseRuntimeMeta(rec));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta))}const exitAfterSave=courseTailorExitAfterSave;courseTailorExitAfterSave=false;state.courseAddFlow=null;courseTailorSessionDirty=false;if(exitAfterSave){courseTailorEditSnapshot=null;state.courseTailorEditing=false}else{state.courseTailorEditing=true;refreshCourseTailorEditBaseline()}toast('Changes saved');renderPreservingManagementView();
   };
   const rememberBuilderInputs=()=>{
     if($('#builderName'))state.builderName=$('#builderName').value;
@@ -12937,15 +12948,15 @@ function bindSettings(){
     cc.platformLabels={...platformLabels};cc.dayNight=(cc.qualifications||[]).filter(x=>x.id==='day'||x.id==='night').map(x=>({id:x.id,name:x.name}));cfgSave(cc);return true;
   };
   const hasUnfinishedAdvancedPackage=()=>advancedPackageCreationDrafts.size>0||[...document.querySelectorAll('[data-package-assign-panel]')].some(panel=>!panel.hidden);
-  const saveAdvancedAndFinish=()=>{
+  const saveAdvancedAndFinish=(finish=true)=>{
    if(hasUnfinishedAdvancedPackage()){toast('Finish or cancel an unfinished Create Package form before saving.','warning');return false}
    if(!stageAdvancedVisibleChanges())return false;
    const activeRecord=courseByKey(currentCourseId);
    if(activeRecord){Object.assign(currentCourseMeta,courseRuntimeMeta(activeRecord));localStorage.setItem('ct-review-active-course',JSON.stringify(currentCourseMeta))}
-   advancedArchitectureEditSnapshot=null;advancedPackageCreationDrafts.clear();state.advancedArchitectureEditing=false;state.packageEditId=null;
+   advancedArchitectureEditSnapshot=finish?null:captureAdvancedArchitectureSnapshot();advancedPackageCreationDrafts.clear();state.advancedArchitectureEditing=!finish;if(finish)state.packageEditId=null;
    toast('Changes saved');renderPreservingManagementView();return true;
   };
-  if($('#cfgSaveCatalogs'))$('#cfgSaveCatalogs').onclick=saveAdvancedAndFinish;
+  if($('#cfgSaveCatalogs'))$('#cfgSaveCatalogs').onclick=()=>saveAdvancedAndFinish(false);
   if($('#advancedArchitectureDone'))$('#advancedArchitectureDone').onclick=()=>{
     const snapshot=advancedArchitectureEditSnapshot;
     if(!snapshot){state.advancedArchitectureEditing=false;renderPreservingManagementView();return}
