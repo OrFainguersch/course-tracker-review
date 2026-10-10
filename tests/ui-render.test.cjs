@@ -115,7 +115,7 @@ assert(!/<input[^>]+type="date"/i.test(html),"Native locale-dependent date input
 assert(html.includes(".dateDmy{width:100%!important;max-width:100%!important;min-width:0!important"),"Date inputs must be constrained to their container on mobile");
 assert(!html.includes('${epCurrentSuitSummaryHtml()}\n<div class="twoCol">'),"Evaluation must not render the redundant Active Suit overview");
 assert(!html.includes("activeSuitOverviewHtml()+\n '<div class=\"twoCol\" style=\"margin-top:14px\">"),"Exams must not render the redundant Active Package overview");
-assert(html.includes("Analytics are scoped to the active course and its resolved training suit.</p>'+activeSuitOverviewHtml()"),"Course Analytics must keep the active Training Suit overview");
+assert(html.includes("return activeSuitOverviewHtml()+"),"Detailed analytics keeps the active Training Suit overview without duplicating the Reports page heading");
 assert(!html.includes('<h3>Filter scope</h3>')&&!html.includes('Filters are applied consistently'),"Course Analytics must hide the Filter scope explainer card");
 assert(html.includes("flightDate:normalizeDateValue(fd.get('date'))")&&html.includes("const normalized=normalizeDateValue(e.target.value)")&&html.includes("state.planDate=normalized")&&html.includes("date=state.planDate||todayIsoDate(),soloCount="),"Daily Flight Plan is the sole editable DD/MM/YYYY date; reports reuse the normalized ISO date for storage and comparisons");
 assert(html.includes("function builderStartLabel(startsOn){return startsOn?formatDateDMY(startsOn):''}"),"Course-builder date labels must follow DD/MM/YYYY too");
