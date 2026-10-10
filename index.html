@@ -108,7 +108,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/reports-dashboard.js?v=0767"></script>
 <link rel="stylesheet" href="./assets/fleet-operations.css?v=20261010-flight-time-only-seamless-0820" />
 <link rel="stylesheet" href="./assets/course-operations.css?v=20261009-plan-single-row-stable-drag-0815" />
-<link rel="stylesheet" href="./assets/home-operations.css?v=20261010-home-flight-moments-0821" />
+<link rel="stylesheet" href="./assets/home-operations.css?v=20261010-home-timeline-live-0822" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
 <script src="./assets/safety-global-inbox.js?v=20261009-approval-sounds-0795"></script>
@@ -120,7 +120,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/duty-approval-model.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/operations-cloud.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/course-operations.js?v=20261009-plan-fleet-identity-v1"></script>
-<script src="./assets/home-operations.js?v=20261008-home02"></script>
+<script src="./assets/home-operations.js?v=20261010-home-timeline-live-0822"></script>
 <script src="./assets/trainee-evaluation-history.js?v=20261008-history01"></script>
 <script src="./assets/trainee-evaluation-view.js?v=20261008-history02"></script>
 
@@ -9178,7 +9178,10 @@ function saveExamRecords(v){writeCourseArray('ct-review-exams',v)}
 function currentActivityCounts(){return {evaluation:getEvaluations().length,safety:courseMockSafetyEvents().length+getSafetyRecords().length,exams:courseMockExamAttempts().length+getExamRecords().length,planned:getDailyReports().length,roster:courseTrainees().length+courseInstructors().length}}
 /* Today Plan uses the Plan model's real briefing/takeoff/landing clocks. */
 function homeFlightMoments(flight,hebrew){
- const clock=window.FLYMPUS_FLEET_MODEL?.flightTimeline?.(flight,getPlanTimingDefaults())?.clock||{};
+ const timeline=window.FLYMPUS_FLEET_MODEL?.flightTimeline?.(flight,getPlanTimingDefaults());
+ const clock=timeline?.clock||{};
+ const raw=n=>Number.isFinite(n)?String(n):'';
+ const pos=window.FLYMPUS_HOME_OPERATIONS?.timelinePosition?.(timeline,new Date())||{phase:'unknown',percent:0,active:false};
  const icons={
   briefing:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="8" cy="7" r="3"/><circle cx="17" cy="8" r="2.5"/><path d="M2 20v-2.2a5.8 5.8 0 0 1 11.6 0V20H2Zm12.7-6.7a5 5 0 0 1 7.3 4.4V20h-6.5v-2.2a8 8 0 0 0-.8-4.5Z"/></svg>',
   takeoff:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m21.5 10.6-7.1-2.2L10.2 2H7.5l2 7.8L3 11.3v1.8l6.5 1.5-2 7.4h2.7l4.2-6.3 7.1-2.3c1.7-.5 1.7-2.3 0-2.8Z"/></svg>',
@@ -9189,11 +9192,58 @@ function homeFlightMoments(flight,hebrew){
   {type:'takeoff',time:clock.takeoff||flight.time||'—',label:hebrew?'שעת המראה':'Takeoff'},
   {type:'debrief',time:clock.landing||'—',label:hebrew?'תחילת תחקיר':'Debrief start'}
  ];
- return '<div class="homePlanTimeline" role="group" aria-label="'+(hebrew?'זמני הטיסה':'Flight timeline')+'">'+
+ const attrs=timeline?' data-briefing-start="'+raw(timeline.briefingStart)+'" data-takeoff="'+raw(timeline.takeoff)+'" data-landing="'+raw(timeline.landing)+'" data-debrief-end="'+raw(timeline.debriefEnd)+'"':'';
+ return '<div class="homePlanTimeline" role="group" aria-label="'+(hebrew?'זמני הטיסה המתוכננים':'Planned flight timeline')+'" data-phase="'+pos.phase+'" style="--home-timeline-progress:'+pos.percent+'%"'+attrs+'>'+
+  '<span class="homePlanTimelineRail" aria-hidden="true"><span class="homePlanTimelinePassed"></span><span class="homePlanTimelineNow"'+(pos.active&&pos.percent<99.9?'':' hidden')+'></span></span>'+
   moments.map(m=>'<span class="homePlanMoment homePlanMoment-'+m.type+'" aria-label="'+esc(m.label+' '+m.time)+'" title="'+esc(m.label)+'">'+
    '<time class="homePlanMomentTime" dir="ltr">'+esc(m.time)+'</time>'+
    '<span class="homePlanMomentIcon" aria-hidden="true">'+icons[m.type]+'</span></span>').join('')+
  '</div>';
+}
+/* Match Fleet's platform prefix formatting without modifying the saved tail. */
+function homeFlightAircraftName(flight){
+ const platform=String(epPlatformLabel(flight?.platformId)||currentFleetContext().platformLabel||flight?.platformId||'').trim();
+ const tail=String(flight?.tail||'').trim();
+ if(!platform||platform==='—')return tail||'—';
+ if(!tail)return platform;
+ const prefix=platform.toLocaleLowerCase();
+ const lower=tail.toLocaleLowerCase();
+ if(lower.startsWith(prefix+'-'))return platform+'-'+tail.slice(platform.length+1).trim();
+ if(lower.startsWith(prefix+' '))return platform+'-'+tail.slice(platform.length).trim();
+ return platform+'-'+tail;
+}
+/* Update the planned current-position marker in place: no screen render,
+   no ticker when Home is not mounted and no changes to flight records. */
+let homeTimelineClockStarted=false;
+function refreshHomeTimelineClock(){
+ if(state.screen!=='home'||document.hidden)return;
+ const track=document.querySelectorAll('.homePlanTimeline[data-briefing-start]');
+ const he=getFlympusAppPreferences().language==='he';
+ track.forEach(el=>{
+  const timeline={
+   briefingStart:Number(el.dataset.briefingStart),takeoff:Number(el.dataset.takeoff),
+   landing:Number(el.dataset.landing),debriefEnd:Number(el.dataset.debriefEnd)
+  };
+  const pos=window.FLYMPUS_HOME_OPERATIONS.timelinePosition(timeline,new Date());
+  el.dataset.phase=pos.phase;
+  el.style.setProperty('--home-timeline-progress',pos.percent+'%');
+  const dot=el.querySelector('.homePlanTimelineNow');
+  if(dot)dot.hidden=!pos.active||pos.percent>=99.9;
+  const status=el.closest('.homePlanRow')?.querySelector('.homePlanLiveStatus');
+  if(status){
+   const names=he?{briefing:'תדריך',flight:'טיסה',debrief:'תחקיר'}:{briefing:'Briefing',flight:'Flight',debrief:'Debrief'};
+   status.hidden=!pos.active;
+   if(pos.active)status.textContent=(he?'מתוכנן כעת: ':'Planned now: ')+names[pos.phase];
+  }
+ });
+}
+function ensureHomeTimelineClock(){
+ refreshHomeTimelineClock();
+ if(homeTimelineClockStarted)return;
+ homeTimelineClockStarted=true;
+ window.setInterval(refreshHomeTimelineClock,30000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshHomeTimelineClock()});
+ window.addEventListener('focus',refreshHomeTimelineClock);
 }
 function home(){
  if(isDutyTrainee())return dutyTraineeHome();
@@ -9272,7 +9322,7 @@ function home(){
      '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Today\'s Plan</h2><p>Scheduled flights and activities for today</p></div></div><span class="homeDateChip">▣ '+esc(todayLabel)+'</span></div></div>'+
        '<div class="homePlanList">'+(function(){const flights=getDailyFlightBoard().filter(x=>x.date===todayIsoDate()&&x.platformId===currentFleetPlatform()).sort((a,b)=>String(a.time).localeCompare(String(b.time)));return flights.length?flights.map(x=>
   '<div class="homePlanRow homePlanRowTimeline">'+homeFlightMoments(x,homeHebrew)+
-  '<div class="homePlanBody"><span class="homePlanMain"><b>'+esc(x.traineeName||'Trainee')+'</b><small>'+esc(x.syllabus)+' · '+esc(x.tail)+(x.instructorName?' · '+esc(x.instructorName):'')+(x.estimatedMinutes?' · '+esc(x.estimatedMinutes)+' min':'')+'</small></span>'+
+  '<div class="homePlanBody"><span class="homePlanMain"><b>'+esc(x.traineeName||'Trainee')+'</b><small>'+esc(x.syllabus)+' · '+esc(homeFlightAircraftName(x))+(x.instructorName?' · <span class="homePlanInstructor">'+esc(x.instructorName)+'</span>':'')+(x.estimatedMinutes?' · '+esc(x.estimatedMinutes)+' min':'')+'</small><span class="homePlanLiveStatus" hidden></span></span>'+
   '<span class="homePlanTags"><span class="homeTag '+(x.mode==='SOLO'?'solo':'instructed')+'">'+esc(x.mode==='SOLO'?'Solo':'Instructed')+'</span>'+(window.FLYMPUS_FLEET_MODEL.flightIssues(x,getFleetAircraft(),currentFleetPlatform())?'<span class="homeTag" style="color:#b42318">Unavailable</span>':'')+'</span></div></div>').join(''):'<div class="homePlanRow homePlanEmpty"><span class="homePlanMain"><b>No flights scheduled yet</b><small>Scheduled flights will appear here when added in Plan.</small></span></div>'})()+
        '</div>'+
      '</div>'+
@@ -11858,7 +11908,7 @@ function bindGlobalFormUx(){
     form.addEventListener('submit',e=>{if(showFormInvalid(form)){e.preventDefault();e.stopImmediatePropagation()}},true)
   });
 }
-function bind(){dutyOperations?.bind();bindGlobalFormUx();bindDmyDateInputs();bindMultiFilters();renderPersonalIdentity();syncAttentionBadges();bindGlobalBackGesture();mountPersonEditModal();if($('#appBackBtn'))$('#appBackBtn').onclick=()=>goBack();const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop'),drawerPanel=drawer?.querySelector?.('.panel'),menuHaptic=ensureFlympusMenuHapticOverlay(menuBtn);const toggleDrawerFromMenu=e=>{e?.preventDefault?.();e?.stopPropagation?.();closeAllMultiFilters(false);const opening=!drawer?.classList?.contains('open');if(opening)triggerFlympusPortableHaptic(8);setDrawerOpen(opening)};if(menuBtn&&drawer)menuBtn.onclick=toggleDrawerFromMenu;if(menuHaptic&&drawer){menuHaptic.ontouchstart=e=>{e?.stopPropagation?.();if(drawer.classList.contains('open'))return;closeAllMultiFilters(false);triggerFlympusPortableHaptic(8);setDrawerOpen(true)};menuHaptic.onclick=e=>{e?.stopPropagation?.()}};if(backdrop&&drawer)backdrop.onclick=()=>setDrawerOpen(false);if(drawer){let drawerSwipeStartX=0,drawerSwipeStartY=0,drawerSwipeTracking=false,drawerSwipeClaimed=false;const drawerCloseSwipeIsRight=()=>getFlympusAppPreferences().language==='he';drawer.ontouchstart=e=>{if(!drawer.classList.contains('open'))return;const t=e.touches?.[0];if(!t)return;drawerSwipeStartX=t.clientX;drawerSwipeStartY=t.clientY;drawerSwipeTracking=true;drawerSwipeClaimed=false};drawer.ontouchmove=e=>{if(!drawerSwipeTracking)return;const t=e.touches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY,correctDirection=drawerCloseSwipeIsRight()?dx>12:dx<-12;if(correctDirection&&Math.abs(dx)>Math.abs(dy)*1.2){drawerSwipeClaimed=true;e.preventDefault?.()}};drawer.ontouchend=e=>{if(!drawerSwipeTracking)return;drawerSwipeTracking=false;const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY,farEnough=drawerCloseSwipeIsRight()?dx>=58:dx<=-58;if(drawerSwipeClaimed&&farEnough&&Math.abs(dy)<=70)setDrawerOpen(false);drawerSwipeClaimed=false};drawer.ontouchcancel=()=>{drawerSwipeTracking=false;drawerSwipeClaimed=false}};const mobileBottom=$('#mobileBottomNav');if(mobileBottom){mobileBottom.ontouchend=e=>{if(!e.target?.closest?.('.mobileBottomIconButton,.mobileBottomHapticSwitch'))e.preventDefault?.()};mobileBottom.ongesturestart=e=>e.preventDefault?.();mobileBottom.ongesturechange=e=>e.preventDefault?.();mobileBottom.ongestureend=e=>e.preventDefault?.()}document.querySelectorAll('[data-mobile-nav]').forEach(b=>{const activate=e=>{const now=performance.now?.()||Date.now();b.__flympusImmediateNavAt=now;const target=b.dataset.mobileNav,currentRoot=bottomNavRootForScreen(state.screen);if(state.screen===target){scrollActiveBottomNavTop(target);return}if(state.screen===currentRoot)rememberBottomNavScroll();bottomDockNavigationTransition=true;
+function bind(){if(state.screen==='home')ensureHomeTimelineClock();dutyOperations?.bind();bindGlobalFormUx();bindDmyDateInputs();bindMultiFilters();renderPersonalIdentity();syncAttentionBadges();bindGlobalBackGesture();mountPersonEditModal();if($('#appBackBtn'))$('#appBackBtn').onclick=()=>goBack();const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop'),drawerPanel=drawer?.querySelector?.('.panel'),menuHaptic=ensureFlympusMenuHapticOverlay(menuBtn);const toggleDrawerFromMenu=e=>{e?.preventDefault?.();e?.stopPropagation?.();closeAllMultiFilters(false);const opening=!drawer?.classList?.contains('open');if(opening)triggerFlympusPortableHaptic(8);setDrawerOpen(opening)};if(menuBtn&&drawer)menuBtn.onclick=toggleDrawerFromMenu;if(menuHaptic&&drawer){menuHaptic.ontouchstart=e=>{e?.stopPropagation?.();if(drawer.classList.contains('open'))return;closeAllMultiFilters(false);triggerFlympusPortableHaptic(8);setDrawerOpen(true)};menuHaptic.onclick=e=>{e?.stopPropagation?.()}};if(backdrop&&drawer)backdrop.onclick=()=>setDrawerOpen(false);if(drawer){let drawerSwipeStartX=0,drawerSwipeStartY=0,drawerSwipeTracking=false,drawerSwipeClaimed=false;const drawerCloseSwipeIsRight=()=>getFlympusAppPreferences().language==='he';drawer.ontouchstart=e=>{if(!drawer.classList.contains('open'))return;const t=e.touches?.[0];if(!t)return;drawerSwipeStartX=t.clientX;drawerSwipeStartY=t.clientY;drawerSwipeTracking=true;drawerSwipeClaimed=false};drawer.ontouchmove=e=>{if(!drawerSwipeTracking)return;const t=e.touches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY,correctDirection=drawerCloseSwipeIsRight()?dx>12:dx<-12;if(correctDirection&&Math.abs(dx)>Math.abs(dy)*1.2){drawerSwipeClaimed=true;e.preventDefault?.()}};drawer.ontouchend=e=>{if(!drawerSwipeTracking)return;drawerSwipeTracking=false;const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY,farEnough=drawerCloseSwipeIsRight()?dx>=58:dx<=-58;if(drawerSwipeClaimed&&farEnough&&Math.abs(dy)<=70)setDrawerOpen(false);drawerSwipeClaimed=false};drawer.ontouchcancel=()=>{drawerSwipeTracking=false;drawerSwipeClaimed=false}};const mobileBottom=$('#mobileBottomNav');if(mobileBottom){mobileBottom.ontouchend=e=>{if(!e.target?.closest?.('.mobileBottomIconButton,.mobileBottomHapticSwitch'))e.preventDefault?.()};mobileBottom.ongesturestart=e=>e.preventDefault?.();mobileBottom.ongesturechange=e=>e.preventDefault?.();mobileBottom.ongestureend=e=>e.preventDefault?.()}document.querySelectorAll('[data-mobile-nav]').forEach(b=>{const activate=e=>{const now=performance.now?.()||Date.now();b.__flympusImmediateNavAt=now;const target=b.dataset.mobileNav,currentRoot=bottomNavRootForScreen(state.screen);if(state.screen===target){scrollActiveBottomNavTop(target);return}if(state.screen===currentRoot)rememberBottomNavScroll();bottomDockNavigationTransition=true;
   /* Visual response is immediate. Do not wait for the full page render before
      moving the gold state/halo to the pressed destination. */
   $('#mobileBottomNav')?.querySelectorAll?.('[data-mobile-nav]')?.forEach?.(btn=>{

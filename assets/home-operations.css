@@ -55,3 +55,55 @@ html.flympusLargeText .homePlanMoment-takeoff .homePlanMomentTime{font-size:15px
  .homePlanMomentIcon{width:31px;height:31px}
  .homePlanMomentIcon svg{width:15px;height:15px}
 }
+
+/* A live, calendar-style schedule rail (planned times, not actual execution). */
+.homePlanTimeline{position:relative;isolation:isolate}
+.homePlanTimelineRail{
+ position:absolute;left:93.5px;top:16.5px;bottom:16.5px;width:0;
+ border-left:2px dashed #b6cee3;transform:translateX(-1px);z-index:0;pointer-events:none;
+}
+.homePlanTimelinePassed{
+ display:block;position:absolute;left:-2px;top:0;width:2px;
+ height:var(--home-timeline-progress,0%);background:#2984c6;border-radius:2px;
+}
+.homePlanTimelineNow{
+ position:absolute;left:-6px;top:var(--home-timeline-progress,0%);
+ width:11px;height:11px;border-radius:50%;transform:translateY(-50%);
+ background:#087fcd;border:2px solid #fff;box-shadow:0 0 0 3px rgba(24,131,213,.20);
+ z-index:3;
+}
+.homePlanTimelineNow[hidden]{display:none!important}
+.homePlanMoment{position:relative;z-index:1}
+.homePlanMomentIcon{position:relative;z-index:2}
+.homePlanTimeline[data-phase="upcoming"] .homePlanMoment{opacity:.8}
+.homePlanTimeline[data-phase="briefing"] .homePlanMoment-briefing .homePlanMomentIcon,
+.homePlanTimeline[data-phase="flight"] .homePlanMoment-takeoff .homePlanMomentIcon,
+.homePlanTimeline[data-phase="debrief"] .homePlanMoment-debrief .homePlanMomentIcon{
+ background:#cde9fc;box-shadow:0 0 0 3px rgba(42,141,210,.21);color:#145986;
+}
+.homePlanTimeline[data-phase="briefing"] .homePlanMoment-briefing .homePlanMomentTime,
+.homePlanTimeline[data-phase="flight"] .homePlanMoment-takeoff .homePlanMomentTime,
+.homePlanTimeline[data-phase="debrief"] .homePlanMoment-debrief .homePlanMomentTime{
+ color:#176ca9;font-weight:950;
+}
+.homePlanTimeline[data-phase="past"] .homePlanTimelinePassed{background:#80adc8}
+.homePlanInstructor{font-weight:850;color:#255879;white-space:normal}
+.homePlanLiveStatus{
+ display:inline-block;margin-top:5px;padding:3px 7px;max-width:100%;
+ border-radius:7px;background:#e7f4ff;color:#146498;
+ font-size:10px;font-weight:800;line-height:1.35;
+}
+.homePlanLiveStatus[hidden]{display:none!important}
+html[data-flympus-theme="dark"] .homePlanTimelineRail{border-color:#52728a}
+html[data-flympus-theme="dark"] .homePlanTimelinePassed{background:#6bbcf3}
+html[data-flympus-theme="dark"] .homePlanTimelineNow{background:#8bd4ff;border-color:#193951}
+html[data-flympus-theme="dark"] .homePlanInstructor{color:#abd8fc}
+html[data-flympus-theme="dark"] .homePlanLiveStatus{background:#1a4668;color:#d2edff}
+html[data-flympus-theme="dark"] .homePlanTimeline[data-phase="briefing"] .homePlanMoment-briefing .homePlanMomentIcon,
+html[data-flympus-theme="dark"] .homePlanTimeline[data-phase="flight"] .homePlanMoment-takeoff .homePlanMomentIcon,
+html[data-flympus-theme="dark"] .homePlanTimeline[data-phase="debrief"] .homePlanMoment-debrief .homePlanMomentIcon{
+ background:#315e7d;color:#e9f7ff;
+}
+html.flympusLargeText .homePlanLiveStatus{font-size:14px!important}
+@media(max-width:480px){.homePlanTimelineRail{left:91.5px;top:15.5px;bottom:15.5px}}
+@media(prefers-reduced-motion:reduce){.homePlanTimelineNow{transition:none}}

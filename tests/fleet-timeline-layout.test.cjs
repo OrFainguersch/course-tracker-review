@@ -167,6 +167,6 @@ test('Timeline integration renders all four clock keys, external names only, and
   assert.match(html,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v='+version));
   assert.match(worker,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-home-flight-moments-0821'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-home-timeline-live-0822'/);
  assert.match(html,/flympus-deploy-build" content="__FLYMPUS_DEPLOY_BUILD__"/);
 });

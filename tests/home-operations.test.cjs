@@ -66,7 +66,7 @@ test('No flight only after 8 full calendar days, based on latest saved Solo or E
  assert.ok(!has(solo,'a','no-flight'));
 });
 test('Home ordering, no duplicate Quick Actions, actual data wiring and Roster Overview routing',()=>{
- assert.ok(html.includes('assets/home-operations.js?v=20261008-home02'));
+ assert.ok(html.includes('assets/home-operations.js?v=20261010-home-timeline-live-0822'));
  assert.ok(html.indexOf('<h2>Course Pulse</h2>')<html.indexOf('<section class="homePrimaryGrid">'),'Course Pulse must appear before the read-only Today Plan');
  assert.ok(!html.includes("'<div class=\"homeTaskStrip\">'"));
  assert.ok(html.includes('weekly.instructed')&&html.includes('weekly.solo'));
@@ -112,7 +112,7 @@ test('Home has only a full-width recent flight card, no grades/upcoming, and Dut
  assert.ok(home.includes("if(isDutyTrainee())return dutyTraineeHome();"));
  assert.ok(!duty.includes('Course Pulse'));
  assert.ok(!duty.includes('homePulseGrid'));
- assert.ok(html.includes('assets/home-operations.js?v=20261008-home02'));
+ assert.ok(html.includes('assets/home-operations.js?v=20261010-home-timeline-live-0822'));
 });
 
 test('Home renders real briefing, flight and debrief start clocks in circular left rail',()=>{
@@ -140,4 +140,41 @@ test('Debrief starts at the planned landing, not the debrief end',()=>{
  assert.equal(clock.takeoff,'08:00');
  assert.equal(clock.landing,'08:30');
  assert.equal(clock.debrief,'08:45');
+});
+
+test('Today Plan displays full platform tail, emphasizes instructor and a planned-now rail',()=>{
+ const page=html.slice(html.indexOf('function homeFlightMoments('),html.indexOf('function home(){'));
+ assert.match(page,/function homeFlightAircraftName\(flight\)/);
+ assert.match(page,/epPlatformLabel\(flight\?\.platformId\)/);
+ assert.match(page,/homePlanInstructor/);
+ assert.match(page,/homePlanLiveStatus/);
+ assert.match(page,/homePlanTimelineRail/);
+ assert.match(page,/homePlanTimelineNow/);
+ assert.match(page,/data-briefing-start/);
+ assert.match(page,/setInterval\(refreshHomeTimelineClock,30000\)/);
+ assert.match(page,/visibilitychange/);
+ assert.match(html,/if\(state\.screen==='home'\)ensureHomeTimelineClock\(\)/);
+ assert.doesNotMatch(page,/setInterval\(\(\)=>render\(/);
+ const styles=fs.readFileSync('assets/home-operations.css','utf8');
+ assert.match(styles,/border-left:2px dashed/);
+ assert.match(styles,/homePlanTimeline\[data-phase="flight"\]/);
+ assert.match(styles,/\.homePlanInstructor\{font-weight:850/);
+ assert.match(styles,/prefers-reduced-motion:reduce/);
+});
+test('Planned-now marker uses local civil time and correct phase boundaries',()=>{
+ const F=require('../assets/fleet-model.js');
+ const flight={date:'2026-10-10',time:'08:00',briefingMinutes:20,estimatedMinutes:30,debriefMinutes:15,mode:'INSTRUCTED'};
+ const timeline=F.flightTimeline(flight,F.TIMING_DEFAULTS);
+ const at=(h,m)=>new Date(2026,9,10,h,m,0);
+ const before=M.timelinePosition(timeline,at(7,35));
+ assert.equal(before.phase,'upcoming');assert.equal(before.percent,0);
+ const briefing=M.timelinePosition(timeline,at(7,45));
+ assert.equal(briefing.phase,'briefing');assert.equal(briefing.percent,12.5);
+ const inFlight=M.timelinePosition(timeline,at(8,15));
+ assert.equal(inFlight.phase,'flight');assert.equal(inFlight.percent,75);
+ const debrief=M.timelinePosition(timeline,at(8,40));
+ assert.equal(debrief.phase,'debrief');assert.equal(debrief.percent,100);
+ const done=M.timelinePosition(timeline,at(8,50));
+ assert.equal(done.phase,'past');assert.equal(done.active,false);
+ assert.equal(M.timelinePosition(null,at(8,0)).phase,'unknown');
 });

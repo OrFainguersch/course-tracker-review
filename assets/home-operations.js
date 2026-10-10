@@ -108,5 +108,23 @@
    return {...t,lastFlight,issues};
   }).filter(t=>t.issues.length).sort((a,b)=>b.issues.length-a.issues.length||String(a.name).localeCompare(String(b.name)));
  }
- return Object.freeze({weekBounds,weeklyFlights,recentFlights,attention});
+ /* The Plan model stores minute offsets on a UTC-like civil-date axis. Use
+    LOCAL civil clock fields on that same axis, never raw UTC timestamps, so
+    the position is correct in Israel and other user time zones. */
+ function timelinePosition(timeline,at=new Date()){
+  const d=at instanceof Date?at:new Date(at);
+  if(!timeline||!Number.isFinite(d.getTime()))return {phase:'unknown',percent:0,active:false};
+  const {briefingStart,takeoff,landing,debriefEnd}=timeline;
+  if(![briefingStart,takeoff,landing,debriefEnd].every(Number.isFinite)
+   ||briefingStart>takeoff||takeoff>=landing||landing>debriefEnd)
+   return {phase:'unknown',percent:0,active:false};
+  const now=Date.UTC(d.getFullYear(),d.getMonth(),d.getDate(),d.getHours(),d.getMinutes(),d.getSeconds())/60000;
+  const fraction=(start,end)=>end>start?Math.min(1,Math.max(0,(now-start)/(end-start))):1;
+  if(now<briefingStart)return {phase:'upcoming',percent:0,active:false};
+  if(now<takeoff)return {phase:'briefing',percent:Math.round(fraction(briefingStart,takeoff)*500)/10,active:true};
+  if(now<landing)return {phase:'flight',percent:50+Math.round(fraction(takeoff,landing)*500)/10,active:true};
+  if(now<debriefEnd)return {phase:'debrief',percent:100,active:true};
+  return {phase:'past',percent:100,active:false};
+ }
+ return Object.freeze({weekBounds,weeklyFlights,recentFlights,attention,timelinePosition});
 });
