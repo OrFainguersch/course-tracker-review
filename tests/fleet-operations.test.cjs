@@ -609,7 +609,7 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
  assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-home-plan-simplify-0823'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261010-plan-instructor-0823/g)||[]).length,2);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-time-only-seamless-0820/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
@@ -877,7 +877,7 @@ test('flight drag UI offers accessible touch grips, reduced motion and localized
  assert.match(html,/dutyOperations\.saveDraft\('PLAN'/);
  assert.match(html,/dutyOperations\.publish\('PLAN'/);
  assert.match(html,/Crew conflict: /);
- assert.ok(html.includes('flight-board-drag.js?v=20261010-plan-instructor-0823'));
+ assert.ok(html.includes('flight-board-drag.js?v=20261010-flight-time-only-seamless-0820'));
 });
 test('Plan tabs use shared Course Management-style segmented control',()=>{
  const css=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
