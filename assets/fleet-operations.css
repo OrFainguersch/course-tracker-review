@@ -1155,3 +1155,20 @@ html[data-flympus-theme="dark"] .fleetFilterEmpty{color:#c3d7e6}
  .fleetInventoryActionsCell .fleetItemActions{grid-template-columns:repeat(2,minmax(0,1fr))}
  .fleetInventoryActionsCell .fleetItemActions .btn{width:100%;min-height:40px}
 }
+
+/* Build 0847: an aircraft's editor opens directly after the selected inventory card. */
+.fleetInventoryTable .fleetInlineEditRow{background:#f4f9fd}
+.fleetInventoryTable .fleetInlineEditorCell{padding:12px!important;min-width:0}
+.fleetInventoryTable .fleetInlineEditRow .fleetEditor{width:100%;max-width:none;box-sizing:border-box;border:1px solid #a8cce7;border-radius:12px;box-shadow:none;margin:0!important;padding:14px!important;background:#fff}
+.fleetInventoryTable .fleetInlineEditRow .fleetEditor .fleetSectionHead h2{font-size:15px}
+html[data-flympus-theme="dark"] .fleetInventoryTable .fleetInlineEditRow .fleetEditor{background:#182f41;border-color:#46657c}
+@media(max-width:680px){
+ .fleetInventoryTable tr.fleetInlineEditRow{padding:0 9px 9px!important;margin-top:-9px;border-top:0!important;border-color:#a8cce7!important;background:#f4f9fd;border-radius:0 0 12px 12px}
+ .fleetInventoryTable tr.fleetInlineEditRow .fleetInlineEditorCell{display:block;width:100%;box-sizing:border-box;padding:4px 0 0!important;text-align:start}
+ .fleetInventoryTable tr.fleetInlineEditRow .fleetInlineEditorCell::before{display:none!important;content:none!important}
+ .fleetInventoryTable tr.fleetInlineEditRow .fleetEditor{padding:13px!important}
+ .fleetInventoryTable tr.fleetInlineEditRow .fleetEditorActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .fleetInventoryTable tr.fleetInlineEditRow .fleetEditorActions .btn{width:100%;min-width:0}
+ html[data-flympus-theme="dark"] .fleetInventoryTable tr.fleetInlineEditRow{background:#1b3549;border-color:#46657c!important}
+}
+@media print{.fleetInlineEditRow{display:none!important}}
