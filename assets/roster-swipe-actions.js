@@ -2,6 +2,8 @@
 (function(root){
 'use strict';
 const attached=new WeakSet(),WIDTH=146,THRESHOLD=52;
+const isHebrew=row=>row?.ownerDocument?.documentElement?.dataset?.flympusLanguage==='he';
+const offsetFor=(row,open)=>open?(isHebrew(row)?WIDTH:-WIDTH):0;
 let openRow=null;
 /* Snap naturally from the exact touch displacement without a zero-offset flash. */
 function settle(row,shouldOpen){
@@ -10,13 +12,13 @@ function settle(row,shouldOpen){
  if(row.classList.contains('rosterSwipeMoving'))row.querySelector('.rosterSwipeContent')?.getBoundingClientRect?.();
  row.classList.toggle('rosterSwipeOpen',shouldOpen);
  row.classList.remove('rosterSwipeMoving');
- row.style.setProperty('--roster-swipe-offset',(shouldOpen?-WIDTH:0)+'px');
+ row.style.setProperty('--roster-swipe-offset',offsetFor(row,shouldOpen)+'px');
  row.style.setProperty('--roster-swipe-reveal',shouldOpen?'1':'0');
  if(shouldOpen)openRow=row;else if(openRow===row)openRow=null;
 }
 const close=row=>settle(row,false);
 const open=row=>settle(row,true);
-function touchDevice(){try{return root.matchMedia?.('(hover: none) and (pointer: coarse)')?.matches===true}catch{return false}}
+function touchDevice(){try{return root.matchMedia?.('(max-width: 759px) and (hover: none) and (pointer: coarse)')?.matches===true}catch{return false}}
 function attach(host,canManage){
  if(!touchDevice()||!canManage||!host)return;
  host.querySelectorAll('.personCard.traineeRosterCard,.personCard.instructorRosterCard').forEach(row=>{
@@ -31,6 +33,10 @@ function attach(host,canManage){
   content.className='rosterSwipeContent';
   while(row.firstChild)content.appendChild(row.firstChild);
   row.appendChild(content);
+  // Keep the ranked trainee's top-corner semicircle anchored to the card frame,
+  // not to the padded moving grid. This restores its original inset in both languages.
+  const rank=content.querySelector?.('.rankCorner');
+  if(rank){row.appendChild(rank);rank.classList.add('rosterSwipeFixedRank')}
   attached.add(row);row.classList.add('rosterSwipeRow');
   const tray=row.ownerDocument.createElement('div');tray.className='rosterSwipeActionTray';
   const edit=row.ownerDocument.createElement('button');edit.type='button';edit.className='rosterSwipeEdit';edit.dataset.personEdit=kind+':'+id;
@@ -49,18 +55,20 @@ function attach(host,canManage){
    if(!start||event.touches?.length!==1)return;
    const t=event.touches[0],dx=t.clientX-start.x,dy=t.clientY-start.y;
    if(!claimed&&Math.abs(dy)>Math.abs(dx)*1.1&&Math.abs(dy)>10){start=null;return}
-   if(!claimed&&Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)*1.3&&(dx<0||start.open))claimed=true;
+   if(!claimed&&Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.25&&((isHebrew(row)?dx>0:dx<0)||start.open))claimed=true;
    if(!claimed)return;
    if(event.cancelable)event.preventDefault();
    row.classList.add('rosterSwipeMoving');
-   const offset=Math.max(-WIDTH,Math.min(0,(start.open?-WIDTH:0)+dx));
-   row.style.setProperty('--roster-swipe-offset',offset+'px');
-   row.style.setProperty('--roster-swipe-reveal',String(Math.abs(offset)/WIDTH));
+   const distance=isHebrew(row)?WIDTH:-WIDTH;
+   const offset=Math.max(-WIDTH,Math.min(WIDTH,(start.open?distance:0)+dx));
+   const constrained=isHebrew(row)?Math.max(0,offset):Math.min(0,offset);
+   row.style.setProperty('--roster-swipe-offset',constrained+'px');
+   row.style.setProperty('--roster-swipe-reveal',String(Math.abs(constrained)/WIDTH));
   },{passive:false});
   row.addEventListener('touchend',event=>{
    if(!start)return;
    const t=event.changedTouches?.[0],dx=t?t.clientX-start.x:0;
-   if(claimed){blockUntil=Date.now()+480;if(start.open?dx<THRESHOLD:dx<=-THRESHOLD)open(row);else close(row);if(event.cancelable)event.preventDefault()}
+   if(claimed){blockUntil=Date.now()+480;if(start.open?(isHebrew(row)?dx>-THRESHOLD:dx<THRESHOLD):(isHebrew(row)?dx>=THRESHOLD:dx<=-THRESHOLD))open(row);else close(row);if(event.cancelable)event.preventDefault()}
    start=null;claimed=false;
   },{passive:false});
   row.addEventListener('touchcancel',()=>{start=null;claimed=false;close(row)});

@@ -148,7 +148,7 @@ test('Plan opens on the date-specific Daily Flight Plan with separate Planned vs
  const homeSource=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
  assert.match(homeSource, /<h2>Today.*s Plan<\/h2>/);
  assert.ok(homeSource.includes('<span class="homeDateChip">'));
- assert.ok(homeSource.includes('<div class="homePlanRow homePlanRowTimeline">'));
+ assert.ok(html.includes('<div class="homePlanRow homePlanRowTimeline">')&&homeSource.includes('homePlanFlightRow(x,homeHebrew)'));
  assert.ok(homeSource.includes('<div class="homePlanRow homePlanEmpty">'));
  assert.ok(!homeSource.includes('data-plan-today="true"'),'Home Today Plan must not navigate to Plan');
  assert.ok(!homeSource.includes('homePlanTitleButton'),'Home Today Plan title must not be a button');
@@ -608,7 +608,7 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-roster-swipe-stability-0829'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-roster-home-expand-0830'/);
  assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-time-only-seamless-0820/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{

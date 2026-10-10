@@ -124,11 +124,11 @@ test('Home renders real briefing, flight and debrief start clocks in circular le
  assert.doesNotMatch(snippet,/clock\.debrief\b/);
  assert.match(snippet,/homePlanMomentIcon/);
  const page=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
- assert.match(page,/homePlanRow homePlanRowTimeline/);
- assert.match(page,/homeFlightMoments\(x,homeHebrew\)/);
- assert.match(page,/x\.traineeName/);
- assert.match(page,/x\.syllabus/);
- assert.match(page,/x\.instructorName/);
+ assert.match(snippet,/homePlanRow homePlanRowTimeline/);
+ assert.match(page,/homePlanFlightRow\(x,homeHebrew\)/);
+ assert.match(snippet,/flight\.traineeName/);
+ assert.match(snippet,/flight\.syllabus/);
+ assert.match(snippet,/flight\.instructorName/);
  const css=fs.readFileSync('assets/home-operations.css','utf8');
  assert.match(css,/\.homePlanRow\.homePlanRowTimeline\{/);
  assert.match(css,/direction:ltr!important/);
@@ -154,7 +154,7 @@ test('Today Plan displays full platform tail, emphasizes instructor and a planne
  assert.match(page,/data-briefing-start/);
  assert.match(page,/setInterval\(refreshHomeTimelineClock,30000\)/);
  assert.match(page,/visibilitychange/);
- assert.match(html,/if\(state\.screen==='home'\)ensureHomeTimelineClock\(\)/);
+ assert.match(html,/if\(state\.screen==='home'\)\{ensureHomeTimelineClock\(\)/);
  assert.doesNotMatch(page,/setInterval\(\(\)=>render\(/);
  const styles=fs.readFileSync('assets/home-operations.css','utf8');
  assert.match(styles,/border-left:2px dashed/);
@@ -180,13 +180,18 @@ test('Planned-now marker uses local civil time and correct phase boundaries',()=
  assert.equal(M.timelinePosition(null,at(8,0)).phase,'unknown');
 });
 
-test('Today Plan hides redundant flight minutes while keeping accurate phase clocks and aircraft',()=>{
+test('Today Plan defaults to compact rows while preserving full phase clocks and aircraft on expansion',()=>{
  const home=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
- assert.match(home,/homeFlightMoments\(x,homeHebrew\)/);
- assert.match(home,/homeFlightAircraftName\(x\)/);
+ const flight=html.slice(html.indexOf('function homePlanFlightRow('),html.indexOf('/* Update the planned current-position marker'));
+ assert.match(home,/homePlanFlightRow\(x,homeHebrew\)/);
+ assert.match(flight,/homeFlightMoments\(flight,hebrew\)/);
+ assert.match(flight,/homeFlightAircraftName\(flight\)/);
  assert.match(html,/class="homePlanInstructor"/);
  assert.doesNotMatch(home,/x\.estimatedMinutes\?\s*' · '/);
- assert.match(home,/homePlanTags/);
+ assert.match(flight,/homePlanFlightBadges/);
+ assert.match(flight,/homePlanFlightDetails/);
+ assert.match(flight,/aria-expanded/);
+ assert.match(flight,/inert/);
 });
 
 test('Approved Home option A shows phase labels and student/instructor icons without badge icons',()=>{
@@ -195,28 +200,32 @@ test('Approved Home option A shows phase labels and student/instructor icons wit
  assert.match(home,/homePlanPersonIcon/);
  assert.match(home,/homePlanPerson-'\+role/);
  assert.match(home,/homePlanMomentLabel/);
- const body=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
- assert.match(body,/homeFlightPerson\(x\.traineeName\|\|'Trainee','student'\)/);
- assert.match(body,/x\.mode!=='SOLO'&&x\.instructorName/);
- assert.match(body,/homeFlightPerson\(x\.instructorName,'teacher'\)/);
- assert.match(body,/class="homeTag/);
+ const flight=html.slice(html.indexOf('function homePlanFlightRow('),html.indexOf('/* Update the planned current-position marker'));
+ assert.match(flight,/homeFlightPerson\(name,'student'\)/);
+ assert.match(flight,/!flight\.instructorName/);
+ assert.match(flight,/homeFlightPerson\(flight\.instructorName,'teacher'\)/);
+ assert.match(flight,/class="homeTag/);
  const css=fs.readFileSync('assets/home-operations.css','utf8');
  assert.match(css,/\.homePlanMomentLabel\{/);
  assert.match(css,/\.homePlanPerson-student b\{/);
 });
 
-test('Today Plan keeps teacher immediately below trainee and badge at logical top-end',()=>{
- const home=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
- const start=home.indexOf("homeFlightPerson(x.traineeName||'Trainee','student')");
- const teacher=home.indexOf("homeFlightPerson(x.instructorName,'teacher')");
- const syllabus=home.indexOf("esc(x.syllabus)");
- assert.ok(start>=0&&teacher>start&&syllabus>teacher);
+test('Today Plan compact summary keeps time, crew, mode, and chevron aligned without duplicate crew in details',()=>{
+ const flight=html.slice(html.indexOf('function homePlanFlightRow('),html.indexOf('/* Update the planned current-position marker'));
+ const summary=flight.slice(flight.indexOf("return '<div class=\"homePlanFlight"));
+ const a=summary.indexOf('homePlanFlightClock'),b=summary.indexOf('homePlanFlightPeople'),d=summary.indexOf('homePlanFlightChevron');
+ assert.ok(a>=0&&b>a&&d>b);
+ assert.match(summary,/badges\+'<span class="homePlanFlightChevron"/);
+ assert.match(flight,/homeFlightPerson\(name,'student'\)/);
+ assert.match(flight,/homeFlightPerson\(flight\.instructorName,'teacher'\)/);
+ assert.match(flight,/homePlanFlightDetails/);
  const css=fs.readFileSync('assets/home-operations.css','utf8');
- assert.match(css,/homePlanRowTimeline \.homePlanTags\{/);
- assert.match(css,/inset-block-start:10px;inset-inline-end:12px/);
- assert.match(css,/data-flympus-language="he"/);
+ assert.match(css,/homePlanFlightToggle\{/);
+ assert.match(css,/grid-template-columns:minmax\(77px,auto\) minmax\(0,1fr\) auto 22px/);
+ assert.match(css,/\.homePlanFlight\.is-expanded \.homePlanFlightDetails\{grid-template-rows:1fr\}/);
+ assert.match(css,/html\[data-flympus-language="he"\] \.homeDashboard \.homePlanFlightToggle\{direction:rtl/);
+ assert.match(css,/prefers-reduced-motion:reduce/);
 });
-
 test('Today Plan phase rail keeps a responsive gutter from names and syllabus',()=>{
  const css=fs.readFileSync('assets/home-operations.css','utf8');
  assert.match(css,/grid-template-columns:176px minmax\(0,1fr\)!important;column-gap:16px!important/);
@@ -240,4 +249,21 @@ test('Home syllabus starts at the name text after the role icon, in English and 
  assert.match(css,/html\[data-flympus-language="he"\] \.homePlanRowTimeline \.homePlanMain\{align-items:flex-start\}/);
  assert.match(css,/homePlanMoment-takeoff \.homePlanMomentIcon\{font-family:inherit;font-size:15px/);
  assert.match(css,/html\.flympusLargeText \.homePlanMoment-takeoff \.homePlanMomentIcon\{font-size:18px\}/);
+});
+
+test('Home flight expansion is accessible and retains open flight state across rerenders',()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ const css=fs.readFileSync('assets/home-operations.css','utf8');
+ assert.match(html,/const homePlanExpandedFlightKeys=new Set\(\)/);
+ assert.match(html,/function homePlanFlightKey\(flight\)/);
+ assert.match(html,/data-home-flight-toggle/);
+ assert.match(html,/details\.setAttribute\('aria-hidden',String\(!expanded\)\)/);
+ assert.match(html,/homePlanExpandedFlightKeys\.add\(key\)/);
+ assert.match(html,/homePlanExpandedFlightKeys\.delete\(key\)/);
+ assert.match(html,/homePlanFlightDetails" aria-hidden/);
+ assert.match(css,/\.homePlanFlightDetails\{display:grid;grid-template-rows:0fr/);
+ assert.match(css,/\.homePlanFlightDetailsInner\{min-height:0;overflow:hidden\}/);
+ assert.match(css,/homePlanFlightPeople/);
+ assert.match(css,/homePlanFlightBadges/);
+ assert.match(css,/homePlanFlightChevron/);
 });

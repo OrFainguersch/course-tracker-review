@@ -20,11 +20,11 @@ test('Roster swipe is mobile-only and uses the established course membership per
  assert.match(js,/const attached=new WeakSet\(\),WIDTH=146,THRESHOLD=52/);
  assert.match(js,/event\.target\?\.closest\?\.\('button,input,select,textarea,a/);
  assert.match(css,/rosterSwipeRow/);
- assert.match(css,/right:0;top:0;bottom:0/);
+ assert.match(css,/right:0;left:auto;top:0;bottom:0/);
  assert.match(css,/rosterSwipeOpen/);
  for(const filename of ['roster-swipe-actions.js','roster-swipe-actions.css']){
-  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-roster-swipe-stability-0829'));
-  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-roster-swipe-stability-0829'));
+  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-roster-home-expand-0830'));
+  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-roster-home-expand-0830'));
  }
 });
 test('Swipe module creates neither tray nor handlers without a touch screen and roster authority',()=>{
@@ -67,7 +67,8 @@ test('mobile roster swipe action reveal follows the finger before settling gentl
  assert.match(js,/--roster-swipe-reveal/);
  assert.match(js,/getBoundingClientRect/);
  assert.match(css,/\.30s cubic-bezier\(\.22,\.72,\.2,1\)/);
- assert.match(css,/rosterSwipeMoving \.rosterSwipeActionTray\{\s*opacity:var\(--roster-swipe-reveal,0\)/);
+ assert.match(css,/\.rosterSwipeActionTray\{[\s\S]*?opacity:1;visibility:visible/);
+ assert.match(css,/filter:none!important;transition:none!important/);
  assert.match(css,/prefers-reduced-motion:reduce/);
 });
 
@@ -116,4 +117,27 @@ test('authorised touch attach preserves original roster nodes in one wrapper',()
  assert.equal(actions.children[1].dataset.rosterRemove,'INSTRUCTOR:inst1');
  sandbox.window.FLYMPUS_ROSTER_SWIPE.attach(host,true);
  assert.equal(row.children.length,2,'repeated binding must not wrap twice');
+});
+
+test('Roster swipe runs only on mobile, mirrors to RTL, and keeps the rank anchored to the original card corner',()=>{
+ const js=read('assets/roster-swipe-actions.js'),css=read('assets/roster-swipe-actions.css');
+ assert.match(js,/max-width: 759px/);
+ assert.match(js,/const isHebrew=row=>/);
+ assert.match(js,/const rank=content\.querySelector\?\.\('\.rankCorner'\)/);
+ assert.match(js,/row\.appendChild\(rank\)/);
+ assert.match(js,/rosterSwipeFixedRank/);
+ assert.match(js,/const constrained=isHebrew\(row\)\?Math\.max\(0,offset\):Math\.min\(0,offset\)/);
+ assert.match(css,/> \.rosterSwipeFixedRank\{/);
+ assert.match(css,/position:absolute!important;top:0!important;right:0!important/);
+ assert.match(css,/right:auto!important;left:0!important/);
+ assert.match(css,/rosterSwipeMoving > \.rosterSwipeFixedRank\{transition:none!important\}/);
+ assert.match(css,/max-width:759px/);
+});
+test('Opaque contextual Edit and Remove panels are revealed by clipping, not blur/fade',()=>{
+ const css=read('assets/roster-swipe-actions.css');
+ assert.match(css,/\.rosterSwipeActionTray\{[\s\S]*?opacity:1;visibility:visible/);
+ assert.match(css,/filter:none!important;transition:none!important/);
+ assert.doesNotMatch(css,/opacity:var\(--roster-swipe-reveal/);
+ assert.doesNotMatch(css,/blur\(/);
+ assert.match(css,/\.rosterSwipeOpen \.rosterSwipeActionTray\{pointer-events:auto\}/);
 });
