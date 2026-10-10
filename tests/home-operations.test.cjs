@@ -70,7 +70,7 @@ test('Home ordering, no duplicate Quick Actions, actual data wiring and Roster O
  assert.ok(!html.includes('<h2>Course Pulse</h2>'),'Course Pulse must be removed entirely from Home');
  assert.match(html,/function reportCoursePulseCards\(model\)/);
  assert.ok(!html.includes("'<div class=\"homeTaskStrip\">'"));
- assert.ok(html.includes('weekly.instructed')&&html.includes('weekly.solo'));
+ assert.ok(html.includes('totals.instructed')&&html.includes('totals.solo'),'Course reports must split recorded instructed and solo flights');
  assert.ok(html.includes('evaluations:getEvaluations(),soloFlights:getSoloFlights(),exams:getExamRecords()'));
  assert.ok(html.includes('attentionRows.length?'),'No fake row when no trainee is at risk');
  assert.ok(html.includes("screen==='profile'?{...extra,profileTab:'overview'}:extra"));
