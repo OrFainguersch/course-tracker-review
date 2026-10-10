@@ -23,8 +23,8 @@ test('Roster swipe is mobile-only and uses the established course membership per
  assert.match(css,/right:0;left:auto;top:0;bottom:0/);
  assert.match(css,/rosterSwipeOpen/);
  for(const filename of ['roster-swipe-actions.js','roster-swipe-actions.css']){
-  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-pulse-inline-swipe-0831'));
-  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-pulse-inline-swipe-0831'));
+  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-notes-rail-motion-0832'));
+  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-notes-rail-motion-0832'));
  }
 });
 test('Swipe module creates neither tray nor handlers without a touch screen and roster authority',()=>{
