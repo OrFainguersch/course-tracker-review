@@ -23,8 +23,8 @@ test('Roster swipe is mobile-only and uses the established course membership per
  assert.match(css,/right:0;left:auto;top:0;bottom:0/);
  assert.match(css,/rosterSwipeOpen/);
  for(const filename of ['roster-swipe-actions.js','roster-swipe-actions.css']){
-  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-pulse-inline-swipe-0831'));
-  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-pulse-inline-swipe-0831'));
+  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-notes-rail-motion-0832'));
+  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-notes-rail-motion-0832'));
  }
 });
 test('Swipe module creates neither tray nor handlers without a touch screen and roster authority',()=>{
@@ -66,10 +66,12 @@ test('mobile roster swipe action reveal follows the finger before settling gentl
  const js=read('assets/roster-swipe-actions.js'),css=read('assets/roster-swipe-actions.css');
  assert.match(js,/--roster-swipe-reveal/);
  assert.match(js,/getBoundingClientRect/);
- assert.match(css,/\.30s cubic-bezier\(\.22,\.72,\.2,1\)/);
+ assert.match(css,/--roster-motion-duration:\.28s/);
+ assert.match(css,/--roster-motion-duration:\.24s/);
+ assert.match(css,/transition:transform var\(--roster-motion-duration\) cubic-bezier\(\.2,\.82,\.22,1\)/);
  assert.match(css,/\.rosterSwipeActionTray\{[\s\S]*?visibility:hidden/);
  assert.match(css,/filter:none!important/);
- assert.match(css,/transition:clip-path .30s/);
+ assert.match(css,/transition:clip-path var\(--roster-motion-duration\)/);
  assert.match(css,/prefers-reduced-motion:reduce/);
 });
 
@@ -138,7 +140,7 @@ test('Opaque contextual Edit and Remove panels are revealed by clipping, not blu
  const css=read('assets/roster-swipe-actions.css');
  assert.match(css,/\.rosterSwipeActionTray\{[\s\S]*?visibility:hidden/);
  assert.match(css,/filter:none!important/);
- assert.match(css,/transition:clip-path .30s/);
+ assert.match(css,/transition:clip-path var\(--roster-motion-duration\)/);
  assert.doesNotMatch(css,/opacity:var\(--roster-swipe-reveal/);
  assert.doesNotMatch(css,/blur\(/);
  assert.match(css,/\.rosterSwipeOpen \.rosterSwipeActionTray\{[\s\S]*?visibility:visible/);
@@ -153,4 +155,14 @@ test('Roster action tray is fully concealed before swipe and progressively uncli
  assert.match(js,/row\.style\.setProperty\('--roster-swipe-clip',\(100\*\(1-fraction\)\)\+'%'\)/);
  assert.match(js,/event\.propertyName==='transform'/);
  assert.doesNotMatch(css,/blur\(/);
+});
+
+test('Swipe settling and opaque action clipping share iOS Notes-like release damping',()=>{
+ const css=read('assets/roster-swipe-actions.css');
+ assert.match(css,/--roster-motion-duration:\.28s/);
+ assert.match(css,/\.rosterSwipeSettling\{--roster-motion-duration:\.24s\}/);
+ assert.match(css,/transition:transform var\(--roster-motion-duration\) cubic-bezier\(\.2,\.82,\.22,1\)/);
+ assert.match(css,/transition:clip-path var\(--roster-motion-duration\) cubic-bezier\(\.2,\.82,\.22,1\)/);
+ assert.doesNotMatch(css,/blur\(/);
+ assert.match(css,/visibility:hidden/);
 });

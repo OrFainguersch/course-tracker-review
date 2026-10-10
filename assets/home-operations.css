@@ -321,3 +321,102 @@ html.flympusLargeText .homeDashboard .homePlanFlightSyllabus{font-size:13px}
  .homeDashboard .homePlanFlightReveal,.homeDashboard .homePlanFlightSyllabus,
  .homeDashboard .homePlanFlightChevron svg{transition:none!important}
 }
+
+/* The reference Home timeline is a single aligned time → icon → phase-label
+   track. Briefing and Debriefing open directly above/below the fixed Flight row. */
+.homeDashboard .homePlanFlight{
+ --home-phase-track:146px;--home-phase-time:51px;--home-phase-icon:27px;
+ --home-phase-gap:7px;position:relative;
+}
+.homeDashboard .homePlanFlightToggle,
+.homeDashboard .homePlanFlightPhase{
+ grid-template-columns:var(--home-phase-track) minmax(0,1fr) auto 22px;
+ gap:9px;align-items:center;
+}
+.homeDashboard .homePlanFlightClock,
+.homeDashboard .homePlanFlightPhaseClock{
+ display:grid;grid-template-columns:var(--home-phase-time) var(--home-phase-icon) minmax(0,1fr);
+ column-gap:var(--home-phase-gap);align-items:center;
+ justify-content:initial;flex-direction:initial;width:100%;min-width:0;direction:ltr;
+}
+.homeDashboard .homePlanFlightClock time,
+.homeDashboard .homePlanFlightPhaseClock time{
+ grid-column:1;grid-row:1;justify-self:end;
+ text-align:end;min-width:0;font-variant-numeric:tabular-nums;
+}
+.homeDashboard .homePlanFlightPlane,
+.homeDashboard .homePlanFlightPhaseIcon{
+ grid-column:2;grid-row:1;justify-self:center;align-self:center;
+}
+.homeDashboard .homePlanFlightStepName,
+.homeDashboard .homePlanFlightPhaseName{
+ grid-column:3;grid-row:1;min-width:0;
+ text-align:start;align-self:center;white-space:nowrap;
+ font-weight:750;line-height:1.2;
+}
+.homeDashboard .homePlanFlightPhaseName{font-size:11px}
+.homeDashboard .homePlanFlightStepName{
+ font-size:11px;font-weight:850;color:#1764a4;
+ visibility:hidden;opacity:0;
+ transition:opacity .14s ease,visibility 0s .14s;
+}
+.homeDashboard .homePlanFlight.is-expanded .homePlanFlightStepName{
+ visibility:visible;opacity:1;transition:opacity .17s ease,visibility 0s;
+}
+.homeDashboard .homePlanFlightPhase{
+ display:grid;min-height:41px;
+}
+.homeDashboard .homePlanFlight::before{
+ content:"";position:absolute;left:calc(14px + var(--home-phase-time) + var(--home-phase-gap) + 13.5px);
+ top:28px;bottom:27px;width:2px;border-radius:3px;background:#b9d6e8;
+ opacity:0;pointer-events:none;z-index:0;
+ transition:opacity .17s ease;
+}
+.homeDashboard .homePlanFlight.is-expanded::before{opacity:1}
+.homeDashboard .homePlanFlightToggle,
+.homeDashboard .homePlanFlightReveal{position:relative;z-index:1}
+.homeDashboard .homePlanFlightClock .homePlanFlightPlane,
+.homeDashboard .homePlanFlightPhaseClock .homePlanFlightPhaseIcon{position:relative;z-index:2}
+html[data-flympus-language="he"] .homeDashboard .homePlanFlightClock,
+html[data-flympus-language="he"] .homeDashboard .homePlanFlightPhaseClock{
+ direction:rtl;flex-direction:initial;
+}
+html[data-flympus-language="he"] .homeDashboard .homePlanFlight::before{
+ left:auto;right:calc(14px + var(--home-phase-time) + var(--home-phase-gap) + 13.5px);
+}
+html[data-flympus-theme="dark"] .homeDashboard .homePlanFlight::before{background:#4b7598}
+html[data-flympus-theme="dark"] .homeDashboard .homePlanFlightStepName{color:#99cefa}
+@media(max-width:480px){
+ .homeDashboard .homePlanFlight{
+  --home-phase-track:129px;--home-phase-time:47px;--home-phase-icon:24px;
+  --home-phase-gap:5px;
+ }
+ .homeDashboard .homePlanFlightToggle,
+ .homeDashboard .homePlanFlightPhase{
+  grid-template-columns:var(--home-phase-track) minmax(0,1fr) auto 19px;
+  gap:6px;
+ }
+ .homeDashboard .homePlanFlightPhaseName,
+ .homeDashboard .homePlanFlightStepName{font-size:10px}
+ .homeDashboard .homePlanFlight::before{
+  left:calc(9px + var(--home-phase-time) + var(--home-phase-gap) + 12px);
+ }
+ html[data-flympus-language="he"] .homeDashboard .homePlanFlight::before{
+  left:auto;right:calc(9px + var(--home-phase-time) + var(--home-phase-gap) + 12px);
+ }
+}
+@media(max-width:360px){
+ .homeDashboard .homePlanFlight{--home-phase-track:117px;--home-phase-time:42px;--home-phase-icon:24px;--home-phase-gap:4px}
+ .homeDashboard .homePlanFlightToggle,.homeDashboard .homePlanFlightPhase{
+  grid-template-columns:var(--home-phase-track) minmax(0,1fr) auto 17px;gap:4px
+ }
+ .homeDashboard .homePlanFlight::before{
+  left:calc(7px + var(--home-phase-time) + var(--home-phase-gap) + 12px)
+ }
+ html[data-flympus-language="he"] .homeDashboard .homePlanFlight::before{
+  left:auto;right:calc(7px + var(--home-phase-time) + var(--home-phase-gap) + 12px)
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .homeDashboard .homePlanFlightStepName,.homeDashboard .homePlanFlight::before{transition:none!important}
+}
