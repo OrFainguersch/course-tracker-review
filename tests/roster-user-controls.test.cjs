@@ -68,7 +68,8 @@ test('mobile roster swipe action reveal follows the finger before settling gentl
  assert.match(js,/getBoundingClientRect/);
  assert.match(css,/\.30s cubic-bezier\(\.22,\.72,\.2,1\)/);
  assert.match(css,/\.rosterSwipeActionTray\{[\s\S]*?visibility:hidden/);
- assert.match(css,/filter:none!important;transition:none!important/);
+ assert.match(css,/filter:none!important/);
+ assert.match(css,/transition:clip-path .30s/);
  assert.match(css,/prefers-reduced-motion:reduce/);
 });
 
@@ -136,7 +137,8 @@ test('Roster swipe runs only on mobile, mirrors to RTL, and keeps the rank ancho
 test('Opaque contextual Edit and Remove panels are revealed by clipping, not blur/fade',()=>{
  const css=read('assets/roster-swipe-actions.css');
  assert.match(css,/\.rosterSwipeActionTray\{[\s\S]*?visibility:hidden/);
- assert.match(css,/filter:none!important;transition:none!important/);
+ assert.match(css,/filter:none!important/);
+ assert.match(css,/transition:clip-path .30s/);
  assert.doesNotMatch(css,/opacity:var\(--roster-swipe-reveal/);
  assert.doesNotMatch(css,/blur\(/);
  assert.match(css,/\.rosterSwipeOpen \.rosterSwipeActionTray\{[\s\S]*?visibility:visible/);
