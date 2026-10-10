@@ -796,6 +796,8 @@ html.flympusLargeText .fleetEditor .fleetSectionHead h2{font-size:22px!important
  html.flympusLargeText .fleetEditor .fleetEditorActions{grid-template-columns:minmax(0,1fr)}
 }
 
+/* Flight edit navigation keeps the form heading below the fixed top chrome. */
+.dailyFlightPlan .fleetSortieForm{scroll-margin-top:110px}
 /* Flight-slot drag: same lifted-card and 220ms FLIP language as syllabus rows. */
 .fleetBookedFlights .fleetSortieDragHelp{
  margin:0 0 11px;color:#667f95;font-size:12px;line-height:1.45;

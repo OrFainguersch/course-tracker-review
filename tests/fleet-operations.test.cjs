@@ -604,12 +604,12 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261009-flight-drag-tabs-0810'],['assets/fleet-operations.css','20261010-flight-ios-loupe-0818']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261009-flight-drag-tabs-0810'],['assets/fleet-operations.css','20261010-plan-no-flash-edit-scroll-0819']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-flight-ios-loupe-0818'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-ios-loupe-0818/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-plan-no-flash-edit-scroll-0819'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261010-plan-no-flash-edit-scroll-0819/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
@@ -877,7 +877,7 @@ test('flight drag UI offers accessible touch grips, reduced motion and localized
  assert.match(html,/dutyOperations\.saveDraft\('PLAN'/);
  assert.match(html,/dutyOperations\.publish\('PLAN'/);
  assert.match(html,/Crew conflict: /);
- assert.ok(html.includes('flight-board-drag.js?v=20261010-flight-ios-loupe-0818'));
+ assert.ok(html.includes('flight-board-drag.js?v=20261010-plan-no-flash-edit-scroll-0819'));
 });
 test('Plan tabs use shared Course Management-style segmented control',()=>{
  const css=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
@@ -1034,4 +1034,31 @@ test('iOS flight drag blocks native text loupe and keeps open flight edit during
  assert.doesNotMatch(callback,/state\.flightBoardEditId=null/,'Reordering must not close Edit');
  assert.match(callback,/Retain the currently edited flight by its stable ID/);
  assert.doesNotMatch(callback,/onError:err=>\{[^}]*render\(\)/,'A rejected drop should not reset the editor');
+});
+
+test('Plan reslot patches keyed cards in place instead of repainting the entire screen',()=>{
+ const start=html.indexOf('function patchPlanFlightCards(date,flights)');
+ const end=html.indexOf('function bindDailyFlightBoard(',start);
+ assert.ok(start>0&&end>start);
+ const implementation=html.slice(start,end);
+ assert.match(implementation,/courseFlightScheduleHtml\(date,flights\)/);
+ assert.match(implementation,/new Map\(existing\.map\(row=>\[row\.dataset\.flightId,row\]\)\)/);
+ assert.match(implementation,/row\.replaceChildren\(\.\.\.fresh\.childNodes\)/);
+ assert.match(implementation,/board\.insertBefore\(row,ghost\|\|null\)/);
+ assert.match(implementation,/bindDailyFlightBoard\('board'\)/);
+ assert.doesNotMatch(implementation,/\$\('#content'\)\.innerHTML/);
+ const call=html.slice(html.indexOf('window.FLYMPUS_FLIGHT_DRAG?.attach?.('),html.indexOf('const refreshTimeline=',html.indexOf('window.FLYMPUS_FLIGHT_DRAG?.attach?.(')));
+ assert.match(call,/if\(!patchPlanFlightCards\(date,proposed\)\)render\(\)/);
+ assert.doesNotMatch(call,/state\.flightBoardEditId=null/);
+});
+test('Plan flight Edit retains the page and scrolls to the editor without input focus',()=>{
+ const click=html.match(/document\.querySelectorAll\('\[data-flight-edit\]'\)\.forEach\(b=>b\.onclick=[^\n]+/);
+ assert.ok(click);
+ assert.match(click[0],/updatePlanFlightEditForm\(\)/);
+ assert.match(click[0],/scrollToPlanFlightForm\(\)/);
+ assert.match(html,/form\.replaceChildren\(\.\.\.updated\.childNodes\)/);
+ assert.match(html,/requestAnimationFrame\(\(\)=>requestAnimationFrame\(reveal\)\)/);
+ assert.match(html,/behavior:reduced\?'auto':'smooth'/);
+ assert.match(html,/bottomDockProgrammaticRestoreUntil=Math\.max/);
+ assert.match(fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8'),/\.dailyFlightPlan \.fleetSortieForm\{scroll-margin-top:110px\}/);
 });

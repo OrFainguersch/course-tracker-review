@@ -106,7 +106,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/reports-dashboard.css?v=0767" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=0767"></script>
-<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261010-flight-ios-loupe-0818" />
+<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261010-plan-no-flash-edit-scroll-0819" />
 <link rel="stylesheet" href="./assets/course-operations.css?v=20261009-plan-single-row-stable-drag-0815" />
 <link rel="stylesheet" href="./assets/home-operations.css?v=20261008-home02" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
@@ -116,7 +116,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/fleet-model.js?v=20261009-flight-drag-tabs-0810"></script>
 <script src="./assets/fleet-timeline-layout.js?v=20261009-connected-leaders-0800"></script>
 <script src="./assets/fleet-views.js?v=20261009-flight-drag-tabs-0810"></script>
-<script src="./assets/flight-board-drag.js?v=20261010-flight-ios-loupe-0818"></script>
+<script src="./assets/flight-board-drag.js?v=20261010-plan-no-flash-edit-scroll-0819"></script>
 <script src="./assets/duty-approval-model.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/operations-cloud.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/course-operations.js?v=20261009-plan-fleet-identity-v1"></script>
@@ -160,7 +160,7 @@ html.flympusColdBoot #flympusAuthRoot{
    still owns notification permission/subscription later; this early call only
    makes the next cold launch independent of mobile network latency. */
 try{
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261010-flight-ios-loupe-0818',{scope:'./',updateViaCache:'none'}).catch(()=>{})
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=20261010-plan-no-flash-edit-scroll-0819',{scope:'./',updateViaCache:'none'}).catch(()=>{})
 }catch{}
 </script>
 <meta name="flympus-deploy-commit" content="__FLYMPUS_DEPLOY_COMMIT__">
@@ -8888,9 +8888,9 @@ function currentFleetContext(extra={}){
  return {fleet:getFleetAircraft(),flights:getDailyFlightBoard(),platformId:currentFleetPlatform(),platformLabel:epPlatformLabel(currentCourseMeta.platformId)||currentCourseMeta.platformId||'—',courseLabel:currentCourseMeta.courseName||currentCourseId,today:todayIsoDate(),canWrite:flympusCan('fleet.serviceability.write'),timingDefaults:getPlanTimingDefaults(),canConfigureTiming:flympusCan('fleet.serviceability.write'),...extra};
 }
 function fleetScreen(){return window.FLYMPUS_FLEET_VIEW?.fleet?.(currentFleetContext({editId:state.fleetEditId||null}))||flympusAccessDenied('Fleet')}
-function courseFlightScheduleHtml(date){
+function courseFlightScheduleHtml(date,flightsOverride=null){
  if(!window.FLYMPUS_FLEET_VIEW)return '';
- return window.FLYMPUS_FLEET_VIEW.schedule(currentFleetContext({date,flights:getPlanWorkingFlights(date),draftMode:isDutyTrainee(),sharedMode:dutyOperations?.enabled(),editId:state.flightBoardEditId||null,canWrite:flympusCan('operations.flightBoard.write'),
+ return window.FLYMPUS_FLEET_VIEW.schedule(currentFleetContext({date,flights:Array.isArray(flightsOverride)?flightsOverride:getPlanWorkingFlights(date),draftMode:isDutyTrainee(),sharedMode:dutyOperations?.enabled(),editId:state.flightBoardEditId||null,canWrite:flympusCan('operations.flightBoard.write'),
   trainees:courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active').map(x=>({id:x.id,name:x.name})),
   instructors:courseInstructors().map(x=>({id:x.id,name:x.name})),syllabi:evaluationSyllabusNames()}));
 }
@@ -8972,19 +8972,93 @@ function planScheduleError(err){
   return 'אחד השיבוצים כולל זמנים לא תקינים. יש לתקן אותו לפני שינוי הסדר.';
  return known[english]||english;
 }
-function bindDailyFlightBoard(){
+/* Refresh ONLY keyed flight cards. A full Plan render on each drop used to
+   destroy/recreate the page, producing the visible iOS flash and scroll jump. */
+function patchPlanFlightCards(date,flights){
+ const board=document.querySelector('[data-flight-sorties]');
+ if(!board)return false;
+ const staging=document.createElement('div');
+ staging.innerHTML=courseFlightScheduleHtml(date,flights);
+ const nextBoard=staging.querySelector('[data-flight-sorties]');
+ if(!nextBoard)return false;
+ const existing=[...board.querySelectorAll('.fleetSortie[data-flight-id]')];
+ const incoming=[...nextBoard.querySelectorAll('.fleetSortie[data-flight-id]')];
+ const byId=new Map(existing.map(row=>[row.dataset.flightId,row]));
+ if(existing.length!==incoming.length||byId.size!==existing.length
+    ||incoming.some(row=>!byId.has(row.dataset.flightId)))return false;
+ const origin=new Map(existing.map(row=>[row.dataset.flightId,row.getBoundingClientRect().top]));
+ const oldTimes=new Map(existing.map(row=>[row.dataset.flightId,row.querySelector('.fleetSortieMain>b')?.textContent]));
+ const ghost=board.querySelector('.fleetSortieDragGhost');
+ for(const fresh of incoming){
+  const row=byId.get(fresh.dataset.flightId);
+  const sourceClass=row.classList.contains('fleetSortieDragSource')?' fleetSortieDragSource':'';
+  row.className=fresh.className+sourceClass;
+  row.replaceChildren(...fresh.childNodes);
+  row.style.transition='none';
+  row.style.transform='';
+  board.insertBefore(row,ghost||null);
+ }
+ const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+ for(const row of existing){
+  const delta=Number(origin.get(row.dataset.flightId))-row.getBoundingClientRect().top;
+  if(!reduced&&Number.isFinite(delta)&&Math.abs(delta)>1)row.animate?.(
+   [{transform:'translateY('+delta+'px)'},{transform:'translateY(0px)'}],
+   {duration:220,easing:'cubic-bezier(.22,.8,.24,1)'});
+  row.style.transition='';
+ }
+ const editId=state.flightBoardEditId,editFlight=flights.find(f=>String(f.id)===String(editId));
+ const timeInput=$('#fleetSortieForm')?.querySelector('[name="time"]');
+ if(editFlight&&timeInput&&timeInput.value===oldTimes.get(String(editId))){
+  timeInput.value=String(editFlight.time);
+  timeInput.dispatchEvent(new Event('input',{bubbles:true}));
+ }
+ bindDailyFlightBoard('board');
+ return true;
+}
+/* Edit just the existing form so its title and fields update without
+   repainting Plan, its date picker, the dock or the complete flight list. */
+function updatePlanFlightEditForm(){
+ const form=$('#fleetSortieForm');
+ if(!form)return false;
+ const staging=document.createElement('div');
+ staging.innerHTML=courseFlightScheduleHtml(state.planDate||todayIsoDate());
+ const updated=staging.querySelector('#fleetSortieForm');
+ if(!updated)return false;
+ form.replaceChildren(...updated.childNodes);
+ form.noValidate=true;
+ form.querySelectorAll('[data-go]').forEach(button=>button.onclick=()=>go(button.dataset.go));
+ bindDailyFlightBoard('form');
+ return true;
+}
+function scrollToPlanFlightForm(){
+ const form=$('#fleetSortieForm');
+ if(!form)return;
+ const reveal=()=>{
+  if(!form.isConnected)return;
+  const header=document.querySelector('.topbar,.topBar,.appHeader');
+  const headerBottom=header?.getBoundingClientRect?.().bottom||0;
+  const margin=Math.max(104,headerBottom>0?headerBottom+15:0);
+  const target=Math.max(0,(window.scrollY||0)+form.getBoundingClientRect().top-margin);
+  bottomDockProgrammaticRestoreUntil=Math.max(Number(bottomDockProgrammaticRestoreUntil||0),(performance.now?.()||Date.now())+950);
+  const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+  window.scrollTo?.({top:target,behavior:reduced?'auto':'smooth'});
+ };
+ if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>requestAnimationFrame(reveal));
+ else reveal();
+}
+function bindDailyFlightBoard(binding='all'){
  const form=$('#fleetSortieForm'),mode=$('#fleetFlightMode');
- const updateTimelineLayout=window.FLYMPUS_FLEET_TIMELINE_LAYOUT?.attach?.(form?.querySelector('.fleetTimeFlow'),form);
+ const updateTimelineLayout=binding==='board'?null:window.FLYMPUS_FLEET_TIMELINE_LAYOUT?.attach?.(form?.querySelector('.fleetTimeFlow'),form);
  if(!flympusCan('operations.flightBoard.write'))return;
  const model=window.FLYMPUS_FLEET_MODEL;
  // Reordering cards assigns flights to existing departure slots and runs
  // full conflict validation before any official or draft write.
- window.FLYMPUS_FLIGHT_DRAG?.attach?.(document.querySelector('[data-flight-sorties]'),{
+ if(binding!=='form')window.FLYMPUS_FLIGHT_DRAG?.attach?.(document.querySelector('[data-flight-sorties]'),{
   onDrop:async orderedIds=>{
    if(!flympusCan('operations.flightBoard.write'))throw Error(planUiText('Flight planning permission required','נדרשת הרשאה לתכנון טיסות'));
    const date=state.planDate||todayIsoDate(),platform=currentFleetPlatform(),original=getPlanWorkingFlights(date);
    const proposed=model.reorderSorties(original,orderedIds,platform,date,getPlanTimingDefaults());
-   if(proposed===original){render();return}
+   if(proposed===original)return;
    if(isDutyTrainee())dutyOperations.saveDraft('PLAN',{flights:proposed.filter(x=>x.date===date)},date);
    else if(dutyOperations?.enabled())await dutyOperations.publish('PLAN',date,{flights:proposed.filter(x=>x.date===date)});
    else if(!markFlightBoardPlanManaged(date)||!persistCourseOperations('ct-review-flight-board',proposed))
@@ -8992,10 +9066,11 @@ function bindDailyFlightBoard(){
    toast(planUiText('Flight departure slots updated','שעות ההמראה עודכנו בהצלחה'),'success');
    // Retain the currently edited flight by its stable ID; moving slots must
    // not silently cancel an open editor and reset it to Add to board.
-   render();
+   if(!patchPlanFlightCards(date,proposed))render();
   },
   onError:err=>{toast(planScheduleError(err),'error')}
  });
+ if(binding==='board')return;
  const refreshTimeline=()=>{
   if(!form)return;
   const read=n=>form.querySelector('[name="'+n+'"]')?.value||'';
@@ -9067,7 +9142,7 @@ function bindDailyFlightBoard(){
     state.flightBoardEditId=null;toast(planUiText('Flight board updated','שיבוץ הטיסה נשמר בהצלחה'),'success');render();
   }catch(err){toast(planScheduleError(err),'error')}
  };
- document.querySelectorAll('[data-flight-edit]').forEach(b=>b.onclick=()=>{if(!flympusCan('operations.flightBoard.write'))return;state.flightBoardEditId=b.dataset.flightEdit;render()});
+ document.querySelectorAll('[data-flight-edit]').forEach(b=>b.onclick=()=>{if(!flympusCan('operations.flightBoard.write'))return;state.flightBoardEditId=b.dataset.flightEdit;if(!updatePlanFlightEditForm())render();scrollToPlanFlightForm()});
  if($('#fleetFlightCancel'))$('#fleetFlightCancel').onclick=()=>{state.flightBoardEditId=null;render()};
  document.querySelectorAll('[data-flight-delete]').forEach(b=>b.onclick=async()=>{
   if(!flympusCan('operations.flightBoard.write'))return;
@@ -9518,7 +9593,7 @@ function syncNotificationPreferenceControls(){
   });
 }
 
-const FLYMPUS_PUSH_SW='./sw.js?v=20261010-flight-ios-loupe-0818',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
+const FLYMPUS_PUSH_SW='./sw.js?v=20261010-plan-no-flash-edit-scroll-0819',FLYMPUS_PUSH_CONFIG='./push-config.json',FLYMPUS_PUSH_USER_ENABLED_KEY='flympus-push-user-enabled';
 let flympusPushConfigCache=null,flympusPushConfigPromise=null;
 function getFlympusPushUserEnabled(){
   try{
