@@ -604,11 +604,11 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261010-plan-cards-polish-0826'],['assets/fleet-operations.css','20261010-roster-swipe-stability-0829']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261010-flight-motion-fleet-edit-0841'],['assets/fleet-operations.css','20261010-flight-motion-fleet-edit-0841']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-restore-inline-stable-0840'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-flight-motion-fleet-edit-0841'/);
  assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-time-only-seamless-0820/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
@@ -1147,7 +1147,7 @@ test('Mobile swipe exposes existing confirmed remove action, never deletes direc
  assert.match(src,/THRESHOLD=44/);
  assert.doesNotMatch(src,/persistCourseOperations|saveDraft|publish\('PLAN'/);
  assert.doesNotMatch(html,/FLYMPUS_ROW_SWIPE\?\.attach\?\.\(document\.querySelector\('\[data-flight-sorties\]'\)\)/);
- assert.match(html,/assets\/row-swipe-delete\.js\?v=20261010-plan-cards-polish-0826/);
+ assert.match(html,/assets\/row-swipe-delete\.js\?v=20261010-flight-motion-fleet-edit-0841/);
  assert.match(css,/\.flympusSwipeDeleteAction/);
  assert.match(css,/\.fleetSortieDragGhost \.flympusSwipeDeleteAction\{display:none!important\}/);
 });
@@ -1186,4 +1186,23 @@ test('Plan syllabus aligns with names in both writing directions',()=>{
  const css=fs.readFileSync('assets/fleet-operations.css','utf8');
  assert.match(css,/\.fleetSortieSlide \.fleetSortieCrew \.fleetSortieSyllabus\{[\s\S]*?margin-inline-start:22px;max-width:calc\(100% - 22px\)/);
  assert.match(css,/html\[data-flympus-language="he"\] \.fleetBookedFlights \.fleetSortieSlide/);
+});
+
+test('Fleet serviceability filter is read-only, with ready aircraft always ordered first',()=>{
+ const vm=require('node:vm');
+ const win={FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=> 'en'};
+ vm.runInNewContext(ui,{window:win});
+ const V=win.FLYMPUS_FLEET_VIEW;
+ const fleet=add(add([],'down','01','UNSERVICEABLE','Inspection','2026-10-07'),'ready','02');
+ const context={fleet,platformId:'shahak',platformLabel:'Shahak',courseLabel:'Test',today:'2026-10-10',canWrite:true};
+ const all=V.fleet(context),filtered=V.fleet({...context,statusFilter:'UNSERVICEABLE'});
+ assert.ok(all.indexOf('fleetInventoryTail">Shahak-02')<all.indexOf('fleetInventoryTail">Shahak-01'));
+ assert.ok(all.includes('id="fleetServiceFilter"'));
+ assert.ok(!all.includes('>Actions<'));
+ assert.ok(filtered.includes('data-fleet-status="SERVICEABLE" hidden'));
+ assert.ok(filtered.includes('data-fleet-status="UNSERVICEABLE"'));
+ assert.ok(all.includes('data-fleet-edit="ready">✎ Edit'));
+ assert.equal(fleet.find(x=>x.id==='down').status,'UNSERVICEABLE','Sorting/filtering cannot mutate aircraft');
+ const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.ok(css.includes('.fleetInventoryTable tr[hidden]{display:none!important}'));
 });

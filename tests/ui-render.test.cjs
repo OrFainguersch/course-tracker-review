@@ -545,7 +545,7 @@ assert.match(advancedHtml,/Define sectors/);
 assert.match(advancedHtml,/Select sector to edit/);
 assert.match(advancedHtml,/>Architecture<\/b>/);
 assert.doesNotMatch(advancedHtml,/Phases · EP|Platforms · EP|EP architecture/,'Selected sector must not be repeated in Advanced headings');
-assert.match(advancedHtml,/class="advancedStepLabel advancedStepEditEntry"[\s\S]*id="advancedArchitectureEdit">Edit advanced setup<\/button>/,"Advanced view mode must expose one contextual Edit action at the start of the setup flow");
+assert.match(advancedHtml,/class="advancedStepLabel advancedStepEditEntry"[\s\S]*id="advancedArchitectureEdit">✎ Edit advanced setup<\/button>/,"Advanced view mode must expose one contextual Edit action at the start of the setup flow");
 assert.doesNotMatch(advancedHtml,/packageSaveBar advancedArchitectureActions/,"Advanced Edit must never float over content or the bottom navigation");
 assert.doesNotMatch(advancedHtml,/id="cfgSaveCatalogs"/,"Save controls must not appear before Advanced edit mode starts");
 assert.match(advancedHtml,/advancedEditFieldset" disabled/,"Advanced architecture must be view-only until Edit is pressed");
@@ -1034,3 +1034,12 @@ assert(html.includes("['planned','planned','Plan'],['home','home','Home'],['flee
 assert(html.includes('data-go="fleet">Open Fleet</button>'),"Duty Home must still provide a direct Fleet entry");
 assert(fs.readFileSync('assets/fleet-views.js','utf8').includes('data-go="fleet"'),
   "Other roles must retain Fleet access from Home and Plan rather than the sidebar");
+
+test('Advanced edit action lies outside the disabled inputs fieldset',()=>{
+ const source=fs.readFileSync('index.html','utf8');
+ const start=source.indexOf("if(tab==='catalog'&&canGlobalPackages)");
+ const piece=source.slice(start,source.indexOf("if(tab==='profiles')",start));
+ assert.ok(piece.includes('btn edit small advancedEditStart'));
+ assert.ok(piece.includes('✎ Edit advanced setup'));
+ assert.ok(piece.indexOf('<section class="advancedSequence"')<piece.indexOf('<fieldset class="advancedEditFieldset"'));
+});

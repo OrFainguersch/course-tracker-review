@@ -2,7 +2,7 @@
    - Instant PWA cold-start from a versioned same-origin app-shell cache
    - Background revalidation so deployments replace the cached shell safely
    - Web Push delivery and notification navigation */
-const FLYMPUS_SW_VERSION='2026-10-10-restore-inline-stable-0840';
+const FLYMPUS_SW_VERSION='2026-10-10-flight-motion-fleet-edit-0841';
 const SHELL_CACHE='flympus-shell-'+FLYMPUS_SW_VERSION;
 const DEFAULT_ICON='./assets/flympus-app-icon.webp';
 const SHELL_URLS=[
@@ -13,18 +13,18 @@ const SHELL_URLS=[
   './account-switcher.js?v=20261008-switcher01',
   './assets/reports-dashboard.js?v=20261010-mobile-table-accordion-0838',
   './assets/reports-dashboard.css?v=20261010-dashboard-stable-flight-0839',
-  './assets/fleet-operations.css?v=20261010-roster-swipe-stability-0829',
+  './assets/fleet-operations.css?v=20261010-flight-motion-fleet-edit-0841',
   './assets/fleet-model.js?v=20261009-flight-drag-tabs-0810',
   './assets/duty-approval-model.js?v=20261009-approval-sounds-0795',
   './assets/operations-cloud.js?v=20261009-approval-sounds-0795',
   './assets/course-operations.js?v=20261009-plan-fleet-identity-v1',
   './assets/course-operations.css?v=20261009-plan-single-row-stable-drag-0815',
   './assets/fleet-timeline-layout.js?v=20261009-connected-leaders-0800',
-  './assets/fleet-views.js?v=20261010-plan-cards-polish-0826',
+  './assets/fleet-views.js?v=20261010-flight-motion-fleet-edit-0841',
   './assets/flight-board-drag.js?v=20261010-flight-time-only-seamless-0820',
   './assets/row-swipe-delete.js?v=20261010-plan-cards-polish-0826',
   './assets/roster-swipe-actions.js?v=20261010-swipe-accordion-report-0837',
-  './assets/home-operations.css?v=20261010-restore-inline-stable-0840',
+  './assets/home-operations.css?v=20261010-flight-motion-fleet-edit-0841',
   './assets/roster-swipe-actions.css?v=20261010-swipe-accordion-report-0837',
   './assets/safety-workflow.css?v=20261008-safety03',
   './assets/safety-workflow.js?v=20261008-safety01',
