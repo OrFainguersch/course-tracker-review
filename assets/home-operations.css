@@ -191,3 +191,7 @@ html[data-flympus-language="he"] .homePlanRowTimeline .homePlanTags{direction:rt
  .homePlanMomentLabel{font-size:8.5px}
 }
 html.flympusLargeText .homePlanMomentLabel{white-space:normal;overflow-wrap:anywhere;line-height:1.1}
+
+/* Match the identical plane glyph from the Home Flights Completed stat. */
+.homePlanMoment-takeoff .homePlanMomentIcon{font-family:inherit;font-size:19px;font-weight:700;line-height:1}
+html.flympusLargeText .homePlanMoment-takeoff .homePlanMomentIcon{font-size:22px}

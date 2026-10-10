@@ -604,11 +604,11 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261010-plan-cards-polish-0826'],['assets/fleet-operations.css','20261010-plan-cards-polish-0826']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261010-plan-cards-polish-0826'],['assets/fleet-operations.css','20261010-visual-swipe-polish-0828']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-roster-swipe-admin-0827'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-visual-swipe-polish-0828'/);
  assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-time-only-seamless-0820/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
@@ -1180,4 +1180,10 @@ test('Scheduled cards eliminate duplicate top time without breaking reorder and 
  assert.match(css,/\.fleetSortie\.flympusSwipeOpen \.fleetSortieSlide\{transform:translate3d\(-94px,0,0\)/);
  assert.match(css,/html\[data-flympus-language="he"\] \.fleetBookedFlights \.fleetSortieSlide/);
  assert.match(css,/html\[data-flympus-theme="dark"\] \.fleetBookedFlights \.fleetSortie\{background:#172d40/);
+});
+
+test('Plan syllabus aligns with names in both writing directions',()=>{
+ const css=fs.readFileSync('assets/fleet-operations.css','utf8');
+ assert.match(css,/\.fleetSortieSlide \.fleetSortieCrew \.fleetSortieSyllabus\{[\s\S]*?margin-inline-start:22px;max-width:calc\(100% - 22px\)/);
+ assert.match(css,/html\[data-flympus-language="he"\] \.fleetBookedFlights \.fleetSortieSlide/);
 });

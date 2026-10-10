@@ -23,8 +23,8 @@ test('Roster swipe is mobile-only and uses the established course membership per
  assert.match(css,/right:0;top:0;bottom:0/);
  assert.match(css,/rosterSwipeOpen/);
  for(const filename of ['roster-swipe-actions.js','roster-swipe-actions.css']){
-  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-roster-swipe-admin-0827'));
-  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-roster-swipe-admin-0827'));
+  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-visual-swipe-polish-0828'));
+  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-visual-swipe-polish-0828'));
  }
 });
 test('Swipe module creates neither tray nor handlers without a touch screen and roster authority',()=>{
@@ -60,4 +60,13 @@ test('User Management sorts roles by hierarchy and filters roles across statuses
  assert.match(release,/REVISED_USER_DELETE_RULE/);
  assert.match(css,/flympusManagedRoleFilter/);
  assert.match(css,/flympusUserDelete/);
+});
+
+test('mobile roster swipe action reveal follows the finger before settling gently',()=>{
+ const js=read('assets/roster-swipe-actions.js'),css=read('assets/roster-swipe-actions.css');
+ assert.match(js,/--roster-swipe-reveal/);
+ assert.match(js,/getBoundingClientRect/);
+ assert.match(css,/\.34s cubic-bezier\(\.2,\.76,\.18,1\)/);
+ assert.match(css,/rosterSwipeMoving \.rosterSwipeActionTray\{opacity:var\(--roster-swipe-reveal,0\)/);
+ assert.match(css,/prefers-reduced-motion:reduce/);
 });
