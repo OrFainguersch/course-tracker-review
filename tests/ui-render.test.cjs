@@ -1133,8 +1133,32 @@ assert(fs.readFileSync('assets/fleet-views.js','utf8').includes('data-go="fleet"
  assert.ok(source.includes('.courseManagementTabs>.seg{flex:1 1 0!important'),"All three tab slots and active halos are equal");
  assert.ok(source.includes('.courseManagementTopbar .sub{grid-column:1/-1;grid-row:2'),"Heading description width never depends on Manage button");
  assert.ok(source.includes('const heading=\'<div class="insightHeading"'),"Every Reports tab has a common title and toolbar");
- assert.ok(source.includes("if(tab==='details')return '<div class=\"insightRoot\">'+heading+nav+reportsLegacy()"),"Detailed analytics does not replace the main Reports title");
+ assert.ok(source.includes("if(tab==='details')return '<div class=\"insightRoot\">'+heading+nav+actions+reportsLegacy()"),"Detailed analytics shares heading, tabs and export toolbar");
  assert.ok(!source.includes('return \'<h1 class="pageTitle">Course analytics</h1>'),"No redundant detailed analytics heading");
  assert.ok(!source.includes("nav.scrollIntoView?.({block:'start'"),"Tab switches cannot scroll past the page title");
  assert.ok(source.includes('window.scrollTo?.(0,0)'),"Reports switch stays at top");
+})();
+
+// 0848 — shared navigation style, reset-all behavior, single-toolbar Reports design.
+(()=>{
+ const html=fs.readFileSync('index.html','utf8');
+ const fleetCss=fs.readFileSync('assets/fleet-operations.css','utf8');
+ const reportCss=fs.readFileSync('assets/reports-dashboard.css','utf8');
+ assert.ok(html.includes('0848 — One navigation style'),"Segmented controls follow Exams visual language");
+ assert.ok(html.includes('outline-offset:-4px!important'),"Focus halos stay inside the button and remain centered");
+ assert.ok(html.includes('.courseManagementTabs>.seg,.coursePlanWorkspace'),"Management and Plan tabs share the same text size");
+ assert.ok(html.includes('.rosterControls>.scrollTabs'),"Roster tabs share the segmented palette");
+ assert.ok(html.includes('.insightRoot .insightTabNav'),"Reports view tabs use same style");
+ assert.ok(html.includes('class="insightHeadingActions insightReportExportActions"'),"Export buttons moved below report tabs");
+ assert.ok(html.includes('viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="17" height="17"'),"Print/PDF has an accessible decoration-only printer icon");
+ assert.ok(html.includes("nav+actions+'<section class=\"card insightFilterPanel\""),"Report main views put exports below tabs");
+ for(const id of ['rosterResetFilters','myCoursesClearFilters','packageResetFilters','evaluationHistoryReset','safetyHistoryReset','examHistoryReset','reportsReset']){
+  assert.ok(html.includes('id="'+id+'"'),id+" reset action exists");
+ }
+ assert.ok(html.includes("if($('#rosterResetFilters'))$('#rosterResetFilters').onclick"),"Roster reset is functional");
+ assert.ok(html.includes("if($('#packageResetFilters'))$('#packageResetFilters').onclick"),"Package reset is functional");
+ assert.ok(html.includes("state.reportGranularity='week';saveUiState();render()"),"Reporting period reset includes grouping");
+ assert.ok(!html.includes("id=\"evaluationHistoryReset\">Reset filters</button>'+filterSelectionsHtml"),"History reset is no longer at bottom of filters");
+ assert.ok(fleetCss.includes('.coursePlanTabs'),"Plan styling still retains its badge placement");
+ assert.ok(reportCss.includes('.insightTabNav'),"Detailed analytics report tabs still have a shared base");
 })();
