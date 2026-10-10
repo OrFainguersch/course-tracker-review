@@ -344,7 +344,7 @@ test('Home inline syllabus preserves original spacing and measures both natural 
  const crew=flight.slice(flight.indexOf('homePlanFlightPeople'),flight.indexOf("badges+'<span"));
  assert.ok(crew.includes('homePlanFlightSyllabus'),'Syllabus remains under the crew');
  assert.ok(!flight.includes("reveal('SyllabusReveal'"),'Detached syllabus rail is removed');
- assert.ok(styles.includes('max-height:64px;opacity:1;margin-top:5px'));
+ assert.ok(styles.includes('height:var(--home-syllabus-open-height,auto)'));
  assert.ok(styles.includes('homeFlightHeightsReady .homePlanFlightToggle'));
  assert.ok(styles.includes('height:var(--home-flight-open-height)'));
  assert.ok(styles.includes('transition:height .38s cubic-bezier'));
@@ -353,4 +353,16 @@ test('Home inline syllabus preserves original spacing and measures both natural 
  assert.ok(markup.includes("document.querySelectorAll('.homePlanFlight').forEach(homePrepareFlightSummaryHeights)"));
  assert.ok(markup.includes("clone.classList.remove('is-expanded')"));
  assert.ok(markup.includes("clone.classList.add('is-expanded')"));
+});
+
+test('Home accordion uses measured syllabus content rather than max-height overshoot',()=>{
+ const markup=fs.readFileSync('index.html','utf8'),styles=fs.readFileSync('assets/home-operations.css','utf8');
+ assert.ok(markup.includes("const syllabusHeight=Math.ceil(syllabus?.scrollHeight||0)"));
+ assert.ok(markup.includes("clone.style.setProperty('--home-syllabus-open-height',syllabusHeight+'px')"));
+ assert.ok(markup.includes("parent.style.setProperty('--home-syllabus-open-height',syllabusHeight+'px')"));
+ const binding=markup.slice(markup.indexOf("document.querySelectorAll('[data-home-flight-toggle]')"),markup.indexOf("}dutyOperations?.bind()"));
+ assert.ok(!binding.includes('homeRevealHeight(part)'), 'No synchronous layout remeasure on tap');
+ assert.ok(styles.includes('transition:height .52s cubic-bezier(.25,.75,.25,1)'));
+ assert.ok(styles.includes('height:var(--home-syllabus-open-height,auto)'));
+ assert.ok(styles.includes('margin-top .52s cubic-bezier'));
 });

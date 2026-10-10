@@ -106,9 +106,9 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/reports-dashboard.css?v=20261010-dashboard-stable-flight-0839" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=20261010-mobile-table-accordion-0838"></script>
-<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261010-roster-swipe-stability-0829" />
+<link rel="stylesheet" href="./assets/fleet-operations.css?v=20261010-flight-motion-fleet-edit-0841" />
 <link rel="stylesheet" href="./assets/course-operations.css?v=20261009-plan-single-row-stable-drag-0815" />
-<link rel="stylesheet" href="./assets/home-operations.css?v=20261010-restore-inline-stable-0840" />
+<link rel="stylesheet" href="./assets/home-operations.css?v=20261010-flight-motion-fleet-edit-0841" />
 <link rel="stylesheet" href="./assets/roster-swipe-actions.css?v=20261010-swipe-accordion-report-0837" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
@@ -116,7 +116,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/safety-ui.js?v=20261008-safety03"></script>
 <script src="./assets/fleet-model.js?v=20261009-flight-drag-tabs-0810"></script>
 <script src="./assets/fleet-timeline-layout.js?v=20261009-connected-leaders-0800"></script>
-<script src="./assets/fleet-views.js?v=20261010-plan-cards-polish-0826"></script>
+<script src="./assets/fleet-views.js?v=20261010-flight-motion-fleet-edit-0841"></script>
 <script src="./assets/flight-board-drag.js?v=20261010-flight-time-only-seamless-0820"></script>
 <script src="./assets/row-swipe-delete.js?v=20261010-plan-cards-polish-0826"></script>
 <script src="./assets/roster-swipe-actions.js?v=20261010-swipe-accordion-report-0837"></script>
@@ -6950,7 +6950,7 @@ const flympusPushBootScreen=String(flympusPushBootParams.get('pushScreen')||''),
    A push deep link may explicitly override either destination. */
 if(!flympusRealPageReload||!appScreenIds.has(String(initialUiState.screen||'')))initialUiState.screen='home';
 if(flympusPushBootScreen&&['home','courses','roster','planned','record','reports','evaluation','safety','exams'].includes(flympusPushBootScreen))initialUiState.screen=flympusPushBootScreen;
-const state={screen:'home',reportTab:'dashboard',reportTabExplicit:false,reportGranularity:'week',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',rosterStatuses:[],rosterRoles:[],rosterDateFrom:'',rosterDateTo:'',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',reportTrainees:[],reportInstructors:[],reportSyllabi:[],reportDateFrom:'',reportDateTo:'',myCoursesStatuses:[],myCoursesSectors:[],myCoursesPhases:[],myCoursesPlatforms:[],myCoursesTrainings:[],myCoursesCountries:[],myCoursesRoles:[],myCoursesDateFrom:'',myCoursesDateTo:'',planView:'board',packageNameFilters:[],packagePhaseFilters:[],packagePlatformFilters:[],packageCategoryFilters:[],packageContextFilters:[],safetyView:'new',evaluationView:'new',examsView:'new',...initialUiState};
+const state={screen:'home',reportTab:'dashboard',reportTabExplicit:false,reportGranularity:'week',fleetStatusFilter:'ALL',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',rosterStatuses:[],rosterRoles:[],rosterDateFrom:'',rosterDateTo:'',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',reportTrainees:[],reportInstructors:[],reportSyllabi:[],reportDateFrom:'',reportDateTo:'',myCoursesStatuses:[],myCoursesSectors:[],myCoursesPhases:[],myCoursesPlatforms:[],myCoursesTrainings:[],myCoursesCountries:[],myCoursesRoles:[],myCoursesDateFrom:'',myCoursesDateTo:'',planView:'board',packageNameFilters:[],packagePhaseFilters:[],packagePlatformFilters:[],packageCategoryFilters:[],packageContextFilters:[],safetyView:'new',evaluationView:'new',examsView:'new',...initialUiState};
 // Preserve manually selected report tabs; migrate the former implicit default.
 if(state.reportTabExplicit!==true)state.reportTab='dashboard';
 let courseTailorEditSnapshot=null;
@@ -7015,7 +7015,7 @@ let appNavHistory=[];try{const stored=JSON.parse(sessionStorage.getItem('ct-revi
 if(state.screen==='home')appNavHistory=[];else if(appRootScreens.has(state.screen))appNavHistory=['home'];else if(!appNavHistory.length||appNavHistory[0]!=='home')appNavHistory=['home',...appNavHistory.filter(x=>x!=='home')];
 function saveAppNavHistory(){try{sessionStorage.setItem('ct-review-nav-history',JSON.stringify(appNavHistory))}catch{}}
 saveAppNavHistory();
-function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,safetyView:state.safetyView,evaluationView:state.evaluationView,examsView:state.examsView,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace,packageWorkspace:state.packageWorkspace,packageFocusId:state.packageFocusId,packageEditId:state.packageEditId,emergencyProfileFilter:state.emergencyProfileFilter,builderType:state.builderType,builderPhase:state.builderPhase,builderPlatform:state.builderPlatform,builderTraining:state.builderTraining,builderProgram:state.builderProgram,builderDay:state.builderDay,builderCountry:state.builderCountry,builderName:state.builderName,builderNameManual:state.builderNameManual,builderCode:state.builderCode,builderCodeManual:state.builderCodeManual,builderStartsOn:state.builderStartsOn,libraryProfession:state.libraryProfession,packageCategoryFilter:state.packageCategoryFilter,myCoursesStatus:state.myCoursesStatus,myCoursesSector:state.myCoursesSector,myCoursesPhase:state.myCoursesPhase,myCoursesPlatform:state.myCoursesPlatform,myCoursesCountry:state.myCoursesCountry,myCoursesTraining:state.myCoursesTraining,myCoursesRole:state.myCoursesRole,myCoursesFiltersOpen:state.myCoursesFiltersOpen,rosterStatuses:state.rosterStatuses,rosterRoles:state.rosterRoles,rosterDateFrom:state.rosterDateFrom,rosterDateTo:state.rosterDateTo,reportTrainees:state.reportTrainees,reportInstructors:state.reportInstructors,reportSyllabi:state.reportSyllabi,reportDateFrom:state.reportDateFrom,reportDateTo:state.reportDateTo,reportTab:state.reportTab,reportTabExplicit:state.reportTabExplicit,reportGranularity:state.reportGranularity,planDate:state.planDate,planView:state.planView,myCoursesStatuses:state.myCoursesStatuses,myCoursesSectors:state.myCoursesSectors,myCoursesPhases:state.myCoursesPhases,myCoursesPlatforms:state.myCoursesPlatforms,myCoursesTrainings:state.myCoursesTrainings,myCoursesCountries:state.myCoursesCountries,myCoursesRoles:state.myCoursesRoles,myCoursesDateFrom:state.myCoursesDateFrom,myCoursesDateTo:state.myCoursesDateTo,packageNameFilters:state.packageNameFilters,packagePhaseFilters:state.packagePhaseFilters,packagePlatformFilters:state.packagePlatformFilters,packageCategoryFilters:state.packageCategoryFilters,packageContextFilters:state.packageContextFilters}))}catch{}}
+function saveUiState(){try{sessionStorage.setItem('ct-review-ui',JSON.stringify({screen:state.screen,selectedTrainee:state.selectedTrainee,selectedInstructor:state.selectedInstructor,profileTab:state.profileTab,rosterType:state.rosterType,filter:state.filter,reportTrainee:state.reportTrainee,reportInstructor:state.reportInstructor,reportSyllabus:state.reportSyllabus,safetyView:state.safetyView,evaluationView:state.evaluationView,examsView:state.examsView,settingsTab:state.settingsTab,typeWorkspace:state.typeWorkspace,packageWorkspace:state.packageWorkspace,packageFocusId:state.packageFocusId,packageEditId:state.packageEditId,emergencyProfileFilter:state.emergencyProfileFilter,builderType:state.builderType,builderPhase:state.builderPhase,builderPlatform:state.builderPlatform,builderTraining:state.builderTraining,builderProgram:state.builderProgram,builderDay:state.builderDay,builderCountry:state.builderCountry,builderName:state.builderName,builderNameManual:state.builderNameManual,builderCode:state.builderCode,builderCodeManual:state.builderCodeManual,builderStartsOn:state.builderStartsOn,libraryProfession:state.libraryProfession,packageCategoryFilter:state.packageCategoryFilter,myCoursesStatus:state.myCoursesStatus,myCoursesSector:state.myCoursesSector,myCoursesPhase:state.myCoursesPhase,myCoursesPlatform:state.myCoursesPlatform,myCoursesCountry:state.myCoursesCountry,myCoursesTraining:state.myCoursesTraining,myCoursesRole:state.myCoursesRole,myCoursesFiltersOpen:state.myCoursesFiltersOpen,rosterStatuses:state.rosterStatuses,rosterRoles:state.rosterRoles,rosterDateFrom:state.rosterDateFrom,rosterDateTo:state.rosterDateTo,reportTrainees:state.reportTrainees,reportInstructors:state.reportInstructors,reportSyllabi:state.reportSyllabi,reportDateFrom:state.reportDateFrom,reportDateTo:state.reportDateTo,reportTab:state.reportTab,reportTabExplicit:state.reportTabExplicit,reportGranularity:state.reportGranularity,fleetStatusFilter:state.fleetStatusFilter,planDate:state.planDate,planView:state.planView,myCoursesStatuses:state.myCoursesStatuses,myCoursesSectors:state.myCoursesSectors,myCoursesPhases:state.myCoursesPhases,myCoursesPlatforms:state.myCoursesPlatforms,myCoursesTrainings:state.myCoursesTrainings,myCoursesCountries:state.myCoursesCountries,myCoursesRoles:state.myCoursesRoles,myCoursesDateFrom:state.myCoursesDateFrom,myCoursesDateTo:state.myCoursesDateTo,packageNameFilters:state.packageNameFilters,packagePhaseFilters:state.packagePhaseFilters,packagePlatformFilters:state.packagePlatformFilters,packageCategoryFilters:state.packageCategoryFilters,packageContextFilters:state.packageContextFilters}))}catch{}}
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function currentUserCourseRole(){
   const sharedRole=dutyOperations?.memberRole?.();if(['INSTRUCTOR','COURSE_MANAGER'].includes(sharedRole))return sharedRole;
@@ -8892,7 +8892,7 @@ function persistCourseOperations(base,items){
 function currentFleetContext(extra={}){
  return {fleet:getFleetAircraft(),flights:getDailyFlightBoard(),platformId:currentFleetPlatform(),platformLabel:epPlatformLabel(currentCourseMeta.platformId)||currentCourseMeta.platformId||'—',courseLabel:currentCourseMeta.courseName||currentCourseId,today:todayIsoDate(),canWrite:flympusCan('fleet.serviceability.write'),timingDefaults:getPlanTimingDefaults(),canConfigureTiming:flympusCan('fleet.serviceability.write'),...extra};
 }
-function fleetScreen(){return window.FLYMPUS_FLEET_VIEW?.fleet?.(currentFleetContext({editId:state.fleetEditId||null}))||flympusAccessDenied('Fleet')}
+function fleetScreen(){return window.FLYMPUS_FLEET_VIEW?.fleet?.(currentFleetContext({editId:state.fleetEditId||null,statusFilter:state.fleetStatusFilter||'ALL'}))||flympusAccessDenied('Fleet')}
 function courseFlightScheduleHtml(date,flightsOverride=null){
  if(!window.FLYMPUS_FLEET_VIEW)return '';
  return window.FLYMPUS_FLEET_VIEW.schedule(currentFleetContext({date,flights:Array.isArray(flightsOverride)?flightsOverride:getPlanWorkingFlights(date),draftMode:isDutyTrainee(),sharedMode:dutyOperations?.enabled(),editId:state.flightBoardEditId||null,canWrite:flympusCan('operations.flightBoard.write'),
@@ -8922,6 +8922,16 @@ function bindFleet(){
   else reveal();
  };
  if($('#fleetStatus'))$('#fleetStatus').onchange=syncReason;syncReason();
+ if($('#fleetServiceFilter'))$('#fleetServiceFilter').onchange=e=>{
+  const next=['SERVICEABLE','UNSERVICEABLE'].includes(e.target.value)?e.target.value:'ALL';
+  state.fleetStatusFilter=next;saveUiState();
+  let shown=0;
+  document.querySelectorAll('.fleetInventoryTable tbody tr[data-fleet-status]').forEach(row=>{
+   row.hidden=next!=='ALL'&&row.dataset.fleetStatus!==next;
+   if(!row.hidden)shown++;
+  });
+  const empty=$('#fleetFilteredEmpty');if(empty)empty.hidden=shown!==0;
+ };
  document.querySelectorAll('[data-fleet-add]').forEach(b=>b.onclick=()=>{if(!flympusCan('fleet.serviceability.write'))return;if(state.fleetEditId){state.fleetEditId=null;render()}showEditor()});
  if(form)form.onsubmit=async e=>{
   e.preventDefault();if(!flympusCan('fleet.serviceability.write'))return;
@@ -11258,7 +11268,7 @@ function settings(){
 
   if(tab==='catalog'&&canGlobalPackages){
     const validScope=c.courseTypes.some(x=>x.id===state.typeWorkspace),scope=validScope?state.typeWorkspace:(c.courseTypes[0]?.id||''),scopeName=cfgItem(c.courseTypes,scope)?.name||scope,advancedEditing=!!state.advancedArchitectureEditing;
-    html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><section class="advancedSequence" style="margin-top:14px"><div class="advancedStepLabel advancedStepEditEntry"><span>1</span><div><b>Define sectors</b><small>Add, rename or remove sectors first.</small></div>'+(advancedEditing?'<span class="pill blue advancedEditingState">Editing</span>':'<button class="btn secondary small advancedEditStart" type="button" id="advancedArchitectureEdit">Edit advanced setup</button>')+'</div>'+cfgCatalogCard('Sectors','courseTypes',c.courseTypes)+'</section></fieldset>';
+    html+='<section class="advancedSequence" style="margin-top:14px"><div class="advancedStepLabel advancedStepEditEntry"><span>1</span><div><b>Define sectors</b><small>Add, rename or remove sectors first.</small></div>'+(advancedEditing?'<span class="pill blue advancedEditingState">Editing</span>':'<button class="btn edit small advancedEditStart" type="button" id="advancedArchitectureEdit">✎ Edit advanced setup</button>')+'</div><fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'>'+cfgCatalogCard('Sectors','courseTypes',c.courseTypes)+'</fieldset></section>';
     html+='<section class="card settingBox advancedSectorPicker"><div class="advancedStepLabel"><span>2</span><div><b>Select sector to edit</b><small>Everything below is scoped to this sector.</small></div></div><div class="field" style="margin-top:12px"><label>Sector</label><select id="typeWorkspace" '+(advancedEditing?'disabled':'')+'>'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></section>';
     html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><div class="advancedStepLabel scopedArchitectureLabel"><span>3</span><div><b>'+(advancedEditing?'Edit architecture':'Architecture')+'</b><small>Phases, platforms, training types and qualifications belong to the selected sector.</small></div></div>';
     html+='<div class="advancedScopeColumns"><div class="advancedScopeColumn">';
@@ -11979,11 +11989,16 @@ function homePrepareFlightSummaryHeights(parent){
  list.appendChild(clone);
  const c=clone.querySelector('.homePlanFlightToggle');
  clone.classList.remove('is-expanded');
+ const syllabus=c.querySelector('.homePlanFlightSyllabus');
+ // Measure exact natural text height before either transition starts.
+ const syllabusHeight=Math.ceil(syllabus?.scrollHeight||0);
+ clone.style.setProperty('--home-syllabus-open-height',syllabusHeight+'px');
  const closed=c.getBoundingClientRect().height;
  clone.classList.add('is-expanded');
  const open=c.getBoundingClientRect().height;
  clone.remove();
  if(!Number.isFinite(closed)||!Number.isFinite(open)||closed<=0||open<=0)return;
+ parent.style.setProperty('--home-syllabus-open-height',syllabusHeight+'px');
  parent.style.setProperty('--home-flight-closed-height',closed+'px');
  parent.style.setProperty('--home-flight-open-height',open+'px');
  parent.classList.add('homeFlightHeightsReady');
@@ -12003,7 +12018,6 @@ function bind(){if(state.screen==='home'){ensureHomeTimelineClock();
   if(!key||!parent)return;
   const expanded=!parent.classList.contains('is-expanded');
   parent.querySelectorAll('.homePlanFlightReveal').forEach(part=>{
-   homeRevealHeight(part);
    part.setAttribute('aria-hidden',String(!expanded));
    if(expanded)part.removeAttribute('inert');else part.setAttribute('inert','');
   });

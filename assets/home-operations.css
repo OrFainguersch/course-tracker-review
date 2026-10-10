@@ -502,3 +502,20 @@ html[data-flympus-language="he"] .homeDashboard .homePlanFlight::before{transfor
 @media(prefers-reduced-motion:reduce){
  .homeDashboard .homeFlightHeightsReady .homePlanFlightToggle{transition:none!important}
 }
+
+/* 0841 — one consistent measured-height rhythm, no max-height plateau.
+   The approved inline syllabus placement and phase spacing are unchanged. */
+.homeDashboard .homePlanFlightReveal{transition:height .52s cubic-bezier(.25,.75,.25,1)!important}
+.homeDashboard .homeFlightHeightsReady .homePlanFlightToggle{transition:height .52s cubic-bezier(.25,.75,.25,1)!important}
+.homeDashboard .homePlanFlightSyllabus{
+ height:0;max-height:none;opacity:0;margin-top:0;
+ transition:height .52s cubic-bezier(.25,.75,.25,1),margin-top .52s cubic-bezier(.25,.75,.25,1),opacity .18s ease!important
+}
+.homeDashboard .homePlanFlight.is-expanded .homePlanFlightSyllabus{
+ height:var(--home-syllabus-open-height,auto);max-height:none;opacity:1;margin-top:5px
+}
+.homeDashboard .homePlanFlightChevron svg{transition:transform .52s cubic-bezier(.25,.75,.25,1)}
+@media(prefers-reduced-motion:reduce){
+ .homeDashboard .homePlanFlightReveal,.homeDashboard .homeFlightHeightsReady .homePlanFlightToggle,
+ .homeDashboard .homePlanFlightSyllabus,.homeDashboard .homePlanFlightChevron svg{transition:none!important}
+}
