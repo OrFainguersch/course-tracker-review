@@ -108,7 +108,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/reports-dashboard.js?v=20261010-mobile-table-accordion-0838"></script>
 <link rel="stylesheet" href="./assets/fleet-operations.css?v=20261010-roster-swipe-stability-0829" />
 <link rel="stylesheet" href="./assets/course-operations.css?v=20261009-plan-single-row-stable-drag-0815" />
-<link rel="stylesheet" href="./assets/home-operations.css?v=20261010-dashboard-stable-flight-0839" />
+<link rel="stylesheet" href="./assets/home-operations.css?v=20261010-restore-inline-stable-0840" />
 <link rel="stylesheet" href="./assets/roster-swipe-actions.css?v=20261010-swipe-accordion-report-0837" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
@@ -9258,10 +9258,9 @@ function homePlanFlightRow(flight,hebrew){
    '<span class="homePlanFlightClock"><span class="homePlanFlightPlane" aria-hidden="true">✈</span><time dir="ltr">'+esc(flight.time||'—')+'</time>'+
     '<span class="homePlanFlightStepName">'+esc(hebrew?'טיסה':'Flight')+'</span></span>'+
    '<span class="homePlanFlightPeople">'+homeFlightPerson(name,'student')+(isSolo||!flight.instructorName?'':homeFlightPerson(flight.instructorName,'teacher'))+
-    '</span>'+
+    '<span class="homePlanFlightSyllabus">'+esc(flight.syllabus||'—')+' · '+esc(homeFlightAircraftName(flight))+'</span></span>'+
    badges+'<span class="homePlanFlightChevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 9 7 7 7-7"/></svg></span>'+
   '</button>'+
-  reveal('SyllabusReveal','<span class="homePlanFlightSyllabus">'+esc(flight.syllabus||'—')+' · '+esc(homeFlightAircraftName(flight))+'</span>')+
   reveal('Debrief',phase('debrief',debrief,debriefIcon,hebrew?'תחקיר':'Debriefing'))+
  '</div>';
 }
@@ -11967,6 +11966,28 @@ function bindGlobalFormUx(){
     form.addEventListener('submit',e=>{if(showFormInvalid(form)){e.preventDefault();e.stopImmediatePropagation()}},true)
   });
 }
+/* Preserve the original in-line syllabus and its natural final spacing.
+   Prepare row endpoint heights offscreen so Safari interpolates fixed pixel
+   lengths instead of repeatedly recentering an auto-height grid row. */
+function homePrepareFlightSummaryHeights(parent){
+ const source=parent.querySelector('.homePlanFlightToggle'),list=parent.parentElement;
+ if(!source||!list)return;
+ const clone=parent.cloneNode(true);
+ clone.classList.remove('homeFlightHeightsReady');
+ clone.style.cssText='position:absolute;visibility:hidden;pointer-events:none;left:0;top:0;z-index:-1;width:'+parent.getBoundingClientRect().width+'px';
+ clone.querySelectorAll('.homePlanFlightSyllabus').forEach(el=>el.style.setProperty('transition','none','important'));
+ list.appendChild(clone);
+ const c=clone.querySelector('.homePlanFlightToggle');
+ clone.classList.remove('is-expanded');
+ const closed=c.getBoundingClientRect().height;
+ clone.classList.add('is-expanded');
+ const open=c.getBoundingClientRect().height;
+ clone.remove();
+ if(!Number.isFinite(closed)||!Number.isFinite(open)||closed<=0||open<=0)return;
+ parent.style.setProperty('--home-flight-closed-height',closed+'px');
+ parent.style.setProperty('--home-flight-open-height',open+'px');
+ parent.classList.add('homeFlightHeightsReady');
+}
 function bind(){if(state.screen==='home'){ensureHomeTimelineClock();
  // Set intrinsic phase heights once while collapsed. A single class toggle
  // transitions CSS lengths, without any forced layout, transition reset or
@@ -11976,6 +11997,7 @@ function bind(){if(state.screen==='home'){ensureHomeTimelineClock();
   if(inner)part.style.setProperty('--home-reveal-height',Math.ceil(inner.scrollHeight)+'px');
  };
  document.querySelectorAll('.homePlanFlightReveal').forEach(homeRevealHeight);
+ document.querySelectorAll('.homePlanFlight').forEach(homePrepareFlightSummaryHeights);
  document.querySelectorAll('[data-home-flight-toggle]').forEach(btn=>btn.onclick=()=>{
   const key=btn.dataset.homeFlightToggle||'',parent=btn.closest('.homePlanFlight');
   if(!key||!parent)return;
