@@ -511,7 +511,7 @@ const editingTailorHtml=elements.get("#content").innerHTML;
 assert.match(editingTailorHtml,/courseTailorEditing/);
 assert.match(editingTailorHtml,/courseTailorEditFieldset" >/);
 assert.match(editingTailorHtml,/>Save changes<\/button>/);
-assert.match(editingTailorHtml,/courseTailorDone|Done editing/);
+assert.ok(editingTailorHtml.includes('id="courseTailorDoneDock" type="button">✓ Done editing</button>'), 'Mobile Tailor dock should show ✓ Done editing');
 assert.doesNotMatch(editingTailorHtml,/resetCourseOverrides|Revert to Package defaults/,"Tailor edit mode must keep only Save changes as the primary action");
 assert.match(editingTailorHtml,/data-rule-table="criteria"/);
 assert.match(editingTailorHtml,/data-rule-table="emergencies"/);
