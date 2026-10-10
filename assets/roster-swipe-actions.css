@@ -1,8 +1,9 @@
-/* Roster gestures: a fixed-height horizontal rail, with opaque contextual
-   action panels uncovered by the card. No opacity fades, blur, or vertical motion. */
+/* Roster gestures: one horizontal rail, with opaque contextual actions.
+   Gentle, synchronized release easing for the content, rank, and tray;
+   drag remains directly finger-tracked with no vertical drift or rubber band. */
 @media (max-width:759px) and (hover:none) and (pointer:coarse){
- .people .personCard.rosterSwipeRow{--roster-motion-duration:.28s;position:relative!important;overflow:hidden!important;isolation:isolate;align-items:stretch!important}
- .people .personCard.rosterSwipeRow.rosterSwipeSettling{--roster-motion-duration:.24s}
+ .people .personCard.rosterSwipeRow{--roster-motion-duration:.42s;--roster-motion-easing:cubic-bezier(.32,.72,0,1);touch-action:pan-y;position:relative!important;overflow:hidden!important;isolation:isolate;align-items:stretch!important}
+ .people .personCard.rosterSwipeRow.rosterSwipeSettling{--roster-motion-duration:.46s}
  .people .personCard.rosterSwipeRow.traineeRosterCard,
  .people .personCard.rosterSwipeRow.instructorRosterCard{grid-template-columns:minmax(0,1fr)!important;gap:0!important}
  .people .personCard.rosterSwipeRow .rosterSwipeContent{
@@ -11,13 +12,13 @@
   box-sizing:border-box;position:relative;z-index:2;border-radius:inherit;
   background:inherit;
   transform:translate3d(var(--roster-swipe-offset,0px),0,0);
-  transition:transform var(--roster-motion-duration) cubic-bezier(.2,.82,.22,1);will-change:transform
+  transition:transform var(--roster-motion-duration) var(--roster-motion-easing);will-change:transform
  }
  .people .personCard.rosterSwipeRow.rosterSwipeMoving .rosterSwipeContent{transition:none!important}
  .people .personCard.rosterSwipeRow > .rosterSwipeFixedRank{
   position:absolute!important;top:0!important;right:0!important;z-index:4;
   transform:translate3d(var(--roster-swipe-offset,0px),0,0);
-  transition:transform var(--roster-motion-duration) cubic-bezier(.2,.82,.22,1);will-change:transform;
+  transition:transform var(--roster-motion-duration) var(--roster-motion-easing);will-change:transform;
  }
  .people .personCard.rosterSwipeRow.rosterSwipeMoving > .rosterSwipeFixedRank{transition:none!important}
  html[data-flympus-language="he"] .people .personCard.rosterSwipeRow > .rosterSwipeFixedRank{
@@ -28,11 +29,11 @@
   display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:6px 5px;
   box-sizing:border-box;opacity:1;visibility:hidden;
   clip-path:inset(0 0 0 100%);pointer-events:none;transform:none!important;filter:none!important;
-  transition:clip-path var(--roster-motion-duration) cubic-bezier(.2,.82,.22,1),visibility 0s var(--roster-motion-duration)
+  transition:clip-path var(--roster-motion-duration) var(--roster-motion-easing),visibility 0s var(--roster-motion-duration)
  }
  html[data-flympus-language="he"] .people .personCard .rosterSwipeActionTray{right:auto;left:0;clip-path:inset(0 100% 0 0)}
  .people .personCard.rosterSwipeOpen .rosterSwipeActionTray{
-  visibility:visible;clip-path:inset(0 0 0 0);pointer-events:auto;transition:clip-path var(--roster-motion-duration) cubic-bezier(.2,.82,.22,1),visibility 0s
+  visibility:visible;clip-path:inset(0 0 0 0);pointer-events:auto;transition:clip-path var(--roster-motion-duration) var(--roster-motion-easing),visibility 0s
  }
  .people .personCard.rosterSwipeMoving .rosterSwipeActionTray{
   visibility:visible;clip-path:inset(0 0 0 var(--roster-swipe-clip,100%));
@@ -43,7 +44,7 @@
  }
  .people .personCard.rosterSwipeSettling .rosterSwipeActionTray{
   visibility:visible;clip-path:inset(0 0 0 100%);
-  pointer-events:none;transition:clip-path var(--roster-motion-duration) cubic-bezier(.2,.82,.22,1),visibility 0s var(--roster-motion-duration)
+  pointer-events:none;transition:clip-path var(--roster-motion-duration) var(--roster-motion-easing),visibility 0s var(--roster-motion-duration)
  }
  html[data-flympus-language="he"] .people .personCard.rosterSwipeSettling .rosterSwipeActionTray{
   clip-path:inset(0 100% 0 0)

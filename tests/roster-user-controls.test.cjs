@@ -66,9 +66,9 @@ test('mobile roster swipe action reveal follows the finger before settling gentl
  const js=read('assets/roster-swipe-actions.js'),css=read('assets/roster-swipe-actions.css');
  assert.match(js,/--roster-swipe-reveal/);
  assert.match(js,/getBoundingClientRect/);
- assert.match(css,/--roster-motion-duration:\.28s/);
- assert.match(css,/--roster-motion-duration:\.24s/);
- assert.match(css,/transition:transform var\(--roster-motion-duration\) cubic-bezier\(\.2,\.82,\.22,1\)/);
+ assert.match(css,/--roster-motion-duration:\.42s/);
+ assert.match(css,/--roster-motion-duration:\.46s/);
+ assert.match(css,/transition:transform var\(--roster-motion-duration\) var\(--roster-motion-easing\)/);
  assert.match(css,/\.rosterSwipeActionTray\{[\s\S]*?visibility:hidden/);
  assert.match(css,/filter:none!important/);
  assert.match(css,/transition:clip-path var\(--roster-motion-duration\)/);
@@ -157,12 +157,14 @@ test('Roster action tray is fully concealed before swipe and progressively uncli
  assert.doesNotMatch(css,/blur\(/);
 });
 
-test('Swipe settling and opaque action clipping share iOS Notes-like release damping',()=>{
+test('Swipe settling and opaque action clipping share one damped horizontal rail',()=>{
  const css=read('assets/roster-swipe-actions.css');
- assert.match(css,/--roster-motion-duration:\.28s/);
- assert.match(css,/\.rosterSwipeSettling\{--roster-motion-duration:\.24s\}/);
- assert.match(css,/transition:transform var\(--roster-motion-duration\) cubic-bezier\(\.2,\.82,\.22,1\)/);
- assert.match(css,/transition:clip-path var\(--roster-motion-duration\) cubic-bezier\(\.2,\.82,\.22,1\)/);
+ assert.match(css,/--roster-motion-duration:\.42s/);
+ assert.match(css,/\.rosterSwipeSettling\{--roster-motion-duration:\.46s\}/);
+ assert.match(css,/transition:transform var\(--roster-motion-duration\) var\(--roster-motion-easing\)/);
+ assert.match(css,/transition:clip-path var\(--roster-motion-duration\) var\(--roster-motion-easing\)/);
  assert.doesNotMatch(css,/blur\(/);
  assert.match(css,/visibility:hidden/);
+ assert.match(css,/--roster-motion-easing:cubic-bezier\(\.32,\.72,0,1\)/);
+ assert.match(css,/touch-action:pan-y/);
 });
