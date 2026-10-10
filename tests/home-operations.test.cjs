@@ -216,3 +216,13 @@ test('Today Plan keeps teacher immediately below trainee and badge at logical to
  assert.match(css,/inset-block-start:10px;inset-inline-end:12px/);
  assert.match(css,/data-flympus-language="he"/);
 });
+
+test('Today Plan phase rail keeps a responsive gutter from names and syllabus',()=>{
+ const css=fs.readFileSync('assets/home-operations.css','utf8');
+ assert.match(css,/grid-template-columns:176px minmax\(0,1fr\)!important;column-gap:16px!important/);
+ assert.match(css,/grid-template-columns:148px minmax\(0,1fr\)!important;column-gap:14px!important/);
+ assert.match(css,/grid-template-columns:136px minmax\(0,1fr\)!important;column-gap:10px!important/);
+ assert.match(css,/html\.flympusLargeText \.homePlanMomentLabel\{white-space:normal/);
+ assert.match(css,/homePlanTimelineRail\{left:69\.5px/);
+ assert.match(css,/homePlanRowTimeline\{direction:rtl!important/);
+});
