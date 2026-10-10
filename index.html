@@ -12495,7 +12495,14 @@ function bindSettings(){
   const c=cfgGet();
   if($('#courseTailorEdit'))$('#courseTailorEdit').onclick=()=>{beginCourseTailorEditSession();renderPreservingManagementView(()=>{state.courseTailorEditing=true;state.courseAddFlow=null})};
   const finishCourseTailorEditing=()=>{
-    const form=$('#courseOverridesForm');if(!form)return;courseTailorExitAfterSave=true;
+    const form=$('#courseOverridesForm');if(!form)return;
+    const dirty=courseTailorSessionDirty||form.dataset.dirty==='1';
+    if(!dirty){
+      courseTailorEditSnapshot=null;courseTailorSessionDirty=false;courseTailorExitAfterSave=false;
+      renderPreservingManagementView(()=>{state.courseTailorEditing=false;state.courseAddFlow=null});
+      return;
+    }
+    courseTailorExitAfterSave=true;
     if(typeof form.requestSubmit==='function')form.requestSubmit();
     else form.onsubmit?.({preventDefault(){},currentTarget:form});
   };
@@ -12939,7 +12946,20 @@ function bindSettings(){
    toast('Changes saved');renderPreservingManagementView();return true;
   };
   if($('#cfgSaveCatalogs'))$('#cfgSaveCatalogs').onclick=saveAdvancedAndFinish;
-  if($('#advancedArchitectureDone'))$('#advancedArchitectureDone').onclick=()=>{saveAdvancedAndFinish()};
+  if($('#advancedArchitectureDone'))$('#advancedArchitectureDone').onclick=()=>{
+    const snapshot=advancedArchitectureEditSnapshot;
+    if(!snapshot){state.advancedArchitectureEditing=false;renderPreservingManagementView();return}
+    const fields=document.querySelectorAll('.advancedEditFieldset input,.advancedEditFieldset select,.advancedEditFieldset textarea,.globalPackageForm input,.globalPackageForm select,.globalPackageForm textarea');
+    const pending=[...fields].some(el=>el.type==='checkbox'||el.type==='radio'?el.checked!==el.defaultChecked:el.tagName==='SELECT'?[...el.options].some(o=>o.selected!==o.defaultSelected):el.value!==el.defaultValue);
+    const keys=new Set(snapshot.keys||[]);
+    for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&(snapshot.prefixes||[]).some(prefix=>key.startsWith(prefix)))keys.add(key)}
+    const storedChanged=[...keys].some(key=>localStorage.getItem(key)!==(snapshot.values[key]??null));
+    if(!pending&&!storedChanged&&!hasUnfinishedAdvancedPackage()){
+      advancedArchitectureEditSnapshot=null;advancedPackageCreationDrafts.clear();state.advancedArchitectureEditing=false;state.packageEditId=null;
+      renderPreservingManagementView();return;
+    }
+    saveAdvancedAndFinish();
+  };
   if(state.advancedArchitectureEditing){
    const draft=advancedPackageCreationDrafts.get(state.typeWorkspace);
    if(draft){

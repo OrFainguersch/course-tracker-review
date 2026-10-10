@@ -1059,7 +1059,9 @@ assert(fs.readFileSync('assets/fleet-views.js','utf8').includes('data-go="fleet"
  assert.ok(source.includes("advancedPackageCreationDrafts.clear()"),"Discard and Save must end the temporary session");
  assert.ok(source.includes("advancedArchitectureEditSnapshot=null"),"Save clears session checkpoint");
  assert.ok(source.includes("if($('#advancedArchitectureDone'))$('#advancedArchitectureDone').onclick=()=>{"),"Done editing is one explicit save action");
- assert.ok(source.includes("if($('#advancedArchitectureDone'))$('#advancedArchitectureDone').onclick=()=>{saveAdvancedAndFinish()"),"Done editing and inline Save share the same finish logic");
+ assert.ok(source.includes("saveAdvancedAndFinish();"),"Done editing and inline Save share the same finish logic");
+  assert.ok(source.includes("if(!pending&&!storedChanged&&!hasUnfinishedAdvancedPackage())"),"Done without changes should not rewrite Advanced catalogs");
+  assert.ok(source.includes("if(!dirty){"),"Done without changes should not write new Tailor overrides");
  assert.ok(!source.includes("function siteEditDecision("),"The obsolete three-choice dialog is removed");
  assert.ok(source.includes("Finish Advanced editing before leaving this tab."),"Navigation prevents silent loss of Advanced session");
  assert.ok(source.includes('.advancedArchitectureActions.editDecisionBar{display:grid!important;grid-template-columns:minmax(0,1fr)!important'),"Decision copy and two buttons must have distinct rows");
