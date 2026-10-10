@@ -67,7 +67,7 @@ test('mobile roster swipe action reveal follows the finger before settling gentl
  assert.match(js,/--roster-swipe-reveal/);
  assert.match(js,/getBoundingClientRect/);
  assert.match(css,/\.30s cubic-bezier\(\.22,\.72,\.2,1\)/);
- assert.match(css,/rosterSwipeMoving \.rosterSwipeActionTray\{opacity:var\(--roster-swipe-reveal,0\)/);
+ assert.match(css,/rosterSwipeMoving \.rosterSwipeActionTray\{\s*opacity:var\(--roster-swipe-reveal,0\)/);
  assert.match(css,/prefers-reduced-motion:reduce/);
 });
 
