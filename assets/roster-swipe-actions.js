@@ -37,10 +37,20 @@ function attach(host,canManage){
   content.className='rosterSwipeContent';
   while(row.firstChild)content.appendChild(row.firstChild);
   row.appendChild(content);
-  // Keep the ranked trainee's top-corner semicircle anchored to the card frame,
-  // not to the padded moving grid. This restores its original inset in both languages.
+  // The badge, text, and progress must share one GPU surface.
+  // Separate transforms of ranked badges produced the trainee-only iOS hop.
   const rank=content.querySelector?.('.rankCorner');
-  if(rank){row.appendChild(rank);rank.classList.add('rosterSwipeFixedRank')}
+  if(rank){
+   content.appendChild(rank);
+   rank.classList.add('rosterSwipeFixedRank');
+   // Match the outer card corner despite the rail's internal grid padding.
+   const frame=row.getBoundingClientRect?.(),rail=content.getBoundingClientRect?.();
+   if(frame&&rail){
+    content.style.setProperty('--roster-rank-top',(frame.top-rail.top)+'px');
+    content.style.setProperty('--roster-rank-right',(rail.right-frame.right)+'px');
+    content.style.setProperty('--roster-rank-left',(frame.left-rail.left)+'px');
+   }
+  }
   attached.add(row);row.classList.add('rosterSwipeRow');
   const tray=row.ownerDocument.createElement('div');tray.className='rosterSwipeActionTray';
   const edit=row.ownerDocument.createElement('button');edit.type='button';edit.className='rosterSwipeEdit';edit.dataset.personEdit=kind+':'+id;

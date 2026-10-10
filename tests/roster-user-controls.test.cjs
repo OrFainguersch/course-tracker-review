@@ -122,18 +122,34 @@ test('authorised touch attach preserves original roster nodes in one wrapper',()
  assert.equal(row.children.length,2,'repeated binding must not wrap twice');
 });
 
+test('Trainee rank and progress share the same horizontal compositor surface',()=>{
+ const js=read('assets/roster-swipe-actions.js'),css=read('assets/roster-swipe-actions.css');
+ assert.match(js,/content\.appendChild\(rank\)/);
+ assert.match(js,/getBoundingClientRect\?\.\(\)/);
+ for(const side of ['top','left','right'])assert.match(js,new RegExp('--roster-rank-'+side));
+ assert.match(css,/\.rosterSwipeContent > \.rosterSwipeFixedRank\{/);
+ assert.match(css,/transform:none!important;transition:none!important/);
+ assert.doesNotMatch(css,/rosterSwipeRow > \.rosterSwipeFixedRank/);
+ assert.match(css,/\.rosterSwipeMoving \.rosterSwipeContent\{transition:none!important\}/);
+});
+
 test('Roster swipe runs only on mobile, mirrors to RTL, and keeps the rank anchored to the original card corner',()=>{
  const js=read('assets/roster-swipe-actions.js'),css=read('assets/roster-swipe-actions.css');
  assert.match(js,/max-width: 759px/);
  assert.match(js,/const isHebrew=row=>/);
  assert.match(js,/const rank=content\.querySelector\?\.\('\.rankCorner'\)/);
- assert.match(js,/row\.appendChild\(rank\)/);
+ assert.match(js,/content\.appendChild\(rank\)/);
+ assert.match(js,/--roster-rank-top/);
+ assert.match(js,/--roster-rank-right/);
+ assert.match(js,/--roster-rank-left/);
  assert.match(js,/rosterSwipeFixedRank/);
  assert.match(js,/const constrained=isHebrew\(row\)\?Math\.max\(0,offset\):Math\.min\(0,offset\)/);
- assert.match(css,/> \.rosterSwipeFixedRank\{/);
- assert.match(css,/position:absolute!important;top:0!important;right:0!important/);
- assert.match(css,/right:auto!important;left:0!important/);
- assert.match(css,/rosterSwipeMoving > \.rosterSwipeFixedRank\{transition:none!important\}/);
+ assert.match(css,/\.rosterSwipeContent > \.rosterSwipeFixedRank\{/);
+ assert.match(css,/position:absolute!important;top:var\(--roster-rank-top,0px\)!important/);
+ assert.match(css,/right:var\(--roster-rank-right,0px\)!important/);
+ assert.match(css,/right:auto!important;left:var\(--roster-rank-left,0px\)!important/);
+ assert.match(css,/transform:none!important;transition:none!important/);
+ assert.doesNotMatch(css,/rosterSwipeRow > \.rosterSwipeFixedRank/);
  assert.match(css,/max-width:759px/);
 });
 test('Opaque contextual Edit and Remove panels are revealed by clipping, not blur/fade',()=>{

@@ -15,14 +15,14 @@
   transition:transform var(--roster-motion-duration) var(--roster-motion-easing);will-change:transform
  }
  .people .personCard.rosterSwipeRow.rosterSwipeMoving .rosterSwipeContent{transition:none!important}
- .people .personCard.rosterSwipeRow > .rosterSwipeFixedRank{
-  position:absolute!important;top:0!important;right:0!important;z-index:4;
-  transform:translate3d(var(--roster-swipe-offset,0px),0,0);
-  transition:transform var(--roster-motion-duration) var(--roster-motion-easing);will-change:transform;
+ /* Rank stays at the outer corner but moves on the content's single layer. */
+ .people .personCard.rosterSwipeRow .rosterSwipeContent > .rosterSwipeFixedRank{
+  position:absolute!important;top:var(--roster-rank-top,0px)!important;
+  right:var(--roster-rank-right,0px)!important;left:auto!important;bottom:auto!important;z-index:4;
+  transform:none!important;transition:none!important
  }
- .people .personCard.rosterSwipeRow.rosterSwipeMoving > .rosterSwipeFixedRank{transition:none!important}
- html[data-flympus-language="he"] .people .personCard.rosterSwipeRow > .rosterSwipeFixedRank{
-  right:auto!important;left:0!important
+ html[data-flympus-language="he"] .people .personCard.rosterSwipeRow .rosterSwipeContent > .rosterSwipeFixedRank{
+  right:auto!important;left:var(--roster-rank-left,0px)!important
  }
  .people .personCard .rosterSwipeActionTray{
   position:absolute;right:0;left:auto;top:0;bottom:0;z-index:1;width:146px;
@@ -61,12 +61,12 @@
 }
 @media (hover:hover) and (pointer:fine), (min-width:760px){
  .people .personCard.rosterSwipeRow .rosterSwipeContent{display:contents!important;transform:none!important}
- .people .personCard.rosterSwipeRow > .rosterSwipeFixedRank{transform:none!important}
+ .people .personCard.rosterSwipeRow .rosterSwipeContent > .rosterSwipeFixedRank{transform:none!important}
  .rosterSwipeActionTray{display:none!important}
 }
 @media(prefers-reduced-motion:reduce){
  .people .personCard.rosterSwipeRow .rosterSwipeContent,
- .people .personCard.rosterSwipeRow > .rosterSwipeFixedRank{transition:none!important}
+ .people .personCard.rosterSwipeRow .rosterSwipeContent > .rosterSwipeFixedRank{transition:none!important}
 }
 /* The Plan has no swipe delete: remove the hidden red layer and make all visible edges uniform. */
 .fleetBookedFlights .fleetSortie:not(.conflict){border-color:#dce7f0!important;background:#fff!important}
