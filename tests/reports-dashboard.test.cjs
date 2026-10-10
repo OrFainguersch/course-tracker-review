@@ -93,7 +93,7 @@ test('HTML render escapes reason labels, includes SVG graphic and responsive tab
  assert(html.includes("getEvaluations(),soloFlights:getSoloFlights()"));
  assert(!html.includes('plans:[...courseMock'));
  assert(html.includes('./assets/reports-dashboard.js?v=20261010-unified-kpis-trainee-0836'));
- assert(html.includes('./assets/reports-dashboard.css?v=20261010-unified-kpis-trainee-0836'));
+ assert(html.includes('./assets/reports-dashboard.css?v=20261010-swipe-accordion-report-0837'));
 });
 test('Hebrew chart headings and table labels are rendered in RTL-ready content',()=>{
  const htmlText=R.plannedHtml(R.operations({plans:submitted,evaluations,soloFlights:solo}),'he');
@@ -186,4 +186,15 @@ test('Course report KPI glyphs are four filled blue vectors with one shared visu
  const css=fs.readFileSync(path.join(root,'assets/reports-dashboard.css'),'utf8');
  assert.match(css,/\.insightPulseGrid \.homePulseIcon\{width:42px;height:42px;background:#eef6ff;color:#087cf0\}/);
  assert.match(css,/\.insightPulseGlyph\{display:block;width:23px;height:23px;fill:currentColor;stroke:none!important\}/);
+});
+
+test('Course dashboard tab order and full trainee icon glyph',()=>{
+ const markup=fs.readFileSync(path.join(root,'index.html'),'utf8');
+ const start=markup.indexOf('function reportCoursePulseCards(model)');
+ const pulse=markup.slice(start,markup.indexOf('function reports(){',start));
+ assert.ok(markup.includes("const controls=[['dashboard','Course dashboard'],['operations','Planned vs Executed'],['details','Detailed analytics']];"));
+ assert.ok(pulse.includes('cx="7" cy="6.5" r="3"'));
+ assert.ok(pulse.includes('cx="17" cy="6.5" r="3"'));
+ const styles=fs.readFileSync(path.join(root,'assets/reports-dashboard.css'),'utf8');
+ assert.ok(styles.includes('transform:rotate(90deg)'));
 });

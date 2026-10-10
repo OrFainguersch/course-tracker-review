@@ -103,13 +103,13 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js" crossorigin />
 <link rel="modulepreload" href="./auth.js?v=20261010-roster-admin-0827" />
 <script src="./firebase-config.js?v=20261004-auth2"></script>
-<link rel="stylesheet" href="./assets/reports-dashboard.css?v=20261010-unified-kpis-trainee-0836" />
+<link rel="stylesheet" href="./assets/reports-dashboard.css?v=20261010-swipe-accordion-report-0837" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
 <script src="./assets/reports-dashboard.js?v=20261010-unified-kpis-trainee-0836"></script>
 <link rel="stylesheet" href="./assets/fleet-operations.css?v=20261010-roster-swipe-stability-0829" />
 <link rel="stylesheet" href="./assets/course-operations.css?v=20261009-plan-single-row-stable-drag-0815" />
-<link rel="stylesheet" href="./assets/home-operations.css?v=20261010-dashboard-touch-polish-0833" />
-<link rel="stylesheet" href="./assets/roster-swipe-actions.css?v=20261010-unified-kpis-trainee-0836" />
+<link rel="stylesheet" href="./assets/home-operations.css?v=20261010-swipe-accordion-report-0837" />
+<link rel="stylesheet" href="./assets/roster-swipe-actions.css?v=20261010-swipe-accordion-report-0837" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
 <script src="./assets/safety-global-inbox.js?v=20261009-approval-sounds-0795"></script>
@@ -119,7 +119,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/fleet-views.js?v=20261010-plan-cards-polish-0826"></script>
 <script src="./assets/flight-board-drag.js?v=20261010-flight-time-only-seamless-0820"></script>
 <script src="./assets/row-swipe-delete.js?v=20261010-plan-cards-polish-0826"></script>
-<script src="./assets/roster-swipe-actions.js?v=20261010-unified-kpis-trainee-0836"></script>
+<script src="./assets/roster-swipe-actions.js?v=20261010-swipe-accordion-report-0837"></script>
 <script src="./assets/duty-approval-model.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/operations-cloud.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/course-operations.js?v=20261009-plan-fleet-identity-v1"></script>
@@ -11720,7 +11720,7 @@ function reportCoursePulseCards(model){
  const avg=mean(active.map(t=>Number(t.average)).filter(Number.isFinite));
  const totals=model?.totals||{flights:0,instructed:0,solo:0};
  return '<div class="homePulseGrid insightPulseGrid">'+
-  '<div class="homePulseCard"><div class="homePulseIcon"><svg class="insightPulseGlyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="7" r="3.4" fill="currentColor"/><path fill="currentColor" d="M2.5 18.5c0-3.5 2.7-5.8 6.5-5.8s6.5 2.3 6.5 5.8v1.2H2.5zM17 8.3a2.9 2.9 0 1 0-1.1-5.6 5.1 5.1 0 0 1 1.1 5.6zM17 12.8c2.9.5 4.5 2.5 4.5 5.2v1.7h-4.3v-1.2c0-2.2-.7-4.1-2.1-5.5.6-.2 1.2-.2 1.9-.2z"/></svg></div><div class="homePulseValue">'+active.length+'</div><div class="homePulseLabel">Active Trainees</div></div>'+
+  '<div class="homePulseCard"><div class="homePulseIcon"><svg class="insightPulseGlyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="7" cy="6.5" r="3"/><circle cx="17" cy="6.5" r="3"/><path d="M1 20v-2a6 6 0 0 1 12 0v2H1zM11 20v-2a6 6 0 0 1 12 0v2H11z"/></svg></div><div class="homePulseValue">'+active.length+'</div><div class="homePulseLabel">Active Trainees</div></div>'+
   '<div class="homePulseCard"><div class="homePulseIcon"><svg class="insightPulseGlyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 15.5c0-.6.4-1 1-1h3a1 1 0 0 1 1 1V21H3v-5.5zM10 11.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V21h-5v-9.5zM17 6.5a1 1 0 0 1 1-1h3v15.5h-4V6.5zM3 11.3 9.4 5l3.4 2.7 5.1-5.1H15V1h7v7h-1.7V4.1l-7.3 7.2-3.4-2.7L4.3 13z"/></svg></div><div class="homePulseValue">'+avgProgress+'%</div><div class="homePulseLabel">Average Progress</div></div>'+
   '<div class="homePulseCard"><div class="homePulseIcon"><svg class="insightPulseGlyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M21.6 14.1 14 9.5V4.1a2 2 0 0 0-4 0v5.4l-7.6 4.6a1.1 1.1 0 0 0-.5.9v2.1l8.1-2.5v4.6l-2.5 1.9V23l4.5-1.3 4.5 1.3v-1.9L14 19.2v-4.6l8.1 2.5V15a1.1 1.1 0 0 0-.5-.9z"/></svg></div><div class="homePulseValue">'+totals.flights+'</div><div class="homePulseLabel">Flights Completed</div><div class="homePulseNote neutral">'+totals.instructed+' '+(he?'מודרכות':'Instructed')+' · '+totals.solo+' '+(he?'סולו':'Solo')+'</div></div>'+
   '<div class="homePulseCard"><div class="homePulseIcon"><svg class="insightPulseGlyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="m12 1.8 3.1 6.5 7.1 1-5.1 5 1.2 7.1-6.3-3.3-6.3 3.3 1.2-7.1-5.1-5 7.1-1z"/></svg></div><div class="homePulseValue">'+(avg?avg.toFixed(1):'—')+'</div><div class="homePulseLabel">Average Grade</div></div>'+
@@ -11728,7 +11728,7 @@ function reportCoursePulseCards(model){
 }
 function reports(){
   const tab=['operations','dashboard','details'].includes(state.reportTab)?state.reportTab:'operations';
-  const controls=[['operations','Planned vs Executed'],['dashboard','Course dashboard'],['details','Detailed analytics']];
+  const controls=[['dashboard','Course dashboard'],['operations','Planned vs Executed'],['details','Detailed analytics']];
   const nav='<nav class="insightTabNav" id="reportInnerTabs" aria-label="Analytics views">'+controls.map(([key,label])=>
     '<button type="button" class="insightTab '+(tab===key?'active':'')+'" data-report-tab="'+key+'" aria-current="'+(tab===key?'page':'false')+'">'+label+'</button>').join('')+'</nav>';
   if(tab==='details')return '<div class="insightRoot">'+nav+reportsLegacy()+'</div>';
@@ -11968,13 +11968,33 @@ function bind(){if(state.screen==='home'){ensureHomeTimelineClock();document.que
  const key=btn.dataset.homeFlightToggle||'',parent=btn.closest('.homePlanFlight');
  if(!key||!parent)return;
  const expanded=!parent.classList.contains('is-expanded');
+ // Measure both rails before changing state. Animating fractional grid rows
+ // while the syllabus reflows caused iOS Safari to jitter.
+ const reveals=Array.from(parent.querySelectorAll('.homePlanFlightReveal'));
+ const fromHeights=reveals.map(part=>part.getBoundingClientRect().height);
  parent.classList.toggle('is-expanded',expanded);
  btn.setAttribute('aria-expanded',String(expanded));
  const he=getFlympusAppPreferences().language==='he';
  btn.setAttribute('aria-label',(expanded?(he?'מזער':'Collapse'):(he?'הצג לוח זמנים':'Expand schedule'))+' '+(btn.querySelector('.homePlanPerson-student')?.textContent||''));
- parent.querySelectorAll('.homePlanFlightReveal').forEach(part=>{
+ reveals.forEach((part,i)=>{
   part.setAttribute('aria-hidden',String(!expanded));
   if(expanded)part.removeAttribute('inert');else part.setAttribute('inert','');
+  part.style.transition='none';
+  part.style.height=fromHeights[i]+'px';
+ });
+ void parent.offsetHeight;
+ const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+ reveals.forEach(part=>{
+  const target=expanded?(part.firstElementChild?.scrollHeight||0):0;
+  part.style.removeProperty('transition');
+  part.style.height=target+'px';
+  if(reduced){part.style.removeProperty('height');return}
+  const finish=event=>{
+   if(event.target!==part||event.propertyName!=='height')return;
+   part.removeEventListener('transitionend',finish);
+   if(parent.classList.contains('is-expanded')===expanded)part.style.removeProperty('height');
+  };
+  part.addEventListener('transitionend',finish);
  });
  if(expanded)homePlanExpandedFlightKeys.add(key);
  else homePlanExpandedFlightKeys.delete(key);
