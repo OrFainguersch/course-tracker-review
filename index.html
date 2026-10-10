@@ -1289,6 +1289,38 @@ html[data-flympus-theme="dark"] :is(.advancedSectorStep,.advancedEditFieldset>.s
  white-space:nowrap;flex:0 0 112px!important;font-size:12px!important;font-weight:800!important;border-radius:11px!important
 }
 @media(max-width:430px){.rosterControlHead .rosterAddPerson,.fleetInventory .fleetSectionHead .fleetAddBtn{font-size:11.5px!important}}
+
+/* Stable Course Management title, subtitle and symmetrical tab highlights (0847). */
+.courseManagementTopbar{display:grid!important;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center!important;gap:8px 10px}
+.courseManagementTopbar>div:first-child{display:contents}
+.courseManagementTopbar .pageTitle{grid-column:1;grid-row:1;margin:0}
+.courseManagementTopbar .sub{grid-column:1/-1;grid-row:2;margin:0!important;max-width:none;min-width:0}
+.courseManagementTopbar>.btn{grid-column:2;grid-row:1;justify-self:end;align-self:center}
+.courseManagementTabs{display:flex!important;align-items:stretch!important;gap:6px!important;overflow:visible!important}
+.courseManagementTabs>.seg{flex:1 1 0!important;width:0!important;min-width:0!important;min-height:44px!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;white-space:normal!important;line-height:1.2!important;text-align:center!important;padding:8px 4px!important;outline-offset:1px}
+.courseManagementTabs>.seg.active{border-radius:9px!important;box-shadow:none!important;transform:none!important}
+@media(max-width:420px){.courseManagementTopbar .pageTitle{font-size:clamp(24px,6vw,32px)}.courseManagementTabs>.seg{font-size:clamp(10px,2.7vw,12px)!important}}
+/* Unified Advanced step rhythm and collapsed Add forms. */
+.advancedSectorStep{border-top:1px solid #dce7f1;margin-top:20px;padding-top:20px;gap:12px}
+.advancedSectorStep>.advancedStepLabel{margin:0 0 2px}
+.advancedSectorStep>.advancedSectorPicker{margin:0}
+.advancedEditFieldset>.scopedArchitectureLabel{border-top:1px solid #dce7f1;margin:20px 0 14px;padding-top:20px}
+.advancedPackagesFinal{margin-top:20px!important;padding-top:20px!important}
+.advancedPackagesFinal>.advancedStepLabel{margin:0 0 14px!important}
+.advancedPackagesFinal .advancedPackageTitle{margin-top:4px}
+.advancedPackagesFinal .sectorPackageActions{margin:4px 0 14px}
+.advancedPackagesFinal .packageAssignPanel{margin:0 0 16px}
+html[data-flympus-theme="dark"] :is(.advancedSectorStep,.advancedEditFieldset>.scopedArchitectureLabel,.advancedPackagesFinal){border-top-color:#365169}
+.advancedDeferredAdd{margin-top:10px}
+.advancedDeferredAdd [data-advanced-add-panel]{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}
+.advancedDeferredAdd [data-advanced-add-panel][hidden],.advancedDeferredAdd [data-advanced-add-open][hidden]{display:none!important}
+.advancedDeferredAdd [data-advanced-add-panel] .input,.advancedDeferredAdd [data-advanced-add-panel] select{flex:1 1 180px;min-width:0}
+@media(max-width:759px){.advancedDeferredAdd [data-advanced-add-panel]{align-items:stretch;flex-direction:column}
+ .advancedDeferredAdd [data-advanced-add-panel] .input,.advancedDeferredAdd [data-advanced-add-panel] select{width:100%;min-width:0;flex:auto}
+ .advancedDeferredAdd [data-advanced-add-panel] .btn{width:100%;min-height:42px}
+ .globalPackageCard .flympusMobileTableSwipeCue,.courseTailorAligned .flympusMobileTableSwipeCue{margin-inline:16px!important}}
+/* Fleet/Roster Add: same size, same label. */
+.rosterControlHead .rosterAddPerson,.fleetInventory .fleetSectionHead .fleetAddBtn{width:112px!important;min-width:112px!important;max-width:112px!important;height:42px!important;min-height:42px!important;box-sizing:border-box!important;padding:8px 12px!important;display:inline-flex!important;align-items:center;justify-content:center!important;flex:0 0 112px!important;font-size:12px!important;font-weight:800!important;border-radius:11px!important;white-space:nowrap}
 /* 0846 — Prominent, consistent page-title Manage / Edit buttons. */
 :is(.rosterTopbar,.courseManagementTopbar,.fleetPageTop,.profileNav)>.btn.edit{
  background:#176fae!important;border:1px solid #176fae!important;color:#fff!important;
@@ -9040,10 +9072,10 @@ function bindFleet(){
  document.querySelectorAll('[data-fleet-add]').forEach(b=>b.onclick=()=>{if(!flympusCan('fleet.serviceability.write'))return;if(state.fleetEditId){state.fleetEditId=null;render()}showEditor()});
  if(form)form.onsubmit=async e=>{
   e.preventDefault();if(!flympusCan('fleet.serviceability.write'))return;
-  try{if(!await saveFleetForm(form)){fleetSaveError();return}state.fleetEditId=null;toast('Fleet status saved','success');render()}catch(err){toast(err.message||'Unable to save aircraft','error')}
+  try{if(!await saveFleetForm(form)){fleetSaveError();return}state.fleetEditId=null;toast('Fleet status saved','success');renderPreservingManagementView()}catch(err){toast(err.message||'Unable to save aircraft','error')}
  };
- document.querySelectorAll('[data-fleet-edit]').forEach(b=>b.onclick=()=>{if(!flympusCan('fleet.serviceability.write'))return;state.fleetEditId=b.dataset.fleetEdit;render();showEditor()});
- if($('#fleetCancelEdit'))$('#fleetCancelEdit').onclick=()=>{state.fleetEditId=null;render()};
+ document.querySelectorAll('[data-fleet-edit]').forEach(b=>b.onclick=()=>{if(!flympusCan('fleet.serviceability.write'))return;renderPreservingManagementView(()=>{state.fleetEditId=b.dataset.fleetEdit})});
+ if($('#fleetCancelEdit'))$('#fleetCancelEdit').onclick=()=>renderPreservingManagementView(()=>{state.fleetEditId=null});
  document.querySelectorAll('[data-fleet-archive]').forEach(b=>b.onclick=async()=>{
   if(!flympusCan('fleet.serviceability.write'))return;
   const item=getFleetAircraft().find(x=>x.id===b.dataset.fleetArchive&&x.platformId===currentFleetPlatform()&&!x.archivedAt);
@@ -11362,7 +11394,7 @@ function settings(){
   const sel={courseType:type,phaseId:phase,platformId:platform,trainingKind:training,programId,dayNight:time,country};
   const managementAction=tab==='catalog'&&canGlobalPackages?(state.advancedArchitectureEditing?'<button type="button" class="btn sky courseManagementDone" id="advancedArchitectureDone">✓ Done editing</button>':'<button type="button" class="btn edit" id="advancedArchitectureEdit" aria-label="Manage advanced setup">✎ Manage</button>'):tab==='overrides'&&canManageCourse?(state.courseTailorEditing?'<button type="button" class="btn sky courseManagementDone" id="courseTailorDoneTop">✓ Done editing</button>':'<button type="button" class="btn edit" id="courseTailorEdit" aria-label="Edit selected course">✎ Edit</button>'):'';
    let html='<div class="rosterTopbar courseManagementTopbar"><div><h1 class="pageTitle">Course Management</h1><p class="sub">Create and manage courses, tailor a selected course, and maintain reusable training Packages and course architecture.</p></div>'+managementAction+'</div>';
-  html+='<div class="scrollTabs">'+(canCreate?'<button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">1 · Create course</button>':'')+(canManageCourse?'<button class="seg '+(tab==='overrides'?'active':'')+'" data-settings-tab="overrides">'+(canCreate?'2 · ':'')+'Tailor course</button>':'')+(canGlobalPackages?'<button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">Advanced setup</button>':'')+'</div>';
+  html+='<div class="scrollTabs courseManagementTabs">'+(canCreate?'<button class="seg '+(tab==='builder'?'active':'')+'" data-settings-tab="builder">1 · Create course</button>':'')+(canManageCourse?'<button class="seg '+(tab==='overrides'?'active':'')+'" data-settings-tab="overrides">'+(canCreate?'2 · ':'')+'Tailor course</button>':'')+(canGlobalPackages?'<button class="seg '+(tab==='catalog'?'active':'')+'" data-settings-tab="catalog">Advanced setup</button>':'')+'</div>';
   if(tab==='overrides'&&canManageCourse){
     html+=courseOverridesHtml();
   }
@@ -11805,8 +11837,8 @@ function reportsLegacy(){
   syllabusSel.length?{label:'Syllabus',value:filterChoiceSummary(syllabusSel,genericMultiItems(syllOptions))}:null,
   (dateFrom||dateTo)?{label:'Date',value:filterDateSummary(dateFrom,dateTo)}:null
  ].filter(Boolean);
- return '<h1 class="pageTitle">Course analytics</h1><p class="sub">Analytics are scoped to the active course and its resolved training suit.</p>'+activeSuitOverviewHtml()+
- '<section class="card settingBox filterPanelCard"><div class="inlineHead unifiedFilterPanelHead"><div><h3>Filters</h3><small>'+esc(reportFilterSummary)+'</small></div><div class="reportToolbar" style="margin:0"><button class="btn secondary small" id="reportsReset">Reset</button><button class="btn secondary small" id="reportsCsv">⇩ Export CSV</button><button class="btn sky small" id="reportsPrint">Print / PDF</button></div></div><div class="reportFilters" style="margin-top:10px">'+
+ return activeSuitOverviewHtml()+
+ '<section class="card settingBox filterPanelCard"><div class="inlineHead unifiedFilterPanelHead"><div><h3>Filters</h3><small>'+esc(reportFilterSummary)+'</small></div><div class="reportToolbar" style="margin:0"><button class="btn secondary small" id="reportsReset">Reset</button></div></div><div class="reportFilters" style="margin-top:10px">'+
  multiFilterHtml('reportTrainee','Trainee',traineeMultiFilterItems(),traineeSel,'All trainees')+
  multiFilterHtml('reportInstructor','Instructor',genericMultiItems(alphaByName(courseInstructors())),instructorSel,'All instructors')+
  multiFilterHtml('reportSyllabus','Syllabus',genericMultiItems(syllOptions),syllabusSel,'All syllabi')+
@@ -11857,17 +11889,17 @@ function reports(){
   const controls=[['dashboard','Course dashboard'],['operations','Planned vs Executed'],['details','Detailed analytics']];
   const nav='<nav class="insightTabNav" id="reportInnerTabs" aria-label="Analytics views">'+controls.map(([key,label])=>
     '<button type="button" class="insightTab '+(tab===key?'active':'')+'" data-report-tab="'+key+'" aria-current="'+(tab===key?'page':'false')+'">'+label+'</button>').join('')+'</nav>';
-  if(tab==='details')return '<div class="insightRoot">'+nav+reportsLegacy()+'</div>';
+  const heading='<div class="insightHeading"><div><div class="eyebrow">REPORTS & ANALYTICS</div><h1 class="pageTitle">Reports & Analytics</h1><p class="sub">Training progress, recorded flights, evaluations and course completion.</p></div>'+
+   '<div class="insightHeadingActions"><button class="btn secondary small" id="reportsCsv" type="button">⇩ Export CSV</button><button class="btn sky small" id="reportsPrint" type="button">Print / PDF</button></div></div>';
+  if(tab==='details')return '<div class="insightRoot">'+heading+nav+reportsLegacy()+'</div>';
   const courseDashboardModel=tab==='dashboard'?reportCourseDashboardData():null;
-  const htmlData=tab==='operations'?
+  const htmlData=tab==='details'?null:tab==='operations'?
     window.FLYMPUS_REPORTS?.plannedHtml?.(reportOpsData(),getFlympusAppPreferences().language==='he'?'he':'en'):
     window.FLYMPUS_REPORTS?.dashboardHtml?.(courseDashboardModel,getFlympusAppPreferences().language==='he'?'he':'en',reportCoursePulseCards(courseDashboardModel));
-  const dateFrom=state.reportDateFrom||'',dateTo=state.reportDateTo||'',
-    reportSubtitle=tab==='operations'?'Daily, weekly and monthly execution, cancellation reasons and operational trends.':'Trainee rankings, evaluations, solo activity and course completion.';
+  const dateFrom=state.reportDateFrom||'',dateTo=state.reportDateTo||'';
   const periodSelector=tab==='operations'?'<label class="insightGroupBy">Group by <select class="input" id="reportGranularity" aria-label="Group by time period">'+
      [['day','Day'],['week','Week'],['month','Month']].map(([v,label])=>'<option value="'+v+'" '+((state.reportGranularity||'week')===v?'selected':'')+'>'+label+'</option>').join('')+'</select></label>':'';
-  return '<div class="insightRoot"><div class="insightHeading"><div><div class="eyebrow">REPORTS & ANALYTICS</div><h1 class="pageTitle">Reports & Analytics</h1><p class="sub">'+reportSubtitle+'</p></div>'+
-   '<div class="insightHeadingActions"><button class="btn secondary small" id="reportsCsv" type="button">⇩ Export CSV</button><button class="btn sky small" id="reportsPrint" type="button">Print / PDF</button></div></div>'+
+  return '<div class="insightRoot">'+heading+
    nav+'<section class="card insightFilterPanel"><div class="insightFilterHeader"><strong>Reporting period</strong><button class="btn secondary small" id="reportsReset" type="button">Reset filters</button></div><div class="insightFilterControls">'+
    dateRangeFilterHtml('reportDate','Date range',dateFrom,dateTo)+periodSelector+'</div></section>'+
    (htmlData||'<section class="card settingBox"><p class="sub">Analytics could not be loaded.</p></section>')+'</div>'
@@ -12324,8 +12356,8 @@ function bindReports(){
    const next=btn.dataset.reportTab;
    if(!['operations','dashboard','details'].includes(next)||state.reportTab===next)return;
    state.reportTab=next;state.reportTabExplicit=true;saveUiState();render();
-   const nav=$('#reportInnerTabs');
-   if(nav)requestAnimationFrame?.(()=>nav.scrollIntoView?.({block:'start',behavior:'auto'}))
+   window.scrollTo?.(0,0);
+   requestAnimationFrame?.(()=>window.scrollTo?.(0,0))
  });
  if($('#reportGranularity'))$('#reportGranularity').onchange=e=>{
    state.reportGranularity=['day','week','month'].includes(e.target.value)?e.target.value:'week';
