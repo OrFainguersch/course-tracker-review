@@ -94,11 +94,15 @@ test('Fleet Home uses real aircraft rows and places the inventory table in the p
  assert.match(empty,/No aircraft registered/);
  assert.doesNotMatch(empty,/Hydraulic inspection/);
  assert.match(detail,/fleetInventoryTable/);
- assert.match(detail,/data-fleet-add/);
+ assert.match(detail,/id="fleetManageToggle"/);
+ assert.doesNotMatch(detail,/data-fleet-add|data-fleet-edit=/,'View mode hides aircraft management');
+ const managed=V.fleet({...ctx,manage:true});
+ assert.match(managed,/data-fleet-add/,'Manage reveals Add aircraft');
+ assert.match(managed,/data-fleet-edit=/,'Manage reveals per-aircraft actions');
  assert.match(detail,/id="fleetEditorPanel" hidden/);
  assert.match(detail,/data-fleet-reason-field/);
  assert.ok(detail.indexOf('fleetInventoryTable')<detail.indexOf('id="fleetEditorPanel"'));
- const editing=V.fleet({...ctx,editId:'a02'});
+ const editing=V.fleet({...ctx,editId:'a02',manage:true});
  assert.match(editing,/id="fleetEditorPanel"/);
  assert.doesNotMatch(editing,/id="fleetEditorPanel" hidden/);
  const readonly=V.fleet({...ctx,canWrite:false});
@@ -1206,3 +1210,11 @@ test('Fleet serviceability filter is read-only, with ready aircraft always order
  const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
  assert.ok(css.includes('.fleetInventoryTable tr[hidden]{display:none!important}'));
 });
+
+// Build 0845 management toggles only editable Fleet actions, not data.
+(()=>{
+ const source=fs.readFileSync('index.html','utf8'),fleetSource=fs.readFileSync('assets/fleet-views.js','utf8');
+ assert.ok(source.includes("state.fleetManage=!state.fleetManage"));
+ assert.ok(source.includes("Discard unsaved aircraft edits"),"Exiting management must protect unfinished edits");
+ assert.ok(fleetSource.includes("manage=c.canWrite&&c.manage===true"),"Unauthorized users cannot open management");
+})();
