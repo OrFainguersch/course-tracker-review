@@ -1205,7 +1205,11 @@ test('Fleet serviceability filter is read-only, with ready aircraft always order
  assert.ok(!all.includes('>Actions<'));
  assert.ok(filtered.includes('data-fleet-status="SERVICEABLE" hidden'));
  assert.ok(filtered.includes('data-fleet-status="UNSERVICEABLE"'));
- assert.ok(all.includes('data-fleet-edit="ready">✎ Edit'));
+ assert.ok(!all.includes('data-fleet-edit="ready">✎ Edit'),'View mode hides edit actions');
+  const managing=V.fleet({...context,manage:true});
+  assert.ok(managing.includes('data-fleet-edit="ready">✎ Edit'),'Manage mode reveals the same edit action');
+  assert.ok(managing.includes('data-fleet-add'),'Manage mode reveals Add aircraft');
+  assert.ok(!filtered.includes('data-fleet-edit="ready">✎ Edit'),'Filter remains view-only outside Manage');
  assert.equal(fleet.find(x=>x.id==='down').status,'UNSERVICEABLE','Sorting/filtering cannot mutate aircraft');
  const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
  assert.ok(css.includes('.fleetInventoryTable tr[hidden]{display:none!important}'));
