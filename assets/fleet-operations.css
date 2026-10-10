@@ -1034,7 +1034,7 @@ html.flympusLargeText .fleetBookedFlights .fleetSortieMiniMoment>b{font-size:14p
 }
 /* Additive swipe reveal: NO parent-row transforms, because Plan's drag/FLIP uses them. */
 .flympusSwipeDeleteAction{display:none}
-.fleetBookedFlights .fleetSortie.flympusSwipeOpen{overflow:hidden;border-color:#f1b2bd}
+.fleetBookedFlights .fleetSortie.flympusSwipeOpen{overflow:hidden}
 .fleetBookedFlights .fleetSortie .flympusSwipeDeleteAction{
  position:absolute;right:0;top:0;bottom:0;z-index:7;
  display:flex;align-items:center;justify-content:center;gap:5px;
@@ -1047,7 +1047,7 @@ html.flympusLargeText .fleetBookedFlights .fleetSortieMiniMoment>b{font-size:14p
  box-shadow:-9px 0 18px rgba(30,41,59,.15);
 }
 .fleetBookedFlights .fleetSortieDragGhost .flympusSwipeDeleteAction{display:none!important}
-html[data-flympus-theme="dark"] .fleetBookedFlights .fleetSortie.flympusSwipeOpen{border-color:#9c5a68}
+html[data-flympus-theme="dark"] .fleetBookedFlights .fleetSortie.flympusSwipeOpen{border-color:#37546a}
 @media(prefers-reduced-motion:reduce){
  .fleetBookedFlights .fleetSortie .flympusSwipeDeleteAction{transition:none}
 }
@@ -1057,7 +1057,7 @@ html[data-flympus-theme="dark"] .fleetBookedFlights .fleetSortie.flympusSwipeOpe
 .fleetBookedFlights .fleetSortie:has(.fleetSortieDragHandle){
  display:block!important;position:relative;isolation:isolate;
  padding:0!important;gap:0!important;overflow:hidden!important;
- background:#f3d4dc;min-width:0;
+ background:#fff;min-width:0;
 }
 .fleetBookedFlights .fleetSortieSlide{
  position:relative;z-index:2;box-sizing:border-box;
@@ -1071,13 +1071,14 @@ html[data-flympus-theme="dark"] .fleetBookedFlights .fleetSortie.flympusSwipeOpe
 .fleetBookedFlights .fleetSortieSlide>.fleetSortieDragHandle{grid-column:1;grid-row:1;align-self:center}
 .fleetBookedFlights .fleetSortieSlide>.fleetSortieMain{
  grid-column:1;grid-row:1;display:grid;
- grid-template-columns:max-content minmax(0,1fr);gap:8px;align-items:start;
+ grid-template-columns:minmax(0,1fr);gap:8px;align-items:start;
  min-width:0;width:100%;
 }
 .fleetBookedFlights .fleetSortieSlide:has(.fleetSortieDragHandle)>.fleetSortieMain{grid-column:2}
-.fleetBookedFlights .fleetSortieSlide .fleetSortieMain>b:first-child{grid-column:1;white-space:nowrap;margin-top:3px}
+/* Preserve the takeoff clock for time-only drag updates, but avoid showing it twice. */
+.fleetBookedFlights .fleetSortieSlide .fleetSortieSlotSync{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%);white-space:nowrap;padding:0!important;margin:0!important;border:0!important;pointer-events:none}
 .fleetBookedFlights .fleetSortieSlide .fleetSortieCrew{
- grid-column:2;display:flex;flex-direction:column;align-items:flex-start;
+ grid-column:1;display:flex;flex-direction:column;align-items:flex-start;
  gap:4px;min-width:0;max-width:100%;overflow-wrap:anywhere;
 }
 .fleetBookedFlights .fleetSortieSlide .fleetSortieCrew>.fleetSortiePerson-student{
@@ -1094,7 +1095,7 @@ html[data-flympus-theme="dark"] .fleetBookedFlights .fleetSortie.flympusSwipeOpe
 .fleetBookedFlights .fleetSortieSlide .fleetSortieMiniTimeline{grid-column:1/-1;grid-row:auto;min-width:0}
 .fleetBookedFlights .fleetSortieSlide>.fleetSortieActions{grid-column:1/-1;width:100%;margin:0}
 .fleetBookedFlights .fleetSortieSlide>.fleetSortieActions .btn{min-width:0}
-html[data-flympus-theme="dark"] .fleetBookedFlights .fleetSortie{background:#59323c;border-color:#37546a}
+html[data-flympus-theme="dark"] .fleetBookedFlights .fleetSortie{background:#172d40;border-color:#37546a}
 html[data-flympus-theme="dark"] .fleetBookedFlights .fleetSortieSlide{background:#172d40;color:#eaf5ff}
 html[data-flympus-language="he"] .fleetBookedFlights .fleetSortieSlide,
 html[data-flympus-language="he"] .fleetBookedFlights .fleetSortieSlide .fleetSortieMain{direction:rtl}

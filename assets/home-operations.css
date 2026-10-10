@@ -167,3 +167,27 @@ html[data-flympus-language="he"] .homePlanRowTimeline .homePlanTags{direction:rt
  .homeDashboard .homePlanRowTimeline .homePlanBody{padding-block-start:24px}
  .homeDashboard .homePlanRowTimeline .homePlanTags{inset-block-start:8px;inset-inline-end:9px}
 }
+
+/* Reserve a real gutter for phase labels, keeping Debriefing off the syllabus. */
+.homeDashboard .homePlanRow.homePlanRowTimeline{grid-template-columns:176px minmax(0,1fr)!important;column-gap:16px!important}
+.homePlanTimeline{width:176px}
+.homePlanMoment{grid-template-columns:60px 31px minmax(0,1fr);column-gap:6px}
+.homePlanTimelineRail{left:81.5px}
+.homePlanMomentLabel{min-width:0;overflow-wrap:anywhere}
+@media(max-width:480px){
+ .homeDashboard .homePlanRow.homePlanRowTimeline{grid-template-columns:148px minmax(0,1fr)!important;column-gap:14px!important;padding-inline:8px!important}
+ .homePlanTimeline{width:148px}
+ .homePlanMoment{grid-template-columns:51px 29px minmax(0,1fr);column-gap:4px}
+ .homePlanMomentIcon{width:29px;height:29px}
+ .homePlanTimelineRail{left:69.5px;top:15.5px;bottom:15.5px}
+ .homePlanMomentLabel{font-size:9px}
+}
+@media(max-width:360px){
+ .homeDashboard .homePlanRow.homePlanRowTimeline{grid-template-columns:136px minmax(0,1fr)!important;column-gap:10px!important;padding-inline:6px!important}
+ .homePlanTimeline{width:136px}
+ .homePlanMoment{grid-template-columns:47px 27px minmax(0,1fr);column-gap:3px}
+ .homePlanMomentIcon{width:27px;height:27px}
+ .homePlanTimelineRail{left:63.5px}
+ .homePlanMomentLabel{font-size:8.5px}
+}
+html.flympusLargeText .homePlanMomentLabel{white-space:normal;overflow-wrap:anywhere;line-height:1.1}

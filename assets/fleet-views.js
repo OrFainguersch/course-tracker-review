@@ -88,7 +88,7 @@ function schedule(c){
   const issue=M.flightIssues(f,c.fleet,c.platformId),t=M.flightTimeline(f,c.timingDefaults);
   return '<div class="fleetSortie '+(issue?'conflict':'')+'" data-flight-id="'+E(f.id)+'"><div class="fleetSortieSlide">'+
  (can&&flights.length>1?'<button type="button" class="fleetSortieDragHandle" data-flight-drag aria-label="'+E(L('Drag to reschedule flight at ','גרור לשינוי שיבוץ הטיסה בשעה ')+f.time)+'" title="'+E(L('Drag to change takeoff time','גרור לשינוי שעת המראה'))+'"><svg viewBox="0 0 24 24" aria-hidden="true" width="21" height="21" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg></button>':'')+
- '<div class="fleetSortieMain"><b data-flight-slot-time>'+E(f.time)+'</b>'+
+ '<div class="fleetSortieMain"><b class="fleetSortieSlotSync" data-flight-slot-time aria-hidden="true">'+E(f.time)+'</b>'+
  '<div class="fleetSortieCrew">'+crewLine('student',f.traineeName||f.traineeId)+(f.mode!=='SOLO'&&f.instructorName?crewLine('teacher',f.instructorName):'')+
  '<small class="fleetSortieSyllabus">'+E(f.syllabus)+' · '+E(aircraftDisplayName(c,f.tail))+'</small>'+
  (f.note?'<small class="fleetSortieNote">'+E(f.note)+'</small>':'')+(issue?'<small class="fleetConflict">'+E(issue)+'</small>':'')+'</div>'+

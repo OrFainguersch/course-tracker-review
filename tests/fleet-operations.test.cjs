@@ -604,11 +604,11 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261010-flight-cards-0825'],['assets/fleet-operations.css','20261010-flight-cards-0825']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261010-plan-cards-polish-0826'],['assets/fleet-operations.css','20261010-plan-cards-polish-0826']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-flight-cards-layout-0825'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-plan-cards-polish-0826'/);
  assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-time-only-seamless-0820/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
@@ -1147,7 +1147,7 @@ test('Mobile swipe exposes existing confirmed remove action, never deletes direc
  assert.match(src,/THRESHOLD=44/);
  assert.doesNotMatch(src,/persistCourseOperations|saveDraft|publish\('PLAN'/);
  assert.match(html,/FLYMPUS_ROW_SWIPE\?\.attach\?\.\(document\.querySelector\('\[data-flight-sorties\]'\)\)/);
- assert.match(html,/assets\/row-swipe-delete\.js\?v=20261010-flight-cards-0825/);
+ assert.match(html,/assets\/row-swipe-delete\.js\?v=20261010-plan-cards-polish-0826/);
  assert.match(css,/\.flympusSwipeDeleteAction/);
  assert.match(css,/\.fleetSortieDragGhost \.flympusSwipeDeleteAction\{display:none!important\}/);
 });
@@ -1168,4 +1168,16 @@ test('Mobile deletion slides the inner card, retaining outer FLIP and confirmed 
  assert.match(css,/\.fleetSortie\.flympusSwipeOpen \.fleetSortieSlide/);
  assert.match(css,/translate3d\(-94px,0,0\)/);
  assert.match(css,/@media\(hover:hover\) and \(pointer:fine\)/);
+});
+
+test('Scheduled cards eliminate duplicate top time without breaking reorder and keep neutral swipe edges',()=>{
+ const view=fs.readFileSync(path.join(__dirname,'../assets/fleet-views.js'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(view,/class="fleetSortieSlotSync" data-flight-slot-time aria-hidden="true"/);
+ assert.match(css,/\.fleetSortieSlide \.fleetSortieSlotSync\{position:absolute!important;width:1px!important/);
+ assert.match(css,/\.fleetSortieSlide \.fleetSortieCrew\{\s*grid-column:1;/);
+ assert.doesNotMatch(css,/background:#f3d4dc|background:#59323c|border-color:#f1b2bd|border-color:#9c5a68/);
+ assert.match(css,/\.fleetSortie\.flympusSwipeOpen \.fleetSortieSlide\{transform:translate3d\(-94px,0,0\)/);
+ assert.match(css,/html\[data-flympus-language="he"\] \.fleetBookedFlights \.fleetSortieSlide/);
+ assert.match(css,/html\[data-flympus-theme="dark"\] \.fleetBookedFlights \.fleetSortie\{background:#172d40/);
 });
