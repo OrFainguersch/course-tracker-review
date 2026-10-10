@@ -133,7 +133,8 @@ test('Trainee rank stays visible at the frame corner without measuring pre-layou
  assert.match(css,/transform:none!important;transition:none!important/);
  assert.doesNotMatch(css,/rosterSwipeRow > \.rosterSwipeFixedRank/);
  assert.match(css,/\.rosterSwipeMoving \.rosterSwipeContent\{transition:none!important\}/);
- assert.match(css,/\.rosterSwipeRow\.personCardOpen:active\{[\s\S]*?transform:none!important/);
+ assert.match(css,/\.traineeRosterCard\.rosterSwipeRow\.personCardOpen:active\{[\s\S]*?transform:none!important/);
+ assert.doesNotMatch(css,/\.instructorRosterCard\.rosterSwipeRow\.personCardOpen:active/);
  assert.match(css,/transition-property:border-color,box-shadow,background-color!important/);
 });
 

@@ -28,7 +28,7 @@
  }
  /* Prevent the card's legacy pressed-scale animation from moving its top and
     bottom edges while the horizontal rail is dragged or released on iOS. */
- .people .personCard.rosterSwipeRow.personCardOpen:active{
+ .people .personCard.traineeRosterCard.rosterSwipeRow.personCardOpen:active{
   transform:none!important;
   transition-property:border-color,box-shadow,background-color!important
  }
