@@ -231,5 +231,13 @@ test('Home takeoff airplane matches the completed flights pulse glyph',()=>{
  const html=fs.readFileSync('index.html','utf8'),css=fs.readFileSync('assets/home-operations.css','utf8');
  assert.match(html,/takeoff:'✈'/);
  assert.match(html,/homePulseIcon">✈<\/div>/);
- assert.match(css,/\.homePlanMoment-takeoff \.homePlanMomentIcon\{font-family:inherit;font-size:19px/);
+ assert.match(css,/\.homePlanMoment-takeoff \.homePlanMomentIcon\{font-family:inherit;font-size:15px/);
+});
+
+test('Home syllabus starts at the name text after the role icon, in English and Hebrew',()=>{
+ const css=fs.readFileSync('assets/home-operations.css','utf8');
+ assert.match(css,/\.homeDashboard \.homePlanRowTimeline \.homePlanMain>small\{margin-top:2px;margin-inline-start:22px;max-width:calc\(100% - 22px\)/);
+ assert.match(css,/html\[data-flympus-language="he"\] \.homePlanRowTimeline \.homePlanMain\{align-items:flex-start\}/);
+ assert.match(css,/homePlanMoment-takeoff \.homePlanMomentIcon\{font-family:inherit;font-size:15px/);
+ assert.match(css,/html\.flympusLargeText \.homePlanMoment-takeoff \.homePlanMomentIcon\{font-size:18px\}/);
 });
