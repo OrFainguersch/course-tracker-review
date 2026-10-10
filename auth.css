@@ -1258,3 +1258,18 @@ html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusRoleGuide
 html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserRoleBadge.duty_trainee,
 html[data-flympus-theme="dark"] #flympusUserManagementPageRoot .flympusUserMeta i.role.duty_trainee{background:#164349;color:#9be0d5}
 html.flympusLargeText #flympusUserManagementPageRoot .flympusRoleGuideCard.duty_trainee li{font-size:15px!important}
+
+/* Role-first user directory: compact filter, responsive destructive control. */
+#flympusUserManagementPageRoot .flympusManagedRoleFilter,
+#flympusUserManagementRoot .flympusManagedRoleFilter{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:17px 0 20px;font-size:13px;font-weight:800;color:#244769}
+#flympusUserManagementPageRoot .flympusManagedRoleFilter select,
+#flympusUserManagementRoot .flympusManagedRoleFilter select{min-height:43px;min-width:160px;max-width:100%;padding:9px 14px;border:1px solid #c7d9e8;border-radius:12px;background:#fff;color:#183d60;font:inherit}
+#flympusUserManagementPageRoot .flympusUserDelete,
+#flympusUserManagementRoot .flympusUserDelete{min-height:40px;padding:9px 12px;border:1px solid #ecc0ca;border-radius:12px;background:#fff0f2;color:#b72040;font-size:11px;font-weight:850;cursor:pointer}
+#flympusUserManagementPageRoot .flympusUserDelete:disabled,
+#flympusUserManagementRoot .flympusUserDelete:disabled{opacity:.55;cursor:wait}
+html[data-flympus-theme="dark"] .flympusManagedRoleFilter{color:#bad0e4}
+html[data-flympus-theme="dark"] .flympusManagedRoleFilter select{background:#102235!important;color:#e6f2fb!important;border-color:#36516a!important}
+html[data-flympus-theme="dark"] .flympusUserDelete{background:#3a1c2a!important;border-color:#7e4050!important;color:#ffd6de!important}
+html.flympusLargeText .flympusManagedRoleFilter,html.flympusLargeText .flympusUserDelete{font-size:15px!important}
+@media(max-width:620px){#flympusUserManagementPageRoot .flympusUserCard:not(.editing) .flympusUserActions{flex-wrap:wrap!important;justify-content:flex-start!important}#flympusUserManagementPageRoot .flympusManagedRoleFilter{align-items:stretch;flex-direction:column}}
