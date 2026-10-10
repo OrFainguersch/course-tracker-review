@@ -67,7 +67,8 @@ test('No flight only after 8 full calendar days, based on latest saved Solo or E
 });
 test('Home ordering, no duplicate Quick Actions, actual data wiring and Roster Overview routing',()=>{
  assert.ok(html.includes('assets/home-operations.js?v=20261010-home-timeline-live-0822'));
- assert.ok(html.indexOf('<h2>Course Pulse</h2>')<html.indexOf('<section class="homePrimaryGrid">'),'Course Pulse must appear before the read-only Today Plan');
+ assert.ok(!html.includes('<h2>Course Pulse</h2>'),'Course Pulse must be removed entirely from Home');
+ assert.match(html,/function reportCoursePulseCards\(\)/);
  assert.ok(!html.includes("'<div class=\"homeTaskStrip\">'"));
  assert.ok(html.includes('weekly.instructed')&&html.includes('weekly.solo'));
  assert.ok(html.includes('evaluations:getEvaluations(),soloFlights:getSoloFlights(),exams:getExamRecords()'));
@@ -184,12 +185,13 @@ test('Today Plan defaults to compact rows while preserving full phase clocks and
  const home=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
  const flight=html.slice(html.indexOf('function homePlanFlightRow('),html.indexOf('/* Update the planned current-position marker'));
  assert.match(home,/homePlanFlightRow\(x,homeHebrew\)/);
- assert.match(flight,/homeFlightMoments\(flight,hebrew\)/);
+ assert.match(flight,/timeline\?\.clock\?\.briefing/);
+ assert.match(flight,/timeline\?\.clock\?\.landing/);
  assert.match(flight,/homeFlightAircraftName\(flight\)/);
  assert.match(html,/class="homePlanInstructor"/);
  assert.doesNotMatch(home,/x\.estimatedMinutes\?\s*' · '/);
  assert.match(flight,/homePlanFlightBadges/);
- assert.match(flight,/homePlanFlightDetails/);
+ assert.match(flight,/homePlanFlightReveal/);
  assert.match(flight,/aria-expanded/);
  assert.match(flight,/inert/);
 });
@@ -218,11 +220,11 @@ test('Today Plan compact summary keeps time, crew, mode, and chevron aligned wit
  assert.match(summary,/badges\+'<span class="homePlanFlightChevron"/);
  assert.match(flight,/homeFlightPerson\(name,'student'\)/);
  assert.match(flight,/homeFlightPerson\(flight\.instructorName,'teacher'\)/);
- assert.match(flight,/homePlanFlightDetails/);
+ assert.match(flight,/homePlanFlightReveal/);
  const css=fs.readFileSync('assets/home-operations.css','utf8');
  assert.match(css,/homePlanFlightToggle\{/);
  assert.match(css,/grid-template-columns:minmax\(77px,auto\) minmax\(0,1fr\) auto 22px/);
- assert.match(css,/\.homePlanFlight\.is-expanded \.homePlanFlightDetails\{grid-template-rows:1fr\}/);
+ assert.match(css,/\.homePlanFlight\.is-expanded \.homePlanFlightReveal\{grid-template-rows:1fr\}/);
  assert.match(css,/html\[data-flympus-language="he"\] \.homeDashboard \.homePlanFlightToggle\{direction:rtl/);
  assert.match(css,/prefers-reduced-motion:reduce/);
 });
@@ -257,13 +259,24 @@ test('Home flight expansion is accessible and retains open flight state across r
  assert.match(html,/const homePlanExpandedFlightKeys=new Set\(\)/);
  assert.match(html,/function homePlanFlightKey\(flight\)/);
  assert.match(html,/data-home-flight-toggle/);
- assert.match(html,/details\.setAttribute\('aria-hidden',String\(!expanded\)\)/);
+ assert.match(html,/part\.setAttribute\('aria-hidden',String\(!expanded\)\)/);
  assert.match(html,/homePlanExpandedFlightKeys\.add\(key\)/);
  assert.match(html,/homePlanExpandedFlightKeys\.delete\(key\)/);
- assert.match(html,/homePlanFlightDetails" aria-hidden/);
- assert.match(css,/\.homePlanFlightDetails\{display:grid;grid-template-rows:0fr/);
- assert.match(css,/\.homePlanFlightDetailsInner\{min-height:0;overflow:hidden\}/);
+ assert.match(html,/homePlanFlightReveal homePlanFlight/);
+ assert.match(css,/\.homePlanFlightReveal\{[\s\S]*?grid-template-rows:0fr/);
+ assert.match(css,/\.homePlanFlightRevealInner\{min-height:0;overflow:hidden\}/);
  assert.match(css,/homePlanFlightPeople/);
  assert.match(css,/homePlanFlightBadges/);
  assert.match(css,/homePlanFlightChevron/);
+});
+
+test('Inline Today Plan expands briefing above flight and debrief below with syllabus nested under crew',()=>{
+ const flight=html.slice(html.indexOf('function homePlanFlightRow('),html.indexOf('/* Update the planned current-position marker'));
+ const before=flight.indexOf("reveal('Briefing'"),center=flight.indexOf('homePlanFlightToggle'),after=flight.indexOf("reveal('Debrief'");
+ assert.ok(before>=0&&center>before&&after>center);
+ assert.match(flight,/homePlanFlightSyllabus/);
+ assert.match(flight,/homeFlightAircraftName\(flight\)/);
+ assert.match(flight,/m5 9 7 7 7-7/);
+ assert.doesNotMatch(flight,/homePlanRowTimeline/);
+ assert.doesNotMatch(flight,/homePlanFlightDetails/);
 });
