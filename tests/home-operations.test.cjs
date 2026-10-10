@@ -68,9 +68,9 @@ test('No flight only after 8 full calendar days, based on latest saved Solo or E
 test('Home ordering, no duplicate Quick Actions, actual data wiring and Roster Overview routing',()=>{
  assert.ok(html.includes('assets/home-operations.js?v=20261010-home-timeline-live-0822'));
  assert.ok(!html.includes('<h2>Course Pulse</h2>'),'Course Pulse must be removed entirely from Home');
- assert.match(html,/function reportCoursePulseCards\(\)/);
+ assert.match(html,/function reportCoursePulseCards\(model\)/);
  assert.ok(!html.includes("'<div class=\"homeTaskStrip\">'"));
- assert.ok(html.includes('weekly.instructed')&&html.includes('weekly.solo'));
+ assert.ok(html.includes('totals.instructed')&&html.includes('totals.solo'),'Course reports must split recorded instructed and solo flights');
  assert.ok(html.includes('evaluations:getEvaluations(),soloFlights:getSoloFlights(),exams:getExamRecords()'));
  assert.ok(html.includes('attentionRows.length?'),'No fake row when no trainee is at risk');
  assert.ok(html.includes("screen==='profile'?{...extra,profileTab:'overview'}:extra"));
@@ -297,4 +297,19 @@ test('Reference inline schedule preserves one shared time-icon-stage track acros
  assert.match(css,/html\[data-flympus-language="he"\] \.homeDashboard \.homePlanFlight::before/);
  assert.match(css,/@media\(max-width:480px\)/);
  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
+});
+
+test('Home flight toggle cannot show iOS dark tap highlight and leaves crew alignment stable',()=>{
+ const css=fs.readFileSync('assets/home-operations.css','utf8'),html=fs.readFileSync('index.html','utf8');
+ assert.match(css,/homePlanFlightToggle:active,/);
+ assert.match(css,/-webkit-tap-highlight-color:transparent!important/);
+ assert.match(css,/transition:grid-template-rows \.38s cubic-bezier/);
+ assert.match(css,/homePlanFlightClock,\s*\.homeDashboard \.homePlanFlightPhaseClock\{transform:translate3d\(-5px,0,0\)/);
+ assert.match(css,/html\[data-flympus-language="he"\] \.homeDashboard \.homePlanFlightClock/);
+ assert.match(css,/-webkit-user-select:none!important/);
+ assert.match(css,/-webkit-user-select:text!important/);
+ assert.match(css,/\.people \.personCard, \.people \.personCard \*/);
+ assert.match(css,/\.fleetTimeFlow, \.fleetTimeFlow \*/);
+ assert.match(html,/View all my courses/);
+ assert.match(html,/הצג את כל הקורסים שלי/);
 });

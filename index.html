@@ -108,7 +108,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/reports-dashboard.js?v=20261010-pulse-inline-swipe-0831"></script>
 <link rel="stylesheet" href="./assets/fleet-operations.css?v=20261010-roster-swipe-stability-0829" />
 <link rel="stylesheet" href="./assets/course-operations.css?v=20261009-plan-single-row-stable-drag-0815" />
-<link rel="stylesheet" href="./assets/home-operations.css?v=20261010-notes-rail-motion-0832" />
+<link rel="stylesheet" href="./assets/home-operations.css?v=20261010-dashboard-touch-polish-0833" />
 <link rel="stylesheet" href="./assets/roster-swipe-actions.css?v=20261010-notes-rail-motion-0832" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
@@ -6130,7 +6130,7 @@ const FLYMPUS_HE_UI={'Home, Plan and Fleet':'בית, תכנון וצי כלי ט
   'Selected':'נבחר','Select course':'בחר קורס','In progress':'בתהליך','Upcoming':'עתידי','Completed':'הושלם',
   'No courses match these filters':'אין קורסים התואמים למסננים','Clear or change a filter to show more courses.':'נקה או שנה מסנן כדי להציג קורסים נוספים.',
   'No courses assigned':'לא הוקצו קורסים','Ask a Course Manager to add you to a course.':'בקש ממנהל קורס להוסיף אותך לקורס.',
-  'Welcome back, Or':'ברוך שובך, אור','View all courses':'הצג את כל הקורסים',"Today's Plan":'התכנון להיום',
+  'Welcome back, Or':'ברוך שובך, אור','View all courses':'הצג את כל הקורסים','View all my courses':'הצג את כל הקורסים שלי',"Today's Plan":'התכנון להיום',
   'Scheduled flights and activities for today':'טיסות ופעילויות מתוכננות להיום','Quick Actions':'פעולות מהירות','Common daily tasks':'משימות יומיות נפוצות',
   'Start Evaluation':'התחל הערכה','Resume Draft':'המשך טיוטה','No Draft to Resume':'אין טיוטה להמשך','Log Safety Event':'דווח אירוע בטיחות',
   'Course Pulse':'מצב הקורס','Key indicators for current course':'מדדים מרכזיים של הקורס הנוכחי','View Reports':'הצג דוחות',
@@ -6272,7 +6272,7 @@ Object.assign(FLYMPUS_HE_UI,{
   'Quick Actions':'פעולות מהירות','Upcoming requirements':'דרישות קרובות','Recent evaluations':'הערכות אחרונות','Needs review':'דורש בדיקה',
   'Open Safety Events':'אירועי בטיחות פתוחים','Average Progress':'התקדמות ממוצעת','Average Grade':'ציון ממוצע','Active Trainees':'חניכים פעילים',
   'Flights Completed':'טיסות שהושלמו','This Week':'השבוע','Evaluations logged':'הערכות שתועדו',
-  'View Reports':'הצג דוחות','View all courses':'הצג את כל הקורסים','Today\'s Plan':'התכנון להיום','Start Evaluation':'התחל הערכה',
+  'View Reports':'הצג דוחות','View all courses':'הצג את כל הקורסים','View all my courses':'הצג את כל הקורסים שלי','Today\'s Plan':'התכנון להיום','Start Evaluation':'התחל הערכה',
   'Resume Draft':'המשך טיוטה','No Draft to Resume':'אין טיוטה להמשך','Log Safety Event':'דווח אירוע בטיחות',
   'All courses':'כל הקורסים','All phases':'כל השלבים','All platforms':'כל הפלטפורמות','All training types':'כל סוגי ההכשרה',
   'All countries':'כל המדינות','All roles':'כל התפקידים','All statuses':'כל הסטטוסים','All trainees':'כל החניכים','All instructors':'כל המדריכים',
@@ -6336,7 +6336,7 @@ Object.assign(FLYMPUS_HE_UI,{
   'Cancelled':'בוטל','No cancellations to classify':'אין ביטולים לסיווג','Set the plan first':'יש להגדיר תחילה את התכנון',
   'Today\'s Plan':'התכנון להיום','Scheduled flights and activities for today':'טיסות ופעילויות המתוכננות להיום',
   'Common daily tasks':'משימות יומיות נפוצות','Key indicators for current course':'מדדים מרכזיים של הקורס הנוכחי',
-  'Good standing':'מצב תקין','Needs review':'דורש בדיקה','View All':'הצג הכול','View all courses':'הצג את כל הקורסים',
+  'Good standing':'מצב תקין','Needs review':'דורש בדיקה','View All':'הצג הכול','View all courses':'הצג את כל הקורסים','View all my courses':'הצג את כל הקורסים שלי',
   'No Draft to Resume':'אין טיוטה להמשך','Resume Draft':'המשך טיוטה','Start Evaluation':'התחל הערכה','Log Safety Event':'דווח אירוע בטיחות',
   'No courses assigned.':'לא הוקצו קורסים.','No courses assigned':'לא הוקצו קורסים','No courses match these filters':'אין קורסים התואמים למסננים',
   'Clear or change a filter to show more courses.':'נקה או שנה מסנן כדי להציג קורסים נוספים.',
@@ -9356,7 +9356,7 @@ function home(){
      '<div class="eyebrow" style="color:#8bc8ff">'+esc(String(currentCourseMeta.courseName||course.name).toUpperCase())+'</div>'+
      '<div class="welcome homeWelcomeLine" data-i18n-skip><span class="homeWelcomeLead">'+esc(homeWelcomeLead)+'</span><span class="homeWelcomeName">'+esc(homeWelcomeName)+'</span></div>'+
      homeContextHtml+
-     '<div class="heroMeta homeHeroFooter"><span class="homeHeroMetaLine"><span class="homeHeroCountry" data-i18n-skip>'+esc(homeCountryLabel)+'</span>'+(currentCourseMeta.startsOn?'<span class="homeHeroMetaSep" aria-hidden="true">·</span><span class="homeHeroStartLabel">Start date</span><bdi class="homeHeroStartDate">'+esc(formatCourseDate(currentCourseMeta.startsOn))+'</bdi>':'')+'</span><button class="homeAllCoursesLink" type="button" data-go="courses">View all courses <i class="homeAllCoursesArrow" aria-hidden="true" data-i18n-skip>'+homeForwardArrow+'</i></button></div>'+
+     '<div class="heroMeta homeHeroFooter"><span class="homeHeroMetaLine"><span class="homeHeroCountry" data-i18n-skip>'+esc(homeCountryLabel)+'</span>'+(currentCourseMeta.startsOn?'<span class="homeHeroMetaSep" aria-hidden="true">·</span><span class="homeHeroStartLabel">Start date</span><bdi class="homeHeroStartDate">'+esc(formatCourseDate(currentCourseMeta.startsOn))+'</bdi>':'')+'</span><button class="homeAllCoursesLink" type="button" data-go="courses">View all my courses <i class="homeAllCoursesArrow" aria-hidden="true" data-i18n-skip>'+homeForwardArrow+'</i></button></div>'+
    '</section>'+
    '<section class="homePrimaryGrid">'+
      '<div class="homePanel"><div class="homePanelPad"><div class="homeBlockHead"><div class="homeBlockTitle"><div><h2>Today\'s Plan</h2><p>Scheduled flights and activities for today</p></div></div><span class="homeDateChip">▣ '+esc(todayLabel)+'</span></div></div>'+
@@ -11710,17 +11710,20 @@ function reportCourseDashboardData(){
 }
 /* Reports reuse the exact four course-scoped Pulse indicators, not demo records.
    The weekly counter remains a 7-day metric irrespective of reporting-date filters. */
-function reportCoursePulseCards(){
+/* Course dashboard overview: count recorded course flights inside the selected
+   report period, including historical activity of removed or inactive trainees.
+   Active roster and progress remain scoped to active trainees. */
+function reportCoursePulseCards(model){
  const he=getFlympusAppPreferences().language==='he';
  const active=courseTrainees().filter(t=>courseMembershipFor(t.id,'TRAINEE',{status:t.status||'Active'}).status==='Active');
  const avgProgress=Math.round(mean(active.map(t=>Number(t.progress)||0))||0);
  const avg=mean(active.map(t=>Number(t.average)).filter(Number.isFinite));
- const weekly=window.FLYMPUS_HOME_OPERATIONS.weeklyFlights({today:todayIsoDate(),evaluations:getEvaluations(),soloFlights:getSoloFlights()});
+ const totals=model?.totals||{flights:0,instructed:0,solo:0};
  return '<div class="homePulseGrid insightPulseGrid">'+
-  '<div class="homePulseCard"><div class="homePulseIcon">♙</div><div class="homePulseValue">'+active.length+'</div><div class="homePulseLabel">Active Trainees</div><div class="homePulseNote neutral">Current roster</div></div>'+
-  '<div class="homePulseCard"><div class="homePulseIcon">◔</div><div class="homePulseValue">'+avgProgress+'%</div><div class="homePulseLabel">Average Progress</div><div class="homePulseNote">Course status</div></div>'+
-  '<div class="homePulseCard"><div class="homePulseIcon">✈</div><div class="homePulseValue">'+weekly.total+'</div><div class="homePulseLabel">Flights Completed<br>This Week</div><div class="homePulseNote neutral">'+weekly.instructed+' '+(he?'מודרכות':'Instructed')+' · '+weekly.solo+' '+(he?'סולו':'Solo')+'</div></div>'+
-  '<div class="homePulseCard"><div class="homePulseIcon" style="background:#f7f0df;color:#8a6a22">★</div><div class="homePulseValue">'+(avg?avg.toFixed(1):'—')+'</div><div class="homePulseLabel">Average Grade</div><div class="homePulseNote">Active trainees</div></div>'+
+  '<div class="homePulseCard"><div class="homePulseIcon">♙</div><div class="homePulseValue">'+active.length+'</div><div class="homePulseLabel">Active Trainees</div></div>'+
+  '<div class="homePulseCard"><div class="homePulseIcon">◔</div><div class="homePulseValue">'+avgProgress+'%</div><div class="homePulseLabel">Average Progress</div></div>'+
+  '<div class="homePulseCard"><div class="homePulseIcon">✈</div><div class="homePulseValue">'+totals.flights+'</div><div class="homePulseLabel">Flights Completed</div><div class="homePulseNote neutral">'+totals.instructed+' '+(he?'מודרכות':'Instructed')+' · '+totals.solo+' '+(he?'סולו':'Solo')+'</div></div>'+
+  '<div class="homePulseCard"><div class="homePulseIcon" style="background:#f7f0df;color:#8a6a22">★</div><div class="homePulseValue">'+(avg?avg.toFixed(1):'—')+'</div><div class="homePulseLabel">Average Grade</div></div>'+
  '</div>';
 }
 function reports(){
@@ -11729,9 +11732,10 @@ function reports(){
   const nav='<nav class="insightTabNav" id="reportInnerTabs" aria-label="Analytics views">'+controls.map(([key,label])=>
     '<button type="button" class="insightTab '+(tab===key?'active':'')+'" data-report-tab="'+key+'" aria-current="'+(tab===key?'page':'false')+'">'+label+'</button>').join('')+'</nav>';
   if(tab==='details')return '<div class="insightRoot">'+nav+reportsLegacy()+'</div>';
+  const courseDashboardModel=tab==='dashboard'?reportCourseDashboardData():null;
   const htmlData=tab==='operations'?
     window.FLYMPUS_REPORTS?.plannedHtml?.(reportOpsData(),getFlympusAppPreferences().language==='he'?'he':'en'):
-    window.FLYMPUS_REPORTS?.dashboardHtml?.(reportCourseDashboardData(),getFlympusAppPreferences().language==='he'?'he':'en',reportCoursePulseCards());
+    window.FLYMPUS_REPORTS?.dashboardHtml?.(courseDashboardModel,getFlympusAppPreferences().language==='he'?'he':'en',reportCoursePulseCards(courseDashboardModel));
   const dateFrom=state.reportDateFrom||'',dateTo=state.reportDateTo||'',
     reportSubtitle=tab==='operations'?'Daily, weekly and monthly execution, cancellation reasons and operational trends.':'Trainee rankings, evaluations, solo activity and course completion.';
   const periodSelector=tab==='operations'?'<label class="insightGroupBy">Group by <select class="input" id="reportGranularity" aria-label="Group by time period">'+

@@ -105,7 +105,7 @@ test('Fleet Home uses real aircraft rows and places the inventory table in the p
  assert.doesNotMatch(readonly,/data-fleet-edit=/);
  assert.doesNotMatch(readonly,/fleetAircraftForm/);
  assert.ok(html.indexOf("FLYMPUS_FLEET_VIEW?.home?.(currentFleetContext())")>html.indexOf("'<section class=\"homePrimaryGrid\">'"));
- assert.ok(!html.includes('<h2>Course Pulse</h2>')&&html.includes('function reportCoursePulseCards()'),'Course Pulse must live only in Reports');
+ assert.ok(!html.includes('<h2>Course Pulse</h2>')&&html.includes('function reportCoursePulseCards(model)'),'Course Pulse must live only in Reports');
  assert.equal((html.match(/FLYMPUS_FLEET_VIEW\?\.home\?\.\(currentFleetContext\(\)\)/g)||[]).length,1);
  assert.ok(!html.includes("'<div class=\"homeTaskStrip\">'"),"Home no longer repeats quick actions");
  assert.ok(html.includes("holder.hidden=!down"),'Unavailable reason is only shown when relevant');
@@ -608,7 +608,7 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-notes-rail-motion-0832'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-dashboard-touch-polish-0833'/);
  assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-time-only-seamless-0820/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
