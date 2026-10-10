@@ -337,3 +337,16 @@ test('Home timeline reveals animate a single measured height without safari fram
  const binding=page.slice(page.indexOf("if(state.screen==='home'){ensureHomeTimelineClock()"),page.indexOf("dutyOperations?.bind();bindGlobalFormUx()"));
  assert.doesNotMatch(binding,/getBoundingClientRect|offsetHeight|transition='none'|transitionend|removeProperty\('height'\)/);
 });
+
+test('Home flight summary is fixed while syllabus animates as a third independent measured rail',()=>{
+ const markup=fs.readFileSync('index.html','utf8'),styles=fs.readFileSync('assets/home-operations.css','utf8');
+ const flight=markup.slice(markup.indexOf('function homePlanFlightRow('),markup.indexOf('/* Update the planned current-position marker'));
+ const crew=flight.slice(flight.indexOf('homePlanFlightPeople'),flight.indexOf("badges+'<span"));
+ assert.doesNotMatch(crew,/homePlanFlightSyllabus/,'Syllabus cannot stretch and re-center the crew row');
+ const toggle=flight.indexOf("  '</button>'"),syllabus=flight.indexOf("reveal('SyllabusReveal'"),debrief=flight.indexOf("reveal('Debrief'");
+ assert.ok(toggle>=0&&syllabus>toggle&&debrief>syllabus,'Syllabus remains below the summary and above debrief');
+ assert.match(flight,/reveal\('Syllabus','<span class="homePlanFlightSyllabus">/);
+ assert.match(styles,/\.homePlanFlightSyllabusReveal \.homePlanFlightRevealInner/);
+ assert.doesNotMatch(styles,/max-height:64px;opacity:1;margin-top:5px/);
+ assert.match(markup,/document\.querySelectorAll\('\.homePlanFlightReveal'\)\.forEach\(homeRevealHeight\)/);
+});

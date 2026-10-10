@@ -93,7 +93,7 @@ test('HTML render escapes reason labels, includes SVG graphic and responsive tab
  assert(html.includes("getEvaluations(),soloFlights:getSoloFlights()"));
  assert(!html.includes('plans:[...courseMock'));
  assert(html.includes('./assets/reports-dashboard.js?v=20261010-mobile-table-accordion-0838'));
- assert(html.includes('./assets/reports-dashboard.css?v=20261010-mobile-table-accordion-0838'));
+ assert(html.includes('./assets/reports-dashboard.css?v=20261010-dashboard-stable-flight-0839'));
 });
 test('Hebrew chart headings and table labels are rendered in RTL-ready content',()=>{
  const htmlText=R.plannedHtml(R.operations({plans:submitted,evaluations,soloFlights:solo}),'he');
@@ -215,4 +215,16 @@ test('Mobile course performance table exposes swipe affordance and sticky traine
  assert.match(css,/position:sticky;inset-inline-start:0/);
  assert.match(css,/data-flympus-language="he"/);
  assert.match(css,/@media print\{/);
+});
+
+test('Course dashboard is the first Reports view and removing the swipe gradient preserves discoverability',()=>{
+ const markup=fs.readFileSync(path.join(root,'index.html'),'utf8');
+ const css=fs.readFileSync(path.join(root,'assets/reports-dashboard.css'),'utf8');
+ assert.match(markup,/reportTab:'dashboard',reportTabExplicit:false/);
+ assert.match(markup,/if\(state\.reportTabExplicit!==true\)state\.reportTab='dashboard'/);
+ assert.match(markup,/state\.reportTabExplicit=true;saveUiState\(\);render\(\)/);
+ assert.match(markup,/state\.reportTab='dashboard';state\.reportTabExplicit=false/);
+ assert.doesNotMatch(css,/insightCourseTableViewport::after/);
+ assert.match(css,/insightSwipeCue\{\s*display:flex/);
+ assert.match(css,/insightCourseTableScroll/);
 });
