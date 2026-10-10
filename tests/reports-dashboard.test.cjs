@@ -92,8 +92,8 @@ test('HTML render escapes reason labels, includes SVG graphic and responsive tab
  assert(html.includes("window.FLYMPUS_REPORTS?.operations?.("));
  assert(html.includes("getEvaluations(),soloFlights:getSoloFlights()"));
  assert(!html.includes('plans:[...courseMock'));
- assert(html.includes('./assets/reports-dashboard.js?v=0767'));
- assert(html.includes('./assets/reports-dashboard.css?v=0767'));
+ assert(html.includes('./assets/reports-dashboard.js?v=20261010-pulse-inline-swipe-0831'));
+ assert(html.includes('./assets/reports-dashboard.css?v=20261010-pulse-inline-swipe-0831'));
 });
 test('Hebrew chart headings and table labels are rendered in RTL-ready content',()=>{
  const htmlText=R.plannedHtml(R.operations({plans:submitted,evaluations,soloFlights:solo}),'he');
