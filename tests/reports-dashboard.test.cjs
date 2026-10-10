@@ -141,10 +141,37 @@ test('Course dashboard replaces its original KPI tiles with the same four course
  assert(rendered.includes(pulse));
  assert(!rendered.includes('insightMetrics'));
  assert(rendered.includes('Course performance overview'));
- assert(html.includes('function reportCoursePulseCards()'));
- assert(html.includes('FLYMPUS_HOME_OPERATIONS.weeklyFlights'));
- assert(html.includes('dashboardHtml?.(reportCourseDashboardData()'));
+ assert(html.includes('function reportCoursePulseCards(model)'));
+ assert(html.includes('const totals=model?.totals'));
+ assert(html.includes('dashboardHtml?.(courseDashboardModel'));
+ assert(html.includes('reportCoursePulseCards(courseDashboardModel)'));
+ const pulseSection=html.slice(html.indexOf('function reportCoursePulseCards(model)'),html.indexOf('function reports(){'));
+ assert(!pulseSection.includes('Current roster'));
+ assert(!pulseSection.includes('Course status'));
+ assert(!pulseSection.includes('This Week'));
+ assert(!pulseSection.includes("homePulseNote\">Active trainees"));
+ assert(pulseSection.includes('Flights Completed'));
  const home=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
  assert(!home.includes('<h2>Course Pulse</h2>'));
  assert(!home.includes('homePulseGrid'));
+});
+
+test('Course dashboard flight KPI totals recorded activity for selected range, including departed trainee history',()=>{
+ const data=R.dashboard({
+  trainees:[{id:'active',name:'Active',progress:74}],
+  evaluations:[{id:'e1',traineeId:'departed',date:'2026-10-01',grade:4},{id:'e2',traineeId:'active',date:'2026-10-09',grade:5}],
+  soloFlights:[{id:'s1',traineeId:'departed',date:'2026-10-03'}],
+  from:'2026-10-01',to:'2026-10-10'
+ });
+ assert.equal(data.people.length,1,'ranking remains current roster only');
+ assert.equal(data.totals.flights,3,'completed course flights still include departed trainee activity');
+ assert.equal(data.totals.instructed,2);
+ assert.equal(data.totals.solo,1);
+ const recent=R.dashboard({
+  trainees:[{id:'active',name:'Active'}],
+  evaluations:[{id:'e1',traineeId:'departed',date:'2026-10-01'},{id:'e2',traineeId:'active',date:'2026-10-09'}],
+  soloFlights:[{id:'s1',traineeId:'departed',date:'2026-10-03'}],
+  from:'2026-10-09'
+ });
+ assert.equal(recent.totals.flights,1,'range filters must affect the reported total');
 });
