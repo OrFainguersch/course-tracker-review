@@ -1087,6 +1087,8 @@ html[data-flympus-theme="dark"] .fleetBookedFlights .fleetSortie.flympusSwipeOpe
 .fleetBookedFlights .fleetSortieSlide .fleetSortieCrew>.fleetSortiePerson-teacher{margin:0}
 .fleetBookedFlights .fleetSortieSlide .fleetSortieCrew .fleetSortieSyllabus{
  font-size:11px;line-height:1.5;white-space:normal;overflow-wrap:anywhere;color:#708598;
+ /* Begin syllabus at same x as trainee/instructor names (16px icon + 6px gap). */
+ margin-inline-start:22px;max-width:calc(100% - 22px);box-sizing:border-box;
 }
 .fleetBookedFlights .fleetSortieSlide>.fleetSortieMode{
  position:absolute;inset-block-start:11px;inset-inline-end:11px;
