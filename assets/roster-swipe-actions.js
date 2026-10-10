@@ -7,7 +7,7 @@ let openRow=null;
 function settle(row,shouldOpen){
  if(!row)return;
  if(shouldOpen&&openRow&&openRow!==row)settle(openRow,false);
- if(row.classList.contains('rosterSwipeMoving'))row.querySelector('.personInfo')?.getBoundingClientRect?.();
+ if(row.classList.contains('rosterSwipeMoving'))row.querySelector('.rosterSwipeContent')?.getBoundingClientRect?.();
  row.classList.toggle('rosterSwipeOpen',shouldOpen);
  row.classList.remove('rosterSwipeMoving');
  row.style.setProperty('--roster-swipe-offset',(shouldOpen?-WIDTH:0)+'px');
@@ -24,6 +24,13 @@ function attach(host,canManage){
   const kind=row.classList.contains('traineeRosterCard')?'TRAINEE':'INSTRUCTOR';
   const id=row.dataset.trainee||row.dataset.instructor||row.querySelector('[data-person-edit]')?.dataset.personEdit?.split(':').slice(1).join(':');
   if(!id)return;
+  // Group the existing card children in ONE grid surface before applying transforms.
+  // Reparenting preserves the actual DOM nodes, their listeners, and card click behavior.
+  // Multiple independently transformed grid children caused Safari vertical jitter on close.
+  const content=row.ownerDocument.createElement('div');
+  content.className='rosterSwipeContent';
+  while(row.firstChild)content.appendChild(row.firstChild);
+  row.appendChild(content);
   attached.add(row);row.classList.add('rosterSwipeRow');
   const tray=row.ownerDocument.createElement('div');tray.className='rosterSwipeActionTray';
   const edit=row.ownerDocument.createElement('button');edit.type='button';edit.className='rosterSwipeEdit';edit.dataset.personEdit=kind+':'+id;
