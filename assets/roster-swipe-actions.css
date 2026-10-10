@@ -11,7 +11,6 @@
   transform:translate3d(var(--roster-swipe-offset,0px),0,0);
   transition:transform .30s cubic-bezier(.22,.72,.2,1);will-change:transform
  }
- @media(max-width:759px){.people .personCard.rosterSwipeRow .rosterSwipeContent{gap:10px}}
  .people .personCard.rosterSwipeRow.rosterSwipeMoving .rosterSwipeContent{transition:none!important}
  .people .personCard .rosterSwipeActionTray{
   position:absolute;right:0;top:0;bottom:0;z-index:1;width:146px;
@@ -35,6 +34,9 @@
  html[data-flympus-theme="dark"] .people .personCard .rosterSwipeEdit{background:#246fa8}
  html[data-flympus-theme="dark"] .people .personCard .rosterSwipeRemove{background:#a52642}
  html.flympusLargeText .people .personCard .rosterSwipeActionTray button{font-size:14px}
+}
+@media (hover:none) and (pointer:coarse) and (max-width:759px){
+ .people .personCard.rosterSwipeRow .rosterSwipeContent{gap:10px}
 }
 @media (hover:hover) and (pointer:fine){
  .people .personCard.rosterSwipeRow .rosterSwipeContent{display:contents!important;transform:none!important}
