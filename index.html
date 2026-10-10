@@ -1266,6 +1266,16 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 .advancedManageHeader{margin-top:12px}
 .advancedManageHeading{width:100%}
 @media(max-width:420px){.courseManagementTopbar{gap:8px}.courseManagementTopbar>.btn{min-width:0;padding:9px 11px}}
+
+/* Global mobile table cue: identical typography/glyph/colors to Course Dashboard. */
+.flympusMobileTableSwipeCue{display:none}
+@media screen and (max-width:759px){
+ .flympusMobileTableSwipeCue{display:flex;align-items:center;gap:8px;margin:0 0 9px;color:#4c6c88;font-size:11px;font-weight:750;line-height:1.5}
+ .flympusMobileTableSwipeCue .insightSwipeCueGlyph{display:inline-flex;align-items:center;justify-content:center;flex:0 0 26px;height:22px;border-radius:7px;background:#eaf4fd;color:#1267ac;font-size:17px;line-height:1}
+ html[data-flympus-theme="dark"] .flympusMobileTableSwipeCue{color:#bdd3e6}
+ html[data-flympus-theme="dark"] .flympusMobileTableSwipeCue .insightSwipeCueGlyph{background:#214c68;color:#c5e5fb}
+}
+@media print{.flympusMobileTableSwipeCue{display:none!important}}
 /* ===== Tailor course syllabus: no provenance/status column ===== */
 .courseSyllabusTable .packageSyllabusHeader,
 .courseSyllabusTable .packageSyllabusRow{
@@ -11969,9 +11979,47 @@ function render(options={}){
     prewarmFlympusBottomScreens();
   }
   if(!dutyRestricted)safetyUI.inbox();
+ queueFlympusMobileTableSwipeCues();
  renderDutyApprovalNotification()
 }
 
+/* Unified mobile cue for any genuinely horizontally scrollable HTML or grid table.
+   Closed details are measured on opening; the existing Dashboard cue isn't duplicated. */
+function syncFlympusMobileTableSwipeCues(){
+ const root=$('#content');
+ if(!root||!window.matchMedia?.('(max-width: 759px)')?.matches||typeof root.querySelectorAll!=='function'||typeof document.createElement!=='function')return;
+ const seen=new Set();
+ root.querySelectorAll('table,.packageSyllabusTable,.ruleEditorTable,[role="table"]').forEach(table=>{
+  let node=table.parentElement,viewport=null,depth=0;
+  while(node&&node!==root&&depth++<10){
+   const overflow=window.getComputedStyle?.(node)?.overflowX||'';
+   if(/auto|scroll/.test(overflow)&&node.clientWidth>0&&node.scrollWidth>node.clientWidth+8){viewport=node;break}
+   node=node.parentElement;
+  }
+  if(!viewport||seen.has(viewport))return;
+  seen.add(viewport);
+  if(viewport.closest?.('.insightCourseTableViewport')||viewport.previousElementSibling?.classList?.contains('insightSwipeCue')||!viewport.parentNode)return;
+  const cue=document.createElement('p');
+  cue.className='insightSwipeCue flympusMobileTableSwipeCue';cue.setAttribute('role','note');
+  const glyph=document.createElement('span');
+  glyph.className='insightSwipeCueGlyph';glyph.setAttribute('aria-hidden','true');glyph.textContent='↔';
+  cue.appendChild(glyph);
+  cue.appendChild(document.createTextNode(getFlympusAppPreferences().language==='he'?'החליקו לצדדים להצגת כל העמודות':'Swipe sideways to view all columns'));
+  viewport.parentNode.insertBefore(cue,viewport);
+ });
+}
+let flympusMobileCueListenerInstalled=false;
+function queueFlympusMobileTableSwipeCues(){
+ if(!window.matchMedia?.('(max-width: 759px)')?.matches)return;
+ const schedule=typeof requestAnimationFrame==='function'?requestAnimationFrame:cb=>setTimeout(cb,0);
+ schedule(syncFlympusMobileTableSwipeCues);
+ if(!flympusMobileCueListenerInstalled){
+  flympusMobileCueListenerInstalled=true;
+  document.addEventListener('toggle',event=>{
+   if(event.target?.closest?.('#content'))queueFlympusMobileTableSwipeCues();
+  },true);
+ }
+}
 document.addEventListener('flympus:auth-ready',()=>{try{render()}catch{}});
 document.addEventListener('flympus:auth-signed-out',()=>{dutyOperations?.stop();safetyGlobal.stop()});
 function renderPreservingManagementView(update){
