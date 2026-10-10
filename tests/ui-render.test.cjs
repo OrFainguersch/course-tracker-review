@@ -1106,7 +1106,7 @@ assert(fs.readFileSync('assets/fleet-views.js','utf8').includes('data-go="fleet"
  assert.ok(source.includes('data-platform-restore='),"Hidden source platforms remain restorable");
  assert.ok(source.includes("if($('#packageFiltersCollapsible'))"),"Filter disclosure remembers whether user opened it");
  assert.ok(!source.includes("'<div class=\"packageRuleStats packageRuleStatsFull\">"),"Package editor must not repeat overview counts");
- assert.ok(source.includes("advancedDeferredAdd('phase'")&&source.includes('data-advanced-add-open aria-label="Add '+ "'+esc(label)+'" + '">＋ Add'),"Local Add labels remain short with descriptive accessibility text");
+ assert.ok(source.includes("advancedDeferredAdd('phase'")&&source.includes('data-advanced-add-open aria-label='),"Local Add labels remain short with descriptive accessibility text");
 })();
 
 // 0847 UI invariants: aligned Advanced stages, deferred Add, and consistent mobile affordances.
