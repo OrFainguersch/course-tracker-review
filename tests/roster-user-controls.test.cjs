@@ -23,8 +23,8 @@ test('Roster swipe is mobile-only and uses the established course membership per
  assert.match(css,/right:0;left:auto;top:0;bottom:0/);
  assert.match(css,/rosterSwipeOpen/);
  for(const filename of ['roster-swipe-actions.js','roster-swipe-actions.css']){
-  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-notes-rail-motion-0832'));
-  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-notes-rail-motion-0832'));
+  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-unified-kpis-trainee-0836'));
+  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-unified-kpis-trainee-0836'));
  }
 });
 test('Swipe module creates neither tray nor handlers without a touch screen and roster authority',()=>{
@@ -127,9 +127,9 @@ test('Trainee rank stays visible at the frame corner without measuring pre-layou
  assert.match(js,/content\.appendChild\(rank\)/);
  assert.doesNotMatch(js,/--roster-rank-(?:top|left|right)/);
  assert.match(css,/\.rosterSwipeContent > \.rosterSwipeFixedRank\{/);
- assert.match(css,/position:absolute!important;top:-11px!important/);
- assert.match(css,/right:-11px!important/);
- assert.match(css,/right:auto!important;left:-11px!important/);
+ assert.match(css,/position:absolute!important;top:0!important/);
+ assert.match(css,/right:0!important/);
+ assert.match(css,/right:auto!important;left:0!important/);
  assert.match(css,/transform:none!important;transition:none!important/);
  assert.doesNotMatch(css,/rosterSwipeRow > \.rosterSwipeFixedRank/);
  assert.match(css,/\.rosterSwipeMoving \.rosterSwipeContent\{transition:none!important\}/);
@@ -148,9 +148,9 @@ test('Roster swipe runs only on mobile, mirrors to RTL, and keeps the rank ancho
  assert.match(js,/rosterSwipeFixedRank/);
  assert.match(js,/const constrained=isHebrew\(row\)\?Math\.max\(0,offset\):Math\.min\(0,offset\)/);
  assert.match(css,/\.rosterSwipeContent > \.rosterSwipeFixedRank\{/);
- assert.match(css,/position:absolute!important;top:-11px!important/);
- assert.match(css,/right:-11px!important/);
- assert.match(css,/right:auto!important;left:-11px!important/);
+ assert.match(css,/position:absolute!important;top:0!important/);
+ assert.match(css,/right:0!important/);
+ assert.match(css,/right:auto!important;left:0!important/);
  assert.match(css,/transform:none!important;transition:none!important/);
  assert.doesNotMatch(css,/rosterSwipeRow > \.rosterSwipeFixedRank/);
  assert.match(css,/max-width:759px/);
@@ -186,4 +186,17 @@ test('Swipe settling and opaque action clipping share one damped horizontal rail
  assert.match(css,/visibility:hidden/);
  assert.match(css,/--roster-motion-easing:cubic-bezier\(\.32,\.72,0,1\)/);
  assert.match(css,/touch-action:pan-y/);
+});
+
+test('Trainee rail paints full-card geometry and reveals actions without a second clip animation',()=>{
+ const css=read('assets/roster-swipe-actions.css'),js=read('assets/roster-swipe-actions.js');
+ assert.match(css,/\.traineeRosterCard\.rosterSwipeRow\{padding:0!important;transform:none!important;transition:none!important\}/);
+ assert.match(css,/\.traineeRosterCard\.rosterSwipeRow \.rosterSwipeContent\{padding:11px;min-height:108px/);
+ assert.match(css,/\.traineeRosterCard\.rosterSwipeRow \.rosterSwipeActionTray\{[\s\S]*?clip-path:none!important;transition:none!important;visibility:hidden/);
+ assert.match(css,/\.rosterSwipeSettling \.rosterSwipeActionTray\{visibility:visible\}/);
+ assert.match(js,/draggedTrainee=!shouldOpen&&row\.classList\.contains\('traineeRosterCard'\)/);
+ assert.match(css,/data-flympus-language="he"[\s\S]*?\.traineeRosterCard\.rosterSwipeRow \.rosterSwipeActionTray\{direction:ltr\}/);
+ // Instructor rail retains its original layout and clipped reveal path.
+ assert.match(css,/\.rosterSwipeRow\.instructorRosterCard\{grid-template-columns:minmax\(0,1fr\)!important/);
+ assert.match(css,/\.rosterSwipeActionTray\{[\s\S]*?clip-path:inset\(0 0 0 100%\)/);
 });

@@ -103,7 +103,9 @@ body:has(.insightRoot) .insightFilterPanel,body:has(.insightRoot) #appBackBtn{di
  min-width:0;min-height:166px;padding:17px 12px;border-radius:17px;
  display:flex;flex-direction:column;justify-content:center;align-items:center;
 }
-.insightRoot .insightPulseGrid .homePulseIcon{width:42px;height:42px;font-size:19px}
+.insightRoot .insightPulseGrid .homePulseIcon{width:42px;height:42px;background:#eef6ff;color:#087cf0}
+.insightRoot .insightPulseGrid .homePulseIcon .insightPulseGlyph{display:block;width:23px;height:23px;fill:currentColor;stroke:none!important}
+html[data-flympus-theme="dark"] .insightRoot .insightPulseGrid .homePulseIcon{background:#193f60;color:#8bcaff}
 .insightRoot .insightPulseGrid .homePulseValue{font-size:29px}
 .insightRoot .insightPulseGrid .homePulseLabel{font-size:12px}
 .insightRoot .insightPulseGrid .homePulseNote{font-size:10px;line-height:1.4}

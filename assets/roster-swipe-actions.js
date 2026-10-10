@@ -12,7 +12,8 @@ function settle(row,shouldOpen){
  if(row.classList.contains('rosterSwipeMoving'))row.querySelector('.rosterSwipeContent')?.getBoundingClientRect?.();
  // During closing, keep the clipped tray visible only until the horizontal
  // transform has reached zero; never show the hidden colored tray at rest.
- row.classList.toggle('rosterSwipeSettling',!shouldOpen&&row.classList.contains('rosterSwipeOpen'));
+ const draggedTrainee=!shouldOpen&&row.classList.contains('traineeRosterCard')&&row.classList.contains('rosterSwipeMoving');
+ row.classList.toggle('rosterSwipeSettling',!shouldOpen&&(row.classList.contains('rosterSwipeOpen')||draggedTrainee));
  row.classList.toggle('rosterSwipeOpen',shouldOpen);
  row.classList.remove('rosterSwipeMoving');
  row.style.setProperty('--roster-swipe-offset',offsetFor(row,shouldOpen)+'px');

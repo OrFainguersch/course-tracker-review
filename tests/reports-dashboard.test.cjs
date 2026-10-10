@@ -92,8 +92,8 @@ test('HTML render escapes reason labels, includes SVG graphic and responsive tab
  assert(html.includes("window.FLYMPUS_REPORTS?.operations?.("));
  assert(html.includes("getEvaluations(),soloFlights:getSoloFlights()"));
  assert(!html.includes('plans:[...courseMock'));
- assert(html.includes('./assets/reports-dashboard.js?v=20261010-pulse-inline-swipe-0831'));
- assert(html.includes('./assets/reports-dashboard.css?v=20261010-pulse-inline-swipe-0831'));
+ assert(html.includes('./assets/reports-dashboard.js?v=20261010-unified-kpis-trainee-0836'));
+ assert(html.includes('./assets/reports-dashboard.css?v=20261010-unified-kpis-trainee-0836'));
 });
 test('Hebrew chart headings and table labels are rendered in RTL-ready content',()=>{
  const htmlText=R.plannedHtml(R.operations({plans:submitted,evaluations,soloFlights:solo}),'he');
@@ -174,4 +174,16 @@ test('Course dashboard flight KPI totals recorded activity for selected range, i
   from:'2026-10-09'
  });
  assert.equal(recent.totals.flights,1,'range filters must affect the reported total');
+});
+
+test('Course report KPI glyphs are four filled blue vectors with one shared visual weight',()=>{
+ const html=read('index.html');
+ const section=html.slice(html.indexOf('function reportCoursePulseCards(model)'),html.indexOf('function reports(){'));
+ assert.equal((section.match(/<svg class="insightPulseGlyph"/g)||[]).length,4);
+ assert.equal((section.match(/<div class="homePulseIcon">/g)||[]).length,4);
+ assert.doesNotMatch(section,/♙|◔|✈|★|background:#f7f0df|color:#8a6a22/);
+ assert.match(section,/M3 15\.5/);
+ const css=read('assets/reports-dashboard.css');
+ assert.match(css,/\.insightPulseGrid \.homePulseIcon\{width:42px;height:42px;background:#eef6ff;color:#087cf0\}/);
+ assert.match(css,/\.insightPulseGlyph\{display:block;width:23px;height:23px;fill:currentColor;stroke:none!important\}/);
 });
