@@ -597,6 +597,9 @@ assert.match(advancedHtml,/value="Night"/);
 assert.match(advancedHtml,/value="ATOL"/);
 assert.doesNotMatch(advancedHtml,/Package configuration · Operating track|Mixed \/ Day\+Night/,"EP architecture must use Qualifications instead of the old track context");
 assert.match(advancedHtml,/id="cfgAddPlatform"/);
+ assert.match(advancedHtml,/class="advancedSequence advancedSectorStep"/,'Sector picker follows the same outside-card step heading');
+ assert.match(advancedHtml,/class="packageFiltersCollapsible" id="packageFiltersCollapsible"/,'Package filters should start collapsed in a details disclosure');
+ assert.doesNotMatch(advancedHtml,/class="packageRuleStats packageRuleStatsFull"/,'Expanded Packages should not repeat the top statistics block');
 assert.match(advancedHtml,/globalPackageForm/,"Advanced must contain the full Package editor");
 assert.match(advancedHtml,/EP ATOL Qualification · Full Scale · Aerostar/,"ATOL must be a standalone EP Full Scale Package, not a Day\/Night track");
 assert.match(advancedHtml,/Qualification/,"EP Package paths must expose Qualification as the relevant dimension");
@@ -608,6 +611,8 @@ assert(advancedHtml.indexOf(">Architecture</b>")<advancedHtml.indexOf("Final ste
 vm.runInContext("const cp=getCustomPlatforms();cp.EP=[{id:'platform_test',name:'Test Platform'}];saveCustomPlatforms(cp);const labels3=getPlatformLabels();labels3.platform_test='Test Platform';savePlatformLabels(labels3);render()",context);
 assert.match(elements.get("#content").innerHTML,/Test Platform/);
 assert.match(elements.get("#content").innerHTML,/data-platform-remove="platform_test"/);
+ assert.match(elements.get("#content").innerHTML,/data-platform-remove="aerostar"/,'Built-in platforms must also show Remove when editing');
+ assert.match(elements.get("#content").innerHTML,/aria-label="Add platform">＋ Add/,'Platform add label should be short');
 assert.match(elements.get("#content").innerHTML,/value="platform_test"/);
 
 vm.runInContext("FLYMPUS_TRAINING.saveCustomPackage('EP',{id:'ui_custom_package',name:'EP · UI Custom Package',phaseId:'ep_full',platformId:'aerostar',trainingKind:'new',dayNight:'day',gradingMin:1,gradingBenchmark:4,gradingMax:5,theory:[],syllabi:[],criteria:[],experienceCounters:[],exams:[],progression:[],emergencyRequirementIds:[],courseEmergencies:[]});state.packageFocusId=null;render()",context);
@@ -1080,4 +1085,19 @@ assert(fs.readFileSync('assets/fleet-views.js','utf8').includes('data-go="fleet"
  assert.ok(source.includes("document.addEventListener('toggle'"),"Collapsed tables can gain hints when expanded");
  assert.ok(source.includes("viewport.closest?.('.insightCourseTableViewport')"),"Do not duplicate Course Dashboard's existing hint");
  assert.ok(source.includes("if(state.screen!=='fleet')state.fleetManage=false"),"Fleet management does not leak to other screens");
+})();
+
+// Build 0846: consistent top-right manage actions, shorter Add labels, safe platform removal and compact filters.
+(()=>{
+ const source=fs.readFileSync('index.html','utf8');
+ assert.ok(source.includes('.flympusMobileTableSwipeCue{display:flex;align-items:center;gap:8px;margin:10px 0 9px;'),"Swipe cue must have breathing room below accordion heading");
+ assert.ok(source.includes(':is(.rosterTopbar,.courseManagementTopbar,.fleetPageTop,.profileNav)>.btn.edit'),"All title-row Edit and Manage buttons should be prominent blue");
+ assert.ok(source.includes('class="btn sky rosterTopDone"'),"Roster Done belongs by the page title");
+ assert.ok(source.includes('class="rosterControlHead"'),"Roster Add belongs to a Fleet-style controls header");
+ assert.ok(!source.includes('class="manageBanner rosterManageBanner"'),"Old wide Roster manage banner should be removed");
+ assert.ok(source.includes("keys:['ct-review-catalogs','ct-review-platform-labels','ct-review-custom-platforms','ct-review-hidden-platforms'"),"Hidden built-ins participate in Discard session rollback");
+ assert.ok(source.includes('data-platform-restore='),"Hidden source platforms remain restorable");
+ assert.ok(source.includes("if($('#packageFiltersCollapsible'))"),"Filter disclosure remembers whether user opened it");
+ assert.ok(!source.includes("'<div class=\"packageRuleStats packageRuleStatsFull\">"),"Package editor must not repeat overview counts");
+ assert.ok(source.includes('aria-label="Add phase">＋ Add'),"Local Add labels should be short yet accessible");
 })();
