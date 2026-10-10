@@ -101,7 +101,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js" crossorigin />
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js" crossorigin />
-<link rel="modulepreload" href="./auth.js?v=20261009-approval-sounds-0795" />
+<link rel="modulepreload" href="./auth.js?v=20261010-roster-admin-0827" />
 <script src="./firebase-config.js?v=20261004-auth2"></script>
 <link rel="stylesheet" href="./assets/reports-dashboard.css?v=0767" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
@@ -109,6 +109,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="stylesheet" href="./assets/fleet-operations.css?v=20261010-plan-cards-polish-0826" />
 <link rel="stylesheet" href="./assets/course-operations.css?v=20261009-plan-single-row-stable-drag-0815" />
 <link rel="stylesheet" href="./assets/home-operations.css?v=20261010-plan-cards-polish-0826" />
+<link rel="stylesheet" href="./assets/roster-swipe-actions.css?v=20261010-roster-swipe-admin-0827" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
 <script src="./assets/safety-global-inbox.js?v=20261009-approval-sounds-0795"></script>
@@ -118,6 +119,7 @@ html.flympusColdBoot #flympusAuthRoot{
 <script src="./assets/fleet-views.js?v=20261010-plan-cards-polish-0826"></script>
 <script src="./assets/flight-board-drag.js?v=20261010-flight-time-only-seamless-0820"></script>
 <script src="./assets/row-swipe-delete.js?v=20261010-plan-cards-polish-0826"></script>
+<script src="./assets/roster-swipe-actions.js?v=20261010-roster-swipe-admin-0827"></script>
 <script src="./assets/duty-approval-model.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/operations-cloud.js?v=20261009-approval-sounds-0795"></script>
 <script src="./assets/course-operations.js?v=20261009-plan-fleet-identity-v1"></script>
@@ -4973,7 +4975,7 @@ html.flympusAuthResuming #flympusAuthRoot.flympusAuthInitial{display:none!import
   }
 }catch{}})();
 </script>
-<link rel="stylesheet" href="./auth.css?v=20261008-switcher01" />
+<link rel="stylesheet" href="./auth.css?v=20261010-roster-admin-0827" />
 <style id="evaluationVoiceStyles">
 .evaluationVoiceBlock{margin:14px 0 18px;padding:14px;border:1px solid #cfe0ee;border-radius:18px;background:linear-gradient(180deg,#fbfdff,#f5faff);box-shadow:0 7px 22px rgba(18,60,96,.05)}
 .evaluationVoiceHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.evaluationVoiceHead h3{margin:2px 0 3px;color:#123d64;font-size:15px}.evaluationVoiceHead p{margin:0;color:#6f8498;font-size:9.5px;line-height:1.45}.evaluationVoiceEyebrow{color:#1687e8;font-size:8px;font-weight:950;letter-spacing:.11em}.evaluationVoiceRecord{min-width:132px;height:42px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #b9d9ef;border-radius:11px;background:#eaf6ff;color:#116cae;font-size:10px;font-weight:900;cursor:pointer}.evaluationVoiceRecord svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9}.evaluationVoiceRecord.listening{background:#fff0f2;border-color:#efb8c0;color:#b43242;box-shadow:0 0 0 4px rgba(180,50,66,.08)}.evaluationVoiceRecord:disabled{opacity:.48;cursor:not-allowed}
@@ -9097,7 +9099,7 @@ function bindDailyFlightBoard(binding='all'){
   },
   onError:err=>{toast(planScheduleError(err),'error')}
  });
- window.FLYMPUS_ROW_SWIPE?.attach?.(document.querySelector('[data-flight-sorties]'));
+ /* Planned flights use the visible Remove action; no swipe actions. */
  if(binding==='board')return;
  const refreshTimeline=()=>{
   if(!form)return;
@@ -9175,7 +9177,7 @@ function bindDailyFlightBoard(binding='all'){
  document.querySelectorAll('[data-flight-delete]').forEach(b=>b.onclick=async()=>{
   if(!flympusCan('operations.flightBoard.write'))return;
   const id=b.dataset.flightDelete,record=getPlanWorkingFlights(state.planDate||todayIsoDate()).find(x=>x.id===id&&x.platformId===currentFleetPlatform());
-  if(!record||!(await siteConfirm('Remove this scheduled flight? Submitted evaluations and solo flights are not affected.',{title:'Remove flight?',confirmLabel:'Remove',tone:'warning'})))return;
+  if(!record||!(await siteConfirm('Remove this scheduled flight? Submitted evaluations and solo flights are not affected.',{title:'Remove flight?',confirmLabel:'Remove',tone:'danger'})))return;
   const next=getPlanWorkingFlights(record.date).filter(x=>x.id!==id);
   try{if(isDutyTrainee())dutyOperations.saveDraft('PLAN',{flights:next.filter(x=>x.date===record.date)},record.date);else if(dutyOperations?.enabled())await dutyOperations.publish('PLAN',record.date,{flights:next.filter(x=>x.date===record.date)});else if(!markFlightBoardPlanManaged(record.date)||!persistCourseOperations('ct-review-flight-board',next)){fleetSaveError();return}}catch(err){toast(err.message,'error');return}
   state.flightBoardEditId=null;toast('Scheduled flight removed');render();
@@ -11970,8 +11972,17 @@ if($('#rosterSearch')){
   if($('#addPersonForm'))$('#addPersonForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget),type=fd.get('type');const arr=getRosterExtras();const name=String(fd.get('name')).trim(),id='x_'+Date.now();arr.push({id,name,email:String(fd.get('email')||''),type,status:'Active',courseIds:[currentCourseId],initials:name.split(' ').map(x=>x[0]).join('').slice(0,2),average:type==='TRAINEE'?null:undefined,totalFlights:type==='TRAINEE'?0:undefined});localStorage.setItem('ct-review-roster',JSON.stringify(arr));updateCourseMembership(id,String(type),type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});setRosterPersonModalOpen(false);toast(name+' added to the course');render()}
   if($('#assignExistingForm'))$('#assignExistingForm').onsubmit=e=>{e.preventDefault();const key=String(new FormData(e.currentTarget).get('personKey')||''),parts=key.split(':'),type=parts[0],id=parts.slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id);if(!p)return;updateCourseMembership(id,type,type==='INSTRUCTOR'?{removed:false,role:'INSTRUCTOR'}:{removed:false,status:'Active'});setRosterPersonModalOpen(false);toast(p.name+' assigned to '+(currentCourseMeta.courseName||'course'));render()}
 }
+window.FLYMPUS_ROSTER_SWIPE?.attach?.(document.querySelector('.people'),flympusCan('roster.manage'));
 const toggleRosterManageMode=()=>renderPreservingManagementView(()=>{state.rosterManage=!state.rosterManage;state.personEditKey=null});if($('#toggleRosterManage'))$('#toggleRosterManage').onclick=toggleRosterManageMode;
-document.querySelectorAll('[data-person-edit]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();renderPreservingManagementView(()=>{state.personEditKey=btn.dataset.personEdit;state.personPhotoDraft=undefined})});
+document.querySelectorAll('[data-person-edit]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();if(!flympusCan('roster.manage'))return;renderPreservingManagementView(()=>{state.personEditKey=btn.dataset.personEdit;state.personPhotoDraft=undefined})});
+document.querySelectorAll('[data-roster-remove]').forEach(btn=>btn.onclick=async e=>{
+ e.stopPropagation();if(!flympusCan('roster.manage'))return;
+ const key=btn.dataset.rosterRemove||'',type=key.split(':')[0],id=key.split(':').slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id);
+ if(!p||!coursePersonIsAssignedTo(p,type,currentCourseId))return;
+ if(!(await siteConfirm('Remove '+p.name+' from '+currentCourseId+'? Historical records will be preserved.',{title:'Remove from course?',confirmLabel:'Remove',tone:'danger'})))return;
+ if(!flympusCan('roster.manage'))return;
+ updateCourseMembership(id,type,{removed:true});toast(p.name+' removed from this course');render();
+});
 if($('#closeEditPerson'))$('#closeEditPerson').onclick=()=>{state.personEditKey=null;state.personPhotoDraft=undefined;render()};
 if($('#cancelEditPerson'))$('#cancelEditPerson').onclick=()=>{state.personEditKey=null;state.personPhotoDraft=undefined;render()};
 if($('#editPersonModal')){
@@ -11981,7 +11992,7 @@ if($('#editPersonModal')){
 if($('#personPhotoInput'))$('#personPhotoInput').onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{await openPersonalPhotoCrop(file,'roster')}catch(err){toast('Could not process this photo')}finally{e.target.value=''}};
 if($('#editPersonPhoto'))$('#editPersonPhoto').onclick=async()=>{const key=state.personEditKey||'',type=key.split(':')[0],id=key.split(':').slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id),data=state.personPhotoDraft!==undefined?state.personPhotoDraft:p?.photoData;if(!data)return;try{await openPersonalPhotoCropDataUrl(data,'roster')}catch(err){toast('Could not open photo editor')}};
 if($('#removePersonPhoto'))$('#removePersonPhoto').onclick=()=>{state.personPhotoDraft=null;const key=state.personEditKey||'',type=key.split(':')[0],id=key.split(':').slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id),preview=$('#personPhotoPreview'),choose=$('#choosePersonPhotoAction'),edit=$('#editPersonPhoto'),remove=$('#removePersonPhoto');if(preview)preview.innerHTML=esc(personInitials(p||{name:'?'}));if(choose)choose.hidden=false;if(edit)edit.hidden=true;if(remove)remove.hidden=true};
-if($('#removePersonFromCourse'))$('#removePersonFromCourse').onclick=async()=>{const key=state.personEditKey||'',type=key.split(':')[0],id=key.split(':').slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id);if(!p)return;if(!(await siteConfirm('Remove '+p.name+' from '+currentCourseId+'? Historical records will be preserved.',{title:'Remove from course?',confirmLabel:'Remove',tone:'danger'})))return;updateCourseMembership(id,type,{removed:true});state.personEditKey=null;state.personPhotoDraft=undefined;toast(p.name+' removed from this course');render()};
+if($('#removePersonFromCourse'))$('#removePersonFromCourse').onclick=async()=>{if(!flympusCan('roster.manage'))return;const key=state.personEditKey||'',type=key.split(':')[0],id=key.split(':').slice(1).join(':'),p=(type==='INSTRUCTOR'?allInstructors():allTrainees()).find(x=>x.id===id);if(!p)return;if(!(await siteConfirm('Remove '+p.name+' from '+currentCourseId+'? Historical records will be preserved.',{title:'Remove from course?',confirmLabel:'Remove',tone:'danger'})))return;updateCourseMembership(id,type,{removed:true});state.personEditKey=null;state.personPhotoDraft=undefined;toast(p.name+' removed from this course');render()};
 if($('#editPersonForm'))$('#editPersonForm').onsubmit=async e=>{e.preventDefault();const key=state.personEditKey||'',type=key.split(':')[0],id=key.split(':').slice(1).join(':'),fd=new FormData(e.currentTarget),list=type==='INSTRUCTOR'?allInstructors():allTrainees(),p=list.find(x=>x.id===id);if(!p)return;const name=String(fd.get('name')||'').trim(),email=String(fd.get('email')||'').trim(),membership=String(fd.get('membership')||''),patch={};if(state.personPhotoDraft!==undefined)patch.photoData=state.personPhotoDraft;if(type==='TRAINEE'){patch.name=name;patch.email=email;const current=courseMembershipFor(id,'TRAINEE',{status:p.status||'Active'}).status;if(current!==membership&&membership==='Inactive'&&!(await siteConfirm('Set '+name+' inactive for '+currentCourseId+'?',{title:'Set trainee inactive?',confirmLabel:'Set inactive',tone:'warning'})))return;personOverride(id,patch);updateCourseMembership(id,'TRAINEE',{status:membership,removed:false})}else{const officialName=instructorOfficialName(p),current=courseMembershipFor(id,'INSTRUCTOR',{role:p.role||'INSTRUCTOR'}).role;if(current!==membership&&membership==='COURSE_MANAGER'&&!(await siteConfirm('Make '+officialName+' Course Manager for '+currentCourseId+'? The current Course Manager will become Instructor.',{title:'Change Course Manager?',confirmLabel:'Confirm change',tone:'primary'})))return;if(Object.keys(patch).length)personOverride(id,patch);if(membership==='COURSE_MANAGER'){courseInstructors().forEach(i=>updateCourseMembership(i.id,'INSTRUCTOR',{role:i.id===id?'COURSE_MANAGER':'INSTRUCTOR',removed:false}))}else updateCourseMembership(id,'INSTRUCTOR',{role:'INSTRUCTOR',removed:false})}state.personEditKey=null;state.personPhotoDraft=undefined;toast('Person details saved');render()};
 if(state.screen==='evaluation')bindEval();
 if(state.screen==='settings')bindSettings();
@@ -12951,6 +12962,6 @@ if(state.screen==='home')saveFlympusReloadSnapshot();
   }
 })();
 </script>
-<script type="module" src="./auth.js?v=20261009-approval-sounds-0795"></script>
+<script type="module" src="./auth.js?v=20261010-roster-admin-0827"></script>
 </body>
 </html>

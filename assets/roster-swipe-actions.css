@@ -1,0 +1,23 @@
+/* Touch-only Course Roster contextual actions, with physical left swipe and right tray. */
+@media (hover:none) and (pointer:coarse){
+ .people .personCard.rosterSwipeRow{position:relative!important;overflow:hidden!important;isolation:isolate}
+ .people .personCard.rosterSwipeRow > :not(.rosterSwipeActionTray){transition:transform .19s cubic-bezier(.22,.8,.24,1);transform:translate3d(var(--roster-swipe-offset,0px),0,0)}
+ .people .personCard.rosterSwipeRow.rosterSwipeOpen > :not(.rosterSwipeActionTray){transform:translate3d(-146px,0,0)}
+ .people .personCard.rosterSwipeRow.rosterSwipeMoving > :not(.rosterSwipeActionTray){transition:none}
+ .people .personCard .rosterSwipeActionTray{position:absolute;right:0;top:0;bottom:0;z-index:5;width:146px;display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:7px 5px;box-sizing:border-box;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s}
+ .people .personCard.rosterSwipeOpen .rosterSwipeActionTray{opacity:1;visibility:visible;pointer-events:auto}
+ .people .personCard .rosterSwipeActionTray button{border-radius:10px;border:0;font-size:12px;font-weight:850;cursor:pointer;padding:4px;color:#fff;min-width:0}
+ .people .personCard .rosterSwipeEdit{background:#1d6fae}
+ .people .personCard .rosterSwipeRemove{background:#c43b51}
+ html[data-flympus-theme="dark"] .people .personCard .rosterSwipeEdit{background:#246fa8}
+ html[data-flympus-theme="dark"] .people .personCard .rosterSwipeRemove{background:#a52642}
+ html.flympusLargeText .people .personCard .rosterSwipeActionTray button{font-size:14px}
+}
+@media (hover:hover) and (pointer:fine){.rosterSwipeActionTray{display:none!important}}
+@media(prefers-reduced-motion:reduce){.rosterSwipeRow > :not(.rosterSwipeActionTray){transition:none!important}}
+/* The Plan has no swipe delete: remove the hidden red layer and make all visible edges uniform. */
+.fleetBookedFlights .fleetSortie:not(.conflict){border-color:#dce7f0!important;background:#fff!important}
+.fleetBookedFlights .fleetSortie .fleetSortieSlide{border-radius:inherit;background:#fff}
+.fleetBookedFlights .fleetSortie .flympusSwipeDeleteAction{display:none!important}
+html[data-flympus-theme="dark"] .fleetBookedFlights .fleetSortie:not(.conflict){border-color:#37546a!important;background:#172d40!important}
+html[data-flympus-theme="dark"] .fleetBookedFlights .fleetSortie .fleetSortieSlide{background:#172d40}

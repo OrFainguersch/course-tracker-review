@@ -608,7 +608,7 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-plan-cards-polish-0826'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-roster-swipe-admin-0827'/);
  assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-time-only-seamless-0820/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
@@ -1146,7 +1146,7 @@ test('Mobile swipe exposes existing confirmed remove action, never deletes direc
  assert.match(src,/\.fleetSortieDragHandle/);
  assert.match(src,/THRESHOLD=44/);
  assert.doesNotMatch(src,/persistCourseOperations|saveDraft|publish\('PLAN'/);
- assert.match(html,/FLYMPUS_ROW_SWIPE\?\.attach\?\.\(document\.querySelector\('\[data-flight-sorties\]'\)\)/);
+ assert.doesNotMatch(html,/FLYMPUS_ROW_SWIPE\?\.attach\?\.\(document\.querySelector\('\[data-flight-sorties\]'\)\)/);
  assert.match(html,/assets\/row-swipe-delete\.js\?v=20261010-plan-cards-polish-0826/);
  assert.match(css,/\.flympusSwipeDeleteAction/);
  assert.match(css,/\.fleetSortieDragGhost \.flympusSwipeDeleteAction\{display:none!important\}/);

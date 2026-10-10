@@ -146,7 +146,9 @@ service cloud.firestore {
     function managerMayDelete(uid) {
       let actorRole = currentUserRecord().data.role;
       let targetRole = resource.data.role;
-      return userManager()
+      return administrator()
+        && actorRole in ['owner', 'admin']
+        && targetRole in ['training_manager', 'user', 'duty_trainee']
         && managerMayTarget(actorRole, targetRole, uid);
     }
 
