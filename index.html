@@ -103,12 +103,12 @@ html.flympusColdBoot #flympusAuthRoot{
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js" crossorigin />
 <link rel="modulepreload" href="./auth.js?v=20261010-roster-admin-0827" />
 <script src="./firebase-config.js?v=20261004-auth2"></script>
-<link rel="stylesheet" href="./assets/reports-dashboard.css?v=20261010-swipe-accordion-report-0837" />
+<link rel="stylesheet" href="./assets/reports-dashboard.css?v=20261010-mobile-table-accordion-0838" />
 <link rel="stylesheet" href="./assets/trainee-evaluation-history.css?v=20261008-history02" />
-<script src="./assets/reports-dashboard.js?v=20261010-unified-kpis-trainee-0836"></script>
+<script src="./assets/reports-dashboard.js?v=20261010-mobile-table-accordion-0838"></script>
 <link rel="stylesheet" href="./assets/fleet-operations.css?v=20261010-roster-swipe-stability-0829" />
 <link rel="stylesheet" href="./assets/course-operations.css?v=20261009-plan-single-row-stable-drag-0815" />
-<link rel="stylesheet" href="./assets/home-operations.css?v=20261010-swipe-accordion-report-0837" />
+<link rel="stylesheet" href="./assets/home-operations.css?v=20261010-mobile-table-accordion-0838" />
 <link rel="stylesheet" href="./assets/roster-swipe-actions.css?v=20261010-swipe-accordion-report-0837" />
 <link rel="stylesheet" href="./assets/safety-workflow.css?v=20261008-safety03" />
 <script src="./assets/safety-workflow.js?v=20261008-safety01"></script>
@@ -11964,41 +11964,32 @@ function bindGlobalFormUx(){
     form.addEventListener('submit',e=>{if(showFormInvalid(form)){e.preventDefault();e.stopImmediatePropagation()}},true)
   });
 }
-function bind(){if(state.screen==='home'){ensureHomeTimelineClock();document.querySelectorAll('[data-home-flight-toggle]').forEach(btn=>btn.onclick=()=>{
- const key=btn.dataset.homeFlightToggle||'',parent=btn.closest('.homePlanFlight');
- if(!key||!parent)return;
- const expanded=!parent.classList.contains('is-expanded');
- // Measure both rails before changing state. Animating fractional grid rows
- // while the syllabus reflows caused iOS Safari to jitter.
- const reveals=Array.from(parent.querySelectorAll('.homePlanFlightReveal'));
- const fromHeights=reveals.map(part=>part.getBoundingClientRect().height);
- parent.classList.toggle('is-expanded',expanded);
- btn.setAttribute('aria-expanded',String(expanded));
- const he=getFlympusAppPreferences().language==='he';
- btn.setAttribute('aria-label',(expanded?(he?'מזער':'Collapse'):(he?'הצג לוח זמנים':'Expand schedule'))+' '+(btn.querySelector('.homePlanPerson-student')?.textContent||''));
- reveals.forEach((part,i)=>{
-  part.setAttribute('aria-hidden',String(!expanded));
-  if(expanded)part.removeAttribute('inert');else part.setAttribute('inert','');
-  part.style.transition='none';
-  part.style.height=fromHeights[i]+'px';
+function bind(){if(state.screen==='home'){ensureHomeTimelineClock();
+ // Set intrinsic phase heights once while collapsed. A single class toggle
+ // transitions CSS lengths, without any forced layout, transition reset or
+ // mid-animation height:auto handoff (all three caused iOS Safari jitter).
+ const homeRevealHeight=part=>{
+  const inner=part.firstElementChild;
+  if(inner)part.style.setProperty('--home-reveal-height',Math.ceil(inner.scrollHeight)+'px');
+ };
+ document.querySelectorAll('.homePlanFlightReveal').forEach(homeRevealHeight);
+ document.querySelectorAll('[data-home-flight-toggle]').forEach(btn=>btn.onclick=()=>{
+  const key=btn.dataset.homeFlightToggle||'',parent=btn.closest('.homePlanFlight');
+  if(!key||!parent)return;
+  const expanded=!parent.classList.contains('is-expanded');
+  parent.querySelectorAll('.homePlanFlightReveal').forEach(part=>{
+   homeRevealHeight(part);
+   part.setAttribute('aria-hidden',String(!expanded));
+   if(expanded)part.removeAttribute('inert');else part.setAttribute('inert','');
+  });
+  parent.classList.toggle('is-expanded',expanded);
+  btn.setAttribute('aria-expanded',String(expanded));
+  const he=getFlympusAppPreferences().language==='he';
+  btn.setAttribute('aria-label',(expanded?(he?'מזער':'Collapse'):(he?'הצג לוח זמנים':'Expand schedule'))+' '+(btn.querySelector('.homePlanPerson-student')?.textContent||''));
+  if(expanded)homePlanExpandedFlightKeys.add(key);
+  else homePlanExpandedFlightKeys.delete(key);
  });
- void parent.offsetHeight;
- const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
- reveals.forEach(part=>{
-  const target=expanded?(part.firstElementChild?.scrollHeight||0):0;
-  part.style.removeProperty('transition');
-  part.style.height=target+'px';
-  if(reduced){part.style.removeProperty('height');return}
-  const finish=event=>{
-   if(event.target!==part||event.propertyName!=='height')return;
-   part.removeEventListener('transitionend',finish);
-   if(parent.classList.contains('is-expanded')===expanded)part.style.removeProperty('height');
-  };
-  part.addEventListener('transitionend',finish);
- });
- if(expanded)homePlanExpandedFlightKeys.add(key);
- else homePlanExpandedFlightKeys.delete(key);
-});}dutyOperations?.bind();bindGlobalFormUx();bindDmyDateInputs();bindMultiFilters();renderPersonalIdentity();syncAttentionBadges();bindGlobalBackGesture();mountPersonEditModal();if($('#appBackBtn'))$('#appBackBtn').onclick=()=>goBack();const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop'),drawerPanel=drawer?.querySelector?.('.panel'),menuHaptic=ensureFlympusMenuHapticOverlay(menuBtn);const toggleDrawerFromMenu=e=>{e?.preventDefault?.();e?.stopPropagation?.();closeAllMultiFilters(false);const opening=!drawer?.classList?.contains('open');if(opening)triggerFlympusPortableHaptic(8);setDrawerOpen(opening)};if(menuBtn&&drawer)menuBtn.onclick=toggleDrawerFromMenu;if(menuHaptic&&drawer){menuHaptic.ontouchstart=e=>{e?.stopPropagation?.();if(drawer.classList.contains('open'))return;closeAllMultiFilters(false);triggerFlympusPortableHaptic(8);setDrawerOpen(true)};menuHaptic.onclick=e=>{e?.stopPropagation?.()}};if(backdrop&&drawer)backdrop.onclick=()=>setDrawerOpen(false);if(drawer){let drawerSwipeStartX=0,drawerSwipeStartY=0,drawerSwipeTracking=false,drawerSwipeClaimed=false;const drawerCloseSwipeIsRight=()=>getFlympusAppPreferences().language==='he';drawer.ontouchstart=e=>{if(!drawer.classList.contains('open'))return;const t=e.touches?.[0];if(!t)return;drawerSwipeStartX=t.clientX;drawerSwipeStartY=t.clientY;drawerSwipeTracking=true;drawerSwipeClaimed=false};drawer.ontouchmove=e=>{if(!drawerSwipeTracking)return;const t=e.touches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY,correctDirection=drawerCloseSwipeIsRight()?dx>12:dx<-12;if(correctDirection&&Math.abs(dx)>Math.abs(dy)*1.2){drawerSwipeClaimed=true;e.preventDefault?.()}};drawer.ontouchend=e=>{if(!drawerSwipeTracking)return;drawerSwipeTracking=false;const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY,farEnough=drawerCloseSwipeIsRight()?dx>=58:dx<=-58;if(drawerSwipeClaimed&&farEnough&&Math.abs(dy)<=70)setDrawerOpen(false);drawerSwipeClaimed=false};drawer.ontouchcancel=()=>{drawerSwipeTracking=false;drawerSwipeClaimed=false}};const mobileBottom=$('#mobileBottomNav');if(mobileBottom){mobileBottom.ontouchend=e=>{if(!e.target?.closest?.('.mobileBottomIconButton,.mobileBottomHapticSwitch'))e.preventDefault?.()};mobileBottom.ongesturestart=e=>e.preventDefault?.();mobileBottom.ongesturechange=e=>e.preventDefault?.();mobileBottom.ongestureend=e=>e.preventDefault?.()}document.querySelectorAll('[data-mobile-nav]').forEach(b=>{const activate=e=>{const now=performance.now?.()||Date.now();b.__flympusImmediateNavAt=now;const target=b.dataset.mobileNav,currentRoot=bottomNavRootForScreen(state.screen);if(state.screen===target){scrollActiveBottomNavTop(target);return}if(state.screen===currentRoot)rememberBottomNavScroll();bottomDockNavigationTransition=true;
+}dutyOperations?.bind();bindGlobalFormUx();bindDmyDateInputs();bindMultiFilters();renderPersonalIdentity();syncAttentionBadges();bindGlobalBackGesture();mountPersonEditModal();if($('#appBackBtn'))$('#appBackBtn').onclick=()=>goBack();const menuBtn=$('#menuBtn'),drawer=$('#drawer'),backdrop=$('#backdrop'),drawerPanel=drawer?.querySelector?.('.panel'),menuHaptic=ensureFlympusMenuHapticOverlay(menuBtn);const toggleDrawerFromMenu=e=>{e?.preventDefault?.();e?.stopPropagation?.();closeAllMultiFilters(false);const opening=!drawer?.classList?.contains('open');if(opening)triggerFlympusPortableHaptic(8);setDrawerOpen(opening)};if(menuBtn&&drawer)menuBtn.onclick=toggleDrawerFromMenu;if(menuHaptic&&drawer){menuHaptic.ontouchstart=e=>{e?.stopPropagation?.();if(drawer.classList.contains('open'))return;closeAllMultiFilters(false);triggerFlympusPortableHaptic(8);setDrawerOpen(true)};menuHaptic.onclick=e=>{e?.stopPropagation?.()}};if(backdrop&&drawer)backdrop.onclick=()=>setDrawerOpen(false);if(drawer){let drawerSwipeStartX=0,drawerSwipeStartY=0,drawerSwipeTracking=false,drawerSwipeClaimed=false;const drawerCloseSwipeIsRight=()=>getFlympusAppPreferences().language==='he';drawer.ontouchstart=e=>{if(!drawer.classList.contains('open'))return;const t=e.touches?.[0];if(!t)return;drawerSwipeStartX=t.clientX;drawerSwipeStartY=t.clientY;drawerSwipeTracking=true;drawerSwipeClaimed=false};drawer.ontouchmove=e=>{if(!drawerSwipeTracking)return;const t=e.touches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY,correctDirection=drawerCloseSwipeIsRight()?dx>12:dx<-12;if(correctDirection&&Math.abs(dx)>Math.abs(dy)*1.2){drawerSwipeClaimed=true;e.preventDefault?.()}};drawer.ontouchend=e=>{if(!drawerSwipeTracking)return;drawerSwipeTracking=false;const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-drawerSwipeStartX,dy=t.clientY-drawerSwipeStartY,farEnough=drawerCloseSwipeIsRight()?dx>=58:dx<=-58;if(drawerSwipeClaimed&&farEnough&&Math.abs(dy)<=70)setDrawerOpen(false);drawerSwipeClaimed=false};drawer.ontouchcancel=()=>{drawerSwipeTracking=false;drawerSwipeClaimed=false}};const mobileBottom=$('#mobileBottomNav');if(mobileBottom){mobileBottom.ontouchend=e=>{if(!e.target?.closest?.('.mobileBottomIconButton,.mobileBottomHapticSwitch'))e.preventDefault?.()};mobileBottom.ongesturestart=e=>e.preventDefault?.();mobileBottom.ongesturechange=e=>e.preventDefault?.();mobileBottom.ongestureend=e=>e.preventDefault?.()}document.querySelectorAll('[data-mobile-nav]').forEach(b=>{const activate=e=>{const now=performance.now?.()||Date.now();b.__flympusImmediateNavAt=now;const target=b.dataset.mobileNav,currentRoot=bottomNavRootForScreen(state.screen);if(state.screen===target){scrollActiveBottomNavTop(target);return}if(state.screen===currentRoot)rememberBottomNavScroll();bottomDockNavigationTransition=true;
   /* Visual response is immediate. Do not wait for the full page render before
      moving the gold state/halo to the pressed destination. */
   $('#mobileBottomNav')?.querySelectorAll?.('[data-mobile-nav]')?.forEach?.(btn=>{

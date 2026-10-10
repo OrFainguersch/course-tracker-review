@@ -319,8 +319,21 @@ test('Home flight toggle cannot show iOS dark tap highlight and leaves crew alig
 test('Home accordion measures exact rail heights instead of reflowing grid tracks',()=>{
  const page=fs.readFileSync('index.html','utf8');
  const css=fs.readFileSync('assets/home-operations.css','utf8');
- assert.ok(page.includes('const fromHeights=reveals.map(part=>part.getBoundingClientRect().height)'));
- assert.ok(page.includes("part.style.height=target+'px'"));
+ assert.ok(page.includes("part.style.setProperty('--home-reveal-height',Math.ceil(inner.scrollHeight)+'px')"));
+ assert.ok(page.includes("parent.classList.toggle('is-expanded',expanded)"));
+ assert.ok(!page.includes('const fromHeights=reveals.map('));
+ assert.ok(!page.includes("part.style.removeProperty('height')"));
  assert.ok(css.includes('.homePlanList,.homeDashboard .homePlanFlight{overflow-anchor:none}'));
  assert.ok(css.includes('transition:height .38s cubic-bezier'));
+});
+
+test('Home timeline reveals animate a single measured height without safari frame resets',()=>{
+ const page=fs.readFileSync('index.html','utf8');
+ const css=fs.readFileSync('assets/home-operations.css','utf8');
+ assert.match(page,/const homeRevealHeight=part=>/);
+ assert.match(page,/document\.querySelectorAll\('\.homePlanFlightReveal'\)\.forEach\(homeRevealHeight\)/);
+ assert.match(css,/height:var\(--home-reveal-height,0px\)/);
+ assert.match(css,/contain:layout paint/);
+ const binding=page.slice(page.indexOf("if(state.screen==='home'){ensureHomeTimelineClock()"),page.indexOf("dutyOperations?.bind();bindGlobalFormUx()"));
+ assert.doesNotMatch(binding,/getBoundingClientRect|offsetHeight|transition='none'|transitionend|removeProperty\('height'\)/);
 });

@@ -133,3 +133,66 @@ html.flympusLargeText .insightRoot .insightPulseGrid .homePulseNote{font-size:13
 .insightRoot .insightPulseGrid .homePulseCard:nth-child(3) .insightPulseGlyph{
  transform:rotate(90deg);transform-origin:50% 50%
 }
+
+/* Reports: keep trainee identity visible and explicitly signal horizontal scroll.
+   Desktop retains the original seven-column table; print stays unchanged. */
+.insightCourseTableViewport{position:relative;min-width:0}
+.insightSwipeCue{display:none}
+.insightMobileRank{display:none}
+@media screen and (max-width:600px){
+ .insightCourseTableViewport::after{
+  content:"";position:absolute;right:0;top:0;bottom:0;width:26px;
+  pointer-events:none;z-index:4;background:linear-gradient(to left,rgba(255,255,255,.84),transparent);
+  border-radius:0 11px 11px 0
+ }
+ html[data-flympus-language="he"] .insightCourseTableViewport::after{
+  right:auto;left:0;background:linear-gradient(to right,rgba(255,255,255,.84),transparent);
+  border-radius:11px 0 0 11px
+ }
+ html[data-flympus-theme="dark"] .insightCourseTableViewport::after{
+  background:linear-gradient(to left,rgba(16,40,62,.92),transparent)
+ }
+ html[data-flympus-theme="dark"][data-flympus-language="he"] .insightCourseTableViewport::after{
+  background:linear-gradient(to right,rgba(16,40,62,.92),transparent)
+ }
+ .insightSwipeCue{
+  display:flex;align-items:center;gap:8px;margin:0 0 9px;
+  color:#4c6c88;font-size:11px;font-weight:750;line-height:1.5;
+ }
+ .insightSwipeCueGlyph{
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 26px;
+  height:22px;border-radius:7px;background:#eaf4fd;color:#1267ac;
+  font-size:17px;line-height:1
+ }
+ html[data-flympus-theme="dark"] .insightSwipeCue{color:#bdd3e6}
+ html[data-flympus-theme="dark"] .insightSwipeCueGlyph{background:#214c68;color:#c5e5fb}
+ .insightCourseTableScroll{
+  overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  scroll-behavior:auto;touch-action:pan-x pan-y
+ }
+ .insightCourseTableScroll:focus-visible{outline:2px solid #087cf0;outline-offset:2px}
+ .insightCourseTableScroll .insightTable{min-width:660px}
+ .insightCourseTableScroll .insightTable thead th:first-child,
+ .insightCourseTableScroll .insightTable tbody td:first-child{display:none}
+ .insightCourseTableScroll .insightTable thead th:nth-child(2),
+ .insightCourseTableScroll .insightTable tbody th:nth-child(2){
+  position:sticky;inset-inline-start:0;z-index:3;
+  width:142px;min-width:142px;max-width:142px;
+  box-sizing:border-box;white-space:normal;overflow-wrap:anywhere;
+  box-shadow:2px 0 7px rgba(13,55,88,.10)
+ }
+ .insightCourseTableScroll .insightTable thead th:nth-child(2){z-index:6;background:#173c60}
+ .insightCourseTableScroll .insightTable tbody th:nth-child(2){background:#fff}
+ .insightCourseTableScroll .insightTable tbody tr:nth-child(even) th:nth-child(2){background:#f6f9fc}
+ html[data-flympus-theme="dark"] .insightCourseTableScroll .insightTable tbody th:nth-child(2){background:#10283e}
+ html[data-flympus-theme="dark"] .insightCourseTableScroll .insightTable tbody tr:nth-child(even) th:nth-child(2){background:#17354d}
+ html[data-flympus-language="he"] .insightCourseTableScroll .insightTable thead th:nth-child(2),
+ html[data-flympus-language="he"] .insightCourseTableScroll .insightTable tbody th:nth-child(2){box-shadow:-2px 0 7px rgba(13,55,88,.10)}
+ .insightMobileRank{display:inline;color:var(--insight-muted);font-size:10px;margin-inline-end:5px;font-weight:750}
+ .insightCourseTableScroll .insightTable thead th,.insightCourseTableScroll .insightTable tbody td{
+  white-space:nowrap
+ }
+}
+@media print{
+ .insightSwipeCue,.insightCourseTableViewport::after{display:none!important}
+}
