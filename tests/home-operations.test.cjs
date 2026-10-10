@@ -280,3 +280,21 @@ test('Inline Today Plan expands briefing above flight and debrief below with syl
  assert.doesNotMatch(flight,/homePlanRowTimeline/);
  assert.doesNotMatch(flight,/homePlanFlightDetails/);
 });
+
+test('Reference inline schedule preserves one shared time-icon-stage track across all phases',()=>{
+ const html=fs.readFileSync('index.html','utf8'),css=fs.readFileSync('assets/home-operations.css','utf8');
+ const flight=html.slice(html.indexOf('function homePlanFlightRow('),html.indexOf('/* Update the planned current-position marker'));
+ assert.match(flight,/homePlanFlightPhaseClock"><time dir="ltr"/);
+ assert.match(flight,/homePlanFlightPhaseIcon/);
+ assert.match(flight,/homePlanFlightPhaseName/);
+ assert.match(flight,/homePlanFlightStepName/);
+ assert.match(flight,/homePlanFlightClock/);
+ assert.match(css,/--home-phase-track:146px;--home-phase-time:51px;--home-phase-icon:27px/);
+ assert.match(css,/\.homePlanFlightPhaseClock\{[\s\S]*?display:grid;grid-template-columns:var\(--home-phase-time\) var\(--home-phase-icon\) minmax\(0,1fr\)/);
+ assert.match(css,/\.homePlanFlightStepName,/);
+ assert.match(css,/\.homePlanFlight\.is-expanded \.homePlanFlightStepName\{/);
+ assert.match(css,/\.homePlanFlight::before\{/);
+ assert.match(css,/html\[data-flympus-language="he"\] \.homeDashboard \.homePlanFlight::before/);
+ assert.match(css,/@media\(max-width:480px\)/);
+ assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
+});
