@@ -1147,7 +1147,7 @@ test('Mobile swipe exposes existing confirmed remove action, never deletes direc
  assert.match(src,/THRESHOLD=44/);
  assert.doesNotMatch(src,/persistCourseOperations|saveDraft|publish\('PLAN'/);
  assert.doesNotMatch(html,/FLYMPUS_ROW_SWIPE\?\.attach\?\.\(document\.querySelector\('\[data-flight-sorties\]'\)\)/);
- assert.match(html,/assets\/row-swipe-delete\.js\?v=20261010-flight-motion-fleet-edit-0841/);
+ assert.match(html,/assets\/row-swipe-delete\.js\?v=20261010-plan-cards-polish-0826/);
  assert.match(css,/\.flympusSwipeDeleteAction/);
  assert.match(css,/\.fleetSortieDragGhost \.flympusSwipeDeleteAction\{display:none!important\}/);
 });
