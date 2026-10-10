@@ -235,3 +235,15 @@ test('The live entry point wires immutable approval drafts, preserved legacy ent
   }
   assert.match(html,/flympus-deploy-build" content="__FLYMPUS_DEPLOY_BUILD__"/);assert.match(worker,/2026-10-10-roster-swipe-admin-0827/);
 });
+
+test('Production rule merge narrows only the approved user delete function, never unrelated rules',()=>{
+ const candidate=fs.readFileSync('firestore.rules','utf8');
+ const revised=candidate.match(/    function managerMayDelete\(uid\) \{[\s\S]*?\n    \}/)?.[0];
+ assert.ok(revised?.includes("return administrator()"));
+ const prior=revised.replace("return administrator()\n        && actorRole in ['owner', 'admin']\n        && targetRole in ['training_manager', 'user', 'duty_trainee']","return userManager()");
+ const original=candidate.replace(revised,prior);
+ const merged=Release.merge(original,candidate);
+ assert.equal(merged,candidate);
+ assert.equal(Release.merge(merged,candidate),merged);
+ assert.throws(()=>Release.merge(original.replace(prior,prior.replace('return userManager()','return owner()')),candidate),/Unexpected live user deletion policy/);
+});
