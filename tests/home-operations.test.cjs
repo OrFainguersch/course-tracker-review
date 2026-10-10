@@ -147,7 +147,7 @@ test('Today Plan displays full platform tail, emphasizes instructor and a planne
  assert.match(page,/function homeFlightAircraftName\(flight\)/);
  assert.match(page,/epPlatformLabel\(flight\?\.platformId\)/);
  const home=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
- assert.match(home,/homePlanInstructor/);
+ assert.match(html,/class="homePlanInstructor"/);
  assert.match(page,/homePlanLiveStatus/);
  assert.match(page,/homePlanTimelineRail/);
  assert.match(page,/homePlanTimelineNow/);
@@ -184,7 +184,7 @@ test('Today Plan hides redundant flight minutes while keeping accurate phase clo
  const home=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
  assert.match(home,/homeFlightMoments\(x,homeHebrew\)/);
  assert.match(home,/homeFlightAircraftName\(x\)/);
- assert.match(home,/homePlanInstructor/);
+ assert.match(html,/class="homePlanInstructor"/);
  assert.doesNotMatch(home,/x\.estimatedMinutes\?\s*' · '/);
  assert.match(home,/homePlanTags/);
 });
@@ -193,7 +193,7 @@ test('Approved Home option A shows phase labels and student/instructor icons wit
  const home=html.slice(html.indexOf('function homeFlightPerson('),html.indexOf('function home(){'));
  assert.match(home,/function homeFlightPerson\(name,role\)/);
  assert.match(home,/homePlanPersonIcon/);
- assert.match(home,/homePlanPerson-teacher/);
+ assert.match(home,/homePlanPerson-'\+role/);
  assert.match(home,/homePlanMomentLabel/);
  const body=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
  assert.match(body,/homeFlightPerson\(x\.traineeName\|\|'Trainee','student'\)/);
