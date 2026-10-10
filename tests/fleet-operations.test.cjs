@@ -105,6 +105,9 @@ test('Fleet Home uses real aircraft rows and places the inventory table in the p
  const editing=V.fleet({...ctx,editId:'a02',manage:true});
  assert.match(editing,/id="fleetEditorPanel"/);
  assert.doesNotMatch(editing,/id="fleetEditorPanel" hidden/);
+ assert.match(editing,/data-fleet-inline-editor="a02"/,'Editing takes place after selected aircraft');
+ assert.ok(editing.indexOf('data-fleet-inline-editor="a02"')<editing.indexOf('id="fleetAircraftForm"'),'Fleet editor lives inside selected table row');
+ assert.equal((editing.match(/id="fleetAircraftForm"/g)||[]).length,1,'Only one active Fleet edit form');
  const readonly=V.fleet({...ctx,canWrite:false});
  assert.doesNotMatch(readonly,/data-fleet-edit=/);
  assert.doesNotMatch(readonly,/fleetAircraftForm/);
@@ -743,7 +746,7 @@ test('Removing an already recorded Solo group marks all removed flights as unexe
 test('Fleet editor supports localized Tail number, Cancel, dark/RTL and Large Text styling',()=>{
  const vm=require('node:vm'),lang={value:'en'},win={FLYMPUS_FLEET_MODEL:M,FLYMPUS_FLEET_LANGUAGE:()=>lang.value};
  vm.runInNewContext(ui,{window:win},{filename:'fleet-views.js'});
- const ctx={fleet:add([],'a01','01'),platformId:'shahak',platformLabel:'Shahak',courseLabel:'Training',today:'2026-10-09',editId:'a01',canWrite:true};
+ const ctx={fleet:add([],'a01','01'),platformId:'shahak',platformLabel:'Shahak',courseLabel:'Training',today:'2026-10-09',editId:'a01',canWrite:true,manage:true};
  const en=win.FLYMPUS_FLEET_VIEW.fleet(ctx);
  assert.match(en,/Tail number/);
  assert.doesNotMatch(en,/Aircraft number/);
@@ -1221,4 +1224,14 @@ test('Fleet serviceability filter is read-only, with ready aircraft always order
  assert.ok(source.includes("state.fleetManage=!state.fleetManage"));
  assert.ok(source.includes("Discard unsaved aircraft edits"),"Exiting management must protect unfinished edits");
  assert.ok(fleetSource.includes("manage=c.canWrite&&c.manage===true"),"Unauthorized users cannot open management");
+})();
+
+// Build 0847 Fleet inline edit, no bottom scroll and consistent + Add to board.
+(()=>{
+ const source=fs.readFileSync('index.html','utf8'),fleet=fs.readFileSync('assets/fleet-views.js','utf8'),css=fs.readFileSync('assets/fleet-operations.css','utf8');
+ assert.ok(fleet.includes('fleetInlineEditRow')&&fleet.includes('can&&!current?editorHtml'),'Only Add uses the old lower form');
+ assert.ok(css.includes('.fleetInventoryTable .fleetInlineEditRow'),'Inline form is styled');
+ assert.ok(source.includes('renderPreservingManagementView(()=>{state.fleetEditId=b.dataset.fleetEdit})'),'Edit does not jump down');
+ assert.ok(source.includes('if($(\'#fleetCancelEdit\'))'),'Cancel remains wired');
+ assert.ok(fleet.includes("+(current?'':'+ ')"),'New flight shows + Add to board');
 })();
