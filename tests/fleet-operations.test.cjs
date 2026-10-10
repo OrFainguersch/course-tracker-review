@@ -604,11 +604,11 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261010-plan-cards-polish-0826'],['assets/fleet-operations.css','20261010-visual-swipe-polish-0828']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261010-plan-cards-polish-0826'],['assets/fleet-operations.css','20261010-roster-swipe-stability-0829']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-visual-swipe-polish-0828'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-roster-swipe-stability-0829'/);
  assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-time-only-seamless-0820/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
