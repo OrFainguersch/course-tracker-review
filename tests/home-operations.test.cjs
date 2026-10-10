@@ -146,7 +146,8 @@ test('Today Plan displays full platform tail, emphasizes instructor and a planne
  const page=html.slice(html.indexOf('function homeFlightMoments('),html.indexOf('function home(){'));
  assert.match(page,/function homeFlightAircraftName\(flight\)/);
  assert.match(page,/epPlatformLabel\(flight\?\.platformId\)/);
- assert.match(page,/homePlanInstructor/);
+ const home=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
+ assert.match(home,/homePlanInstructor/);
  assert.match(page,/homePlanLiveStatus/);
  assert.match(page,/homePlanTimelineRail/);
  assert.match(page,/homePlanTimelineNow/);

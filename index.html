@@ -9241,9 +9241,9 @@ function ensureHomeTimelineClock(){
  refreshHomeTimelineClock();
  if(homeTimelineClockStarted)return;
  homeTimelineClockStarted=true;
- window.setInterval(refreshHomeTimelineClock,30000);
- document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshHomeTimelineClock()});
- window.addEventListener('focus',refreshHomeTimelineClock);
+ if(typeof window.setInterval==='function')window.setInterval(refreshHomeTimelineClock,30000);
+ document.addEventListener?.('visibilitychange',()=>{if(!document.hidden)refreshHomeTimelineClock()});
+ window.addEventListener?.('focus',refreshHomeTimelineClock);
 }
 function home(){
  if(isDutyTrainee())return dutyTraineeHome();
