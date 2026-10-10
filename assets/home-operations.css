@@ -420,3 +420,53 @@ html[data-flympus-theme="dark"] .homeDashboard .homePlanFlightStepName{color:#99
 @media(prefers-reduced-motion:reduce){
  .homeDashboard .homePlanFlightStepName,.homeDashboard .homePlanFlight::before{transition:none!important}
 }
+
+/* iPhone interaction polish: avoid the temporary dark system tap highlight when a
+   schedule row expands. Keep the pressed row visually identical to its resting state. */
+.homeDashboard .homePlanFlightToggle,
+.homeDashboard .homePlanFlightToggle:active,
+.homeDashboard .homePlanFlightToggle:hover{
+ -webkit-tap-highlight-color:transparent!important;background:transparent!important;
+ -webkit-touch-callout:none;touch-action:manipulation;
+}
+.homeDashboard .homePlanFlightToggle:focus:not(:focus-visible){outline:none!important}
+.homeDashboard .homePlanFlightReveal{
+ background:transparent!important;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+ transition:grid-template-rows .38s cubic-bezier(.2,.76,.22,1)!important;
+}
+.homeDashboard .homePlanFlightRevealInner{background:transparent!important;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.homeDashboard .homePlanFlightChevron svg{transition:transform .33s cubic-bezier(.2,.76,.22,1)}
+/* Shift only the time-icon-label rail 5px outward. The crew column and its
+   measured grid track remain fixed, creating a clearer gutter between them. */
+.homeDashboard .homePlanFlightClock,
+.homeDashboard .homePlanFlightPhaseClock{transform:translate3d(-5px,0,0)}
+.homeDashboard .homePlanFlight::before{transform:translate3d(-5px,0,0)}
+html[data-flympus-language="he"] .homeDashboard .homePlanFlightClock,
+html[data-flympus-language="he"] .homeDashboard .homePlanFlightPhaseClock,
+html[data-flympus-language="he"] .homeDashboard .homePlanFlight::before{transform:translate3d(5px,0,0)}
+/* Touch selection belongs in editable fields and intentional reading surfaces.
+   Tapping static cards, timetable labels or action buttons must not summon
+   iOS text-selection handles / translation / copy toolbars. */
+@media (hover:none) and (pointer:coarse){
+ .people .personCard, .people .personCard *,
+ .homeDashboard .homePlanFlight, .homeDashboard .homePlanFlight *,
+ .fleetTimeFlow, .fleetTimeFlow *,
+ .fleetBookedFlights .fleetSortie, .fleetBookedFlights .fleetSortie *,
+ .insightPulseGrid, .insightPulseGrid *,
+ button, button *, .fleetTimeFlowHeading, .fleetTimeFlowHeading *{
+  -webkit-user-select:none!important;user-select:none!important;
+  -webkit-touch-callout:none!important;
+ }
+ .people .personCard input, .people .personCard textarea,
+ .people .personCard [contenteditable="true"],
+ .homeDashboard input, .homeDashboard textarea,
+ .fleetBookedFlights input, .fleetBookedFlights textarea,
+ .fleetTimeFlow input, .fleetTimeFlow textarea{
+  -webkit-user-select:text!important;user-select:text!important;
+  -webkit-touch-callout:default!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .homeDashboard .homePlanFlightReveal,
+ .homeDashboard .homePlanFlightChevron svg{transition:none!important}
+}
