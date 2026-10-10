@@ -20,7 +20,7 @@ test('Roster swipe is mobile-only and uses the established course membership per
  assert.match(js,/const attached=new WeakSet\(\),WIDTH=146,THRESHOLD=52/);
  assert.match(js,/event\.target\?\.closest\?\.\('button,input,select,textarea,a/);
  assert.match(css,/rosterSwipeRow/);
- assert.match(css,/right:0;top:0;bottom:0/);
+ assert.match(css,/right:0;left:auto;top:0;bottom:0/);
  assert.match(css,/rosterSwipeOpen/);
  for(const filename of ['roster-swipe-actions.js','roster-swipe-actions.css']){
   assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-roster-home-expand-0830'));
