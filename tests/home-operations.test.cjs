@@ -345,7 +345,7 @@ test('Home flight summary is fixed while syllabus animates as a third independen
  assert.doesNotMatch(crew,/homePlanFlightSyllabus/,'Syllabus cannot stretch and re-center the crew row');
  const toggle=flight.indexOf("  '</button>'"),syllabus=flight.indexOf("reveal('SyllabusReveal'"),debrief=flight.indexOf("reveal('Debrief'");
  assert.ok(toggle>=0&&syllabus>toggle&&debrief>syllabus,'Syllabus remains below the summary and above debrief');
- assert.match(flight,/reveal\('Syllabus','<span class="homePlanFlightSyllabus">/);
+ assert.match(flight,/reveal\('SyllabusReveal','<span class="homePlanFlightSyllabus">/);
  assert.match(styles,/\.homePlanFlightSyllabusReveal \.homePlanFlightRevealInner/);
  assert.doesNotMatch(styles,/max-height:64px;opacity:1;margin-top:5px/);
  assert.match(markup,/document\.querySelectorAll\('\.homePlanFlightReveal'\)\.forEach\(homeRevealHeight\)/);
