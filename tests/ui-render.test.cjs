@@ -500,7 +500,7 @@ assert.match(elements.get("#content").innerHTML,/name="course_grade_max"/);
 assert.match(elements.get("#content").innerHTML,/Grading settings/);
 assert.match(elements.get("#content").innerHTML,/packageEditorItem/);
 assert.match(elements.get("#content").innerHTML,/data-course-add-open="criteria"/);
-assert.match(elements.get("#content").innerHTML,/id="courseTailorEdit" aria-label="Edit selected course">✎ Edit selected course<\/button>/);
+assert.match(elements.get("#content").innerHTML,/class="rosterTopbar courseManagementTopbar"[\s\S]*id="courseTailorEdit" aria-label="Edit selected course">✎ Edit<\/button>/);
 assert.match(elements.get("#content").innerHTML,/courseTailorEditFieldset" disabled/);
 assert.doesNotMatch(elements.get("#content").innerHTML,/Save changes<\/button>/,"Tailor must not show Save changes before Edit is selected");
 assert.doesNotMatch(elements.get("#content").innerHTML,/Done editing/,"Tailor must use one Save changes action only");
@@ -548,7 +548,7 @@ assert.match(advancedHtml,/Define sectors/);
 assert.match(advancedHtml,/Select sector to edit/);
 assert.match(advancedHtml,/>Architecture<\/b>/);
 assert.doesNotMatch(advancedHtml,/Phases · EP|Platforms · EP|EP architecture/,'Selected sector must not be repeated in Advanced headings');
-assert.match(advancedHtml,/class="advancedManageHeader"[\s\S]*id="advancedArchitectureEdit" aria-label="Manage advanced setup">✎ Manage<\/button>/,"Advanced must show one prominent Edit button at the top");
+assert.match(advancedHtml,/class="rosterTopbar courseManagementTopbar"[\s\S]*id="advancedArchitectureEdit" aria-label="Manage advanced setup">✎ Manage<\/button>/,"Advanced Manage belongs beside the page title, just as in Roster");
 assert.doesNotMatch(advancedHtml,/packageSaveBar advancedArchitectureActions/,"Advanced Edit must never float over content or the bottom navigation");
 assert.doesNotMatch(advancedHtml,/id="cfgSaveCatalogs"/,"Save controls must not appear before Advanced edit mode starts");
 assert.match(advancedHtml,/advancedEditFieldset" disabled/,"Advanced architecture must be view-only until Edit is pressed");
@@ -1044,10 +1044,10 @@ assert(fs.readFileSync('assets/fleet-views.js','utf8').includes('data-go="fleet"
  const source=fs.readFileSync('index.html','utf8');
  const start=source.indexOf("if(tab==='catalog'&&canGlobalPackages)");
  const piece=source.slice(start,source.indexOf("if(tab==='profiles')",start));
- assert.ok(piece.includes('btn sky advancedEditStart'));
- assert.ok(piece.includes('aria-label="Manage advanced setup">✎ Manage'));
+ assert.ok(source.includes('class="rosterTopbar courseManagementTopbar"'));
+ assert.ok(source.includes('aria-label="Manage advanced setup">✎ Manage'));
  assert.ok(piece.indexOf('<section class="advancedSequence"')<piece.indexOf('<fieldset class="advancedEditFieldset"'));
- assert.ok(piece.includes('id="advancedArchitectureDone">✓ Done editing'));
+ assert.ok(source.includes('id="advancedArchitectureDone">✓ Done editing'));
 })();
 
 (()=> {
@@ -1067,4 +1067,17 @@ assert(fs.readFileSync('assets/fleet-views.js','utf8').includes('data-go="fleet"
  assert.ok(source.includes('.advancedArchitectureActions.editDecisionBar{display:grid!important;grid-template-columns:minmax(0,1fr)!important'),"Decision copy and two buttons must have distinct rows");
  assert.ok(source.includes('.advancedDecisionButtons{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))'),"Save/Discard occupy separate equal columns");
  assert.ok(source.includes('height:auto!important;min-height:46px!important;white-space:normal!important'),"Action text must wrap safely in narrow mobile and large text");
+})();
+
+// Build 0845 — Roster-matched header actions, independent Save/Done and mobile-wide-table cue.
+(()=>{
+ const source=fs.readFileSync('index.html','utf8');
+ assert.ok(source.includes('class="rosterTopbar courseManagementTopbar"'));
+ assert.ok(source.includes("saveAdvancedAndFinish(false)"),"Advanced inline Save retains editing");
+ assert.ok(source.includes("const exitAfterSave=courseTailorExitAfterSave"),"Tailor Save stays in editing, Done exits");
+ assert.ok(source.includes("syncFlympusMobileTableSwipeCues"),"A common mobile table cue is installed");
+ assert.ok(source.includes("node.scrollWidth>node.clientWidth+8"),"Cue appears only if table scroll area overflows");
+ assert.ok(source.includes("document.addEventListener('toggle'"),"Collapsed tables can gain hints when expanded");
+ assert.ok(source.includes("viewport.closest?.('.insightCourseTableViewport')"),"Do not duplicate Course Dashboard's existing hint");
+ assert.ok(source.includes("if(state.screen!=='fleet')state.fleetManage=false"),"Fleet management does not leak to other screens");
 })();
