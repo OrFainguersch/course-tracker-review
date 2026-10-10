@@ -1035,11 +1035,11 @@ assert(html.includes('data-go="fleet">Open Fleet</button>'),"Duty Home must stil
 assert(fs.readFileSync('assets/fleet-views.js','utf8').includes('data-go="fleet"'),
   "Other roles must retain Fleet access from Home and Plan rather than the sidebar");
 
-test('Advanced edit action lies outside the disabled inputs fieldset',()=>{
+(()=>{
  const source=fs.readFileSync('index.html','utf8');
  const start=source.indexOf("if(tab==='catalog'&&canGlobalPackages)");
  const piece=source.slice(start,source.indexOf("if(tab==='profiles')",start));
  assert.ok(piece.includes('btn edit small advancedEditStart'));
  assert.ok(piece.includes('✎ Edit advanced setup'));
  assert.ok(piece.indexOf('<section class="advancedSequence"')<piece.indexOf('<fieldset class="advancedEditFieldset"'));
-});
+})();
