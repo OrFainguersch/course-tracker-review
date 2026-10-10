@@ -933,6 +933,7 @@ html.flympusLargeText .fleetSortieDragGhost:has(.fleetSortieDragHandle){
 }
 .fleetBookedFlights .fleetSorties:has(.fleetSortieDragSource){overflow-anchor:none}
 .fleetBookedFlights .fleetSortieDragSource{overflow-anchor:none}
+.fleetBookedFlights .fleetSorties{overflow-anchor:none}
 
 @media(prefers-reduced-motion:reduce){
  .fleetBookedFlights .fleetSortie:has(.fleetSortieDragHandle){transition:none}

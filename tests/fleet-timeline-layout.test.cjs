@@ -163,10 +163,10 @@ test('Timeline integration renders all four clock keys, external names only, and
  assert.match(engine,/document\.fonts\?\.ready/);
  assert.doesNotMatch(engine,/element\.textContent=phaseLabel\(item\.key\)\s*\+.*min/);
  for(const asset of ['fleet-timeline-layout.js','fleet-views.js','fleet-operations.css']){
-  const version=asset==='fleet-timeline-layout.js'?'20261009-connected-leaders-0800':asset==='fleet-views.js'?'20261009-flight-drag-tabs-0810':asset==='fleet-operations.css'?'20261010-plan-no-flash-edit-scroll-0819':'20261009-plan-single-row-stable-drag-0815';
+  const version=asset==='fleet-timeline-layout.js'?'20261009-connected-leaders-0800':asset==='fleet-views.js'?'20261010-flight-slot-markers-0820':asset==='fleet-operations.css'?'20261010-flight-time-only-seamless-0820':'20261009-plan-single-row-stable-drag-0815';
   assert.match(html,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v='+version));
   assert.match(worker,new RegExp('assets/'+asset.replace('.','\\.')+'\\?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-plan-no-flash-edit-scroll-0819'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-flight-time-only-seamless-0820'/);
  assert.match(html,/flympus-deploy-build" content="__FLYMPUS_DEPLOY_BUILD__"/);
 });

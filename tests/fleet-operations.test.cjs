@@ -604,12 +604,12 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261009-flight-drag-tabs-0810'],['assets/fleet-operations.css','20261010-plan-no-flash-edit-scroll-0819']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261010-flight-slot-markers-0820'],['assets/fleet-operations.css','20261010-flight-time-only-seamless-0820']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-plan-no-flash-edit-scroll-0819'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261010-plan-no-flash-edit-scroll-0819/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-flight-time-only-seamless-0820'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-time-only-seamless-0820/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
@@ -877,7 +877,7 @@ test('flight drag UI offers accessible touch grips, reduced motion and localized
  assert.match(html,/dutyOperations\.saveDraft\('PLAN'/);
  assert.match(html,/dutyOperations\.publish\('PLAN'/);
  assert.match(html,/Crew conflict: /);
- assert.ok(html.includes('flight-board-drag.js?v=20261010-plan-no-flash-edit-scroll-0819'));
+ assert.ok(html.includes('flight-board-drag.js?v=20261010-flight-time-only-seamless-0820'));
 });
 test('Plan tabs use shared Course Management-style segmented control',()=>{
  const css=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
@@ -931,7 +931,7 @@ test('Frozen insertion thresholds prevent drag jitter after DOM swaps and suppor
  assert.doesNotMatch(source,/others\.find\(item=>\{const rect=item\.getBoundingClientRect/);
  assert.match(source,/animation\.finished\.then\(settle,settle\)/);
  assert.match(source,/if\(ev\.type==='pointercancel'\|\|targetIndex===origin\)\{clean\(\);return\}/);
- assert.match(source,/void commit\(desired\)\.finally\(clean\)/);
+ assert.match(source,/void commit\(desired,true\)\.finally\(clean\)/);
 });
 
 test('Drag uses an in-board ghost and never swaps live rows before persistence',()=>{
@@ -942,7 +942,7 @@ test('Drag uses an in-board ghost and never swaps live rows before persistence',
  assert.doesNotMatch(source,/document\.body\.appendChild\(clone\)/);
  assert.match(source,/if\(!active&&Math\.abs\(y-startY\)<8\)return/,'Tapping the handle must not create a ghost');
  assert.match(source,/const desired=movedIds\(original,origin,targetIndex\)/);
- assert.match(source,/void commit\(desired\)\.finally\(clean\)/);
+ assert.match(source,/void commit\(desired,true\)\.finally\(clean\)/);
  assert.match(source,/items\.length<=3/,'No iPhone edge autoscroll for short lists');
  assert.match(css,/\.fleetBookedFlights \.fleetSortieDragGhost \.fleetSortieTail\{/);
  assert.match(css,/white-space:nowrap!important/);
@@ -1043,12 +1043,14 @@ test('Plan reslot patches keyed cards in place instead of repainting the entire 
  const implementation=html.slice(start,end);
  assert.match(implementation,/courseFlightScheduleHtml\(date,flights\)/);
  assert.match(implementation,/new Map\(existing\.map\(row=>\[row\.dataset\.flightId,row\]\)\)/);
- assert.match(implementation,/row\.replaceChildren\(\.\.\.fresh\.childNodes\)/);
- assert.match(implementation,/board\.insertBefore\(row,ghost\|\|null\)/);
- assert.match(implementation,/bindDailyFlightBoard\('board'\)/);
+ assert.match(implementation,/x\.time\.textContent=x\.nextTime\.textContent/);
+ assert.match(implementation,/x\.details\.textContent=x\.nextDetails\.textContent/);
+ assert.match(implementation,/board\.insertBefore\(x\.row,ghost\|\|null\)/);
+ assert.doesNotMatch(implementation,/row\.replaceChildren/);
+ assert.doesNotMatch(implementation,/bindDailyFlightBoard\('board'\)/);
  assert.doesNotMatch(implementation,/\$\('#content'\)\.innerHTML/);
  const call=html.slice(html.indexOf('window.FLYMPUS_FLIGHT_DRAG?.attach?.('),html.indexOf('const refreshTimeline=',html.indexOf('window.FLYMPUS_FLIGHT_DRAG?.attach?.(')));
- assert.match(call,/if\(!patchPlanFlightCards\(date,proposed\)\)render\(\)/);
+ assert.match(call,/patchPlanFlightCards\(date,proposed,\{previewed,animateReorder:!previewed\}\)/);
  assert.doesNotMatch(call,/state\.flightBoardEditId=null/);
 });
 test('Plan flight Edit retains the page and scrolls to the editor without input focus',()=>{
@@ -1061,4 +1063,46 @@ test('Plan flight Edit retains the page and scrolls to the editor without input 
  assert.match(html,/behavior:reduced\?'auto':'smooth'/);
  assert.match(html,/bottomDockProgrammaticRestoreUntil=Math\.max/);
  assert.match(fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8'),/\.dailyFlightPlan \.fleetSortieForm\{scroll-margin-top:110px\}/);
+});
+
+test('Reordering only changes time and preserves every other flight field',()=>{
+ const date='2026-10-09',create=(id,time,overrides={})=>({
+  id,date,platformId:'shahak',time,aircraftId:'plane-'+id,
+  tail:'Shahak-'+id,traineeId:'trainee-'+id,traineeName:'Trainee '+id,
+  instructorId:'ip-'+id,instructorName:'Instructor '+id,
+  syllabus:'Circuits & figures',mode:'INSTRUCTED',note:'Notes '+id,
+  briefingMinutes:10,estimatedMinutes:20,debriefMinutes:10,...overrides
+ });
+ const original=[create('a','08:00'),create('b','09:00')];
+ const result=M.reorderSorties(original,['b','a'],'shahak',date);
+ for(const before of original){
+  const after=result.find(x=>x.id===before.id);
+  assert.equal(after.time,before.id==='a'?'09:00':'08:00');
+  const unchanged=Object.fromEntries(Object.entries(after).filter(([k])=>!['time','updatedAt'].includes(k)));
+  assert.deepEqual(unchanged,before,'All other fields must stay attached to '+before.id);
+ }
+});
+test('Plan reorder patches only keyed time fields without remounting cards or animating twice',()=>{
+ const view=fs.readFileSync(path.join(__dirname,'../assets/fleet-views.js'),'utf8');
+ const drag=fs.readFileSync(path.join(__dirname,'../assets/flight-board-drag.js'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(view,/data-flight-slot-time/);
+ assert.match(view,/data-flight-slot-details/);
+ const start=html.indexOf('function patchPlanFlightCards(date,flights)');
+ const end=html.indexOf('function updatePlanFlightEditForm()',start);
+ assert.ok(start>=0&&end>start);
+ const patch=html.slice(start,end);
+ assert.match(patch,/x\.time\.textContent=x\.nextTime\.textContent/);
+ assert.match(patch,/x\.details\.textContent=x\.nextDetails\.textContent/);
+ assert.match(patch,/board\.insertBefore\(x\.row,ghost\|\|null\)/);
+ assert.doesNotMatch(patch,/replaceChildren/);
+ assert.doesNotMatch(patch,/bindDailyFlightBoard/);
+ assert.match(patch,/animateReorder&&!previewed/);
+ assert.match(drag,/onDrop\(next,\{previewed\}\)/);
+ assert.match(drag,/clone\.dataset\.dragFlightId=source\.dataset\.flightId/);
+ assert.match(drag,/targetIndex>origin\?finishAt\.height-sourceBox\.height:0/);
+ assert.match(css,/\.fleetBookedFlights \.fleetSorties\{overflow-anchor:none\}/);
+ const drop=html.slice(html.indexOf('onDrop:async (orderedIds'),html.indexOf('onError:err=>',html.indexOf('onDrop:async (orderedIds')));
+ assert.match(drop,/const painted=patchPlanFlightCards\(date,proposed/);
+ assert.match(drop,/catch\(error\)\{[\s\S]*patchPlanFlightCards\(date,original/);
 });

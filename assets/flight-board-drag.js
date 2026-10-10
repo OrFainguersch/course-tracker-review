@@ -24,12 +24,12 @@
   // The board consists of read-only flight cards; never start native text selection.
   board.addEventListener?.('selectstart',event=>{if(event.cancelable)event.preventDefault()});
   let busy=false,dragging=false;
-  const commit=async next=>{
+  const commit=async (next,previewed=false)=>{
    // Do not insert live rows into the DOM: old timestamps and crews would
    // flash in the wrong slots before the asynchronous Plan update rerenders.
    if(busy||next.every((id,index)=>labels()[index]===id))return;
    busy=true;board.classList.add('fleetDragSaving');
-   try{await onDrop(next)}
+   try{await onDrop(next,{previewed})}
    catch(error){onError?.(error)}
    finally{board.classList.remove('fleetDragSaving');busy=false}
   };
@@ -79,6 +79,7 @@
      clone.classList.remove('fleetSortiePressing');
      clone.classList.add('fleetSortieDragGhost');
      clone.removeAttribute('data-flight-id');clone.removeAttribute('id');
+     clone.dataset.dragFlightId=source.dataset.flightId;
      clone.querySelectorAll('button').forEach(button=>{button.disabled=true;button.tabIndex=-1});
      Object.assign(clone.style,{
       position:'fixed',zIndex:'99999',pointerEvents:'none',margin:'0',
@@ -161,11 +162,11 @@
      const desired=movedIds(original,origin,targetIndex);
      // Destination coordinates come from the initial stationary slots.
      const finishAt=startingBoxes[targetIndex];
-     const top=(finishAt?finishAt.top+initialScroll-scroll():sourceBox.top);
+     const top=(finishAt?finishAt.top+(targetIndex>origin?finishAt.height-sourceBox.height:0)+initialScroll-scroll():sourceBox.top);
      const settle=()=>{
       // Keep the original DOM and the lifted card untouched until the
       // validated Plan write resolves. One render will reveal the final times.
-      void commit(desired).finally(clean);
+      void commit(desired,true).finally(clean);
      };
      if(reduced()){settle();return}
      const animation=clone.animate?.([

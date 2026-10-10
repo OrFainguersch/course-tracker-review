@@ -2,7 +2,7 @@
    - Instant PWA cold-start from a versioned same-origin app-shell cache
    - Background revalidation so deployments replace the cached shell safely
    - Web Push delivery and notification navigation */
-const FLYMPUS_SW_VERSION='2026-10-10-plan-no-flash-edit-scroll-0819';
+const FLYMPUS_SW_VERSION='2026-10-10-flight-time-only-seamless-0820';
 const SHELL_CACHE='flympus-shell-'+FLYMPUS_SW_VERSION;
 const DEFAULT_ICON='./assets/flympus-app-icon.webp';
 const SHELL_URLS=[
@@ -13,15 +13,15 @@ const SHELL_URLS=[
   './account-switcher.js?v=20261008-switcher01',
   './assets/reports-dashboard.js?v=0767',
   './assets/reports-dashboard.css?v=0767',
-  './assets/fleet-operations.css?v=20261010-plan-no-flash-edit-scroll-0819',
+  './assets/fleet-operations.css?v=20261010-flight-time-only-seamless-0820',
   './assets/fleet-model.js?v=20261009-flight-drag-tabs-0810',
   './assets/duty-approval-model.js?v=20261009-approval-sounds-0795',
   './assets/operations-cloud.js?v=20261009-approval-sounds-0795',
   './assets/course-operations.js?v=20261009-plan-fleet-identity-v1',
   './assets/course-operations.css?v=20261009-plan-single-row-stable-drag-0815',
   './assets/fleet-timeline-layout.js?v=20261009-connected-leaders-0800',
-  './assets/fleet-views.js?v=20261009-flight-drag-tabs-0810',
-  './assets/flight-board-drag.js?v=20261010-plan-no-flash-edit-scroll-0819',
+  './assets/fleet-views.js?v=20261010-flight-slot-markers-0820',
+  './assets/flight-board-drag.js?v=20261010-flight-time-only-seamless-0820',
   './assets/safety-workflow.css?v=20261008-safety03',
   './assets/safety-workflow.js?v=20261008-safety01',
   './assets/safety-global-inbox.js?v=20261009-approval-sounds-0795',
