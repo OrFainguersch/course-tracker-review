@@ -148,7 +148,7 @@ test('Plan opens on the date-specific Daily Flight Plan with separate Planned vs
  const homeSource=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
  assert.match(homeSource, /<h2>Today.*s Plan<\/h2>/);
  assert.ok(homeSource.includes('<span class="homeDateChip">'));
- assert.ok(homeSource.includes('<div class="homePlanRow homePlanRowTimeline">'));
+ assert.ok(html.includes('<div class="homePlanRow homePlanRowTimeline">')&&homeSource.includes('homePlanFlightRow(x,homeHebrew)'));
  assert.ok(homeSource.includes('<div class="homePlanRow homePlanEmpty">'));
  assert.ok(!homeSource.includes('data-plan-today="true"'),'Home Today Plan must not navigate to Plan');
  assert.ok(!homeSource.includes('homePlanTitleButton'),'Home Today Plan title must not be a button');
