@@ -604,12 +604,12 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261010-flight-slot-markers-0820'],['assets/fleet-operations.css','20261010-flight-time-only-seamless-0820']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261010-plan-instructor-0823'],['assets/fleet-operations.css','20261010-plan-instructor-0823']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-home-timeline-live-0822'/);
- assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-time-only-seamless-0820/g)||[]).length,2);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-home-plan-simplify-0823'/);
+ assert.equal((html.match(/\.\/sw\.js\?v=20261010-plan-instructor-0823/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
  const stylesheet=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
@@ -877,7 +877,7 @@ test('flight drag UI offers accessible touch grips, reduced motion and localized
  assert.match(html,/dutyOperations\.saveDraft\('PLAN'/);
  assert.match(html,/dutyOperations\.publish\('PLAN'/);
  assert.match(html,/Crew conflict: /);
- assert.ok(html.includes('flight-board-drag.js?v=20261010-flight-time-only-seamless-0820'));
+ assert.ok(html.includes('flight-board-drag.js?v=20261010-plan-instructor-0823'));
 });
 test('Plan tabs use shared Course Management-style segmented control',()=>{
  const css=fs.readFileSync(path.join(__dirname,'../assets/course-operations.css'),'utf8');
@@ -1106,4 +1106,13 @@ test('Plan reorder patches only keyed time fields without remounting cards or an
  const drop=html.slice(html.indexOf('onDrop:async (orderedIds'),html.indexOf('onError:err=>',html.indexOf('onDrop:async (orderedIds')));
  assert.match(drop,/const painted=patchPlanFlightCards\(date,proposed/);
  assert.match(drop,/catch\(error\)\{[\s\S]*patchPlanFlightCards\(date,original/);
+});
+
+test('Scheduled flights emphasize instructor without changing slot field updates',()=>{
+ const view=fs.readFileSync(path.join(__dirname,'../assets/fleet-views.js'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(view,/class="fleetSortieInstructor"/);
+ assert.match(view,/E\(f\.instructorName\)/);
+ assert.match(view,/data-flight-slot-details/);
+ assert.match(css,/\.fleetSortieMain \.fleetSortieInstructor\{font-weight:850/);
 });

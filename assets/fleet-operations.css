@@ -939,3 +939,7 @@ html.flympusLargeText .fleetSortieDragGhost:has(.fleetSortieDragHandle){
  .fleetBookedFlights .fleetSortie:has(.fleetSortieDragHandle){transition:none}
  .fleetBookedFlights .fleetSortiePressing{transform:none;outline:2px solid #70aaed;outline-offset:1px}
 }
+
+/* Instructor emphasis in Scheduled flights without changing flight data. */
+.fleetSortieMain .fleetSortieInstructor{font-weight:850;color:#255879}
+html[data-flympus-theme="dark"] .fleetSortieMain .fleetSortieInstructor{color:#aed8fb}

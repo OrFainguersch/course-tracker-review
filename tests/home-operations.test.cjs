@@ -179,3 +179,12 @@ test('Planned-now marker uses local civil time and correct phase boundaries',()=
  assert.equal(done.phase,'past');assert.equal(done.active,false);
  assert.equal(M.timelinePosition(null,at(8,0)).phase,'unknown');
 });
+
+test('Today Plan hides redundant flight minutes while keeping accurate phase clocks and aircraft',()=>{
+ const home=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
+ assert.match(home,/homeFlightMoments\(x,homeHebrew\)/);
+ assert.match(home,/homeFlightAircraftName\(x\)/);
+ assert.match(home,/homePlanInstructor/);
+ assert.doesNotMatch(home,/x\.estimatedMinutes\?\s*' · '/);
+ assert.match(home,/homePlanTags/);
+});
