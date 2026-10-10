@@ -597,6 +597,12 @@ assert.match(advancedHtml,/value="Night"/);
 assert.match(advancedHtml,/value="ATOL"/);
 assert.doesNotMatch(advancedHtml,/Package configuration · Operating track|Mixed \/ Day\+Night/,"EP architecture must use Qualifications instead of the old track context");
 assert.match(advancedHtml,/id="cfgAddPlatform"/);
+ assert.match(advancedHtml,/data-advanced-add-open/,"Advanced local Add triggers are available but initially closed");
+ assert.match(advancedHtml,/id="cfgAddPhase"[^>]*>/,"Phase creation form remains intact");
+ assert.match(advancedHtml,/id="cfgAddPlatform"[^>]*>/,"Platform creation form remains intact");
+ assert.doesNotMatch(advancedHtml,/class="advancedManageHeader"/,"Duplicate Advanced title card has been removed");
+ assert.doesNotMatch(advancedHtml,/class="card settingBox sectorPackageCard"/,"Duplicate Packages intro card has been removed");
+ assert.match(advancedHtml,/data-settings-tab="catalog">Advanced setup/,"The tab uses Advanced setup");
  assert.match(advancedHtml,/class="advancedSequence advancedSectorStep"/,'Sector picker follows the same outside-card step heading');
  assert.match(advancedHtml,/class="packageFiltersCollapsible" id="packageFiltersCollapsible"/,'Package filters should start collapsed in a details disclosure');
  assert.doesNotMatch(advancedHtml,/class="packageRuleStats packageRuleStatsFull"/,'Expanded Packages should not repeat the top statistics block');
@@ -1100,4 +1106,21 @@ assert(fs.readFileSync('assets/fleet-views.js','utf8').includes('data-go="fleet"
  assert.ok(source.includes("if($('#packageFiltersCollapsible'))"),"Filter disclosure remembers whether user opened it");
  assert.ok(!source.includes("'<div class=\"packageRuleStats packageRuleStatsFull\">"),"Package editor must not repeat overview counts");
  assert.ok(source.includes('aria-label="Add phase">＋ Add'),"Local Add labels should be short yet accessible");
+})();
+
+// 0847 UI invariants: aligned Advanced stages, deferred Add, and consistent mobile affordances.
+(()=>{
+ const source=fs.readFileSync('index.html','utf8');
+ const fleet=fs.readFileSync('assets/fleet-views.js','utf8');
+ assert.ok(source.includes('advancedSectorStep{border-top:1px solid #dce7f1'),"Advanced step 2 has divider");
+ assert.ok(source.includes('.advancedEditFieldset>.scopedArchitectureLabel{border-top:1px solid #dce7f1'),"Advanced step 3 has divider");
+ assert.ok(source.includes('.advancedPackagesFinal{margin-top:20px!important;padding-top:20px!important}'),"Advanced step 4 has matching spacing");
+ assert.ok(source.includes("formHtml.replace('<form ','<form data-advanced-add-panel hidden ')"),"Add forms begin closed");
+ assert.ok(source.includes('form.hidden=false;btn.hidden=true'),"Add reveals an entry form");
+ assert.ok(source.includes('form.reset?.();form.hidden=true'),"Cancel closes and clears the form");
+ assert.ok(source.includes('.globalPackageCard .flympusMobileTableSwipeCue'),"Global packages mobile swipe cue is inset");
+ assert.ok(source.includes('.courseTailorAligned .flympusMobileTableSwipeCue'),"Tailor swipe cue is inset");
+ assert.ok(!source.includes('class="card settingBox sectorPackageCard"'),"Duplicate Packages card is removed");
+ assert.ok(source.includes('.rosterControlHead .rosterAddPerson,.fleetInventory .fleetSectionHead .fleetAddBtn'),"Fleet and Roster Add actions share exact dimensions");
+ assert.ok(fleet.includes("data-fleet-add aria-label="),"Fleet keeps a descriptive accessibility label");
 })();
