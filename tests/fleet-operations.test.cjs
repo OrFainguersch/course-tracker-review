@@ -1233,5 +1233,5 @@ test('Fleet serviceability filter is read-only, with ready aircraft always order
  assert.ok(css.includes('.fleetInventoryTable .fleetInlineEditRow'),'Inline form is styled');
  assert.ok(source.includes('renderPreservingManagementView(()=>{state.fleetEditId=b.dataset.fleetEdit})'),'Edit does not jump down');
  assert.ok(source.includes('if($(\'#fleetCancelEdit\'))'),'Cancel remains wired');
- assert.ok(fleet.includes("+(current?'':'+ ')"),'New flight shows + Add to board');
+ assert.ok(!fleet.includes("+(current?'':'+ ')"),'New flight Add to board must not add a redundant + icon');
 })();
