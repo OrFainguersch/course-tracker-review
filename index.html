@@ -1258,6 +1258,36 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 </style>
 <style>
 
+
+/* 0846 — Prominent, consistent page-title Manage / Edit buttons. */
+:is(.rosterTopbar,.courseManagementTopbar,.fleetPageTop,.profileNav)>.btn.edit{
+ background:#176fae!important;border:1px solid #176fae!important;color:#fff!important;
+ box-shadow:0 2px 7px rgba(12,74,130,.11)!important;
+}
+:is(.rosterTopbar,.courseManagementTopbar,.fleetPageTop,.profileNav)>.btn.edit:hover{background:#12629e!important;color:#fff!important}
+:is(.rosterTopbar,.courseManagementTopbar,.fleetPageTop,.profileNav)>.btn.edit:focus-visible{outline:3px solid #93d0fd;outline-offset:2px}
+.rosterControlHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}
+.rosterControlHead h2{font-size:17px;margin:0;font-weight:900;color:#133758}
+.rosterControlHead .btn{min-height:40px;min-width:0;white-space:nowrap}
+.rosterTopbar>.rosterTopDone{border-radius:12px;min-height:42px;flex:0 0 auto;white-space:nowrap}
+html[data-flympus-theme="dark"] .rosterControlHead h2{color:#e4f1fb}
+@media(max-width:420px){.rosterTopbar>.rosterTopDone{padding:9px 11px;font-size:11px}}
+/* Architecture steps: number and heading always outside each content card. */
+.advancedSectorStep{display:grid;gap:10px}
+.advancedSectorStep>.advancedStepLabel{margin:4px 0 0}
+.advancedSectorStep>.advancedSectorPicker{margin:0}
+.advancedSectorStep .advancedSectorPicker .field{margin:0}
+.packageFiltersCollapsible{min-width:0;margin:12px 0 14px;border:1px solid #cbddea;border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 2px 8px rgba(23,75,115,.05)}
+.packageFiltersCollapsible>.myCoursesFilterSummary{cursor:pointer;list-style:none}
+.packageFiltersCollapsible>.myCoursesFilterSummary::-webkit-details-marker{display:none}
+.packageFiltersCollapsible>.myCoursesFilterSummary:focus-visible{outline:2px solid #1686d6;outline-offset:-2px}
+.packageFiltersCollapsible>.packageFilterBar.packagePathFilters{margin:0!important;border:0!important;border-top:1px solid #dce8f2!important;border-radius:0!important;box-shadow:none!important}
+html[data-flympus-theme="dark"] .packageFiltersCollapsible{background:#182f41;border-color:#365169}
+html[data-flympus-theme="dark"] .packageFiltersCollapsible>.packageFilterBar.packagePathFilters{border-top-color:#365169!important}
+.advancedPlatformHidden{margin-top:12px;font-size:11px;color:#627c92}
+.advancedPlatformHidden summary{cursor:pointer;font-weight:800;padding:6px 0}
+.advancedPlatformHidden .editableRow{margin-top:6px}
+@media(max-width:759px){.packageFiltersCollapsible>.packageFilterBar.packagePathFilters{margin:0!important}}
 /* 0845: same page title/Manage placement as Course Roster. */
 .courseManagementTopbar{align-items:flex-start}
 .courseManagementTopbar>div:first-child{flex:1;min-width:0}
@@ -1270,7 +1300,7 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 /* Global mobile table cue: identical typography/glyph/colors to Course Dashboard. */
 .flympusMobileTableSwipeCue{display:none}
 @media screen and (max-width:759px){
- .flympusMobileTableSwipeCue{display:flex;align-items:center;gap:8px;margin:0 0 9px;color:#4c6c88;font-size:11px;font-weight:750;line-height:1.5}
+ .flympusMobileTableSwipeCue{display:flex;align-items:center;gap:8px;margin:10px 0 9px;color:#4c6c88;font-size:11px;font-weight:750;line-height:1.5}
  .flympusMobileTableSwipeCue .insightSwipeCueGlyph{display:inline-flex;align-items:center;justify-content:center;flex:0 0 26px;height:22px;border-radius:7px;background:#eaf4fd;color:#1267ac;font-size:17px;line-height:1}
  html[data-flympus-theme="dark"] .flympusMobileTableSwipeCue{color:#bdd3e6}
  html[data-flympus-theme="dark"] .flympusMobileTableSwipeCue .insightSwipeCueGlyph{background:#214c68;color:#c5e5fb}
@@ -7005,7 +7035,7 @@ const flympusPushBootScreen=String(flympusPushBootParams.get('pushScreen')||''),
    A push deep link may explicitly override either destination. */
 if(!flympusRealPageReload||!appScreenIds.has(String(initialUiState.screen||'')))initialUiState.screen='home';
 if(flympusPushBootScreen&&['home','courses','roster','planned','record','reports','evaluation','safety','exams'].includes(flympusPushBootScreen))initialUiState.screen=flympusPushBootScreen;
-const state={screen:'home',fleetManage:false,reportTab:'dashboard',reportTabExplicit:false,reportGranularity:'week',fleetStatusFilter:'ALL',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',rosterStatuses:[],rosterRoles:[],rosterDateFrom:'',rosterDateTo:'',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',reportTrainees:[],reportInstructors:[],reportSyllabi:[],reportDateFrom:'',reportDateTo:'',myCoursesStatuses:[],myCoursesSectors:[],myCoursesPhases:[],myCoursesPlatforms:[],myCoursesTrainings:[],myCoursesCountries:[],myCoursesRoles:[],myCoursesDateFrom:'',myCoursesDateTo:'',planView:'board',packageNameFilters:[],packagePhaseFilters:[],packagePlatformFilters:[],packageCategoryFilters:[],packageContextFilters:[],safetyView:'new',evaluationView:'new',examsView:'new',...initialUiState};
+const state={screen:'home',fleetManage:false,packageFiltersOpen:false,reportTab:'dashboard',reportTabExplicit:false,reportGranularity:'week',fleetStatusFilter:'ALL',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',rosterStatuses:[],rosterRoles:[],rosterDateFrom:'',rosterDateTo:'',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',reportTrainees:[],reportInstructors:[],reportSyllabi:[],reportDateFrom:'',reportDateTo:'',myCoursesStatuses:[],myCoursesSectors:[],myCoursesPhases:[],myCoursesPlatforms:[],myCoursesTrainings:[],myCoursesCountries:[],myCoursesRoles:[],myCoursesDateFrom:'',myCoursesDateTo:'',planView:'board',packageNameFilters:[],packagePhaseFilters:[],packagePlatformFilters:[],packageCategoryFilters:[],packageContextFilters:[],safetyView:'new',evaluationView:'new',examsView:'new',...initialUiState};
 // Preserve manually selected report tabs; migrate the former implicit default.
 if(state.reportTabExplicit!==true)state.reportTab='dashboard';
 let courseTailorEditSnapshot=null;
@@ -7059,7 +7089,7 @@ function discardCourseTailorSession(){
 }
 function captureAdvancedArchitectureSnapshot(){
   return captureLocalStorageScope({
-    keys:['ct-review-catalogs','ct-review-platform-labels','ct-review-custom-platforms','flympus-custom-packages','flympus-hidden-packages'],
+    keys:['ct-review-catalogs','ct-review-platform-labels','ct-review-custom-platforms','ct-review-hidden-platforms','flympus-custom-packages','flympus-hidden-packages'],
     prefixes:['flympus-global-program-overrides:']
   });
 }
@@ -9676,9 +9706,9 @@ function roster(){
    else{const ma=a.role==='COURSE_MANAGER',mb=b.role==='COURSE_MANAGER';if(ma!==mb)return ma?-1:1;if(Number(a.workloadRank||999)!==Number(b.workloadRank||999))return Number(a.workloadRank||999)-Number(b.workloadRank||999)}
    return String(a.name).localeCompare(String(b.name),undefined,{sensitivity:'base'})
  });
- return '<div class="rosterTopbar"><div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div>'+((canManageRoster&&!manage)?'<button class="btn edit" id="toggleRosterManage">✎ Manage</button>':'')+'</div>'+
- (manage?'<div class="manageBanner rosterManageBanner"><div class="rosterManageBannerCopy"><b>Manage mode</b><span> · Edit identity, photo and course membership safely.</span></div><div class="rosterManageBannerActions"><button class="btn sky small rosterDoneEditing" id="toggleRosterManage" type="button">✓ Done editing</button><button class="btn edit small rosterAddPerson" id="addPersonBtn" type="button">+ Add person</button></div></div>':'')+
- '<section class="card rosterControls"><div class="scrollTabs"><button class="seg '+(type==='TRAINEE'?'active':'')+'" data-roster-type="TRAINEE">Trainees ('+allT.length+')</button><button class="seg '+(type==='INSTRUCTOR'?'active':'')+'" data-roster-type="INSTRUCTOR">Instructors ('+allI.length+')</button></div>'+
+ return '<div class="rosterTopbar"><div><h1 class="pageTitle">Course Roster</h1><p class="sub">Trainees and instructors assigned to this course.</p></div>'+(canManageRoster?(manage?'<button class="btn sky rosterTopDone" id="toggleRosterManage" type="button">✓ Done editing</button>':'<button class="btn edit" id="toggleRosterManage" type="button">✎ Manage</button>'):'')+'</div>'+
+ (manage?'<div class="rosterManageContext" role="status"><span>Manage mode · Edit identity, photo and course membership safely.</span></div>':'')+
+ '<section class="card rosterControls">'+(manage?'<div class="rosterControlHead"><h2>Course members</h2><button class="btn edit rosterAddPerson" id="addPersonBtn" type="button" aria-label="Add person to course roster">+ Add</button></div>':'')+'<div class="scrollTabs"><button class="seg '+(type==='TRAINEE'?'active':'')+'" data-roster-type="TRAINEE">Trainees ('+allT.length+')</button><button class="seg '+(type==='INSTRUCTOR'?'active':'')+'" data-roster-type="INSTRUCTOR">Instructors ('+allI.length+')</button></div>'+
  '<div class="rosterSearchRow"><input class="input" id="rosterSearch" placeholder="Search '+(type==='TRAINEE'?'trainees':'instructors')+'..." value="'+esc(state.search)+'"></div>'+
  '<div class="rosterAdvancedFilters unifiedFilterGrid"><div class="unifiedFilterHeader"><b>Filters</b><small>'+esc(rosterSummary)+'</small></div>'+(type==='TRAINEE'?'<div class="field rosterSingleStatus"><label>Status</label><select id="rosterStatusFilterSingle"><option value="ALL" '+(singleStatus==='ALL'?'selected':'')+'>All</option><option value="Active" '+(singleStatus==='Active'?'selected':'')+'>Active</option><option value="Inactive" '+(singleStatus==='Inactive'?'selected':'')+'>Inactive</option></select></div>'+dateRangeFilterHtml('rosterDate','Last activity',dateFrom,dateTo):multiFilterHtml('rosterRoleFilter','Role',genericMultiItems(['COURSE_MANAGER','INSTRUCTOR']),roleSel,'All roles')+dateRangeFilterHtml('rosterDate','Last activity',dateFrom,dateTo))+filterSelectionsHtml('',rosterSelections)+'</div></section>'+
  '<section class="people">'+(list.length?list.map(t=>{if(type==='TRAINEE'){const active=t.status==='Active',avg=t.average==null?'—':Number(t.average).toFixed(1),progress=Math.max(0,Math.min(100,Number(t.progress||0)));return '<article class="card personCard traineeRosterCard '+(manage?'manageCard':'personCardOpen')+'" '+(manage?'':'data-trainee="'+t.id+'" role="button" tabindex="0" aria-label="Open '+esc(t.name)+'"')+'>'+personAvatar(t,false)+'<div class="personInfo"><div class="rosterTraineeHead"><b>'+esc(t.name)+'</b><span class="rosterStatus '+(active?'active':'inactive')+'"><i aria-hidden="true"></i>'+esc(t.status)+'</span></div><div class="rosterMetricRow traineeMetricRow"><div class="rosterMetric rosterGradeMetric"><span class="rosterStatLabel">Average Grade</span><span class="rosterStatValue">'+avg+'</span></div><span class="rosterMetricDivider" aria-hidden="true"></span><div class="rosterMetric rosterProgressMetric"><span class="rosterProgressIcon" aria-hidden="true"><i></i><i></i><i></i></span><span class="rosterMetricCopy"><span class="rosterStatLabel">Progress</span><span class="rosterStatValue">'+progress+'%</span></span></div></div><div class="miniProgress rosterFullProgress"><i style="width:'+progress+'%"></i></div></div>'+(t.rank?'<span class="rankCorner">#'+t.rank+'</span>':'')+'<div class="rosterActions">'+(manage?'<button class="btn edit small rosterEditBtn" data-person-edit="TRAINEE:'+t.id+'">✎ Edit</button>':'<span class="rosterChevron" aria-hidden="true">›</span>')+'</div></article>'}
@@ -10486,10 +10516,12 @@ function savePlatformLabels(v){
   try{const catalog=JSON.parse(localStorage.getItem('ct-review-catalogs')||'null')||cfgDefaults();catalog.platformLabels=labels;localStorage.setItem('ct-review-catalogs',JSON.stringify(catalog))}catch{}
 }
 function getCustomPlatforms(){return safeObjectStorage('ct-review-custom-platforms')}
+function getHiddenPlatforms(){return safeObjectStorage('ct-review-hidden-platforms')}
+function saveHiddenPlatforms(v){localStorage.setItem('ct-review-hidden-platforms',JSON.stringify(v||{}))}
 function saveCustomPlatforms(v){localStorage.setItem('ct-review-custom-platforms',JSON.stringify(v||{}))}
 function sectorPlatforms(type){
-  const base=window.FLYMPUS_TRAINING?.catalog(type)?.platforms||[],custom=getCustomPlatforms()[type]||[],seen=new Set();
-  return [...base,...custom].filter(x=>x?.id&&!seen.has(x.id)&&seen.add(x.id)).map(x=>({...x,name:getPlatformLabels()[x.id]||x.name}));
+  const base=window.FLYMPUS_TRAINING?.catalog(type)?.platforms||[],custom=getCustomPlatforms()[type]||[],seen=new Set(),hidden=new Set(getHiddenPlatforms()[type]||[]);
+  return [...base,...custom].filter(x=>x?.id&&!hidden.has(x.id)&&!seen.has(x.id)&&seen.add(x.id)).map(x=>({...x,name:getPlatformLabels()[x.id]||x.name}));
 }
 function epPlatformLabel(id){return getPlatformLabels()[id]||window.FLYMPUS_PLATFORMS?.[id]?.name||Object.values(window.FLYMPUS_TRAINING?.catalogs||{}).flatMap(x=>x.platforms||[]).find(x=>x.id===id)?.name||Object.values(getCustomPlatforms()).flat().find(x=>x.id===id)?.name||id||'—'}
 function epTrainingIdFromName(name){return ({'New Training':'new','Conversion':'conversion','Flight Instructor Training':'instructor','Screening':'screening','Refreshment':'refreshment','Return to Currency':'return_currency','Qualification':'qualification','Customer-specific Qualification':'customer_qualification'})[name]||name||''}
@@ -10765,10 +10797,12 @@ function builderPackage(){
   return packageFor(state.builderType||'',state.builderProgram||'');
 }
 function advancedPlatformsCard(type){
-  const platforms=sectorPlatforms(type),customIds=new Set((getCustomPlatforms()[type]||[]).map(x=>x.id));
-  return '<section class="card settingBox"><h3>Platforms</h3><p class="sub">Rename the platform display name here. The internal platform identifier stays stable automatically and is intentionally hidden.</p><div class="editableList">'+
-    (platforms.length?platforms.map(x=>'<div class="editableRow"><input class="input cfgPlatformName" data-id="'+esc(x.id)+'" value="'+esc(x.name)+'">'+(customIds.has(x.id)?'<button class="btn danger small" type="button" data-platform-remove="'+esc(x.id)+'">Remove</button>':'')+'</div>').join(''):'<div class="wizardEmpty compact">No platforms are defined for this sector.</div>')+
-    '</div><form class="toolbar" id="cfgAddPlatform"><input class="input" name="name" placeholder="Add platform" required><button class="btn secondary" type="submit">＋ Add platform</button></form></section>';
+  const platforms=sectorPlatforms(type),base=window.FLYMPUS_TRAINING?.catalog(type)?.platforms||[],baseIds=new Set(base.map(x=>x.id)),hidden=new Set(getHiddenPlatforms()[type]||[]);
+  const hiddenItems=base.filter(x=>hidden.has(x.id));
+  return '<section class="card settingBox"><h3>Platforms</h3><p class="sub">Rename platform display names here. Platform identifiers are preserved so existing Packages and courses stay valid.</p><div class="editableList">'+
+    (platforms.length?platforms.map(x=>'<div class="editableRow"><input class="input cfgPlatformName" data-id="'+esc(x.id)+'" value="'+esc(x.name)+'"><button class="btn danger small" type="button" data-platform-remove="'+esc(x.id)+'" data-platform-base="'+(baseIds.has(x.id)?'1':'0')+'">Remove</button></div>').join(''):'<div class="wizardEmpty compact">No active platforms are defined for this sector.</div>')+
+    '</div><form class="toolbar" id="cfgAddPlatform"><input class="input" name="name" placeholder="Add platform" required><button class="btn secondary" type="submit" aria-label="Add platform">＋ Add</button></form>'+
+    (hiddenItems.length?'<details class="advancedPlatformHidden"><summary>Hidden platforms ('+hiddenItems.length+')</summary><div class="editableList">'+hiddenItems.map(x=>'<div class="editableRow"><span>'+esc(getPlatformLabels()[x.id]||x.name)+'</span><button class="btn secondary small" type="button" data-platform-restore="'+esc(x.id)+'">Restore</button></div>').join('')+'</div></details>':'')+'</section>';
 }
 function advancedContextCard(type,c){
   const cat=window.FLYMPUS_TRAINING?.catalog(type),programs=cat?.programs||[];
@@ -10814,15 +10848,15 @@ function advancedPackagesHtml(type){
     selectedContexts.length&&{label:contextLabel,value:filterChoiceSummary(selectedContexts,genericMultiItems(contextItems))}
   ].filter(Boolean);
   const sectorFilter='<div class="field packageSectorFilterField"><label>Sector</label><select id="packageSectorFilter" >'+cfg.courseTypes.map(x=>'<option value="'+esc(x.id)+'" '+(String(x.id)===String(type)?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div>';
-  const filterHtml='<div class="packageFilterBar unifiedFilterGrid packagePathFilters"><div class="unifiedFilterHeader"><b>Filters</b><small>'+esc(packageFilterSummary)+'</small></div>'+
+  const filterHtml='<details class="packageFiltersCollapsible" id="packageFiltersCollapsible" '+(state.packageFiltersOpen?'open':'')+'><summary class="myCoursesFilterSummary"><span class="myCoursesFilterSummaryCopy"><b>Filters</b><small>'+esc(packageFilterSummary)+'</small></span></summary><div class="packageFilterBar unifiedFilterGrid packagePathFilters">'+
     sectorFilter+
     multiFilterHtml('packagePhaseFilter','Phase',genericMultiItems(phaseItems),selectedPhases,'All phases')+
     multiFilterHtml('packagePlatformFilter','Platform',genericMultiItems(platformItems),selectedPlatforms,'All platforms')+
     multiFilterHtml('packageTrainingFilter','Training type',genericMultiItems(trainingItems),selectedTraining,'All training types')+
     multiFilterHtml('packageContextFilter',contextLabel,genericMultiItems(contextItems),selectedContexts,'All')+
-    '<small class="packageFilterHint">Filter Packages by Sector, Phase, Platform, Training type and '+esc(contextLabel)+'. Sector options come from the Sectors defined above.</small>'+filterSelectionsHtml('',packageSelections)+'</div>';
+    '<small class="packageFilterHint">Filter Packages by Sector, Phase, Platform, Training type and '+esc(contextLabel)+'. Sector options come from the Sectors defined above.</small>'+filterSelectionsHtml('',packageSelections)+'</div></details>';
   const field=(label,control,wide=false)=>'<label class="field '+(wide?'tailorWide':'')+'"><span class="fieldLabel">'+label+'</span>'+control+'</label>';
-  const addBox=(kind,title,fields)=>'<div class="packageAddBox compactAddBox" data-global-add-box="'+kind+'"><button class="btn secondary packageAddTrigger" type="button" data-global-add-open="'+kind+'">＋ '+title+'</button><div class="packageAddPanel" data-global-add-panel="'+kind+'" hidden><div class="packageAddFields">'+fields+'</div><div class="toolbar packageAddActions"><button class="btn sky small" type="button" data-global-add="'+kind+'">Add</button><button class="btn secondary small" type="button" data-global-add-cancel="'+kind+'">Cancel</button></div></div></div>';
+  const addBox=(kind,title,fields)=>'<div class="packageAddBox compactAddBox" data-global-add-box="'+kind+'"><button class="btn secondary packageAddTrigger" type="button" data-global-add-open="'+kind+'" aria-label="'+esc(title)+'">＋ Add</button><div class="packageAddPanel" data-global-add-panel="'+kind+'" hidden><div class="packageAddFields">'+fields+'</div><div class="toolbar packageAddActions"><button class="btn sky small" type="button" data-global-add="'+kind+'">Add</button><button class="btn secondary small" type="button" data-global-add-cancel="'+kind+'">Cancel</button></div></div></div>';
   const orderItems=list=>[...(list||[])].sort((a,b)=>(Number(a.order)||9999)-(Number(b.order)||9999));
   const mergeEditor=(base,added,patches)=>orderItems([...(base||[]),...((added||[]).map(x=>({...x,packageCustom:true})))].filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i).map(x=>({...x,...(patches?.[x.id]||{})})));
   const cell=(label,html,cls='')=>'<div class="packageSyllabusCell '+cls+'" data-label="'+esc(label)+'">'+html+'</div>';
@@ -10864,7 +10898,7 @@ function advancedPackagesHtml(type){
     return '<form class="card globalPackageCard globalPackageForm '+(focused?'packageFocused ':'')+(editing?'packageEditing':'')+'" data-global-package-id="'+esc(p.id)+'" data-global-package-type="'+esc(type)+'"><details class="packageEditorShell" '+(focused?'open':'')+'><summary class="packageShellSummary"><div class="globalPackageHead"><div><div class="eyebrow">REUSABLE PACKAGE</div><h3>'+esc(current.name)+'</h3><p>'+esc(packagePathLabel(type,current))+'</p></div><div class="packageHeaderActions">'+(editing?'<div class="packageActionButtons"><button class="btn danger small" type="button" data-delete-package="'+esc(p.id)+'" data-package-sector="'+esc(type)+'">Delete Package</button></div>':'')+'</div></div><div class="packageSummaryStats"><span><b>'+orderedSyllabi.length+'</b> Syllabi</span><span><b>'+criteriaActive.length+'</b> Criteria</span><span><b>'+required.size+'</b> Emergencies</span><span><b>'+counterActive.length+'</b> Experience</span><span><b>'+examActive.length+'</b> Exams</span></div></summary><fieldset class="packageEditFieldset" '+(editing?'':'disabled')+'><div class="packageEditorBody">'+
       '<div class="fields"><label class="field"><span class="fieldLabel">Package name</span><input class="input" name="g_package_name" value="'+esc(current.name)+'"></label><label class="field"><span class="fieldLabel">Package ID</span><input class="input" value="'+esc(p.id)+'" readonly></label></div>'+
       '<div class="packagePathBox"><div class="inlineHead"><div><b>Package path</b><p class="sub">Defines where this Package belongs inside '+esc(type)+'.</p></div></div>'+packagePathControls(type,current,'g_')+'</div>'+
-      '<div class="packageRuleStats packageRuleStatsFull"><span><b>'+orderedSyllabi.length+'</b> Syllabi / tasks</span><span><b>'+criteriaActive.length+'</b> Assessment criteria</span><span><b>'+required.size+'</b> Required emergencies</span><span><b>'+counterActive.length+'</b> Experience requirements</span><span><b>'+examActive.length+'</b> Exams</span><span><b>'+gateActive.length+'</b> Progression gates</span></div>'+
+      
       '<details class="packageRules syllabiRules" data-package-rule="syllabi" data-package-id="'+esc(p.id)+'" '+(syllabusFlowOpen?'open':'')+'><summary><b>Syllabi / practical tasks (<span data-active-syllabus-count>'+orderedSyllabi.length+'</span>)</b><span><span data-excluded-syllabus-count>'+excludedSyllabi.length+'</span> excluded · Drag ☰ to reorder</span></summary><p class="syllabusMinimumHint">Minimum 0 = Optional / non-blocking.</p><div class="packageSyllabusSection">'+(allSyllabi.length?'<div class="packageSyllabusTable"><div class="packageSyllabusHeader"><span>Use</span><span>Order / Move</span><span>Series / Syllabus</span><span>Minimum</span><span>Instructor Presence</span><span>Status</span></div>'+syllabiRows+'</div>':'<div class="packageRuleEmpty"><b>No syllabi / practical tasks configured</b><span>This Package does not currently include any syllabi or practical tasks.</span></div>')+'<div class="packageSyllabusFooter"><span><b data-syllabus-minimum-total>'+syllabiMinimumTotal+'</b> total planned minimum</span><small>Only included syllabi are numbered.</small></div><details class="excludedSyllabiBox" '+(excludedSyllabi.length?'':'hidden')+'><summary><b>Excluded syllabi (<span data-excluded-syllabus-count>'+excludedSyllabi.length+'</span>)</b><span>Restore to add one back</span></summary><div class="excludedSyllabusList">'+excludedSyllabiRows+'</div></details>'+syllabusAdd+'</div></details>'+
       '<details class="packageRules"><summary><b>Assessment criteria ('+criteriaActive.length+')</b><span>'+(allCriteria.length-criteriaActive.length)+' excluded · Drag ☰ to reorder</span></summary>'+gradingSettings+table('criteria',['Use','Order / Move','Assessment criterion','Weight (%)','Status'],criteriaRows,'48px 92px minmax(250px,1.6fr) 120px minmax(140px,.7fr)')+criteriaAdd+'</details>'+
       '<details class="packageRules"><summary><b>Emergency requirements ('+required.size+')</b><span>'+(allEmergency.length-required.size)+' not required · Drag ☰ to reorder</span></summary>'+table('emergencies',['Use','Order / Move','Emergency','Category','Status'],emergencyRows,'48px 92px minmax(250px,1.6fr) minmax(180px,1fr) minmax(140px,.7fr)')+emergencyAdd+'</details>'+
@@ -10898,7 +10932,7 @@ function courseOverridesHtml(){
   const {active:p,inherited,o,syllabi,counters,criteria:criterionDefs,exams,progression,emergencies,required}=m;
   const field=(label,control,wide=false)=>'<label class="field '+(wide?'tailorWide':'')+'"><span class="fieldLabel">'+label+'</span>'+control+'</label>';
   const origin=(x,kind)=>x.courseOnly?'<div class="packageCustomMeta"><span class="pill amber">COURSE ONLY</span><button class="btn danger small" type="button" data-course-custom-remove="'+kind+'|'+esc(x.id)+'">Remove</button></div>':'<small>Package item</small>';
-  const addBox=(kind,title,fields)=>'<div class="packageAddBox compactAddBox" data-course-add-box="'+kind+'"><button class="btn secondary packageAddTrigger" type="button" data-course-add-open="'+kind+'">＋ '+title+'</button><div class="packageAddPanel" data-course-add-panel="'+kind+'" hidden><div class="packageAddFields">'+fields+'</div><div class="toolbar packageAddActions"><button class="btn sky small" type="button" data-course-add="'+kind+'">Add</button><button class="btn secondary small" type="button" data-course-add-cancel="'+kind+'">Cancel</button></div></div></div>';
+  const addBox=(kind,title,fields)=>'<div class="packageAddBox compactAddBox" data-course-add-box="'+kind+'"><button class="btn secondary packageAddTrigger" type="button" data-course-add-open="'+kind+'" aria-label="'+esc(title)+'">＋ Add</button><div class="packageAddPanel" data-course-add-panel="'+kind+'" hidden><div class="packageAddFields">'+fields+'</div><div class="toolbar packageAddActions"><button class="btn sky small" type="button" data-course-add="'+kind+'">Add</button><button class="btn secondary small" type="button" data-course-add-cancel="'+kind+'">Cancel</button></div></div></div>';
   const orderItems=list=>[...(list||[])].sort((a,b)=>(Number(a.order)||9999)-(Number(b.order)||9999));
   const cell=(label,html,cls='')=>'<div class="packageSyllabusCell '+cls+'" data-label="'+esc(label)+'">'+html+'</div>';
   const ruleEmptyLabel={criteria:'assessment criteria',emergencies:'emergency requirements',counters:'experience requirements',exams:'exams',progression:'progression gates'};
@@ -11098,7 +11132,7 @@ function cfgEmergencyCategoriesCard(c){
   const list=c.emergencyCategories||[];
   return '<section class="card settingBox emergencyCategoriesCard"><h3>Emergency categories</h3><p class="sub">Controls the Category dropdown and grouping used in Packages, Tailor course, trainee emergency views and Evaluation.</p><div class="editableList emergencyCategoryConfigList">'+
     list.map(x=>'<div class="editableRow emergencyCategoryConfigRow"><input class="input cfgEmergencyCategoryName" data-id="'+esc(x.id)+'" data-original-name="'+esc(x.name)+'" value="'+esc(x.name)+'"><button class="btn danger small" type="button" data-emergency-category-remove="'+esc(x.id)+'">Remove</button></div>').join('')+
-    '</div><form class="toolbar" id="cfgAddEmergencyCategory"><input class="input" name="name" placeholder="Add emergency category" required><button class="btn secondary" type="submit">＋ Add category</button></form></section>';
+    '</div><form class="toolbar" id="cfgAddEmergencyCategory"><input class="input" name="name" placeholder="Add emergency category" required><button class="btn secondary" type="submit" aria-label="Add emergency category">＋ Add</button></form></section>';
 }
 function applyEmergencyCategoryEditorToConfig(c){
   const inputs=[...document.querySelectorAll('.cfgEmergencyCategoryName')];
@@ -11138,7 +11172,7 @@ function cfgPhaseCard(c,scope){
   const list=c.phases.filter(x=>x.type===scope);
   return '<section class="card settingBox"><h3>Phases</h3><p class="sub">Phases belong to the sector selected above. Experience minimums belong to Training Packages, not to the phase itself.</p><div class="editableList" style="margin-top:10px">'+
     list.map(x=>'<div class="editableRow"><input class="input cfgPhaseName" data-id="'+x.id+'" value="'+esc(x.name)+'"><button class="btn danger small" data-phase-remove="'+x.id+'">Remove</button></div>').join('')+
-    '</div><form class="toolbar" id="cfgAddPhase"><input class="input" name="name" placeholder="Add phase" required><button class="btn secondary" type="submit">＋ Add phase</button></form></section>';
+    '</div><form class="toolbar" id="cfgAddPhase"><input class="input" name="name" placeholder="Add phase" required><button class="btn secondary" type="submit" aria-label="Add phase">＋ Add</button></form></section>';
 }
 function cfgCriteriaCard(list){
   return '<section class="card settingBox"><h3>Assessment criteria</h3><div class="editableList">'+
@@ -11316,7 +11350,7 @@ function settings(){
     const validScope=c.courseTypes.some(x=>x.id===state.typeWorkspace),scope=validScope?state.typeWorkspace:(c.courseTypes[0]?.id||''),scopeName=cfgItem(c.courseTypes,scope)?.name||scope,advancedEditing=!!state.advancedArchitectureEditing;
     html+='<div class="advancedManageHeader"><div class="advancedManageHeading"><h2>Advanced setup</h2><p>'+(advancedEditing?'Editing reusable architecture and Packages. Switch sector below at any time.':'Review sectors, architecture and Packages before editing.')+'</p></div></div>';
     html+='<section class="advancedSequence" style="margin-top:14px"><div class="advancedStepLabel advancedStepEditEntry"><span>1</span><div><b>Define sectors</b><small>Add, rename or remove sectors first.</small></div></div><fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'>'+cfgCatalogCard('Sectors','courseTypes',c.courseTypes)+'</fieldset></section>';
-    html+='<section class="card settingBox advancedSectorPicker"><div class="advancedStepLabel"><span>2</span><div><b>Select sector to edit</b><small>'+(advancedEditing?'Switch sectors freely; edits remain in this session until Save or Discard.':'Everything below is scoped to this sector.')+'</small></div></div><div class="field" style="margin-top:12px"><label>Sector</label><select id="typeWorkspace" >'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></section>';
+    html+='<section class="advancedSequence advancedSectorStep"><div class="advancedStepLabel"><span>2</span><div><b>Select sector to edit</b><small>'+(advancedEditing?'Switch sectors freely; edits remain in this session until Save or Discard.':'Everything below is scoped to this sector.')+'</small></div></div><div class="card settingBox advancedSectorPicker"><div class="field"><label>Sector</label><select id="typeWorkspace">'+c.courseTypes.map(x=>'<option value="'+x.id+'" '+(x.id===scope?'selected':'')+'>'+esc(x.name)+'</option>').join('')+'</select></div></div></section>';
     html+='<fieldset class="advancedEditFieldset" '+(advancedEditing?'':'disabled')+'><div class="advancedStepLabel scopedArchitectureLabel"><span>3</span><div><b>'+(advancedEditing?'Edit architecture':'Architecture')+'</b><small>Phases, platforms, training types and qualifications belong to the selected sector.</small></div></div>';
     html+='<div class="advancedScopeColumns"><div class="advancedScopeColumn">';
     html+=cfgPhaseCard(c,scope);
@@ -12695,6 +12729,7 @@ function bindSettings(){
   };
   if($('#typeWorkspace'))$('#typeWorkspace').onchange=switchAdvancedSector;
   if($('#packageSectorFilter'))$('#packageSectorFilter').onchange=switchAdvancedSector;
+  if($('#packageFiltersCollapsible'))$('#packageFiltersCollapsible').addEventListener('toggle',e=>{state.packageFiltersOpen=e.target.open});
   [['packagePhaseFilter','packagePhaseFilters'],['packagePlatformFilter','packagePlatformFilters'],['packageTrainingFilter','packageCategoryFilters'],['packageContextFilter','packageContextFilters']].forEach(([id,key])=>{const el=$('#'+id);if(el)el.addEventListener('filterapply',e=>{state[key]=e.detail?.values||[];state.packageFocusId=null;state.packageAddFlow=null;saveUiState();render()})});
   document.querySelectorAll('[data-package-assign-open]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const type=btn.dataset.packageAssignOpen,panel=document.querySelector('[data-package-assign-panel="'+type+'"]');state.packageCreateOpen=type;if(panel){panel.hidden=false;btn.hidden=true;panel.querySelector('input[name="name"]')?.focus?.()}});
   document.querySelectorAll('[data-package-assign-cancel]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const panel=btn.closest('[data-package-assign-panel]'),type=panel?.dataset.packageAssignPanel,trigger=document.querySelector('[data-package-assign-open="'+type+'"]');if(panel)panel.hidden=true;if(trigger)trigger.hidden=false;if(state.packageCreateOpen===type)state.packageCreateOpen=null});
@@ -12969,9 +13004,18 @@ function bindSettings(){
     const all=getCustomPlatforms(),arr=all[type]||[],id=cfgId('platform');arr.push({id,name});all[type]=arr;saveCustomPlatforms(all);
     const labels=getPlatformLabels();labels[id]=name;savePlatformLabels(labels);toast(name+' added to '+(cfgItem(cfgGet().courseTypes,type)?.name||type));render();
   };
-  document.querySelectorAll('[data-platform-remove]').forEach(btn=>btn.onclick=()=>{
-    const type=state.typeWorkspace||'',id=btn.dataset.platformRemove,all=getCustomPlatforms(),arr=all[type]||[];
-    all[type]=arr.filter(x=>x.id!==id);saveCustomPlatforms(all);const labels=getPlatformLabels();delete labels[id];savePlatformLabels(labels);toast('Platform removed');render();
+  document.querySelectorAll('[data-platform-remove]').forEach(btn=>btn.onclick=async()=>{
+    if(!state.advancedArchitectureEditing)return;
+    const type=state.typeWorkspace||'',id=btn.dataset.platformRemove,all=getCustomPlatforms(),arr=all[type]||[],builtIn=btn.dataset.platformBase==='1',name=btn.closest('.editableRow')?.querySelector('.cfgPlatformName')?.value||id;
+    if(!(await siteConfirm(builtIn?'Hide “'+name+'” from available platforms? Existing Packages and courses will retain their stable platform IDs.':'Remove custom platform “'+name+'”? Existing references will not be deleted.',{title:'Remove platform?',confirmLabel:'Remove',tone:'warning'})))return;
+    if(builtIn){const hidden=getHiddenPlatforms();hidden[type]=[...new Set([...(hidden[type]||[]),id])];saveHiddenPlatforms(hidden)}
+    else{all[type]=arr.filter(x=>x.id!==id);saveCustomPlatforms(all);const labels=getPlatformLabels();delete labels[id];savePlatformLabels(labels)}
+    toast('Platform removed from available choices');renderPreservingManagementView();
+  });
+  document.querySelectorAll('[data-platform-restore]').forEach(btn=>btn.onclick=()=>{
+    if(!state.advancedArchitectureEditing)return;
+    const type=state.typeWorkspace||'',hidden=getHiddenPlatforms();hidden[type]=(hidden[type]||[]).filter(id=>id!==btn.dataset.platformRestore);saveHiddenPlatforms(hidden);
+    toast('Platform restored');renderPreservingManagementView();
   });
 
   if($('#cfgAddEmergencyCategory'))$('#cfgAddEmergencyCategory').onsubmit=e=>{
