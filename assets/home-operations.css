@@ -145,3 +145,25 @@ html.flympusLargeText .homePlanMomentLabel,html.flympusLargeText .homePlanPerson
  .homePlanMomentTime{font-size:10px}
  .homePlanMomentLabel{font-size:9px}
 }
+
+/* Selected Option A: identity first; teacher immediately below student. */
+.homeDashboard .homePlanRow.homePlanRowTimeline{position:relative;overflow:hidden;align-items:center}
+.homeDashboard .homePlanRowTimeline .homePlanBody{position:static!important;min-width:0;gap:5px!important;padding-block-start:22px}
+.homeDashboard .homePlanRowTimeline .homePlanMain{display:flex!important;flex-direction:column;gap:4px;min-width:0}
+.homeDashboard .homePlanRowTimeline .homePlanPerson-teacher{margin-top:0!important}
+.homeDashboard .homePlanRowTimeline .homePlanMain>small{margin-top:2px;line-height:1.45;overflow-wrap:anywhere}
+.homeDashboard .homePlanRowTimeline .homePlanTags{
+ position:absolute!important;inset-block-start:10px;inset-inline-end:12px;
+ z-index:2;display:flex!important;gap:6px;justify-content:flex-end!important;
+ margin:0!important;max-width:60%
+}
+.homeDashboard .homePlanRowTimeline .homePlanTags .homeTag{font-size:10px;padding:4px 9px;white-space:nowrap}
+html[data-flympus-language="he"] .homeDashboard .homePlanRow.homePlanRowTimeline{direction:rtl!important}
+html[data-flympus-language="he"] .homePlanRowTimeline .homePlanTimeline{direction:ltr}
+html[data-flympus-language="he"] .homePlanRowTimeline .homePlanMain{align-items:flex-start}
+html[data-flympus-language="he"] .homePlanRowTimeline .homePlanPerson{direction:rtl}
+html[data-flympus-language="he"] .homePlanRowTimeline .homePlanTags{direction:rtl}
+@media(max-width:480px){
+ .homeDashboard .homePlanRowTimeline .homePlanBody{padding-block-start:24px}
+ .homeDashboard .homePlanRowTimeline .homePlanTags{inset-block-start:8px;inset-inline-end:9px}
+}

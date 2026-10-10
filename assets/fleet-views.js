@@ -86,19 +86,19 @@ function schedule(c){
   '<div class="fleetTimeFlowBoundaryTimes">'+timeMark('briefing',L('Briefing start','תחילת תדריך'),'Start')+timeMark('takeoff',L('Takeoff','המראה'),'Takeoff')+timeMark('landing',L('Landing','נחיתה'),'Landing')+timeMark('debrief',L('Debriefing end','סיום תחקיר'),'End')+'</div>'+  '<svg class="fleetTimeFlowLeaders" aria-hidden="true" focusable="false"></svg><div class="fleetTimeFlowFloatingLabels"></div></div>'+  '<div class="fleetTimeFlowFallback" hidden></div><div class="fleetTimeFlowDetails" role="status" hidden></div></div>';
  const booked=flights.length?'<section class="fleetBookedFlights"><div class="fleetBookedHeading"><h3>'+(c.draftMode?L('Proposed flights','טיסות מוצעות'):L('Scheduled flights','טיסות משובצות'))+'</h3><span>'+flights.length+'</span></div>'+(can&&flights.length>1?'<p class="fleetSortieDragHelp">'+L('Drag the grip to change takeoff slots. Conflicting assignments are rejected.','גררו את הידית לשינוי סדר משבצות ההמראה. שיבוץ שיוצר חפיפה יידחה.')+'</p>':'')+'<div class="fleetSorties" data-flight-sorties>'+flights.map(f=>{
   const issue=M.flightIssues(f,c.fleet,c.platformId),t=M.flightTimeline(f,c.timingDefaults);
-  return '<div class="fleetSortie '+(issue?'conflict':'')+'" data-flight-id="'+E(f.id)+'">'+
+  return '<div class="fleetSortie '+(issue?'conflict':'')+'" data-flight-id="'+E(f.id)+'"><div class="fleetSortieSlide">'+
  (can&&flights.length>1?'<button type="button" class="fleetSortieDragHandle" data-flight-drag aria-label="'+E(L('Drag to reschedule flight at ','גרור לשינוי שיבוץ הטיסה בשעה ')+f.time)+'" title="'+E(L('Drag to change takeoff time','גרור לשינוי שעת המראה'))+'"><svg viewBox="0 0 24 24" aria-hidden="true" width="21" height="21" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg></button>':'')+
- '<div class="fleetSortieMain"><b data-flight-slot-time>'+E(f.time)+'</b><b class="fleetSortieTail">'+E(aircraftDisplayName(c,f.tail))+'</b>'+
+ '<div class="fleetSortieMain"><b data-flight-slot-time>'+E(f.time)+'</b>'+
  '<div class="fleetSortieCrew">'+crewLine('student',f.traineeName||f.traineeId)+(f.mode!=='SOLO'&&f.instructorName?crewLine('teacher',f.instructorName):'')+
- '<small class="fleetSortieSyllabus">'+E(f.syllabus)+'</small>'+
- '<span class="fleetSortieMode '+(f.mode==='SOLO'?'solo':'instructed')+'">'+L(f.mode==='SOLO'?'Solo':'Instructed',f.mode==='SOLO'?'סולו':'מודרכת')+'</span>'+
+ '<small class="fleetSortieSyllabus">'+E(f.syllabus)+' · '+E(aircraftDisplayName(c,f.tail))+'</small>'+
  (f.note?'<small class="fleetSortieNote">'+E(f.note)+'</small>':'')+(issue?'<small class="fleetConflict">'+E(issue)+'</small>':'')+'</div>'+
  '<small data-flight-slot-details class="fleetSortieMiniTimeline">'+
  miniMoment('briefing',t?.clock.briefing,L('Briefing','תדריך'))+
  miniMoment('flight',t?.clock.takeoff||f.time,L('Flight','טיסה'))+
  miniMoment('debrief',t?.clock.landing,L('Debriefing','תחקיר'))+
  '</small></div>'+
- (can?'<div class="fleetSortieActions"><button class="btn secondary small" type="button" data-flight-edit="'+E(f.id)+'">'+L('Edit','ערוך')+'</button><button class="btn danger small" type="button" data-flight-delete="'+E(f.id)+'">'+L('Remove','הסר')+'</button></div>':'')+'</div>';
+ '<span class="fleetSortieMode '+(f.mode==='SOLO'?'solo':'instructed')+'">'+L(f.mode==='SOLO'?'Solo':'Instructed',f.mode==='SOLO'?'סולו':'מודרכת')+'</span>'+
+ (can?'<div class="fleetSortieActions"><button class="btn secondary small" type="button" data-flight-edit="'+E(f.id)+'">'+L('Edit','ערוך')+'</button><button class="btn danger small" type="button" data-flight-delete="'+E(f.id)+'">'+L('Remove','הסר')+'</button></div>':'')+'</div></div>';
  }).join('')+'</div></section>':'';
  const settings=c.timingDefaults||M.TIMING_DEFAULTS;
  const defaultsBlock=c.canConfigureTiming?'<details class="fleetTimingSettings"><summary>'+L('Edit course timing defaults','עריכת ברירות מחדל לזמני הטיסה')+'</summary><form id="fleetTimingDefaultsForm"><div class="fleetTimingSettingsGrid">'+

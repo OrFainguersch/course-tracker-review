@@ -604,11 +604,11 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261010-scheduled-cards-0824'],['assets/fleet-operations.css','20261010-scheduled-cards-0824']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261010-flight-cards-0825'],['assets/fleet-operations.css','20261010-flight-cards-0825']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-approved-cards-swipe-0824'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-flight-cards-layout-0825'/);
  assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-time-only-seamless-0820/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
@@ -796,7 +796,7 @@ test('platform and tail display consistently, without changing stored aircraft i
  assert.match(V.fleet(ctx),/fleetInventoryTail">Shahak-01<\/td>/);
  assert.doesNotMatch(V.fleet(ctx),/fleetInventoryCount/);
  assert.match(V.schedule(ctx),/<option value="aircraft-a01"[^>]*>Shahak-01<\/option>/);
- assert.match(V.schedule(ctx),/fleetSortieTail">Shahak-01<\/b>/);
+ assert.match(V.schedule(ctx),/fleetSortieSyllabus">[^<]*Shahak-01<\/small>/);
  assert.equal(plane[0].tail,'01','Display must not change stored tail number');
  assert.doesNotMatch(V.home({...ctx,fleet:[{...plane[0],tail:'Shahak-01'}]}),/Shahak Shahak/);
  lang.value='he';
@@ -905,14 +905,13 @@ test('Plan stage numbers and Pending approvals share one Course Management-style
  assert.match(css,/html\[data-flympus-theme="dark"\]/);
  assert.match(css,/html\.flympusLargeText/);
 });
-test('Platform-tail badge stays on one line by reallocating width instead of shrinking the font',()=>{
+test('Aircraft displays as plain syllabus-side text, not a separate badge',()=>{
+ const view=fs.readFileSync(path.join(__dirname,'../assets/fleet-views.js'),'utf8');
  const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
- assert.match(css,/\.fleetBookedFlights \.fleetSortieTail\{/);
- assert.match(css,/white-space:nowrap;overflow-wrap:normal;word-break:normal;hyphens:none/);
- assert.match(css,/flex:0 0 auto;width:max-content;max-width:none/);
- assert.match(css,/\.fleetBookedFlights \.fleetSortieMain>div\{flex:1 1 0;min-width:0\}/);
- assert.match(css,/\.fleetBookedFlights \.fleetSortieMain\{gap:7px/);
- assert.match(css,/html\.flympusLargeText \.fleetSortieDragGhost/);
+ assert.match(view,/fleetSortieSyllabus/);
+ assert.match(view,/E\(f\.syllabus\)\+' · '\+E\(aircraftDisplayName\(c,f\.tail\)\)/);
+ assert.doesNotMatch(view,/class="fleetSortieTail"/);
+ assert.match(css,/\.fleetBookedFlights \.fleetSortieSlide>/);
 });
 test('Frozen insertion thresholds prevent drag jitter after DOM swaps and support auto-scroll',()=>{
  const vm=require('node:vm'),source=fs.readFileSync(path.join(__dirname,'../assets/flight-board-drag.js'),'utf8');
@@ -1145,10 +1144,28 @@ test('Mobile swipe exposes existing confirmed remove action, never deletes direc
  assert.match(src,/if\(event\.cancelable\)event\.preventDefault\(\)/);
  assert.match(src,/\[data-flight-drag\]/);
  assert.match(src,/\.fleetSortieDragHandle/);
- assert.match(src,/THRESHOLD=56/);
+ assert.match(src,/THRESHOLD=44/);
  assert.doesNotMatch(src,/persistCourseOperations|saveDraft|publish\('PLAN'/);
  assert.match(html,/FLYMPUS_ROW_SWIPE\?\.attach\?\.\(document\.querySelector\('\[data-flight-sorties\]'\)\)/);
- assert.match(html,/assets\/row-swipe-delete\.js\?v=20261010-row-swipe-0824/);
+ assert.match(html,/assets\/row-swipe-delete\.js\?v=20261010-flight-cards-0825/);
  assert.match(css,/\.flympusSwipeDeleteAction/);
  assert.match(css,/\.fleetSortieDragGhost \.flympusSwipeDeleteAction\{display:none!important\}/);
+});
+
+test('Mobile deletion slides the inner card, retaining outer FLIP and confirmed remove button',()=>{
+ const view=fs.readFileSync(path.join(__dirname,'../assets/fleet-views.js'),'utf8');
+ const swipe=fs.readFileSync(path.join(__dirname,'../assets/row-swipe-delete.js'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(view,/fleetSortieSlide/);
+ assert.match(view,/data-flight-delete/);
+ assert.match(view,/fleetSortieMode/);
+ assert.match(view,/fleetSortieSyllabus/);
+ assert.doesNotMatch(view,/class="fleetSortieTail"/);
+ assert.match(swipe,/slide\(row\)\.style\.transform/);
+ assert.match(swipe,/target\.click\(\)/);
+ assert.match(swipe,/flympusSwipeTracking/);
+ assert.match(swipe,/\[data-flight-drag\]/);
+ assert.match(css,/\.fleetSortie\.flympusSwipeOpen \.fleetSortieSlide/);
+ assert.match(css,/translate3d\(-94px,0,0\)/);
+ assert.match(css,/@media\(hover:hover\) and \(pointer:fine\)/);
 });

@@ -204,3 +204,15 @@ test('Approved Home option A shows phase labels and student/instructor icons wit
  assert.match(css,/\.homePlanMomentLabel\{/);
  assert.match(css,/\.homePlanPerson-student b\{/);
 });
+
+test('Today Plan keeps teacher immediately below trainee and badge at logical top-end',()=>{
+ const home=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
+ const start=home.indexOf("homeFlightPerson(x.traineeName||'Trainee','student')");
+ const teacher=home.indexOf("homeFlightPerson(x.instructorName,'teacher')");
+ const syllabus=home.indexOf("esc(x.syllabus)");
+ assert.ok(start>=0&&teacher>start&&syllabus>teacher);
+ const css=fs.readFileSync('assets/home-operations.css','utf8');
+ assert.match(css,/homePlanRowTimeline \.homePlanTags\{/);
+ assert.match(css,/inset-block-start:10px;inset-inline-end:12px/);
+ assert.match(css,/data-flympus-language="he"/);
+});
