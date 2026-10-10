@@ -10801,7 +10801,7 @@ function advancedPlatformsCard(type){
   const hiddenItems=base.filter(x=>hidden.has(x.id));
   return '<section class="card settingBox"><h3>Platforms</h3><p class="sub">Rename platform display names here. Platform identifiers are preserved so existing Packages and courses stay valid.</p><div class="editableList">'+
     (platforms.length?platforms.map(x=>'<div class="editableRow"><input class="input cfgPlatformName" data-id="'+esc(x.id)+'" value="'+esc(x.name)+'"><button class="btn danger small" type="button" data-platform-remove="'+esc(x.id)+'" data-platform-base="'+(baseIds.has(x.id)?'1':'0')+'">Remove</button></div>').join(''):'<div class="wizardEmpty compact">No active platforms are defined for this sector.</div>')+
-    '</div><form class="toolbar" id="cfgAddPlatform"><input class="input" name="name" placeholder="Add platform" required><button class="btn secondary" type="submit" aria-label="Add platform">＋ Add</button></form>'+
+    '</div>'+advancedDeferredAdd('platform','<form class="toolbar" id="cfgAddPlatform"><input class="input" name="name" placeholder="Add platform" required><button class="btn sky" type="submit">Add</button></form>')+
     (hiddenItems.length?'<details class="advancedPlatformHidden"><summary>Hidden platforms ('+hiddenItems.length+')</summary><div class="editableList">'+hiddenItems.map(x=>'<div class="editableRow"><span>'+esc(getPlatformLabels()[x.id]||x.name)+'</span><button class="btn secondary small" type="button" data-platform-restore="'+esc(x.id)+'">Restore</button></div>').join('')+'</div></details>':'')+'</section>';
 }
 function advancedContextCard(type,c){
@@ -11121,6 +11121,10 @@ function cfgResolvedHtml(sel){
 }
 function cfgId(prefix){return prefix+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)}
 
+function advancedDeferredAdd(label,formHtml){
+ const marked=formHtml.replace('<form ','<form data-advanced-add-panel hidden ').replace('</form>','<button class="btn secondary" type="button" data-advanced-add-cancel>Cancel</button></form>');
+ return '<div class="cfgCompactAdd advancedDeferredAdd"><button class="btn secondary" type="button" data-advanced-add-open aria-label="Add '+esc(label)+'">＋ Add</button>'+marked+'</div>';
+}
 function cfgCatalogCard(title,key,list,help=''){
   const addLabel=key==='courseTypes'?'sector':title.toLowerCase();
   return '<section class="card settingBox"><h3>'+esc(title)+'</h3>'+(help?'<p class="sub">'+esc(help)+'</p>':'')+'<div class="editableList">'+
@@ -11132,7 +11136,7 @@ function cfgEmergencyCategoriesCard(c){
   const list=c.emergencyCategories||[];
   return '<section class="card settingBox emergencyCategoriesCard"><h3>Emergency categories</h3><p class="sub">Controls the Category dropdown and grouping used in Packages, Tailor course, trainee emergency views and Evaluation.</p><div class="editableList emergencyCategoryConfigList">'+
     list.map(x=>'<div class="editableRow emergencyCategoryConfigRow"><input class="input cfgEmergencyCategoryName" data-id="'+esc(x.id)+'" data-original-name="'+esc(x.name)+'" value="'+esc(x.name)+'"><button class="btn danger small" type="button" data-emergency-category-remove="'+esc(x.id)+'">Remove</button></div>').join('')+
-    '</div><form class="toolbar" id="cfgAddEmergencyCategory"><input class="input" name="name" placeholder="Add emergency category" required><button class="btn secondary" type="submit" aria-label="Add emergency category">＋ Add</button></form></section>';
+    '</div>'+advancedDeferredAdd('emergency category','<form class="toolbar" id="cfgAddEmergencyCategory"><input class="input" name="name" placeholder="Add emergency category" required><button class="btn sky" type="submit">Add</button></form>')+'</section>';
 }
 function applyEmergencyCategoryEditorToConfig(c){
   const inputs=[...document.querySelectorAll('.cfgEmergencyCategoryName')];
@@ -11166,18 +11170,18 @@ function cfgTypeScopedCard(title,key,list,type,kind){
   if(isSyllabus)add+='<input class="input" name="minimum" type="number" min="0" max="999" required value="0" placeholder="Minimum"><select name="instructorPresence" required><option value="" selected disabled>Select presence</option><option value="WITH INSTRUCTOR">With Instructor</option><option value="WITHOUT INSTRUCTOR">Without Instructor</option></select>';
   if(isCriteria)add+='<input class="input" name="weight" type="number" min="0" max="100" required value="10" style="max-width:90px">';
   if(isEmergency)add+='<select name="category" required style="max-width:210px"><option value="" selected disabled>Select category</option>'+categoryOptions('')+'</select>';
-  return '<section class="card settingBox"><h3>'+esc(title)+'</h3><p class="sub">Belongs only to '+esc(cfgItem(cfgGet().courseTypes,type)?.name||type)+(isSyllabus?' · Minimum 0 means optional / non-blocking.':isEmergency?' · Categories control how emergencies are grouped during Evaluation.':'')+'</p><div class="editableList">'+rows+'</div><form class="toolbar cfgScopedAdd" data-kind="'+key+'" data-course-type="'+type+'">'+add+'<button class="btn secondary" type="submit">＋ Add</button></form></section>';
+  return '<section class="card settingBox"><h3>'+esc(title)+'</h3><p class="sub">Belongs only to '+esc(cfgItem(cfgGet().courseTypes,type)?.name||type)+(isSyllabus?' · Minimum 0 means optional / non-blocking.':isEmergency?' · Categories control how emergencies are grouped during Evaluation.':'')+'</p><div class="editableList">'+rows+'</div>'+advancedDeferredAdd(title,'<form class="toolbar cfgScopedAdd" data-kind="'+key+'" data-course-type="'+type+'">'+add+'<button class="btn sky" type="submit">Add</button></form>')+'</section>';
 }
 function cfgPhaseCard(c,scope){
   const list=c.phases.filter(x=>x.type===scope);
   return '<section class="card settingBox"><h3>Phases</h3><p class="sub">Phases belong to the sector selected above. Experience minimums belong to Training Packages, not to the phase itself.</p><div class="editableList" style="margin-top:10px">'+
     list.map(x=>'<div class="editableRow"><input class="input cfgPhaseName" data-id="'+x.id+'" value="'+esc(x.name)+'"><button class="btn danger small" data-phase-remove="'+x.id+'">Remove</button></div>').join('')+
-    '</div><form class="toolbar" id="cfgAddPhase"><input class="input" name="name" placeholder="Add phase" required><button class="btn secondary" type="submit" aria-label="Add phase">＋ Add</button></form></section>';
+    '</div>'+advancedDeferredAdd('phase','<form class="toolbar" id="cfgAddPhase"><input class="input" name="name" placeholder="Add phase" required><button class="btn sky" type="submit">Add</button></form>')+'</section>';
 }
 function cfgCriteriaCard(list){
   return '<section class="card settingBox"><h3>Assessment criteria</h3><div class="editableList">'+
     list.map(x=>'<div class="editableRow"><input class="input cfgCriterionName" data-id="'+x.id+'" value="'+esc(x.name)+'"><input class="input cfgCriterionWeight" data-id="'+x.id+'" type="number" min="0" max="100" value="'+x.weight+'" style="max-width:86px"><button class="btn danger small" data-criterion-remove="'+x.id+'">Remove</button></div>').join('')+
-    '</div><form class="toolbar" id="cfgAddCriterion"><input class="input" name="name" placeholder="Criterion name" required><input class="input" name="weight" type="number" min="0" max="100" value="10" style="max-width:90px"><button class="btn secondary" type="submit">＋ Add</button></form></section>';
+    '</div>'+advancedDeferredAdd('assessment criterion','<form class="toolbar" id="cfgAddCriterion"><input class="input" name="name" placeholder="Criterion name" required><input class="input" name="weight" type="number" min="0" max="100" value="10" style="max-width:90px"><button class="btn sky" type="submit">Add</button></form>')+'</section>';
 }
 function cfgProfileCard(p,c){
   const n=(list,id,any)=>id==='*'?(any||'Any'):(cfgItem(list,id)?.name||id),phase=cfgItem(c.phases,p.phaseId)?.name||p.phaseId;
@@ -13079,6 +13083,15 @@ function bindSettings(){
   }
 
 
+  document.querySelectorAll('[data-advanced-add-open]').forEach(btn=>btn.onclick=e=>{
+    e.preventDefault();if(!state.advancedArchitectureEditing)return;
+    const form=btn.nextElementSibling;if(!form?.matches?.('[data-advanced-add-panel]'))return;
+    form.hidden=false;btn.hidden=true;form.querySelector('input:not([type="hidden"]),select,textarea')?.focus?.();
+  });
+  document.querySelectorAll('[data-advanced-add-cancel]').forEach(btn=>btn.onclick=e=>{
+    e.preventDefault();const form=btn.closest('[data-advanced-add-panel]'),trigger=form?.previousElementSibling;
+    if(form){form.reset?.();form.hidden=true}if(trigger)trigger.hidden=false;
+  });
   document.querySelectorAll('[data-cfg-add-open]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-cfg-add-box]'),form=box?.querySelector('.cfgAddForm');if(!form)return;form.hidden=false;btn.hidden=true;form.querySelector('input[name="name"]')?.focus?.()});
   document.querySelectorAll('[data-cfg-add-cancel]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const box=btn.closest('[data-cfg-add-box]'),form=box?.querySelector('.cfgAddForm'),trigger=box?.querySelector('[data-cfg-add-open]');if(form){form.reset?.();form.hidden=true}if(trigger)trigger.hidden=false});
   document.querySelectorAll('.cfgAddForm').forEach(form=>form.onsubmit=e=>{
