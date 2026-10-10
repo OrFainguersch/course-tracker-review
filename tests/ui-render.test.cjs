@@ -1125,3 +1125,16 @@ assert(fs.readFileSync('assets/fleet-views.js','utf8').includes('data-go="fleet"
  assert.ok(source.includes('.rosterControlHead .rosterAddPerson,.fleetInventory .fleetSectionHead .fleetAddBtn'),"Fleet and Roster Add actions share exact dimensions");
  assert.ok(fleet.includes("data-fleet-add aria-label="),"Fleet keeps a descriptive accessibility label");
 })();
+
+// 0847: Course Management tab text/selected halos and Reports share an immovable header.
+(()=>{
+ const source=fs.readFileSync('index.html','utf8');
+ assert.ok(source.includes('class="scrollTabs courseManagementTabs"'),"Settings tab control is consistently sized");
+ assert.ok(source.includes('.courseManagementTabs>.seg{flex:1 1 0!important'),"All three tab slots and active halos are equal");
+ assert.ok(source.includes('.courseManagementTopbar .sub{grid-column:1/-1;grid-row:2'),"Heading description width never depends on Manage button");
+ assert.ok(source.includes('const heading=\'<div class="insightHeading"'),"Every Reports tab has a common title and toolbar");
+ assert.ok(source.includes("if(tab==='details')return '<div class=\"insightRoot\">'+heading+nav+reportsLegacy()"),"Detailed analytics does not replace the main Reports title");
+ assert.ok(!source.includes('return \'<h1 class="pageTitle">Course analytics</h1>'),"No redundant detailed analytics heading");
+ assert.ok(!source.includes("nav.scrollIntoView?.({block:'start'"),"Tab switches cannot scroll past the page title");
+ assert.ok(source.includes('window.scrollTo?.(0,0)'),"Reports switch stays at top");
+})();
