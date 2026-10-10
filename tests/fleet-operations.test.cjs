@@ -1032,12 +1032,12 @@ test('iOS flight drag blocks native text loupe and keeps open flight edit during
  assert.match(css,/-webkit-user-select:none!important/);
  assert.match(css,/\.fleetSortieDragSource\{opacity:0!important/);
  assert.doesNotMatch(callback,/state\.flightBoardEditId=null/,'Reordering must not close Edit');
- assert.match(callback,/Retain the currently edited flight by its stable ID/);
+ assert.match(callback,/const painted=patchPlanFlightCards\(date,proposed/);
  assert.doesNotMatch(callback,/onError:err=>\{[^}]*render\(\)/,'A rejected drop should not reset the editor');
 });
 
 test('Plan reslot patches keyed cards in place instead of repainting the entire screen',()=>{
- const start=html.indexOf('function patchPlanFlightCards(date,flights)');
+ const start=html.indexOf('function patchPlanFlightCards(date,flights,');
  const end=html.indexOf('function bindDailyFlightBoard(',start);
  assert.ok(start>0&&end>start);
  const implementation=html.slice(start,end);
@@ -1079,7 +1079,8 @@ test('Reordering only changes time and preserves every other flight field',()=>{
   const after=result.find(x=>x.id===before.id);
   assert.equal(after.time,before.id==='a'?'09:00':'08:00');
   const unchanged=Object.fromEntries(Object.entries(after).filter(([k])=>!['time','updatedAt'].includes(k)));
-  assert.deepEqual(unchanged,before,'All other fields must stay attached to '+before.id);
+  const unchangedBefore=Object.fromEntries(Object.entries(before).filter(([k])=>k!=='time'));
+  assert.deepEqual(unchanged,unchangedBefore,'All other fields must stay attached to '+before.id);
  }
 });
 test('Plan reorder patches only keyed time fields without remounting cards or animating twice',()=>{
@@ -1088,7 +1089,7 @@ test('Plan reorder patches only keyed time fields without remounting cards or an
  const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
  assert.match(view,/data-flight-slot-time/);
  assert.match(view,/data-flight-slot-details/);
- const start=html.indexOf('function patchPlanFlightCards(date,flights)');
+ const start=html.indexOf('function patchPlanFlightCards(date,flights,');
  const end=html.indexOf('function updatePlanFlightEditForm()',start);
  assert.ok(start>=0&&end>start);
  const patch=html.slice(start,end);
