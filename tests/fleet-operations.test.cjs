@@ -604,11 +604,11 @@ test('Plan uses instructor plane outline and checked debrief clipboard',()=>{
   assert.ok(stylesheet.includes('[data-phase="'+phase+'"]{background:'+background+';color:'+color+'}'));
  }
  const worker=fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8');
- for(const [asset,version] of [['assets/fleet-views.js','20261010-plan-instructor-0823'],['assets/fleet-operations.css','20261010-plan-instructor-0823']]){
+ for(const [asset,version] of [['assets/fleet-views.js','20261010-scheduled-cards-0824'],['assets/fleet-operations.css','20261010-scheduled-cards-0824']]){
   assert.ok(html.includes('./'+asset+'?v='+version));
   assert.ok(worker.includes('./'+asset+'?v='+version));
  }
- assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-home-plan-simplify-0823'/);
+ assert.match(worker,/const FLYMPUS_SW_VERSION='2026-10-10-approved-cards-swipe-0824'/);
  assert.equal((html.match(/\.\/sw\.js\?v=20261010-flight-time-only-seamless-0820/g)||[]).length,2);
 });
 test('Mobile calculated timeline preserves proportions and hides icons without broken text',()=>{
@@ -1044,7 +1044,7 @@ test('Plan reslot patches keyed cards in place instead of repainting the entire 
  assert.match(implementation,/courseFlightScheduleHtml\(date,flights\)/);
  assert.match(implementation,/new Map\(existing\.map\(row=>\[row\.dataset\.flightId,row\]\)\)/);
  assert.match(implementation,/x\.time\.textContent=x\.nextTime\.textContent/);
- assert.match(implementation,/x\.details\.textContent=x\.nextDetails\.textContent/);
+ assert.match(implementation,/updateSlotDetail\(x\.details,x\.nextDetails\)/);
  assert.match(implementation,/board\.insertBefore\(x\.row,ghost\|\|null\)/);
  assert.doesNotMatch(implementation,/row\.replaceChildren/);
  assert.doesNotMatch(implementation,/bindDailyFlightBoard\('board'\)/);
@@ -1094,7 +1094,7 @@ test('Plan reorder patches only keyed time fields without remounting cards or an
  assert.ok(start>=0&&end>start);
  const patch=html.slice(start,end);
  assert.match(patch,/x\.time\.textContent=x\.nextTime\.textContent/);
- assert.match(patch,/x\.details\.textContent=x\.nextDetails\.textContent/);
+ assert.match(patch,/updateSlotDetail\(x\.details,x\.nextDetails\)/);
  assert.match(patch,/board\.insertBefore\(x\.row,ghost\|\|null\)/);
  assert.doesNotMatch(patch,/replaceChildren/);
  assert.doesNotMatch(patch,/bindDailyFlightBoard/);
@@ -1111,8 +1111,44 @@ test('Plan reorder patches only keyed time fields without remounting cards or an
 test('Scheduled flights emphasize instructor without changing slot field updates',()=>{
  const view=fs.readFileSync(path.join(__dirname,'../assets/fleet-views.js'),'utf8');
  const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
- assert.match(view,/class="fleetSortieInstructor"/);
- assert.match(view,/E\(f\.instructorName\)/);
+ assert.match(view,/fleetSortiePerson-teacher/);
+ assert.match(view,/crewLine\('teacher',f\.instructorName\)/);
  assert.match(view,/data-flight-slot-details/);
- assert.match(css,/\.fleetSortieMain \.fleetSortieInstructor\{font-weight:850/);
+ assert.match(css,/\.fleetBookedFlights \.fleetSortiePerson-teacher\{font-size:12px;font-weight:850/);
+});
+
+test('Approved Scheduled flight option 1 uses named crew and real planned clocks',()=>{
+ const view=fs.readFileSync(path.join(__dirname,'../assets/fleet-views.js'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(view,/crewLine\('student',f\.traineeName\|\|f\.traineeId\)/);
+ assert.match(view,/f\.mode!=='SOLO'&&f\.instructorName/);
+ assert.match(view,/crewLine\('teacher',f\.instructorName\)/);
+ assert.match(view,/fleetSortieMode/);
+ assert.match(view,/fleetSortieMiniTimeline/);
+ assert.match(view,/miniMoment\('briefing',t\?\.clock\.briefing/);
+ assert.match(view,/miniMoment\('flight',t\?\.clock\.takeoff\|\|f\.time/);
+ assert.match(view,/miniMoment\('debrief',t\?\.clock\.landing/);
+ assert.match(html,/const old=\[\.\.\.destination\.querySelectorAll\('\[data-flight-slot-clock\]'\)\]/);
+ assert.match(html,/old\.forEach\(\(item,i\)=>\{item\.textContent=future\[i\]\.textContent\}\)/);
+ assert.match(css,/fleetSortieMiniMoment/);
+ assert.match(css,/\.fleetBookedFlights \.fleetSortieMode\.solo/);
+});
+test('Mobile swipe exposes existing confirmed remove action, never deletes directly',()=>{
+ const src=fs.readFileSync(path.join(__dirname,'../assets/row-swipe-delete.js'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'../assets/fleet-operations.css'),'utf8');
+ assert.match(src,/target\.click\(\)/);
+ assert.match(src,/\[data-flight-delete\]/);
+ assert.match(src,/\[data-swipe-delete-row\]/);
+ assert.match(src,/touchstart/);
+ assert.match(src,/touchmove/);
+ assert.match(src,/touchend/);
+ assert.match(src,/if\(event\.cancelable\)event\.preventDefault\(\)/);
+ assert.match(src,/\[data-flight-drag\]/);
+ assert.match(src,/\.fleetSortieDragHandle/);
+ assert.match(src,/THRESHOLD=56/);
+ assert.doesNotMatch(src,/persistCourseOperations|saveDraft|publish\('PLAN'/);
+ assert.match(html,/FLYMPUS_ROW_SWIPE\?\.attach\?\.\(document\.querySelector\('\[data-flight-sorties\]'\)\)/);
+ assert.match(html,/assets\/row-swipe-delete\.js\?v=20261010-row-swipe-0824/);
+ assert.match(css,/\.flympusSwipeDeleteAction/);
+ assert.match(css,/\.fleetSortieDragGhost \.flympusSwipeDeleteAction\{display:none!important\}/);
 });

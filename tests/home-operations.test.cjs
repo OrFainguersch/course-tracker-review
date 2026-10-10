@@ -188,3 +188,19 @@ test('Today Plan hides redundant flight minutes while keeping accurate phase clo
  assert.doesNotMatch(home,/x\.estimatedMinutes\?\s*' · '/);
  assert.match(home,/homePlanTags/);
 });
+
+test('Approved Home option A shows phase labels and student/instructor icons without badge icons',()=>{
+ const home=html.slice(html.indexOf('function homeFlightPerson('),html.indexOf('function home(){'));
+ assert.match(home,/function homeFlightPerson\(name,role\)/);
+ assert.match(home,/homePlanPersonIcon/);
+ assert.match(home,/homePlanPerson-teacher/);
+ assert.match(home,/homePlanMomentLabel/);
+ const body=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
+ assert.match(body,/homeFlightPerson\(x\.traineeName\|\|'Trainee','student'\)/);
+ assert.match(body,/x\.mode!=='SOLO'&&x\.instructorName/);
+ assert.match(body,/homeFlightPerson\(x\.instructorName,'teacher'\)/);
+ assert.match(body,/class="homeTag/);
+ const css=fs.readFileSync('assets/home-operations.css','utf8');
+ assert.match(css,/\.homePlanMomentLabel\{/);
+ assert.match(css,/\.homePlanPerson-student b\{/);
+});

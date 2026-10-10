@@ -107,3 +107,41 @@ html[data-flympus-theme="dark"] .homePlanTimeline[data-phase="debrief"] .homePla
 html.flympusLargeText .homePlanLiveStatus{font-size:14px!important}
 @media(max-width:480px){.homePlanTimelineRail{left:91.5px;top:15.5px;bottom:15.5px}}
 @media(prefers-reduced-motion:reduce){.homePlanTimelineNow{transition:none}}
+
+/* Chosen Home Option A: phase labels and student / instructor identity. */
+.homeDashboard .homePlanRow.homePlanRowTimeline{grid-template-columns:154px minmax(0,1fr)!important;column-gap:10px!important}
+.homePlanTimeline{width:154px}
+.homePlanMoment{grid-template-columns:70px 33px minmax(0,1fr);gap:7px}
+.homePlanMomentLabel{font-size:10px;font-weight:730;color:#658099;white-space:nowrap;line-height:1.15}
+.homePlanMoment-takeoff .homePlanMomentLabel{color:#236fba;font-weight:900}
+.homePlanTimeline[data-phase="briefing"] .homePlanMoment-briefing .homePlanMomentLabel,
+.homePlanTimeline[data-phase="flight"] .homePlanMoment-takeoff .homePlanMomentLabel,
+.homePlanTimeline[data-phase="debrief"] .homePlanMoment-debrief .homePlanMomentLabel{font-weight:900;color:#176ca9}
+.homePlanPerson{display:flex;align-items:center;gap:6px;min-width:0}
+.homePlanPersonIcon{display:inline-grid;place-items:center;flex:0 0 16px;width:16px;height:16px;color:#4f83ac}
+.homePlanPersonIcon svg{display:block;width:15px;height:15px}
+.homePlanPerson-student b{font-weight:900;color:#10385e;line-height:1.22}
+.homePlanPerson-teacher{margin-top:7px}
+.homePlanPerson-teacher .homePlanInstructor{font-size:11px;font-weight:850;color:#285b81}
+.homeDashboard .homePlanRowTimeline .homePlanTags{margin-top:0}
+.homeDashboard .homePlanRowTimeline .homeTag{font-weight:800}
+html[data-flympus-theme="dark"] .homePlanPersonIcon{color:#9dcaf1}
+html[data-flympus-theme="dark"] .homePlanPerson-student b{color:#edf7ff}
+html[data-flympus-theme="dark"] .homePlanMomentLabel{color:#b0c9dc}
+html[data-flympus-theme="dark"] .homePlanMoment-takeoff .homePlanMomentLabel{color:#a3d8ff}
+html.flympusLargeText .homePlanMomentLabel,html.flympusLargeText .homePlanPerson-teacher .homePlanInstructor{font-size:13px!important}
+@media(max-width:480px){
+ .homeDashboard .homePlanRow.homePlanRowTimeline{grid-template-columns:150px minmax(0,1fr)!important;gap:8px!important;padding-inline:9px!important}
+ .homePlanTimeline{width:150px}
+ .homePlanMoment{grid-template-columns:69px 31px minmax(0,1fr);gap:6px}
+ .homePlanMomentLabel{font-size:9.5px}
+}
+@media(max-width:360px){
+ .homeDashboard .homePlanRow.homePlanRowTimeline{grid-template-columns:135px minmax(0,1fr)!important;gap:6px!important}
+ .homePlanTimeline{width:135px}
+ .homePlanMoment{grid-template-columns:61px 29px minmax(0,1fr);gap:4px}
+ .homePlanTimelineRail{left:79.5px}
+ .homePlanMomentIcon{width:29px;height:29px}
+ .homePlanMomentTime{font-size:10px}
+ .homePlanMomentLabel{font-size:9px}
+}

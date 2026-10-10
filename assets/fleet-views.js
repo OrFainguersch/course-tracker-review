@@ -60,6 +60,11 @@ function fleet(c){
 function schedule(c){
  const available=M.active(c.fleet,c.platformId).filter(x=>x.status===M.AVAILABLE);
  const flights=c.flights.filter(x=>x.date===c.date&&String(x.platformId)===String(c.platformId)).sort((a,b)=>a.time.localeCompare(b.time));
+ const studentPictogram="<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\" focusable=\"false\"><path d=\"m12 3 11 5-11 5L1 8l11-5Zm-6 9.2V16c3.6 2.6 8.4 2.6 12 0v-3.8l-6 2.8-6-2.8ZM21 10v6h-2v-6h2Z\"/></svg>";
+ const teacherPictogram="<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M9 3h13v11h-7v-2h5V5H9v2H7V3h2Zm3 3h6v2h-6V6Zm-3.5 4a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7ZM2 22v-1a5.5 5.5 0 0 1 11 0v1H2Zm12-5 3-3 1.4 1.4-3 3L14 17Z\"/></svg>";
+ const crewLine=(role,name)=>'<span class="fleetSortiePerson fleetSortiePerson-'+role+'"><span class="fleetSortiePersonIcon" aria-hidden="true">'+(role==='student'?studentPictogram:teacherPictogram)+'</span><span>'+E(name)+'</span></span>';
+ const miniMoment=(type,time,label)=>'<span class="fleetSortieMiniMoment fleetSortieMini-'+type+'"><b data-flight-slot-clock="'+type+'">'+E(time||'—')+'</b><em>'+E(label)+'</em></span>';
+
  const current=flights.find(x=>x.id===c.editId),can=c.canWrite;
  const mode=current?.mode||'INSTRUCTED',timing=M.configuredTimings(c.timingDefaults,mode);
  const briefing=current?.briefingMinutes??timing.briefingMinutes,debrief=current?.debriefMinutes??timing.debriefMinutes;
@@ -81,10 +86,19 @@ function schedule(c){
   '<div class="fleetTimeFlowBoundaryTimes">'+timeMark('briefing',L('Briefing start','תחילת תדריך'),'Start')+timeMark('takeoff',L('Takeoff','המראה'),'Takeoff')+timeMark('landing',L('Landing','נחיתה'),'Landing')+timeMark('debrief',L('Debriefing end','סיום תחקיר'),'End')+'</div>'+  '<svg class="fleetTimeFlowLeaders" aria-hidden="true" focusable="false"></svg><div class="fleetTimeFlowFloatingLabels"></div></div>'+  '<div class="fleetTimeFlowFallback" hidden></div><div class="fleetTimeFlowDetails" role="status" hidden></div></div>';
  const booked=flights.length?'<section class="fleetBookedFlights"><div class="fleetBookedHeading"><h3>'+(c.draftMode?L('Proposed flights','טיסות מוצעות'):L('Scheduled flights','טיסות משובצות'))+'</h3><span>'+flights.length+'</span></div>'+(can&&flights.length>1?'<p class="fleetSortieDragHelp">'+L('Drag the grip to change takeoff slots. Conflicting assignments are rejected.','גררו את הידית לשינוי סדר משבצות ההמראה. שיבוץ שיוצר חפיפה יידחה.')+'</p>':'')+'<div class="fleetSorties" data-flight-sorties>'+flights.map(f=>{
   const issue=M.flightIssues(f,c.fleet,c.platformId),t=M.flightTimeline(f,c.timingDefaults);
-  return '<div class="fleetSortie '+(issue?'conflict':'')+'" data-flight-id="'+E(f.id)+'">'+(can&&flights.length>1?'<button type="button" class="fleetSortieDragHandle" data-flight-drag aria-label="'+E(L('Drag to reschedule flight at ','גרור לשינוי שיבוץ הטיסה בשעה ')+f.time)+'" title="'+E(L('Drag to change takeoff time','גרור לשינוי שעת המראה'))+'"><svg viewBox="0 0 24 24" aria-hidden="true" width="21" height="21" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg></button>':'')+'<div class="fleetSortieMain"><b data-flight-slot-time>'+E(f.time)+'</b><b class="fleetSortieTail">'+E(aircraftDisplayName(c,f.tail))+'</b><div><strong>'+E(f.traineeName||f.traineeId)+'</strong><small>'+E(f.syllabus)+' · '+(f.mode==='SOLO'?L('Solo','סולו'):L('Instructed','מודרכת'))+(f.instructorName?' · <span class="fleetSortieInstructor">'+E(f.instructorName)+'</span>':'')+'</small>'+
-  '<small data-flight-slot-details>'+L('Briefing','תדריך')+': '+E(t?.clock.briefing||'—')+' · '+L('Landing','נחיתה')+': '+E(t?.clock.landing||'—')+' · '+L('Debriefing end','סיום תחקיר')+': '+E(t?.clock.debrief||'—')+'</small>'+
-  (f.note?'<small class="fleetSortieNote">'+E(f.note)+'</small>':'')+(issue?'<small class="fleetConflict">'+E(issue)+'</small>':'')+'</div></div>'+
-  (can?'<div class="fleetSortieActions"><button class="btn secondary small" type="button" data-flight-edit="'+E(f.id)+'">'+L('Edit','ערוך')+'</button><button class="btn danger small" type="button" data-flight-delete="'+E(f.id)+'">'+L('Remove','הסר')+'</button></div>':'')+'</div>';
+  return '<div class="fleetSortie '+(issue?'conflict':'')+'" data-flight-id="'+E(f.id)+'">'+
+ (can&&flights.length>1?'<button type="button" class="fleetSortieDragHandle" data-flight-drag aria-label="'+E(L('Drag to reschedule flight at ','גרור לשינוי שיבוץ הטיסה בשעה ')+f.time)+'" title="'+E(L('Drag to change takeoff time','גרור לשינוי שעת המראה'))+'"><svg viewBox="0 0 24 24" aria-hidden="true" width="21" height="21" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg></button>':'')+
+ '<div class="fleetSortieMain"><b data-flight-slot-time>'+E(f.time)+'</b><b class="fleetSortieTail">'+E(aircraftDisplayName(c,f.tail))+'</b>'+
+ '<div class="fleetSortieCrew">'+crewLine('student',f.traineeName||f.traineeId)+(f.mode!=='SOLO'&&f.instructorName?crewLine('teacher',f.instructorName):'')+
+ '<small class="fleetSortieSyllabus">'+E(f.syllabus)+'</small>'+
+ '<span class="fleetSortieMode '+(f.mode==='SOLO'?'solo':'instructed')+'">'+L(f.mode==='SOLO'?'Solo':'Instructed',f.mode==='SOLO'?'סולו':'מודרכת')+'</span>'+
+ (f.note?'<small class="fleetSortieNote">'+E(f.note)+'</small>':'')+(issue?'<small class="fleetConflict">'+E(issue)+'</small>':'')+'</div>'+
+ '<small data-flight-slot-details class="fleetSortieMiniTimeline">'+
+ miniMoment('briefing',t?.clock.briefing,L('Briefing','תדריך'))+
+ miniMoment('flight',t?.clock.takeoff||f.time,L('Flight','טיסה'))+
+ miniMoment('debrief',t?.clock.landing,L('Debriefing','תחקיר'))+
+ '</small></div>'+
+ (can?'<div class="fleetSortieActions"><button class="btn secondary small" type="button" data-flight-edit="'+E(f.id)+'">'+L('Edit','ערוך')+'</button><button class="btn danger small" type="button" data-flight-delete="'+E(f.id)+'">'+L('Remove','הסר')+'</button></div>':'')+'</div>';
  }).join('')+'</div></section>':'';
  const settings=c.timingDefaults||M.TIMING_DEFAULTS;
  const defaultsBlock=c.canConfigureTiming?'<details class="fleetTimingSettings"><summary>'+L('Edit course timing defaults','עריכת ברירות מחדל לזמני הטיסה')+'</summary><form id="fleetTimingDefaultsForm"><div class="fleetTimingSettingsGrid">'+
