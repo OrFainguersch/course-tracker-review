@@ -122,15 +122,19 @@ test('authorised touch attach preserves original roster nodes in one wrapper',()
  assert.equal(row.children.length,2,'repeated binding must not wrap twice');
 });
 
-test('Trainee rank and progress share the same horizontal compositor surface',()=>{
+test('Trainee rank stays visible at the frame corner without measuring pre-layout geometry',()=>{
  const js=read('assets/roster-swipe-actions.js'),css=read('assets/roster-swipe-actions.css');
  assert.match(js,/content\.appendChild\(rank\)/);
- assert.match(js,/getBoundingClientRect\?\.\(\)/);
- for(const side of ['top','left','right'])assert.match(js,new RegExp('--roster-rank-'+side));
+ assert.doesNotMatch(js,/--roster-rank-(?:top|left|right)/);
  assert.match(css,/\.rosterSwipeContent > \.rosterSwipeFixedRank\{/);
+ assert.match(css,/position:absolute!important;top:-11px!important/);
+ assert.match(css,/right:-11px!important/);
+ assert.match(css,/right:auto!important;left:-11px!important/);
  assert.match(css,/transform:none!important;transition:none!important/);
  assert.doesNotMatch(css,/rosterSwipeRow > \.rosterSwipeFixedRank/);
  assert.match(css,/\.rosterSwipeMoving \.rosterSwipeContent\{transition:none!important\}/);
+ assert.match(css,/\.rosterSwipeRow\.personCardOpen:active\{[\s\S]*?transform:none!important/);
+ assert.match(css,/transition-property:border-color,box-shadow,background-color!important/);
 });
 
 test('Roster swipe runs only on mobile, mirrors to RTL, and keeps the rank anchored to the original card corner',()=>{
@@ -139,15 +143,13 @@ test('Roster swipe runs only on mobile, mirrors to RTL, and keeps the rank ancho
  assert.match(js,/const isHebrew=row=>/);
  assert.match(js,/const rank=content\.querySelector\?\.\('\.rankCorner'\)/);
  assert.match(js,/content\.appendChild\(rank\)/);
- assert.match(js,/--roster-rank-top/);
- assert.match(js,/--roster-rank-right/);
- assert.match(js,/--roster-rank-left/);
+ assert.doesNotMatch(js,/--roster-rank-(?:top|right|left)/);
  assert.match(js,/rosterSwipeFixedRank/);
  assert.match(js,/const constrained=isHebrew\(row\)\?Math\.max\(0,offset\):Math\.min\(0,offset\)/);
  assert.match(css,/\.rosterSwipeContent > \.rosterSwipeFixedRank\{/);
- assert.match(css,/position:absolute!important;top:var\(--roster-rank-top,0px\)!important/);
- assert.match(css,/right:var\(--roster-rank-right,0px\)!important/);
- assert.match(css,/right:auto!important;left:var\(--roster-rank-left,0px\)!important/);
+ assert.match(css,/position:absolute!important;top:-11px!important/);
+ assert.match(css,/right:-11px!important/);
+ assert.match(css,/right:auto!important;left:-11px!important/);
  assert.match(css,/transform:none!important;transition:none!important/);
  assert.doesNotMatch(css,/rosterSwipeRow > \.rosterSwipeFixedRank/);
  assert.match(css,/max-width:759px/);

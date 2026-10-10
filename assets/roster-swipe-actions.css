@@ -15,14 +15,22 @@
   transition:transform var(--roster-motion-duration) var(--roster-motion-easing);will-change:transform
  }
  .people .personCard.rosterSwipeRow.rosterSwipeMoving .rosterSwipeContent{transition:none!important}
- /* Rank stays at the outer corner but moves on the content's single layer. */
+ /* The row has a fixed 11px mobile inset. Anchor the badge to the original
+    outer frame, NEVER to a pre-layout DOM measurement. The badge rides on
+    the same single translated surface as the trainee name and progress. */
  .people .personCard.rosterSwipeRow .rosterSwipeContent > .rosterSwipeFixedRank{
-  position:absolute!important;top:var(--roster-rank-top,0px)!important;
-  right:var(--roster-rank-right,0px)!important;left:auto!important;bottom:auto!important;z-index:4;
+  position:absolute!important;top:-11px!important;
+  right:-11px!important;left:auto!important;bottom:auto!important;z-index:4;
   transform:none!important;transition:none!important
  }
  html[data-flympus-language="he"] .people .personCard.rosterSwipeRow .rosterSwipeContent > .rosterSwipeFixedRank{
-  right:auto!important;left:var(--roster-rank-left,0px)!important
+  right:auto!important;left:-11px!important
+ }
+ /* Prevent the card's legacy pressed-scale animation from moving its top and
+    bottom edges while the horizontal rail is dragged or released on iOS. */
+ .people .personCard.rosterSwipeRow.personCardOpen:active{
+  transform:none!important;
+  transition-property:border-color,box-shadow,background-color!important
  }
  .people .personCard .rosterSwipeActionTray{
   position:absolute;right:0;left:auto;top:0;bottom:0;z-index:1;width:146px;
