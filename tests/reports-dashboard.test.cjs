@@ -133,3 +133,18 @@ test('grouped cancellation reasons expand per flight and never exceed unexecuted
  const excessive=R.operations({plans:[{...plan,cancellations:[{reasonLabel:'Weather',quantity:99}]}],soloFlights:[{date:'2026-09-24',id:'solo1'}],today:'2026-09-25'}).byDate[0];
  assert.equal(excessive.cancelled,4,'Reported grouped reasons cannot exceed the unexecuted flights');
 });
+
+test('Course dashboard replaces its original KPI tiles with the same four course Pulse cards',()=>{
+ const dashboard=R.dashboard({trainees:[{id:'a',name:'A',progress:75}],evaluations:[],soloFlights:[]});
+ const pulse='<div class="homePulseGrid insightPulseGrid"><div class="homePulseCard">Flights Completed</div></div>';
+ const rendered=R.dashboardHtml(dashboard,'en',pulse);
+ assert(rendered.includes(pulse));
+ assert(!rendered.includes('insightMetrics'));
+ assert(rendered.includes('Course performance overview'));
+ assert(html.includes('function reportCoursePulseCards()'));
+ assert(html.includes('FLYMPUS_HOME_OPERATIONS.weeklyFlights'));
+ assert(html.includes('dashboardHtml?.(reportCourseDashboardData()'));
+ const home=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
+ assert(!home.includes('<h2>Course Pulse</h2>'));
+ assert(!home.includes('homePulseGrid'));
+});
