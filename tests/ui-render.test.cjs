@@ -560,7 +560,8 @@ assert.match(advancedHtml,/class="toolbar cfgAddForm cfgAddPanel" data-kind="cou
 assert.match(advancedHtml,/data-cfg-add-cancel="courseTypes"/);
 assert.doesNotMatch(advancedHtml,/>Add course types<\/input>/);
 assert.match(advancedHtml,/Packages/);
-assert.match(advancedHtml,/Choose Edit to create, change or delete Packages/);
+assert.doesNotMatch(advancedHtml,/Choose Edit to create, change or delete Packages/,"Redundant Package summary copy is removed");
+assert.match(advancedHtml,/Training Packages/,"Package catalog remains visible in view mode");
 assert.doesNotMatch(advancedHtml,/Open Packages/);
 assert.doesNotMatch(advancedHtml,/data-open-packages-page=/);
 assert.doesNotMatch(advancedHtml,/data-package-assign-open="EP"/,"Create Package must stay hidden before Advanced Edit");
