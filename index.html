@@ -6995,7 +6995,7 @@ const flympusPushBootScreen=String(flympusPushBootParams.get('pushScreen')||''),
    A push deep link may explicitly override either destination. */
 if(!flympusRealPageReload||!appScreenIds.has(String(initialUiState.screen||'')))initialUiState.screen='home';
 if(flympusPushBootScreen&&['home','courses','roster','planned','record','reports','evaluation','safety','exams'].includes(flympusPushBootScreen))initialUiState.screen=flympusPushBootScreen;
-const state={screen:'home',reportTab:'dashboard',reportTabExplicit:false,reportGranularity:'week',fleetStatusFilter:'ALL',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',rosterStatuses:[],rosterRoles:[],rosterDateFrom:'',rosterDateTo:'',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',reportTrainees:[],reportInstructors:[],reportSyllabi:[],reportDateFrom:'',reportDateTo:'',myCoursesStatuses:[],myCoursesSectors:[],myCoursesPhases:[],myCoursesPlatforms:[],myCoursesTrainings:[],myCoursesCountries:[],myCoursesRoles:[],myCoursesDateFrom:'',myCoursesDateTo:'',planView:'board',packageNameFilters:[],packagePhaseFilters:[],packagePlatformFilters:[],packageCategoryFilters:[],packageContextFilters:[],safetyView:'new',evaluationView:'new',examsView:'new',...initialUiState};
+const state={screen:'home',fleetManage:false,reportTab:'dashboard',reportTabExplicit:false,reportGranularity:'week',fleetStatusFilter:'ALL',selectedTrainee:'t1',selectedInstructor:currentUserId,search:'',filter:'All',editingEval:null,rosterType:'TRAINEE',rosterStatuses:[],rosterRoles:[],rosterDateFrom:'',rosterDateTo:'',reportTrainee:'ALL',reportInstructor:'ALL',reportSyllabus:'ALL',reportTrainees:[],reportInstructors:[],reportSyllabi:[],reportDateFrom:'',reportDateTo:'',myCoursesStatuses:[],myCoursesSectors:[],myCoursesPhases:[],myCoursesPlatforms:[],myCoursesTrainings:[],myCoursesCountries:[],myCoursesRoles:[],myCoursesDateFrom:'',myCoursesDateTo:'',planView:'board',packageNameFilters:[],packagePhaseFilters:[],packagePlatformFilters:[],packageCategoryFilters:[],packageContextFilters:[],safetyView:'new',evaluationView:'new',examsView:'new',...initialUiState};
 // Preserve manually selected report tabs; migrate the former implicit default.
 if(state.reportTabExplicit!==true)state.reportTab='dashboard';
 let courseTailorEditSnapshot=null;
@@ -8920,7 +8920,7 @@ function persistCourseOperations(base,items){
 function currentFleetContext(extra={}){
  return {fleet:getFleetAircraft(),flights:getDailyFlightBoard(),platformId:currentFleetPlatform(),platformLabel:epPlatformLabel(currentCourseMeta.platformId)||currentCourseMeta.platformId||'—',courseLabel:currentCourseMeta.courseName||currentCourseId,today:todayIsoDate(),canWrite:flympusCan('fleet.serviceability.write'),timingDefaults:getPlanTimingDefaults(),canConfigureTiming:flympusCan('fleet.serviceability.write'),...extra};
 }
-function fleetScreen(){return window.FLYMPUS_FLEET_VIEW?.fleet?.(currentFleetContext({editId:state.fleetEditId||null,statusFilter:state.fleetStatusFilter||'ALL'}))||flympusAccessDenied('Fleet')}
+function fleetScreen(){return window.FLYMPUS_FLEET_VIEW?.fleet?.(currentFleetContext({editId:state.fleetEditId||null,manage:state.fleetManage===true,statusFilter:state.fleetStatusFilter||'ALL'}))||flympusAccessDenied('Fleet')}
 function courseFlightScheduleHtml(date,flightsOverride=null){
  if(!window.FLYMPUS_FLEET_VIEW)return '';
  return window.FLYMPUS_FLEET_VIEW.schedule(currentFleetContext({date,flights:Array.isArray(flightsOverride)?flightsOverride:getPlanWorkingFlights(date),draftMode:isDutyTrainee(),sharedMode:dutyOperations?.enabled(),editId:state.flightBoardEditId||null,canWrite:flympusCan('operations.flightBoard.write'),
@@ -8936,6 +8936,13 @@ async function saveFleetForm(form){
 function fleetSaveError(){toast('Unable to save. Check device storage; no changes were submitted.','error')}
 function bindFleet(){
  const form=$('#fleetAircraftForm');
+ if($('#fleetManageToggle'))$('#fleetManageToggle').onclick=async()=>{
+   if(!flympusCan('fleet.serviceability.write'))return;
+   const panel=$('#fleetEditorPanel');
+   const changed=state.fleetManage&&panel&&!panel.hidden&&[...panel.querySelectorAll('input:not([type="hidden"]),select,textarea')].some(el=>el.value!==el.defaultValue);
+   if(changed&&!(await siteConfirm('Discard unsaved aircraft edits and finish managing Fleet?',{title:'Finish Fleet management?',confirmLabel:'Discard changes',tone:'warning'})))return;
+   state.fleetManage=!state.fleetManage;state.fleetEditId=null;renderPreservingManagementView();
+ };
  const syncReason=()=>{const status=$('#fleetStatus'),reason=$('#fleetReason'),holder=document.querySelector('[data-fleet-reason-field]');if(!reason||!status)return;const down=status.value==='UNSERVICEABLE';reason.required=down;if(holder)holder.hidden=!down};
  const showEditor=()=>{
   const panel=$('#fleetEditorPanel');if(!panel)return;
@@ -11920,6 +11927,7 @@ function mountPersonEditModal(){
   document.body.style.overflow='hidden';
 }
 function render(options={}){
+ if(state.screen!=='fleet')state.fleetManage=false;
   const versionBanner=document.querySelector('.reviewBanner');
   if(versionBanner)versionBanner.textContent=flympusBuildLabel();
   dutyOperations?.connect();
