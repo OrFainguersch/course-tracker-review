@@ -212,8 +212,10 @@ test('Approved Home option A shows phase labels and student/instructor icons wit
 
 test('Today Plan compact summary keeps time, crew, mode, and chevron aligned without duplicate crew in details',()=>{
  const flight=html.slice(html.indexOf('function homePlanFlightRow('),html.indexOf('/* Update the planned current-position marker'));
- const a=flight.indexOf('homePlanFlightClock'),b=flight.indexOf('homePlanFlightPeople'),c=flight.indexOf('homePlanFlightBadges'),d=flight.indexOf('homePlanFlightChevron');
- assert.ok(a>=0&&b>a&&c>b&&d>c);
+ const summary=flight.slice(flight.indexOf("return '<div class=\"homePlanFlight"));
+ const a=summary.indexOf('homePlanFlightClock'),b=summary.indexOf('homePlanFlightPeople'),d=summary.indexOf('homePlanFlightChevron');
+ assert.ok(a>=0&&b>a&&d>b);
+ assert.match(summary,/badges\+'<span class="homePlanFlightChevron"/);
  assert.match(flight,/homeFlightPerson\(name,'student'\)/);
  assert.match(flight,/homeFlightPerson\(flight\.instructorName,'teacher'\)/);
  assert.match(flight,/homePlanFlightDetails/);
