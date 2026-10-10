@@ -25,11 +25,28 @@
  .people .personCard .rosterSwipeActionTray{
   position:absolute;right:0;left:auto;top:0;bottom:0;z-index:1;width:146px;
   display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:6px 5px;
-  box-sizing:border-box;opacity:1;visibility:visible;
-  pointer-events:none;transform:none!important;filter:none!important;transition:none!important
+  box-sizing:border-box;opacity:1;visibility:hidden;
+  clip-path:inset(0 0 0 100%);pointer-events:none;transform:none!important;filter:none!important;
+  transition:clip-path .30s cubic-bezier(.22,.72,.2,1),visibility 0s .30s
  }
- html[data-flympus-language="he"] .people .personCard .rosterSwipeActionTray{right:auto;left:0}
- .people .personCard.rosterSwipeOpen .rosterSwipeActionTray{pointer-events:auto}
+ html[data-flympus-language="he"] .people .personCard .rosterSwipeActionTray{right:auto;left:0;clip-path:inset(0 100% 0 0)}
+ .people .personCard.rosterSwipeOpen .rosterSwipeActionTray{
+  visibility:visible;clip-path:inset(0 0 0 0);pointer-events:auto;transition:clip-path .30s cubic-bezier(.22,.72,.2,1),visibility 0s
+ }
+ .people .personCard.rosterSwipeMoving .rosterSwipeActionTray{
+  visibility:visible;clip-path:inset(0 0 0 var(--roster-swipe-clip,100%));
+  transition:none!important;pointer-events:none
+ }
+ html[data-flympus-language="he"] .people .personCard.rosterSwipeMoving .rosterSwipeActionTray{
+  clip-path:inset(0 var(--roster-swipe-clip,100%) 0 0)
+ }
+ .people .personCard.rosterSwipeSettling .rosterSwipeActionTray{
+  visibility:visible;clip-path:inset(0 0 0 100%);
+  pointer-events:none;transition:clip-path .30s cubic-bezier(.22,.72,.2,1),visibility 0s .30s
+ }
+ html[data-flympus-language="he"] .people .personCard.rosterSwipeSettling .rosterSwipeActionTray{
+  clip-path:inset(0 100% 0 0)
+ }
  .people .personCard .rosterSwipeActionTray button{
   border-radius:11px;border:0;font-size:12px;font-weight:850;cursor:pointer;padding:4px;
   color:#fff;min-width:0;filter:none!important;box-shadow:none
