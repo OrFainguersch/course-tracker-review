@@ -23,8 +23,8 @@ test('Roster swipe is mobile-only and uses the established course membership per
  assert.match(css,/right:0;left:auto;top:0;bottom:0/);
  assert.match(css,/rosterSwipeOpen/);
  for(const filename of ['roster-swipe-actions.js','roster-swipe-actions.css']){
-  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-roster-home-expand-0830'));
-  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-roster-home-expand-0830'));
+  assert.match(html,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-pulse-inline-swipe-0831'));
+  assert.match(worker,new RegExp(filename.replace('.','\\.')+'\\?v=20261010-pulse-inline-swipe-0831'));
  }
 });
 test('Swipe module creates neither tray nor handlers without a touch screen and roster authority',()=>{
@@ -67,8 +67,9 @@ test('mobile roster swipe action reveal follows the finger before settling gentl
  assert.match(js,/--roster-swipe-reveal/);
  assert.match(js,/getBoundingClientRect/);
  assert.match(css,/\.30s cubic-bezier\(\.22,\.72,\.2,1\)/);
- assert.match(css,/\.rosterSwipeActionTray\{[\s\S]*?opacity:1;visibility:visible/);
- assert.match(css,/filter:none!important;transition:none!important/);
+ assert.match(css,/\.rosterSwipeActionTray\{[\s\S]*?visibility:hidden/);
+ assert.match(css,/filter:none!important/);
+ assert.match(css,/transition:clip-path .30s/);
  assert.match(css,/prefers-reduced-motion:reduce/);
 });
 
@@ -135,9 +136,21 @@ test('Roster swipe runs only on mobile, mirrors to RTL, and keeps the rank ancho
 });
 test('Opaque contextual Edit and Remove panels are revealed by clipping, not blur/fade',()=>{
  const css=read('assets/roster-swipe-actions.css');
- assert.match(css,/\.rosterSwipeActionTray\{[\s\S]*?opacity:1;visibility:visible/);
- assert.match(css,/filter:none!important;transition:none!important/);
+ assert.match(css,/\.rosterSwipeActionTray\{[\s\S]*?visibility:hidden/);
+ assert.match(css,/filter:none!important/);
+ assert.match(css,/transition:clip-path .30s/);
  assert.doesNotMatch(css,/opacity:var\(--roster-swipe-reveal/);
  assert.doesNotMatch(css,/blur\(/);
- assert.match(css,/\.rosterSwipeOpen \.rosterSwipeActionTray\{pointer-events:auto\}/);
+ assert.match(css,/\.rosterSwipeOpen \.rosterSwipeActionTray\{[\s\S]*?visibility:visible/);
+});
+
+test('Roster action tray is fully concealed before swipe and progressively unclipped on drag',()=>{
+ const js=read('assets/roster-swipe-actions.js'),css=read('assets/roster-swipe-actions.css');
+ assert.match(css,/visibility:hidden/);
+ assert.match(css,/clip-path:inset\(0 0 0 100%\)/);
+ assert.match(css,/\.rosterSwipeMoving \.rosterSwipeActionTray\{[\s\S]*?clip-path:inset\(0 0 0 var\(--roster-swipe-clip,100%\)\)/);
+ assert.match(css,/\.rosterSwipeSettling \.rosterSwipeActionTray\{[\s\S]*?clip-path:inset\(0 0 0 100%\)/);
+ assert.match(js,/row\.style\.setProperty\('--roster-swipe-clip',\(100\*\(1-fraction\)\)\+'%'\)/);
+ assert.match(js,/event\.propertyName==='transform'/);
+ assert.doesNotMatch(css,/blur\(/);
 });

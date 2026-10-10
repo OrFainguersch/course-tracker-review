@@ -10,10 +10,14 @@ function settle(row,shouldOpen){
  if(!row)return;
  if(shouldOpen&&openRow&&openRow!==row)settle(openRow,false);
  if(row.classList.contains('rosterSwipeMoving'))row.querySelector('.rosterSwipeContent')?.getBoundingClientRect?.();
+ // During closing, keep the clipped tray visible only until the horizontal
+ // transform has reached zero; never show the hidden colored tray at rest.
+ row.classList.toggle('rosterSwipeSettling',!shouldOpen&&row.classList.contains('rosterSwipeOpen'));
  row.classList.toggle('rosterSwipeOpen',shouldOpen);
  row.classList.remove('rosterSwipeMoving');
  row.style.setProperty('--roster-swipe-offset',offsetFor(row,shouldOpen)+'px');
  row.style.setProperty('--roster-swipe-reveal',shouldOpen?'1':'0');
+ row.style.setProperty('--roster-swipe-clip',shouldOpen?'0%':'100%');
  if(shouldOpen)openRow=row;else if(openRow===row)openRow=null;
 }
 const close=row=>settle(row,false);
@@ -63,7 +67,9 @@ function attach(host,canManage){
    const offset=Math.max(-WIDTH,Math.min(WIDTH,(start.open?distance:0)+dx));
    const constrained=isHebrew(row)?Math.max(0,offset):Math.min(0,offset);
    row.style.setProperty('--roster-swipe-offset',constrained+'px');
-   row.style.setProperty('--roster-swipe-reveal',String(Math.abs(constrained)/WIDTH));
+   const fraction=Math.abs(constrained)/WIDTH;
+   row.style.setProperty('--roster-swipe-reveal',String(fraction));
+   row.style.setProperty('--roster-swipe-clip',(100*(1-fraction))+'%');
   },{passive:false});
   row.addEventListener('touchend',event=>{
    if(!start)return;
@@ -71,6 +77,11 @@ function attach(host,canManage){
    if(claimed){blockUntil=Date.now()+480;if(start.open?(isHebrew(row)?dx>-THRESHOLD:dx<THRESHOLD):(isHebrew(row)?dx>=THRESHOLD:dx<=-THRESHOLD))open(row);else close(row);if(event.cancelable)event.preventDefault()}
    start=null;claimed=false;
   },{passive:false});
+  row.addEventListener('transitionend',event=>{
+   if(event.target===content&&event.propertyName==='transform'&&!row.classList.contains('rosterSwipeOpen')){
+    row.classList.remove('rosterSwipeSettling');
+   }
+  });
   row.addEventListener('touchcancel',()=>{start=null;claimed=false;close(row)});
   row.addEventListener('click',event=>{
    if(event.target?.closest?.('.rosterSwipeActionTray'))return;

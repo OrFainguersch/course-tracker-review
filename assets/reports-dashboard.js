@@ -178,7 +178,7 @@ function plannedHtml(model,lang='en'){
    '<section class="card insightPanel insightTablePanel"><h3>'+esc(tr('dailyBreakdown',lang))+'</h3><p class="insightSource">'+esc(tr('gapNote',lang))+'</p>'+
     (model.rows.length?summaryTable(model,lang):empty(tr('noData',lang)))+'</section></section>'
 }
-function dashboardHtml(model,lang='en'){
+function dashboardHtml(model,lang='en',pulseCards=null){
  const t=model.totals;
  const cards=metrics([
   [tr('activeTrainees',lang),t.trainees],
@@ -186,11 +186,12 @@ function dashboardHtml(model,lang='en'){
   [tr('soloFlights',lang),t.solo],
   [tr('avgGrade',lang),gradeFormat(t.avg),t.graded+' '+tr('gradedFlights',lang)]
  ]);
+ const summaryCards=pulseCards||cards;
  const head=['rank','trainee','flightCount','soloFlights','avgGrade','currentSyllabus','completion'];
  const thead='<thead><tr>'+head.map(x=>'<th scope="col">'+esc(tr(x,lang))+'</th>').join('')+'</tr></thead>';
  const body=model.people.map(p=>'<tr><td>'+(p.rank===null?'—':p.rank)+'</td><th scope="row">'+esc(p.name)+'</th><td>'+p.flights+'</td><td>'+p.solo+'</td><td>'+gradeFormat(p.avg)+'</td><td>'+esc(p.current||'—')+'</td><td>'+
  (p.completion===null?'—':'<div class="insightProgress"><span style="width:'+p.completion+'%"></span></div><small>'+p.completion.toFixed(0)+'%</small>')+'</td></tr>').join('');
- return '<section class="insightSection"><p class="insightSource">'+esc(tr('quality',lang))+'</p>'+cards+
+ return '<section class="insightSection"><p class="insightSource">'+esc(tr('quality',lang))+'</p>'+summaryCards+
  '<section class="card insightPanel insightTablePanel"><h3>'+esc(tr('courseSummary',lang))+'</h3>'+
  (model.people.length?'<div class="insightTableScroll"><table class="insightTable">'+thead+'<tbody>'+body+'</tbody></table></div>':empty(tr('noTrainees',lang)))+
  '</section></section>'

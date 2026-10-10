@@ -92,8 +92,8 @@ test('HTML render escapes reason labels, includes SVG graphic and responsive tab
  assert(html.includes("window.FLYMPUS_REPORTS?.operations?.("));
  assert(html.includes("getEvaluations(),soloFlights:getSoloFlights()"));
  assert(!html.includes('plans:[...courseMock'));
- assert(html.includes('./assets/reports-dashboard.js?v=0767'));
- assert(html.includes('./assets/reports-dashboard.css?v=0767'));
+ assert(html.includes('./assets/reports-dashboard.js?v=20261010-pulse-inline-swipe-0831'));
+ assert(html.includes('./assets/reports-dashboard.css?v=20261010-pulse-inline-swipe-0831'));
 });
 test('Hebrew chart headings and table labels are rendered in RTL-ready content',()=>{
  const htmlText=R.plannedHtml(R.operations({plans:submitted,evaluations,soloFlights:solo}),'he');
@@ -132,4 +132,19 @@ test('grouped cancellation reasons expand per flight and never exceed unexecuted
  assert.deepEqual(Array.from(day.reasons),['Aircraft issue','Weather','Weather','Weather']);
  const excessive=R.operations({plans:[{...plan,cancellations:[{reasonLabel:'Weather',quantity:99}]}],soloFlights:[{date:'2026-09-24',id:'solo1'}],today:'2026-09-25'}).byDate[0];
  assert.equal(excessive.cancelled,4,'Reported grouped reasons cannot exceed the unexecuted flights');
+});
+
+test('Course dashboard replaces its original KPI tiles with the same four course Pulse cards',()=>{
+ const dashboard=R.dashboard({trainees:[{id:'a',name:'A',progress:75}],evaluations:[],soloFlights:[]});
+ const pulse='<div class="homePulseGrid insightPulseGrid"><div class="homePulseCard">Flights Completed</div></div>';
+ const rendered=R.dashboardHtml(dashboard,'en',pulse);
+ assert(rendered.includes(pulse));
+ assert(!rendered.includes('insightMetrics'));
+ assert(rendered.includes('Course performance overview'));
+ assert(html.includes('function reportCoursePulseCards()'));
+ assert(html.includes('FLYMPUS_HOME_OPERATIONS.weeklyFlights'));
+ assert(html.includes('dashboardHtml?.(reportCourseDashboardData()'));
+ const home=html.slice(html.indexOf('function home(){'),html.indexOf('function evaluationHistoryViewHtml('));
+ assert(!home.includes('<h2>Course Pulse</h2>'));
+ assert(!home.includes('homePulseGrid'));
 });

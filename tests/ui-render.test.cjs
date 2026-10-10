@@ -175,7 +175,7 @@ assert.ok(planBadgeCss.includes('.coursePlanMenu>.coursePlanTabs .planRequiredTa
 assert.match(planBadgeCss,/background:#d64545;color:#fff;/,'Plan required badge must be red with white text');
 assert.doesNotMatch(planBadgeCss,/\.planRequiredTabCount\{[^}]*background:#fff0cd/,'No yellow background on Plan badge');
 
-assert(html.includes("safety:'<path d=\"M12 3.5 19 6v5.3c0 4.5-2.7 7.7-7 9.2-4.3-1.5-7-4.7-7-9.2V6l7-2.5Z\"></path><path d=\"M12 8.2v5.1\"></path><path d=\"M12 16.4h.01\"></path>'")&&html.includes("homeQuickIcon safety")+html.includes("homePulseIcon safety")+html.includes("icon safetyIcon"),"Safety must use the shield-with-exclamation icon consistently across relevant surfaces");
+assert(html.includes("safety:'<path d=\"M12 3.5 19 6v5.3c0 4.5-2.7 7.7-7 9.2-4.3-1.5-7-4.7-7-9.2V6l7-2.5Z\"></path><path d=\"M12 8.2v5.1\"></path><path d=\"M12 16.4h.01\"></path>'")&&html.includes("homeQuickIcon safety")+html.includes("icon safetyIcon"),"Safety must use the shield-with-exclamation icon consistently across relevant surfaces");
 assert(html.includes(".recordHubCard.eval{border-top:3px solid var(--record-eval)}")&&html.includes(".recordHubCard.safety{border-top:3px solid var(--record-safety)}")&&html.includes(".recordHubCard.exam{border-top:3px solid var(--record-exam)}"),"Forms hub cards must keep the Evaluation, Safety and Exam color identity used by trainee record actions");
 
 assert(html.includes("Course safety history")&&html.includes("safetyHistorySearch")&&html.includes("safetyHistorySeverity")&&html.includes("safetyHistoryClassification")&&html.includes("safetyHistoryTrainee")&&html.includes("safetyHistoryInstructor"),"Safety must provide course-specific history with search and operational filters");

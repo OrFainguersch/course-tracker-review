@@ -233,7 +233,7 @@ test('The live entry point wires immutable approval drafts, preserved legacy ent
     const version=asset==='course-operations.css'?'20261009-plan-single-row-stable-drag-0815':asset==='course-operations.js'?'20261009-plan-fleet-identity-v1':'20261009-approval-sounds-0795';
     const url='./assets/'+asset+'?v='+version;assert.ok(html.includes(url));assert.ok(worker.includes(url));
   }
-  assert.match(html,/flympus-deploy-build" content="__FLYMPUS_DEPLOY_BUILD__"/);assert.match(worker,/2026-10-10-roster-home-expand-0830/);
+  assert.match(html,/flympus-deploy-build" content="__FLYMPUS_DEPLOY_BUILD__"/);assert.match(worker,/2026-10-10-pulse-inline-swipe-0831/);
 });
 
 test('Production rule merge narrows only the approved user delete function, never unrelated rules',()=>{
