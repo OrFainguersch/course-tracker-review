@@ -1260,6 +1260,58 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 
 
 
+
+/* 0848 — One navigation style: Exams' white selection on a pale slate track. */
+:is(.rosterControls>.scrollTabs,.courseManagementTabs,.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs,.insightRoot .insightTabNav){
+ display:flex!important;align-items:stretch!important;gap:5px!important;padding:5px!important;
+ border:1px solid #cedeea!important;border-radius:15px!important;background:#e9f1f7!important;
+ box-shadow:none!important;box-sizing:border-box!important;min-width:0;max-width:100%;overflow:visible!important
+}
+:is(.rosterControls>.scrollTabs,.courseManagementTabs,.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs,.insightRoot .insightTabNav)>button{
+ appearance:none!important;position:relative;display:flex!important;align-items:center!important;justify-content:center!important;
+ border:0!important;border-radius:11px!important;min-height:45px!important;box-sizing:border-box!important;
+ padding:10px 12px!important;margin:0!important;background:transparent!important;color:#64758c!important;
+ font:inherit!important;font-size:12px!important;font-weight:850!important;line-height:1.3!important;
+ text-align:center!important;white-space:normal!important;box-shadow:none!important;transform:none!important;
+ background-clip:padding-box!important;outline:0!important
+}
+:is(.rosterControls>.scrollTabs,.courseManagementTabs,.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs,.insightRoot .insightTabNav)>button:is(.active,[aria-current="page"]){
+ background:#fff!important;color:#174e77!important;box-shadow:0 2px 8px rgba(15,56,93,.07)!important
+}
+:is(.rosterControls>.scrollTabs,.courseManagementTabs,.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs,.insightRoot .insightTabNav)>button:focus-visible{
+ outline:2px solid #398dca!important;outline-offset:-4px!important
+}
+.courseManagementTabs>.seg{flex:1 1 0!important;width:0!important;min-width:0!important}
+.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;width:100%!important}
+.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs>button{min-width:0!important}
+.insightRoot .insightTabNav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;width:100%!important}
+.insightRoot .insightTabNav>button{min-width:0!important}
+.rosterControls>.scrollTabs>button{flex:0 0 auto!important}
+@media(max-width:759px){
+ .rosterControls>.scrollTabs>button{padding:10px 13px!important}
+ .courseManagementTabs>.seg,.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs>button,.insightRoot .insightTabNav>button{
+  font-size:clamp(10px,2.75vw,12px)!important;padding:9px 5px!important
+ }
+}
+html[data-flympus-theme="dark"] :is(.rosterControls>.scrollTabs,.courseManagementTabs,.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs,.insightRoot .insightTabNav){background:#213c50!important;border-color:#49677a!important}
+html[data-flympus-theme="dark"] :is(.rosterControls>.scrollTabs,.courseManagementTabs,.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs,.insightRoot .insightTabNav)>button{color:#c0d3e2!important}
+html[data-flympus-theme="dark"] :is(.rosterControls>.scrollTabs,.courseManagementTabs,.coursePlanWorkspace .coursePlanMenu>.coursePlanTabs,.insightRoot .insightTabNav)>button:is(.active,[aria-current="page"]){background:#36566f!important;color:#fff!important}
+/* All multi-filter panels have the same reset position as Reporting period. */
+.unifiedFilterHeader{flex-wrap:wrap;min-height:35px}
+.filterResetTop{margin-inline-start:auto!important;white-space:nowrap!important;min-width:0!important;min-height:35px!important;padding:7px 12px!important;font-size:11px!important;border-radius:11px!important;justify-self:end}
+.unifiedFilterHeader>.filterResetTop{grid-column:auto!important;width:auto!important;flex:0 0 auto}
+:is(.myCoursesFilters,.packageFiltersCollapsible){position:relative}
+:is(.myCoursesFilters,.packageFiltersCollapsible)>.myCoursesFilterSummary{padding-inline-end:144px!important}
+:is(.myCoursesFilters,.packageFiltersCollapsible)>.filterResetDisclosure{position:absolute!important;inset-inline-end:12px!important;top:9px!important;z-index:2;max-width:128px}
+@media(max-width:420px){
+ :is(.myCoursesFilters,.packageFiltersCollapsible)>.myCoursesFilterSummary{padding-inline-end:126px!important}
+ :is(.myCoursesFilters,.packageFiltersCollapsible)>.filterResetDisclosure{inset-inline-end:8px!important;padding:7px 8px!important;font-size:10px!important}
+}
+/* Export belongs after view selection, with balanced icons and controls. */
+.insightRoot .insightReportExportActions{display:flex;justify-content:flex-end;gap:8px;margin:0 0 15px}
+.insightRoot .insightReportExportActions>.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px}
+.insightRoot .insightReportExportActions svg{width:17px;height:17px;flex:0 0 17px}
+@media(max-width:759px){.insightRoot .insightReportExportActions{width:100%;gap:8px}.insightRoot .insightReportExportActions>.btn{flex:1 1 0;min-width:0}}
 /* 0847 — Four aligned architecture steps, with equal margins and separators. */
 .advancedSectorStep{border-top:1px solid #dce7f1;margin-top:20px;padding-top:20px;gap:12px}
 .advancedSectorStep>.advancedStepLabel{margin:0 0 2px}
@@ -11889,9 +11941,9 @@ function reports(){
   const controls=[['dashboard','Course dashboard'],['operations','Planned vs Executed'],['details','Detailed analytics']];
   const nav='<nav class="insightTabNav" id="reportInnerTabs" aria-label="Analytics views">'+controls.map(([key,label])=>
     '<button type="button" class="insightTab '+(tab===key?'active':'')+'" data-report-tab="'+key+'" aria-current="'+(tab===key?'page':'false')+'">'+label+'</button>').join('')+'</nav>';
-  const heading='<div class="insightHeading"><div><div class="eyebrow">REPORTS & ANALYTICS</div><h1 class="pageTitle">Reports & Analytics</h1><p class="sub">Training progress, recorded flights, evaluations and course completion.</p></div>'+
-   '<div class="insightHeadingActions"><button class="btn secondary small" id="reportsCsv" type="button">⇩ Export CSV</button><button class="btn sky small" id="reportsPrint" type="button">Print / PDF</button></div></div>';
-  if(tab==='details')return '<div class="insightRoot">'+heading+nav+reportsLegacy()+'</div>';
+  const heading='<div class="insightHeading"><div><div class="eyebrow">REPORTS & ANALYTICS</div><h1 class="pageTitle">Reports & Analytics</h1><p class="sub">Training progress, recorded flights, evaluations and course completion.</p></div></div>';
+   const actions='<div class="insightHeadingActions insightReportExportActions"><button class="btn secondary small" id="reportsCsv" type="button"><span aria-hidden="true">⇩</span> Export CSV</button><button class="btn sky small" id="reportsPrint" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 17H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6zM18 12h.01"/></svg> Print / PDF</button></div>';
+  if(tab==='details')return '<div class="insightRoot">'+heading+nav+actions+reportsLegacy()+'</div>';
   const courseDashboardModel=tab==='dashboard'?reportCourseDashboardData():null;
   const htmlData=tab==='details'?null:tab==='operations'?
     window.FLYMPUS_REPORTS?.plannedHtml?.(reportOpsData(),getFlympusAppPreferences().language==='he'?'he':'en'):
@@ -11900,7 +11952,7 @@ function reports(){
   const periodSelector=tab==='operations'?'<label class="insightGroupBy">Group by <select class="input" id="reportGranularity" aria-label="Group by time period">'+
      [['day','Day'],['week','Week'],['month','Month']].map(([v,label])=>'<option value="'+v+'" '+((state.reportGranularity||'week')===v?'selected':'')+'>'+label+'</option>').join('')+'</select></label>':'';
   return '<div class="insightRoot">'+heading+
-   nav+'<section class="card insightFilterPanel"><div class="insightFilterHeader"><strong>Reporting period</strong><button class="btn secondary small" id="reportsReset" type="button">Reset filters</button></div><div class="insightFilterControls">'+
+   nav+actions+'<section class="card insightFilterPanel"><div class="insightFilterHeader"><strong>Reporting period</strong><button class="btn secondary small" id="reportsReset" type="button">Reset filters</button></div><div class="insightFilterControls">'+
    dateRangeFilterHtml('reportDate','Date range',dateFrom,dateTo)+periodSelector+'</div></section>'+
    (htmlData||'<section class="card settingBox"><p class="sub">Analytics could not be loaded.</p></section>')+'</div>'
 }
