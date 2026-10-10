@@ -285,13 +285,9 @@ html.flympusLargeText .homeDashboard .homePlanFlightClock,html.flympusLargeText 
 .homeDashboard .homePlanFlightToggle{min-height:68px;padding-block:7px}
 .homeDashboard .homePlanFlightClock{flex-direction:row-reverse;justify-content:flex-end}
 .homeDashboard .homePlanFlightSyllabus{
- display:block;overflow:hidden;max-height:0;min-width:0;max-width:100%;
+ display:block;min-width:0;max-width:100%;
  color:#708598;font-size:11px;font-weight:500;line-height:1.5;
- overflow-wrap:anywhere;opacity:0;margin-top:0;
- transition:max-height .32s cubic-bezier(.22,.72,.2,1),margin-top .32s,opacity .15s;
-}
-.homeDashboard .homePlanFlight.is-expanded .homePlanFlightSyllabus{
- max-height:64px;opacity:1;margin-top:5px;
+ overflow-wrap:anywhere
 }
 .homeDashboard .homePlanFlightChevron{font-size:unset;transform:none!important}
 .homeDashboard .homePlanFlightChevron svg{
@@ -490,10 +486,25 @@ html[data-flympus-language="he"] .homeDashboard .homePlanFlight::before{transfor
  .homeDashboard .homePlanFlightReveal{transition:none!important}
 }
 
-/* Keep the timeline's vertical motion on a single timing curve. */
-.homeDashboard .homePlanFlightSyllabus{
- transition:opacity .18s ease!important
+/* A separate measured-height syllabus rail keeps flight crew and clock centered
+   in a constant-sized summary row as the details expand and collapse. */
+.homeDashboard .homePlanFlightSyllabusReveal .homePlanFlightRevealInner{
+ box-sizing:border-box;padding:4px 14px 8px;
+ padding-inline-start:calc(14px + var(--home-phase-track) + 9px + 22px);
+ text-align:start
 }
-@media(prefers-reduced-motion:reduce){
- .homeDashboard .homePlanFlightSyllabus{transition:none!important}
+html[data-flympus-language="he"] .homeDashboard .homePlanFlightSyllabusReveal .homePlanFlightRevealInner{
+ direction:rtl;text-align:right
+}
+@media(max-width:480px){
+ .homeDashboard .homePlanFlightSyllabusReveal .homePlanFlightRevealInner{
+  padding-inline-start:calc(9px + var(--home-phase-track) + 6px + 22px);
+  padding-inline-end:9px
+ }
+}
+@media(max-width:360px){
+ .homeDashboard .homePlanFlightSyllabusReveal .homePlanFlightRevealInner{
+  padding-inline-start:calc(7px + var(--home-phase-track) + 4px + 22px);
+  padding-inline-end:7px
+ }
 }

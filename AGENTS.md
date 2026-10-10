@@ -110,7 +110,7 @@ Any change touching mobile header positioning, bottom-nav auto-hide, pull-to-ref
 - Bell > Notification settings should directly center the Notifications **section heading** (not the full tall card) in Settings, on desktop and mobile. Avoid conflicting top-reset scroll timers. Maintain RTL, dark theme, and large-text behavior.
 
 ## Reports & Analytics · operational reporting baseline (2026-10-08)
-- Three distinct in-page views: **Planned vs Executed** (default), **Course dashboard**, **Detailed analytics** (preserve existing legacy panels and filters). No outer-tab duplicate buttons.
+- Three distinct in-page views: **Course dashboard** (default), **Planned vs Executed**, **Detailed analytics** (preserve existing legacy panels and filters). No outer-tab duplicate buttons.
 - Only **submitted** course-scoped daily reports supply planned flight numbers. No draft/unsaved plan counts. Actual instructed flights come from submitted Evaluations, actual Solo flights from saved Solo records. Never include review/demo mock Evaluations in operational counts.
 - A scheduled sortie with no execution is **NOT automatically Cancelled**. Count cancellations only where a saved reason is recorded, never above the actual shortfall; remaining shortfall is **Unclassified gap**. Unplanned execution is a separate category; do not inflate execution rate above 100%.
 - Provide day/week/month grouping, date-range filtering, CSV export appropriate to current view, Print/PDF, responsive accessible charts, reason breakdown and trainee course dashboard. All data scoped to active course, user UID namespace.

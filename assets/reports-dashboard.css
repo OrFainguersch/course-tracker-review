@@ -140,21 +140,6 @@ html.flympusLargeText .insightRoot .insightPulseGrid .homePulseNote{font-size:13
 .insightSwipeCue{display:none}
 .insightMobileRank{display:none}
 @media screen and (max-width:600px){
- .insightCourseTableViewport::after{
-  content:"";position:absolute;right:0;top:0;bottom:0;width:26px;
-  pointer-events:none;z-index:4;background:linear-gradient(to left,rgba(255,255,255,.84),transparent);
-  border-radius:0 11px 11px 0
- }
- html[data-flympus-language="he"] .insightCourseTableViewport::after{
-  right:auto;left:0;background:linear-gradient(to right,rgba(255,255,255,.84),transparent);
-  border-radius:11px 0 0 11px
- }
- html[data-flympus-theme="dark"] .insightCourseTableViewport::after{
-  background:linear-gradient(to left,rgba(16,40,62,.92),transparent)
- }
- html[data-flympus-theme="dark"][data-flympus-language="he"] .insightCourseTableViewport::after{
-  background:linear-gradient(to right,rgba(16,40,62,.92),transparent)
- }
  .insightSwipeCue{
   display:flex;align-items:center;gap:8px;margin:0 0 9px;
   color:#4c6c88;font-size:11px;font-weight:750;line-height:1.5;
@@ -194,5 +179,5 @@ html.flympusLargeText .insightRoot .insightPulseGrid .homePulseNote{font-size:13
  }
 }
 @media print{
- .insightSwipeCue,.insightCourseTableViewport::after{display:none!important}
+ .insightSwipeCue{display:none!important}
 }
