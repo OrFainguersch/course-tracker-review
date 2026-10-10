@@ -151,7 +151,7 @@ html.flympusLargeText .homePlanMomentLabel,html.flympusLargeText .homePlanPerson
 .homeDashboard .homePlanRowTimeline .homePlanBody{position:static!important;min-width:0;gap:5px!important;padding-block-start:22px}
 .homeDashboard .homePlanRowTimeline .homePlanMain{display:flex!important;flex-direction:column;gap:4px;min-width:0}
 .homeDashboard .homePlanRowTimeline .homePlanPerson-teacher{margin-top:0!important}
-.homeDashboard .homePlanRowTimeline .homePlanMain>small{margin-top:2px;line-height:1.45;overflow-wrap:anywhere}
+.homeDashboard .homePlanRowTimeline .homePlanMain>small{margin-top:2px;margin-inline-start:22px;max-width:calc(100% - 22px);box-sizing:border-box;line-height:1.45;overflow-wrap:anywhere}
 .homeDashboard .homePlanRowTimeline .homePlanTags{
  position:absolute!important;inset-block-start:10px;inset-inline-end:12px;
  z-index:2;display:flex!important;gap:6px;justify-content:flex-end!important;
@@ -193,5 +193,5 @@ html[data-flympus-language="he"] .homePlanRowTimeline .homePlanTags{direction:rt
 html.flympusLargeText .homePlanMomentLabel{white-space:normal;overflow-wrap:anywhere;line-height:1.1}
 
 /* Match the identical plane glyph from the Home Flights Completed stat. */
-.homePlanMoment-takeoff .homePlanMomentIcon{font-family:inherit;font-size:19px;font-weight:700;line-height:1}
-html.flympusLargeText .homePlanMoment-takeoff .homePlanMomentIcon{font-size:22px}
+.homePlanMoment-takeoff .homePlanMomentIcon{font-family:inherit;font-size:15px;font-weight:700;line-height:1}
+html.flympusLargeText .homePlanMoment-takeoff .homePlanMomentIcon{font-size:18px}
