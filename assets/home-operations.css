@@ -477,12 +477,23 @@ html[data-flympus-language="he"] .homeDashboard .homePlanFlight::before{transfor
 .homeDashboard .homePlanFlightReveal{
  display:block;height:0;overflow:hidden;grid-template-rows:none!important;
  transition:height .38s cubic-bezier(.2,.76,.22,1)!important;
- backface-visibility:visible!important;-webkit-backface-visibility:visible!important
+ backface-visibility:visible!important;-webkit-backface-visibility:visible!important;
+ contain:layout paint
 }
-.homeDashboard .homePlanFlight.is-expanded .homePlanFlightReveal{height:auto;grid-template-rows:none!important}
+.homeDashboard .homePlanFlight.is-expanded .homePlanFlightReveal{
+ height:var(--home-reveal-height,0px);grid-template-rows:none!important
+}
 .homeDashboard .homePlanFlightRevealInner{
  min-height:0;overflow:visible;backface-visibility:visible!important;-webkit-backface-visibility:visible!important
 }
 @media(prefers-reduced-motion:reduce){
  .homeDashboard .homePlanFlightReveal{transition:none!important}
+}
+
+/* Keep the timeline's vertical motion on a single timing curve. */
+.homeDashboard .homePlanFlightSyllabus{
+ transition:opacity .18s ease!important
+}
+@media(prefers-reduced-motion:reduce){
+ .homeDashboard .homePlanFlightSyllabus{transition:none!important}
 }

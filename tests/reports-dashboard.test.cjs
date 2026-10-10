@@ -92,8 +92,8 @@ test('HTML render escapes reason labels, includes SVG graphic and responsive tab
  assert(html.includes("window.FLYMPUS_REPORTS?.operations?.("));
  assert(html.includes("getEvaluations(),soloFlights:getSoloFlights()"));
  assert(!html.includes('plans:[...courseMock'));
- assert(html.includes('./assets/reports-dashboard.js?v=20261010-unified-kpis-trainee-0836'));
- assert(html.includes('./assets/reports-dashboard.css?v=20261010-swipe-accordion-report-0837'));
+ assert(html.includes('./assets/reports-dashboard.js?v=20261010-mobile-table-accordion-0838'));
+ assert(html.includes('./assets/reports-dashboard.css?v=20261010-mobile-table-accordion-0838'));
 });
 test('Hebrew chart headings and table labels are rendered in RTL-ready content',()=>{
  const htmlText=R.plannedHtml(R.operations({plans:submitted,evaluations,soloFlights:solo}),'he');
@@ -197,4 +197,22 @@ test('Course dashboard tab order and full trainee icon glyph',()=>{
  assert.ok(pulse.includes('cx="17" cy="6.5" r="3"'));
  const styles=fs.readFileSync(path.join(root,'assets/reports-dashboard.css'),'utf8');
  assert.ok(styles.includes('transform:rotate(90deg)'));
+});
+
+test('Mobile course performance table exposes swipe affordance and sticky trainee names',()=>{
+ const model=R.dashboard({
+  trainees:[{id:'t1',name:'First pilot',progress:70}],evaluations:[],soloFlights:[]
+ });
+ const en=R.dashboardHtml(model,'en');
+ const he=R.dashboardHtml(model,'he');
+ assert.match(en,/class="insightSwipeCue"/);
+ assert.match(en,/Swipe sideways to view all columns/);
+ assert.match(he,/החליקו לצדדים להצגת כל העמודות/);
+ assert.match(en,/insightCourseTableScroll" role="region" tabindex="0"/);
+ assert.match(en,/insightMobileRank/);
+ const css=fs.readFileSync(path.join(root,'assets/reports-dashboard.css'),'utf8');
+ assert.match(css,/insightCourseTableScroll \.insightTable tbody th:nth-child\(2\)/);
+ assert.match(css,/position:sticky;inset-inline-start:0/);
+ assert.match(css,/data-flympus-language="he"/);
+ assert.match(css,/@media print\{/);
 });

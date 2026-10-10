@@ -189,11 +189,15 @@ function dashboardHtml(model,lang='en',pulseCards=null){
  const summaryCards=pulseCards||cards;
  const head=['rank','trainee','flightCount','soloFlights','avgGrade','currentSyllabus','completion'];
  const thead='<thead><tr>'+head.map(x=>'<th scope="col">'+esc(tr(x,lang))+'</th>').join('')+'</tr></thead>';
- const body=model.people.map(p=>'<tr><td>'+(p.rank===null?'—':p.rank)+'</td><th scope="row">'+esc(p.name)+'</th><td>'+p.flights+'</td><td>'+p.solo+'</td><td>'+gradeFormat(p.avg)+'</td><td>'+esc(p.current||'—')+'</td><td>'+
+ const body=model.people.map(p=>'<tr><td>'+(p.rank===null?'—':p.rank)+'</td><th scope="row"><span class="insightMobileRank" aria-hidden="true">'+(p.rank===null?'—':p.rank)+'.</span>'+esc(p.name)+'</th><td>'+p.flights+'</td><td>'+p.solo+'</td><td>'+gradeFormat(p.avg)+'</td><td>'+esc(p.current||'—')+'</td><td>'+
  (p.completion===null?'—':'<div class="insightProgress"><span style="width:'+p.completion+'%"></span></div><small>'+p.completion.toFixed(0)+'%</small>')+'</td></tr>').join('');
  return '<section class="insightSection"><p class="insightSource">'+esc(tr('quality',lang))+'</p>'+summaryCards+
  '<section class="card insightPanel insightTablePanel"><h3>'+esc(tr('courseSummary',lang))+'</h3>'+
- (model.people.length?'<div class="insightTableScroll"><table class="insightTable">'+thead+'<tbody>'+body+'</tbody></table></div>':empty(tr('noTrainees',lang)))+
+ (model.people.length?
+  '<p class="insightSwipeCue"><span class="insightSwipeCueGlyph" aria-hidden="true">↔</span>'+
+   esc(lang==='he'?'החליקו לצדדים להצגת כל העמודות':'Swipe sideways to view all columns')+'</p>'+
+  '<div class="insightCourseTableViewport"><div class="insightTableScroll insightCourseTableScroll" role="region" tabindex="0" aria-label="'+esc(lang==='he'?'טבלת ביצועי הקורס, גלילה אופקית':'Course performance table, horizontally scrollable')+'"><table class="insightTable">'+thead+'<tbody>'+body+'</tbody></table></div></div>'
+ :empty(tr('noTrainees',lang)))+
  '</section></section>'
 }
 function csvCells(rows){return '\ufeff'+rows.map(r=>r.map(value=>{
