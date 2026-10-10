@@ -8,8 +8,8 @@ const DEFAULT_ICON='./assets/flympus-app-icon.webp';
 const SHELL_URLS=[
   './',
   './index.html',
-  './auth.css?v=20261008-switcher01',
-  './auth.js?v=20261009-approval-sounds-0795',
+  './auth.css?v=20261010-roster-admin-0827',
+  './auth.js?v=20261010-roster-admin-0827',
   './account-switcher.js?v=20261008-switcher01',
   './assets/reports-dashboard.js?v=0767',
   './assets/reports-dashboard.css?v=0767',
