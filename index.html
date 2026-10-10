@@ -1259,6 +1259,36 @@ form input,form select,form textarea{max-width:100%;min-width:0}
 <style>
 
 
+
+/* 0847 — Four aligned architecture steps, with equal margins and separators. */
+.advancedSectorStep{border-top:1px solid #dce7f1;margin-top:20px;padding-top:20px;gap:12px}
+.advancedSectorStep>.advancedStepLabel{margin:0 0 2px}
+.advancedSectorStep>.advancedSectorPicker{margin:0}
+.advancedEditFieldset>.scopedArchitectureLabel{border-top:1px solid #dce7f1;margin:20px 0 14px;padding-top:20px}
+.advancedPackagesFinal{margin-top:20px!important;padding-top:20px!important}
+.advancedPackagesFinal>.advancedStepLabel{margin:0 0 14px!important}
+.advancedPackagesFinal .advancedPackageTitle{margin-top:4px}
+.advancedPackagesFinal .sectorPackageActions{margin:4px 0 14px}
+.advancedPackagesFinal .packageAssignPanel{margin:0 0 16px}
+html[data-flympus-theme="dark"] :is(.advancedSectorStep,.advancedEditFieldset>.scopedArchitectureLabel,.advancedPackagesFinal){border-top-color:#365169}
+.advancedDeferredAdd{margin-top:10px}
+.advancedDeferredAdd [data-advanced-add-panel]{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}
+.advancedDeferredAdd [data-advanced-add-panel][hidden],.advancedDeferredAdd [data-advanced-add-open][hidden]{display:none!important}
+.advancedDeferredAdd [data-advanced-add-panel] .input,.advancedDeferredAdd [data-advanced-add-panel] select{flex:1 1 180px;min-width:0}
+.advancedDeferredAdd [data-advanced-add-panel] .btn{flex:0 0 auto}
+@media(max-width:759px){
+ .advancedDeferredAdd [data-advanced-add-panel]{align-items:stretch;flex-direction:column}
+ .advancedDeferredAdd [data-advanced-add-panel] .input,.advancedDeferredAdd [data-advanced-add-panel] select{width:100%;min-width:0;flex:auto}
+ .advancedDeferredAdd [data-advanced-add-panel] .btn{width:100%;min-height:42px}
+ /* The hint's icon should share the table edge, like Course Dashboard. */
+ .globalPackageCard .flympusMobileTableSwipeCue,.courseTailorAligned .flympusMobileTableSwipeCue{margin-inline:16px!important}
+}
+.rosterControlHead .rosterAddPerson,.fleetInventory .fleetSectionHead .fleetAddBtn{
+ width:112px!important;min-width:112px!important;max-width:112px!important;height:42px!important;min-height:42px!important;
+ box-sizing:border-box!important;padding:8px 12px!important;display:inline-flex!important;justify-content:center;align-items:center;
+ white-space:nowrap;flex:0 0 112px!important;font-size:12px!important;font-weight:800!important;border-radius:11px!important
+}
+@media(max-width:430px){.rosterControlHead .rosterAddPerson,.fleetInventory .fleetSectionHead .fleetAddBtn{font-size:11.5px!important}}
 /* 0846 — Prominent, consistent page-title Manage / Edit buttons. */
 :is(.rosterTopbar,.courseManagementTopbar,.fleetPageTop,.profileNav)>.btn.edit{
  background:#176fae!important;border:1px solid #176fae!important;color:#fff!important;
